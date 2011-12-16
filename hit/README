@@ -1,0 +1,87 @@
+[K]arim [I]nference [T]ool - KIT
+
+o TODO
+
+	Data :
+		9,-2147483648,S2out0
+		9,101,S2out0
+		101,-2147483648,S0out1
+		4,-2147483648,S0out1
+		3,-2147483648,S0out1
+		6,-2147483648,S0out1
+		2098,-2147483648,S0out1
+		8848,-2147483648,S0out1
+		8172,-2147483648,S0out1
+		9525,-2147483648,S0out1
+		3399,-2147483648,S0out1
+		7076,-2147483648,S0out1
+	Produce only one node
+	
+	-----
+	
+	Only one instances of X
+	
+	-----
+	
+	Optimize the size of the tables :)
+	
+	
+o PREREQUISITES
+	- Java Runtime Environment	>= 1.5	www.java.com/fr/download/
+	- Weka 						>= 3	sourceforge.net/projects/weka/
+	- GraphViz					>= 2	www.graphviz.org/Download.php
+	 
+o INSTALLATION
+	- Add dot executable to the PATH
+	- Weka.jar has to be in the CLASSPATH
+
+o USAGE
+	- KIT
+		Usage : KIT systemName [Options]
+		
+		Options
+			> General
+			    --help | -h       : Show help
+			> Algorithm
+			    --reuseop         : Reuse output parameter for non closed row
+			    --forcej48        : Force the use of J48 algorithm instead of M5P for numeric classes
+			    --supportmin (20) : Minimal support for relation (1-100)
+			> Output
+			    --outdir (.)      : Where to save arff and graph files
+			    --text            : Use the text logger
+			    --html            : Use HTML logger
+			    --openhtml        : Open HTML log automatically
+
+		Ex: KIT drivers.efsm.NSPKDriver --outdir mydir --text
+	
+	- KITest
+		Same options as KIT with :
+		
+		> Test
+		    --nbtest          (100) : Number of tests
+		    --minstates        (6) : Minimal number of states
+		    --maxstates        (6) :  Maximal number of states
+		    --transitions     (25) :  % of transitions for each states
+		    --mininputsym      (3) :  Minimal number of input symbols
+		    --maxinputsym      (3) :  Maximal number of input symbols
+		    --minoutputsym     (3) :  Minimal number of output symbols
+		    --maxoutputsym     (3) :  Maximal number of output symbols
+		    --minparameter     (1) :  Minimal number of parameters by symbol
+		    --maxparameter     (1) :  Maximal number of parameters by symbol
+		    --domainsize      (10) :  Size of the parameter's domain
+		    --simpleguard     (25) :  % of simple guard by transitions
+		    --ndvguard        (25) :  % of generating NDV by transitions
+		    --ndvmintrans      (1) :  Minimum number of states before checking NDV value
+		    --ndvmaxtrans      (1) :  Maximum number of states before checking NDV value
+    
+	- KIStat
+		Just read the main of KIStat :)
+	
+o BUGS
+	Send an email to hossen@imag.fr with the complete logs and details
+	
+o TIPS
+	- How to use more than 2Go of ram ?
+		You need to have 64-bit (x64) processor and Java Runtime.
+		Then add this option to the VM : -d64 -Xmx?g
+		Replacing ? by the size of ram you want tu use in gigabytes

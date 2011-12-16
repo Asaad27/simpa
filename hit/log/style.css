@@ -1,0 +1,157 @@
+* {
+	margin : 0px;
+	padding:0px;
+	font-size:8pt;
+	font-family : 'Verdana';
+	width:auto;
+	height:auto;
+}
+
+body {
+	padding:5px;
+}
+
+#info{
+	text-align:center;
+	font-size:15px;
+	border:1px solid #DDD;
+	padding:10px;
+	margin-bottom:15px;
+}
+
+hr {
+	border:1px solid #F5F5F5;
+	margin-top:2em;
+	margin-bottom:2em;
+}
+
+li {
+	list-style-type : none;
+}
+
+table {
+	border-collapse:collapse;
+	border-spacing:0px;
+}
+
+table .header {
+	text-align:center;
+}
+
+table td {
+	border:1px solid #000000;
+	padding:4px;
+}
+
+table.cti td, table.dti td{
+	border:none;
+	padding-left:3px;
+	padding-right:3px;
+}
+
+.symbols_and_params table td {
+	text-align:center;
+}
+
+.symbols_and_params table tr.header {
+	color:#153EBE;
+}
+
+.symbols_and_params table tr.value {
+	color:#C35617;
+}
+
+.inputparam {
+	color:#153EBE;
+}
+
+.outputsymbol {
+	color:#C35617;
+}
+
+.state {
+	color:#6D7B8D;
+}
+
+.outputparam {
+	color:#C35617;
+}
+
+.reset, .datatable, .controltable {
+	margin-top:10px;
+}
+
+.nbp, .ncr, .ndf, .ndv .stepunknown {
+	margin-top:10px;
+}
+
+.nbp .content, .ncr .content, .ndf .content, .ndv .content, .stepunknown .content, .number {
+	font-weight:bold;
+}
+
+.error {
+	margin-top:10px;	
+}
+
+.exception .content, .error .content {
+	color:#FF0000;
+	font-weight:bold;
+}
+
+.transition .content {
+	position:relative;
+	left:2em;
+	color:#006E3E;
+}
+
+.concrete .content {
+	position:relative;
+	left:2em;
+	color:#999;
+}
+
+.data .content {
+	position:relative;
+	left:4em;
+	color:#6D7B8D;
+}
+
+.exception .details {
+	margin-left : 8.7em;
+	margin-top : 5px;
+	border:1px solid #FAA;
+}
+
+.exception .details td {
+	border:none;
+}
+
+.exception .details .method{
+	color:#FF0000;
+}
+
+.exception .details .filename, .exception .details .line{
+	color:#338;
+}
+
+.po {
+	color:#C35617;
+}
+
+.pi {
+	color:#153EBE;	
+}
+
+#stats{
+	text-align:center;
+	font-size:12px;
+	border:1px solid #DDD;
+	padding:10px;
+	margin-bottom:15px;
+}
+
+img {
+	vertical-align: middle;
+	height:50%;
+	margin:2em;
+}
