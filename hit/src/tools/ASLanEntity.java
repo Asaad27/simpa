@@ -38,10 +38,10 @@ public class ASLanEntity {
 	
 	public String toString(){
 		String ent = header();
-		ent += "specification SYSTEM_" + name.toUpperCase() + "\n";
+		ent += "specification SYSTEM_" + name.replace(" ", "_").toUpperCase() + "\n";
 		ent += "channel_model CCM\n";
 		ent += "\n";
-		ent += "entity " + name + "(" + printArguments() + "){\n";
+		ent += "entity " + name.replace(" ", "_") + "(" + printArguments() + "){\n";
 		ent +=    printSymbols();
 		ent += "  body {\n";
 		ent += "    State := 0;\n";

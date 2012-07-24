@@ -17,7 +17,7 @@ import automata.efsm.ParameterizedOutput;
 
 public class WGStoredXSSDriver extends WebDriver {
 	
-	private String basicAuth = "Basic Z3Vlc3Q6Z3Vlc3Q=";
+	private String basicAuth = "Basic Z3Vlc3Q6Z3Vlc3Q="; // guest:guest in base64
 	private String screen = null;
 	
 	public WGStoredXSSDriver() {
@@ -32,7 +32,6 @@ public class WGStoredXSSDriver extends WebDriver {
 		
 		HTTPRequest res = new HTTPRequest(Method.GET, "/WebGoat/attack", Version.v11);
 		res.addHeader("Authorization", basicAuth);
-		LogManager.logConcrete(res.toString());
 		HTTPResponse resp = executeWeb(res);
 		cookie.updateCookies(resp.getHeader("Set-Cookie"));
 		
@@ -40,12 +39,10 @@ public class WGStoredXSSDriver extends WebDriver {
 		res.addHeader("Authorization", basicAuth);
 		res.addHeader("Cookie", cookie.getCookieLine());
 		res.addPostData("start", "Start WebGoat");
-		LogManager.logConcrete(res.toString());
 		resp = executeWeb(res);
-
-		screen = extractScreen(resp.toString(), "Stage 1: Stored XSS");
-		LogManager.logInfo("Screen : " + screen);
 		cookie.updateCookies(resp.getHeader("Set-Cookie"));
+		
+		screen = extractScreen(resp.toString(), "Stage 1: Stored XSS");
 		
 		LogManager.logInfo("Ready to infer");
 	}
@@ -90,7 +87,6 @@ public class WGStoredXSSDriver extends WebDriver {
 			params.add(Utils.createArrayList(new Parameter("101", Types.STRING), new Parameter("larry", Types.STRING)));
 			params.add(Utils.createArrayList(new Parameter("111", Types.STRING), new Parameter("larry", Types.STRING)));
 			params.add(Utils.createArrayList(new Parameter("101", Types.STRING), new Parameter("john", Types.STRING)));
-			params.add(Utils.createArrayList(new Parameter("111", Types.STRING), new Parameter("john", Types.STRING)));
 			defaultParamValues.put("Login", params);		
 		}
 		
@@ -141,63 +137,63 @@ public class WGStoredXSSDriver extends WebDriver {
 	}
 	
 	public HTTPRequest abstractToConcrete(ParameterizedInput pi){
-		HTTPRequest res = null;
+		HTTPRequest req = null;
 		if (!pi.isEpsilonSymbol()){
 			LogManager.logInfo("Abstract : " + pi);			
 
 			if (pi.getInputSymbol().equals("Login")){
-				res = new HTTPRequest(Method.POST, "/WebGoat/attack?Screen="+screen+"&menu=900", Version.v11);
-				res.addPostData("employee_id", pi.getParameterValue(0));
-				res.addPostData("password", pi.getParameterValue(1));
-				res.addPostData("action", "Login");
+				req = new HTTPRequest(Method.POST, "/WebGoat/attack?Screen="+screen+"&menu=900", Version.v11);
+				req.addPostData("employee_id", pi.getParameterValue(0));
+				req.addPostData("password", pi.getParameterValue(1));
+				req.addPostData("action", "Login");
 				
 			}else if (pi.getInputSymbol().equals("ViewProfile")){
-				res = new HTTPRequest(Method.POST, "/WebGoat/attack?Screen="+screen+"&menu=900", Version.v11);
-				res.addPostData("employee_id", pi.getParameterValue(0));
-				res.addPostData("action", "ViewProfile");
+				req = new HTTPRequest(Method.POST, "/WebGoat/attack?Screen="+screen+"&menu=900", Version.v11);
+				req.addPostData("employee_id", pi.getParameterValue(0));
+				req.addPostData("action", "ViewProfile");
 				
 			}else if (pi.getInputSymbol().equals("EditProfile")){
-				res = new HTTPRequest(Method.POST, "/WebGoat/attack?Screen="+screen+"&menu=900", Version.v11);
-				res.addPostData("employee_id", pi.getParameterValue(0));
-				res.addPostData("action", "EditProfile");
+				req = new HTTPRequest(Method.POST, "/WebGoat/attack?Screen="+screen+"&menu=900", Version.v11);
+				req.addPostData("employee_id", pi.getParameterValue(0));
+				req.addPostData("action", "EditProfile");
 				
 			}else if (pi.getInputSymbol().equals("XSSProfile")){
-				res = new HTTPRequest(Method.POST, "/WebGoat/attack?Screen="+screen+"&menu=900", Version.v11);
-				res.addPostData("employee_id", pi.getParameterValue(0));
-				res.addPostData("action", "UpdateProfile");
-				res.addPostData("address1", pi.getParameterValue(1));
-				res.addPostData("address2", "New York, NY");
-				res.addPostData("ccn", "2578546969853547");
-				res.addPostData("ccnLimit", "5000");
-				res.addPostData("description", "Does not work well with others");
-				res.addPostData("disciplinaryDate", "10106");
-				res.addPostData("disciplinaryNotes", "Constantly harassing coworkers");
-				res.addPostData("firstName", "Larry");
-				res.addPostData("lastName", "Stooge");
-				res.addPostData("manager", "101");
-				res.addPostData("phoneNumber", "443-689-0192");
-				res.addPostData("salary", "55000");
-				res.addPostData("ssn", "386-09-5451");
-				res.addPostData("startDate", "1012000");
-				res.addPostData("title", "Technician");
+				req = new HTTPRequest(Method.POST, "/WebGoat/attack?Screen="+screen+"&menu=900", Version.v11);
+				req.addPostData("employee_id", pi.getParameterValue(0));
+				req.addPostData("action", "UpdateProfile");
+				req.addPostData("address1", pi.getParameterValue(1));
+				req.addPostData("address2", "New York, NY");
+				req.addPostData("ccn", "2578546969853547");
+				req.addPostData("ccnLimit", "5000");
+				req.addPostData("description", "Does not work well with others");
+				req.addPostData("disciplinaryDate", "10106");
+				req.addPostData("disciplinaryNotes", "Constantly harassing coworkers");
+				req.addPostData("firstName", "Larry");
+				req.addPostData("lastName", "Stooge");
+				req.addPostData("manager", "101");
+				req.addPostData("phoneNumber", "443-689-0192");
+				req.addPostData("salary", "55000");
+				req.addPostData("ssn", "386-09-5451");
+				req.addPostData("startDate", "1012000");
+				req.addPostData("title", "Technician");
 				
 			}else if (pi.getInputSymbol().equals("Logout")){
-				res = new HTTPRequest(Method.POST, "/WebGoat/attack?Screen="+screen+"&menu=900", Version.v11);
-				res.addPostData("employee_id", pi.getParameterValue(0));
-				res.addPostData("action", "Logout");
+				req = new HTTPRequest(Method.POST, "/WebGoat/attack?Screen="+screen+"&menu=900", Version.v11);
+				req.addPostData("employee_id", pi.getParameterValue(0));
+				req.addPostData("action", "Logout");
 			}else{
 				LogManager.logError("AbstractToConcrete method is missing for symbol : " + pi.getInputSymbol());
 			}
 			
-			if (res != null){
-				res.addHeader("Authorization", basicAuth);
-				if (!cookie.isEmpty()) res.addHeader("Cookie", cookie.getCookieLine());
-				LogManager.logConcrete(res.toString());
+			if (req != null){
+				req.addHeader("Authorization", basicAuth);
+				if (!cookie.isEmpty()) req.addHeader("Cookie", cookie.getCookieLine());
+				LogManager.logConcrete(req.toString());
 			}
 		}else{
 			LogManager.logError("AbstractToConcrete for Epsilon symbol is impossible in " + pi.getInputSymbol());
 		}
-		return res;
+		return req;
 	}
 	
 	public ParameterizedOutput concreteToAbstract(HTTPResponse resp){
@@ -213,11 +209,14 @@ public class WGStoredXSSDriver extends WebDriver {
 			}else if (resp.getContent().contains("<div id=\"lesson_login\">")){
 				po = new ParameterizedOutput("Home");
 				po.getParameters().add(new Parameter(resp.getCodeString(), Types.STRING));
+			}else if (resp.getContent().contains("<input type=\"submit\" value=\"UpdateProfile\"")){
+				po = new ParameterizedOutput("EditionPage");
+				po.getParameters().add(new Parameter(resp.getCodeString(), Types.STRING));
 			}else if (resp.getContent().contains("Credit Card Limit")){
 				po = new ParameterizedOutput("ProfilePage");
 				po.getParameters().add(new Parameter(resp.getCodeString(), Types.STRING));
 			}else{
-				LogManager.logError("Unknown webpage");
+				LogManager.logError("ConcreteToAbstract method is missing for this page");
 				LogManager.logConcrete(resp.toString());
 			}
 		}
