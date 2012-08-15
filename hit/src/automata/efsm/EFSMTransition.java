@@ -1,5 +1,6 @@
 package automata.efsm;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +22,8 @@ public class EFSMTransition extends Transition {
 	protected List<LiDataTableItem> paramsData;
 	public boolean generateNdv = false;
 	
-	public class Label {		
+	public class Label implements Serializable {		
+		private static final long serialVersionUID = -3119005509594327935L;
 		private ParameterizedInput input;
 		private List<String> predicates;
 		private List<String> var;

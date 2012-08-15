@@ -1,9 +1,12 @@
 package automata.efsm;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ParameterizedOutputSequence {
+public class ParameterizedOutputSequence implements Serializable{
+
+	private static final long serialVersionUID = -3673446835319484666L;
 	public List<ParameterizedOutput> sequence;
 	
 	public ParameterizedOutputSequence(){

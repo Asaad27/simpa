@@ -38,7 +38,12 @@ import automata.efsm.Parameter;
 import drivers.efsm.EFSMDriver.Types;
 
 public class ARFF {
-	private static int iOut = 0; 
+	private static int iOut = 0;
+	private static List<String> gSymbols = new ArrayList<String>();
+	
+	public static List<String> getGlobalSymbols(){
+		return gSymbols;
+	}
 	
 	private static String convertTypes(Types type) {
 		switch (type) {
@@ -57,11 +62,13 @@ public class ARFF {
 	private static String convertValue(Parameter param) {
 		switch (param.type) {
 		case NOMINAL:
-			return "'\"" + param.value + "\"'";
+			gSymbols.add("s" + filterSymName(param.value));
+			return "'s" + filterSymName(param.value) + "'";
 		case NUMERIC:
 			return param.value;
 		case STRING:
-			return "'\"" + param.value + "\"'";
+			gSymbols.add("s" + filterSymName(param.value));
+			return "'s" + filterSymName(param.value) + "'";
 		default:
 			LogManager.logException("", new Exception("Undefined type"));
 		}			
@@ -71,15 +78,26 @@ public class ARFF {
 	private static String convertInit(Parameter param, Types type) {
 		switch (type) {
 		case NOMINAL:
-			return "'\"" + param.value + "\"'";
+			gSymbols.add("s" + filterSymName(param.value));
+			return "'s" + filterSymName(param.value) + "'";
 		case NUMERIC:
 			return String.valueOf(Integer.MIN_VALUE);
 		case STRING:
-			return "'\"" + param.value + "\"'";
+			gSymbols.add("s" + filterSymName(param.value));
+			return "'s" + filterSymName(param.value) + "'";
 		default:
 			LogManager.logException("", new Exception("Undefined type"));	
 		}
 		return null;
+	}
+	
+	private static String filterSymName(String name){
+		String allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+		String result = "";
+		for (int i=0; i<name.length(); i++){
+			if (allowed.indexOf(name.charAt(i)) != -1) result += name.charAt(i);
+		}
+		return result;
 	}
 
 	public static String generateFileForPredicate(
@@ -96,14 +114,14 @@ public class ARFF {
 			writer.write("@RELATION 'from" + list.get(0).getFrom() + "'\n");
 			for (i = 0; i < list.get(0).getParamsData(0).getInputParameters()
 					.size(); i++)
-				writer.write("@ATTRIBUTE " + paramNames.get(list.get(0).getInput()).get(i)	+ " "
+				writer.write("@ATTRIBUTE " + Utils.capitalize(paramNames.get(list.get(0).getInput()).get(i))	+ " "
 						+ convertTypes(list.get(0).getParamsData(0)
 								.getInputParameters().get(i).type) + "\n");
 			i=0; currentParamIndex = 0;
 			List<Types> realTypes = getTypesOfParams(list);
 			for (Map.Entry<String, List<Parameter>> entry : list.get(0).getParamsData(0).getAutomataState().entrySet()) {
 				for (int j = 0; j < entry.getValue().size(); j++) {
-					writer.write("@ATTRIBUTE saved" + paramNames.get(entry.getKey()).get(j) + " "
+					writer.write("@ATTRIBUTE saved" + Utils.capitalize(paramNames.get(entry.getKey()).get(j)) + " "
 							+ convertTypes(realTypes.get(currentParamIndex++)) + "\n");
 				}
 				i++;
@@ -199,21 +217,21 @@ public class ARFF {
 					+ "'\n");
 			for (i = 0; i < transition.getParamsData(0).getInputParameters()
 					.size(); i++)
-				writer.write("@ATTRIBUTE "+ paramNames.get(transition.getInput()).get(i)	+ " "
+				writer.write("@ATTRIBUTE "+ Utils.capitalize(paramNames.get(transition.getInput()).get(i))	+ " "
 						+ convertTypes(transition.getParamsData(0)
 								.getInputParameters().get(i).type) + "\n");
 			i = 0;
 			List<Types> realTypes = getTypesOfParams(transition);
 			for (Map.Entry<String, List<Parameter>> entry : transition.getParamsData(0).getAutomataState().entrySet()) {
 				for (int j = 0; j < entry.getValue().size(); j++) {
-					writer.write("@ATTRIBUTE saved" + paramNames.get(entry.getKey()).get(j) + " "
+					writer.write("@ATTRIBUTE saved" + Utils.capitalize(paramNames.get(entry.getKey()).get(j)) + " "
 							+ convertTypes(realTypes.get(i)) + "\n");
 					i++;
 				}				
 			}
 			for (i = 0; i < transition.getParamsData(0).getOutputParameters()
 					.size(); i++)
-				writer.write("@ATTRIBUTE "+ paramNames.get(transition.getOutput()).get(i) + " "
+				writer.write("@ATTRIBUTE "+ Utils.capitalize(paramNames.get(transition.getOutput()).get(i)) + " "
 						+ convertTypes(transition.getParamsData(0).getOutputParameters().get(i).type) + "\n");
 
 			writer.write("@DATA\n");
@@ -372,7 +390,7 @@ public class ARFF {
 					data = Filter.useFilter(data, r);
 				}
 			}
-
+			
 			if (data.numAttributes() > 0) {
 				ArffSaver saver = new ArffSaver();
 				saver.setInstances(data);
@@ -429,8 +447,13 @@ public class ARFF {
 							node = new TreeNode();
 							node.loadFromString(cl);
 						}catch(StringIndexOutOfBoundsException g){
-							LogManager.logError("Unable to get a tree with data in " + new File(dataFile).getName());
-							node = null;
+							try{
+								MyClassifier mcl = new MyClassifier(data);
+								node = mcl.buildTreeNode();
+							}catch(Exception h){
+								LogManager.logError("Unable to get a tree with data in " + new File(dataFile).getName());
+								node = null;
+							}
 						}
 					}
 				}

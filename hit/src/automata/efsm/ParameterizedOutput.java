@@ -1,11 +1,13 @@
 package automata.efsm;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import main.Options;
 
-public class ParameterizedOutput implements Cloneable{
+public class ParameterizedOutput implements Cloneable, Serializable{
+	private static final long serialVersionUID = -8078721161724041483L;
 	private String outputSymbol;
 	private List<Parameter> parameters;
 

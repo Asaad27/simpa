@@ -116,7 +116,7 @@ public class HTMLLogger implements ILogger {
 		try {
 			writer.flush();
 			writer.write("<li class=\"info\">\n");
-			writer.write("<span class=\"date\">" + tfm.format(new Date()) + "</span><span class=\"content\">" + s + "</span>");
+			writer.write("<span class=\"date\">" + tfm.format(new Date()) + "</span><span class=\"content\">" + Utils.escapeHTML(s) + "</span>");
 			writer.write("</li>\n");
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -128,7 +128,7 @@ public class HTMLLogger implements ILogger {
 		try {
 			writer.flush();
 			writer.write("<li class=\"request\">\n");
-			writer.write("<span class=\"date\">" + tfm.format(new Date()) + "</span><span class=\"content\"><span class=\"pi\">" + pi + "</span> -> <span class=\"po\">" + po + "</span></span>\n</li>\n");
+			writer.write("<span class=\"date\">" + tfm.format(new Date()) + "</span><span class=\"content\"><span class=\"pi\">" + Utils.escapeHTML(pi.toString()) + "</span> -> <span class=\"po\">" + Utils.escapeHTML(po.toString()) + "</span></span>\n</li>\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

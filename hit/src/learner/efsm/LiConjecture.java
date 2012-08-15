@@ -2,8 +2,12 @@ package learner.efsm;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +33,7 @@ public class LiConjecture extends automata.efsm.EFSM {
 	private List<String> inputSymbols;
 	private TreeMap<String, List<String>> paramNames;
 	private	Map<String, Label> labels;
+	public List<String> gSymbols;
 	
 	public LiConjecture(Driver d) {
 		super(d.getSystemName());
@@ -127,6 +132,7 @@ public class LiConjecture extends automata.efsm.EFSM {
 							fillPredicate(getTransitionFromWithInput(s, input), labels);        
 						}
 					}
+					gSymbols = ARFF.getGlobalSymbols();
 
 					for (EFSMTransition t : getTransitions()){
 						writer.write("\t" + t.getFrom() + " -> " + t.getTo() + "[label=\"" + labels.get(t.toString()) + "\"];" + "\n");            	
@@ -143,12 +149,45 @@ public class LiConjecture extends automata.efsm.EFSM {
 			}	
 		}			
 	}
+	
+	public static void serialize(LiConjecture o, String filename) {
+		FileOutputStream fos = null;
+		ObjectOutputStream oos = null;
+		try {
+			fos = new FileOutputStream(Options.DIRGRAPH + File.separator + filename);
+			oos = new ObjectOutputStream(fos);
+			oos.writeObject(o);
+			oos.flush();
+			oos.close();
+			fos.close();
+		} catch (Exception e){
+			LogManager.logException("Error serializing generated EFSM", e);
+		}
+	}
+	
+	public static LiConjecture deserialize(String filename){
+		Object o = null;
+		File f = new File(Options.DIRGRAPH + File.separator + filename);
+		LogManager.logStep(LogManager.STEPOTHER, "Loading LiConjecture from " + f.getName());
+		try {
+			FileInputStream fis = new FileInputStream(f.getAbsolutePath());
+			ObjectInputStream ois= new ObjectInputStream(fis);
+			o = ois.readObject();
+			ois.close();
+			fis.close();
+			}catch (Exception e) {
+				LogManager.logException("Error deserializing generated EFSM", e);
+			}
+		return (LiConjecture)o;
+	}
 
 	public void exportToAslan() {
 		LogManager.logConsole("Converting conjecture to ASLan++");
 		
 		ASLanEntity entity = new ASLanEntity(name);
 		entity.loadFromEFSM(this);
+		
+		serialize(this, "saved_efsm");
 		
 		Writer writer = null;
 		File file = null;

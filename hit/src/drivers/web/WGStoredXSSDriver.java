@@ -55,20 +55,20 @@ public class WGStoredXSSDriver extends WebDriver {
 
 	public ArrayList<String> getInputSymbols() {
 		ArrayList<String> is = new ArrayList<String>();
-		is.add("Login");
-		is.add("Logout");
-		is.add("ViewProfile");
-		is.add("EditProfile");
-		is.add("XSSProfile");
+		is.add("login");
+		is.add("logout");
+		is.add("viewProfile");
+		is.add("editProfile");
+		is.add("xSSProfile");
 		return is;
 	}
 
 	public ArrayList<String> getOutputSymbols(){
 		ArrayList<String> os = new ArrayList<String>();
-		os.add("Listing");
-		os.add("Home");
-		os.add("ProfilePage");
-		os.add("EditionPage");
+		os.add("listing");
+		os.add("home");
+		os.add("profilePage");
+		os.add("editionPage");
 		return os;
 	}
 	
@@ -87,7 +87,8 @@ public class WGStoredXSSDriver extends WebDriver {
 			params.add(Utils.createArrayList(new Parameter("101", Types.STRING), new Parameter("larry", Types.STRING)));
 			params.add(Utils.createArrayList(new Parameter("111", Types.STRING), new Parameter("larry", Types.STRING)));
 			params.add(Utils.createArrayList(new Parameter("101", Types.STRING), new Parameter("john", Types.STRING)));
-			defaultParamValues.put("Login", params);		
+			//params.add(Utils.createArrayList(new Parameter("111", Types.STRING), new Parameter("john", Types.STRING)));
+			defaultParamValues.put("login", params);		
 		}
 		
 		//ViewProfile
@@ -95,7 +96,7 @@ public class WGStoredXSSDriver extends WebDriver {
 			params = new ArrayList<ArrayList<Parameter>>();
 			params.add(Utils.createArrayList(new Parameter("101", Types.STRING)));
 			params.add(Utils.createArrayList(new Parameter("111", Types.STRING)));
-			defaultParamValues.put("ViewProfile", params);		
+			defaultParamValues.put("viewProfile", params);		
 		}
 
 		//EditProfile
@@ -103,7 +104,7 @@ public class WGStoredXSSDriver extends WebDriver {
 			params = new ArrayList<ArrayList<Parameter>>();
 			params.add(Utils.createArrayList(new Parameter("101", Types.STRING)));
 			params.add(Utils.createArrayList(new Parameter("111", Types.STRING)));
-			defaultParamValues.put("EditProfile", params);		
+			defaultParamValues.put("editProfile", params);		
 		}
 		
 		//XSSProfile
@@ -113,7 +114,7 @@ public class WGStoredXSSDriver extends WebDriver {
 			params.add(Utils.createArrayList(new Parameter("111", Types.STRING), new Parameter("<script>alert(1);</script>", Types.STRING)));
 			params.add(Utils.createArrayList(new Parameter("111", Types.STRING), new Parameter("22 Foo Street", Types.STRING)));
 			params.add(Utils.createArrayList(new Parameter("101", Types.STRING), new Parameter("22 Foo Street", Types.STRING)));
-			defaultParamValues.put("XSSProfile", params);		
+			defaultParamValues.put("xssProfile", params);		
 		}
 		
 		//Logout
@@ -121,7 +122,7 @@ public class WGStoredXSSDriver extends WebDriver {
 			params = new ArrayList<ArrayList<Parameter>>();
 			params.add(Utils.createArrayList(new Parameter("101", Types.STRING)));
 			params.add(Utils.createArrayList(new Parameter("111", Types.STRING)));
-			defaultParamValues.put("Logout", params);		
+			defaultParamValues.put("logout", params);		
 		}
 		
 		return defaultParamValues;	
@@ -209,7 +210,7 @@ public class WGStoredXSSDriver extends WebDriver {
 			}else if (resp.getContent().contains("<div id=\"lesson_login\">")){
 				po = new ParameterizedOutput("Home");
 				po.getParameters().add(new Parameter(resp.getCodeString(), Types.STRING));
-			}else if (resp.getContent().contains("<input type=\"submit\" value=\"UpdateProfile\"")){
+			}else if (resp.getContent().contains("value=\"UpdateProfile\"")){
 				po = new ParameterizedOutput("EditionPage");
 				po.getParameters().add(new Parameter(resp.getCodeString(), Types.STRING));
 			}else if (resp.getContent().contains("Credit Card Limit")){

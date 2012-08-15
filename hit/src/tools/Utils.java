@@ -13,12 +13,48 @@ import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+
 import main.Options;
 import tools.loggers.LogManager;
 
 public class Utils {
 	private static Random rand = new Random();
+
+	public static String capitalize(String s) {
+		if (s.length() == 0)
+			return s;
+		return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
+	}
 	
+	public static String escapeTags(String original) {
+		if (original == null)
+			return "";
+		StringBuffer out = new StringBuffer("");
+		char[] chars = original.toCharArray();
+		for (int i = 0; i < chars.length; i++) {
+			boolean found = true;
+			switch (chars[i]) {
+			case 60:
+				out.append("&lt;");
+				break; // <
+			case 62:
+				out.append("&gt;");
+				break; // >
+			case 34:
+				out.append("&quot;");
+				break; // "
+			default:
+				found = false;
+				break;
+			}
+			if (!found)
+				out.append(chars[i]);
+
+		}
+		return out.toString();
+
+	}
+
 	public static boolean randBoolWithPercent(int p){
 		return rand.nextInt(100) < p;
 	}

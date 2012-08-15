@@ -1,5 +1,6 @@
 package learner.efsm.table;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +10,9 @@ import java.util.TreeMap;
 import main.Options;
 import automata.efsm.Parameter;
 
-public class LiDataTableItem{
+public class LiDataTableItem implements Serializable{
+
+	private static final long serialVersionUID = 7893795283839427233L;
 	private List<Parameter> inputParameters;
 	private List<Parameter> outputParameters;
 	private String outputSymbol;

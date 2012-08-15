@@ -1,12 +1,15 @@
 package learner.efsm.table;
 
+import java.io.Serializable;
 import java.util.List;
 
 import main.Options;
 import automata.efsm.EFSM;
 import automata.efsm.Parameter;
 
-public class LiControlTableItem{
+public class LiControlTableItem implements Serializable{
+
+	private static final long serialVersionUID = -8484677909227738772L;
 	private List<Parameter> parameters;
 	private String outputSymbol;
 	

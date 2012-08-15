@@ -14,7 +14,7 @@ public class InputSequence implements Cloneable{
 	}
 	
 	public InputSequence(String input){
-		super();
+		sequence = new ArrayList<String>();
 		sequence.add(input);
 	}
 	

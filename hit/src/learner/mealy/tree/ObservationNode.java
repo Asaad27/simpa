@@ -13,9 +13,7 @@ import tools.loggers.LogManager;
 
 public class ObservationNode extends Node{
 	public int state = -1;
-	public int equivTo = -1;
-	public boolean haveSigma = false;
-	public boolean isCE = false;
+	public int label = -1;
 		
 	public ObservationNode(){
 		super();
@@ -27,10 +25,13 @@ public class ObservationNode extends Node{
 	
 	public void makeInitial(){
 		state = 0;
-		equivTo = 0;
+		label = 0;
 		input = null;
 		output = null;
 		clearChildren();
+	}
+	public boolean isState(){
+		return state > -1;
 	}
 	
 	public boolean isInitial(){
@@ -38,7 +39,7 @@ public class ObservationNode extends Node{
 	}
 	
 	private void toDotCreateNodes(Writer w) throws IOException{
-		w.write("    node" + id + " [style=\"rounded,filled\", fillcolor=\"#"+ (state==-1?"FFFFFF":"E0FEEE") + "\", color=\"#" + (haveSigma?((equivTo==-1)?"DD2B5A":"2B835A"):"666666") + "\", shape=record, label=\"{"+ equivTo + "|" + id + "}\"]\n");
+		w.write("    node" + id + " [style=\"rounded,filled\", fillcolor=\"#"+ (state==-1?"FFFFFF":"E0FEEE") + "\", color=\"#666666" + "\", shape=record, label=\"{"+ label + "|" + id + "}\"]\n");
 		for (Node n : children){        	
 			((ObservationNode)n).toDotCreateNodes(w);
         }
@@ -67,6 +68,6 @@ public class ObservationNode extends Node{
 	}
 
 	public String toString(){
-		return "[" + id + ", " + state + ", " + equivTo+"]";
+		return "[" + id + ", " + state + ", " + label+"]";
 	}
 }
