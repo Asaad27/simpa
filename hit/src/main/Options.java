@@ -31,6 +31,8 @@ public class Options {
 	// Algorithm's options
 	
 	public static boolean TREEINFERENCE = false;
+	public static String INITIAL_INPUT_SYMBOLS = null;
+	public static String INITIAL_INPUT_SEQUENCES = null;
 	public static int SUPPORT_MIN = 20;
 	public static boolean REUSE_OP_IFNEEDED = false;
 	public static boolean FORCE_J48 = false;

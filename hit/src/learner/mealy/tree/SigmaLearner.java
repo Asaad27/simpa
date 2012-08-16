@@ -1,17 +1,15 @@
 package learner.mealy.tree;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import learner.Learner;
-import learner.efsm.LiConjecture;
 import learner.mealy.LmConjecture;
 import learner.mealy.Node;
 import main.Options;
 import tools.loggers.LogManager;
-import weka.filters.unsupervised.attribute.Add;
 import automata.State;
-import automata.efsm.ParameterizedInput;
 import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
 import drivers.Driver;
@@ -26,17 +24,27 @@ public class SigmaLearner extends Learner{
 	
 	public SigmaLearner(Driver driver){
 		this.driver = (MealyDriver)driver;		
-		this.i = new ArrayList<String>();
+		this.i = Arrays.asList(Options.INITIAL_INPUT_SYMBOLS.split(","));
 		this.z = new ArrayList<InputSequence>();
+		for(String inputSeqString : Options.INITIAL_INPUT_SEQUENCES.split(",")){
+			InputSequence seq = new InputSequence();
+			for(String inputSym : inputSeqString.split("-")){
+				seq.addInput(inputSym);
+			}
+			z.add(seq);
+		}
 		this.root = new ObservationNode();
 		this.root.makeInitial();
+		
+		LogManager.logConsole("Options : I -> " + i.toString());
+		LogManager.logConsole("Options : Z -> " + z.toString());
 	}
 	
 	private boolean noLabelledPred(ObservationNode node) {
 		boolean noLabelledPred = true;
 		while (node.parent != null){
 			ObservationNode parent = (ObservationNode)node.parent;
-			if (parent.isState()) return false;
+			if (parent.isLabelled()) return false;
 			node = parent;
 		}
 		return noLabelledPred;
@@ -63,12 +71,11 @@ public class SigmaLearner extends Learner{
 		ObservationNode currentNode = null;
 		while(!queue.isEmpty()){
 			currentNode = (ObservationNode) queue.get(0);
-			if (currentNode.isState()){
-				InputSequence tmpdfs = compareNodesUsingZ(node,  currentNode);
-				if (tmpdfs == null) return currentNode;
-				queue.addAll(currentNode.children);
-			}
-			queue.remove(0);		
+			if (currentNode.id == node.id) break;
+			InputSequence tmpdfs = compareNodesUsingZ(node,  currentNode);
+			if (tmpdfs == null) return currentNode;
+			queue.remove(0);
+			queue.addAll(currentNode.children);	
 		}
 		return null;
 	}
@@ -108,10 +115,10 @@ public class SigmaLearner extends Learner{
 		queue.add(root);
 		ObservationNode currentNode = null;
 		while(!queue.isEmpty()){
-			currentNode = (ObservationNode)queue.get(0);
+			currentNode = (ObservationNode) queue.remove(0);
 
 			//4. if (u has no labelled predecessor)
-			if (currentNode.isState() && noLabelledPred(currentNode)){
+			if (noLabelledPred(currentNode)){
 				//6. Extend_Node (u, Z),
 				extendNodeWithInputSeqs(currentNode, z);
 				
@@ -126,9 +133,8 @@ public class SigmaLearner extends Learner{
 					//11. Extend_Node (u,I)
 					extendNodeWithSymbol(currentNode, i);
 				}
-			}
+			}			
 			
-			queue.remove(0);
 			queue.addAll(currentNode.children);
 		}
 		
@@ -265,7 +271,8 @@ public class SigmaLearner extends Learner{
 			for(ObservationNode s : states){
 				for(String input : i){
 					ObservationNode child = (ObservationNode) s.childBy(input);
-					c.addTransition(new MealyTransition(c, c.getState(s.state), c.getState(child.label), input, child.output));
+					if (child.isState()) c.addTransition(new MealyTransition(c, c.getState(s.state), c.getState(child.state), input, child.output));
+					else c.addTransition(new MealyTransition(c, c.getState(s.state), c.getState(child.label), input, child.output));
 				}
 			}
 		}catch(Exception e){
@@ -274,7 +281,7 @@ public class SigmaLearner extends Learner{
 			System.exit(1);
 		}
 
-		LogManager.logInfo(Options.SYMBOL_SIGMA + " : " + z);
+		LogManager.logInfo("Z : " + z);
 		LogManager.logInfo("I : " + i);
 
 		LogManager.logInfo("Conjecture have " + c.getStateCount() + " states and " + c.getTransitionCount() + " transitions : ");		

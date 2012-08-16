@@ -25,13 +25,17 @@ public class ObservationNode extends Node{
 	
 	public void makeInitial(){
 		state = 0;
-		label = 0;
 		input = null;
 		output = null;
 		clearChildren();
 	}
+	
 	public boolean isState(){
 		return state > -1;
+	}
+	
+	public boolean isLabelled(){
+		return label > -1;
 	}
 	
 	public boolean isInitial(){

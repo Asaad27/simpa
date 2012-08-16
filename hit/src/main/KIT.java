@@ -2,7 +2,6 @@ package main;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
 import learner.Learner;
 import tools.GraphViz;
 import tools.Utils;
@@ -23,6 +22,8 @@ public class KIT {
 			for(i = 0; i < args.length; i++){
 				if (args[i].equals("--reuseop")) Options.REUSE_OP_IFNEEDED = true;
 				else if (args[i].equals("--text"))  Options.LOG_TEXT = true;
+				else if (args[i].equals("-I")) Options.INITIAL_INPUT_SYMBOLS = args[++i];
+				else if (args[i].equals("-Z")) Options.INITIAL_INPUT_SEQUENCES = args[++i];
 				else if (args[i].equals("--html")) Options.LOG_HTML = true;
 				else if (args[i].equals("--openhtml")) Options.AUTO_OPEN_HTML = true;
 				else if (args[i].equals("--forcej48")) Options.FORCE_J48 = true;
@@ -74,6 +75,9 @@ public class KIT {
 		f = new File(Options.OUTDIR + Options.DIRARFF);
 		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite()) throw new Exception("Unable to create/write " + f.getName());	
 		
+		if (Options.TREEINFERENCE && (Options.INITIAL_INPUT_SEQUENCES==null || Options.INITIAL_INPUT_SYMBOLS==null))
+			 throw new Exception("Missing initial input symbols or sequences for tree inference");	
+		
 		if (Options.LOG_TEXT) LogManager.addLogger(new TextLogger());
 		if (Options.LOG_HTML) LogManager.addLogger(new HTMLLogger());
 	}
@@ -122,6 +126,8 @@ public class KIT {
 		System.out.println("    --help | -h       : Show help");
 		System.out.println("> Algorithm");
 		System.out.println("    --tree            : Use tree inference (if available) instead of table");
+		System.out.println("    -I                : Initial input symbols (a,b,c)");
+		System.out.println("    -Z                : Initial distinguishing sequences (a-b,a-c,a-c-b)");
 		System.out.println("    --reuseop         : Reuse output parameter for non closed row");
 		System.out.println("    --forcej48        : Force the use of J48 algorithm instead of M5P for numeric classes");
 		System.out.println("    --supportmin (20) : Minimal support for relation (1-100)");
