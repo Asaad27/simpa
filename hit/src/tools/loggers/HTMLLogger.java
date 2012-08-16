@@ -318,6 +318,7 @@ public class HTMLLogger implements ILogger {
 			writer.write("<li class=\"image\">\n");
 			writer.write("<center><img src=\"data:image/svg+xml;base64," + Base64.encodeFromFile(path) + "\"/></center>");
 			writer.write("</li>\n");
+			writer.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -397,7 +398,7 @@ public class HTMLLogger implements ILogger {
 
 	@Override
 	public void logObservationTree(ObservationNode root) {
-		logImage(root.toDot().getAbsolutePath());		
+		logImage(root.toDot().getAbsolutePath());
 	}
 
 }

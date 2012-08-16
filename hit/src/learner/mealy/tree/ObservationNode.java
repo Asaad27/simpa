@@ -43,7 +43,7 @@ public class ObservationNode extends Node{
 	}
 	
 	private void toDotCreateNodes(Writer w) throws IOException{
-		w.write("    node" + id + " [style=\"rounded,filled\", fillcolor=\"#"+ (state==-1?"FFFFFF":"E0FEEE") + "\", color=\"#666666" + "\", shape=record, label=\"{"+ label + "|" + id + "}\"]\n");
+		w.write("    node" + id + " [style=\"rounded,filled\", fillcolor=\"#"+ (state==-1?"FFFFFF":"E0FEEE") + "\", color=\"#666666" + "\", shape=record, label=\"{"+ state+" | " + label + "|" + id + "}\"]\n");
 		for (Node n : children){        	
 			((ObservationNode)n).toDotCreateNodes(w);
         }

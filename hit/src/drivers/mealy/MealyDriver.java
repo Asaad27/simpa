@@ -18,13 +18,19 @@ import drivers.Driver;
 public class MealyDriver extends Driver{
 	protected Mealy automata;
 	protected State currentState;
+	protected List<InputSequence> forcedCE;
 	
 	public MealyDriver(Mealy automata){
 		super();
 		type = DriverType.MEALY;
 		this.automata = automata;
+		this.forcedCE = getForcedCE();
 	}
 	
+	protected List<InputSequence> getForcedCE() {
+		return null;
+	}
+
 	public String execute(String input) {
 		String output = null;
 		if (input.length()>0){
@@ -72,43 +78,49 @@ public class MealyDriver extends Driver{
 	
 	public InputSequence getCounterExample(Automata c){
 		LogManager.logInfo("Searching counter example");
-		LmConjecture conj = (LmConjecture)c;
-		int maxTries = 100000;
-		InputSequence ce = null;
-		List<String> is = getInputSymbols();
-		MealyDriver conjDriver = new MealyDriver(conj);
-		stopLog();
-		conjDriver.stopLog();
 		boolean found = false;
-		int i = 0;
-		int ceSize = 0;
-		while(i<maxTries && !found){
-			ce = InputSequence.generate(is, Utils.randIntBetween(2, 12));
-			OutputSequence osSystem = new OutputSequence();
-			OutputSequence osConj = new OutputSequence();
-			reset();
-			conjDriver.reset();
-			for(String input : ce.sequence){
-				String _sys = execute(input);
-				String _conj = conjDriver.execute(input);
-				osSystem.addOutput(_sys);
-				osConj.addOutput(_conj);
-				if (!_sys.equals(_conj)){
-					found = true;
-					ceSize = osSystem.getLength();
-					LogManager.logInfo("Counter example found : " + ce.getIthPreffix(ceSize));
-					LogManager.logInfo("On system : " + osSystem);
-					LogManager.logInfo("On conjecture : " + osConj);
-					break;
-				}				
+		InputSequence ce = null;
+		if (forcedCE != null && !forcedCE.isEmpty()){
+			found = true;
+			ce = forcedCE.remove(0);
+			LogManager.logInfo("Counter example found (forced) : " + ce);
+		}else{
+			LmConjecture conj = (LmConjecture)c;
+			int maxTries = 100000;
+			List<String> is = getInputSymbols();
+			MealyDriver conjDriver = new MealyDriver(conj);
+			stopLog();
+			conjDriver.stopLog();
+			int i = 0;
+			while(i<maxTries && !found){
+				ce = InputSequence.generate(is, Utils.randIntBetween(2, 12));
+				OutputSequence osSystem = new OutputSequence();
+				OutputSequence osConj = new OutputSequence();
+				reset();
+				conjDriver.reset();
+				for(String input : ce.sequence){
+					String _sys = execute(input);
+					String _conj = conjDriver.execute(input);
+					osSystem.addOutput(_sys);
+					osConj.addOutput(_conj);
+					if (!_sys.equals(_conj)){
+						found = true;
+						ce = ce.getIthPreffix(osSystem.getLength());
+						LogManager.logInfo("Counter example found : " + ce);
+						LogManager.logInfo("On system : " + osSystem);
+						LogManager.logInfo("On conjecture : " + osConj);
+						break;
+					}				
+				}
+				i++;
 			}
-			i++;
-		}	
-		startLog();
-		conjDriver.startLog();
+			startLog();
+			conjDriver.startLog();
+		}
+
 		if (!found) LogManager.logInfo("No counter example found");
 		
-		return (found?ce.getIthPreffix(ceSize):null);		
+		return (found?ce:null);		
 	}
 		
 	@Override

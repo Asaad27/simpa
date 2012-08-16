@@ -50,7 +50,7 @@ public class SigmaLearner extends Learner{
 		return noLabelledPred;
 	}
 	
-	private InputSequence compareNodesUsingZ(Node node1, Node node2) {
+	private InputSequence compareNodesUsingSeqs(Node node1, Node node2, List<InputSequence> z) {
 		for(InputSequence seq : z){
 			Node currentNode1 = node1;
 			Node currentNode2 = node2;
@@ -65,14 +65,14 @@ public class SigmaLearner extends Learner{
 		return null;
 	}
 	
-	private ObservationNode findFirstEquivalent(ObservationNode node) {
+	private ObservationNode findFirstEquivalent(ObservationNode node, List<InputSequence> z) {
 		List<Node> queue = new ArrayList<Node>();
 		queue.add(root);
 		ObservationNode currentNode = null;
 		while(!queue.isEmpty()){
 			currentNode = (ObservationNode) queue.get(0);
 			if (currentNode.id == node.id) break;
-			InputSequence tmpdfs = compareNodesUsingZ(node,  currentNode);
+			InputSequence tmpdfs = compareNodesUsingSeqs(node,  currentNode, z);
 			if (tmpdfs == null) return currentNode;
 			queue.remove(0);
 			queue.addAll(currentNode.children);	
@@ -81,7 +81,6 @@ public class SigmaLearner extends Learner{
 	}
 	
 	private void addState(ObservationNode node) {
-		LogManager.logInfo("New state in node : " + node.id);
 		node.state = states.size();
 		states.add(node);
 	}
@@ -106,7 +105,7 @@ public class SigmaLearner extends Learner{
 		return ret;
 	}
 
-	private LmConjecture buildQuotient() {
+	private LmConjecture buildQuotient(List<InputSequence> z) {
 		//1. Q = Q0		
 		this.states = new ArrayList<ObservationNode>();
 		
@@ -123,7 +122,7 @@ public class SigmaLearner extends Learner{
 				extendNodeWithInputSeqs(currentNode, z);
 				
 				//7. if (u is Z-equivalent to a traversed state w of U)
-				ObservationNode w = findFirstEquivalent(currentNode);
+				ObservationNode w = findFirstEquivalent(currentNode, z);
 				if (w != null){
 					//8. Label u with w
 					currentNode.label = w.state;					
@@ -176,11 +175,36 @@ public class SigmaLearner extends Learner{
 		}		
 	}
 	
+	private InputSequence getCEForConjecture(LmConjecture c) {
+		LogManager.logInfo("Searching counter example for state");
+		InputSequence ce = getCEForConjectureRec(c, c.getInitialState(), root, new InputSequence());
+		if (ce != null) LogManager.logInfo("Counter example for state found : " + ce);
+		else LogManager.logInfo("No counter example found");
+		return ce;
+	}
+	
+	private InputSequence getCEForConjectureRec(LmConjecture c, State s, ObservationNode node, InputSequence ce) {
+		if (!node.children.isEmpty()){
+			for(Node n : node.children){
+				ce.addInput(n.input);
+				MealyTransition t = c.getTransitionFromWithInput(s, n.input);
+				if (t != null && t.getOutput().equals(n.output)){
+					InputSequence otherCE = getCEForConjectureRec(c, t.getTo(), (ObservationNode)n, ce);
+					if (otherCE != null) return otherCE;
+				}else
+					return ce;
+				ce.removeLastInput();
+			}
+		}
+		return null;
+	}
+	
 	public void learn() {
 		LogManager.logConsole("Inferring the system");
 		InputSequence ce, ceState = null;
+		addtolog = false;
 		
-		LmConjecture Z_Q = buildQuotient();
+		LmConjecture Z_Q = buildQuotient(z);
 		
 		// 3. while there exists an unprocessed counterexample CE
 		do{
@@ -198,13 +222,13 @@ public class SigmaLearner extends Learner{
 				
 				//3.4.  while there exists a counterexample for any state of the Z_Q that is not in Z 
 				do{
-					ceState = driver.getCounterExample(Z_Q);
+					ceState = getCEForConjecture(Z_Q);
 					if (ceState != null){
 						// 3.4.2.	Include it into the set Z
 						List<InputSequence> zp = includeInto(z, ceState);
 						
 						// 3.4.3.	Build-quotient (A, I, Z’, U(Z,CE) 
-						LmConjecture Zp_Q = buildQuotient();
+						LmConjecture Zp_Q = buildQuotient(zp);
 						
 						// 3.4.4.	Label the nodes of the observation tree by states of the K-quotient
 						labelNodes(root, Zp_Q);
@@ -212,13 +236,15 @@ public class SigmaLearner extends Learner{
 						// 3.4.5.	Let Z=Z’, I=I’
 						z = zp; i = ip;
 						
+						// ADDED
+						Z_Q = Zp_Q;
+						
 					}					
 				}while(ceState != null);				
 			}
 		}while(ce != null);
 		
-		LmConjecture conjecture = createConjecture();
-		conjecture.exportToDot();
+		addtolog = true;
 	}
 
 	private void askInputSequenceToNode(Node node, InputSequence sequence){
@@ -226,6 +252,7 @@ public class SigmaLearner extends Learner{
 		InputSequence seq = sequence.clone();
 		InputSequence previousSeq = getPreviousInputSequenceFromNode(currentNode);
 		while (seq.getLength()>0 && currentNode.haveChildBy(seq.getFirstSymbol())){
+			((ObservationNode)currentNode).label = -1;
 			currentNode = currentNode.childBy(seq.getFirstSymbol());
 			previousSeq.addInput(seq.getFirstSymbol());
 			seq.removeFirstInput();			
@@ -236,6 +263,7 @@ public class SigmaLearner extends Learner{
 				driver.execute(input);
 			}			
 			for (String input : seq.sequence){
+				((ObservationNode)currentNode).label = -1;
 				if (currentNode.haveChildBy(input)) currentNode = currentNode.childBy(input);
 				else currentNode = currentNode.addChild(new ObservationNode(input, driver.execute(input)));				
 			}
@@ -263,11 +291,8 @@ public class SigmaLearner extends Learner{
 		
 		LmConjecture c = new LmConjecture(driver);
 
-		for(int i=0; i<states.size(); i++){
-			c.addState(new State("S" + i, i == 0));
-		}
+		for(int i=0; i<states.size(); i++) c.addState(new State("S" + i, i == 0));
 
-		try{
 			for(ObservationNode s : states){
 				for(String input : i){
 					ObservationNode child = (ObservationNode) s.childBy(input);
@@ -275,19 +300,12 @@ public class SigmaLearner extends Learner{
 					else c.addTransition(new MealyTransition(c, c.getState(s.state), c.getState(child.label), input, child.output));
 				}
 			}
-		}catch(Exception e){
-			LogManager.logObservationTree(root);
-			e.printStackTrace();
-			System.exit(1);
-		}
 
 		LogManager.logInfo("Z : " + z);
 		LogManager.logInfo("I : " + i);
 
 		LogManager.logInfo("Conjecture have " + c.getStateCount() + " states and " + c.getTransitionCount() + " transitions : ");		
-		for (MealyTransition t : c.getTransitions()){
-			LogManager.logTransition(t.toString());
-		}
+		for (MealyTransition t : c.getTransitions()) LogManager.logTransition(t.toString());
 		LogManager.logLine();
 
 		c.exportToDot();
@@ -299,43 +317,6 @@ public class SigmaLearner extends Learner{
 //		return getDistinguishingSequenceBFS();
 //	}
 
-//	private void updateEquivalent(ObservationNode node) {
-//		for (ObservationNode state : states){
-//			InputSequence tmpdfs = compareNodesUsingZ(node,  state);
-//			if (tmpdfs == null){
-//				node.label = state.state;
-//				return;
-//			}			
-//		}
-//	}	
-	
-	// 4.4.	while there exists a counterexample for any state of the Z_Q 
-//	private boolean getDistinguishingSequenceBFS() {
-//		List<Node> queue = new ArrayList<Node>();
-//		queue.add(root);
-//		ObservationNode currentNode = null;
-//		LogManager.logObservationTree(root);
-//		while(!queue.isEmpty()){
-//			currentNode = (ObservationNode) queue.get(0);
-//			System.out.println(currentNode.id);
-//			if (currentNode.state == -1){
-//				InputSequence tmpdfs = new InputSequence();
-//				if (currentNode.equivTo == -1 && currentNode.haveSigma){
-//					addState(currentNode);
-//					return true;
-//				}else if (currentNode.equivTo != -1){
-//					compareNodesUsingSubTrees(tmpdfs, states.get(currentNode.equivTo),  currentNode);
-//					if (tmpdfs.getLength() > 0){
-//						addState(currentNode, tmpdfs);
-//						return true;
-//					}
-//				}
-//			}
-//			queue.remove(0);
-//			queue.addAll(currentNode.children);
-//		}
-//		return false;
-//	}
 
 	
 //	private InputSequence compareNodesUsingSubTrees(InputSequence dfs, Node node1, Node node2) {

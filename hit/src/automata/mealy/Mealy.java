@@ -82,20 +82,18 @@ public class Mealy extends Automata implements Serializable{
 		return res;
 	}
 
-	public List<MealyTransition> getTransitionFromWithInput(State s, String input) {
-		List<MealyTransition> res = new ArrayList<MealyTransition>();
+	public MealyTransition getTransitionFromWithInput(State s, String input) {
 		for (MealyTransition t : getTransitionFrom(s)){
-			if (t.getInput().equals(input)) res.add(t);
+			if (t.getInput().equals(input)) return t;
 		}
-		return res;
+		return null;
 	}
 	
-	public List<MealyTransition> getTransitionFromWithInput(State s, String input, boolean loop) {
-		List<MealyTransition> res = new ArrayList<MealyTransition>();
+	public MealyTransition getTransitionFromWithInput(State s, String input, boolean loop) {
 		for (MealyTransition t : getTransitionFrom(s, loop)){
-			if (t.getInput().equals(input)) res.add(t);
+			if (t.getInput().equals(input)) return t;
 		}
-		return res;
+		return null;
 	}
 	
 	public void exportToDot(){

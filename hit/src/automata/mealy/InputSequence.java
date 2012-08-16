@@ -18,12 +18,14 @@ public class InputSequence implements Cloneable{
 		sequence.add(input);
 	}
 	
-	public void addInput(String input){
+	public InputSequence addInput(String input){
 		sequence.add(input);
+		return this;
 	}
 	
-	public void addInputSequence(InputSequence inputSeq){
+	public InputSequence addInputSequence(InputSequence inputSeq){
 		sequence.addAll(inputSeq.sequence);
+		return this;
 	}
 	
 	public int getLength(){
@@ -97,8 +99,9 @@ public class InputSequence implements Cloneable{
 		return s.toString();
 	}
 
-	public void removeLastInput() {
+	public InputSequence removeLastInput() {
 		sequence.remove(sequence.size()-1);
+		return this;
 	}
 	
 	public void removeFirstInput() {
