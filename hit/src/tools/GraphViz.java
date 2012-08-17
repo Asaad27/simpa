@@ -7,7 +7,7 @@ import main.Options;
 import tools.loggers.LogManager;
 
 public class GraphViz{
-   private final static String DOT = "dot";
+   private static String DOT = "dot";
    
    public static File dotToFile(String filename)
    {
@@ -29,20 +29,30 @@ public class GraphViz{
 	   return img;
    }
    
-   public static int check(){
-	   try {
-	         Runtime rt = Runtime.getRuntime();  
-	         String[] args = {DOT, "-V"};
-	         Process p = rt.exec(args);
-	         p.waitFor();
-	         return p.exitValue();
-	      }
-	   	  catch (IOException e) {
-	         return 1;
-	      }
-	      catch (Exception e) {
-	         return 2;
-	      }
-   }
+	public static int check() {
+		Runtime rt = Runtime.getRuntime();
+		Process p;
+		try {
+			String[] args = { DOT, "-V" };
+			p = rt.exec(args);
+			p.waitFor();
+			return p.exitValue();
+		} catch (IOException e) {
+			try {
+				DOT = Utils.exec("which dot");
+				String[] newargs = { DOT, "-V" };
+	            if (DOT != null){
+	            	p = rt.exec(newargs);
+	    			p.waitFor();
+	    			return p.exitValue();
+	            }
+	            return 1;
+			}catch (Exception f) {
+				return 1;
+			}
+		} catch (Exception e) {
+			return 2;
+		}
+	}
 }
 

@@ -147,6 +147,8 @@ public class SigmaLearner extends Learner{
 		}
 		
 		LmConjecture ret = createConjecture();
+		
+		// NEEDED ?
 		labelNodes(ret);
 		
 		return ret;
@@ -206,7 +208,6 @@ public class SigmaLearner extends Learner{
 	public void learn() {
 		LogManager.logConsole("Inferring the system");
 		InputSequence ce;;
-		addtolog = false;
 		
 		// 1. Build-quotient(A, I, Z, {€}) returning U and K =  (Q, q0, I, O, hK)		
 		LmConjecture Z_Q = buildQuotient(z);
@@ -231,13 +232,12 @@ public class SigmaLearner extends Learner{
 			}
 		}while(ce != null);
 		
-		addtolog = true;
 	}
 
 	private LmConjecture fixPointConsistency(LmConjecture K) {
 		InputSequence inconsistency;
 		
-		//1.	while there exists a witness w for state q in U such that its input projection is not in Z
+		//1. while there exists a witness w for state q in U such that its input projection is not in Z
 		do{
 			inconsistency = findInconsistency(K);
 			if (inconsistency != null){
@@ -250,6 +250,7 @@ public class SigmaLearner extends Learner{
 			}					
 		}while(inconsistency != null);
 		
+		//7. Return the last labelled observation tree and quotient.
 		return K;
 	}
 
@@ -285,7 +286,7 @@ public class SigmaLearner extends Learner{
 	}
 	
 	public LmConjecture createConjecture() {
-		if (addtolog) LogManager.logConsole("Building the conjecture");
+		LogManager.logInfo("Building conjecture");
 		LogManager.logObservationTree(root);
 		
 		LmConjecture c = new LmConjecture(driver);

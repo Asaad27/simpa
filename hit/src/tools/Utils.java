@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,19 @@ public class Utils {
 		if (s.length() == 0)
 			return s;
 		return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
+	}
+	
+	public static String exec(String cmd) {
+		String output = null;
+		try {
+			Process p = Runtime.getRuntime().exec(cmd);
+			BufferedReader input = new BufferedReader(new InputStreamReader(
+					p.getInputStream()));
+			output = input.readLine();
+			input.close();
+		} catch (Exception e) {
+		}
+		return output;
 	}
 	
 	public static String escapeTags(String original) {

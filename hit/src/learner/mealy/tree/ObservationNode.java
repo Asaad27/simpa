@@ -44,7 +44,7 @@ public class ObservationNode extends Node{
 	
 	private void toDotCreateNodes(Writer w) throws IOException{
 		if (state==-1)
-			w.write("    node" + id + " [style=\"rounded,filled\", fillcolor=\"#"+ "FFFFFF" + "\", color=\"#666666" + "\", shape=record, label=\"{"+ label + "}\"]\n");
+			w.write("    node" + id + " [style=\"rounded,filled\", fillcolor=\"#"+ "FFFFFF" + "\", color=\"#" + (isLabelled()?"FF6666":"666666") + "\", shape=record, label=\"{"+ label + "}\"]\n");
 		else
 			w.write("    node" + id + " [style=\"rounded,filled\", fillcolor=\"#"+ "E0FEEE" + "\", color=\"#666666" + "\", shape=record, label=\"{"+ state+" | " + label + "}\"]\n");
 		for (Node n : children){        	
