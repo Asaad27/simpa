@@ -18,8 +18,6 @@ public abstract class Learner {
 		addtolog = true;
 	}
 	
-	protected abstract void completeDataStructure();
-	
 	public abstract Automata createConjecture();
 	
 	public abstract void learn();

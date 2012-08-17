@@ -15,8 +15,8 @@ public class State implements Serializable{
 		this.flag = false;
 	}
 	
-	public String getId(){
-		return name.substring(1);
+	public int getId(){
+		return Integer.parseInt(name.substring(1));
 	}
 	
 	public void cleanMark(){

@@ -57,6 +57,7 @@ public class SigmaLearner extends Learner{
 			InputSequence dfs = new InputSequence();
 			for(String input : seq.sequence){
 				dfs.addInput(input);
+				if (!currentNode1.haveChildBy(input) || !currentNode2.haveChildBy(input)) return dfs;
 				if (!currentNode1.childBy(input).output.equals(currentNode2.childBy(input).output)) return dfs;
 				currentNode1 = currentNode1.childBy(input);
 				currentNode2 = currentNode2.childBy(input);
@@ -82,6 +83,10 @@ public class SigmaLearner extends Learner{
 	
 	private void addState(ObservationNode node) {
 		node.state = states.size();
+		
+		// ADDED
+		node.label = -1;
+		
 		states.add(node);
 	}
 
@@ -106,6 +111,10 @@ public class SigmaLearner extends Learner{
 	}
 
 	private LmConjecture buildQuotient(List<InputSequence> z) {
+		LogManager.logInfo("Build Quotient");
+		LogManager.logInfo("Z : " + z.toString());
+		LogManager.logInfo("I : " + i.toString());
+		
 		//1. Q = Q0		
 		this.states = new ArrayList<ObservationNode>();
 		
@@ -131,13 +140,16 @@ public class SigmaLearner extends Learner{
 					addState(currentNode);
 					//11. Extend_Node (u,I)
 					extendNodeWithSymbol(currentNode, i);
+					
 				}
 			}			
-			
-			queue.addAll(currentNode.children);
+			queue.addAll(currentNode.children);			
 		}
 		
-		return createConjecture();
+		LmConjecture ret = createConjecture();
+		labelNodes(ret);
+		
+		return ret;
 	}
 
 	private List<InputSequence> includeInto(List<InputSequence> into, InputSequence seq) {
@@ -145,55 +157,47 @@ public class SigmaLearner extends Learner{
 		boolean exists = false;
 		for (InputSequence s : into){
 			ret.add(s);
-			if (s.startsWith(seq)) exists = true;
+			if (s.equals(seq)) exists = true;
 		}
 		if (!exists) ret.add(seq);
 		return ret;
 	}	
 
-	private void labelNodes(ObservationNode node, LmConjecture quotient) {
-		List<Node> queue = new ArrayList<Node>();
-		queue.add(root);
-		ObservationNode currentNode = null;
-		while(!queue.isEmpty()){
-			currentNode = (ObservationNode) queue.get(0);
-			ObservationNode currentState = root;
-			InputSequence ce = getPreviousInputSequenceFromNode(node);
-			node = currentState;
-			while (ce.getLength()>0){
-				if (node.label == -1){
-					node.label = currentState.state;
-				}			
-				String input = ce.getFirstSymbol();
-				node = (ObservationNode) node.childBy(input);
-				currentState = (ObservationNode) currentState.childBy(input);
-				if (currentState.state==-1) currentState = states.get(currentState.label);
-				ce.removeFirstInput();
-			}			
-			queue.remove(0);
-			queue.addAll(currentNode.children);
-		}		
+	private void labelNodes(LmConjecture q) {
+		LogManager.logInfo("Labeling nodes");
+		labelNodesRec(q, root, q.getInitialState(), false);
+		LogManager.logObservationTree(root);
 	}
 	
-	private InputSequence getCEForConjecture(LmConjecture c) {
-		LogManager.logInfo("Searching counter example for state");
-		InputSequence ce = getCEForConjectureRec(c, c.getInitialState(), root, new InputSequence());
-		if (ce != null) LogManager.logInfo("Counter example for state found : " + ce);
-		else LogManager.logInfo("No counter example found");
+	private void labelNodesRec(LmConjecture q, ObservationNode node, State s, boolean label) {
+		if (label) node.label = s.getId();
+		if (node.isLabelled()) label = true;
+		if (!node.children.isEmpty()){
+			for(Node n : node.children){
+				MealyTransition t = q.getTransitionFromWithInput(s, n.input);
+				labelNodesRec(q, (ObservationNode) n, t.getTo(), label);
+			}
+		}
+	}
+	
+	private InputSequence findInconsistency(LmConjecture c) {
+		LogManager.logInfo("Searching inconsistency");
+		InputSequence ce = findInconsistencyRec(c, c.getInitialState(), root, new InputSequence());
+		if (ce != null) LogManager.logInfo("Inconsistency found : " + ce); else LogManager.logInfo("No inconsistency found");
 		return ce;
 	}
 	
-	private InputSequence getCEForConjectureRec(LmConjecture c, State s, ObservationNode node, InputSequence ce) {
+	private InputSequence findInconsistencyRec(LmConjecture c, State s, ObservationNode node, InputSequence ce) {
 		if (!node.children.isEmpty()){
 			for(Node n : node.children){
-				ce.addInput(n.input);
+				if (!((ObservationNode)n).isState()) ce.addInput(n.input);
 				MealyTransition t = c.getTransitionFromWithInput(s, n.input);
 				if (t != null && t.getOutput().equals(n.output)){
-					InputSequence otherCE = getCEForConjectureRec(c, t.getTo(), (ObservationNode)n, ce);
+					InputSequence otherCE = findInconsistencyRec(c, t.getTo(), (ObservationNode)n, ce);
 					if (otherCE != null) return otherCE;
 				}else
-					return ce;
-				ce.removeLastInput();
+					return ce.removeFirstInput();
+				if (!((ObservationNode)n).isState()) ce.removeLastInput();
 			}
 		}
 		return null;
@@ -201,50 +205,52 @@ public class SigmaLearner extends Learner{
 	
 	public void learn() {
 		LogManager.logConsole("Inferring the system");
-		InputSequence ce, ceState = null;
+		InputSequence ce;;
 		addtolog = false;
 		
+		// 1. Build-quotient(A, I, Z, {€}) returning U and K =  (Q, q0, I, O, hK)		
 		LmConjecture Z_Q = buildQuotient(z);
 		
-		// 3. while there exists an unprocessed counterexample CE
+		// 2. Fix_Point_Consistency(A, I, Z, U, K)
+		Z_Q = fixPointConsistency(Z_Q);
+		
+		// 4. while there exists an unprocessed counterexample CE
 		do{
 			ce = driver.getCounterExample(Z_Q);
 			if (ce != null){
 				LogManager.logInfo("Adding the counter example to tree");
 				
-				//3.2.	Build U(Z, CE)
+				//5. U = U U CE
 				askInputSequenceToNode(root, ce);
-				
-				//3.3.	Extend I with inputs from X that appear in CE, yielding I’
-				List<String> ip = extendInputSymbolsWith(ce);
-				
+								
 				LogManager.logObservationTree(root);
 				
-				//3.4.  while there exists a counterexample for any state of the Z_Q that is not in Z 
-				do{
-					ceState = getCEForConjecture(Z_Q);
-					if (ceState != null){
-						// 3.4.2.	Include it into the set Z
-						List<InputSequence> zp = includeInto(z, ceState);
-						
-						// 3.4.3.	Build-quotient (A, I, Z’, U(Z,CE) 
-						LmConjecture Zp_Q = buildQuotient(zp);
-						
-						// 3.4.4.	Label the nodes of the observation tree by states of the K-quotient
-						labelNodes(root, Zp_Q);
-						
-						// 3.4.5.	Let Z=Z’, I=I’
-						z = zp; i = ip;
-						
-						// ADDED
-						Z_Q = Zp_Q;
-						
-					}					
-				}while(ceState != null);				
+				// 6. Fix_Point_Consistency(A, I, Z, U, K)
+				Z_Q = fixPointConsistency(Z_Q);
+				
 			}
 		}while(ce != null);
 		
 		addtolog = true;
+	}
+
+	private LmConjecture fixPointConsistency(LmConjecture K) {
+		InputSequence inconsistency;
+		
+		//1.	while there exists a witness w for state q in U such that its input projection is not in Z
+		do{
+			inconsistency = findInconsistency(K);
+			if (inconsistency != null){
+				// 4. Z' = Z U {w|I} and I' = I U inp(w)
+				// 6. Z = Z' and I = I'
+				z = includeInto(z, inconsistency); i = extendInputSymbolsWith(inconsistency);
+						
+				// 5. Build_quotient(A, I', Z', U) returning an updated observation tree and quotient 
+				K = buildQuotient(z);
+			}					
+		}while(inconsistency != null);
+		
+		return K;
 	}
 
 	private void askInputSequenceToNode(Node node, InputSequence sequence){
@@ -252,7 +258,6 @@ public class SigmaLearner extends Learner{
 		InputSequence seq = sequence.clone();
 		InputSequence previousSeq = getPreviousInputSequenceFromNode(currentNode);
 		while (seq.getLength()>0 && currentNode.haveChildBy(seq.getFirstSymbol())){
-			((ObservationNode)currentNode).label = -1;
 			currentNode = currentNode.childBy(seq.getFirstSymbol());
 			previousSeq.addInput(seq.getFirstSymbol());
 			seq.removeFirstInput();			
@@ -263,7 +268,6 @@ public class SigmaLearner extends Learner{
 				driver.execute(input);
 			}			
 			for (String input : seq.sequence){
-				((ObservationNode)currentNode).label = -1;
 				if (currentNode.haveChildBy(input)) currentNode = currentNode.childBy(input);
 				else currentNode = currentNode.addChild(new ObservationNode(input, driver.execute(input)));				
 			}
@@ -278,11 +282,6 @@ public class SigmaLearner extends Learner{
 			currentNode = currentNode.parent;
 		}
 		return seq;
-	}
-
-	@Override
-	protected void completeDataStructure() {
-		
 	}
 	
 	public LmConjecture createConjecture() {
@@ -312,29 +311,4 @@ public class SigmaLearner extends Learner{
 
 		return c;
 	}
-
-//	private boolean processNextDistinguishingSequence() {		
-//		return getDistinguishingSequenceBFS();
-//	}
-
-
-	
-//	private InputSequence compareNodesUsingSubTrees(InputSequence dfs, Node node1, Node node2) {
-//		for(Node cn1 : node1.children){
-//			String input = cn1.input;
-//			if (node2.haveChildBy(input) && !(cn1.output.equals(node2.childBy(input).output))){
-//				dfs.addInput(input);
-//				return dfs;
-//			}
-//		}
-//		for(Node cn1 : node1.children){
-//			dfs.addInput(cn1.input);
-//			if (node2.haveChildBy(cn1.input)){
-//				InputSequence cdfs = compareNodesUsingSubTrees(dfs, cn1, node2.childBy(cn1.input));
-//				if (cdfs != null) return cdfs;
-//			}
-//			dfs.removeLastInput();
-//		}
-//		return null;
-//	}
 }

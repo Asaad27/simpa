@@ -36,8 +36,7 @@ public class LiLearner extends Learner{
 		this.dTable = new LiDataTable(driver.getInputSymbols(), defaultParamValues);
 	}
 	
-	@Override
-	protected void completeDataStructure() {
+	private void completeTable() {
 		for(int i=0; i<cTable.getCountOfRowsInS(); i++) fillTablesForRow(cTable.getRowInS(i), dTable.getRowInS(i));
 		for(int i=0; i<cTable.getCountOfRowsInR(); i++) fillTablesForRow(cTable.getRowInR(i), dTable.getRowInR(i));
 	}
@@ -217,7 +216,7 @@ public class LiLearner extends Learner{
 			if (!alreadyExists){
 				cTable.addRowInR(new LiControlTableRow(pis, cTable.E));
 				dTable.addRowInR(new LiDataTableRow(pis, cTable.getInputSymbols()));
-				completeDataStructure();
+				completeTable();
 			}
 		}		
 	}
@@ -339,7 +338,7 @@ public class LiLearner extends Learner{
 				dTable.addRowInR(newDataRow);			
 			}
 		}
-		completeDataStructure();
+		completeTable();
 	}
 	
 	public void learn() {
@@ -347,7 +346,7 @@ public class LiLearner extends Learner{
 		boolean finished = false;
 		NDV ndv; NBP nbp; NDF ndf;
 		ParameterizedInputSequence ce = null;
-		completeDataStructure();
+		completeTable();
 		LogManager.logControlTable(cTable);
 		LogManager.logDataTable(dTable);
 		while(!finished){
@@ -399,7 +398,7 @@ public class LiLearner extends Learner{
 			int suffixLength = 1;
 			do{
 				cTable.addColumnInE(ce.getIthSuffix(suffixLength));
-				completeDataStructure();
+				completeTable();
 				if (!cTable.getNonClosedRows().isEmpty()) break;
 				suffixLength++;
 			}while(suffixLength <= ce.getLength());

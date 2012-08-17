@@ -104,8 +104,9 @@ public class InputSequence implements Cloneable{
 		return this;
 	}
 	
-	public void removeFirstInput() {
+	public InputSequence removeFirstInput() {
 		sequence.remove(0);
+		return this;
 	}
 
 	public static InputSequence generate(List<String> is, int length) {

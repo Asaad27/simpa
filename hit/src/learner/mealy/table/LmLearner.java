@@ -23,8 +23,7 @@ public class LmLearner extends Learner{
 		this.cTable = new LmControlTable(driver.getInputSymbols());
 	}
 	
-	@Override
-	protected void completeDataStructure() {
+	private void completeTable() {
 		for(int i=0; i<cTable.getCountOfRowsInS(); i++) fillTablesForRow(cTable.getRowInS(i));
 		for(int i=0; i<cTable.getCountOfRowsInR(); i++) fillTablesForRow(cTable.getRowInR(i));
 	}
@@ -108,14 +107,14 @@ public class LmLearner extends Learner{
 			LmControlTableRow newControlRow = new LmControlTableRow(pis, cTable.E); 
 			cTable.addRowInR(newControlRow);		
 		}
-		completeDataStructure();
+		completeTable();
 	}
 	
 	public void learn() {
 		LogManager.logConsole("Inferring the system");
 		boolean finished = false;
 		InputSequence ce = null;
-		completeDataStructure();
+		completeTable();
 		LogManager.logControlTable(cTable);
 		while(!finished){
 			finished = true;
@@ -136,7 +135,7 @@ public class LmLearner extends Learner{
 				int suffixLength = 1;
 				do{
 					cTable.addColumnInE(ce.getIthSuffix(suffixLength));
-					completeDataStructure();
+					completeTable();
 					if (!cTable.getNonClosedRows().isEmpty()) break;
 					suffixLength++;
 				}while(suffixLength <= ce.getLength());

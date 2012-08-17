@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import automata.mealy.InputSequence;
-import examples.mealy.ZQPaper;
+import examples.mealy.ZQPaper0709;
+import examples.mealy.ZQPaper0730;
 
-public class ZQDriver extends MealyDriver{
+public class ZQPaper0730Driver extends MealyDriver{
 
-	public ZQDriver() {
-		super(ZQPaper.getAutomata());
+	public ZQPaper0730Driver() {
+		super(ZQPaper0730.getAutomata());
 	}
 	
 	protected List<InputSequence> getForcedCE() {
@@ -17,17 +18,16 @@ public class ZQDriver extends MealyDriver{
 		
 		InputSequence ce = new InputSequence();
 		ce.addInput("a");
+		ce.addInput("a");
+		ce.addInput("b");
+		ce.addInput("b");
 		ce.addInput("b");
 		ce.addInput("a");
+		ce.addInput("b");
+		ce.addInput("b");
 		ce.addInput("a");
 		seq.add(ce);
-		
-		ce = new InputSequence();
-		ce.addInput("a");
-		ce.addInput("a");
-		ce.addInput("c");
-		ce.addInput("c");	
-		seq.add(ce);
+
 
 		return seq;
 	}

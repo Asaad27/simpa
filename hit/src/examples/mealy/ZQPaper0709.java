@@ -4,10 +4,10 @@ import automata.State;
 import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
 
-public class ZQPaper {
+public class ZQPaper0709 {
 
 	public static Mealy getAutomata() {
-		Mealy test = new Mealy("ZQPaper");
+		Mealy test = new Mealy("ZQPaper0709");
 		State s0 = test.addState(true);
 		State s1 = test.addState();
 		State s2 = test.addState();
