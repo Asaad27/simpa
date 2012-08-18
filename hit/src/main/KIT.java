@@ -87,6 +87,7 @@ public class KIT {
 		Driver driver;
 		try{
 			driver = (Driver) Class.forName(system).newInstance();
+			LogManager.logConsole("System : " + driver.getSystemName());
 			return driver;
 		} catch (InstantiationException e) {
 			throw new Exception("Unable to instantiate the driver : " + system);

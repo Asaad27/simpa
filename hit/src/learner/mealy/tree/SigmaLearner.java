@@ -219,7 +219,7 @@ public class SigmaLearner extends Learner{
 			ret.add(s);
 			if (s.equals(seq)) exists = true;
 		}
-		if (!exists) ret.add(seq);
+		if (!exists && seq.getLength()>0) ret.add(seq);
 		return ret;
 	}	
 
@@ -235,7 +235,7 @@ public class SigmaLearner extends Learner{
 		if (!node.children.isEmpty()){
 			for(Node n : node.children){
 				MealyTransition t = q.getTransitionFromWithInput(s, n.input);
-				labelNodesRec(q, (ObservationNode) n, t.getTo(), label);
+				if (t != null) labelNodesRec(q, (ObservationNode) n, t.getTo(), label);
 			}
 		}
 	}
@@ -261,8 +261,10 @@ public class SigmaLearner extends Learner{
 						}
 						if (!processed) return otherCE;
 					}
-				}else
-					return ce.removeFirstInput();
+				}else{
+					if (ce.getLength()==1) return ce;
+					else return ce.removeFirstInput();
+				}
 				if (!((ObservationNode)n).isState()) ce.removeLastInput();
 			}
 		}

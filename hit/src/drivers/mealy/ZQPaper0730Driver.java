@@ -27,7 +27,6 @@ public class ZQPaper0730Driver extends MealyDriver{
 		ce.addInput("a");
 		seq.add(ce);
 
-
 		return seq;
 	}
 }
