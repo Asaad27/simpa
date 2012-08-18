@@ -12,11 +12,11 @@ import tools.loggers.HTMLLogger;
 import tools.loggers.LogManager;
 import tools.loggers.TextLogger;
 import drivers.Driver;
-import drivers.efsm.RandomTestDriver;
+import drivers.efsm.RandomEFSMDriver;
 import examples.efsm.RandomEFSM;
 
-public class KITest {
-	public final static String name = "KITest";
+public class KITestEFSM {
+	public final static String name = "KITestEFSM";
 	
 	private static void init(String[] args) {
 		if (!Options.STAT) System.out.println("[+] Reading arguments");
@@ -83,7 +83,7 @@ public class KITest {
 						LogManager.start();
 						
 						RandomEFSM rEFSM = new RandomEFSM();
-						driver = new RandomTestDriver(rEFSM);
+						driver = new RandomEFSMDriver(rEFSM);
 						LiLearner lilearner = new LiLearner(driver);
 						lilearner.learn();
 						driver.logStats();
@@ -92,7 +92,7 @@ public class KITest {
 						LogManager.logLine();
 						c.exportToDot();
 						
-						List<String> record  = ((RandomTestDriver)driver).getStats();
+						List<String> record  = ((RandomEFSMDriver)driver).getStats();
 						record.add(0, String.valueOf(i));
 						record.add(c.getStateCount()<rEFSM.getStateCount()?"1":"0");
 						record.add(c.getStateCount()==rEFSM.getStateCount()?"1":"0");
@@ -121,7 +121,7 @@ public class KITest {
 					LogManager.start();
 					RandomEFSM randEFSM = RandomEFSM.deserialize(Options.OUTDIR + "Random.serialized");
 					randEFSM.exportToDot();
-					driver = new RandomTestDriver(randEFSM);
+					driver = new RandomEFSMDriver(randEFSM);
 					LiLearner lilearner = new LiLearner(driver);
 					lilearner.learn();
 					driver.logStats();

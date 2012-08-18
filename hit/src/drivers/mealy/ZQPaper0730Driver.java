@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import automata.mealy.InputSequence;
-import examples.mealy.ZQPaper0709;
 import examples.mealy.ZQPaper0730;
 
 public class ZQPaper0730Driver extends MealyDriver{

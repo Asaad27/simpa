@@ -19,11 +19,13 @@ public class SigmaLearner extends Learner{
 	private MealyDriver driver;
 	private List<InputSequence> z;
 	private List<String> i;
-	private ObservationNode root;
+	private ObservationNode u;
 	private List<ObservationNode> states; 
 	
 	public SigmaLearner(Driver driver){
-		this.driver = (MealyDriver)driver;		
+		this.driver = (MealyDriver)driver;
+		
+		// Initialize I and Z with specified options
 		this.i = Arrays.asList(Options.INITIAL_INPUT_SYMBOLS.split(","));
 		this.z = new ArrayList<InputSequence>();
 		for(String inputSeqString : Options.INITIAL_INPUT_SEQUENCES.split(",")){
@@ -33,11 +35,111 @@ public class SigmaLearner extends Learner{
 			}
 			z.add(seq);
 		}
-		this.root = new ObservationNode();
-		this.root.makeInitial();
+		
+		// an observation tree U, initialized with {e}. 
+		this.u = new ObservationNode();
 		
 		LogManager.logConsole("Options : I -> " + i.toString());
 		LogManager.logConsole("Options : Z -> " + z.toString());
+	}
+	
+	private LmConjecture fixPointConsistency(LmConjecture K) {
+		InputSequence inconsistency;
+		
+		//1. while there exists a witness w for state q in U such that its input projection is not in Z
+		do{
+			inconsistency = findInconsistency(K);
+			if (inconsistency != null){
+				// 4. Z' = Z U {w|I} and I' = I U inp(w)
+				// 6. Z = Z' and I = I'
+				z = extendInputSequencesWith(z, inconsistency); i = extendInputSymbolsWith(inconsistency);
+						
+				// 5. Build_quotient(A, I', Z', U) returning an updated observation tree and quotient 
+				K = buildQuotient(z);
+			}					
+		}while(inconsistency != null);
+		
+		//7. Return the last labelled observation tree (global) and quotient.
+		return K;
+	}
+
+	private LmConjecture buildQuotient(List<InputSequence> z) {
+		LogManager.logInfo("Build Quotient");
+		LogManager.logInfo("Z : " + z.toString());
+		LogManager.logInfo("I : " + i.toString());
+		
+		//1. 		q0 := e, Q : = {q0}
+		this.states = new ArrayList<ObservationNode>();
+		
+		//2. 		for (each state u of U being traversed during Breadth First Search 
+		List<Node> queue = new ArrayList<Node>();
+		queue.add(u);
+		ObservationNode currentNode = null;
+		while(!queue.isEmpty()){
+			currentNode = (ObservationNode) queue.remove(0);
+
+			//2. 		such that u has no labelled predecessor
+			if (noLabelledPred(currentNode)){
+				//4.		Extend_Node(A, u, Z),
+				extendNodeWithInputSeqs(currentNode, z);
+				
+				//5.		if (u is Z-equivalent to a traversed state w of U)
+				ObservationNode w = findFirstEquivalent(currentNode, z);
+				if (w != null){
+					//6.		Label u with w
+					currentNode.label = w.state;					
+				}else{
+					//8.		Add u into Q
+					addState(currentNode);
+					//9.		Extend_Node(A, u, I)
+					extendNodeWithSymbols(currentNode, i);					
+				}
+			}			
+			queue.addAll(currentNode.children);			
+		}
+		
+		//11.	for (each transition (u, ab, v), such that neither state u nor any of its predecessors is labelled)
+		//12.	begin
+		//13.		if (v is not labelled)
+		//14.		Add transition (u, ab, v) to K
+		//15.		else
+		//16.		Add transition (u, ab, w), where w = label(v), to K.
+		//17.	end
+		LmConjecture ret = createConjecture();
+		
+		// NEEDED ?		
+		//18.	for each node u labelled with u label its successor nodes such that for each transition (u, ab, v), if there is a transition (u, ab, w) in K, then label(v) = w, else v is not labelled.
+		labelNodes(ret);
+		
+		return ret;
+	}
+	
+	public void learn() {
+		LogManager.logConsole("Inferring the system");
+		InputSequence ce;
+		
+		// 1. Build-quotient(A, I, Z, {€}) returning U and K =  (Q, q0, I, O, hK)		
+		LmConjecture Z_Q = buildQuotient(z);
+		
+		// 2. Fix_Point_Consistency(A, I, Z, U, K)
+		Z_Q = fixPointConsistency(Z_Q);
+		
+		// 4. while there exists an unprocessed counterexample CE
+		do{
+			ce = driver.getCounterExample(Z_Q);
+			if (ce != null){
+				LogManager.logInfo("Adding the counter example to tree");
+				
+				//5. U = U U CE
+				askInputSequenceToNode(u, ce);
+								
+				LogManager.logObservationTree(u);
+				
+				// 6. Fix_Point_Consistency(A, I, Z, U, K)
+				Z_Q = fixPointConsistency(Z_Q);
+				
+			}
+		}while(ce != null);		
 	}
 	
 	private boolean noLabelledPred(ObservationNode node) {
@@ -68,7 +170,7 @@ public class SigmaLearner extends Learner{
 	
 	private ObservationNode findFirstEquivalent(ObservationNode node, List<InputSequence> z) {
 		List<Node> queue = new ArrayList<Node>();
-		queue.add(root);
+		queue.add(u);
 		ObservationNode currentNode = null;
 		while(!queue.isEmpty()){
 			currentNode = (ObservationNode) queue.get(0);
@@ -96,7 +198,7 @@ public class SigmaLearner extends Learner{
 		}
 	}
 
-	private void extendNodeWithSymbol(Node node, List<String> symbols) {
+	private void extendNodeWithSymbols(Node node, List<String> symbols) {
 		for (String symbol : symbols) {
 			askInputSequenceToNode(node, new InputSequence(symbol));
 		}
@@ -110,51 +212,7 @@ public class SigmaLearner extends Learner{
 		return ret;
 	}
 
-	private LmConjecture buildQuotient(List<InputSequence> z) {
-		LogManager.logInfo("Build Quotient");
-		LogManager.logInfo("Z : " + z.toString());
-		LogManager.logInfo("I : " + i.toString());
-		
-		//1. Q = Q0		
-		this.states = new ArrayList<ObservationNode>();
-		
-		//2. for (each state u of U being traversed during Breadth First Search)
-		List<Node> queue = new ArrayList<Node>();
-		queue.add(root);
-		ObservationNode currentNode = null;
-		while(!queue.isEmpty()){
-			currentNode = (ObservationNode) queue.remove(0);
-
-			//4. if (u has no labelled predecessor)
-			if (noLabelledPred(currentNode)){
-				//6. Extend_Node (u, Z),
-				extendNodeWithInputSeqs(currentNode, z);
-				
-				//7. if (u is Z-equivalent to a traversed state w of U)
-				ObservationNode w = findFirstEquivalent(currentNode, z);
-				if (w != null){
-					//8. Label u with w
-					currentNode.label = w.state;					
-				}else{
-					//10. Add u into Q
-					addState(currentNode);
-					//11. Extend_Node (u,I)
-					extendNodeWithSymbol(currentNode, i);
-					
-				}
-			}			
-			queue.addAll(currentNode.children);			
-		}
-		
-		LmConjecture ret = createConjecture();
-		
-		// NEEDED ?
-		labelNodes(ret);
-		
-		return ret;
-	}
-
-	private List<InputSequence> includeInto(List<InputSequence> into, InputSequence seq) {
+	private List<InputSequence> extendInputSequencesWith(List<InputSequence> into, InputSequence seq) {
 		List<InputSequence> ret = new ArrayList<InputSequence>();
 		boolean exists = false;
 		for (InputSequence s : into){
@@ -167,8 +225,8 @@ public class SigmaLearner extends Learner{
 
 	private void labelNodes(LmConjecture q) {
 		LogManager.logInfo("Labeling nodes");
-		labelNodesRec(q, root, q.getInitialState(), false);
-		LogManager.logObservationTree(root);
+		labelNodesRec(q, u, q.getInitialState(), false);
+		LogManager.logObservationTree(u);
 	}
 	
 	private void labelNodesRec(LmConjecture q, ObservationNode node, State s, boolean label) {
@@ -184,7 +242,7 @@ public class SigmaLearner extends Learner{
 	
 	private InputSequence findInconsistency(LmConjecture c) {
 		LogManager.logInfo("Searching inconsistency");
-		InputSequence ce = findInconsistencyRec(c, c.getInitialState(), root, new InputSequence());
+		InputSequence ce = findInconsistencyRec(c, c.getInitialState(), u, new InputSequence());
 		if (ce != null) LogManager.logInfo("Inconsistency found : " + ce); else LogManager.logInfo("No inconsistency found");
 		return ce;
 	}
@@ -196,7 +254,13 @@ public class SigmaLearner extends Learner{
 				MealyTransition t = c.getTransitionFromWithInput(s, n.input);
 				if (t != null && t.getOutput().equals(n.output)){
 					InputSequence otherCE = findInconsistencyRec(c, t.getTo(), (ObservationNode)n, ce);
-					if (otherCE != null) return otherCE;
+					if (otherCE != null){
+						boolean processed = false;
+						for (InputSequence seq : z){
+							if (seq.equals(ce)){processed = true; break;}
+						}
+						if (!processed) return otherCE;
+					}
 				}else
 					return ce.removeFirstInput();
 				if (!((ObservationNode)n).isState()) ce.removeLastInput();
@@ -205,55 +269,6 @@ public class SigmaLearner extends Learner{
 		return null;
 	}
 	
-	public void learn() {
-		LogManager.logConsole("Inferring the system");
-		InputSequence ce;;
-		
-		// 1. Build-quotient(A, I, Z, {€}) returning U and K =  (Q, q0, I, O, hK)		
-		LmConjecture Z_Q = buildQuotient(z);
-		
-		// 2. Fix_Point_Consistency(A, I, Z, U, K)
-		Z_Q = fixPointConsistency(Z_Q);
-		
-		// 4. while there exists an unprocessed counterexample CE
-		do{
-			ce = driver.getCounterExample(Z_Q);
-			if (ce != null){
-				LogManager.logInfo("Adding the counter example to tree");
-				
-				//5. U = U U CE
-				askInputSequenceToNode(root, ce);
-								
-				LogManager.logObservationTree(root);
-				
-				// 6. Fix_Point_Consistency(A, I, Z, U, K)
-				Z_Q = fixPointConsistency(Z_Q);
-				
-			}
-		}while(ce != null);
-		
-	}
-
-	private LmConjecture fixPointConsistency(LmConjecture K) {
-		InputSequence inconsistency;
-		
-		//1. while there exists a witness w for state q in U such that its input projection is not in Z
-		do{
-			inconsistency = findInconsistency(K);
-			if (inconsistency != null){
-				// 4. Z' = Z U {w|I} and I' = I U inp(w)
-				// 6. Z = Z' and I = I'
-				z = includeInto(z, inconsistency); i = extendInputSymbolsWith(inconsistency);
-						
-				// 5. Build_quotient(A, I', Z', U) returning an updated observation tree and quotient 
-				K = buildQuotient(z);
-			}					
-		}while(inconsistency != null);
-		
-		//7. Return the last labelled observation tree and quotient.
-		return K;
-	}
-
 	private void askInputSequenceToNode(Node node, InputSequence sequence){
 		Node currentNode = node;
 		InputSequence seq = sequence.clone();
@@ -287,7 +302,7 @@ public class SigmaLearner extends Learner{
 	
 	public LmConjecture createConjecture() {
 		LogManager.logInfo("Building conjecture");
-		LogManager.logObservationTree(root);
+		LogManager.logObservationTree(u);
 		
 		LmConjecture c = new LmConjecture(driver);
 

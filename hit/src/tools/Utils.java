@@ -14,7 +14,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-
 import main.Options;
 import tools.loggers.LogManager;
 

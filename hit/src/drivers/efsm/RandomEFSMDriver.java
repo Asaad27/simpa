@@ -9,14 +9,14 @@ import tools.Utils;
 import automata.efsm.Parameter;
 import examples.efsm.RandomEFSM;
 
-public class RandomTestDriver extends EFSMDriver {
+public class RandomEFSMDriver extends EFSMDriver {
 
 	private HashMap<String, List<ArrayList<Parameter>>> dpv = null;
 	private  TreeMap<String, List<String>> pn = null;
 	private int nbStates = 0;
 	private RandomEFSM efsm = null;
 	
-	public RandomTestDriver(RandomEFSM a) {
+	public RandomEFSMDriver(RandomEFSM a) {
 		super(a);
 		efsm = a;
 		dpv = a.getDefaultParamValues();

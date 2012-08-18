@@ -2,6 +2,7 @@ package tools;
 import java.util.Collections;
 import java.util.List;
 import java.util.TreeMap;
+
 import learner.efsm.LiConjecture;
 import automata.State;
 import automata.efsm.EFSMTransition;

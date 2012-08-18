@@ -23,13 +23,6 @@ public class ObservationNode extends Node{
 		super(input, output);
 	}
 	
-	public void makeInitial(){
-		state = 0;
-		input = null;
-		output = null;
-		clearChildren();
-	}
-	
 	public boolean isState(){
 		return state > -1;
 	}

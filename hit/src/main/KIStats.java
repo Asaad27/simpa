@@ -26,7 +26,7 @@ public class KIStats {
 	try{
 			for (int i=0; i<=100; i+= 10){
 				Options.NDVGUARDPERCENT = i;
-				KITest.main(args);
+				KITestEFSM.main(args);
 
 				System.out.println(i + "," + Utils.meanOfCSVField(Options.DIRTEST + File.separator + "stats.csv", 7));
 				System.out.println(i + "," + Utils.percentOfCSVField(Options.DIRTEST + File.separator + "stats.csv", 9, "1"));
