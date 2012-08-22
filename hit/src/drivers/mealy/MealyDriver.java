@@ -98,21 +98,25 @@ public class MealyDriver extends Driver{
 				OutputSequence osConj = new OutputSequence();
 				reset();
 				conjDriver.reset();
-				for(String input : ce.sequence){
-					String _sys = execute(input);
-					String _conj = conjDriver.execute(input);
-					osSystem.addOutput(_sys);
-					osConj.addOutput(_conj);
-					if (!_sys.equals(_conj)){
-						found = true;
-						ce = ce.getIthPreffix(osSystem.getLength());
-						LogManager.logInfo("Counter example found : " + ce);
-						LogManager.logInfo("On system : " + osSystem);
-						LogManager.logInfo("On conjecture : " + osConj);
-						break;
-					}				
+				if (ce.getLength()>0){
+					for(String input : ce.sequence){
+						String _sys = execute(input);
+						String _conj = conjDriver.execute(input);
+						if (_sys.length()>0){
+							osSystem.addOutput(_sys);
+							osConj.addOutput(_conj);
+						}
+						if (!_sys.equals(_conj)){
+							found = true;
+							ce = ce.getIthPreffix(osSystem.getLength());
+							LogManager.logInfo("Counter example found : " + ce);
+							LogManager.logInfo("On system : " + osSystem);
+							LogManager.logInfo("On conjecture : " + osConj);
+							break;
+						}				
+					}
+					i++;
 				}
-				i++;
 			}
 			startLog();
 			conjDriver.startLog();

@@ -19,6 +19,32 @@ import tools.loggers.LogManager;
 
 public class Utils {
 	private static Random rand = new Random();
+	
+	public static String nextSymbols(String current){
+		for(int i=current.length()-1; i>=0; i--){
+			if (current.charAt(i) == 'z'){
+				current = resetCharAt(current, i);
+				if (i == 0) return "a" + current;
+			}else{
+				current = incCharAt(current, i);
+				break;
+			}
+		}
+		return current;
+	}
+	
+	public static String resetCharAt(String s, int pos) {
+		  StringBuffer buf = new StringBuffer(s);
+		  buf.setCharAt( pos, 'a');
+		  return buf.toString();
+	}
+	
+	public static String incCharAt(String s, int pos) {
+		  StringBuffer buf = new StringBuffer(s);
+		  buf.setCharAt( pos, (char)(buf.charAt(pos) +1));
+		  return buf.toString();
+	}
+	
 
 	public static String capitalize(String s) {
 		if (s.length() == 0)

@@ -15,25 +15,30 @@ import automata.mealy.MealyTransition;
 import drivers.Driver;
 import drivers.mealy.MealyDriver;
 
-public class SigmaLearner extends Learner{
+public class ZLearner extends Learner{
 	private MealyDriver driver;
 	private List<InputSequence> z;
 	private List<String> i;
 	private ObservationNode u;
 	private List<ObservationNode> states; 
 	
-	public SigmaLearner(Driver driver){
+	public ZLearner(Driver driver){
 		this.driver = (MealyDriver)driver;
 		
 		// Initialize I and Z with specified options
-		this.i = Arrays.asList(Options.INITIAL_INPUT_SYMBOLS.split(","));
+		if (Options.INITIAL_INPUT_SYMBOLS.length()>0)
+			this.i = Arrays.asList(Options.INITIAL_INPUT_SYMBOLS.split(","));
+		else
+			this.i = new ArrayList<String>();
 		this.z = new ArrayList<InputSequence>();
-		for(String inputSeqString : Options.INITIAL_INPUT_SEQUENCES.split(",")){
-			InputSequence seq = new InputSequence();
-			for(String inputSym : inputSeqString.split("-")){
-				seq.addInput(inputSym);
+		if (Options.INITIAL_INPUT_SEQUENCES.length()>0){
+			for(String inputSeqString : Options.INITIAL_INPUT_SEQUENCES.split(",")){
+				InputSequence seq = new InputSequence();
+				for(String inputSym : inputSeqString.split("-")){
+					seq.addInput(inputSym);
+				}
+				z.add(seq);
 			}
-			z.add(seq);
 		}
 		
 		// an observation tree U, initialized with {e}. 
@@ -152,20 +157,20 @@ public class SigmaLearner extends Learner{
 		return noLabelledPred;
 	}
 	
-	private InputSequence compareNodesUsingSeqs(Node node1, Node node2, List<InputSequence> z) {
+	private int compareNodesUsingSeqs(Node node1, Node node2, List<InputSequence> z) {
 		for(InputSequence seq : z){
 			Node currentNode1 = node1;
 			Node currentNode2 = node2;
 			InputSequence dfs = new InputSequence();
 			for(String input : seq.sequence){
 				dfs.addInput(input);
-				if (!currentNode1.haveChildBy(input) || !currentNode2.haveChildBy(input)) return dfs;
-				if (!currentNode1.childBy(input).output.equals(currentNode2.childBy(input).output)) return dfs;
+				if (!currentNode1.haveChildBy(input) || !currentNode2.haveChildBy(input)) return -1;
+				if (!currentNode1.childBy(input).output.equals(currentNode2.childBy(input).output)) return -1;
 				currentNode1 = currentNode1.childBy(input);
 				currentNode2 = currentNode2.childBy(input);
 			}
 		}
-		return null;
+		return 0;
 	}
 	
 	private ObservationNode findFirstEquivalent(ObservationNode node, List<InputSequence> z) {
@@ -175,8 +180,7 @@ public class SigmaLearner extends Learner{
 		while(!queue.isEmpty()){
 			currentNode = (ObservationNode) queue.get(0);
 			if (currentNode.id == node.id) break;
-			InputSequence tmpdfs = compareNodesUsingSeqs(node,  currentNode, z);
-			if (tmpdfs == null) return currentNode;
+			if (compareNodesUsingSeqs(node,  currentNode, z) == 0) return currentNode;
 			queue.remove(0);
 			queue.addAll(currentNode.children);	
 		}

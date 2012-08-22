@@ -76,9 +76,6 @@ public class KIT {
 		f = new File(Options.OUTDIR + Options.DIRARFF);
 		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite()) throw new Exception("Unable to create/write " + f.getName());	
 		
-		if (Options.TREEINFERENCE && (Options.INITIAL_INPUT_SEQUENCES==null || Options.INITIAL_INPUT_SYMBOLS==null))
-			 throw new Exception("Missing initial input symbols or sequences for tree inference");	
-		
 		if (Options.LOG_TEXT) LogManager.addLogger(new TextLogger());
 		if (Options.LOG_HTML) LogManager.addLogger(new HTMLLogger());
 	}

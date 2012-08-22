@@ -31,8 +31,8 @@ public class Options {
 	// Algorithm's options
 	
 	public static boolean TREEINFERENCE = false;
-	public static String INITIAL_INPUT_SYMBOLS = null;
-	public static String INITIAL_INPUT_SEQUENCES = null;
+	public static String INITIAL_INPUT_SYMBOLS = "";
+	public static String INITIAL_INPUT_SEQUENCES = "";
 	public static int SUPPORT_MIN = 20;
 	public static boolean REUSE_OP_IFNEEDED = false;
 	public static boolean FORCE_J48 = false;
@@ -47,12 +47,12 @@ public class Options {
 	public static String OUTDIR = System.getProperty("user.dir");
 	
 	// Kitest's options
-	public static int RETEST = -1;
+	public static int RETEST = 11;
 	
 	public static int NBTEST = 50;
-	public static int MINSTATES = 10;
-	public static int MAXSTATES = 10;
-	public static int TRANSITIONPERCENT = 25;
+	public static int MINSTATES = 4;
+	public static int MAXSTATES = 4;
+	public static int TRANSITIONPERCENT = 20;
 	public static int MININPUTSYM = 3;
 	public static int MAXINPUTSYM = 3;
 	public static int MINOUTPUTSYM = 3;

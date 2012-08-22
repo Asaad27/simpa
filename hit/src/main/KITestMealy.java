@@ -3,7 +3,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import learner.efsm.table.LiLearner;
+import learner.Learner;
 import tools.GraphViz;
 import tools.Stats;
 import tools.Utils;
@@ -11,14 +11,17 @@ import tools.loggers.HTMLLogger;
 import tools.loggers.LogManager;
 import tools.loggers.TextLogger;
 import drivers.Driver;
-import drivers.efsm.RandomEFSMDriver;
-import examples.efsm.RandomEFSM;
+import drivers.mealy.RandomMealyDriver;
+import examples.mealy.RandomMealy;
 
-public class KITestEFSM {
-	public final static String name = "KITestEFSM";
+public class KITestMealy {
+	public final static String name = "KITestMealy";
 	
 	private static void init(String[] args) {
 		if (!Options.STAT) System.out.println("[+] Reading arguments");
+		
+		Options.TREEINFERENCE = true;
+		Options.LOG_HTML = true;
 		
 		int i=0;
 		try {			
@@ -31,18 +34,10 @@ public class KITestEFSM {
 				else if (args[i].equals("--maxinputsym")) Options.MAXINPUTSYM = Integer.parseInt(args[++i]);
 				else if (args[i].equals("--minoutputsym")) Options.MININPUTSYM = Integer.parseInt(args[++i]);
 				else if (args[i].equals("--maxoutputsym")) Options.MAXOUTPUTSYM = Integer.parseInt(args[++i]);
-				else if (args[i].equals("--minparameter")) Options.MINPARAMETER = Integer.parseInt(args[++i]);
-				else if (args[i].equals("--maxarameter")) Options.MAXPARAMETER = Integer.parseInt(args[++i]);
-				else if (args[i].equals("--domainsize")) Options.DOMAINSIZE = Integer.parseInt(args[++i]);
-				else if (args[i].equals("--simpleguard")) Options.SIMPLEGUARDPERCENT = Integer.parseInt(args[++i]);
-				else if (args[i].equals("--ndvguard")) Options.NDVGUARDPERCENT = Integer.parseInt(args[++i]);
-				else if (args[i].equals("--ndvmintrans")) Options.NDVMINTRANSTOCHECK = Integer.parseInt(args[++i]);
-				else if (args[i].equals("--ndvmaxtrans")) Options.NDVMAXTRANSTOCHECK = Integer.parseInt(args[++i]);
-				else if (args[i].equals("--retest")) Options.RETEST = Integer.parseInt(args[++i]);
+				else if (args[i].equals("-I")) Options.INITIAL_INPUT_SYMBOLS = args[++i];
+				else if (args[i].equals("-Z")) Options.INITIAL_INPUT_SEQUENCES = args[++i];
 				
-				else if (args[i].equals("--reuseop")) Options.REUSE_OP_IFNEEDED = true;
-				else if (args[i].equals("--forcej48")) Options.FORCE_J48 = true;
-				else if (args[i].equals("--supportmin")) Options.SUPPORT_MIN = Integer.parseInt(args[++i]);
+				else if (args[i].equals("--retest")) Options.RETEST = Integer.parseInt(args[++i]);
 				
 				else if (args[i].equals("--text"))  Options.LOG_TEXT = true;
 				else if (args[i].equals("--html")) Options.LOG_HTML = true;
@@ -70,7 +65,7 @@ public class KITestEFSM {
 				Utils.cleanDir(new File(Options.OUTDIR));
 				
 				Stats stats = new Stats(Options.OUTDIR + "stats.csv");
-				stats.setHeader(RandomEFSMDriver.getStatHeaders());
+				stats.setHeader(RandomMealyDriver.getStatHeaders());
 				
 				if (!Options.STAT) System.out.println("[+] Testing " + Options.NBTEST + " automaton");
 				
@@ -78,23 +73,19 @@ public class KITestEFSM {
 					Options.OUTDIR = Utils.makePath(dir + i);
 					Utils.createDir(new File(Options.OUTDIR));
 					Options.SYSTEM = "Random " + i;
-					if (!Options.STAT) System.out.print("    " + i + "/" + Options.NBTEST);
+					if (!Options.STAT) System.out.println("    " + i + "/" + Options.NBTEST);
 					try {
 						if (Options.LOG_HTML) LogManager.addLogger(new HTMLLogger());
 						if (Options.LOG_TEXT) LogManager.addLogger(new TextLogger());
 						LogManager.start();
 						
-						RandomEFSM rEFSM = new RandomEFSM();
-						driver = new RandomEFSMDriver(rEFSM);
-						LiLearner lilearner = new LiLearner(driver);
-						lilearner.learn();
+						RandomMealy rMealy = new RandomMealy();
+						driver = new RandomMealyDriver(rMealy);
+						Learner l = Learner.getLearnerFor(driver);
+						l.learn();
 						driver.logStats();
-						learner.efsm.LiConjecture c = lilearner.createConjecture();						
-						c.exportToRawDot();
-						LogManager.logLine();
-						c.exportToDot();
 						
-						stats.addRecord(((RandomEFSMDriver)driver).getStats());
+						stats.addRecord(((RandomMealyDriver)driver).getStats());
 					}finally {
 						LogManager.end();
 						LogManager.clear();
@@ -114,16 +105,12 @@ public class KITestEFSM {
 					if (Options.LOG_HTML) LogManager.addLogger(new HTMLLogger());
 					if (Options.LOG_TEXT) LogManager.addLogger(new TextLogger());
 					LogManager.start();
-					RandomEFSM randEFSM = RandomEFSM.deserialize(Options.OUTDIR + "Random.serialized");
-					randEFSM.exportToDot();
-					driver = new RandomEFSMDriver(randEFSM);
-					LiLearner lilearner = new LiLearner(driver);
-					lilearner.learn();
+					RandomMealy randMealy = RandomMealy.deserialize(Options.OUTDIR + "Random.serialized");
+					randMealy.exportToDot();
+					driver = new RandomMealyDriver(randMealy);
+					Learner l = Learner.getLearnerFor(driver);
+					l.learn();
 					driver.logStats();
-					learner.efsm.LiConjecture c = lilearner.createConjecture();
-					c.exportToRawDot();
-					LogManager.logLine();
-					c.exportToDot();
 				}finally {
 					LogManager.end();
 					LogManager.clear();
@@ -173,27 +160,17 @@ public class KITestEFSM {
 		if (Options.MININPUTSYM > Options.MAXINPUTSYM) throw new Exception("Minimal number of input symbols <= Maximal number of input symbols needed");
 		if (Options.MINOUTPUTSYM < 1) throw new Exception("Minimal number of output symbols >= 1 needed");
 		if (Options.MINOUTPUTSYM > Options.MAXOUTPUTSYM) throw new Exception("Minimal number of output symbols <= Maximal number of output symbols needed");
-		if (Options.MINPARAMETER < 1) throw new Exception("Minimal number of parameters >= 1 needed");
-		if (Options.MINPARAMETER > Options.MAXPARAMETER) throw new Exception("Minimal number of parameters <= Maximal number of parameters needed");
-		if (Options.DOMAINSIZE < 10) throw new Exception("Size of domain >= 10 needed");
-		if (Options.SIMPLEGUARDPERCENT < 0 || Options.SIMPLEGUARDPERCENT > 100) throw new Exception("Percent of simple guards between 0 and 100 needed");
-		if (Options.NDVGUARDPERCENT < 0 || Options.NDVGUARDPERCENT > 100) throw new Exception("Percent of ndv guard between 0 and 100 needed");
-		if (Options.NDVMINTRANSTOCHECK < 1) throw new Exception("Minimal number of transitions to check ndv >= 1 needed");
-		if (Options.NDVMINTRANSTOCHECK > Options.NDVMAXTRANSTOCHECK) throw new Exception("Minimal number of transitions to check ndv <= Minimal number of transitions to check ndv needed");
-		if (Options.SUPPORT_MIN < 1 || Options.SUPPORT_MIN > 100) throw new Exception("Minimal between 1 and 100 include needed");
+
 	}
 	
 	public static void usage(){
-		System.out.println("Usage : KITest [Options]");
+		System.out.println("Usage : KITestMealy [Options]");
 		System.out.println("");
 		System.out.println("Options");
 		System.out.println("> General");
 		System.out.println("    --help | -h            : Show help");
 		System.out.println("    --retest X             : Load and test the random EFSM numner X");
 		System.out.println("> Algorithm");
-		System.out.println("    --reuseop              : Reuse output parameter for non closed row");
-		System.out.println("    --forcej48             : Force the use of J48 algorithm instead of M5P for numeric classes");
-		System.out.println("    --supportmin      " + String.format("%4s", "("+ Options.SUPPORT_MIN + ")") + " : Minimal support for relation (1-100)");
 		System.out.println("> Test");
 		System.out.println("    --nbtest          " + String.format("%4s", "("+ Options.NBTEST + ")") + " : Number of tests");
 		System.out.println("    --minstates       " + String.format("%4s", "("+ Options.MINSTATES + ")") + " : Minimal number of states");
@@ -203,13 +180,7 @@ public class KITestEFSM {
 		System.out.println("    --maxinputsym     " + String.format("%4s", "("+ Options.MAXINPUTSYM + ")") + " :  Maximal number of input symbols");
 		System.out.println("    --minoutputsym    " + String.format("%4s", "("+ Options.MINOUTPUTSYM + ")") + " :  Minimal number of output symbols");
 		System.out.println("    --maxoutputsym    " + String.format("%4s", "("+ Options.MAXOUTPUTSYM + ")") + " :  Maximal number of output symbols");
-		System.out.println("    --minparameter    " + String.format("%4s", "("+ Options.MINPARAMETER + ")") + " :  Minimal number of parameters by symbol");
-		System.out.println("    --maxparameter    " + String.format("%4s", "("+ Options.MAXPARAMETER + ")") + " :  Maximal number of parameters by symbol");
-		System.out.println("    --domainsize      " + String.format("%4s", "("+ Options.DOMAINSIZE + ")") + " :  Size of the parameter's domain");
-		System.out.println("    --simpleguard     " + String.format("%4s", "("+ Options.SIMPLEGUARDPERCENT + ")") + " :  % of simple guard by transitions");
-		System.out.println("    --ndvguard        " + String.format("%4s", "("+ Options.NDVGUARDPERCENT + ")") + " :  % of generating NDV by transitions");
-		System.out.println("    --ndvmintrans     " + String.format("%4s", "("+ Options.NDVMINTRANSTOCHECK + ")") + " :  Minimum number of states before checking NDV value");
-		System.out.println("    --ndvmaxtrans     " + String.format("%4s", "("+ Options.NDVMAXTRANSTOCHECK + ")") + " :  Maximum number of states before checking NDV value");
+
 		System.exit(0);
 	}
 }

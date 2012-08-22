@@ -146,7 +146,7 @@ public class HTMLLogger implements ILogger {
 			writer.write("<title>" + KIT.name + " - " + dfm.format(new Date()) + " - " + Options.SYSTEM + "</title>\n");
 			writer.write("<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />\n");
 			writer.write("<style type=\"text/css\">\n");
-			writer.write(Utils.fileContentOf(dir.getAbsolutePath() + File.separator + "style.css"));
+			writer.write(Utils.fileContentOf(new File("log").getAbsolutePath() + File.separator + "style.css"));
 			writer.write("</style>\n");
 			writer.write("</head>\n");
 			writer.write("<body>\n");
@@ -154,8 +154,6 @@ public class HTMLLogger implements ILogger {
 			writer.write(KIT.name + " - " + dfm.format(new Date()) + " - " + Options.SYSTEM);
 			writer.write("</div>\n");
 			writer.write("<ul>\n");
-			if (Options.TEST)
-				Utils.copyFile(new File(Options.DIRLOG + File.separator + "style.css"), new File(dir.getAbsolutePath() + File.separator + "style.css"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
