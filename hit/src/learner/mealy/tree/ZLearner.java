@@ -263,11 +263,17 @@ public class ZLearner extends Learner{
 						for (InputSequence seq : z){
 							if (seq.equals(ce)){processed = true; break;}
 						}
-						if (!processed) return otherCE;
+						if (!processed && ce.getLength()>0) return otherCE;
 					}
 				}else{
-					if (ce.getLength()==1) return ce;
-					else return ce.removeFirstInput();
+					boolean processed = false;
+					for (InputSequence seq : z){
+						if (seq.equals(ce)){processed = true; break;}
+					}
+					if (ce.getLength()==1 && !processed) return ce;
+					else{
+						if (ce.getLength()>1) return ce.removeFirstInput();
+					}
 				}
 				if (!((ObservationNode)n).isState()) ce.removeLastInput();
 			}
@@ -317,8 +323,10 @@ public class ZLearner extends Learner{
 			for(ObservationNode s : states){
 				for(String input : i){
 					ObservationNode child = (ObservationNode) s.childBy(input);
-					if (child.isState()) c.addTransition(new MealyTransition(c, c.getState(s.state), c.getState(child.state), input, child.output));
-					else c.addTransition(new MealyTransition(c, c.getState(s.state), c.getState(child.label), input, child.output));
+					if (child.output.length()>0){
+						if (child.isState()) c.addTransition(new MealyTransition(c, c.getState(s.state), c.getState(child.state), input, child.output));
+						else c.addTransition(new MealyTransition(c, c.getState(s.state), c.getState(child.label), input, child.output));
+					}
 				}
 			}
 

@@ -47,9 +47,9 @@ public class Options {
 	public static String OUTDIR = System.getProperty("user.dir");
 	
 	// Kitest's options
-	public static int RETEST = 11;
+	public static int RETEST = -1;
 	
-	public static int NBTEST = 50;
+	public static int NBTEST = 10;
 	public static int MINSTATES = 4;
 	public static int MAXSTATES = 4;
 	public static int TRANSITIONPERCENT = 20;

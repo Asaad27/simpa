@@ -5,6 +5,8 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
+import main.Options;
+
 public class Node {
 	public static int GLOBALID = 1;
 	public int id = 0;
@@ -59,7 +61,7 @@ public class Node {
 		while(!queue.isEmpty()){
 			currentNode = queue.get(0);
 			for (Node n : currentNode.children){
-				w.write("    node" + currentNode.id + " -> node" + n.id+ " [color=\""+ "black" +"\" label=\""+ n.input + "/" + n.output +"\"]\n");
+				w.write("    node" + currentNode.id + " -> node" + n.id+ " [color=\""+ "black" +"\" label=\""+ n.input + "/" + (n.output.length()>0?n.output:Options.SYMBOL_OMEGA_LOW)  +"\"]\n");
 			}
 			queue.remove(0);
 			queue.addAll(currentNode.children);

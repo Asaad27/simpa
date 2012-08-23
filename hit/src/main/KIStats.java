@@ -21,15 +21,19 @@ public class KIStats {
 		welcome();
 		String dir = Options.OUTDIR;
 		
-		Options.NBTEST = 50;
-		
-	try{
-			for (int i=0; i<=100; i+= 10){
-				Options.NDVGUARDPERCENT = i;
-				KITestEFSM.main(args);
 
-				System.out.println(i + "," + Utils.meanOfCSVField(Options.DIRTEST + File.separator + "stats.csv", 7));
-				System.out.println(i + "," + Utils.percentOfCSVField(Options.DIRTEST + File.separator + "stats.csv", 9, "1"));
+	try{
+			for (int i=4; i<=50; i++){
+				Options.MINSTATES = i;
+				Options.MAXSTATES = i;
+				
+				System.out.println("Testing with states = " + i);
+				
+				KITestMealy.main(args);
+
+				System.out.println(i + "," + Utils.meanOfCSVField(Options.DIRTEST + File.separator + "stats.csv", 5));
+				System.out.println(i + "," + Utils.meanOfCSVField(Options.DIRTEST + File.separator + "stats.csv", 6));
+				
 				Options.OUTDIR = dir;
 				Utils.copyFile(new File(Options.DIRTEST + File.separator + "stats.csv"), new File("basic=" + i + ".csv"));
 			}
