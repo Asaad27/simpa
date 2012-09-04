@@ -27,6 +27,7 @@ public class ASLanEntity {
 		mappingKITASLan.put(Types.STRING, "text");
 		mappingKITASLan.put(Types.NUMERIC, "int");
 		mappingKITASLan.put(Types.NOMINAL, "text");
+		gsymbols.put("system", "agent");
 	}
 	
 	public void addSymbol(String name, String type){
@@ -60,7 +61,7 @@ public class ASLanEntity {
 		ent += "    }\n";
 		ent += "  }\n";
 		ent += "  body {\n";
-		ent += "    new Session(system" + printActors() + ");\n";
+		ent += "    new "+ name.replace(" ", "_").toUpperCase() +"(system" + printActors() + ");\n";
 		ent += "    %% TO BE COMPLETED\n";
 		ent += "  }\n";
 		ent += "}\n";
@@ -90,6 +91,11 @@ public class ASLanEntity {
 	private String printGlobalSymbols() {
 		if (gsymbols.isEmpty()) return "";
 		else{
+			char agent = 'a';
+			for(int i=0; i<arguments.size()-1; i++){
+				gsymbols.put(String.valueOf(agent++), "agent");
+			}			
+			
 			String sym = "  symbols\n";
 			for(String key : gsymbols.keySet()){
 				sym += "    " + key + " : " + gsymbols.get(key) + ";\n";
