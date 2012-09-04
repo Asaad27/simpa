@@ -94,18 +94,22 @@ public class KIT {
 			throw new Exception("Unable to find the driver. Please check the system name (" + system + ")");
 		}
 	}
+	
+	public static void launch() throws Exception{
+		check();			
+		LogManager.start();
+		driver = loadDriver(Options.SYSTEM);
+		Learner learner = Learner.getLearnerFor(driver);		
+		learner.learn();
+		driver.logStats();	
+		LogManager.end();
+	}
 
 	public static void main(String[] args) {
 		welcome();
-		init(args);		
+		init(args);
 		try {
-			check();			
-			LogManager.start();
-			driver = loadDriver(Options.SYSTEM);
-			Learner learner = Learner.getLearnerFor(driver);		
-			learner.learn();
-			driver.logStats();	
-			LogManager.end();
+			launch();
 		}catch (Exception e) {
 			System.err.println("Unexpected error");
 			e.printStackTrace(System.err);

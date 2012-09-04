@@ -17,11 +17,11 @@ public class Options {
 	public static final String SYMBOL_SIGMA = "\u03a3";
 	public static final String SYMBOL_NOT_EQUAL = "\u2260";
 
-	public static final String DIRGRAPH = "out";
-	public static final String DIRARFF = "arff";
-	public static final String DIRTEST = "test";
-	public static final String DIRLOG = "log";
-	public static final String DIRASLAN = "model";
+	public static String DIRGRAPH = "out";
+	public static String DIRARFF = "arff";
+	public static String DIRTEST = "test";
+	public static String DIRLOG = "log";
+	public static String DIRASLAN = "model";
 	
 	// Tools available
 	
