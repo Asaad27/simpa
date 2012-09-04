@@ -59,7 +59,7 @@ public class WGStoredXSSDriver extends WebDriver {
 		is.add("logout");
 		is.add("viewProfile");
 		is.add("editProfile");
-		is.add("xSSProfile");
+		is.add("xssProfile");
 		return is;
 	}
 
@@ -142,23 +142,23 @@ public class WGStoredXSSDriver extends WebDriver {
 		if (!pi.isEpsilonSymbol()){
 			LogManager.logInfo("Abstract : " + pi);			
 
-			if (pi.getInputSymbol().equals("Login")){
+			if (pi.getInputSymbol().equals("login")){
 				req = new HTTPRequest(Method.POST, "/WebGoat/attack?Screen="+screen+"&menu=900", Version.v11);
 				req.addPostData("employee_id", pi.getParameterValue(0));
 				req.addPostData("password", pi.getParameterValue(1));
 				req.addPostData("action", "Login");
 				
-			}else if (pi.getInputSymbol().equals("ViewProfile")){
+			}else if (pi.getInputSymbol().equals("viewProfile")){
 				req = new HTTPRequest(Method.POST, "/WebGoat/attack?Screen="+screen+"&menu=900", Version.v11);
 				req.addPostData("employee_id", pi.getParameterValue(0));
 				req.addPostData("action", "ViewProfile");
 				
-			}else if (pi.getInputSymbol().equals("EditProfile")){
+			}else if (pi.getInputSymbol().equals("editProfile")){
 				req = new HTTPRequest(Method.POST, "/WebGoat/attack?Screen="+screen+"&menu=900", Version.v11);
 				req.addPostData("employee_id", pi.getParameterValue(0));
 				req.addPostData("action", "EditProfile");
 				
-			}else if (pi.getInputSymbol().equals("XSSProfile")){
+			}else if (pi.getInputSymbol().equals("xssProfile")){
 				req = new HTTPRequest(Method.POST, "/WebGoat/attack?Screen="+screen+"&menu=900", Version.v11);
 				req.addPostData("employee_id", pi.getParameterValue(0));
 				req.addPostData("action", "UpdateProfile");
@@ -178,7 +178,7 @@ public class WGStoredXSSDriver extends WebDriver {
 				req.addPostData("startDate", "1012000");
 				req.addPostData("title", "Technician");
 				
-			}else if (pi.getInputSymbol().equals("Logout")){
+			}else if (pi.getInputSymbol().equals("logout")){
 				req = new HTTPRequest(Method.POST, "/WebGoat/attack?Screen="+screen+"&menu=900", Version.v11);
 				req.addPostData("employee_id", pi.getParameterValue(0));
 				req.addPostData("action", "Logout");
@@ -205,16 +205,16 @@ public class WGStoredXSSDriver extends WebDriver {
 		}else if (resp.getCode() == 200){
 			po = new ParameterizedOutput();			
 			if (resp.getContent().contains("Staff Listing Page")){
-				po = new ParameterizedOutput("Listing");
+				po = new ParameterizedOutput("listing");
 				po.getParameters().add(new Parameter(resp.getCodeString(), Types.STRING));
 			}else if (resp.getContent().contains("<div id=\"lesson_login\">")){
-				po = new ParameterizedOutput("Home");
+				po = new ParameterizedOutput("home");
 				po.getParameters().add(new Parameter(resp.getCodeString(), Types.STRING));
 			}else if (resp.getContent().contains("value=\"UpdateProfile\"")){
-				po = new ParameterizedOutput("EditionPage");
+				po = new ParameterizedOutput("editionPage");
 				po.getParameters().add(new Parameter(resp.getCodeString(), Types.STRING));
 			}else if (resp.getContent().contains("Credit Card Limit")){
-				po = new ParameterizedOutput("ProfilePage");
+				po = new ParameterizedOutput("profilePage");
 				po.getParameters().add(new Parameter(resp.getCodeString(), Types.STRING));
 			}else{
 				LogManager.logError("ConcreteToAbstract method is missing for this page");
@@ -229,16 +229,16 @@ public class WGStoredXSSDriver extends WebDriver {
 	@Override
 	public TreeMap<String, List<String>> getParameterNames() {
 		TreeMap<String, List<String>> defaultParamNames = new TreeMap<String, List<String>>();
-		defaultParamNames.put("Login", Utils.createArrayList("profileIdLogin", "passwordLogin"));
-		defaultParamNames.put("ViewProfile", Utils.createArrayList("profileIdProfile"));
-		defaultParamNames.put("EditProfile", Utils.createArrayList("profileIdEdit"));
-		defaultParamNames.put("XSSProfile", Utils.createArrayList("profileIdXSS", "XSSPayload"));
-		defaultParamNames.put("Logout", Utils.createArrayList("profileIdLogout"));
+		defaultParamNames.put("login", Utils.createArrayList("profileIdLogin", "passwordLogin"));
+		defaultParamNames.put("viewProfile", Utils.createArrayList("profileIdProfile"));
+		defaultParamNames.put("editProfile", Utils.createArrayList("profileIdEdit"));
+		defaultParamNames.put("xssProfile", Utils.createArrayList("profileIdXSS", "XSSPayload"));
+		defaultParamNames.put("logout", Utils.createArrayList("profileIdLogout"));
 		
-		defaultParamNames.put("Listing", Utils.createArrayList("codeListing"));
-		defaultParamNames.put("Home", Utils.createArrayList("codeHome"));
-		defaultParamNames.put("ProfilePage", Utils.createArrayList("codeProfilePage"));
-		defaultParamNames.put("EditionPage", Utils.createArrayList("codeEditionPage"));
+		defaultParamNames.put("listing", Utils.createArrayList("codeListing"));
+		defaultParamNames.put("home", Utils.createArrayList("codeHome"));
+		defaultParamNames.put("profilePage", Utils.createArrayList("codeProfilePage"));
+		defaultParamNames.put("editionPage", Utils.createArrayList("codeEditionPage"));
 		return defaultParamNames;
 	}
 }
