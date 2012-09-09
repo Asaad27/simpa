@@ -93,7 +93,7 @@ public class MealyDriver extends Driver{
 			conjDriver.stopLog();
 			int i = 0;
 			while(i<maxTries && !found){
-				ce = InputSequence.generate(is, Utils.randIntBetween(2, 12));
+				ce = InputSequence.generate(is, Utils.randIntBetween(1, 12));
 				OutputSequence osSystem = new OutputSequence();
 				OutputSequence osConj = new OutputSequence();
 				reset();
@@ -106,7 +106,7 @@ public class MealyDriver extends Driver{
 							osSystem.addOutput(_sys);
 							osConj.addOutput(_conj);
 						}
-						if (!_sys.equals(_conj)){
+						if (!_sys.equals(_conj) && !osSystem.getLastSymbol().isEmpty()){
 							found = true;
 							ce = ce.getIthPreffix(osSystem.getLength());
 							LogManager.logInfo("Counter example found : " + ce);
