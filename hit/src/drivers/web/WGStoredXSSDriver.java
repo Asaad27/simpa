@@ -15,7 +15,7 @@ import automata.efsm.Parameter;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedOutput;
 
-public class WGStoredXSSDriver extends WebDriver {
+public class WGStoredXSSDriver extends LowWebDriver {
 	
 	private String basicAuth = "Basic Z3Vlc3Q6Z3Vlc3Q="; // guest:guest in base64
 	private String screen = null;
@@ -38,7 +38,7 @@ public class WGStoredXSSDriver extends WebDriver {
 		res = new HTTPRequest(Method.POST, "/WebGoat/attack", Version.v11);
 		res.addHeader("Authorization", basicAuth);
 		res.addHeader("Cookie", cookie.getCookieLine());
-		res.addPostData("start", "Start WebGoat");
+		res.addData("start", "Start WebGoat");
 		resp = executeWeb(res);
 		cookie.updateCookies(resp.getHeader("Set-Cookie"));
 		
@@ -144,44 +144,44 @@ public class WGStoredXSSDriver extends WebDriver {
 
 			if (pi.getInputSymbol().equals("login")){
 				req = new HTTPRequest(Method.POST, "/WebGoat/attack?Screen="+screen+"&menu=900", Version.v11);
-				req.addPostData("employee_id", pi.getParameterValue(0));
-				req.addPostData("password", pi.getParameterValue(1));
-				req.addPostData("action", "Login");
+				req.addData("employee_id", pi.getParameterValue(0));
+				req.addData("password", pi.getParameterValue(1));
+				req.addData("action", "Login");
 				
 			}else if (pi.getInputSymbol().equals("viewProfile")){
 				req = new HTTPRequest(Method.POST, "/WebGoat/attack?Screen="+screen+"&menu=900", Version.v11);
-				req.addPostData("employee_id", pi.getParameterValue(0));
-				req.addPostData("action", "ViewProfile");
+				req.addData("employee_id", pi.getParameterValue(0));
+				req.addData("action", "ViewProfile");
 				
 			}else if (pi.getInputSymbol().equals("editProfile")){
 				req = new HTTPRequest(Method.POST, "/WebGoat/attack?Screen="+screen+"&menu=900", Version.v11);
-				req.addPostData("employee_id", pi.getParameterValue(0));
-				req.addPostData("action", "EditProfile");
+				req.addData("employee_id", pi.getParameterValue(0));
+				req.addData("action", "EditProfile");
 				
 			}else if (pi.getInputSymbol().equals("xssProfile")){
 				req = new HTTPRequest(Method.POST, "/WebGoat/attack?Screen="+screen+"&menu=900", Version.v11);
-				req.addPostData("employee_id", pi.getParameterValue(0));
-				req.addPostData("action", "UpdateProfile");
-				req.addPostData("address1", pi.getParameterValue(1));
-				req.addPostData("address2", "New York, NY");
-				req.addPostData("ccn", "2578546969853547");
-				req.addPostData("ccnLimit", "5000");
-				req.addPostData("description", "Does not work well with others");
-				req.addPostData("disciplinaryDate", "10106");
-				req.addPostData("disciplinaryNotes", "Constantly harassing coworkers");
-				req.addPostData("firstName", "Larry");
-				req.addPostData("lastName", "Stooge");
-				req.addPostData("manager", "101");
-				req.addPostData("phoneNumber", "443-689-0192");
-				req.addPostData("salary", "55000");
-				req.addPostData("ssn", "386-09-5451");
-				req.addPostData("startDate", "1012000");
-				req.addPostData("title", "Technician");
+				req.addData("employee_id", pi.getParameterValue(0));
+				req.addData("action", "UpdateProfile");
+				req.addData("address1", pi.getParameterValue(1));
+				req.addData("address2", "New York, NY");
+				req.addData("ccn", "2578546969853547");
+				req.addData("ccnLimit", "5000");
+				req.addData("description", "Does not work well with others");
+				req.addData("disciplinaryDate", "10106");
+				req.addData("disciplinaryNotes", "Constantly harassing coworkers");
+				req.addData("firstName", "Larry");
+				req.addData("lastName", "Stooge");
+				req.addData("manager", "101");
+				req.addData("phoneNumber", "443-689-0192");
+				req.addData("salary", "55000");
+				req.addData("ssn", "386-09-5451");
+				req.addData("startDate", "1012000");
+				req.addData("title", "Technician");
 				
 			}else if (pi.getInputSymbol().equals("logout")){
 				req = new HTTPRequest(Method.POST, "/WebGoat/attack?Screen="+screen+"&menu=900", Version.v11);
-				req.addPostData("employee_id", pi.getParameterValue(0));
-				req.addPostData("action", "Logout");
+				req.addData("employee_id", pi.getParameterValue(0));
+				req.addData("action", "Logout");
 			}else{
 				LogManager.logError("AbstractToConcrete method is missing for symbol : " + pi.getInputSymbol());
 			}

@@ -1,7 +1,15 @@
 package drivers.web;
 
+import tools.HTTPRequest;
+import tools.HTTPResponse;
+import tools.TCPSend;
+import tools.loggers.LogManager;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedOutput;
+
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+
 import drivers.efsm.EFSMDriver;
 
 /*
@@ -26,14 +34,31 @@ import drivers.efsm.EFSMDriver;
  *  
  */
 
-public abstract class WebDriver extends EFSMDriver{
+public abstract class HighWebDriver extends EFSMDriver{
 	public String systemHost;
 	public int systemPort;
 	
-	public WebDriver(){
-		super(null);
-	}
-
-	public abstract ParameterizedOutput execute(ParameterizedInput pi);
+	public WebClient webClient;
+	public HtmlPage currentPage;
 	
+	public HighWebDriver(){
+		super(null);
+		webClient = new WebClient();
+		currentPage = null;
+	}
+	
+	public HTTPResponse executeWeb(HTTPRequest req){
+		return new HTTPResponse(TCPSend.Send(systemHost, systemPort, req));
+	}
+	
+	public ParameterizedOutput execute(ParameterizedInput pi) {
+		numberOfAtomicRequest++;
+		ParameterizedOutput po = concreteToAbstract(abstractToConcrete(pi));
+		LogManager.logRequest(pi, po);
+		return po;
+	}
+	
+	public abstract HtmlPage abstractToConcrete(ParameterizedInput pi);
+	
+	public abstract ParameterizedOutput concreteToAbstract(HtmlPage resp);
 }

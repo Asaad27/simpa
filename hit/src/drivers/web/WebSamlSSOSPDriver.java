@@ -5,17 +5,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 
-import tools.HTTPRequest;
-import tools.HTTPRequest.Method;
-import tools.HTTPRequest.Version;
-import tools.HTTPResponse;
 import tools.Utils;
 import tools.loggers.LogManager;
 import automata.efsm.Parameter;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedOutput;
 
-public class WebSamlSSOSPDriver extends WebDriver {
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlForm;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+
+public class WebSamlSSOSPDriver extends HighWebDriver {
 	
 	public WebSamlSSOSPDriver() {
 		super();
@@ -25,17 +25,19 @@ public class WebSamlSSOSPDriver extends WebDriver {
 
 	public ArrayList<String> getInputSymbols() {
 		ArrayList<String> is = new ArrayList<String>();
-		is.add("askRessource");
-		is.add("getSAMLRequest");
-		is.add("sendSAMLResp");
+		is.add("start");
+		is.add("selectIDP");
+		is.add("login");
+		is.add("logout");
 		return is;
 	}
 
 	public ArrayList<String> getOutputSymbols(){
 		ArrayList<String> os = new ArrayList<String>();
-		os.add("IdPList");
-		os.add("SAMLRequest");
-		os.add("error");
+		os.add("idpList");
+		os.add("credentialsPage");
+		os.add("profilePage");
+		os.add("loggedOutPage");
 		return os;
 	}
 	
@@ -48,25 +50,33 @@ public class WebSamlSSOSPDriver extends WebDriver {
 		HashMap<String, List<ArrayList<Parameter>>> defaultParamValues = new HashMap<String, List<ArrayList<Parameter>>>();		
 		ArrayList<ArrayList<Parameter>> params = null;
 		
-		//askRessource
+		//start
 		{
 			params = new ArrayList<ArrayList<Parameter>>();
-			params.add(Utils.createArrayList(new Parameter("myAttributes", Types.STRING)));
-			defaultParamValues.put("askRessource", params);		
+			params.add(Utils.createArrayList(new Parameter("http://127.0.0.1:8094/simplesamlphp-sp/www/module.php/core/authenticate.php?as=default-sp", Types.STRING)));
+			defaultParamValues.put("start", params);		
+		}
+			
+		//selectIDP
+		{
+			params = new ArrayList<ArrayList<Parameter>>();
+			params.add(Utils.createArrayList(new Parameter("0", Types.NUMERIC)));
+			defaultParamValues.put("selectIDP", params);		
 		}
 		
-		//getSAMLRequest
+		//login
 		{
 			params = new ArrayList<ArrayList<Parameter>>();
-			params.add(Utils.createArrayList(new Parameter("IdP", Types.STRING), new Parameter("defaultSAMLSessionID", Types.STRING), new Parameter("defaultAuthID", Types.STRING)));
-			defaultParamValues.put("getSAMLRequest", params);		
+			params.add(Utils.createArrayList(new Parameter("orlando", Types.STRING), new Parameter("orlandopassword", Types.STRING)));
+			params.add(Utils.createArrayList(new Parameter("root", Types.STRING), new Parameter("toor", Types.STRING)));
+			defaultParamValues.put("login", params);		
 		}
 		
-		//sendSAMLResp
+		//logout
 		{
 			params = new ArrayList<ArrayList<Parameter>>();
-			params.add(Utils.createArrayList(new Parameter("SAMLResp", Types.STRING), new Parameter("defaultSAMLSessionID", Types.STRING)));
-			defaultParamValues.put("sendSAMLResp", params);		
+			params.add(Utils.createArrayList(new Parameter("none", Types.STRING)));
+			defaultParamValues.put("logout", params);		
 		}
 				
 		return defaultParamValues;	
@@ -75,71 +85,91 @@ public class WebSamlSSOSPDriver extends WebDriver {
 	@Override
 	public void reset() {
 		super.reset();
-		cookie.reset();
+		webClient = new WebClient();
+		currentPage = null;
 	}
 	
-	public HTTPRequest abstractToConcrete(ParameterizedInput pi){
-		HTTPRequest res = null;
-		if (!pi.isEpsilonSymbol()){
-			if (pi.getInputSymbol().equals("askRessource")){
-				if (pi.getParameterValue(0).equals("myAttributes")) res = new HTTPRequest(Method.GET, "/simplesamlphp-sp/www/module.php/core/authenticate.php?as=default-sp", Version.v11);
-			}else if (pi.getInputSymbol().equals("getSAMLRequest")){
-				if (pi.getParameterValue(0).equals("IdP")) res = new HTTPRequest(Method.GET, "/simplesamlphp-sp/www/module.php/saml/disco.php?entityID=http%3A%2F%2F127.0.0.1%3A8094%2Fsimplesamlphp-sp%2Fwww%2Fmodule.php%2Fsaml%2Fsp%2Fmetadata.php%2Fdefault-sp&return=http%3A%2F%2F127.0.0.1%3A8094%2Fsimplesamlphp-sp%2Fwww%2Fmodule.php%2Fsaml%2Fsp%2Fdiscoresp.php%3FAuthID%3D_"+pi.getParameterValue(2)+"%253Ahttp%253A%252F%252F127.0.0.1%253A8094%252Fsimplesamlphp-sp%252Fwww%252Fmodule.php%252Fcore%252Fas_login.php%253FAuthId%253Ddefault-sp%2526ReturnTo%253Dhttp%25253A%25252F%25252F127.0.0.1%25253A8094%25252Fsimplesamlphp-sp%25252Fwww%25252Fmodule.php%25252Fcore%25252Fauthenticate.php%25253Fas%25253Ddefault-sp&returnIDParam=idpentityid&idpentityid=http%3A%2F%2Flocalhost%3A8092%2Fsimplesamlphp-idp%2Fwww%2Fsaml2%2Fidp%2Fmetadata.php", Version.v11);
-				cookie.set("SimpleSAMLSessionID-SP", pi.getParameterValue(1));
-			}else if (pi.getInputSymbol().equals("sendSAMLResp")){
-				if (pi.getParameterValue(0).equals("SAMLResp")) res = new HTTPRequest(Method.POST, "/simplesamlphp-sp/www/module.php/saml/sp/saml2-acs.php/default-sp", Version.v11);
-				cookie.set("SimpleSAMLSessionID-SP", pi.getParameterValue(1));
-			}else{
-				LogManager.logError("AbstractToConcrete method is missing for symbol : " + pi.getInputSymbol());
-			}
-			if (res!=null && !cookie.isEmpty()) res.addHeader("Cookie", cookie.getCookieLine());
-		}else{
-			LogManager.logError("AbstractToConcrete for Epsilon symbol is impossible in " + pi.getInputSymbol());
-		}		
-		LogManager.logInfo("Abstract : " + pi);
-		if (res!=null) LogManager.logConcrete(res.toString());
-		return res;
+	@Override
+	public TreeMap<String, List<String>> getParameterNames() {
+		TreeMap<String, List<String>> defaultParamNames = new TreeMap<String, List<String>>();
+		defaultParamNames.put("start", Utils.createArrayList("spAddr"));
+		defaultParamNames.put("selectIDP", Utils.createArrayList("idpIndex"));
+		defaultParamNames.put("login", Utils.createArrayList("loginUsername", "loginPassword"));
+		defaultParamNames.put("logout", Utils.createArrayList("noparam"));
+		
+		defaultParamNames.put("idpList", Utils.createArrayList("codeIdp"));
+		defaultParamNames.put("credentialsPage", Utils.createArrayList("codeCredentialsPage"));
+		defaultParamNames.put("profilePage", Utils.createArrayList("codeProfilePage"));
+		defaultParamNames.put("loggedOutPage", Utils.createArrayList("codeLoggedOutPage"));
+		return defaultParamNames;
 	}
-	
-	public ParameterizedOutput concreteToAbstract(HTTPResponse resp){
+
+	@Override
+	public ParameterizedOutput concreteToAbstract(HtmlPage resp) {
 		ParameterizedOutput po = null;
-		LogManager.logConcrete(resp.toString());
-		cookie.updateCookies(resp.getHeader("Set-Cookie"));
-		if (resp == null || resp.getCode()==404 || resp.getCode()==503 || resp.getCode()==500){
+		
+		if (resp == null){
 			po = new ParameterizedOutput();
-		}else if (resp.getCode() == 302 || resp.getCode() == 303){
-			String location = resp.getHeader("Location");
-			if (location.startsWith("http://localhost:8092/simplesamlphp-idp/www/saml2/idp/SSOService.php?SAMLRequest=")){
-				po = new ParameterizedOutput("SAMLRequest");
-				po.getParameters().add(new Parameter((cookie.get("SimpleSAMLSessionID-SP")==null?"no_SAMLSessionID":cookie.get("SimpleSAMLSessionID-SP")), Types.STRING));
+			
+		}else{
+			po = new ParameterizedOutput();			
+			if (resp.getTitleText().contains("Enter your username and password")){
+				po = new ParameterizedOutput("credentialsPage");
+				po.getParameters().add(new Parameter("ok", Types.STRING));
+				
+			}else if (resp.getTitleText().contains("Select your identity provider")){
+				po = new ParameterizedOutput("idpList");
+				po.getParameters().add(new Parameter("ok", Types.STRING));
+				
+			}else if (resp.asText().contains("eduPersonAffiliation")){
+				po = new ParameterizedOutput("profilePage");
+				po.getParameters().add(new Parameter("ok", Types.STRING));
+				
+			}else if (resp.getTitleText().contains("Logged out")){
+				po = new ParameterizedOutput("loggedOutPage");
+				po.getParameters().add(new Parameter("ok", Types.STRING));
+				
 			}else{
-				return concreteToAbstract(executeWeb(new HTTPRequest(Method.GET, resp.getHeader("Location"), Version.v11)));
-			}
-		}else if (resp.getCode() == 200){
-			po = new ParameterizedOutput();
-			po.getParameters().add(new Parameter((cookie.get("SimpleSAMLSessionID-SP")==null?"no_SAMLSessionID":cookie.get("SimpleSAMLSessionID-SP")), Types.STRING));
-			if (resp.getContent().contains("<title>Select your identity provider</title>")){
-				po = new ParameterizedOutput("IdPList");
-				po.getParameters().add(new Parameter(resp.getContent().substring(resp.getContent().indexOf("AuthID%3D_")+10, resp.getContent().indexOf("%253A", resp.getContent().indexOf("AuthID%3D_"))), Types.STRING));
-			}else if (resp.getContent().contains("<title>Logged out</title>")){
-				po = new ParameterizedOutput("webPage");
-				po.getParameters().add(new Parameter("LoggedOut", Types.STRING));
-			}else if (resp.getContent().contains("<title>Entrez votre identifiant et votre mot de passe</title>")){
-				po = new ParameterizedOutput("SAMLRequest");
-				po.getParameters().add(new Parameter(resp.getContent().substring(resp.getContent().indexOf("name=\"AuthState\"")+24, resp.getContent().indexOf(":http", resp.getContent().indexOf("name=\"AuthState\"")+30)), Types.STRING));
-				po.getParameters().add(new Parameter(resp.getContent().substring(resp.getContent().indexOf("cookieTime")+11, resp.getContent().indexOf("&", resp.getContent().indexOf("cookieTime")+15)), Types.STRING));
-			}else{
-				LogManager.logError("Unknown webpage");
+				LogManager.logError("ConcreteToAbstract method is missing for this page");
+				LogManager.logConcrete(resp.getTitleText());
 			}
 		}
 		 
 		LogManager.logInfo("Abstract : " + po);
-		return po;		
+		return po;
 	}
 
 	@Override
-	public TreeMap<String, List<String>> getParameterNames() {
-		// TODO Auto-generated method stub
-		return null;
+	public HtmlPage abstractToConcrete(ParameterizedInput pi) {
+		if (!pi.isEpsilonSymbol()){
+			LogManager.logInfo("Abstract : " + pi);	
+			
+			try{	
+				if (pi.getInputSymbol().equals("start")){
+					currentPage = webClient.getPage(pi.getParameterValue(0));
+					
+				}else if (pi.getInputSymbol().equals("selectIDP")){
+					HtmlForm form = currentPage.getForms().get(Integer.parseInt(pi.getParameterValue(0)));
+				    currentPage = form.getInputByValue("Select").click();
+					
+				}else if (pi.getInputSymbol().equals("login")){
+					HtmlForm credForm = currentPage.getForms().get(0);
+					credForm.getInputByName("username").setValueAttribute(pi.getParameterValue(0));
+					credForm.getInputByName("password").setValueAttribute(pi.getParameterValue(1));
+					currentPage = credForm.getInputByValue("Login").click();
+					
+				}else if (pi.getInputSymbol().equals("logout")){
+					currentPage = currentPage.getAnchorByText("Logout").click();
+					
+				}else{
+					LogManager.logError("AbstractToConcrete method is missing for symbol : " + pi.getInputSymbol());
+				}				
+			}catch (Exception e){
+				return null;
+			}
+		}else{
+			LogManager.logError("AbstractToConcrete for Epsilon symbol is impossible in " + pi.getInputSymbol());
+		}
+		return currentPage;
 	}
 }

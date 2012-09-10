@@ -21,6 +21,8 @@ public class TCPSend {
 			if (request.method == Method.POST){
 				request.addHeader("Content-Type", "application/x-www-form-urlencoded");
 				request.addHeader("Content-Length", String.valueOf(request.content.length()));
+			}else{
+				if (!request.content.isEmpty()) request.url += request.content;
 			}
 			
 			BufferedOutputStream outToServer = new BufferedOutputStream(clientSocket.getOutputStream());

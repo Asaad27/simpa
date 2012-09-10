@@ -49,7 +49,7 @@ public class Options {
 	// Kitest's options
 	public static int RETEST = -1;
 	
-	public static int NBTEST = 10;
+	public static int NBTEST = 40;
 	public static int MINSTATES = 4;
 	public static int MAXSTATES = 4;
 	public static int TRANSITIONPERCENT = 20;

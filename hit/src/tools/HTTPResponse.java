@@ -46,6 +46,10 @@ public class HTTPResponse {
 		s.append("\n");
 		return s.toString();
 	}
+	
+	public boolean isRedirection(){
+		return headers.containsKey("Location");
+	}
 
 	public Version getVersion() {
 		return version;

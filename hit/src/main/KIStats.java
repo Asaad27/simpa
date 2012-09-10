@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import tools.Stats;
 import tools.Utils;
 import tools.loggers.LogManager;
 
@@ -23,18 +24,19 @@ public class KIStats {
 		
 
 	try{
-			for (int i=2; i<=15; i++){
+			Stats stat = new Stats("global.csv");
+			stat.setHeaders(Utils.createArrayList("TestID", "Requests", "Duration"));
+			for (int i=2; i<=20; i++){
 				Options.MINSTATES = i;
 				Options.MAXSTATES = i;
 				
 				KITestMealy.main(args);
 
-				System.out.println(i + "," +
-						Utils.meanOfCSVField(Options.DIRTEST + File.separator + "stats.csv", 5) + "," +
-						Utils.meanOfCSVField(Options.DIRTEST + File.separator + "stats.csv", 6));
-				
+				stat.addRecord(Utils.createArrayList(String.valueOf(i),
+						String.valueOf(Utils.meanOfCSVField(Options.DIRTEST + File.separator + "stats.csv", 5)),
+						String.valueOf(Utils.meanOfCSVField(Options.DIRTEST + File.separator + "stats.csv", 6))));
+							
 				Options.OUTDIR = dir;
-				Utils.copyFile(new File(Options.DIRTEST + File.separator + "stats.csv"), new File("basic=" + i + ".csv"));
 			}
 
 		}catch(Exception e){

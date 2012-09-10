@@ -1,6 +1,7 @@
 package drivers.mealy;
 
 import java.util.List;
+
 import automata.mealy.InputSequence;
 import examples.mealy.SFM11Stefen;
 

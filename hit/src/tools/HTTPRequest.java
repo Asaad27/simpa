@@ -14,6 +14,14 @@ public class HTTPRequest {
 	HashMap<String, String> headers;
 	String content;
 	
+	public HTTPRequest(String url){
+		this.method = Method.GET;
+		this.url = url;
+		this.version = Version.v11;
+		headers = new HashMap<String, String>();
+		content = "";
+	}
+	
 	public HTTPRequest(Method m, String u, Version v){
 		this.method = m;
 		this.url = u;
@@ -77,7 +85,7 @@ public class HTTPRequest {
 		headers.put(header, value);
 	}
 
-	public void addPostData(String key, String value) {		 
+	public void addData(String key, String value) {		 
 		try {
 			if (content.length()>0) content += "&";
 			content += key + "=" + URLEncoder.encode(value, "UTF-8");
