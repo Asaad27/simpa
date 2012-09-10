@@ -65,7 +65,7 @@ public class KITestMealy {
 				Utils.cleanDir(new File(Options.OUTDIR));
 				
 				Stats stats = new Stats(Options.OUTDIR + "stats.csv");
-				stats.setHeader(RandomMealyDriver.getStatHeaders());
+				stats.setHeaders(RandomMealyDriver.getStatHeaders());
 				
 				if (!Options.STAT) System.out.println("[+] Testing " + Options.NBTEST + " automaton");
 				
@@ -171,15 +171,16 @@ public class KITestMealy {
 		System.out.println("    --help | -h            : Show help");
 		System.out.println("    --retest X             : Load and test the random EFSM numner X");
 		System.out.println("> Algorithm");
+		System.out.println("    -I                " + String.format("%4s", "("+ Options.SYMBOL_EPSILON + ")") + " : Initial inputs symbols");
+		System.out.println("    -Z                " + String.format("%4s", "("+ Options.SYMBOL_EPSILON + ")") + " : Initial Z");
 		System.out.println("> Test");
 		System.out.println("    --nbtest          " + String.format("%4s", "("+ Options.NBTEST + ")") + " : Number of tests");
 		System.out.println("    --minstates       " + String.format("%4s", "("+ Options.MINSTATES + ")") + " : Minimal number of states");
-		System.out.println("    --maxstates       " + String.format("%4s", "("+ Options.MAXSTATES + ")") + " :  Maximal number of states");
-		System.out.println("    --transitions     " + String.format("%4s", "("+ Options.TRANSITIONPERCENT + ")") + " :  % of transitions for each states");
-		System.out.println("    --mininputsym     " + String.format("%4s", "("+ Options.MININPUTSYM + ")") + " :  Minimal number of input symbols");
-		System.out.println("    --maxinputsym     " + String.format("%4s", "("+ Options.MAXINPUTSYM + ")") + " :  Maximal number of input symbols");
-		System.out.println("    --minoutputsym    " + String.format("%4s", "("+ Options.MINOUTPUTSYM + ")") + " :  Minimal number of output symbols");
-		System.out.println("    --maxoutputsym    " + String.format("%4s", "("+ Options.MAXOUTPUTSYM + ")") + " :  Maximal number of output symbols");
+		System.out.println("    --maxstates       " + String.format("%4s", "("+ Options.MAXSTATES + ")") + " : Maximal number of states");
+		System.out.println("    --mininputsym     " + String.format("%4s", "("+ Options.MININPUTSYM + ")") + " : Minimal number of input symbols");
+		System.out.println("    --maxinputsym     " + String.format("%4s", "("+ Options.MAXINPUTSYM + ")") + " : Maximal number of input symbols");
+		System.out.println("    --minoutputsym    " + String.format("%4s", "("+ Options.MINOUTPUTSYM + ")") + " : Minimal number of output symbols");
+		System.out.println("    --maxoutputsym    " + String.format("%4s", "("+ Options.MAXOUTPUTSYM + ")") + " : Maximal number of output symbols");
 
 		System.exit(0);
 	}

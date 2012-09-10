@@ -70,7 +70,7 @@ public class KITestEFSM {
 				Utils.cleanDir(new File(Options.OUTDIR));
 				
 				Stats stats = new Stats(Options.OUTDIR + "stats.csv");
-				stats.setHeader(RandomEFSMDriver.getStatHeaders());
+				stats.setHeaders(RandomEFSMDriver.getStatHeaders());
 				
 				if (!Options.STAT) System.out.println("[+] Testing " + Options.NBTEST + " automaton");
 				

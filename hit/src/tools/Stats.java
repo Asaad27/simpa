@@ -22,24 +22,28 @@ public class Stats{
 		}			
 	}
 	
-	public void setHeader(List<String> headers){
+	public void setHeaders(List<String> headers){
 		headers.add(0, "TestID");
-		addRecord(headers);
+		addHeaders(headers);
 	}
 	
-	public void addRecord(List<String> records){
+	public void addHeaders(List<String> headers){
 		if (writer != null){
 			try {
-				records.add(0, String.valueOf(++recordCount));
-				for(int i=0; i<records.size(); i++){
-					writer.write(records.get(i));
-					if (i<records.size()-1) writer.write(",");					
+				for(int i=0; i<headers.size(); i++){
+					writer.write(headers.get(i));
+					if (i<headers.size()-1) writer.write(",");					
 				}
 				writer.write("\n");
 			} catch (IOException e) {
 				LogManager.logException("Unable to write in stats file", e);
 			}
 		}
+	}
+	
+	public void addRecord(List<String> records){
+		records.add(0, String.valueOf(++recordCount));
+		addHeaders(records);
 	}
 	
 	public void close(){

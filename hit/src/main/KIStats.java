@@ -23,16 +23,15 @@ public class KIStats {
 		
 
 	try{
-			for (int i=4; i<=50; i++){
+			for (int i=2; i<=15; i++){
 				Options.MINSTATES = i;
 				Options.MAXSTATES = i;
 				
-				System.out.println("Testing with states = " + i);
-				
 				KITestMealy.main(args);
 
-				System.out.println(i + "," + Utils.meanOfCSVField(Options.DIRTEST + File.separator + "stats.csv", 5));
-				System.out.println(i + "," + Utils.meanOfCSVField(Options.DIRTEST + File.separator + "stats.csv", 6));
+				System.out.println(i + "," +
+						Utils.meanOfCSVField(Options.DIRTEST + File.separator + "stats.csv", 5) + "," +
+						Utils.meanOfCSVField(Options.DIRTEST + File.separator + "stats.csv", 6));
 				
 				Options.OUTDIR = dir;
 				Utils.copyFile(new File(Options.DIRTEST + File.separator + "stats.csv"), new File("basic=" + i + ".csv"));

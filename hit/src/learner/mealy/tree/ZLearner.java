@@ -92,7 +92,8 @@ public class ZLearner extends Learner{
 				ObservationNode w = findFirstEquivalent(currentNode, z);
 				if (w != null){
 					//6.		Label u with w
-					currentNode.label = w.state;					
+					currentNode.label = w.state;
+					currentNode.state = -1;
 				}else{
 					//8.		Add u into Q
 					addState(currentNode);
