@@ -35,12 +35,10 @@ public class TCPSend {
 			int bytesRead = 0;
 			int bufLen = 20000;
 			byte buf[] = new byte[bufLen];
-			Thread.sleep(50);
 			while (true) {
 				bytesRead = inFromServer.read(buf, 0, bufLen);
 				if (bytesRead != -1) fromServer.append(new String(buf, 0, bytesRead));
 				else break;
-				Thread.sleep(50);
 			}
 			clientSocket.close();
 		} catch (Exception e) {

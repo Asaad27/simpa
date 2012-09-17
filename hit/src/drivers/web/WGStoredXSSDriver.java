@@ -87,7 +87,12 @@ public class WGStoredXSSDriver extends LowWebDriver {
 			params.add(Utils.createArrayList(new Parameter("101", Types.STRING), new Parameter("larry", Types.STRING)));
 			params.add(Utils.createArrayList(new Parameter("111", Types.STRING), new Parameter("larry", Types.STRING)));
 			params.add(Utils.createArrayList(new Parameter("101", Types.STRING), new Parameter("john", Types.STRING)));
-			//params.add(Utils.createArrayList(new Parameter("111", Types.STRING), new Parameter("john", Types.STRING)));
+			params.add(Utils.createArrayList(new Parameter("111", Types.STRING), new Parameter("john", Types.STRING)));
+			params.add(Utils.createArrayList(new Parameter("111", Types.STRING), new Parameter("foo", Types.STRING)));
+			params.add(Utils.createArrayList(new Parameter("101", Types.STRING), new Parameter("foo", Types.STRING)));
+			params.add(Utils.createArrayList(new Parameter("666", Types.STRING), new Parameter("foo", Types.STRING)));
+			params.add(Utils.createArrayList(new Parameter("666", Types.STRING), new Parameter("larry", Types.STRING)));
+			params.add(Utils.createArrayList(new Parameter("666", Types.STRING), new Parameter("john", Types.STRING)));
 			defaultParamValues.put("login", params);		
 		}
 		
