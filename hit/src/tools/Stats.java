@@ -10,12 +10,15 @@ import tools.loggers.LogManager;
 
 public class Stats{
 	private BufferedWriter writer = null;
+	private File f;
 	private int recordCount;
 	
 	public Stats(String filename){
 		try {
 			recordCount = 0;
-			writer = new BufferedWriter(new FileWriter(new File(filename)));
+			f = new File(filename);
+			f.getAbsoluteFile().getParentFile().mkdirs();
+			writer = new BufferedWriter(new FileWriter(f));
 		} catch (IOException e) {
 			LogManager.logException("Unable to create stats file ("+filename+")", e);
 			writer = null;
@@ -35,6 +38,7 @@ public class Stats{
 					if (i<headers.size()-1) writer.write(",");					
 				}
 				writer.write("\n");
+				writer.flush();
 			} catch (IOException e) {
 				LogManager.logException("Unable to write in stats file", e);
 			}

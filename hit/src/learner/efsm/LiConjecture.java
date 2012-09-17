@@ -194,7 +194,7 @@ public class LiConjecture extends automata.efsm.EFSM {
 		try {
 			File dir = new File(Options.OUTDIR + Options.DIRASLAN);		
 			if (Utils.createDir(dir)){
-				file = new File(dir.getPath() + File.separatorChar + name + ".aslan++");				
+				file = new File(dir.getPath() + File.separatorChar + name.replace(" ", "_").toUpperCase() + ".aslan++");				
 				writer = new BufferedWriter(new FileWriter(file));				
 				writer.write(entity.toString());								
 				if (writer != null) writer.close();

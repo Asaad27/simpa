@@ -41,6 +41,9 @@ public class ZLearner extends Learner{
 			}
 		}
 		
+		if (Options.INITIAL_INPUT_SYMBOLS_EQUALS_TO_X)
+			this.i = driver.getInputSymbols();
+		
 		// an observation tree U, initialized with {e}. 
 		this.u = new ObservationNode();
 		

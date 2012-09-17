@@ -44,7 +44,7 @@ public class ASLanEntity {
 	
 	public String toString(){
 		String ent = header();
-		ent += "specification SYSTEM_" + name.replace(" ", "_").toUpperCase() + "\n";
+		ent += "specification " + name.replace(" ", "_").toUpperCase() + "\n";
 		ent += "channel_model CCM\n";
 		ent += "\n";
 		ent += "entity Environment {\n";

@@ -19,14 +19,12 @@ public class KITestMealy {
 	
 	private static void init(String[] args) {
 		if (!Options.STAT) System.out.println("[+] Reading arguments");
-		
-		Options.TREEINFERENCE = true;
-		Options.LOG_HTML = true;
-		
+				
 		int i=0;
 		try {			
 			for(i = 0; i < args.length; i++){
 				if (args[i].equals("--nbtest")) Options.NBTEST = Integer.parseInt(args[++i]);
+				else if (args[i].equals("--tree")) Options.TREEINFERENCE = true;
 				else if (args[i].equals("--minstates")) Options.MINSTATES = Integer.parseInt(args[++i]);
 				else if (args[i].equals("--maxstates")) Options.MAXSTATES = Integer.parseInt(args[++i]);
 				else if (args[i].equals("--transitions")) Options.TRANSITIONPERCENT = Integer.parseInt(args[++i]);
@@ -36,6 +34,8 @@ public class KITestMealy {
 				else if (args[i].equals("--maxoutputsym")) Options.MAXOUTPUTSYM = Integer.parseInt(args[++i]);
 				else if (args[i].equals("-I")) Options.INITIAL_INPUT_SYMBOLS = args[++i];
 				else if (args[i].equals("-Z")) Options.INITIAL_INPUT_SEQUENCES = args[++i];
+				else if (args[i].equals("-I=X")) Options.INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = true;
+				
 				
 				else if (args[i].equals("--retest")) Options.RETEST = Integer.parseInt(args[++i]);
 				
@@ -79,8 +79,7 @@ public class KITestMealy {
 						if (Options.LOG_TEXT) LogManager.addLogger(new TextLogger());
 						LogManager.start();
 						
-						RandomMealy rMealy = new RandomMealy();
-						driver = new RandomMealyDriver(rMealy);
+						driver = new RandomMealyDriver();
 						Learner l = Learner.getLearnerFor(driver);
 						l.learn();
 						driver.logStats();
@@ -171,8 +170,10 @@ public class KITestMealy {
 		System.out.println("    --help | -h            : Show help");
 		System.out.println("    --retest X             : Load and test the random EFSM numner X");
 		System.out.println("> Algorithm");
+		System.out.println("    --tree                 : Use tree inference instead of table");
 		System.out.println("    -I                " + String.format("%4s", "("+ Options.SYMBOL_EPSILON + ")") + " : Initial inputs symbols");
 		System.out.println("    -Z                " + String.format("%4s", "("+ Options.SYMBOL_EPSILON + ")") + " : Initial Z");
+		System.out.println("    --I=X                  : Initial input symbols set to X");
 		System.out.println("> Test");
 		System.out.println("    --nbtest          " + String.format("%4s", "("+ Options.NBTEST + ")") + " : Number of tests");
 		System.out.println("    --minstates       " + String.format("%4s", "("+ Options.MINSTATES + ")") + " : Minimal number of states");

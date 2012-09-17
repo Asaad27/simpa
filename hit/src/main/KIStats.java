@@ -25,10 +25,12 @@ public class KIStats {
 
 	try{
 			Stats stat = new Stats("global.csv");
-			stat.setHeaders(Utils.createArrayList("TestID", "Requests", "Duration"));
-			for (int i=2; i<=20; i++){
+			stat.setHeaders(Utils.createArrayList("State", "Requests", "Duration"));
+			for (int i=18; i<=18; i++){
 				Options.MINSTATES = i;
 				Options.MAXSTATES = i;
+				
+				System.out.println("State = " + i);
 				
 				KITestMealy.main(args);
 

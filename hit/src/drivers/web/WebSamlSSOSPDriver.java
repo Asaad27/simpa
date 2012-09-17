@@ -43,7 +43,7 @@ public class WebSamlSSOSPDriver extends HighWebDriver {
 	
 	@Override
 	public String getSystemName() {
-		return "WebSamlSSO SP (" + systemHost + ":" + systemPort + ")";
+		return "WebSamlSSO";
 	}
 
 	public HashMap<String, List<ArrayList<Parameter>>> getDefaultParamValues(){

@@ -16,7 +16,7 @@ public class Options {
 	public static final String SYMBOL_EPSILON = "\u03b5";
 	public static final String SYMBOL_SIGMA = "\u03a3";
 	public static final String SYMBOL_NOT_EQUAL = "\u2260";
-
+	
 	public static String DIRGRAPH = "out";
 	public static String DIRARFF = "arff";
 	public static String DIRTEST = "test";
@@ -33,6 +33,7 @@ public class Options {
 	public static boolean TREEINFERENCE = false;
 	public static String INITIAL_INPUT_SYMBOLS = "";
 	public static String INITIAL_INPUT_SEQUENCES = "";
+	public static boolean INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = false;
 	public static int SUPPORT_MIN = 20;
 	public static boolean REUSE_OP_IFNEEDED = false;
 	public static boolean FORCE_J48 = false;
@@ -49,14 +50,14 @@ public class Options {
 	// Kitest's options
 	public static int RETEST = -1;
 	
-	public static int NBTEST = 40;
-	public static int MINSTATES = 4;
-	public static int MAXSTATES = 4;
+	public static int NBTEST = 1;
+	public static int MINSTATES = 100;
+	public static int MAXSTATES = 100;
 	public static int TRANSITIONPERCENT = 20;
-	public static int MININPUTSYM = 3;
-	public static int MAXINPUTSYM = 3;
-	public static int MINOUTPUTSYM = 3;
-	public static int MAXOUTPUTSYM = 3;
+	public static int MININPUTSYM = 10;
+	public static int MAXINPUTSYM = 10;
+	public static int MINOUTPUTSYM = 10;
+	public static int MAXOUTPUTSYM = 10;
 	public static int MINPARAMETER = 1;
 	public static int MAXPARAMETER = 1;
 	public static int DOMAINSIZE = 10;
