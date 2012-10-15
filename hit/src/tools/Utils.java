@@ -33,6 +33,10 @@ public class Utils {
 		return current;
 	}
 	
+	public static String decapitalize(String s){
+		return s.substring(0, 1).toLowerCase() + s.substring(1);
+	}
+	
 	public static String resetCharAt(String s, int pos) {
 		  StringBuffer buf = new StringBuffer(s);
 		  buf.setCharAt( pos, 'a');

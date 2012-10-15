@@ -3,11 +3,31 @@ package tools;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.net.Socket;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import tools.HTTPRequest.Method;
 import tools.loggers.LogManager;
 
 public class TCPSend {
+	public static String Send(String url) {
+		String host = null;
+		int port = 80;
+	    String regex = "https?://([^:/]+)(:[0-9]+)?(/[.]*)";
+	    Pattern pattern = Pattern.compile(regex);
+	    Matcher matcher = pattern.matcher(url);
+
+	    if (matcher.matches())
+	    {
+	    	host = matcher.group(0);
+	        int n = matcher.groupCount();
+	        if (n==3) port = Integer.valueOf(matcher.group(2));	        	
+	        url = matcher.group(matcher.groupCount()-1);
+	    }
+
+		return Send(host, port, new HTTPRequest(url));
+	}
+	
 	public static String Send(String host, int port, HTTPRequest request) {
 		StringBuffer fromServer = new StringBuffer();
 		LogManager.logInfo("Sending request");
