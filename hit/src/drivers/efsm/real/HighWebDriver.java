@@ -1,12 +1,15 @@
-package drivers.web;
+package drivers.efsm.real;
 
-import tools.CookieManager;
 import tools.HTTPRequest;
 import tools.HTTPResponse;
 import tools.TCPSend;
 import tools.loggers.LogManager;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedOutput;
+
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+
 import drivers.efsm.EFSMDriver;
 
 /*
@@ -31,15 +34,17 @@ import drivers.efsm.EFSMDriver;
  *  
  */
 
-public abstract class LowWebDriver extends EFSMDriver{
+public abstract class HighWebDriver extends EFSMDriver{
 	public String systemHost;
 	public int systemPort;
 	
-	public CookieManager cookie;
+	public WebClient webClient;
+	public HtmlPage currentPage;
 	
-	public LowWebDriver(){
+	public HighWebDriver(){
 		super(null);
-		this.cookie = new CookieManager();
+		webClient = new WebClient();
+		currentPage = null;
 	}
 	
 	public HTTPResponse executeWeb(HTTPRequest req){
@@ -48,15 +53,12 @@ public abstract class LowWebDriver extends EFSMDriver{
 	
 	public ParameterizedOutput execute(ParameterizedInput pi) {
 		numberOfAtomicRequest++;
-		HTTPRequest req = abstractToConcrete(pi);
-		ParameterizedOutput po = new ParameterizedOutput();
-		if (req != null) po = concreteToAbstract(executeWeb(req));
+		ParameterizedOutput po = concreteToAbstract(abstractToConcrete(pi));
 		LogManager.logRequest(pi, po);
 		return po;
 	}
 	
-	public abstract HTTPRequest abstractToConcrete(ParameterizedInput pi);
+	public abstract HtmlPage abstractToConcrete(ParameterizedInput pi);
 	
-	public abstract ParameterizedOutput concreteToAbstract(HTTPResponse resp);
-
+	public abstract ParameterizedOutput concreteToAbstract(HtmlPage resp);
 }

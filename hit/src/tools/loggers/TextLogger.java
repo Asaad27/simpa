@@ -26,7 +26,7 @@ import learner.mealy.table.LmControlTable;
 import learner.mealy.table.LmControlTableItem;
 import learner.mealy.table.LmControlTableRow;
 import learner.mealy.tree.ObservationNode;
-import main.KIT;
+import main.SIMPA;
 import main.Options;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedInputSequence;
@@ -197,7 +197,7 @@ public class TextLogger implements ILogger {
 			file = new File(dir.getAbsolutePath() + File.separator
 					+ filenameFm.format(new Date()) + "_" +  Options.SYSTEM + ".txt");
 			writer = new BufferedWriter(new FileWriter(file));
-			writer.write(KIT.name + " - " + dfm.format(new Date()) + " - " + Options.SYSTEM + ret + ret);
+			writer.write(SIMPA.name + " - " + dfm.format(new Date()) + " - " + Options.SYSTEM + ret + ret);
 			writer.flush();
 		} catch (IOException e) {
 			e.printStackTrace();

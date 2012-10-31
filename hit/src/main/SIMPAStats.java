@@ -9,7 +9,7 @@ import tools.Stats;
 import tools.Utils;
 import tools.loggers.LogManager;
 
-public class KIStats {
+public class SIMPAStats {
 	public final static String name = "KIStat";
 	
 	private static void welcome() {
@@ -32,7 +32,7 @@ public class KIStats {
 				
 				System.out.println("State = " + i);
 				
-				KITestMealy.main(args);
+				SIMPATestMealy.main(args);
 
 				stat.addRecord(Utils.createArrayList(String.valueOf(i),
 						String.valueOf(Utils.meanOfCSVField(Options.DIRTEST + File.separator + "stats.csv", 5)),

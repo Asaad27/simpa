@@ -20,6 +20,12 @@ import tools.loggers.LogManager;
 public class Utils {
 	private static Random rand = new Random();
 	
+	public static int getStatusCode(String response){
+		String[] resp = response.split("\n");
+		String[] status = resp[0].trim().split(" ");
+		return Integer.parseInt(status[1]);
+	}
+	
 	public static String nextSymbols(String current){
 		for(int i=current.length()-1; i>=0; i--){
 			if (current.charAt(i) == 'z'){

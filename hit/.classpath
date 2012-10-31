@@ -37,7 +37,7 @@
 	<classpathentry kind="lib" path="lib/nist-sdp-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/relaxngDatatype-20020414.jar"/>
 	<classpathentry kind="lib" path="lib/relaxngDatatype-2011.1.jar"/>
-	<classpathentry kind="lib" path="lib/sipunit-2.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/sipunit-2.0.0.jar" sourcepath="C:/Documents and Settings/Karim/Bureau/sipunit-2.0.0.src.zip"/>
 	<classpathentry kind="lib" path="lib/stun4j-1.0.MOBICENTS.jar"/>
 	<classpathentry kind="lib" path="lib/xalan-2.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/xercesImpl-2.6.2.jar"/>

@@ -10,20 +10,17 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import drivers.efsm.EFSMDriver.Types;
-
-import automata.efsm.Parameter;
-import automata.efsm.ParameterizedInput;
-import automata.efsm.ParameterizedOutput;
-
 import tools.Form;
 import tools.HTTPRequest;
+import tools.HTTPRequest.Method;
+import tools.HTTPRequest.Version;
 import tools.HTTPResponse;
 import tools.TCPSend;
 import tools.Utils;
-import tools.HTTPRequest.Method;
-import tools.HTTPRequest.Version;
 import tools.loggers.LogManager;
+import automata.efsm.Parameter;
+import automata.efsm.ParameterizedInput;
+import automata.efsm.ParameterizedOutput;
 
 public class WGStoredXSSDriverGenerator extends DriverGenerator{
 	

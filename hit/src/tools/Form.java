@@ -3,8 +3,10 @@ package tools;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
 import tools.HTTPRequest.Method;
 
 public class Form {

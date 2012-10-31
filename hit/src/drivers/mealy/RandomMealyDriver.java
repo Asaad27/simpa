@@ -2,9 +2,8 @@ package drivers.mealy;
 
 import java.util.List;
 
-import automata.mealy.Mealy;
-
 import tools.Utils;
+import automata.mealy.Mealy;
 import examples.mealy.RandomMealy;
 
 public class RandomMealyDriver extends MealyDriver {

@@ -14,7 +14,7 @@ import drivers.Driver;
 import drivers.mealy.RandomMealyDriver;
 import examples.mealy.RandomMealy;
 
-public class KITestMealy {
+public class SIMPATestMealy {
 	public final static String name = "KITestMealy";
 	
 	private static void init(String[] args) {

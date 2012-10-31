@@ -11,7 +11,7 @@ import tools.loggers.LogManager;
 import tools.loggers.TextLogger;
 import drivers.Driver;
 
-public class KIT {
+public class SIMPA {
 	public final static String name = "KIT";
 	private static Driver driver;
 	

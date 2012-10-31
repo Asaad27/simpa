@@ -5,16 +5,13 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 import org.jsoup.select.Elements;
 
-import drivers.web.LowWebDriver;
-
-import automata.efsm.ParameterizedInput;
 import tools.CookieManager;
 import tools.Form;
-import tools.HTTPRequest;
-import tools.TCPSend;
 import tools.Utils;
+import drivers.efsm.real.LowWebDriver;
 
 
 public abstract class DriverGenerator extends LowWebDriver{

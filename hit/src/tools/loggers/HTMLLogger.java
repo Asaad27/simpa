@@ -25,7 +25,7 @@ import learner.mealy.table.LmControlTable;
 import learner.mealy.table.LmControlTableItem;
 import learner.mealy.table.LmControlTableRow;
 import learner.mealy.tree.ObservationNode;
-import main.KIT;
+import main.SIMPA;
 import main.Options;
 import tools.Base64;
 import tools.Utils;
@@ -143,7 +143,7 @@ public class HTMLLogger implements ILogger {
 			writer.flush();
 			writer.write("<html>\n");
 			writer.write("<head>\n");
-			writer.write("<title>" + KIT.name + " - " + dfm.format(new Date()) + " - " + Options.SYSTEM + "</title>\n");
+			writer.write("<title>" + SIMPA.name + " - " + dfm.format(new Date()) + " - " + Options.SYSTEM + "</title>\n");
 			writer.write("<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />\n");
 			writer.write("<style type=\"text/css\">\n");
 			writer.write(Utils.fileContentOf(new File("log").getAbsolutePath() + File.separator + "style.css"));
@@ -151,7 +151,7 @@ public class HTMLLogger implements ILogger {
 			writer.write("</head>\n");
 			writer.write("<body>\n");
 			writer.write("<div id=\"info\">\n");
-			writer.write(KIT.name + " - " + dfm.format(new Date()) + " - " + Options.SYSTEM);
+			writer.write(SIMPA.name + " - " + dfm.format(new Date()) + " - " + Options.SYSTEM);
 			writer.write("</div>\n");
 			writer.write("<ul>\n");
 		} catch (IOException e) {

@@ -20,6 +20,7 @@ public class MealyDriver extends Driver{
 	protected State currentState;
 	protected List<InputSequence> forcedCE;
 	private int nbStates = 0;
+	private String name = null;
 	
 	public MealyDriver(Mealy automata){
 		super();
@@ -27,8 +28,13 @@ public class MealyDriver extends Driver{
 		this.automata = automata;
 		this.forcedCE = getForcedCE();
 		this.nbStates = automata.getStateCount();
+		this.name = automata.getName();
 	}
 	
+	public MealyDriver(String name) {
+		this.name = name;
+	}
+
 	public List<String> getStats(){
 		return Utils.createArrayList(
 				String.valueOf(nbStates),
@@ -85,7 +91,7 @@ public class MealyDriver extends Driver{
 		
 	@Override
 	public String getSystemName(){
-		return automata.getName();
+		return name;
 	}
 	
 	public InputSequence getCounterExample(Automata c){

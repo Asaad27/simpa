@@ -14,7 +14,7 @@ import drivers.Driver;
 import drivers.efsm.RandomEFSMDriver;
 import examples.efsm.RandomEFSM;
 
-public class KITestEFSM {
+public class SIMPATestEFSM {
 	public final static String name = "KITestEFSM";
 	
 	private static void init(String[] args) {
