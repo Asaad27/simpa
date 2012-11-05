@@ -18,6 +18,7 @@ import main.Options;
 import tools.ASLanEntity;
 import tools.GraphViz;
 import tools.Utils;
+import tools.XMLModel;
 import tools.loggers.LogManager;
 import weka.ARFF;
 import weka.TreeNode;
@@ -34,6 +35,7 @@ public class LiConjecture extends automata.efsm.EFSM {
 	private TreeMap<String, List<String>> paramNames;
 	private	Map<String, Label> labels;
 	public List<String> gSymbols;
+	
 	
 	public LiConjecture(Driver d) {
 		super(d.getSystemName());
@@ -135,7 +137,7 @@ public class LiConjecture extends automata.efsm.EFSM {
 					gSymbols = ARFF.getGlobalSymbols();
 
 					for (EFSMTransition t : getTransitions()){
-						writer.write("\t" + t.getFrom() + " -> " + t.getTo() + "[label=\"" + labels.get(t.toString()) + "\"];" + "\n");            	
+						writer.write("\t" + t.getFrom() + " -> " + t.getTo() + "[label=\"" + labels.get(t.toString()).toDotString() + "\"];" + "\n");            	
 					}
 					writer.write("}\n");
 					if (writer != null) writer.close();
@@ -197,6 +199,29 @@ public class LiConjecture extends automata.efsm.EFSM {
 				file = new File(dir.getPath() + File.separatorChar + name.replace(" ", "_").toUpperCase() + ".aslan++");				
 				writer = new BufferedWriter(new FileWriter(file));				
 				writer.write(entity.toString());								
+				if (writer != null) writer.close();
+				LogManager.logInfo("Conjecture have been exported to " + file.getName());
+			}else
+				LogManager.logError("unable to create "+ dir.getName() +" directory");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void exportToXML() {
+		LogManager.logConsole("Converting conjecture to XML");
+		
+		XMLModel m = new XMLModel(name);
+		m.loadFromEFSM(this);
+		
+		Writer writer = null;
+		File file = null;
+		try {
+			File dir = new File(Options.OUTDIR + Options.DIRASLAN);		
+			if (Utils.createDir(dir)){
+				file = new File(dir.getPath() + File.separatorChar + name.replace(" ", "_").toUpperCase() + ".xml");				
+				writer = new BufferedWriter(new FileWriter(file));				
+				writer.write(m.toString());								
 				if (writer != null) writer.close();
 				LogManager.logInfo("Conjecture have been exported to " + file.getName());
 			}else

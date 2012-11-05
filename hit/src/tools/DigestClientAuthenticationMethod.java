@@ -1,6 +1,7 @@
 package tools;
 
-import java.security.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Get this interface from the nist-sip IM

@@ -1,6 +1,7 @@
 package drivers.mealy.real;
 
 import java.util.List;
+
 import drivers.mealy.MealyDriver;
 
 public abstract class RealDriver extends MealyDriver{
@@ -10,7 +11,9 @@ public abstract class RealDriver extends MealyDriver{
 		type = DriverType.MEALY;
 	}
 	
-	public abstract void reset();
+	public void reset(){
+		super.reset();
+	}
 	
 	public abstract List<String> getInputSymbols();
 	

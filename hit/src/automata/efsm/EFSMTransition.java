@@ -72,7 +72,7 @@ public class EFSMTransition extends Transition {
 			var.add(v);
 		}
 	
-		public String toString(){
+		public String toDotString(){
 			StringBuffer s = new StringBuffer();
 			s.append(input + "\\n");
 			Collections.sort(predicates);

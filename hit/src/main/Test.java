@@ -1,9 +1,6 @@
 package main;
 
-import java.text.ParseException;
 import java.util.Properties;
-
-import javax.sip.InvalidArgumentException;
 
 import org.cafesip.sipunit.Credential;
 import org.cafesip.sipunit.SipCall;

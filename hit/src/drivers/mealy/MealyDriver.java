@@ -33,6 +33,7 @@ public class MealyDriver extends Driver{
 	
 	public MealyDriver(String name) {
 		this.name = name;
+		this.automata = null;
 	}
 
 	public List<String> getStats(){
@@ -148,8 +149,10 @@ public class MealyDriver extends Driver{
 	@Override
 	public void reset(){
 		super.reset();
-		automata.reset();
-		currentState = automata.getInitialState();
+		if (automata != null){
+			automata.reset();
+			currentState = automata.getInitialState();
+		}
 	}
 
 	public boolean isCounterExample(Object ce, Object c) {
