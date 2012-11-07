@@ -37,7 +37,7 @@ public class SIPDriver extends RealDriver{
 	private HeaderFactory hdr_factory;
 	
 	private String HOST = "82.233.118.237";
-	private int PORT = 5060;
+	private int PORT = 5070;
 	private long cseq = 1;
 	private Response lastResp = null;
 	private AuthorizationHeader lastInvite = null;
@@ -61,31 +61,52 @@ public class SIPDriver extends RealDriver{
 			if (input.equals("REGISTER")){
 				cseq++;
 				URI uri = addr_factory.createURI("sip:iptel.org");
-				Address to_address = addr_factory.createAddress(addr_factory.createURI("sip:user1test@iptel.org"));					
+				Address to_address = addr_factory.createAddress(addr_factory.createURI("sip:user1test@iptel.org"));									
 				ArrayList<ViaHeader> viaHeaders = new ArrayList<ViaHeader>();
 				ViaHeader via = (ViaHeader) phone.getViaHeaders().get(0);
 				via.setBranch("z9hG4bK3" + cseq + "2632");
-				viaHeaders.add(via);
-				Address contact_address = addr_factory.createAddress("sip:user1test@"+ HOST + ":" +PORT);
+				viaHeaders.add(via);				
 
 				req = msg_factory.createRequest(
 						uri,
 						Request.REGISTER,
-						hdr_factory.createCallIdHeader("KARIM1@192.168.1.1"),
+						hdr_factory.createCallIdHeader("KARIM1@" + HOST),
 						hdr_factory.createCSeqHeader(cseq, Request.REGISTER),
 						hdr_factory.createFromHeader(phone.getAddress(), phone.generateNewTag()),
 						hdr_factory.createToHeader(to_address, null),
 						viaHeaders,
-						hdr_factory.createMaxForwardsHeader(70));					
+						hdr_factory.createMaxForwardsHeader(70));	
+				
+				Address contact_address = addr_factory.createAddress("sip:user1test@"+ HOST + ":" +PORT);
 				req.addHeader(hdr_factory.createContactHeader(contact_address));
 				ArrayList<String> userAgents = new ArrayList<String>();
 				userAgents.add("SIMPA/SIPClient");
 				req.addHeader(hdr_factory.createUserAgentHeader(userAgents));
 				
-				String respStr = UDPSend.Send("iptel.org", 5060, req.toString());
+				String respStr = UDPSend.Send("iptel.org", 5060, req);
 				Response resp = msg_factory.createResponse(respStr);
 				
 				if (resp != null && resp.getHeader("WWW-Authenticate") != null){
+					cseq++;
+					
+					viaHeaders = new ArrayList<ViaHeader>();
+					via = (ViaHeader) phone.getViaHeaders().get(0);
+					via.setBranch("z9hG4bK3" + cseq + "2632");
+					viaHeaders.add(via);
+					
+					req = msg_factory.createRequest(
+							uri,
+							Request.REGISTER,
+							hdr_factory.createCallIdHeader("KARIM1@" + HOST),
+							hdr_factory.createCSeqHeader(cseq, Request.REGISTER),
+							hdr_factory.createFromHeader(phone.getAddress(), phone.generateNewTag()),
+							hdr_factory.createToHeader(to_address, null),
+							viaHeaders,
+							hdr_factory.createMaxForwardsHeader(70));
+					
+					req.addHeader(hdr_factory.createContactHeader(contact_address));
+					req.addHeader(hdr_factory.createUserAgentHeader(userAgents));
+					
 					WWWAuthenticate auth = (WWWAuthenticate)resp.getHeader("WWW-Authenticate");
 					AuthorizationHeader auth_hdr = hdr_factory.createAuthorizationHeader("Digest");
 					auth_hdr.setAlgorithm("MD5");
@@ -103,7 +124,7 @@ public class SIPDriver extends RealDriver{
 			}else if (input.equals("INVITE")){
 				cseq++;
 				lastInvite = null;
-				URI to = addr_factory.createURI("sip:user2test@iptel.org");
+				URI to = addr_factory.createURI("sip:1000@iptel.org");
 				Address to_address = addr_factory.createAddress(to);				
 				ArrayList<ViaHeader> viaHeaders = new ArrayList<ViaHeader>();
 				ViaHeader via = (ViaHeader) phone.getViaHeaders().get(0);
@@ -114,16 +135,18 @@ public class SIPDriver extends RealDriver{
 				req = msg_factory.createRequest(
 						to,
 						Request.INVITE,
-						hdr_factory.createCallIdHeader("KARIM1@192.168.1.1"),
+						hdr_factory.createCallIdHeader("KARIM1@" + HOST),
 						hdr_factory.createCSeqHeader(cseq, Request.INVITE),
 						(lastResp==null?hdr_factory.createFromHeader(phone.getAddress(), phone.generateNewTag()):(FromHeader)lastResp.getHeader("From")),
-						(lastResp==null?hdr_factory.createToHeader(to_address, null):(ToHeader)lastResp.getHeader("To")),
+						hdr_factory.createToHeader(to_address, null),
 						viaHeaders,
 						hdr_factory.createMaxForwardsHeader(70));					
 				req.addHeader(hdr_factory.createContactHeader(contact_address));
 				ArrayList<String> userAgents = new ArrayList<String>();
 				userAgents.add("SIMPA/SIPClient");
 				req.addHeader(hdr_factory.createUserAgentHeader(userAgents));
+				req.addHeader(hdr_factory.createAllowHeader("INVITE, ACK, CANCEL, OPTIONS, BYE, INFO, REFER, NOTIFY"));
+				req.addHeader(hdr_factory.createSupportedHeader("replaces"));
 				
 				req.setContent("v=0\no=SIMPA-Talk 1352071263 1352071272 IN IP4 82.233.118.237\ns=SIMPA Call\nc=IN IP4 82.233.118.237\nt=0 0\nm=audio 8000 RTP/AVP 0 8 96 3 13 101\na=rtpmap:0 PCMU/8000\na=rtpmap:8 PCMA/8000\na=rtpmap:96 G726-32/8000\na=rtpmap:3 GSM/8000\na=rtpmap:13 CN/8000\na=rtpmap:101 telephone-event/8000\na=fmtp:101 0-16\na=sendrecv\na=local:192.168.1.1 8000\na=domain:82.233.118.237\n", hdr_factory.createContentTypeHeader("application", "sdp"));
 				
@@ -154,7 +177,7 @@ public class SIPDriver extends RealDriver{
 				req = msg_factory.createRequest(
 						to,
 						Request.ACK,
-						hdr_factory.createCallIdHeader("KARIM1@192.168.1.1"),
+						hdr_factory.createCallIdHeader("KARIM1@" + HOST),
 						hdr_factory.createCSeqHeader(cseq, Request.ACK),
 						(lastResp==null?hdr_factory.createFromHeader(phone.getAddress(), phone.generateNewTag()):(FromHeader)lastResp.getHeader("From")),
 						(lastResp==null?hdr_factory.createToHeader(to_address, null):(ToHeader)lastResp.getHeader("To")),
@@ -178,10 +201,12 @@ public class SIPDriver extends RealDriver{
 	@Override
 	public String execute(String input) {
 		Request req = abstractToConcrete(input);
+		LogManager.logInfo("\n" + req.toString());
 		Response resp = null;
 		String output = null;
 		try {
-			String respStr = UDPSend.Send("iptel.org", 5060, req.toString());
+			String respStr = UDPSend.Send("iptel.org", 5060, req);
+			LogManager.logInfo("\n" + respStr);
 			if (!respStr.equals("Timeout")){
 				resp = msg_factory.createResponse(respStr);
 				lastResp = resp;
@@ -200,7 +225,7 @@ public class SIPDriver extends RealDriver{
 	public void reset() {
 		super.reset();
 		try {
-			cseq = 1;
+			cseq += 5;
 			if (phone != null) {
 				phone.dispose();
 			}
@@ -213,7 +238,7 @@ public class SIPDriver extends RealDriver{
 
 	@Override
 	public List<String> getInputSymbols() {
-		return Utils.createArrayList("REGISTER", "INVITE", "ACK");
+		return Utils.createArrayList("REGISTER");
 	}
 
 	@Override

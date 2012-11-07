@@ -16,7 +16,7 @@ public class CookieManager {
 	public String set(String name, String value){
 		return cookies.put(name, value);
 	}
-
+	
 	public String getCookieLine() {
 		StringBuffer b = new StringBuffer();
 		for (String key : cookies.keySet()) {

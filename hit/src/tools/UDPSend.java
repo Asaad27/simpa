@@ -6,11 +6,13 @@ import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
 
+import javax.sip.message.Request;
+
 import tools.loggers.LogManager;
 
 public class UDPSend {
 
-	public static String Send(String host, int port, String request) {
+	public static String Send(String host, int port, Request request) {
 		byte[] buffer = new byte[2048];
 		Arrays.fill(buffer, (byte)0);		
 		LogManager.logInfo("Sending request");
@@ -18,11 +20,12 @@ public class UDPSend {
 			DatagramSocket sendSocket = new DatagramSocket();
 			sendSocket.setSoTimeout(5000);
 			
-			DatagramPacket dataSend = new DatagramPacket(request.getBytes(), request.getBytes().length, InetAddress.getByName(host), port);
+			DatagramPacket dataSend = new DatagramPacket(request.toString().getBytes(), request.toString().getBytes().length, InetAddress.getByName(host), port);
 			DatagramPacket dataRecv = new DatagramPacket(buffer, buffer.length);
 			
 			sendSocket.send(dataSend);
-			sendSocket.receive(dataRecv);
+			if (request.getMethod().equals(Request.ACK)) return "Timeout";
+			else sendSocket.receive(dataRecv);
 			
 			sendSocket.close();
 		

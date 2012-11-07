@@ -1,10 +1,12 @@
 package tools;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.channels.FileChannel;
@@ -326,5 +328,24 @@ public class Utils {
 			br.close();
 		}catch(Exception e){}
 		return content;
+	}
+
+	public static String randString() {
+		return "token" + Utils.randInt(1000);
+	}
+	
+	public static int minimum(int a, int b, int c) {
+        return Math.min(Math.min(a, b), c);
+	}
+
+	public static void saveToFile(String s, String filename) {
+		try {
+			FileWriter fstream = new FileWriter(filename);
+			BufferedWriter out = new BufferedWriter(fstream);
+			out.write(s);
+			out.close();
+		} catch (Exception e) {
+			System.err.println("Error: " + e.getMessage());
+		}
 	}
 }

@@ -3,24 +3,19 @@ package tools;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
 import tools.HTTPRequest.Method;
 
 public class Form {
 	private String action;
 	private Method method;
 	private HashMap<String, List<String>> inputs;
-	private HashMap<String, String> submit;
 
 	
-	public Form(String id, Method m, String action, HashMap<String, List<String>> inputs, HashMap<String, String> submit){
+	public Form(String id, Method m, String action, HashMap<String, List<String>> inputs){
 		this.method = m;
 		this.action = action;
 		this.inputs = inputs;
-		this.submit = submit;
 	}
 	
 	public static List<Form> getFormList(Element form) {
@@ -40,13 +35,13 @@ public class Form {
 		if (action.equals("")) action = form.baseUri();
 		
 		for (Element input : form.select("input[type=text]")){
-			inputs.put(input.attr("name"), Utils.createArrayList((input.hasAttr("value")?input.attr("value"):"")));
+			inputs.put(input.attr("name"), (!input.hasAttr("value") || input.attr("value").length()==0?new ArrayList<String>():Utils.createArrayList(input.attr("value"))));
 		}
 		for (Element input : form.select("input[type=hidden]")){
-			inputs.put(input.attr("name"), Utils.createArrayList((input.hasAttr("value")?input.attr("value"):"")));
+			inputs.put(input.attr("name"), (!input.hasAttr("value") || input.attr("value").length()==0?new ArrayList<String>():Utils.createArrayList(input.attr("value"))));
 		}
 		for (Element input : form.select("input[type=password]")){
-			inputs.put(input.attr("name"), Utils.createArrayList((input.hasAttr("value")?input.attr("value"):"")));
+			inputs.put(input.attr("name"), (!input.hasAttr("value") || input.attr("value").length()==0?new ArrayList<String>():Utils.createArrayList(input.attr("value"))));
 		}
 		for (Element input : form.select("select")){
 			List<String> values = new ArrayList<String>();
@@ -55,12 +50,11 @@ public class Form {
 			}
 			inputs.put(input.attr("name"), values);
 		}
-		
-		Elements submits = form.select("input[type=submit]");
-		for(Element submit : submits){
-			HashMap<String, String> s = new HashMap<String, String>();
-			s.put(submit.attr("name"), submit.attr("value"));
-			l.add(new Form(id, method, action, inputs, s));
+		for(Element submit : form.select("input[type=submit]")){
+			HashMap<String, List<String>> inputsCopy = new HashMap<>();
+			inputsCopy.putAll(inputs);
+			inputsCopy.put(submit.attr("name"), Utils.createArrayList(submit.attr("value")));
+			l.add(new Form(id, method, action, inputsCopy));
 		}
 		
 		return l;
@@ -68,10 +62,6 @@ public class Form {
 	
 	public HashMap<String, List<String>> getInputs() {
 		return inputs;
-	}
-	
-	public HashMap<String, String> getSubmit() {
-		return submit;
 	}
 	
 	public Method getMethod() {
@@ -87,19 +77,16 @@ public class Form {
 	}
 	
 	public String toString(){
-		return "["+action + ", " + inputs+", "+ submit +"]";
+		return "["+action + ", " + inputs +"]";
 	}
 
 	public boolean equals(Form to){
 		if (!action.equals(to.action)) return false;
 		for(String input : inputs.keySet()){
 			if (to.inputs.get(input) == null) return false;
+			if (to.inputs.get(input).size()==1 && inputs.get(input).size()==1 && (!to.inputs.get(input).equals(inputs.get(input)))) return false;
 		}
 		if (inputs.size() != to.inputs.size()) return false;
-		for(String s : submit.keySet()){
-			if (to.submit.containsKey(s)) return submit.get(s).equals(to.submit.get(s));
-			else return false;
-		}
 		return true; 
 	}
 }
