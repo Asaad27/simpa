@@ -3,6 +3,7 @@ package drivergenerator;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -23,6 +24,7 @@ import tools.Utils;
 public abstract class DriverGenerator{
 	protected List<String> urlsToCrawl = null;
 	protected List<Form> forms = null;
+	protected HashSet<String> links = null;
 	protected HashMap<String, String> formValues = null;
 	protected List<Object> sequence = null;
 	protected HTTPClient client = null;
@@ -35,11 +37,13 @@ public abstract class DriverGenerator{
 		this.config = config;
 		urlsToCrawl = new ArrayList<String>();
 		forms = new ArrayList<Form>();
+		links = new HashSet<String>();
 		sequence = new ArrayList<Object>();
 		errors = new HashSet<String>();
 		output = new ArrayList<String>();
 		client = new HTTPClient(config.getHost(), config.getPort());
-		client.setCredentials(config.getBasicAuthUser(), config.getBasicAuthPass());
+		if (config.getBasicAuthUser() != null && config.getBasicAuthPass() != null)
+			client.setCredentials(config.getBasicAuthUser(), config.getBasicAuthPass());
 		formValues = config.getData();
 	}
 	
@@ -167,9 +171,9 @@ public abstract class DriverGenerator{
 		
 		Element lesson = d.select(limitSelector()).first();
 		if (lesson != null){
-			Elements links = lesson.select("a[href]");
+			Elements l = lesson.select("a[href]");
 			Elements forms = lesson.select("form");
-			System.out.println("        "+ links.size() + " links and " + forms.select("input[type=submit]").size() + " forms");
+			System.out.println("        "+ l.size() + " links and " + (forms.select("input[type=submit]").size()+forms.select("input[type=image]").size()) + " forms");
 			
 			for(Element aform: forms){
 				List<Form> formList = Form.getFormList(aform);
@@ -181,8 +185,43 @@ public abstract class DriverGenerator{
 					}
 				}
 			}
-			for(String url : filterUrl(links)) crawlLink(url);
+			for(String url : filterUrl(l)){
+				if (!links.contains(url) && !isParamLink(url)){
+					sendSequences();
+					crawlLink(url);
+					sequence.remove(sequence.size()-1);
+				}
+			}
 		}
+	}
+
+	private boolean isParamLink(String url) {
+		if (url.indexOf("?") != -1){
+			Iterator<String> it = links.iterator();
+			while(it.hasNext()){
+				String u = (String) it.next();
+				if (u.indexOf("?") != -1){
+					String[] up = u.split("\\?");
+					String[] urlp = url.split("\\?");
+					if (up[0].equals(urlp[0])){
+						String[] upa = up[1].split("&");
+						Arrays.sort(upa);
+						String[] urlpa = urlp[1].split("&");
+						Arrays.sort(urlpa);
+						if (urlpa.length == upa.length){
+							for (int i=0; i<upa.length; i++){
+								String[] p1 = upa[i].split("=");
+								String[] p2 = urlpa[i].split("=");
+								if (p1[0].equals(p2[0]) && !p1[1].equals(p2[1]) && p1[1].matches("[\\d]+") && p2[1].matches("[\\d]+")){
+									return true;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	private void updateOutput(Document d) {
@@ -193,11 +232,11 @@ public abstract class DriverGenerator{
 					for(String page : output){
 						double l = (double)computeLevenshteinDistance(page, content);
 						double c = l / ((double)(page.length()+content.length()) /2.0);
-						if (c < 0.2) { return ; }
+						if (c < 0.10) { return ; }
 					}
-					System.out.println("        New page !");
 					output.add(content);
 			}
+			System.out.println("        New page !");
 		}
 	}
 
@@ -205,6 +244,12 @@ public abstract class DriverGenerator{
 		String s = "";
 		for(Element e : selected){
 			s += e.tagName();
+			if (e.tagName().equals("form")){
+				s += e.attr("action");
+			}
+			if (e.tagName().equals("input")){
+				s += e.attr("name");
+			}
 			s += filter(e.children());
 		}
 		return s;
@@ -233,7 +278,8 @@ public abstract class DriverGenerator{
 	}
 
 	private void crawlLink(String link){
-		sequence.add(link);		
+		links.add(link);
+		sequence.add(link);
 		System.out.println("    l " + link);
 		
 		Document doc = Jsoup.parse(client.get(link).toString());

@@ -1,0 +1,10 @@
+{
+  "host" : "192.168.1.1",
+  "port" : 8888,
+  "basicAuthUser" : null,
+  "basicAuthPass" : null,
+  "name" : "Test",
+  "limitSelector" : "html",
+  "noFollow" : [ "^javascript:.*", "^mailto:.*" ],
+  "data" : { }
+}

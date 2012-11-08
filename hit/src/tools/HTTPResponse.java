@@ -13,11 +13,11 @@ public class HTTPResponse {
 
 	public static enum Version {v11, v10};
 	
-	Version version;
-	int code;
-	String codeString;
-	TreeMap<String, String> headers;
-	StringBuffer content;
+	private Version version;
+	private int code;
+	private String codeString;
+	private TreeMap<String, String> headers;
+	private StringBuffer content;
 	
 	public HTTPResponse(String response){
 		String[] resp = response.split("\n");
@@ -31,8 +31,10 @@ public class HTTPResponse {
 		for(i=1; !resp[i].trim().isEmpty(); i++){
 			headers.put(resp[i].trim().split(": ")[0].trim(), resp[i].trim().split(": ")[1].trim()); 
 		}
-		content = new StringBuffer(resp[++i].trim());
-		for(i=i+1; i<resp.length; i++) content.append("\n" + resp[i]);
+		if (resp.length>i+1){
+			content = new StringBuffer(resp[++i].trim());
+			for(i=i+1; i<resp.length; i++) content.append("\n" + resp[i]);
+		}
 	}
 	
 	public String toString(){

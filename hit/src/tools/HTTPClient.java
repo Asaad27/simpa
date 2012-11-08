@@ -31,6 +31,10 @@ public class HTTPClient {
 		HTTPRequest req = buildRequest(Method.GET, url);
 		HTTPResponse resp = new HTTPResponse(TCPSend.Send(host, port, req));
 		cookie.updateCookies(resp.getHeader("Set-Cookie"));
+		if (resp.getCode() == 303){
+			req.setUrl(resp.getHeader("Location"));
+			resp = new HTTPResponse(TCPSend.Send(host, port, req));
+		}
 		return resp;
 	}
 	
@@ -38,6 +42,10 @@ public class HTTPClient {
 		HTTPRequest req = buildRequest(Method.POST, url);
 		HTTPResponse resp = new HTTPResponse(TCPSend.Send(host, port, req));
 		cookie.updateCookies(resp.getHeader("Set-Cookie"));
+		if (resp.getCode() == 303){
+			req.setUrl(resp.getHeader("Location"));
+			resp = new HTTPResponse(TCPSend.Send(host, port, req));
+		}
 		return resp;
 	}
 	
@@ -48,6 +56,10 @@ public class HTTPClient {
 		}
 		HTTPResponse resp = new HTTPResponse(TCPSend.Send(host, port, req));
 		cookie.updateCookies(resp.getHeader("Set-Cookie"));
+		if (resp.getCode() == 303){
+			req.setUrl(resp.getHeader("Location"));
+			resp = new HTTPResponse(TCPSend.Send(host, port, req));
+		}
 		return resp;
 	}
 	
@@ -56,9 +68,12 @@ public class HTTPClient {
 		for (String key: data.getData().keySet()){
 			req.addData(key, data.getData().get(key));
 		}
-		HTTPResponse resp = new HTTPResponse(TCPSend.Send(host, port, req));
-		
+		HTTPResponse resp = new HTTPResponse(TCPSend.Send(host, port, req));		
 		cookie.updateCookies(resp.getHeader("Set-Cookie"));
+		if (resp.getCode() == 303){
+			req.setUrl(resp.getHeader("Location"));
+			resp = new HTTPResponse(TCPSend.Send(host, port, req));
+		}
 		return resp;
 	}
 	

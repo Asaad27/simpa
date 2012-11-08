@@ -53,7 +53,13 @@ public class Form {
 		for(Element submit : form.select("input[type=submit]")){
 			HashMap<String, List<String>> inputsCopy = new HashMap<>();
 			inputsCopy.putAll(inputs);
-			inputsCopy.put(submit.attr("name"), Utils.createArrayList(submit.attr("value")));
+			if (submit.hasAttr("name") && !submit.attr("name").isEmpty()) inputsCopy.put(submit.attr("name"), Utils.createArrayList(submit.attr("value")));
+			l.add(new Form(id, method, action, inputsCopy));
+		}
+		for(Element submit : form.select("input[type=image]")){
+			HashMap<String, List<String>> inputsCopy = new HashMap<>();
+			inputsCopy.putAll(inputs);
+			if (submit.hasAttr("name") && !submit.attr("name").isEmpty()) inputsCopy.put(submit.attr("name"), Utils.createArrayList(submit.attr("value")));
 			l.add(new Form(id, method, action, inputsCopy));
 		}
 		
