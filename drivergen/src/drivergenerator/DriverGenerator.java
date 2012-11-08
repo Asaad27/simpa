@@ -16,9 +16,9 @@ import org.jsoup.select.Elements;
 import tools.Form;
 import tools.HTTPClient;
 import tools.HTTPData;
+import tools.HTTPRequest.Method;
 import tools.HTTPResponse;
 import tools.Utils;
-import tools.HTTPRequest.Method;
 
 public abstract class DriverGenerator{
 	protected List<String> urlsToCrawl = null;
@@ -29,23 +29,29 @@ public abstract class DriverGenerator{
 	protected HashSet<String> errors = null;
 	protected ArrayList<String> output;
 	
-	public DriverGenerator(){
+	protected Config config = null;
+	
+	public DriverGenerator(Config config){
+		this.config = config;
 		urlsToCrawl = new ArrayList<String>();
 		forms = new ArrayList<Form>();
-		formValues = buildFormValues();
 		sequence = new ArrayList<Object>();
 		errors = new HashSet<String>();
 		output = new ArrayList<String>();
+		client = new HTTPClient(config.getHost(), config.getPort());
+		client.setCredentials(config.getBasicAuthUser(), config.getBasicAuthPass());
+		formValues = config.getData();
+	}
+	
+	public String getName(){
+		return config.getName();
 	}
 	
 	public void exportToFile(String filename) {
 		try {
 			FileWriter fstream = new FileWriter(filename);
-			BufferedWriter out = new BufferedWriter(fstream);
-			
-			
-			
-			
+			BufferedWriter out = new BufferedWriter(fstream);		
+			// NYI
 			out.close();
 		} catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
@@ -54,7 +60,7 @@ public abstract class DriverGenerator{
 	
 	protected abstract void reset();
 	
-	protected void sendSequences(){
+	private void sendSequences(){
 		reset();
 		for(Object o : sequence){
 			if (o instanceof Form) submitForm((Form) o);
@@ -62,7 +68,23 @@ public abstract class DriverGenerator{
 		}
 	}
 	
-	protected boolean addForm(Form form){
+	public List<String> filterUrl(Elements links) {
+		List<String> urls = new ArrayList<String>();
+		for (Element e : links){
+			String to = e.attr("href");
+			boolean add = true;
+			for(String filter : config.getNoFollow()){
+				if (to.toLowerCase().matches(filter)){
+					add = false;
+					break;
+				}
+			}
+			if (add) urls.add(to);
+		}
+		return urls;
+	}
+	
+	private boolean addForm(Form form){
 		boolean exists = false;
 		for(Form f : forms){
 			if (f.equals(form)){
@@ -74,7 +96,7 @@ public abstract class DriverGenerator{
 		return !exists;			
 	}
 	
-	protected HTTPData getValuesForForm(Form form){
+	private HTTPData getValuesForForm(Form form){
 		HTTPData data = new HTTPData();
 		HashMap<String, List<String>> inputs = form.getInputs();		
 		for (String key : inputs.keySet()){
@@ -94,23 +116,21 @@ public abstract class DriverGenerator{
 		return data;
 	}
 	
-	public String submitForm(Form form) {
+	private String submitForm(Form form) {
 		HTTPData values = getValuesForForm(form);
 		HTTPResponse r = null;
 		if (form.getMethod().equals(Method.GET)) r = client.get(form.getAction(), values);
 		else r = client.post(form.getAction(), values);
 		return r.toString();
 	}
-	
-	public abstract HashMap<String, String> buildFormValues();
 
-	protected void addUrl(String url){
+	public void addUrl(String url){
 		urlsToCrawl.add(url);
 	}
 	
-	protected abstract List<String> filterUrl(Elements links);
-	
-	protected abstract String limitToThisSelector();
+	protected String limitSelector(){
+		return config.getLimitSelector();
+	}
 	
 	private void banner(){
 		System.out.println("---------------------------------------------------------------------");
@@ -134,10 +154,7 @@ public abstract class DriverGenerator{
 		
 		System.out.println();
 		System.out.println("[+] Outputs (" + output.size() + ")");
-		for(int i=0; i<output.size(); i++){
-			Utils.saveToFile(output.get(i), i + ".txt");
-		}
-		
+				
 		System.out.println();
 		System.out.println("[+] Comments (" + errors.size() + ")");
 		Iterator<String> iter = errors.iterator();
@@ -148,11 +165,11 @@ public abstract class DriverGenerator{
 	private void crawl(Document d){
 		updateOutput(d);
 		
-		Element lesson = d.select(limitToThisSelector()).first();
+		Element lesson = d.select(limitSelector()).first();
 		if (lesson != null){
 			Elements links = lesson.select("a[href]");
 			Elements forms = lesson.select("form");
-			System.out.println(" ("+ links.size() + " links and " + forms.select("input[type=submit]").size() + " forms)");
+			System.out.println("        "+ links.size() + " links and " + forms.select("input[type=submit]").size() + " forms");
 			
 			for(Element aform: forms){
 				List<Form> formList = Form.getFormList(aform);
@@ -169,18 +186,31 @@ public abstract class DriverGenerator{
 	}
 
 	private void updateOutput(Document d) {
-		String content = d.select(limitToThisSelector()).html();
-		if (output.isEmpty()) output.add(content);
-		else{
-			for(String page : output){
-				int l = computeLevenshteinDistance(page, content);
-				if (l < 50) { return ; }
+		String content = filter(d.select(limitSelector()));
+		if (content.length()>0){
+			if (output.isEmpty()) output.add(content);
+			else{
+					for(String page : output){
+						double l = (double)computeLevenshteinDistance(page, content);
+						double c = l / ((double)(page.length()+content.length()) /2.0);
+						if (c < 0.2) { return ; }
+					}
+					System.out.println("        New page !");
+					output.add(content);
 			}
-			output.add(content);
 		}
 	}
 
-	public static int computeLevenshteinDistance(CharSequence str1,
+	private String filter(Elements selected) {
+		String s = "";
+		for(Element e : selected){
+			s += e.tagName();
+			s += filter(e.children());
+		}
+		return s;
+	}
+
+	private int computeLevenshteinDistance(CharSequence str1,
 			CharSequence str2) {
 		int[][] distance = new int[str1.length() + 1][str2.length() + 1];
 
@@ -202,18 +232,18 @@ public abstract class DriverGenerator{
 		return distance[str1.length()][str2.length()];
 	}
 
-	protected void crawlLink(String link){
+	private void crawlLink(String link){
 		sequence.add(link);		
-		System.out.print("    l " + link);
+		System.out.println("    l " + link);
 		
 		Document doc = Jsoup.parse(client.get(link).toString());
 		doc.setBaseUri(link);		
 		crawl(doc);
 	}
 	
-	protected void crawlForm(Form form){
+	private void crawlForm(Form form){
 		sequence.add(form);
-		System.out.print("    f " + form.getAction() + ' ' + form.getInputs());
+		System.out.println("    f " + form.getAction() + ' ' + form.getInputs());
 
 		Document doc = Jsoup.parse(submitForm(form));
 		doc.setBaseUri(form.getAction());		

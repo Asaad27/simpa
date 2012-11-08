@@ -14,6 +14,11 @@ public class HTTPData {
 		data.put(name, value);
 	}
 	
+	public HTTPData(HashMap<String, String> paramValues) {
+		this();
+		data.putAll(paramValues);
+	}
+
 	public void add(String name, String value){
 		data.put(name, value);
 	}

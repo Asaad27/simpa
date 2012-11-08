@@ -1,0 +1,14 @@
+{
+  "host" : "localhost",
+  "port" : 8080,
+  "basicAuthUser" : "guest",
+  "basicAuthPass" : "guest",
+  "name" : "WebGoat Stored XSS",
+  "limitSelector" : "#lesson_wrapper",
+  "noFollow" : [ "^javascript:", "^http://" ],
+  "data" : {
+    "manager" : "110",
+    "employee_id" : "111",
+    "password" : "john"
+  }
+}
