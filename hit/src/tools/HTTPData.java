@@ -1,6 +1,10 @@
 package tools;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+
+import com.gargoylesoftware.htmlunit.util.NameValuePair;
 
 public class HTTPData {
 	private HashMap<String, String> data = null;
@@ -25,6 +29,14 @@ public class HTTPData {
 	
 	public HashMap<String, String> getData(){
 		return data;
+	}
+	
+	public List<NameValuePair> getNameValueData(){
+		List<NameValuePair> l = new ArrayList<NameValuePair>();
+		for (String name : data.keySet()){
+			l.add(new NameValuePair(name,  data.get(name)));
+		}
+		return l;
 	}
 
 }

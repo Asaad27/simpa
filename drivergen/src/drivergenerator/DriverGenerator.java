@@ -1,7 +1,10 @@
 package drivergenerator;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,17 +12,28 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import tools.Form;
-import tools.HTTPClient;
 import tools.HTTPData;
 import tools.HTTPRequest.Method;
-import tools.HTTPResponse;
 import tools.Utils;
+import tools.loggers.LogManager;
+
+import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.HttpMethod;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebRequest;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 public abstract class DriverGenerator{
 	protected List<String> urlsToCrawl = null;
@@ -27,24 +41,31 @@ public abstract class DriverGenerator{
 	protected HashSet<String> links = null;
 	protected HashMap<String, String> formValues = null;
 	protected List<Object> sequence = null;
-	protected HTTPClient client = null;
+	protected WebClient client = null;
 	protected HashSet<String> errors = null;
 	protected ArrayList<String> output;
 	
 	protected Config config = null;
 	
-	public DriverGenerator(Config config){
-		this.config = config;
+	public DriverGenerator(String configFileName) throws JsonParseException, JsonMappingException, IOException{
+		ObjectMapper mapper = new ObjectMapper();
+		this.config = mapper.readValue(new File("conf//" + configFileName), Config.class);
 		urlsToCrawl = new ArrayList<String>();
 		forms = new ArrayList<Form>();
 		links = new HashSet<String>();
 		sequence = new ArrayList<Object>();
 		errors = new HashSet<String>();
 		output = new ArrayList<String>();
-		client = new HTTPClient(config.getHost(), config.getPort());
-		if (config.getBasicAuthUser() != null && config.getBasicAuthPass() != null)
-			client.setCredentials(config.getBasicAuthUser(), config.getBasicAuthPass());
+		client = new WebClient();
+		client.setThrowExceptionOnFailingStatusCode(false);
+		client.setTimeout(5000);
+		BasicCredentialsProvider creds = new BasicCredentialsProvider();
+		if (config.getBasicAuthUser() != null && config.getBasicAuthPass() != null){
+			creds.setCredentials(new AuthScope(config.getHost(), config.getPort()), new UsernamePasswordCredentials(config.getBasicAuthUser(), config.getBasicAuthPass()));
+		}
+		client.setCredentialsProvider(creds);
 		formValues = config.getData();
+		addUrl(config.getFirstURL());
 	}
 	
 	public String getName(){
@@ -67,8 +88,12 @@ public abstract class DriverGenerator{
 	private void sendSequences(){
 		reset();
 		for(Object o : sequence){
-			if (o instanceof Form) submitForm((Form) o);
-			else if (o instanceof String) client.get((String) o);
+			try {
+				if (o instanceof Form) submitForm((Form) o);
+				else if (o instanceof String) client.getPage((String) o);
+			} catch (FailingHttpStatusCodeException | IOException e) {
+				LogManager.logException("Unable to execute sequence", e);
+			}
 		}
 	}
 	
@@ -120,16 +145,17 @@ public abstract class DriverGenerator{
 		return data;
 	}
 	
-	private String submitForm(Form form) {
+	private String submitForm(Form form) throws FailingHttpStatusCodeException, IOException {
+		WebRequest request = null;
 		HTTPData values = getValuesForForm(form);
-		HTTPResponse r = null;
-		if (form.getMethod().equals(Method.GET)) r = client.get(form.getAction(), values);
-		else r = client.post(form.getAction(), values);
-		return r.toString();
+		request = new WebRequest(new URL(form.getAction()), (form.getMethod().equals(Method.GET)?HttpMethod.GET:HttpMethod.POST));
+		request.setRequestParameters(values.getNameValueData());
+		HtmlPage page = client.getPage(request); 
+		return page.asXml();
 	}
 
 	public void addUrl(String url){
-		urlsToCrawl.add(url);
+		if (url != null) urlsToCrawl.add(url);
 	}
 	
 	protected String limitSelector(){
@@ -186,8 +212,10 @@ public abstract class DriverGenerator{
 				}
 			}
 			for(String url : filterUrl(l)){
+				if (url.startsWith("/")) url = d.baseUri().substring(0, d.baseUri().indexOf("/", 7)) + url;
+				else url = d.baseUri().substring(0, d.baseUri().lastIndexOf("/")+1) + url;
 				if (!links.contains(url) && !isParamLink(url)){
-					sendSequences();
+					sendSequences();					
 					crawlLink(url);
 					sequence.remove(sequence.size()-1);
 				}
@@ -282,17 +310,28 @@ public abstract class DriverGenerator{
 		sequence.add(link);
 		System.out.println("    l " + link);
 		
-		Document doc = Jsoup.parse(client.get(link).toString());
-		doc.setBaseUri(link);		
-		crawl(doc);
+		Document doc;
+		HtmlPage p;
+		try {
+			p = client.getPage(link);
+			doc = Jsoup.parse(p.asXml());
+			doc.setBaseUri(link);		
+			crawl(doc);
+		} catch (FailingHttpStatusCodeException | IOException e) {
+			LogManager.logException("Unable to get page for " + link, e);
+		}
 	}
 	
 	private void crawlForm(Form form){
 		sequence.add(form);
 		System.out.println("    f " + form.getAction() + ' ' + form.getInputs());
 
-		Document doc = Jsoup.parse(submitForm(form));
-		doc.setBaseUri(form.getAction());		
-		crawl(doc);
+		try{
+			Document doc = Jsoup.parse(submitForm(form));
+			doc.setBaseUri(form.getAction());		
+			crawl(doc);
+		} catch (FailingHttpStatusCodeException | IOException e) {
+			LogManager.logException("Unable to get page for " + form, e);
+		}
 	}
 }

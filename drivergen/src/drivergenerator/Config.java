@@ -11,6 +11,7 @@ public class Config {
 	private String limitSelector = "html";
 	private HashMap<String, String> paramValues = null;
 	private ArrayList<String> noFollow = null;
+	private String firstURL = null;
 	
 	public Config(){
 		paramValues = new HashMap<String, String>();
@@ -19,6 +20,10 @@ public class Config {
 	
 	public ArrayList<String> getNoFollow(){
 		return noFollow;
+	}
+	
+	public String getFirstURL(){
+		return firstURL;
 	}
 	
 	public String getName() {

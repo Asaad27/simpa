@@ -62,6 +62,7 @@ public class LogManager {
 		System.err.flush();
 		System.err.println(tfm.format(new Date()) + s);
 		e.printStackTrace(System.err);
+		System.exit(1);
 	}
 
 	public static void logInfo(String s) {

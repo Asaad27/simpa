@@ -29,7 +29,9 @@ public class Form {
 		if (id.isEmpty()) id = form.attr("name");
 		
 		String action = form.attr("action");
-		if (!action.startsWith("/")){
+		if (action.startsWith("/")){
+			action = form.baseUri().substring(0, form.baseUri().indexOf("/", 7)) + action;
+		}else{
 			action = form.baseUri().substring(0, form.baseUri().lastIndexOf("/")+1) + action;
 		}
 		if (action.equals("")) action = form.baseUri();

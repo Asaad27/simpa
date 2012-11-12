@@ -331,7 +331,7 @@ public class Utils {
 	}
 
 	public static String randString() {
-		return "token" + Utils.randInt(1000);
+		return "random" + Utils.randInt(1000);
 	}
 	
 	public static int minimum(int a, int b, int c) {
