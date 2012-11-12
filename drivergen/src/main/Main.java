@@ -1,12 +1,12 @@
 package main;
 
-import drivergenerator.WackoPickoDriverGenerator;
-
+import drivergenerator.DriverGenerator;
 
 public class Main {
 	
 	public static void main(String[] args) throws Exception{
-		WackoPickoDriverGenerator gen = new WackoPickoDriverGenerator();
-		gen.start();
+		DriverGenerator g = DriverGenerator.getDriver("WGStoredXSS");
+		g.start();
+		g.exportToDot();
 	}
 }

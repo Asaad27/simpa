@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,7 +12,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.impl.client.BasicCredentialsProvider;
@@ -22,15 +22,15 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
 import tools.Form;
+import tools.GraphViz;
 import tools.HTTPData;
 import tools.HTTPRequest.Method;
 import tools.Utils;
 import tools.loggers.LogManager;
-
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.HttpMethod;
+import com.gargoylesoftware.htmlunit.ScriptException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -44,7 +44,9 @@ public abstract class DriverGenerator{
 	protected WebClient client = null;
 	protected HashSet<String> errors = null;
 	protected ArrayList<String> output;
-	
+	protected ArrayList<Transition> transitions;
+	protected int currentState;
+		
 	protected Config config = null;
 	
 	public DriverGenerator(String configFileName) throws JsonParseException, JsonMappingException, IOException{
@@ -55,6 +57,7 @@ public abstract class DriverGenerator{
 		links = new HashSet<String>();
 		sequence = new ArrayList<Object>();
 		errors = new HashSet<String>();
+		transitions = new ArrayList<Transition>();
 		output = new ArrayList<String>();
 		client = new WebClient();
 		client.setThrowExceptionOnFailingStatusCode(false);
@@ -66,6 +69,20 @@ public abstract class DriverGenerator{
 		client.setCredentialsProvider(creds);
 		formValues = config.getData();
 		addUrl(config.getFirstURL());
+		currentState = 0;
+	}
+	
+	public static DriverGenerator getDriver(String system){
+		try {
+			return (DriverGenerator)Class.forName("drivergenerator.drivers." + system + "Driver").newInstance();
+		} catch (InstantiationException e) {
+			LogManager.logException("Unable to instantiate " + system + " driver", e);
+		} catch (IllegalAccessException e) {
+			LogManager.logException("Illegal access to class " + system + " driver", e);
+		} catch (ClassNotFoundException e) {
+			LogManager.logException("Unable to find " + system + " driver", e);
+		}
+		return null;
 	}
 	
 	public String getName(){
@@ -150,8 +167,12 @@ public abstract class DriverGenerator{
 		HTTPData values = getValuesForForm(form);
 		request = new WebRequest(new URL(form.getAction()), (form.getMethod().equals(Method.GET)?HttpMethod.GET:HttpMethod.POST));
 		request.setRequestParameters(values.getNameValueData());
-		HtmlPage page = client.getPage(request); 
-		return page.asXml();
+		try{
+			HtmlPage page = client.getPage(request); 
+			return page.asXml();
+		}catch(ScriptException e){
+			return "";
+		}
 	}
 
 	public void addUrl(String url){
@@ -184,6 +205,12 @@ public abstract class DriverGenerator{
 		
 		System.out.println();
 		System.out.println("[+] Outputs (" + output.size() + ")");
+		
+		System.out.println();
+		System.out.println("[+] Model (" + transitions.size() + " transitions)");
+		for(Transition t : transitions){
+			System.out.println("    " + t);
+		}
 				
 		System.out.println();
 		System.out.println("[+] Comments (" + errors.size() + ")");
@@ -192,8 +219,9 @@ public abstract class DriverGenerator{
 	        System.out.println("    " + iter.next());
 	}
 	
-	private void crawl(Document d){
-		updateOutput(d);
+	private int crawl(Document d){
+		int state = updateOutput(d);
+		currentState = state;
 		
 		Element lesson = d.select(limitSelector()).first();
 		if (lesson != null){
@@ -221,6 +249,29 @@ public abstract class DriverGenerator{
 				}
 			}
 		}
+		return state;
+	}
+	
+	public void exportToDot(){
+		Writer writer = null;
+		File file = null;
+		File dir = new File("models");
+		try {			
+			if (!dir.isDirectory() && !dir.mkdirs()) throw new IOException("unable to create "+ dir.getName() +" directory");
+
+			file = new File(dir.getPath() + File.separatorChar + config.getName() + ".dot");
+			writer = new BufferedWriter(new FileWriter(file));
+            writer.write("digraph G {\n");
+            for (Transition t : transitions){
+            	writer.write("\t" + t.toDot() + "\n");
+            }
+            writer.write("}\n");
+            writer.close();
+            File imagePath = GraphViz.dotToFile(file.getPath());
+            if (imagePath!= null) LogManager.logImage(imagePath.getPath());
+		} catch (IOException e) {
+            LogManager.logException("Error writing dot file", e);
+        }		
 	}
 
 	private boolean isParamLink(String url) {
@@ -252,20 +303,19 @@ public abstract class DriverGenerator{
 		return false;
 	}
 
-	private void updateOutput(Document d) {
+	private int updateOutput(Document d) {
 		String content = filter(d.select(limitSelector()));
 		if (content.length()>0){
-			if (output.isEmpty()) output.add(content);
-			else{
-					for(String page : output){
-						double l = (double)computeLevenshteinDistance(page, content);
-						double c = l / ((double)(page.length()+content.length()) /2.0);
-						if (c < 0.10) { return ; }
-					}
-					output.add(content);
+			for(int i=0; i<output.size(); i++){
+				double l = (double)computeLevenshteinDistance(output.get(i), content);
+				double c = l / ((double)(output.get(i).length()+content.length()) /2.0);
+				if (c < 0.10) { return i; }
 			}
+			output.add(content);
 			System.out.println("        New page !");
+			return output.size()-1;
 		}
+		return currentState;
 	}
 
 	private String filter(Elements selected) {
@@ -316,7 +366,7 @@ public abstract class DriverGenerator{
 			p = client.getPage(link);
 			doc = Jsoup.parse(p.asXml());
 			doc.setBaseUri(link);		
-			crawl(doc);
+			transitions.add(new Transition(currentState, crawl(doc), prettyprint(link)));
 		} catch (FailingHttpStatusCodeException | IOException e) {
 			LogManager.logException("Unable to get page for " + link, e);
 		}
@@ -329,9 +379,11 @@ public abstract class DriverGenerator{
 		try{
 			Document doc = Jsoup.parse(submitForm(form));
 			doc.setBaseUri(form.getAction());		
-			crawl(doc);
+			transitions.add(new Transition(currentState, crawl(doc), prettyprint(form)));
 		} catch (FailingHttpStatusCodeException | IOException e) {
 			LogManager.logException("Unable to get page for " + form, e);
 		}
 	}
+
+	protected abstract String prettyprint(Object o);
 }

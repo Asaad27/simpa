@@ -1,15 +1,17 @@
-package drivergenerator;
+package drivergenerator.drivers;
 
 import java.io.IOException;
 
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
+import drivergenerator.DriverGenerator;
+
 import tools.loggers.LogManager;
 
-public class WackoPickoDriverGenerator extends DriverGenerator{
+public class WackoPickoDriver extends DriverGenerator{
 	
-	public WackoPickoDriverGenerator() throws JsonParseException, JsonMappingException, IOException{			
+	public WackoPickoDriver() throws JsonParseException, JsonMappingException, IOException{			
 		super("wackopicko.json");
 		initConnection();
 	}
@@ -20,5 +22,10 @@ public class WackoPickoDriverGenerator extends DriverGenerator{
 	
 	private void initConnection() {
 		LogManager.logInfo("Initializing connection to the system");		
+	}
+
+	@Override
+	protected String prettyprint(Object o) {
+		return o.toString();
 	}
 }
