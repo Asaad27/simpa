@@ -6,8 +6,8 @@ import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
 
+import javax.sip.header.CSeqHeader;
 import javax.sip.message.Request;
-
 import tools.loggers.LogManager;
 
 public class UDPSend {
@@ -17,6 +17,7 @@ public class UDPSend {
 		Arrays.fill(buffer, (byte)0);		
 		LogManager.logInfo("Sending request");
 		try {			
+			CSeqHeader nSeq = (CSeqHeader)request.getHeader("CSeq");
 			DatagramSocket sendSocket = new DatagramSocket();
 			sendSocket.setSoTimeout(5000);
 			
@@ -25,7 +26,26 @@ public class UDPSend {
 			
 			sendSocket.send(dataSend);
 			if (request.getMethod().equals(Request.ACK)) return "Timeout";
-			else sendSocket.receive(dataRecv);
+			else{
+				int code = -1;long seq = -1;
+				if (request.getMethod().equals("INVITE")){
+					while (code<200 || (code>300 && code<400)){
+						sendSocket.receive(dataRecv);
+						code = Integer.parseInt(new String(buffer, 0, dataRecv.getLength()).split("\n")[0].split(" ")[1]);
+					}
+				}else{
+					while (seq != nSeq.getSeqNumber()){
+						sendSocket.receive(dataRecv);
+						String[] headers = new String(buffer, 0, dataRecv.getLength()).split("\n");
+						for(String h : headers){
+							if (h.startsWith("CSeq")){
+								seq = Integer.parseInt(h.substring(6, h.lastIndexOf(" ")));
+								break;
+							}
+						}
+					}
+				}
+			}
 			
 			sendSocket.close();
 		

@@ -3,7 +3,7 @@
   "port" : 8888,
   "basicAuthUser" : null,
   "basicAuthPass" : null,
-  "name" : "Test",
+  "name" : "WackoPicko",
   "limitSelector" : "html",
   "firstURL" : "http://192.168.1.1:8888/WackoPicko/",
   "noFollow" : [ "^javascript:.*", "^mailto:.*" ],

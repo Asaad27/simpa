@@ -14,6 +14,7 @@ import javax.sip.header.AuthorizationHeader;
 import javax.sip.header.FromHeader;
 import javax.sip.header.HeaderFactory;
 import javax.sip.header.ProxyAuthorizationHeader;
+import javax.sip.header.RecordRouteHeader;
 import javax.sip.header.ToHeader;
 import javax.sip.header.ViaHeader;
 import javax.sip.message.MessageFactory;
@@ -41,6 +42,7 @@ public class SIPDriver extends RealDriver{
 	private long cseq = 1;
 	private Response lastResp = null;
 	private AuthorizationHeader lastInvite = null;
+	private RecordRouteHeader lastRoute = null;
 	
 	public SIPDriver() {
 		super("SIP");
@@ -49,6 +51,7 @@ public class SIPDriver extends RealDriver{
 			msg_factory = stack.getMessageFactory();
 			addr_factory = stack.getAddressFactory();
 			hdr_factory = stack.getHeaderFactory();
+			outputSymbols = new ArrayList<String>();
 		} catch (Exception e) {
 			LogManager.logException("Error initializing SIP driver", e);
 		}
@@ -124,6 +127,7 @@ public class SIPDriver extends RealDriver{
 			}else if (input.equals("INVITE")){
 				cseq++;
 				lastInvite = null;
+				lastRoute = null;
 				URI to = addr_factory.createURI("sip:1000@iptel.org");
 				Address to_address = addr_factory.createAddress(to);				
 				ArrayList<ViaHeader> viaHeaders = new ArrayList<ViaHeader>();
@@ -167,7 +171,7 @@ public class SIPDriver extends RealDriver{
 				}		
 				
 			}else if (input.equals("ACK")){
-				URI to = addr_factory.createURI("sip:user2test@iptel.org");	
+				URI to = addr_factory.createURI("sip:1000@iptel.org");	
 				Address to_address = addr_factory.createAddress(to);
 				ArrayList<ViaHeader> viaHeaders = new ArrayList<ViaHeader>();
 				ViaHeader via = (ViaHeader) phone.getViaHeaders().get(0);
@@ -187,6 +191,63 @@ public class SIPDriver extends RealDriver{
 				if (lastInvite != null){
 					req.addHeader(lastInvite);
 				}
+			}else if (input.equals("BYE")){
+				cseq++;
+				URI to = addr_factory.createURI("sip:1000@iptel.org");	
+				Address to_address = addr_factory.createAddress(to);
+				ArrayList<ViaHeader> viaHeaders = new ArrayList<ViaHeader>();
+				ViaHeader via = (ViaHeader) phone.getViaHeaders().get(0);
+				via.setBranch("z9hG4bK3" + cseq + "2632");
+				viaHeaders.add(via);
+
+				req = msg_factory.createRequest(
+						to,
+						Request.BYE,
+						hdr_factory.createCallIdHeader("KARIM1@" + HOST),
+						hdr_factory.createCSeqHeader(cseq, Request.BYE),
+						(lastResp==null?hdr_factory.createFromHeader(phone.getAddress(), phone.generateNewTag()):(FromHeader)lastResp.getHeader("From")),
+						(lastResp==null?hdr_factory.createToHeader(to_address, null):(ToHeader)lastResp.getHeader("To")),
+						viaHeaders,
+						hdr_factory.createMaxForwardsHeader(70));					
+							
+				if (lastRoute != null){
+					req.addHeader(hdr_factory.createRouteHeader(lastRoute.getAddress()));
+				}				
+				
+				String respStr = UDPSend.Send("iptel.org", 5060, req);
+				Response resp = msg_factory.createResponse(respStr);
+				
+				if (resp != null && resp.getHeader("Proxy-Authenticate") != null){
+					cseq++;
+					
+					viaHeaders = new ArrayList<ViaHeader>();
+					via = (ViaHeader) phone.getViaHeaders().get(0);
+					via.setBranch("z9hG4bK3" + cseq + "2632");
+					viaHeaders.add(via);
+					
+					req = msg_factory.createRequest(
+							to,
+							Request.BYE,
+							hdr_factory.createCallIdHeader("KARIM1@" + HOST),
+							hdr_factory.createCSeqHeader(cseq, Request.BYE),
+							(lastResp==null?hdr_factory.createFromHeader(phone.getAddress(), phone.generateNewTag()):(FromHeader)lastResp.getHeader("From")),
+							(lastResp==null?hdr_factory.createToHeader(to_address, null):(ToHeader)lastResp.getHeader("To")),
+							viaHeaders,
+							hdr_factory.createMaxForwardsHeader(70));
+										
+					ProxyAuthenticate auth = (ProxyAuthenticate)resp.getHeader("Proxy-Authenticate");
+					AuthorizationHeader auth_hdr = hdr_factory.createAuthorizationHeader("Digest");
+					auth_hdr.setAlgorithm("MD5");
+					auth_hdr.setNonce(auth.getNonce());
+					auth_hdr.setRealm(auth.getRealm());
+					auth_hdr.setUsername("user1test");
+					auth_hdr.setURI(to);
+
+					DigestClientAuthenticationMethod m = new DigestClientAuthenticationMethod();
+					m.initialize(auth_hdr.getRealm(), auth_hdr.getUsername(), auth_hdr.getURI().toString(), auth_hdr.getNonce(), auth_hdr.getUsername(), Request.REGISTER, auth_hdr.getCNonce(), auth_hdr.getAlgorithm());
+					auth_hdr.setResponse(m.generateResponse());						
+					req.addHeader(auth_hdr);					
+				}				
 			}
 		} catch (Exception e) {
 			LogManager.logException("Error concretizing " + input + " request", e);
@@ -200,6 +261,7 @@ public class SIPDriver extends RealDriver{
 
 	@Override
 	public String execute(String input) {
+		numberOfAtomicRequest++;
 		Request req = abstractToConcrete(input);
 		LogManager.logInfo("\n" + req.toString());
 		Response resp = null;
@@ -209,6 +271,7 @@ public class SIPDriver extends RealDriver{
 			LogManager.logInfo("\n" + respStr);
 			if (!respStr.equals("Timeout")){
 				resp = msg_factory.createResponse(respStr);
+				if (resp.getHeader("Record-Route") != null) lastRoute = (RecordRouteHeader) resp.getHeader("Record-Route");
 				lastResp = resp;
 				output = concreteToAbstract(resp);
 			}else{
@@ -217,6 +280,7 @@ public class SIPDriver extends RealDriver{
 		} catch (ParseException e) {
 			LogManager.logException("Unable to parse response", e);
 		}		
+		if (!outputSymbols.contains(output)) outputSymbols.add(output);
 		LogManager.logRequest(input, output);
 		return output;
 	}
@@ -238,12 +302,6 @@ public class SIPDriver extends RealDriver{
 
 	@Override
 	public List<String> getInputSymbols() {
-		return Utils.createArrayList("REGISTER");
+		return Utils.createArrayList("INVITE", "ACK", "BYE");
 	}
-
-	@Override
-	public List<String> getOutputSymbols() {
-		return Utils.createArrayList("200", "401", "407", "TIMEOUT");
-	}
-
 }

@@ -52,7 +52,7 @@ public abstract class DriverGenerator{
 	public DriverGenerator(String configFileName) throws JsonParseException, JsonMappingException, IOException{
 		ObjectMapper mapper = new ObjectMapper();
 		this.config = mapper.readValue(new File("conf//" + configFileName), Config.class);
-		urlsToCrawl = new ArrayList<String>();
+		urlsToCrawl = new ArrayList<>();
 		forms = new ArrayList<Form>();
 		links = new HashSet<String>();
 		sequence = new ArrayList<Object>();
@@ -89,17 +89,6 @@ public abstract class DriverGenerator{
 		return config.getName();
 	}
 	
-	public void exportToFile(String filename) {
-		try {
-			FileWriter fstream = new FileWriter(filename);
-			BufferedWriter out = new BufferedWriter(fstream);		
-			// NYI
-			out.close();
-		} catch (Exception e) {
-			System.err.println("Error: " + e.getMessage());
-		}
-	}
-	
 	protected abstract void reset();
 	
 	private void sendSequences(){
@@ -131,15 +120,13 @@ public abstract class DriverGenerator{
 	}
 	
 	private boolean addForm(Form form){
-		boolean exists = false;
 		for(Form f : forms){
 			if (f.equals(form)){
-				exists = true;
-				break;
+				return false;
 			}
 		}
-		if (!exists) forms.add(form);
-		return !exists;			
+		forms.add(form);
+		return true;			
 	}
 	
 	private HTTPData getValuesForForm(Form form){
@@ -315,7 +302,7 @@ public abstract class DriverGenerator{
 			System.out.println("        New page !");
 			return output.size()-1;
 		}
-		return currentState;
+		return 0;
 	}
 
 	private String filter(Elements selected) {

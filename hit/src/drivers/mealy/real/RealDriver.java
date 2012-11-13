@@ -6,6 +6,8 @@ import drivers.mealy.MealyDriver;
 
 public abstract class RealDriver extends MealyDriver{
 
+	protected List<String> outputSymbols = null;
+
 	public RealDriver(String name) {
 		super(name);
 		type = DriverType.MEALY;
@@ -17,7 +19,9 @@ public abstract class RealDriver extends MealyDriver{
 	
 	public abstract List<String> getInputSymbols();
 	
-	public abstract List<String> getOutputSymbols();
+	public List<String> getOutputSymbols(){
+		return outputSymbols ;
+	}
 	
 	public abstract String execute(String input);
 	

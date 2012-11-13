@@ -37,6 +37,7 @@ public class Options {
 	public static int SUPPORT_MIN = 20;
 	public static boolean REUSE_OP_IFNEEDED = false;
 	public static boolean FORCE_J48 = false;
+	public static boolean STOP_ON_CE_SEARCH = false;
 	
 	// Output's options 
 		
@@ -47,7 +48,7 @@ public class Options {
 	public static String SYSTEM = "";
 	public static String OUTDIR = System.getProperty("user.dir");
 	
-	// Kitest's options
+	// SIMPATest's options
 	public static int RETEST = -1;
 	
 	public static int NBTEST = 1;

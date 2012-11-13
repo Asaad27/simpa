@@ -31,7 +31,8 @@ public class LogManager {
 	
 	public static void end() {
 		logConsole("End");
-		for (ILogger l : loggers) l.logEnd();		
+		for (ILogger l : loggers) l.logEnd();
+		System.exit(0);
 	}
 	
 	public static void logControlTable(LmControlTable ct) {

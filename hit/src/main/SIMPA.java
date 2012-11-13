@@ -26,6 +26,7 @@ public class SIMPA {
 				else if (args[i].equals("-I")) Options.INITIAL_INPUT_SYMBOLS = args[++i];
 				else if (args[i].equals("-Z")) Options.INITIAL_INPUT_SEQUENCES = args[++i];
 				else if (args[i].equals("--I=X")) Options.INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = true;
+				else if (args[i].equals("--stopatce")) Options.STOP_ON_CE_SEARCH = true;
 				else if (args[i].equals("--html")) Options.LOG_HTML = true;
 				else if (args[i].equals("--openhtml")) Options.AUTO_OPEN_HTML = true;
 				else if (args[i].equals("--forcej48")) Options.FORCE_J48 = true;
@@ -123,7 +124,7 @@ public class SIMPA {
 	}
 
 	public static void usage(){
-		System.out.println("Usage : KIT driverClass [Options]");
+		System.out.println("Usage : SIMPA driverClass [Options]");
 		System.out.println("");
 		System.out.println("Options");
 		System.out.println("> General");
@@ -133,6 +134,7 @@ public class SIMPA {
 		System.out.println("    -I                : Initial input symbols (a,b,c)");
 		System.out.println("    -Z                : Initial distinguishing sequences (a-b,a-c,a-c-b)");
 		System.out.println("    --I=X             : Initial input symbols set to X");
+		System.out.println("    --stopatce        : Stop at counter example search");
 		System.out.println("    --reuseop         : Reuse output parameter for non closed row");
 		System.out.println("    --forcej48        : Force the use of J48 algorithm instead of M5P for numeric classes");
 		System.out.println("    --supportmin (20) : Minimal support for relation (1-100)");

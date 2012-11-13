@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import learner.mealy.LmConjecture;
+import main.Options;
 import tools.Utils;
 import tools.loggers.LogManager;
 import automata.Automata;
@@ -103,7 +104,7 @@ public class MealyDriver extends Driver{
 			found = true;
 			ce = forcedCE.remove(0);
 			LogManager.logInfo("Counter example found (forced) : " + ce);
-		}else{
+		}else if (!Options.STOP_ON_CE_SEARCH){
 			LmConjecture conj = (LmConjecture)c;
 			int maxTries = 100000;
 			List<String> is = getInputSymbols();
