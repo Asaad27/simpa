@@ -302,6 +302,6 @@ public class SIPDriver extends RealDriver{
 
 	@Override
 	public List<String> getInputSymbols() {
-		return Utils.createArrayList("INVITE", "ACK", "BYE");
+		return Utils.createArrayList("REGISTER", "INVITE", "ACK", "BYE");
 	}
 }
