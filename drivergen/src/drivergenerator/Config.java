@@ -12,10 +12,15 @@ public class Config {
 	private HashMap<String, String> paramValues = null;
 	private ArrayList<String> noFollow = null;
 	private String firstURL = null;
+	private String actionByParameter = null;
 	
 	public Config(){
 		paramValues = new HashMap<String, String>();
 		noFollow = new ArrayList<String>();
+	}
+	
+	public String getActionByParameter(){
+		return actionByParameter;
 	}
 	
 	public ArrayList<String> getNoFollow(){

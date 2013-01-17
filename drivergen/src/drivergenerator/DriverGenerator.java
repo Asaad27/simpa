@@ -43,22 +43,22 @@ public abstract class DriverGenerator{
 	protected List<Object> sequence = null;
 	protected WebClient client = null;
 	protected HashSet<String> errors = null;
-	protected ArrayList<String> output;
+	protected ArrayList<Output> outputs;
 	protected ArrayList<Transition> transitions;
 	protected int currentState;
 		
-	protected Config config = null;
+	protected static Config config = null;
 	
 	public DriverGenerator(String configFileName) throws JsonParseException, JsonMappingException, IOException{
 		ObjectMapper mapper = new ObjectMapper();
-		this.config = mapper.readValue(new File("conf//" + configFileName), Config.class);
+		config = mapper.readValue(new File("conf//" + configFileName), Config.class);
 		urlsToCrawl = new ArrayList<>();
 		forms = new ArrayList<Form>();
 		links = new HashSet<String>();
 		sequence = new ArrayList<Object>();
 		errors = new HashSet<String>();
 		transitions = new ArrayList<Transition>();
-		output = new ArrayList<String>();
+		outputs = new ArrayList<Output>();
 		client = new WebClient();
 		client.setThrowExceptionOnFailingStatusCode(false);
 		client.setTimeout(5000);
@@ -121,11 +121,33 @@ public abstract class DriverGenerator{
 	
 	private boolean addForm(Form form){
 		for(Form f : forms){
-			if (f.equals(form)){
+			if (f.equals(form) ||
+					((config.getActionByParameter()!=null) && 
+							(f.getInputs().get(config.getActionByParameter()).equals(form.getInputs().get(config.getActionByParameter()))) && 
+							 f.getInputs().size()<form.getInputs().size())){
 				return false;
 			}
-		}
+		}		
+		for (String key : form.getInputs().keySet()){
+			List<String> values = form.getInputs().get(key);
+			if (values.isEmpty()){
+				String providedValue = formValues.get(key); 
+				if (providedValue != null) values.add(providedValue);
+				else {
+					values.add(Utils.randString());
+					errors.add("No values for " + key + ", random string used. You may need to provide useful value.");
+				}
+			}
+		}		
 		forms.add(form);
+		if (config.getActionByParameter() != null){
+			for (int i=0; i<forms.size(); i++){
+				if ((forms.get(i).getInputs().get(config.getActionByParameter()).equals(form.getInputs().get(config.getActionByParameter()))) && (forms.get(i).getInputs().size()>form.getInputs().size())){
+					forms.remove(i);
+					break;
+				}
+			}
+		}
 		return true;			
 	}
 	
@@ -134,12 +156,15 @@ public abstract class DriverGenerator{
 		HashMap<String, List<String>> inputs = form.getInputs();		
 		for (String key : inputs.keySet()){
 			List<String> values = inputs.get(key);
-			if (values.size()>1 || values.isEmpty()){
+			if (values.isEmpty() || values.size()>1){
 				String newValue = formValues.get(key);
 				if (newValue == null){
-					newValue = Utils.randString();
-					if (values.size()>1) errors.add("Multiple values for " + key + ", random string used. Please provide one value.");
-					else errors.add("No values for " + key + ", random string used. You may need to provide useful value.");
+					if (values.size()>1){
+						newValue = Utils.randIn(values);
+					}else{
+						errors.add("Multiple values for " + key + ", random string used. Please provide one value.");
+						newValue = Utils.randString();
+					}
 				}
 				data.add(key, newValue);				
 			}else{
@@ -166,13 +191,9 @@ public abstract class DriverGenerator{
 		if (url != null) urlsToCrawl.add(url);
 	}
 	
-	protected String limitSelector(){
-		return config.getLimitSelector();
-	}
-	
 	private void banner(){
 		System.out.println("---------------------------------------------------------------------");
-		System.out.println("|                      Weissmuller: SIMPA Crawler                   |");
+		System.out.println("|                           SIMPA Crawler                           |");
 		System.out.println("---------------------------------------------------------------------");
 		System.out.println();
 	}
@@ -191,7 +212,7 @@ public abstract class DriverGenerator{
 		}
 		
 		System.out.println();
-		System.out.println("[+] Outputs (" + output.size() + ")");
+		System.out.println("[+] Outputs (" + outputs.size() + ")");
 		
 		System.out.println();
 		System.out.println("[+] Model (" + transitions.size() + " transitions)");
@@ -210,7 +231,7 @@ public abstract class DriverGenerator{
 		int state = updateOutput(d);
 		currentState = state;
 		
-		Element lesson = d.select(limitSelector()).first();
+		Element lesson = d.select(config.getLimitSelector()).first();
 		if (lesson != null){
 			Elements l = lesson.select("a[href]");
 			Elements forms = lesson.select("form");
@@ -291,55 +312,16 @@ public abstract class DriverGenerator{
 	}
 
 	private int updateOutput(Document d) {
-		String content = filter(d.select(limitSelector()));
-		if (content.length()>0){
-			for(int i=0; i<output.size(); i++){
-				double l = (double)computeLevenshteinDistance(output.get(i), content);
-				double c = l / ((double)(output.get(i).length()+content.length()) /2.0);
-				if (c < 0.10) { return i; }
+		Output o = new Output(d);
+		if (o.getFilteredSource().length()>0){
+			for(int i=0; i<outputs.size(); i++){
+				if (o.isEquivalentTo(outputs.get(i))) return i;
 			}
-			output.add(content);
+			outputs.add(o);
 			System.out.println("        New page !");
-			return output.size()-1;
+			return outputs.size()-1;
 		}
 		return 0;
-	}
-
-	private String filter(Elements selected) {
-		String s = "";
-		for(Element e : selected){
-			s += e.tagName();
-			if (e.tagName().equals("form")){
-				s += e.attr("action");
-			}
-			if (e.tagName().equals("input")){
-				s += e.attr("name");
-			}
-			s += filter(e.children());
-		}
-		return s;
-	}
-
-	private int computeLevenshteinDistance(CharSequence str1,
-			CharSequence str2) {
-		int[][] distance = new int[str1.length() + 1][str2.length() + 1];
-
-		for (int i = 0; i <= str1.length(); i++)
-			distance[i][0] = i;
-		for (int j = 1; j <= str2.length(); j++)
-			distance[0][j] = j;
-
-		for (int i = 1; i <= str1.length(); i++)
-			for (int j = 1; j <= str2.length(); j++)
-				distance[i][j] = Utils
-						.minimum(
-								distance[i - 1][j] + 1,
-								distance[i][j - 1] + 1,
-								distance[i - 1][j - 1]
-										+ ((str1.charAt(i - 1) == str2
-												.charAt(j - 1)) ? 0 : 1));
-
-		return distance[str1.length()][str2.length()];
 	}
 
 	private void crawlLink(String link){

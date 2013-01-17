@@ -6,6 +6,7 @@
   "name" : "WebGoat Stored XSS",
   "limitSelector" : "#lesson_wrapper",
   "noFollow" : [ "^javascript:", "^http://" ],
+  "actionByParameter" : "action",
   "data" : {
     "manager" : "110",
     "employee_id" : "111",

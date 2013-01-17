@@ -10,7 +10,7 @@ public abstract class Driver {
 	public int numberOfAtomicRequest = 0;
 	private long start = 0;
 	public long duration = 0;
-	public enum DriverType {NONE, EFSM, MEALY};
+	public enum DriverType {NONE, EFSM, MEALY, DFA};
 	public DriverType type = DriverType.NONE;
 	protected boolean addtolog = true;
 	
