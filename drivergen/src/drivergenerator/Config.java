@@ -1,4 +1,5 @@
 package drivergenerator;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -13,24 +14,24 @@ public class Config {
 	private ArrayList<String> noFollow = null;
 	private String firstURL = null;
 	private String actionByParameter = null;
-	
-	public Config(){
+
+	public Config() {
 		paramValues = new HashMap<String, String>();
 		noFollow = new ArrayList<String>();
 	}
-	
-	public String getActionByParameter(){
+
+	public String getActionByParameter() {
 		return actionByParameter;
 	}
-	
-	public ArrayList<String> getNoFollow(){
+
+	public ArrayList<String> getNoFollow() {
 		return noFollow;
 	}
-	
-	public String getFirstURL(){
+
+	public String getFirstURL() {
 		return firstURL;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
@@ -50,12 +51,12 @@ public class Config {
 	public int getPort() {
 		return port;
 	}
-	
+
 	public String getLimitSelector() {
 		return limitSelector;
 	}
-	
-	public HashMap<String, String> getData(){
+
+	public HashMap<String, String> getData() {
 		return paramValues;
 	}
 }

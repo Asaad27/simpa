@@ -6,6 +6,7 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
 import drivergenerator.DriverGenerator;
+import drivergenerator.Input;
 
 import tools.loggers.LogManager;
 
@@ -25,7 +26,7 @@ public class WackoPickoDriver extends DriverGenerator{
 	}
 
 	@Override
-	protected String prettyprint(Object o) {
-		return o.toString();
+	protected String prettyprint(Input in) {
+		return in.toString();
 	}
 }

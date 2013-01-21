@@ -1,18 +1,24 @@
 package drivergenerator;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import drivergenerator.Input.Type;
+
 import tools.Utils;
 
 public class Output {
-	private Elements source = null;	
+	private Elements source = null;
 	private String filteredSource = null;
-	
-	public Output(Document doc){
+
+	public Output(Document doc) {
 		this.source = doc.select(DriverGenerator.config.getLimitSelector());
-		this.filteredSource = filter(doc.select(DriverGenerator.config.getLimitSelector()));
+		this.filteredSource = filter(doc.select(DriverGenerator.config
+				.getLimitSelector()));
 	}
 
 	public Elements getDoc() {
@@ -22,15 +28,15 @@ public class Output {
 	public String getFilteredSource() {
 		return filteredSource;
 	}
-	
+
 	private String filter(Elements selected) {
 		String s = "";
-		for(Element e : selected){
+		for (Element e : selected) {
 			s += e.tagName();
-			if (e.tagName().equals("form")){
+			if (e.tagName().equals("form")) {
 				s += e.attr("action");
 			}
-			if (e.tagName().equals("input")){
+			if (e.tagName().equals("input")) {
 				s += e.attr("name");
 			}
 			s += filter(e.children());
@@ -38,8 +44,7 @@ public class Output {
 		return s;
 	}
 
-	private int computeLevenshteinDistance(CharSequence str1,
-			CharSequence str2) {
+	private int computeLevenshteinDistance(CharSequence str1, CharSequence str2) {
 		int[][] distance = new int[str1.length() + 1][str2.length() + 1];
 
 		for (int i = 0; i <= str1.length(); i++)
@@ -61,13 +66,21 @@ public class Output {
 	}
 
 	public boolean isEquivalentTo(Output to) {
-		double l = (double)computeLevenshteinDistance(to.getFilteredSource(), getFilteredSource());
-		double c = l / ((double)(to.getFilteredSource().length()+getFilteredSource().length()) /2.0);
-		if (c < 0.10){
-			System.out.println(getDoc().html());
-			System.out.println(to.getDoc().html());
-			return true;
+		double l = (double) computeLevenshteinDistance(to.getFilteredSource(),
+				getFilteredSource());
+		double c = l
+				/ ((double) (to.getFilteredSource().length() + getFilteredSource()
+						.length()) / 2.0);
+		return c < 0.10;
+	}
+	
+	public List<String> findParameters(List<Input> sequence) {
+		List<String> diff = new ArrayList<String>();
+		if (sequence.get(sequence.size()-1).getType() ==Type.FORM){
+			for (int i=0; i<1; i++){
+				
+			}
 		}
-		return false;
+		return diff;
 	}
 }

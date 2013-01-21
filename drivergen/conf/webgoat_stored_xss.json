@@ -3,7 +3,7 @@
   "port" : 8080,
   "basicAuthUser" : "guest",
   "basicAuthPass" : "guest",
-  "name" : "WebGoat Stored XSS",
+  "name" : "WebGoat_Stored_XSS",
   "limitSelector" : "#lesson_wrapper",
   "noFollow" : [ "^javascript:", "^http://" ],
   "actionByParameter" : "action",

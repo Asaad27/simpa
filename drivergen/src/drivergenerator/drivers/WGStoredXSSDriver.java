@@ -6,7 +6,6 @@ import java.net.URL;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
-import tools.Form;
 import tools.HTTPData;
 import tools.loggers.LogManager;
 
@@ -16,6 +15,8 @@ import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 
 import drivergenerator.DriverGenerator;
+import drivergenerator.Input;
+import drivergenerator.Input.Type;
 
 public class WGStoredXSSDriver extends DriverGenerator{
 	
@@ -56,13 +57,12 @@ public class WGStoredXSSDriver extends DriverGenerator{
 	}
 
 	@Override
-	protected String prettyprint(Object o) {
-		if (o != null){
-			if (o instanceof String){
-				return ((String) o).substring(21);
-			}else if (o instanceof Form){
-				Form f = (Form)o;
-				return f.getInputs().get("action").get(0);
+	protected String prettyprint(Input in) {
+		if (in != null){
+			if (in.getType() == Type.LINK){
+				return in.getAddress();
+			}else if (in.getType() == Type.FORM){
+				return in.getParams().get("action").get(0);
 			}
 		}
 		return null;
