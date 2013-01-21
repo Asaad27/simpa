@@ -1,6 +1,5 @@
 package drivergenerator.driver;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -16,27 +15,24 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.codehaus.jackson.annotate.JsonSubTypes;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import tools.HTTPData;
+import tools.HTTPRequest;
+import tools.HTTPResponse;
+import tools.loggers.LogManager;
+import automata.efsm.Parameter;
+import automata.efsm.ParameterizedInput;
+import automata.efsm.ParameterizedOutput;
 
 import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
-import tools.HTTPData;
-import tools.HTTPRequest;
-import tools.HTTPResponse;
-import tools.Utils;
-import tools.loggers.LogManager;
-import automata.efsm.Parameter;
-import automata.efsm.ParameterizedInput;
-import automata.efsm.ParameterizedOutput;
 import drivergenerator.Config;
 import drivergenerator.Input;
 import drivergenerator.Input.Type;
@@ -78,18 +74,17 @@ public class GenericDriver extends LowWebDriver {
 		numberOfAtomicRequest++;
 		Input in = inputs.get(Integer.parseInt(pi.getInputSymbol().substring(pi.getInputSymbol().indexOf("_")+1)));
 		
+		String source = null;
 		try {
-			String source = submit(in, pi);
+			source = submit(in, pi);
 		} catch (MalformedURLException e1) {
 			e1.printStackTrace();
 		}
 		
 		ParameterizedOutput po = null;
-		try {
-			Output out = new Output(submit(in));
-		} catch (MalformedURLException e) {
-			po = new ParameterizedOutput();
-		}
+		Output out = new Output(source);
+		
+		
 		
 		LogManager.logRequest(pi, po);
 		return po;
@@ -99,8 +94,9 @@ public class GenericDriver extends LowWebDriver {
 		HTTPData data = new HTTPData();
 		if (in.getType() == Type.FORM) {
 			HashMap<String, List<String>> inputs = in.getParams();
+			int i = 0;
 			for (String key : inputs.keySet()) {
-				data.add(key, in.getParams().get(key).get(0));
+				data.add(key, pi.getParameterValue(i++));
 			}
 		}
 		return data;

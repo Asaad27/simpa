@@ -4,12 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 
 import tools.HTTPData;
-import tools.HTTPRequest;
-import tools.HTTPResponse;
 import tools.loggers.LogManager;
-
-import automata.efsm.ParameterizedInput;
-import automata.efsm.ParameterizedOutput;
 
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.HttpMethod;
