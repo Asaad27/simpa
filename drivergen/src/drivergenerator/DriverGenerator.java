@@ -92,7 +92,7 @@ public abstract class DriverGenerator {
 	public static DriverGenerator getDriver(String system) {
 		try {
 			return (DriverGenerator) Class.forName(
-					"drivergenerator.drivers." + system + "Driver")
+					"drivergenerator.systems." + system)
 					.newInstance();
 		} catch (InstantiationException e) {
 			LogManager.logException("Unable to instantiate " + system
@@ -209,28 +209,6 @@ public abstract class DriverGenerator {
 		return data;
 	}
 	
-	private HTTPData getRandomValuesForInput(Input in) {
-		HTTPData data = new HTTPData();
-		if (in.getType() == Type.FORM) {
-			HashMap<String, List<String>> inputs = in.getParams();
-			for (String key : inputs.keySet()) {
-				List<String> values = inputs.get(key);
-				if (values.isEmpty() || values.size() > 1) {
-					String newValue = null;
-					if (values.size() > 1) {
-						newValue = Utils.randIn(values);
-					} else {
-						newValue = Utils.randString();
-					}
-					data.add(key, newValue);
-				} else {
-					data.add(key, values.get(0));
-				}
-			}
-		}
-		return data;
-	}
-
 	private String submit(Input in) throws MalformedURLException{
 		WebRequest request = null;
 		HTTPData values = getValuesForInput(in);
@@ -293,6 +271,7 @@ public abstract class DriverGenerator {
 		System.out.println();
 		System.out.println("[+] Inputs (" + inputs.size() + ")");
 		for (Input in : inputs) {
+			in.cleanRuntimeParameters(config.getRuntimeParameters()); 
 			System.out.println("    " + in);
 		}
 
@@ -392,10 +371,116 @@ public abstract class DriverGenerator {
 			}
 			outputs.add(o);
 			System.out.println("        New page !");
-			o.findParameters(sequence);
+			findParameters(sequence, o);
 			return outputs.size() - 1;
 		}
 		return 0;
+	}
+	
+	private HTTPData getRandomValuesForInput(Input in) {
+		HTTPData data = new HTTPData();
+		if (in.getType() == Type.FORM) {
+			HashMap<String, List<String>> inputs = in.getParams();
+			for (String key : inputs.keySet()) {
+				List<String> values = inputs.get(key);
+				if (values.isEmpty() || values.size() > 1) {
+					String newValue = null;
+					if (values.size() > 1) {
+						newValue = Utils.randIn(values);
+					} else {
+						newValue = Utils.randString();
+					}
+					data.add(key, newValue);
+				} else {
+					data.add(key, values.get(0));
+				}
+			}
+		}
+		return data;
+	}
+	
+	private String submitRandom(Input in) throws MalformedURLException{
+		WebRequest request = null;
+		HTTPData values = getRandomValuesForInput(in);
+		if (in.getType()==Type.FORM){
+			request = new WebRequest(new URL(in.getAddress()), in.getMethod());
+			request.setRequestParameters(values.getNameValueData());
+			
+			HtmlPage page;
+			try {
+				page = client.getPage(request);
+			} catch (Exception e) {
+				return null;
+			}
+			return page.asXml();
+		}else if (in.getType()==Type.LINK){
+			String link = in.getAddress() + "?";
+			if (!in.getParams().isEmpty()){
+				for(String name : in.getParams().keySet()){
+					link += name + "=" + Utils.randIn(in.getParams().get(name)) + "&";
+				}
+			}
+			HtmlPage page;
+			try {
+				page = client.getPage(link.substring(0, link.length()-1));
+			} catch (Exception e) {
+				return null;
+			}
+			return page.asXml();
+		}
+		return null;
+	}
+	
+	public void findParameters(List<Input> sequence, Output out) {
+		HashSet<String> diff = new HashSet<String>();
+		Input inputToFuzz = sequence.remove(sequence.size()-1);
+		for (int i=0; i<5; i++){
+			try {
+				sendSequences();
+				Output variant = new Output(submitRandom(inputToFuzz));
+				if (out.isEquivalentTo(variant)){
+					diff.addAll(findDifferences(out, variant));
+				}
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			}
+			
+		}
+		sequence.add(inputToFuzz);
+		out.getParams().addAll(diff);
+		System.out.println("        " + out.getParams().size() + " output parameters");
+	}
+
+	private List<String> findDifferences(Output first, Output second) {
+		List<String> diff = new ArrayList<String>();
+		List<String> pos = new ArrayList<String>();
+		Elements firstE = first.getDoc();
+		Elements secondE = second.getDoc();
+		if (firstE.size() == secondE.size()){
+			for(int i=0; i<firstE.size(); i++){
+				pos.add(String.valueOf(i));
+				findDifferences(firstE.get(i), secondE.get(i), diff, pos);
+				pos.remove(pos.size()-1);
+			}		
+		}else{
+			System.out.println("WTF !");
+		}
+		return diff;
+	}
+	
+	private void findDifferences(Element first, Element second, List<String> diff, List<String> pos) {
+		if (first.nodeName().equals(second.nodeName())){
+			pos.add(first.nodeName());
+			if (!first.ownText().equals(second.ownText())){
+				diff.add(pos.toString());
+			}
+			for(int i=0; i<first.children().size(); i++){
+				pos.add(String.valueOf(i));
+				findDifferences(first.child(i), second.child(i), diff, pos);
+				pos.remove(pos.size()-1);
+			}
+			pos.remove(pos.size()-1);
+		}
 	}
 
 	private void crawlInput(Input in) {
@@ -443,6 +528,13 @@ public abstract class DriverGenerator {
             n = doc.createElement("basicAuthPass");
             n.setTextContent(config.getBasicAuthPass());
             esettings.appendChild(n);
+            n = doc.createElement("runtimeParameters");
+            for(String rt : config.getRuntimeParameters()){
+            	org.w3c.dom.Element eparams = doc.createElement("parameter");
+            	eparams.setTextContent(rt);
+            	n.appendChild(eparams);
+            }            
+            esettings.appendChild(n);
             edriver.appendChild(esettings);            
             org.w3c.dom.Element einputs = doc.createElement("inputs");
             for (Input i : inputs){
@@ -465,14 +557,18 @@ public abstract class DriverGenerator {
             edriver.appendChild(einputs);            
             org.w3c.dom.Element eoutputs = doc.createElement("outputs");
             for (Output o : outputs){
-            	org.w3c.dom.Element eouput = doc.createElement("output");
-            	org.w3c.dom.Element eraw = doc.createElement("source");
-            	eraw.setTextContent(o.getDoc().toString());
-            	eouput.appendChild(eraw);
+            	org.w3c.dom.Element eoutput = doc.createElement("output");
             	org.w3c.dom.Element ediff = doc.createElement("diff");
             	ediff.setTextContent(o.getFilteredSource());
-            	eouput.appendChild(ediff);
-            	eoutputs.appendChild(eouput);
+            	eoutput.appendChild(ediff);
+            	org.w3c.dom.Element eparams = doc.createElement("parameters");
+            	for (String value : o.getParams()){
+        			org.w3c.dom.Element eparam = doc.createElement("parameter");
+        			eparam.setTextContent(value);
+        			eparams.appendChild(eparam);
+        		}
+            	eoutput.appendChild(eparams);
+            	eoutputs.appendChild(eoutput);
             }             
             edriver.appendChild(eoutputs);
             doc.appendChild(edriver);

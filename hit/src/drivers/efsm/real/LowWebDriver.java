@@ -59,4 +59,7 @@ public abstract class LowWebDriver extends EFSMDriver{
 	
 	public abstract ParameterizedOutput concreteToAbstract(HTTPResponse resp);
 
+	public abstract void initConnection();
+		
+
 }

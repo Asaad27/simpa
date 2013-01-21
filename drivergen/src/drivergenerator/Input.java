@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.jsoup.nodes.Element;
 
-import com.gargoylesoftware.htmlunit.HttpMethod;
-
 import tools.Utils;
+
+import com.gargoylesoftware.htmlunit.HttpMethod;
 
 public class Input {
 	public enum Type {
@@ -19,6 +19,22 @@ public class Input {
 	private HttpMethod method = null;
 	private String address = null;
 	private HashMap<String, List<String>> params = null;
+	
+	public Input(){
+		params = new HashMap<String, List<String>>();
+	}
+
+	public void setType(Type type) {
+		this.type = type;
+	}
+
+	public void setMethod(HttpMethod method) {
+		this.method = method;
+	}
+
+	public void setParams(HashMap<String, List<String>> params) {
+		this.params = params;
+	}
 
 	public Input(String link) {
 		this.type = Type.LINK;
@@ -154,6 +170,41 @@ public class Input {
 		if (params.size() != to.params.size())
 			return false;
 		return true;
+	}
+
+	public void cleanRuntimeParameters(List<String> rtParams) {
+		if (type == Type.LINK){
+			for(String name : params.keySet()){
+				for(String runtime : rtParams){
+					if (name.equals(runtime)){
+						params.get(name).clear();
+						params.get(name).add("%%__RUNTIME__" + name + "__%%");
+					}
+				}
+			}
+		}else if (type == Type.FORM){
+			for(String name : params.keySet()){
+				for(String runtime : rtParams){
+					if (name.equals(runtime)){
+						params.get(name).clear();
+						params.get(name).add("%%__RUNTIME__" + name + "__%%");
+					}
+				}
+			}
+			int pos = address.indexOf("?");
+			if (pos != -1){
+				while (pos < address.length()){
+					String name = address.substring(pos+1, address.indexOf("=", pos+1));
+					for(String runtime : rtParams){
+						if (name.equals(runtime)){
+							address = address.substring(0, address.indexOf("=", pos+1)+1) + "%%__RUNTIME__" + name + "__%%" + address.substring(address.indexOf("=", pos+1)-1 + name.length()); 
+						}
+					}
+					pos = address.indexOf("&", pos+1);
+					if (pos == -1) break;					
+				}
+			}
+		}
 	}
 
 }

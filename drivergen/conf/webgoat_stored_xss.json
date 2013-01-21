@@ -7,6 +7,7 @@
   "limitSelector" : "#lesson_wrapper",
   "noFollow" : [ "^javascript:", "^http://" ],
   "actionByParameter" : "action",
+  "runtimeParameters" : ["Screen"],
   "data" : {
     "manager" : "110",
     "employee_id" : "111",

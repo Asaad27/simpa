@@ -3,22 +3,43 @@ package drivergenerator;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
-import drivergenerator.Input.Type;
 
 import tools.Utils;
 
 public class Output {
 	private Elements source = null;
 	private String filteredSource = null;
+	private List<String> params = null;
+	
+	public Output(){
+		params = new ArrayList<String>();
+	}
+
+	public void setFilteredSource(String filteredSource) {
+		this.filteredSource = filteredSource;
+	}
 
 	public Output(Document doc) {
 		this.source = doc.select(DriverGenerator.config.getLimitSelector());
 		this.filteredSource = filter(doc.select(DriverGenerator.config
 				.getLimitSelector()));
+		this.params = new ArrayList<String>();
+	}
+	
+	public Output(String source) {
+		Document doc = Jsoup.parse(source);
+		this.source = doc.select(DriverGenerator.config.getLimitSelector());
+		this.filteredSource = filter(doc.select(DriverGenerator.config
+				.getLimitSelector()));
+		this.params = new ArrayList<String>();
+	}
+
+	public List<String> getParams() {
+		return params;
 	}
 
 	public Elements getDoc() {
@@ -74,13 +95,5 @@ public class Output {
 		return c < 0.10;
 	}
 	
-	public List<String> findParameters(List<Input> sequence) {
-		List<String> diff = new ArrayList<String>();
-		if (sequence.get(sequence.size()-1).getType() ==Type.FORM){
-			for (int i=0; i<1; i++){
-				
-			}
-		}
-		return diff;
-	}
+
 }

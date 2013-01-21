@@ -1,40 +1,29 @@
-package drivergenerator.drivers;
+package drivergenerator.driver;
 
 import java.io.IOException;
 import java.net.URL;
 
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-
 import tools.HTTPData;
+import tools.HTTPRequest;
+import tools.HTTPResponse;
 import tools.loggers.LogManager;
+
+import automata.efsm.ParameterizedInput;
+import automata.efsm.ParameterizedOutput;
 
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 
-import drivergenerator.DriverGenerator;
-import drivergenerator.Input;
-import drivergenerator.Input.Type;
-
-public class WGStoredXSSDriver extends DriverGenerator{
+public class WGStoredXSSDriver extends GenericDriver {
 	
 	private String screen = null;
-	
-	public WGStoredXSSDriver() throws JsonParseException, JsonMappingException, IOException{
-		super("webgoat_stored_xss.json");
-		initConnection();
-		addUrl("http://localhost:8080/WebGoat/attack?Screen="+screen+"&menu=900");
+
+	public WGStoredXSSDriver(String xml) throws IOException {
+		super(xml);
 	}
-	
-	private String extractScreen(WebResponse resp, String lesson) {
-		String content = resp.getContentAsString();
-		int pos = content.indexOf("LAB: Cross Site Scripting");
-		pos = content.indexOf("Screen=", pos);
-		return content.substring(pos+7, content.indexOf("&", pos));
-	}
-	
+
 	@Override
 	public void reset() {
 		try {
@@ -44,7 +33,14 @@ public class WGStoredXSSDriver extends DriverGenerator{
 		}
 	}
 	
-	private void initConnection() {
+	private String extractScreen(WebResponse resp, String lesson) {
+		String content = resp.getContentAsString();
+		int pos = content.indexOf("LAB: Cross Site Scripting");
+		pos = content.indexOf("Screen=", pos);
+		return content.substring(pos+7, content.indexOf("&", pos));
+	}
+		
+	public void initConnection() {
 		LogManager.logInfo("Initializing connection to the system");		
 		try {
 			client.getPage("http://localhost:8080/WebGoat/attack");		
@@ -56,15 +52,4 @@ public class WGStoredXSSDriver extends DriverGenerator{
 		}	
 	}
 
-	@Override
-	protected String prettyprint(Input in) {
-		if (in != null){
-			if (in.getType() == Type.LINK){
-				return in.getAddress();
-			}else if (in.getType() == Type.FORM){
-				return in.getParams().get("action").get(0);
-			}
-		}
-		return null;
-	}
 }

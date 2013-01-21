@@ -27,7 +27,7 @@ public class WGStoredXSSDriver extends LowWebDriver {
 		initConnection();
 	}
 
-	private void initConnection() {
+	public void initConnection() {
 		LogManager.logInfo("Initializing connection to the system");
 		
 		HTTPRequest res = new HTTPRequest(Method.GET, "/WebGoat/attack", Version.v11);
