@@ -8,12 +8,14 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.text.html.HTML.Tag;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -85,7 +87,7 @@ public abstract class DriverGenerator {
 		}
 		client.setCredentialsProvider(creds);
 		formValues = config.getData();
-		if (config.getFirstURL()!=null) addUrl(config.getFirstURL());
+		addUrl(config.getFirstURL());
 		currentState = 0;
 	}
 
@@ -151,7 +153,13 @@ public abstract class DriverGenerator {
 							.getParams().size() < in.getParams().size())) {
 				return false;
 			}
+			if ((i.getAddress().equals(in.getAddress())) && (!i.getParams().isEmpty() && in.getParams().isEmpty())) return false;
 		}
+		
+		for (Input i : inputs) {
+			if (i.isAlmostEquals(in)) return false;
+		}
+		
 		for (String key : in.getParams().keySet()) {
 			List<String> values = in.getParams().get(key);
 			if (values.isEmpty()) {
@@ -170,12 +178,21 @@ public abstract class DriverGenerator {
 		if ((config.getActionByParameter() != null) && (in.getParams().get(config.getActionByParameter()) != null)) {
 			for (int i = 0; i < inputs.size()-1; i++) {
 				if ((inputs.get(i).getParams().get(config.getActionByParameter()) != null) && (inputs.get(i).getParams().get(config.getActionByParameter()).equals(in.getParams().get(config.getActionByParameter())))
-						&& (inputs.get(i).getParams().size() > in.getParams().size())
-						) {
+						&& ((inputs.get(i).getParams().size() > in.getParams().size())))
+				{
 					Input removed = inputs.remove(i);
 					for (int t =transitions.size()-1; t>=0; t--){
 						if (transitions.get(t).getBy()==removed) transitions.remove(t);
 					}
+				}
+			}
+		}
+		for (int i = 0; i < inputs.size()-1; i++) {
+			if ((inputs.get(i).getAddress().equals(in.getAddress())) && (inputs.get(i).getParams().isEmpty() && in.getParams().size()>0))
+			{
+				Input removed = inputs.remove(i);
+				for (int t =transitions.size()-1; t>=0; t--){
+					if (transitions.get(t).getBy()==removed) transitions.remove(t);
 				}
 			}
 		}
@@ -209,13 +226,16 @@ public abstract class DriverGenerator {
 		return data;
 	}
 	
+	public void log(String s){
+		System.out.println(s);	
+	}
+	
 	private String submit(Input in) throws MalformedURLException{
 		WebRequest request = null;
 		HTTPData values = getValuesForInput(in);
 		if (in.getType()==Type.FORM){
 			request = new WebRequest(new URL(in.getAddress()), in.getMethod());
 			request.setRequestParameters(values.getNameValueData());
-			
 			HtmlPage page;
 			try {
 				page = client.getPage(request);
@@ -223,7 +243,7 @@ public abstract class DriverGenerator {
 				return null;
 			}
 			return page.asXml();
-		}else if (in.getType()==Type.LINK){
+		}else if (in.getType()==Type.LINK){		
 			String link = in.getAddress() + "?";
 			if (!in.getParams().isEmpty()){
 				for(String name : in.getParams().keySet()){
@@ -263,7 +283,7 @@ public abstract class DriverGenerator {
 		System.out.println("[+] Crawling ...");
 		long duration = System.nanoTime();
 		for (String url : urlsToCrawl) {
-			Input in = new Input(url);
+			Input in = new Input("http://" + config.getHost() + ":" + config.getPort() + url);
 			if (addInput(in)) crawlInput(in);
 		}
 		errors.add("Duration : " + ((System.nanoTime()-duration)/1000000000.00) + " secs");
@@ -271,7 +291,7 @@ public abstract class DriverGenerator {
 		System.out.println();
 		System.out.println("[+] Inputs (" + inputs.size() + ")");
 		for (Input in : inputs) {
-			in.cleanRuntimeParameters(config.getRuntimeParameters()); 
+			if (!config.getRuntimeParameters().isEmpty()) in.cleanRuntimeParameters(config.getRuntimeParameters()); 
 			System.out.println("    " + in);
 		}
 
@@ -292,14 +312,17 @@ public abstract class DriverGenerator {
 			System.out.println("    " + iter.next());
 	}
 
-	private int crawl(Document d) {
+	private int crawl(Document d, Input from, String content) {
 		int state = updateOutput(d);
 		currentState = state;
-
-		Element lesson = d.select(config.getLimitSelector()).first();
+		from.setOutput(currentState);
+		Element lesson = null;
+		if (!config.getLimitSelector().isEmpty()) d.select(config.getLimitSelector()).first();  
+		else lesson = d.getAllElements().first();
 		if (lesson != null) {
 			Elements l = lesson.select("a[href]");
 			Elements forms = lesson.select("form");
+			forms.addAll(findFormsIn(content, d.baseUri())); // https://github.com/jhy/jsoup/issues/249
 			System.out.println("        "
 					+ l.size()
 					+ " links and "
@@ -333,6 +356,25 @@ public abstract class DriverGenerator {
 			}
 		}
 		return state;
+	}
+
+	private Collection<Element> findFormsIn(String content, String baseUri) {
+		List<Element> el = new ArrayList<Element>();
+		int nextForm = content.indexOf("<form ");
+		while (nextForm != -1){
+			Document d = Jsoup.parseBodyFragment(content.substring(nextForm, content.indexOf("</form", nextForm)));
+			d.setBaseUri(baseUri);
+			el.addAll(d.select("form"));
+			nextForm = content.indexOf("<form ", nextForm+1);
+		}
+		nextForm = content.indexOf("<FORM ");
+		while (nextForm != -1){
+			Document d = Jsoup.parseBodyFragment(content.substring(nextForm, content.indexOf("</FORM", nextForm)));
+			d.setBaseUri(baseUri);
+			el.addAll(d.select("FORM"));
+			nextForm = content.indexOf("<FORM ", nextForm+1);
+		}
+		return el;
 	}
 
 	public void exportToDot() {
@@ -462,8 +504,6 @@ public abstract class DriverGenerator {
 				findDifferences(firstE.get(i), secondE.get(i), diff, pos);
 				pos.remove(pos.size()-1);
 			}		
-		}else{
-			System.out.println("WTF !");
 		}
 		return diff;
 	}
@@ -493,7 +533,7 @@ public abstract class DriverGenerator {
 			if (content != null){
 				doc = Jsoup.parse(content);
 				doc.setBaseUri(in.getAddress());
-				transitions.add(new Transition(currentState, crawl(doc), in));
+				transitions.add(new Transition(currentState, crawl(doc, in, content), in));
 			}
 		} catch (FailingHttpStatusCodeException | IOException e) {
 			LogManager.logException("Unable to get page for " + in, e);

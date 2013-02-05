@@ -38,5 +38,9 @@ public class HTTPData {
 		}
 		return l;
 	}
+	
+	public String toString(){
+		return data.toString();
+	}
 
 }

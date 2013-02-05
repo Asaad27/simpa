@@ -1,5 +1,4 @@
 package drivergenerator;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,17 +23,17 @@ public class Output {
 	}
 
 	public Output(Document doc) {
-		this.source = doc.select(DriverGenerator.config.getLimitSelector());
-		this.filteredSource = filter(doc.select(DriverGenerator.config
-				.getLimitSelector()));
+		this.source = doc.getAllElements();
+		if (!DriverGenerator.config.getLimitSelector().isEmpty()) this.source = doc.select(DriverGenerator.config.getLimitSelector());		
+		this.filteredSource = filter(this.source);
 		this.params = new ArrayList<String>();
 	}
 	
 	public Output(String source) {
 		Document doc = Jsoup.parse(source);
-		this.source = doc.select(DriverGenerator.config.getLimitSelector());
-		this.filteredSource = filter(doc.select(DriverGenerator.config
-				.getLimitSelector()));
+		this.source = doc.getAllElements();
+		if (!DriverGenerator.config.getLimitSelector().isEmpty()) this.source = doc.select(DriverGenerator.config.getLimitSelector());
+		this.filteredSource = filter(this.source);
 		this.params = new ArrayList<String>();
 	}
 
@@ -82,7 +81,7 @@ public class Output {
 								distance[i - 1][j - 1]
 										+ ((str1.charAt(i - 1) == str2
 												.charAt(j - 1)) ? 0 : 1));
-
+		
 		return distance[str1.length()][str2.length()];
 	}
 
@@ -95,5 +94,12 @@ public class Output {
 		return c < 0.10;
 	}
 	
-
+	public boolean isEquivalentTo2(Output to) {
+		double l = (double) computeLevenshteinDistance(to.getFilteredSource(),
+				getFilteredSource());
+		double c = l
+				/ ((double) (to.getFilteredSource().length() + getFilteredSource()
+						.length()) / 2.0);
+		return c < 0.10;
+	}		
 }

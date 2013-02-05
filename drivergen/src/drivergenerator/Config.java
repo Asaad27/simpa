@@ -70,7 +70,8 @@ public class Config {
 	}
 	
 	public ArrayList<String> getRuntimeParameters() {
-		return runtimeParameters;
+		if (runtimeParameters != null) 	return runtimeParameters;
+		else return new ArrayList<String>();
 	}
 
 	public String getFirstURL() {

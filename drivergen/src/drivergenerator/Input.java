@@ -19,9 +19,18 @@ public class Input {
 	private HttpMethod method = null;
 	private String address = null;
 	private HashMap<String, List<String>> params = null;
+	private int output = 0;
 	
 	public Input(){
 		params = new HashMap<String, List<String>>();
+	}
+	
+	public int getOutput() {
+		return output;
+	}
+
+	public void setOutput(int output) {
+		this.output = output;
 	}
 
 	public void setType(Type type) {
@@ -42,13 +51,16 @@ public class Input {
 		this.params = new HashMap<String, List<String>>();
 		if (link.indexOf("?") != -1) {
 			this.address = link.split("\\?")[0];
-			String[] params = link.split("\\?")[1].split("&");
-			for (int i = 0; i < params.length; i++) {
-				String[] name_value = params[i].split("=");
-				if (this.params.get(name_value[0]) == null){
-					this.params.put(name_value[0], new ArrayList<String>());
+			if (link.split("\\?").length>1){
+				String[] params = link.split("\\?")[1].split("&");
+				for (int i = 0; i < params.length; i++) {
+					String[] name_value = params[i].split("=");
+					if (this.params.get(name_value[0]) == null){
+						this.params.put(name_value[0], new ArrayList<String>());
+					}
+					if (name_value.length == 2) this.params.get(name_value[0]).add(name_value[1]);
+					else this.params.get(name_value[0]).add("");
 				}
-				this.params.get(name_value[0]).add(name_value[1]);
 			}
 		}else{
 			this.address = link;
@@ -204,6 +216,26 @@ public class Input {
 					if (pos == -1) break;					
 				}
 			}
+		}
+	}
+
+	public boolean isAlmostEquals(Input to) {
+		if (!address.equals(to.address))
+			return false;
+		int NbEquals = 0; int Nb = 0;
+		for (String input : params.keySet()) {
+			if (to.params.get(input) == null)
+				return false;
+			if (to.params.get(input).size() == 1 && params.get(input).size() == 1){
+				Nb++;
+				if (to.params.get(input).equals(params.get(input))) NbEquals++;
+			}
+				
+		}
+		if (params.size() != to.params.size())
+			return false;
+		else{
+			return Nb-NbEquals <= 1;
 		}
 	}
 

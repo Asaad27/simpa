@@ -12,7 +12,7 @@ public class Main {
 	public static String NAME = "TIC - The Inference Crawler";
 	
 	public static void testCrawler(){
-		DriverGenerator g = DriverGenerator.getDriver("WGStoredXSS");
+		DriverGenerator g = DriverGenerator.getDriver("BookStore");
 		g.start();
 		g.exportToDot();
 		g.exportToXML();
@@ -26,7 +26,7 @@ public class Main {
 	}
 	
 	public static void main(String[] args) throws Exception{
-		//testCrawler();
-		testDriver();
+		testCrawler();
+		//testDriver();
 	}
 }

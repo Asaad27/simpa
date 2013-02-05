@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><driver date="1358790268445" generator="TIC - The Inference Crawler" version="1.0">
+<?xml version="1.0" encoding="UTF-8"?><driver date="1359020538850" generator="TIC - The Inference Crawler" version="1.0">
     <settings>
         <target>WebGoat_Stored_XSS</target>
         <host>localhost</host>
@@ -16,7 +16,7 @@
                 <parameter name="menu">900</parameter>
             </parameters>
         </input>
-        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%&amp;menu=900" method="POST" type="FORM">
+        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%enu=900" method="POST" type="FORM">
             <parameters>
                 <parameter name="action">Login</parameter>
                 <parameter name="password">john</parameter>
@@ -34,7 +34,7 @@
                 <parameter name="employee_id">112</parameter>
             </parameters>
         </input>
-        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%&amp;menu=900" method="POST" type="FORM">
+        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%enu=900" method="POST" type="FORM">
             <parameters>
                 <parameter name="action">SearchStaff</parameter>
                 <parameter name="employee_id">101</parameter>
@@ -50,13 +50,13 @@
                 <parameter name="employee_id">111</parameter>
             </parameters>
         </input>
-        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%&amp;menu=900" method="POST" type="FORM">
+        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%enu=900" method="POST" type="FORM">
             <parameters>
                 <parameter name="action">FindProfile</parameter>
-                <parameter name="search_name">random379</parameter>
+                <parameter name="search_name">random762</parameter>
             </parameters>
         </input>
-        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%&amp;menu=900" method="POST" type="FORM">
+        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%enu=900" method="POST" type="FORM">
             <parameters>
                 <parameter name="action">ViewProfile</parameter>
                 <parameter name="employee_id">101</parameter>
@@ -72,13 +72,13 @@
                 <parameter name="employee_id">111</parameter>
             </parameters>
         </input>
-        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%&amp;menu=900" method="POST" type="FORM">
+        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%enu=900" method="POST" type="FORM">
             <parameters>
                 <parameter name="action">ListStaff</parameter>
                 <parameter name="employee_id">111</parameter>
             </parameters>
         </input>
-        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%&amp;menu=900" method="POST" type="FORM">
+        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%enu=900" method="POST" type="FORM">
             <parameters>
                 <parameter name="action">CreateProfile</parameter>
                 <parameter name="employee_id">101</parameter>
@@ -94,7 +94,7 @@
                 <parameter name="employee_id">111</parameter>
             </parameters>
         </input>
-        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%&amp;menu=900" method="POST" type="FORM">
+        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%enu=900" method="POST" type="FORM">
             <parameters>
                 <parameter name="action">DeleteProfile</parameter>
                 <parameter name="employee_id">101</parameter>
@@ -110,13 +110,13 @@
                 <parameter name="employee_id">111</parameter>
             </parameters>
         </input>
-        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%&amp;menu=900" method="POST" type="FORM">
+        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%enu=900" method="POST" type="FORM">
             <parameters>
                 <parameter name="action">EditProfile</parameter>
                 <parameter name="employee_id">111</parameter>
             </parameters>
         </input>
-        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%&amp;menu=900" method="POST" type="FORM">
+        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%enu=900" method="POST" type="FORM">
             <parameters>
                 <parameter name="ccnLimit">300</parameter>
                 <parameter name="startDate">1012001</parameter>
@@ -138,7 +138,7 @@
                 <parameter name="title">CTO</parameter>
                 <parameter name="phoneNumber">610-213-1134</parameter>
                 <parameter name="disciplinaryDate">112005</parameter>
-                <parameter name="description">random48</parameter>
+                <parameter name="description">random565</parameter>
                 <parameter name="ccn">4437334565679921</parameter>
                 <parameter name="action">UpdateProfile</parameter>
                 <parameter name="salary">200000</parameter>
@@ -154,37 +154,23 @@
     </inputs>
     <outputs>
         <output>
-            <diff>divdivdivdivdivformattack?Screen=2300&amp;menu=900labelselectoptionoptionoptionoptionoptionoptionoptionoptionoptionoptionoptionoptionbrlabelinputpasswordbrinputaction</diff>
+            <diff>divdivdivdivdivformattack?Screen=20&amp;menu=900labelselectoptionoptionoptionoptionoptionoptionoptionoptionoptionoptionoptionoptionbrlabelinputpasswordbrinputaction</diff>
             <parameters/>
         </output>
         <output>
-            <diff>divdivdivdivstrongspanbrbrbrpformattack?Screen=2300&amp;menu=900tabletbodytrtdlabelselectoptionoptionoptionoptionoptionoptionoptionoptionoptionoptionoptiontdinputactionbrinputactionbrinputactionbrinputactionbrbrinputaction</diff>
+            <diff>divdivdivdivstrongspanbrbrbrpformattack?Screen=20&amp;menu=900tabletbodytrtdlabelselectoptionoptionoptionoptionoptionoptionoptionoptionoptionoptionoptiontdinputactionbrinputactionbrinputactionbrinputactionbrbrinputaction</diff>
             <parameters/>
         </output>
         <output>
-            <diff>divdivdivdivformattack?Screen=2300&amp;menu=900labelinputsearch_namebrinputaction</diff>
+            <diff>divdivdivdivformattack?Screen=20&amp;menu=900labelinputsearch_namebrinputaction</diff>
             <parameters/>
         </output>
         <output>
-            <diff>divdivdivdivstrongspandivtabletbodytrtdtdtdtdtrtdtdtdtdtrtdtdtdtdtrtdtdtdtdtrtdtdtdtdtrtdtdtdtdtrtdtdtdtddivtabletbodytrtdformattack?Screen=2300&amp;menu=900inputemployee_idinputactiontdformattack?Screen=2300&amp;menu=900inputemployee_idinputactiontdformattack?Screen=2300&amp;menu=900inputemployee_idinputactiontdtdforminputaction</diff>
-            <parameters>
-                <parameter>[0, div, 1, div, 1, div, 0, table, 0, tbody, 3, tr, 3, td]</parameter>
-                <parameter>[0, div, 1, div, 1, div, 0, table, 0, tbody, 5, tr, 3, td]</parameter>
-                <parameter>[0, div, 1, div, 1, div, 0, table, 0, tbody, 2, tr, 3, td]</parameter>
-                <parameter>[0, div, 1, div, 1, div, 0, table, 0, tbody, 6, tr, 1, td]</parameter>
-                <parameter>[0, div, 1, div, 1, div, 0, table, 0, tbody, 1, tr, 1, td]</parameter>
-                <parameter>[0, div, 1, div, 1, div, 0, table, 0, tbody, 3, tr, 1, td]</parameter>
-                <parameter>[0, div, 1, div, 1, div, 0, table, 0, tbody, 4, tr, 3, td]</parameter>
-                <parameter>[0, div, 1, div, 1, div, 0, table, 0, tbody, 2, tr, 1, td]</parameter>
-                <parameter>[0, div, 1, div, 1, div, 0, table, 0, tbody, 0, tr, 1, td]</parameter>
-                <parameter>[0, div, 1, div, 1, div, 0, table, 0, tbody, 4, tr, 1, td]</parameter>
-                <parameter>[0, div, 1, div, 1, div, 0, table, 0, tbody, 6, tr, 3, td]</parameter>
-                <parameter>[0, div, 1, div, 1, div, 0, table, 0, tbody, 0, tr, 3, td]</parameter>
-                <parameter>[0, div, 1, div, 1, div, 0, table, 0, tbody, 5, tr, 1, td]</parameter>
-            </parameters>
+            <diff>divdivdivdivstrongspandivtabletbodytrtdtdtdtdtrtdtdtdtdtrtdtdtdtdtrtdtdtdtdtrtdtdtdtdtrtdtdtdtdtrtdtdtdtddivtabletbodytrtdformattack?Screen=20&amp;menu=900inputemployee_idinputactiontdformattack?Screen=20&amp;menu=900inputemployee_idinputactiontdformattack?Screen=20&amp;menu=900inputemployee_idinputactiontdtdforminputaction</diff>
+            <parameters/>
         </output>
         <output>
-            <diff>divdivdivdivstrongspandivformattack?Screen=2300&amp;menu=900tabletbodytrtdtdinputfirstNametdtdinputlastNametrtdtdinputaddress1tdtdinputaddress2trtdtdinputphoneNumbertdtdinputstartDatetrtdtdinputssntdtdinputsalarytrtdtdinputccntdtdinputccnLimittrtdtdinputdescriptiontdtdselectoptionoptionoptionoptionoptionoptionoptionoptionoptionoptionoptiontrtdtdtextareatdtdinputdisciplinaryDatebrdivtabletbodytrtdinputactiontdinputemployee_idinputtitleinputactiontdtdinputaction</diff>
+            <diff>divdivdivdivstrongspandivformattack?Screen=20&amp;menu=900tabletbodytrtdtdinputfirstNametdtdinputlastNametrtdtdinputaddress1tdtdinputaddress2trtdtdinputphoneNumbertdtdinputstartDatetrtdtdinputssntdtdinputsalarytrtdtdinputccntdtdinputccnLimittrtdtdinputdescriptiontdtdselectoptionoptionoptionoptionoptionoptionoptionoptionoptionoptionoptiontrtdtdtextareatdtdinputdisciplinaryDatebrdivtabletbodytrtdinputactiontdinputemployee_idinputtitleinputactiontdtdinputaction</diff>
             <parameters/>
         </output>
     </outputs>
