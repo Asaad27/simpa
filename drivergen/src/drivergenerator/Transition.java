@@ -23,6 +23,10 @@ public class Transition {
 	public Input getBy() {
 		return by;
 	}
+	
+	public void setBy(Input i) {
+		this.by = i;
+	}
 
 	public String toString() {
 		return from + " to " + to + " by input_" + by;

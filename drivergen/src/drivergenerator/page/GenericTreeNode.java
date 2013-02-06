@@ -2,22 +2,26 @@ package drivergenerator.page;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class GenericTreeNode<T> {
 
     public T data;
     public List<GenericTreeNode<T>> children;
+    public GenericTreeNode<T> parent;
 
     public GenericTreeNode() {
         super();
         children = new ArrayList<GenericTreeNode<T>>();
+        parent = null;
     }
 
     public GenericTreeNode(T data) {
         this();
         setData(data);
+    }
+    
+    public GenericTreeNode<T> getParent(){
+    	return parent;
     }
 
     public List<GenericTreeNode<T>> getChildren() {
@@ -33,14 +37,17 @@ public class GenericTreeNode<T> {
     }
 
     public void setChildren(List<GenericTreeNode<T>> children) {
-        this.children = children;
+    	for (GenericTreeNode<T> n : children) n.parent = this;
+        this.children = children;        
     }
 
     public void addChild(GenericTreeNode<T> child) {
+    	child.parent = this;
         children.add(child);
     }
 
     public void addChildAt(int index, GenericTreeNode<T> child) throws IndexOutOfBoundsException {
+    	child.parent = this;
         children.add(index, child);
     }
 
@@ -76,19 +83,21 @@ public class GenericTreeNode<T> {
         return getData().hashCode();
     }
 
-    public String toStringVerbose() {
-        String stringRepresentation = getData().toString() + ":[";
-
-        for (GenericTreeNode<T> node : getChildren()) {
-            stringRepresentation += node.getData().toString() + ", ";
-        }
-
-        Pattern pattern = Pattern.compile(", $", Pattern.DOTALL);
-        Matcher matcher = pattern.matcher(stringRepresentation);
-
-        stringRepresentation = matcher.replaceFirst("");
-        stringRepresentation += "]";
-
-        return stringRepresentation;
+	private String space(int depth) {
+    	String s = "";
+		for (int i=0; i<depth*3; i++) s += " ";
+		return s;
+	}
+    
+    public String toStringFull() {
+    	return toString(0);
     }
+
+	private String toString(int i) {
+        String s = data.toString() + "\n";
+        for(GenericTreeNode<T> child : children){
+        	s += space(i+1) + child.toString(i+1);
+        }
+        return s;
+	}
 }

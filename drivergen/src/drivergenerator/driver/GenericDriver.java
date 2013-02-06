@@ -181,9 +181,7 @@ public class GenericDriver extends LowWebDriver {
 			NodeList outputs = root.getElementsByTagName("outputs").item(0).getChildNodes();
 			for (int i=0; i<outputs.getLength(); i++){
 				if (outputs.item(i).getNodeName().equals("output")){
-					Output out = new Output();
-					out.setFilteredSource(outputs.item(i).getChildNodes().item(1).getTextContent());	
-					
+					Output out = new Output(outputs.item(i).getChildNodes().item(1).getTextContent());					
 					for(int j=0; j<outputs.item(i).getChildNodes().item(3).getChildNodes().getLength(); j++){
 						if (outputs.item(i).getChildNodes().item(3).getChildNodes().item(j).getNodeName().equals("parameter")){
 							String value = outputs.item(i).getChildNodes().item(3).getChildNodes().item(j).getTextContent();

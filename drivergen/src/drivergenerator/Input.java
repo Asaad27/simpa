@@ -222,6 +222,7 @@ public class Input {
 	public boolean isAlmostEquals(Input to) {
 		if (!address.equals(to.address))
 			return false;
+		
 		int NbEquals = 0; int Nb = 0;
 		for (String input : params.keySet()) {
 			if (to.params.get(input) == null)

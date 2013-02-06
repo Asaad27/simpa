@@ -15,7 +15,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.text.html.HTML.Tag;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -76,7 +75,7 @@ public abstract class DriverGenerator {
 		outputs = new ArrayList<Output>();
 		client = new WebClient();
 		client.setThrowExceptionOnFailingStatusCode(false);
-		client.setTimeout(2000);
+		client.setTimeout(500);
 		BasicCredentialsProvider creds = new BasicCredentialsProvider();
 		if (config.getBasicAuthUser() != null
 				&& config.getBasicAuthPass() != null) {
@@ -157,7 +156,10 @@ public abstract class DriverGenerator {
 		}
 		
 		for (Input i : inputs) {
-			if (i.isAlmostEquals(in)) return false;
+			if ((config.getActionByParameter() != null) &&
+			    (in.getParams().get(config.getActionByParameter()) != null) &&
+			    (i.getParams().get(config.getActionByParameter()) != null)  &&
+			    (i.getParams().get(config.getActionByParameter()).equals(in.getParams().get(config.getActionByParameter()))) && i.isAlmostEquals(in)) return false;
 		}
 		
 		for (String key : in.getParams().keySet()) {
@@ -175,14 +177,19 @@ public abstract class DriverGenerator {
 			}
 		}
 		inputs.add(in);
-		if ((config.getActionByParameter() != null) && (in.getParams().get(config.getActionByParameter()) != null)) {
+		if (config.getActionByParameter() != null) {
 			for (int i = 0; i < inputs.size()-1; i++) {
-				if ((inputs.get(i).getParams().get(config.getActionByParameter()) != null) && (inputs.get(i).getParams().get(config.getActionByParameter()).equals(in.getParams().get(config.getActionByParameter())))
-						&& ((inputs.get(i).getParams().size() > in.getParams().size())))
+				if ((inputs.get(i).getAddress().equals(in.getAddress())) &&
+					(in.getParams().get(config.getActionByParameter()) != null) &&
+					(inputs.get(i).getParams().get(config.getActionByParameter()) != null) &&
+					(inputs.get(i).getParams().get(config.getActionByParameter()).equals(in.getParams().get(config.getActionByParameter()))) &&
+					((inputs.get(i).getParams().size() > in.getParams().size())))
 				{
 					Input removed = inputs.remove(i);
 					for (int t =transitions.size()-1; t>=0; t--){
-						if (transitions.get(t).getBy()==removed) transitions.remove(t);
+						if (transitions.get(t).getBy()==removed){
+							transitions.get(t).setBy(in);
+						}
 					}
 				}
 			}
@@ -192,7 +199,9 @@ public abstract class DriverGenerator {
 			{
 				Input removed = inputs.remove(i);
 				for (int t =transitions.size()-1; t>=0; t--){
-					if (transitions.get(t).getBy()==removed) transitions.remove(t);
+					if (transitions.get(t).getBy()==removed){
+						transitions.get(t).setBy(in);
+					}
 				}
 			}
 		}
@@ -236,6 +245,7 @@ public abstract class DriverGenerator {
 		if (in.getType()==Type.FORM){
 			request = new WebRequest(new URL(in.getAddress()), in.getMethod());
 			request.setRequestParameters(values.getNameValueData());
+			request.setAdditionalHeader("Connection", "Close");
 			HtmlPage page;
 			try {
 				page = client.getPage(request);
@@ -317,11 +327,11 @@ public abstract class DriverGenerator {
 		currentState = state;
 		from.setOutput(currentState);
 		Element lesson = null;
-		if (!config.getLimitSelector().isEmpty()) d.select(config.getLimitSelector()).first();  
+		if (!config.getLimitSelector().isEmpty()) lesson = d.select(config.getLimitSelector()).first();  
 		else lesson = d.getAllElements().first();
 		if (lesson != null) {
 			Elements l = lesson.select("a[href]");
-			Elements forms = lesson.select("form");
+			Elements forms = new Elements();
 			forms.addAll(findFormsIn(content, d.baseUri())); // https://github.com/jhy/jsoup/issues/249
 			System.out.println("        "
 					+ l.size()
@@ -405,18 +415,15 @@ public abstract class DriverGenerator {
 
 	private int updateOutput(Document d) {
 		Output o = new Output(d);
-		if (o.getFilteredSource().length() > 0) {
-			for (int i = 0; i < outputs.size(); i++) {
-				if (o.isEquivalentTo(outputs.get(i))) {
-					return i;
-				}
+		for (int i = 0; i < outputs.size(); i++) {
+			if (o.isEquivalentTo(outputs.get(i))) {
+				return i;
 			}
-			outputs.add(o);
-			System.out.println("        New page !");
-			findParameters(sequence, o);
-			return outputs.size() - 1;
 		}
-		return 0;
+		outputs.add(o);
+		System.out.println("        New page !");
+		findParameters(sequence, o);
+		return outputs.size() - 1;
 	}
 	
 	private HTTPData getRandomValuesForInput(Input in) {
@@ -598,8 +605,8 @@ public abstract class DriverGenerator {
             org.w3c.dom.Element eoutputs = doc.createElement("outputs");
             for (Output o : outputs){
             	org.w3c.dom.Element eoutput = doc.createElement("output");
-            	org.w3c.dom.Element ediff = doc.createElement("diff");
-            	ediff.setTextContent(o.getFilteredSource());
+            	org.w3c.dom.Element ediff = doc.createElement("source");
+            	ediff.setTextContent(o.getDoc().toString());
             	eoutput.appendChild(ediff);
             	org.w3c.dom.Element eparams = doc.createElement("parameters");
             	for (String value : o.getParams()){

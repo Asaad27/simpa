@@ -25,7 +25,7 @@ public class WGStoredXSS extends DriverGenerator{
 	public WGStoredXSS() throws JsonParseException, JsonMappingException, IOException{
 		super("webgoat_stored_xss.json");
 		initConnection();
-		addUrl("http://localhost:8080/WebGoat/attack?Screen="+screen+"&menu=900");
+		addUrl("/WebGoat/attack?Screen="+screen+"&menu=900");
 	}
 	
 	private String extractScreen(WebResponse resp, String lesson) {
