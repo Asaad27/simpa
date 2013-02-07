@@ -20,12 +20,13 @@ public class WackoPicko extends DriverGenerator{
 	public void reset() {
 	}
 	
-	private void initConnection() {
+	@Override
+	public void initConnection() {
 		LogManager.logInfo("Initializing connection to the system");		
 	}
 
 	@Override
-	protected String prettyprint(Input in) {
+	public String prettyprint(Input in) {
 		return in.toString();
 	}
 }

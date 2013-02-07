@@ -6,14 +6,42 @@ import java.util.HashMap;
 public class Config {
 	private String host = "localhost";
 	private int port = 80;
+	private int timeout = 1000;
 	private String basicAuthUser = null;
 	private String basicAuthPass = null;
 	private String name = null;
 	private String limitSelector = "html";
 	private HashMap<String, String> paramValues = null;
 	private ArrayList<String> noFollow = null;
-	private ArrayList<String> runtimeParameters = null;
+	private ArrayList<String> runtimeParameters;
 	private String firstURL = null;
+	private boolean enableCSS = false;
+	private boolean enableJS = false;
+	
+	public int getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(int timeout) {
+		this.timeout = timeout;
+	}
+	
+	public boolean isEnableCSS() {
+		return enableCSS;
+	}
+
+	public void setEnableCSS(boolean enableCSS) {
+		this.enableCSS = enableCSS;
+	}
+
+	public boolean isEnableJS() {
+		return enableJS;
+	}
+
+	public void setEnableJS(boolean enableJS) {
+		this.enableJS = enableJS;
+	}
+
 	private String actionByParameter = null;
 
 	public Config() {
@@ -66,12 +94,13 @@ public class Config {
 	}
 
 	public ArrayList<String> getNoFollow() {
+		if (noFollow == null) noFollow = new ArrayList<String>();
 		return noFollow;
 	}
 	
 	public ArrayList<String> getRuntimeParameters() {
-		if (runtimeParameters != null) 	return runtimeParameters;
-		else return new ArrayList<String>();
+		if (runtimeParameters == null) runtimeParameters = new ArrayList<String>();
+		return runtimeParameters;
 	}
 
 	public String getFirstURL() {
@@ -103,6 +132,7 @@ public class Config {
 	}
 
 	public HashMap<String, String> getData() {
+		if (paramValues == null) paramValues = new HashMap<String, String>();
 		return paramValues;
 	}
 }

@@ -65,7 +65,7 @@ public abstract class DriverGenerator {
 	public DriverGenerator(String configFileName) throws JsonParseException,
 			JsonMappingException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
-		config = mapper.readValue(new File("conf//" + configFileName),
+		config = mapper.readValue(new File("conf" + File.separator + configFileName),
 				Config.class);
 		urlsToCrawl = new ArrayList<>();
 		inputs = new ArrayList<Input>();
@@ -75,7 +75,9 @@ public abstract class DriverGenerator {
 		outputs = new ArrayList<Output>();
 		client = new WebClient();
 		client.setThrowExceptionOnFailingStatusCode(false);
-		client.setTimeout(500);
+		client.setTimeout(config.getTimeout());
+		client.setCssEnabled(config.isEnableCSS());
+		client.setJavaScriptEnabled(config.isEnableJS());
 		BasicCredentialsProvider creds = new BasicCredentialsProvider();
 		if (config.getBasicAuthUser() != null
 				&& config.getBasicAuthPass() != null) {
@@ -112,6 +114,10 @@ public abstract class DriverGenerator {
 	}
 
 	protected abstract void reset();
+	
+	protected abstract void initConnection();
+	
+	protected abstract String prettyprint(Input in);
 
 	private void sendSequences() {
 		reset();
@@ -124,7 +130,7 @@ public abstract class DriverGenerator {
 		}
 	}
 
-	public List<String> filterUrl(Elements links) {
+	private List<String> filterUrl(Elements links) {
 		List<String> urls = new ArrayList<String>();
 		for (Element e : links) {
 			String to = e.attr("href");
@@ -233,10 +239,6 @@ public abstract class DriverGenerator {
 			}
 		}
 		return data;
-	}
-	
-	public void log(String s){
-		System.out.println(s);	
 	}
 	
 	private String submit(Input in) throws MalformedURLException{
@@ -480,7 +482,7 @@ public abstract class DriverGenerator {
 		return null;
 	}
 	
-	public void findParameters(List<Input> sequence, Output out) {
+	private void findParameters(List<Input> sequence, Output out) {
 		HashSet<String> diff = new HashSet<String>();
 		Input inputToFuzz = sequence.remove(sequence.size()-1);
 		for (int i=0; i<5; i++){
@@ -517,12 +519,14 @@ public abstract class DriverGenerator {
 	
 	private void findDifferences(Element first, Element second, List<String> diff, List<String> pos) {
 		if (first.nodeName().equals(second.nodeName())){
-			pos.add(first.nodeName());
+			pos.add("/" + first.nodeName());
 			if (!first.ownText().equals(second.ownText())){
-				diff.add(pos.toString());
+				String xpath = "";
+				for(String tag : pos) xpath += tag;
+				diff.add(xpath);
 			}
 			for(int i=0; i<first.children().size(); i++){
-				pos.add(String.valueOf(i));
+				pos.add("[" + String.valueOf(i) + "]");
 				findDifferences(first.child(i), second.child(i), diff, pos);
 				pos.remove(pos.size()-1);
 			}
@@ -541,13 +545,14 @@ public abstract class DriverGenerator {
 				doc = Jsoup.parse(content);
 				doc.setBaseUri(in.getAddress());
 				transitions.add(new Transition(currentState, crawl(doc, in, content), in));
+			}else{
+				transitions.add(new Transition(currentState, 0, in));
+				currentState = 0;
 			}
 		} catch (FailingHttpStatusCodeException | IOException e) {
 			LogManager.logException("Unable to get page for " + in, e);
 		}
 	}
-
-	protected abstract String prettyprint(Input in);
 
 	public void exportToXML() {
         DocumentBuilderFactory icFactory = DocumentBuilderFactory.newInstance();

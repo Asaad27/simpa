@@ -4,7 +4,10 @@
   "basicAuthUser" : null,
   "basicAuthPass" : null,
   "name" : "GotoCode",
-  "limitSelector" : "",
+  "limitSelector" : null,
+  "enableCSS" : false,
+  "enableJS" : false,
+  "timeout" : 2000,  
   "firstURL" : "/bookstore/Default.jsp",
   "noFollow" : [ "^javascript:.*", "^mailto:.*", ".*codecharge.com.*", ".*amazon.com.*" ],
   "data" : {

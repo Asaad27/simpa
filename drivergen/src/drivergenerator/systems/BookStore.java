@@ -19,6 +19,7 @@ public class BookStore extends DriverGenerator{
 	public void reset() {
 	}
 	
+	@Override
 	protected void initConnection() {
 	}
 
