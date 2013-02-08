@@ -33,7 +33,7 @@ public class Options {
 	public static boolean TREEINFERENCE = false;
 	public static String INITIAL_INPUT_SYMBOLS = "";
 	public static String INITIAL_INPUT_SEQUENCES = "";
-	public static boolean INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = false;
+	public static boolean INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = true;
 	public static int SUPPORT_MIN = 20;
 	public static boolean REUSE_OP_IFNEEDED = false;
 	public static boolean FORCE_J48 = false;
@@ -52,9 +52,9 @@ public class Options {
 	public static int RETEST = -1;
 	
 	public static int NBTEST = 1;
-	public static int MINSTATES = 100;
-	public static int MAXSTATES = 100;
-	public static int TRANSITIONPERCENT = 20;
+	public static int MINSTATES = 20;
+	public static int MAXSTATES = 20;
+	public static int TRANSITIONPERCENT = 2;
 	public static int MININPUTSYM = 10;
 	public static int MAXINPUTSYM = 10;
 	public static int MINOUTPUTSYM = 10;

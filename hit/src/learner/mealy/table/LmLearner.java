@@ -93,7 +93,7 @@ public class LmLearner extends Learner{
 		LogManager.logLine();
 		
 		if (addtolog) LogManager.logConsole("Exporting conjecture");
-		c.exportToDot();
+		//c.exportToDot();
 		
 		return c;
 	}

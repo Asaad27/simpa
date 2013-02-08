@@ -142,7 +142,7 @@ public class ZLearner extends Learner{
 				//5. U = U U CE
 				askInputSequenceToNode(u, ce);
 								
-				LogManager.logObservationTree(u);
+				//LogManager.logObservationTree(u);
 				
 				// 6. Fix_Point_Consistency(A, I, Z, U, K)
 				Z_Q = fixPointConsistency(Z_Q);
@@ -234,7 +234,7 @@ public class ZLearner extends Learner{
 	private void labelNodes(LmConjecture q) {
 		LogManager.logInfo("Labeling nodes");
 		labelNodesRec(q, u, q.getInitialState(), false);
-		LogManager.logObservationTree(u);
+		//LogManager.logObservationTree(u);
 	}
 	
 	private void labelNodesRec(LmConjecture q, ObservationNode node, State s, boolean label) {
@@ -318,7 +318,7 @@ public class ZLearner extends Learner{
 	
 	public LmConjecture createConjecture() {
 		LogManager.logInfo("Building conjecture");
-		LogManager.logObservationTree(u);
+		//LogManager.logObservationTree(u);
 		
 		LmConjecture c = new LmConjecture(driver);
 
@@ -341,7 +341,7 @@ public class ZLearner extends Learner{
 		for (MealyTransition t : c.getTransitions()) LogManager.logTransition(t.toString());
 		LogManager.logLine();
 
-		c.exportToDot();
+		//c.exportToDot();
 
 		return c;
 	}

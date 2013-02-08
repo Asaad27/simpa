@@ -24,11 +24,13 @@ public class SIMPAStats {
 		
 
 	try{
-			Stats stat = new Stats("global.csv");
-			stat.setHeaders(Utils.createArrayList("State", "Requests", "Duration"));
-			for (int i=18; i<=18; i++){
+			Stats stat = new Stats("global2empty.csv");
+			stat.setHeaders(Utils.createArrayList("State", "Requests", "Duration", "Transitions"));
+			int[] states = {300, 750, 1000};
+			for (int i : states){
 				Options.MINSTATES = i;
 				Options.MAXSTATES = i;
+				Options.INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = false;
 				
 				System.out.println("State = " + i);
 				
@@ -36,7 +38,8 @@ public class SIMPAStats {
 
 				stat.addRecord(Utils.createArrayList(String.valueOf(i),
 						String.valueOf(Utils.meanOfCSVField(Options.DIRTEST + File.separator + "stats.csv", 5)),
-						String.valueOf(Utils.meanOfCSVField(Options.DIRTEST + File.separator + "stats.csv", 6))));
+						String.valueOf(Utils.meanOfCSVField(Options.DIRTEST + File.separator + "stats.csv", 6)),
+						String.valueOf(Utils.meanOfCSVField(Options.DIRTEST + File.separator + "stats.csv", 7))));
 							
 				Options.OUTDIR = dir;
 			}

@@ -103,7 +103,7 @@ public class Mealy extends Automata implements Serializable{
 		try {			
 			if (!dir.isDirectory() && !dir.mkdirs()) throw new IOException("unable to create "+ dir.getName() +" directory");
 
-			file = new File(dir.getPath() + File.separatorChar + name + ".dot");
+			file = new File(dir.getPath() + File.separatorChar + name + "_inf.dot");
 			writer = new BufferedWriter(new FileWriter(file));
             writer.write("digraph G {\n");
             for (MealyTransition t : getTransitions()){

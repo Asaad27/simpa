@@ -58,7 +58,7 @@ public abstract class DriverGenerator {
 	protected HashSet<String> errors = null;
 	protected ArrayList<Output> outputs;
 	protected ArrayList<Transition> transitions;
-	protected int currentState;
+	protected List<Integer> currentState;
 
 	protected static Config config = null;
 
@@ -89,7 +89,8 @@ public abstract class DriverGenerator {
 		client.setCredentialsProvider(creds);
 		formValues = config.getData();
 		addUrl(config.getFirstURL());
-		currentState = 0;
+		currentState = new ArrayList<Integer>();
+		currentState.add(0);
 	}
 
 	public static DriverGenerator getDriver(String system) {
@@ -251,6 +252,7 @@ public abstract class DriverGenerator {
 			HtmlPage page;
 			try {
 				page = client.getPage(request);
+				if (page.getWebResponse().getStatusCode() != 200) return null;
 			} catch (Exception e) {
 				return null;
 			}
@@ -267,6 +269,7 @@ public abstract class DriverGenerator {
 			HtmlPage page;
 			try {
 				page = client.getPage(link.substring(0, link.length()-1));
+				if (page.getWebResponse().getStatusCode() != 200) return null;
 			} catch (Exception e) {
 				return null;
 			}
@@ -326,8 +329,8 @@ public abstract class DriverGenerator {
 
 	private int crawl(Document d, Input from, String content) {
 		int state = updateOutput(d);
-		currentState = state;
-		from.setOutput(currentState);
+		currentState.add(state);
+		from.setOutput(state);
 		Element lesson = null;
 		if (!config.getLimitSelector().isEmpty()) lesson = d.select(config.getLimitSelector()).first();  
 		else lesson = d.getAllElements().first();
@@ -367,6 +370,7 @@ public abstract class DriverGenerator {
 				}
 			}
 		}
+		currentState.remove(currentState.size()-1);
 		return state;
 	}
 
@@ -417,9 +421,12 @@ public abstract class DriverGenerator {
 
 	private int updateOutput(Document d) {
 		Output o = new Output(d);
-		for (int i = 0; i < outputs.size(); i++) {
-			if (o.isEquivalentTo(outputs.get(i))) {
-				return i;
+		if (d.toString().isEmpty()) return 0;
+		else{
+			for (int i = 0; i < outputs.size(); i++) {
+				if (o.isEquivalentTo(outputs.get(i))) {
+					return i;
+				}
 			}
 		}
 		outputs.add(o);
@@ -544,10 +551,7 @@ public abstract class DriverGenerator {
 			if (content != null){
 				doc = Jsoup.parse(content);
 				doc.setBaseUri(in.getAddress());
-				transitions.add(new Transition(currentState, crawl(doc, in, content), in));
-			}else{
-				transitions.add(new Transition(currentState, 0, in));
-				currentState = 0;
+				transitions.add(new Transition(currentState.get(currentState.size()-1), crawl(doc, in, content), in));
 			}
 		} catch (FailingHttpStatusCodeException | IOException e) {
 			LogManager.logException("Unable to get page for " + in, e);

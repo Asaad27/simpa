@@ -44,7 +44,8 @@ public class MealyDriver extends Driver{
 				String.valueOf(getOutputSymbols().size()),
 				String.valueOf(((float)numberOfAtomicRequest/numberOfRequest)),
 				String.valueOf(numberOfRequest),
-				String.valueOf(((float)duration/1000000000)));
+				String.valueOf(((float)duration/1000000000)),
+				String.valueOf(automata.getTransitionCount()));
 	}
 	
 	protected List<InputSequence> getForcedCE() {
@@ -126,7 +127,7 @@ public class MealyDriver extends Driver{
 							osSystem.addOutput(_sys);
 							osConj.addOutput(_conj);
 						}
-						if (!_sys.equals(_conj) && !osSystem.getLastSymbol().isEmpty()){
+						if (!_sys.equals(_conj) && (osSystem.getLength()>0 && !osSystem.getLastSymbol().isEmpty())){
 							found = true;
 							ce = ce.getIthPreffix(osSystem.getLength());
 							LogManager.logInfo("Counter example found : " + ce);

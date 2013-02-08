@@ -17,7 +17,7 @@ public class RandomMealyDriver extends MealyDriver {
 	}
 	
 	public static List<String> getStatHeaders() {
-		return Utils.createArrayList("States", "Inputs", "Outputs", "ARL", "Requests", "Duration");
+		return Utils.createArrayList("States", "Inputs", "Outputs", "ARL", "Requests", "Duration", "Transitions");
 	}
 		
 }

@@ -51,8 +51,8 @@ public class RandomMealy extends Mealy implements Serializable {
 		generateSymbols();
 		createStates();
 		createTransitions();
-		exportToDot();
-		RandomMealy.serialize(this);
+		//exportToDot();
+		//RandomMealy.serialize(this);
 	}
 
 	public static void serialize(RandomMealy o) {
@@ -89,7 +89,7 @@ public class RandomMealy extends Mealy implements Serializable {
 	private void createTransitions() {
 		for(State s1 : states){
 			for (String is : inputSymbols){
-				if (Utils.randBoolWithPercent(75)){
+				if (Utils.randBoolWithPercent(50)){
 					addTransition(new MealyTransition(this, s1, Utils.randIn(states), is, Utils.randIn(outputSymbols)));
 				}else{
 					addTransition(new MealyTransition(this, s1, s1, is, Utils.randIn(outputSymbols)));
