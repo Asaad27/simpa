@@ -1,4 +1,4 @@
-package drivergenerator.configuration;
+package crawler.configuration;
 
 import java.util.ArrayList;
 import java.util.HashMap;

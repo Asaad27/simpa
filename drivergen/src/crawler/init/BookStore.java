@@ -1,12 +1,13 @@
-package drivergenerator.systems;
+package crawler.init;
 
 import java.io.IOException;
 
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
-import drivergenerator.DriverGenerator;
-import drivergenerator.Input;
+import crawler.DriverGenerator;
+import crawler.Input;
+
 
 public class BookStore extends DriverGenerator{
 	

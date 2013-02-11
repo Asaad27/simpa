@@ -7,10 +7,11 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import drivergenerator.DriverGenerator;
-import drivergenerator.configuration.Configuration;
-import drivergenerator.driver.GenericDriver;
-import drivergenerator.driver.WGStoredXSSDriver;
+import crawler.DriverGenerator;
+import crawler.configuration.Configuration;
+import crawler.driver.GenericDriver;
+import crawler.driver.WGStoredXSSDriver;
+
 
 public class Main {
 	

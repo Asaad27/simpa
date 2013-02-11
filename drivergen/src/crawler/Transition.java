@@ -1,4 +1,4 @@
-package drivergenerator;
+package crawler;
 
 public class Transition {
 	private int from;

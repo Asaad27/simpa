@@ -1,4 +1,4 @@
-package drivergenerator.systems;
+package crawler.init;
 
 import java.io.IOException;
 import java.net.URL;
@@ -14,9 +14,10 @@ import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 
-import drivergenerator.DriverGenerator;
-import drivergenerator.Input;
-import drivergenerator.Input.Type;
+import crawler.DriverGenerator;
+import crawler.Input;
+import crawler.Input.Type;
+
 
 public class WGStoredXSS extends DriverGenerator{
 	

@@ -1,4 +1,4 @@
-package drivergenerator.configuration;
+package crawler.configuration;
 
 public class ParserConfiguration {
 	public int timeout = 1000;

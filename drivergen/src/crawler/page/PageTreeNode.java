@@ -1,4 +1,4 @@
-package drivergenerator.page;
+package crawler.page;
 
 import java.util.Arrays;
 import java.util.HashSet;

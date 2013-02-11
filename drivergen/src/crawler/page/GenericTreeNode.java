@@ -1,4 +1,4 @@
-package drivergenerator.page;
+package crawler.page;
 
 import java.util.ArrayList;
 import java.util.List;

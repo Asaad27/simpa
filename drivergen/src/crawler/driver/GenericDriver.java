@@ -1,4 +1,4 @@
-package drivergenerator.driver;
+package crawler.driver;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -33,10 +33,11 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
-import drivergenerator.Input;
-import drivergenerator.Input.Type;
-import drivergenerator.configuration.Configuration;
-import drivergenerator.Output;
+import crawler.Input;
+import crawler.Output;
+import crawler.Input.Type;
+import crawler.configuration.Configuration;
+
 import drivers.efsm.real.LowWebDriver;
 
 public class GenericDriver extends LowWebDriver {

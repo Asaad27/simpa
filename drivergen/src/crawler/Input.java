@@ -1,4 +1,4 @@
-package drivergenerator;
+package crawler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,7 +19,6 @@ public class Input {
 	private HttpMethod method = null;
 	private String address = null;
 	private HashMap<String, List<String>> params = null;
-	private int output = 0;
 	
 	public Input(){
 		params = new HashMap<String, List<String>>();

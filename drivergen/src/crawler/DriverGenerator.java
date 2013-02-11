@@ -1,4 +1,4 @@
-package drivergenerator;
+package crawler;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -47,8 +47,9 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
-import drivergenerator.Input.Type;
-import drivergenerator.configuration.Configuration;
+import crawler.Input.Type;
+import crawler.configuration.Configuration;
+
 
 public abstract class DriverGenerator {
 	protected List<String> urlsToCrawl = null;
@@ -99,7 +100,7 @@ public abstract class DriverGenerator {
 	public static DriverGenerator getDriver(String system) {
 		try {
 			return (DriverGenerator) Class.forName(
-					"drivergenerator.systems." + system)
+					"crawler.init." + system)
 					.newInstance();
 		} catch (InstantiationException e) {
 			LogManager.logException("Unable to instantiate " + system

@@ -1,4 +1,4 @@
-package drivergenerator;
+package crawler;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -6,7 +6,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
-import drivergenerator.page.PageTreeNode;
+import crawler.page.PageTreeNode;
+
 
 public class Output {
 	private int state = 0;
