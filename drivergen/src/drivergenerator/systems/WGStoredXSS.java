@@ -25,6 +25,7 @@ public class WGStoredXSS extends DriverGenerator{
 	public WGStoredXSS() throws JsonParseException, JsonMappingException, IOException{
 		super("webgoat_stored_xss.json");
 		initConnection();
+		reset();
 		addUrl("/WebGoat/attack?Screen="+screen+"&menu=900");
 	}
 	
@@ -46,13 +47,14 @@ public class WGStoredXSS extends DriverGenerator{
 	
 	protected void initConnection() {
 		LogManager.logInfo("Initializing connection to the system");		
-		try {
+		try {			
 			client.getPage("http://localhost:8080/WebGoat/attack");		
 			WebRequest request = new WebRequest(new URL("http://localhost:8080/WebGoat/attack"), HttpMethod.POST);
 			request.setRequestParameters(new HTTPData("start", "Start WebGoat").getNameValueData());	
 			screen = extractScreen(client.getPage(request).getWebResponse(), "Stage 1: Stored XSS");
+			client.getPage("http://localhost:8080/WebGoat/attack?Screen="+screen+"&menu=900&Stage=1");
 		} catch (FailingHttpStatusCodeException | IOException e) {
-			LogManager.logException("Error initializing connectin to the system", e);
+			LogManager.logException("Error initializing connection to the system", e);
 		}	
 	}
 

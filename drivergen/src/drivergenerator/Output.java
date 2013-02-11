@@ -9,12 +9,21 @@ import org.jsoup.select.Elements;
 import drivergenerator.page.PageTreeNode;
 
 public class Output {
+	private int state = 0;
 	private Elements source = null;
 	private List<String> params = null;
 	private PageTreeNode pt = null;
 	
 	public Output(){
 		params = new ArrayList<String>();
+	}
+
+	public int getState() {
+		return state;
+	}
+
+	public void setState(int state) {
+		this.state = state;
 	}
 
 	public Output(Document doc) {

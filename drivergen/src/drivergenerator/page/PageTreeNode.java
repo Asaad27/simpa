@@ -12,7 +12,7 @@ public class PageTreeNode extends GenericTreeNode<String> {
 	
 	public Set<String> excludedNode = new HashSet<String>(Arrays.asList(new String[] {
 			"#document", "#text", "span", "font", "a", "center", "bold", "italic", "style", "base", "param", "script", "noscript",
-			"b", "i", "tt", "sub", "sup", "big", "small", "img", "br", "tr", "td", "option"
+			"b", "i", "tt", "sub", "sup", "big", "small", "img", "br", "tr", "td", "option", "#comment", "#data", "strong"
 			}));
 
 	public PageTreeNode(String nodeName){
@@ -48,5 +48,9 @@ public class PageTreeNode extends GenericTreeNode<String> {
 			}
 		}
 		return true;
+	}
+	
+	public String toString(){
+		return toString(0);
 	}
 }

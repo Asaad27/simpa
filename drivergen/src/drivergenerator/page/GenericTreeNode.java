@@ -93,7 +93,7 @@ public class GenericTreeNode<T> {
     	return toString(0);
     }
 
-	private String toString(int i) {
+	public String toString(int i) {
         String s = data.toString() + "\n";
         for(GenericTreeNode<T> child : children){
         	s += space(i+1) + child.toString(i+1);

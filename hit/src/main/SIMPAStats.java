@@ -10,7 +10,7 @@ import tools.Utils;
 import tools.loggers.LogManager;
 
 public class SIMPAStats {
-	public final static String name = "KIStat";
+	public final static String name = "SIMPAStats";
 	
 	private static void welcome() {
 		System.out.println(name + " - " + new SimpleDateFormat("MM/dd/yyyy").format(new Date()));
@@ -24,13 +24,12 @@ public class SIMPAStats {
 		
 
 	try{
-			Stats stat = new Stats("global2empty.csv");
+			Stats stat = new Stats("global.csv");
 			stat.setHeaders(Utils.createArrayList("State", "Requests", "Duration", "Transitions"));
-			int[] states = {300, 750, 1000};
+			int[] states = {50, 100, 200, 300, 500, 750, 1000, 2000};
 			for (int i : states){
 				Options.MINSTATES = i;
 				Options.MAXSTATES = i;
-				Options.INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = false;
 				
 				System.out.println("State = " + i);
 				

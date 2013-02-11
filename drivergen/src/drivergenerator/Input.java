@@ -24,14 +24,6 @@ public class Input {
 	public Input(){
 		params = new HashMap<String, List<String>>();
 	}
-	
-	public int getOutput() {
-		return output;
-	}
-
-	public void setOutput(int output) {
-		this.output = output;
-	}
 
 	public void setType(Type type) {
 		this.type = type;

@@ -1,8 +1,14 @@
 package main;
 
+import java.io.File;
 import java.io.IOException;
 
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+
 import drivergenerator.DriverGenerator;
+import drivergenerator.configuration.Configuration;
 import drivergenerator.driver.GenericDriver;
 import drivergenerator.driver.WGStoredXSSDriver;
 
@@ -26,7 +32,13 @@ public class Main {
 	}
 	
 	public static void main(String[] args) throws Exception{
+		//testJSON();
 		testCrawler();
 		//testDriver();
+	}
+
+	public static void testJSON() throws JsonGenerationException, JsonMappingException, IOException {
+		ObjectMapper m = new ObjectMapper();
+		m.writeValue(new File("test.json"), new Configuration());
 	}
 }

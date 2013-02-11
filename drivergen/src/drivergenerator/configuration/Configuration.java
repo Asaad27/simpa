@@ -1,12 +1,11 @@
-package drivergenerator;
+package drivergenerator.configuration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Config {
+public class Configuration {
 	private String host = "localhost";
 	private int port = 80;
-	private int timeout = 1000;
 	private String basicAuthUser = null;
 	private String basicAuthPass = null;
 	private String name = null;
@@ -15,38 +14,37 @@ public class Config {
 	private ArrayList<String> noFollow = null;
 	private ArrayList<String> runtimeParameters;
 	private String firstURL = null;
-	private boolean enableCSS = false;
-	private boolean enableJS = false;
+	private ParserConfiguration parser = null;
+	private String actionByParameter = null;	
 	
 	public int getTimeout() {
-		return timeout;
+		return parser.timeout;
 	}
 
 	public void setTimeout(int timeout) {
-		this.timeout = timeout;
+		this.parser.timeout = timeout;
 	}
 	
 	public boolean isEnableCSS() {
-		return enableCSS;
+		return parser.enableCSS;
 	}
 
 	public void setEnableCSS(boolean enableCSS) {
-		this.enableCSS = enableCSS;
+		this.parser.enableCSS = enableCSS;
 	}
 
 	public boolean isEnableJS() {
-		return enableJS;
+		return parser.enableJS;
 	}
 
 	public void setEnableJS(boolean enableJS) {
-		this.enableJS = enableJS;
+		this.parser.enableJS = enableJS;
 	}
 
-	private String actionByParameter = null;
-
-	public Config() {
+	public Configuration() {
 		paramValues = new HashMap<String, String>();
 		noFollow = new ArrayList<String>();
+		parser = new ParserConfiguration();
 	}
 
 	public void setHost(String host) {

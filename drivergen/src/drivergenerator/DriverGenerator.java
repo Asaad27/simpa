@@ -48,6 +48,7 @@ import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 import drivergenerator.Input.Type;
+import drivergenerator.configuration.Configuration;
 
 public abstract class DriverGenerator {
 	protected List<String> urlsToCrawl = null;
@@ -55,22 +56,24 @@ public abstract class DriverGenerator {
 	protected HashMap<String, String> formValues = null;
 	protected List<Input> sequence = null;
 	protected WebClient client = null;
-	protected HashSet<String> errors = null;
-	protected ArrayList<Output> outputs;
-	protected ArrayList<Transition> transitions;
-	protected List<Integer> currentState;
+	protected HashSet<String> comments = null;
+	protected ArrayList<Output> outputs = null;
+	protected ArrayList<Transition> transitions = null;
+	protected List<Integer> currentNode = null;
+	protected int requests = 0;
+	protected int currentState = 0;
 
-	protected static Config config = null;
+	protected static Configuration config = null;
 
 	public DriverGenerator(String configFileName) throws JsonParseException,
 			JsonMappingException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		config = mapper.readValue(new File("conf" + File.separator + configFileName),
-				Config.class);
+				Configuration.class);
 		urlsToCrawl = new ArrayList<>();
 		inputs = new ArrayList<Input>();
 		sequence = new ArrayList<Input>();
-		errors = new HashSet<String>();
+		comments = new HashSet<String>();
 		transitions = new ArrayList<Transition>();
 		outputs = new ArrayList<Output>();
 		client = new WebClient();
@@ -89,8 +92,8 @@ public abstract class DriverGenerator {
 		client.setCredentialsProvider(creds);
 		formValues = config.getData();
 		addUrl(config.getFirstURL());
-		currentState = new ArrayList<Integer>();
-		currentState.add(0);
+		currentNode = new ArrayList<Integer>();
+		currentNode.add(0);
 	}
 
 	public static DriverGenerator getDriver(String system) {
@@ -177,7 +180,7 @@ public abstract class DriverGenerator {
 					values.add(providedValue);
 				else {
 					values.add(Utils.randString());
-					errors.add("No values for "
+					comments.add("No values for "
 							+ key
 							+ ", random string used. You may need to provide useful value.");
 				}
@@ -227,7 +230,7 @@ public abstract class DriverGenerator {
 						if (values.size() > 1) {
 							newValue = Utils.randIn(values);
 						} else {
-							errors.add("Multiple values for "
+							comments.add("Multiple values for "
 									+ key
 									+ ", random string used. Please provide one value.");
 							newValue = Utils.randString();
@@ -253,6 +256,7 @@ public abstract class DriverGenerator {
 			try {
 				page = client.getPage(request);
 				if (page.getWebResponse().getStatusCode() != 200) return null;
+				requests++;
 			} catch (Exception e) {
 				return null;
 			}
@@ -270,6 +274,7 @@ public abstract class DriverGenerator {
 			try {
 				page = client.getPage(link.substring(0, link.length()-1));
 				if (page.getWebResponse().getStatusCode() != 200) return null;
+				requests++;
 			} catch (Exception e) {
 				return null;
 			}
@@ -299,9 +304,10 @@ public abstract class DriverGenerator {
 		long duration = System.nanoTime();
 		for (String url : urlsToCrawl) {
 			Input in = new Input("http://" + config.getHost() + ":" + config.getPort() + url);
-			if (addInput(in)) crawlInput(in);
+			crawlInput(in);
 		}
-		errors.add("Duration : " + ((System.nanoTime()-duration)/1000000000.00) + " secs");
+		comments.add("Duration : " + ((System.nanoTime()-duration)/1000000000.00) + " secs");
+		comments.add("Requests : " + requests);
 
 		System.out.println();
 		System.out.println("[+] Inputs (" + inputs.size() + ")");
@@ -321,16 +327,15 @@ public abstract class DriverGenerator {
 		}
 
 		System.out.println();
-		System.out.println("[+] Comments (" + errors.size() + ")");
-		Iterator<String> iter = errors.iterator();
+		System.out.println("[+] Comments (" + comments.size() + ")");
+		Iterator<String> iter = comments.iterator();
 		while (iter.hasNext())
 			System.out.println("    " + iter.next());
 	}
 
 	private int crawl(Document d, Input from, String content) {
-		int state = updateOutput(d);
-		currentState.add(state);
-		from.setOutput(state);
+		int node = updateOutput(d);
+		currentNode.add(node);
 		Element lesson = null;
 		if (!config.getLimitSelector().isEmpty()) lesson = d.select(config.getLimitSelector()).first();  
 		else lesson = d.getAllElements().first();
@@ -370,8 +375,8 @@ public abstract class DriverGenerator {
 				}
 			}
 		}
-		currentState.remove(currentState.size()-1);
-		return state;
+		currentNode.remove(currentNode.size()-1);
+		return node;
 	}
 
 	private Collection<Element> findFormsIn(String content, String baseUri) {
@@ -551,7 +556,7 @@ public abstract class DriverGenerator {
 			if (content != null){
 				doc = Jsoup.parse(content);
 				doc.setBaseUri(in.getAddress());
-				transitions.add(new Transition(currentState.get(currentState.size()-1), crawl(doc, in, content), in));
+				transitions.add(new Transition(currentNode.get(currentNode.size()-1), crawl(doc, in, content), in));
 			}
 		} catch (FailingHttpStatusCodeException | IOException e) {
 			LogManager.logException("Unable to get page for " + in, e);

@@ -33,16 +33,16 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
-import drivergenerator.Config;
 import drivergenerator.Input;
 import drivergenerator.Input.Type;
+import drivergenerator.configuration.Configuration;
 import drivergenerator.Output;
 import drivers.efsm.real.LowWebDriver;
 
 public class GenericDriver extends LowWebDriver {
 	
 	protected WebClient client = null;
-	private Config config = null; 
+	private Configuration config = null; 
 	private List<Input> inputs;
 	private List<Output> outputs;
 	
@@ -137,9 +137,9 @@ public class GenericDriver extends LowWebDriver {
 		return null;
 	}	
 	
-	private Config LoadConfig(String xml) throws IOException {
+	private Configuration LoadConfig(String xml) throws IOException {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		config = new Config();
+		config = new Configuration();
 		try {
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			org.w3c.dom.Document dom = db.parse(xml);
