@@ -1,5 +1,6 @@
 package crawler;
 
+import java.awt.Color;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -23,6 +24,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import learner.mealy.tree.ObservationNode;
 import main.Main;
 
 import org.apache.http.auth.AuthScope;
@@ -61,6 +63,7 @@ public abstract class DriverGenerator {
 	protected ArrayList<Output> outputs = null;
 	protected ArrayList<Transition> transitions = null;
 	protected List<Integer> currentNode = null;
+	protected List<String> colors = null;
 	protected int requests = 0;
 	protected int currentState = 0;
 
@@ -328,10 +331,50 @@ public abstract class DriverGenerator {
 		}
 
 		System.out.println();
+		System.out.println("[+] Collapsing nodes into states");
+		inference();
+		
+		System.out.println();
 		System.out.println("[+] Comments (" + comments.size() + ")");
 		Iterator<String> iter = comments.iterator();
 		while (iter.hasNext())
 			System.out.println("    " + iter.next());
+	}
+
+	private void inference() {
+		initColor();
+		reset();
+		currentNode.clear();
+		currentNode.add(0);
+		randomWalk();
+		
+		
+	}
+
+	private void initColor() {
+		final float saturation = 0.2f;
+		final float luminance = 0.9f;
+		float hue;
+		colors = new ArrayList<String>();
+		for(int i=0; i<outputs.size(); i++){
+			hue = ((0.8f/outputs.size())*i)+0.1f;
+			Color c = Color.getHSBColor(hue, saturation, luminance);
+			colors.add(Integer.toHexString(c.getRed())+Integer.toHexString(c.getGreen())+Integer.toHexString(c.getBlue()));
+		}		
+	}
+
+	private void randomWalk() {		
+		Input oneMissingInputsFromNode = Utils.randIn(getMissingInputFromNode());
+		crawlInput(oneMissingInputsFromNode);
+	}
+
+	private List<Input> getMissingInputFromNode() {
+		List<Input> ret = new ArrayList<Input>();
+		ret.addAll(inputs);
+		for(Transition t: transitions){
+			if (t.getFrom()==currentState) ret.remove(t.getBy());
+		}
+		return ret;
 	}
 
 	private int crawl(Document d, Input from, String content) {
@@ -398,6 +441,12 @@ public abstract class DriverGenerator {
 		}
 		return el;
 	}
+	
+	private void exportToDotCreateNodes(Writer w) throws IOException{
+		for (int i=0; i<outputs.size(); i++){        	
+			w.write("    " + i + " [style=\"filled\", fillcolor=\"#"+ colors.get(outputs.get(i).getState()) + "\"]\n");
+		}
+	}
 
 	public void exportToDot() {
 		Writer writer = null;
@@ -412,6 +461,7 @@ public abstract class DriverGenerator {
 					+ config.getName() + ".dot");
 			writer = new BufferedWriter(new FileWriter(file));
 			writer.write("digraph G {\n");
+			exportToDotCreateNodes(writer);
 			for (Transition t : transitions) {
 				writer.write("\t" + t.getFrom() + " -> " + t.getTo() + " [label=\"" + prettyprint(t.getBy()) + "\"]" + "\n");
 			}
