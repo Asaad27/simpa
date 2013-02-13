@@ -10,6 +10,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,10 +24,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
-import learner.mealy.tree.ObservationNode;
 import main.Main;
-
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.impl.client.BasicCredentialsProvider;
@@ -65,7 +63,6 @@ public abstract class DriverGenerator {
 	protected List<Integer> currentNode = null;
 	protected List<String> colors = null;
 	protected int requests = 0;
-	protected int currentState = 0;
 
 	protected static Configuration config = null;
 
@@ -340,17 +337,7 @@ public abstract class DriverGenerator {
 		while (iter.hasNext())
 			System.out.println("    " + iter.next());
 	}
-
-	private void inference() {
-		initColor();
-		reset();
-		currentNode.clear();
-		currentNode.add(0);
-		randomWalk();
-		
-		
-	}
-
+	
 	private void initColor() {
 		final float saturation = 0.2f;
 		final float luminance = 0.9f;
@@ -361,18 +348,32 @@ public abstract class DriverGenerator {
 			Color c = Color.getHSBColor(hue, saturation, luminance);
 			colors.add(Integer.toHexString(c.getRed())+Integer.toHexString(c.getGreen())+Integer.toHexString(c.getBlue()));
 		}		
+		Collections.shuffle(colors);
 	}
 
-	private void randomWalk() {		
-		Input oneMissingInputsFromNode = Utils.randIn(getMissingInputFromNode());
-		crawlInput(oneMissingInputsFromNode);
+	private void inference() {
+		initColor();
+		for(int i=0; i<outputs.size(); i++){
+			reset();
+			currentNode.clear();
+			currentNode.add(i);
+			randomWalk(i);		
+		}
 	}
 
-	private List<Input> getMissingInputFromNode() {
+	private void randomWalk(int i) {		
+		Input oneMissingInputsFromNode = Utils.randIn(getMissingInputFromNode(i));
+		if (oneMissingInputsFromNode != null){
+			int nextOutput = crawlInput(oneMissingInputsFromNode); 
+			if (nextOutput != -1) randomWalk(nextOutput);
+		}
+	}
+
+	private List<Input> getMissingInputFromNode(int i) {
 		List<Input> ret = new ArrayList<Input>();
 		ret.addAll(inputs);
 		for(Transition t: transitions){
-			if (t.getFrom()==currentState) ret.remove(t.getBy());
+			if (t.getFrom()==i) ret.remove(t.getBy());
 		}
 		return ret;
 	}
@@ -597,7 +598,7 @@ public abstract class DriverGenerator {
 		}
 	}
 
-	private void crawlInput(Input in) {
+	private int crawlInput(Input in) {
 		sequence.add(in);
 		System.out.println("    " + (in.getType() == Type.FORM ? "f" : "l") + " " + in.getAddress() + ' ' + in.getParams());
 
@@ -607,12 +608,16 @@ public abstract class DriverGenerator {
 			if (content != null){
 				doc = Jsoup.parse(content);
 				doc.setBaseUri(in.getAddress());
-				transitions.add(new Transition(currentNode.get(currentNode.size()-1), crawl(doc, in, content), in));
+				int output = crawl(doc, in, content);
+				transitions.add(new Transition(currentNode.get(currentNode.size()-1), output, in));
+				return output;
 			}
 		} catch (FailingHttpStatusCodeException | IOException e) {
 			LogManager.logException("Unable to get page for " + in, e);
 		}
+		return -1;
 	}
+
 
 	public void exportToXML() {
         DocumentBuilderFactory icFactory = DocumentBuilderFactory.newInstance();
