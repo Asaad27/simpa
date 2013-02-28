@@ -19,7 +19,8 @@ public class Main {
 	public static String NAME = "TIC - The Inference Crawler";
 	
 	public static void testCrawler(){
-		DriverGenerator g = DriverGenerator.getDriver("WGStoredXSS");
+		//DriverGenerator g = DriverGenerator.getDriver("WGStoredXSS");
+		DriverGenerator g = DriverGenerator.getDriver("WackoPicko");
 		g.start();
 		g.exportToDot();
 		g.exportToXML();

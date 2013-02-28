@@ -173,6 +173,20 @@ public abstract class DriverGenerator {
 			    (i.getParams().get(config.getActionByParameter()).equals(in.getParams().get(config.getActionByParameter()))) && i.isAlmostEquals(in)) return false;
 		}
 		
+		for (Input i : inputs) {
+			if (i.getAddress().equals(in.getAddress())){
+				int diff = 0;
+				for(String paramName : i.getParams().keySet()){
+					if (in.getParams().get(paramName).size() == 1 && i.getParams().get(paramName).size() == 1){
+						if (Utils.isNumeric(in.getParams().get(paramName).get(0)) && Utils.isNumeric(i.getParams().get(paramName).get(0))){
+							if (!in.getParams().get(paramName).get(0).equals(i.getParams().get(paramName).get(0))) diff++;
+						}
+					}
+				}
+				if (diff >= 1) return false;	
+			}
+		}
+		
 		for (String key : in.getParams().keySet()) {
 			List<String> values = in.getParams().get(key);
 			if (values.isEmpty()) {
@@ -305,7 +319,7 @@ public abstract class DriverGenerator {
 		long duration = System.nanoTime();
 		for (String url : urlsToCrawl) {
 			Input in = new Input("http://" + config.getHost() + ":" + config.getPort() + url);
-			crawlInput(in);
+			if (addInput(in)) crawlInput(in);
 		}
 		comments.add("Duration : " + ((System.nanoTime()-duration)/1000000000.00) + " secs");
 		comments.add("Requests : " + requests);
@@ -337,7 +351,7 @@ public abstract class DriverGenerator {
 		while (iter.hasNext())
 			System.out.println("    " + iter.next());
 	}
-	
+
 	private void initColor() {
 		final float saturation = 0.2f;
 		final float luminance = 0.9f;
@@ -351,8 +365,18 @@ public abstract class DriverGenerator {
 		Collections.shuffle(colors);
 	}
 
+	private void randomWalk(int i) {
+		System.out.println("    Walking from node " + i);
+		Input oneInput = Utils.randIn(getMissingInputFromOutput(i));
+		if (oneInput == null) oneInput = Utils.randIn(getTransitionsNotMarkedFromOutput(i));
+		if (oneInput != null){		
+			int nextnode = crawlInput(oneInput);
+			if (nextnode != currentNode.get(currentNode.size()-1)) currentNode.add(nextnode);
+			randomWalk(nextnode);				
+		}
+}
+			
 	private void inference() {
-		initColor();
 		for(int i=0; i<outputs.size(); i++){
 			reset();
 			currentNode.clear();
@@ -361,15 +385,16 @@ public abstract class DriverGenerator {
 		}
 	}
 
-	private void randomWalk(int i) {		
-		Input oneMissingInputsFromNode = Utils.randIn(getMissingInputFromNode(i));
-		if (oneMissingInputsFromNode != null){
-			int nextOutput = crawlInput(oneMissingInputsFromNode); 
-			if (nextOutput != -1) randomWalk(nextOutput);
+	private List<Input> getTransitionsNotMarkedFromOutput(int i) {
+		List<Input> ret = new ArrayList<Input>();
+		ret.addAll(inputs);
+		for(Transition t: transitions){
+			if (t.getFrom()!=i || t.getTo()==i || outputs.get(t.getTo()).isMark()) ret.remove(t.getBy());
 		}
+		return ret;
 	}
 
-	private List<Input> getMissingInputFromNode(int i) {
+	private List<Input> getMissingInputFromOutput(int i) {
 		List<Input> ret = new ArrayList<Input>();
 		ret.addAll(inputs);
 		for(Transition t: transitions){
@@ -399,7 +424,8 @@ public abstract class DriverGenerator {
 				for (Input in : formList) {
 					if (addInput(in)) {
 						sendSequences();
-						crawlInput(in);
+						int next = crawlInput(in);
+						if (next == -1) inputs.remove(in);
 						sequence.remove(sequence.size() - 1);
 					}
 				}
@@ -415,7 +441,8 @@ public abstract class DriverGenerator {
 				Input in = new Input(url);
 				if (addInput(in)) {
 					sendSequences();
-					crawlInput(in);
+					int next = crawlInput(in);
+					if (next == -1) inputs.remove(in);
 					sequence.remove(sequence.size() - 1);
 				}
 			}
@@ -450,6 +477,7 @@ public abstract class DriverGenerator {
 	}
 
 	public void exportToDot() {
+		initColor();
 		Writer writer = null;
 		File file = null;
 		File dir = new File("models");

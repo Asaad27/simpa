@@ -22,6 +22,11 @@ import tools.loggers.LogManager;
 public class Utils {
 	private static Random rand = new Random();
 	
+	public static boolean isNumeric(String str)
+	{
+	  return str.matches("-?\\d+(\\.\\d+)?");
+	}
+	
 	public static int getStatusCode(String response){
 		String[] resp = response.split("\n");
 		String[] status = resp[0].trim().split(" ");

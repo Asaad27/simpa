@@ -4,14 +4,16 @@
   "basicAuthUser" : null,
   "basicAuthPass" : null,
   "name" : "WackoPicko",
-  "limitSelector" : "html",
+  "limitSelector" : "body",
   "enableCSS" : false,
   "enableJS" : true,
   "timeout" : 2000,  
   "firstURL" : "/WackoPicko/",
   "noFollow" : [ "^javascript:.*", "^mailto:.*" ],
   "data" : {
+    "username" : "scanner1",
     "adminname" : "admin",    
-    "password" : "admin"
+    "password" : "scanner1",
+    "query" : "house"
    }
 }

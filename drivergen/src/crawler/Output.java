@@ -14,7 +14,20 @@ public class Output {
 	private Elements source = null;
 	private List<String> params = null;
 	private PageTreeNode pt = null;
+	private boolean mark = false;
 	
+	public boolean isMark() {
+		return mark;
+	}
+
+	public void setMark() {
+		this.mark = true;
+	}
+	
+	public void cleanMark() {
+		this.mark = false;
+	}
+
 	public Output(){
 		params = new ArrayList<String>();
 	}
