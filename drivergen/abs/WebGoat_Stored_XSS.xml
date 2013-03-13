@@ -1,14 +1,23 @@
-<?xml version="1.0" encoding="UTF-8"?><driver date="1360774624647" generator="TIC - The Inference Crawler" version="1.0">
+<?xml version="1.0" encoding="UTF-8"?><driver date="1363153101154" generator="TIC - The Inference Crawler" version="1.0">
     <settings>
         <target>WebGoat_Stored_XSS</target>
         <host>localhost</host>
         <port>8080</port>
+        <limitSelector>#lesson_wrapper</limitSelector>
         <basicAuthUser>guest</basicAuthUser>
         <basicAuthPass>guest</basicAuthPass>
-        <runtimeParameters/>
+        <runtimeParameters>
+            <parameter>Screen</parameter>
+        </runtimeParameters>
     </settings>
     <inputs>
-        <input address="http://localhost:8080/WebGoat/attack?Screen=248&amp;menu=900" method="POST" type="FORM">
+        <input address="http://localhost:8080/WebGoat/attack" method="GET" type="LINK">
+            <parameters>
+                <parameter name="Screen">%%__RUNTIME__Screen__%%</parameter>
+                <parameter name="menu">900</parameter>
+            </parameters>
+        </input>
+        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%menu=900" method="POST" type="FORM">
             <parameters>
                 <parameter name="action">Login</parameter>
                 <parameter name="password">john</parameter>
@@ -26,7 +35,7 @@
                 <parameter name="employee_id">112</parameter>
             </parameters>
         </input>
-        <input address="http://localhost:8080/WebGoat/attack?Screen=248&amp;menu=900" method="POST" type="FORM">
+        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%menu=900" method="POST" type="FORM">
             <parameters>
                 <parameter name="action">SearchStaff</parameter>
                 <parameter name="employee_id">101</parameter>
@@ -42,19 +51,19 @@
                 <parameter name="employee_id">111</parameter>
             </parameters>
         </input>
-        <input address="http://localhost:8080/WebGoat/attack?Screen=248&amp;menu=900" method="POST" type="FORM">
+        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%menu=900" method="POST" type="FORM">
             <parameters>
                 <parameter name="action">FindProfile</parameter>
                 <parameter name="search_name">Bruce</parameter>
             </parameters>
         </input>
-        <input address="http://localhost:8080/WebGoat/attack?Screen=248&amp;menu=900" method="POST" type="FORM">
+        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%menu=900" method="POST" type="FORM">
             <parameters>
                 <parameter name="action">ListStaff</parameter>
                 <parameter name="employee_id">108</parameter>
             </parameters>
         </input>
-        <input address="http://localhost:8080/WebGoat/attack?Screen=248&amp;menu=900" method="POST" type="FORM">
+        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%menu=900" method="POST" type="FORM">
             <parameters>
                 <parameter name="action">ViewProfile</parameter>
                 <parameter name="employee_id">101</parameter>
@@ -70,49 +79,7 @@
                 <parameter name="employee_id">111</parameter>
             </parameters>
         </input>
-        <input address="http://localhost:8080/WebGoat/attack?Screen=248&amp;menu=900" method="POST" type="FORM">
-            <parameters>
-                <parameter name="action">EditProfile</parameter>
-                <parameter name="employee_id">111</parameter>
-            </parameters>
-        </input>
-        <input address="http://localhost:8080/WebGoat/attack?Screen=248&amp;menu=900" method="POST" type="FORM">
-            <parameters>
-                <parameter name="ccnLimit">300</parameter>
-                <parameter name="lastName">Wayne</parameter>
-                <parameter name="startDate">1012001</parameter>
-                <parameter name="manager">101</parameter>
-                <parameter name="manager">102</parameter>
-                <parameter name="manager">103</parameter>
-                <parameter name="manager">104</parameter>
-                <parameter name="manager">105</parameter>
-                <parameter name="manager">106</parameter>
-                <parameter name="manager">107</parameter>
-                <parameter name="manager">108</parameter>
-                <parameter name="manager">109</parameter>
-                <parameter name="manager">110</parameter>
-                <parameter name="manager">111</parameter>
-                <parameter name="ssn">129-69-4572</parameter>
-                <parameter name="address1">129 Third St</parameter>
-                <parameter name="address2">New York, NY</parameter>
-                <parameter name="title">CTO</parameter>
-                <parameter name="phoneNumber">610-213-1134</parameter>
-                <parameter name="disciplinaryDate">112005</parameter>
-                <parameter name="description">random569</parameter>
-                <parameter name="ccn">4437334565679921</parameter>
-                <parameter name="action">UpdateProfile</parameter>
-                <parameter name="salary">200000</parameter>
-                <parameter name="firstName">John</parameter>
-                <parameter name="employee_id">111</parameter>
-            </parameters>
-        </input>
-        <input address="http://localhost:8080/WebGoat/attack?Screen=248&amp;menu=900" method="POST" type="FORM">
-            <parameters>
-                <parameter name="action">DeleteProfile</parameter>
-                <parameter name="employee_id">111</parameter>
-            </parameters>
-        </input>
-        <input address="http://localhost:8080/WebGoat/attack?Screen=248&amp;menu=900" method="POST" type="FORM">
+        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%menu=900" method="POST" type="FORM">
             <parameters>
                 <parameter name="action">CreateProfile</parameter>
                 <parameter name="employee_id">101</parameter>
@@ -125,9 +92,26 @@
                 <parameter name="employee_id">108</parameter>
                 <parameter name="employee_id">109</parameter>
                 <parameter name="employee_id">110</parameter>
+                <parameter name="employee_id">111</parameter>
             </parameters>
         </input>
-        <input address="http://localhost:8080/WebGoat/attack?Screen=248&amp;menu=900" method="POST" type="FORM">
+        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%menu=900" method="POST" type="FORM">
+            <parameters>
+                <parameter name="action">DeleteProfile</parameter>
+                <parameter name="employee_id">101</parameter>
+                <parameter name="employee_id">102</parameter>
+                <parameter name="employee_id">103</parameter>
+                <parameter name="employee_id">104</parameter>
+                <parameter name="employee_id">105</parameter>
+                <parameter name="employee_id">106</parameter>
+                <parameter name="employee_id">107</parameter>
+                <parameter name="employee_id">108</parameter>
+                <parameter name="employee_id">109</parameter>
+                <parameter name="employee_id">110</parameter>
+                <parameter name="employee_id">111</parameter>
+            </parameters>
+        </input>
+        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%menu=900" method="POST" type="FORM">
             <parameters>
                 <parameter name="action">Logout</parameter>
                 <parameter name="employee_id">101</parameter>
@@ -142,252 +126,290 @@
                 <parameter name="employee_id">110</parameter>
             </parameters>
         </input>
-        <input address="http://localhost:8080/WebGoat/" method="POST" type="FORM">
+        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%menu=900" method="POST" type="FORM">
             <parameters>
-                <parameter name="action">Logout</parameter>
+                <parameter name="action">EditProfile</parameter>
+                <parameter name="employee_id">108</parameter>
+            </parameters>
+        </input>
+        <input address="http://localhost:8080/WebGoat/attack?Screen=%%__RUNTIME__Screen__%%menu=900" method="POST" type="FORM">
+            <parameters>
+                <parameter name="ccnLimit">30000</parameter>
+                <parameter name="lastName">McGuirre</parameter>
+                <parameter name="startDate">3012000</parameter>
+                <parameter name="manager">101</parameter>
+                <parameter name="manager">102</parameter>
+                <parameter name="manager">103</parameter>
+                <parameter name="manager">104</parameter>
+                <parameter name="manager">105</parameter>
+                <parameter name="manager">106</parameter>
+                <parameter name="manager">107</parameter>
+                <parameter name="manager">108</parameter>
+                <parameter name="manager">109</parameter>
+                <parameter name="manager">110</parameter>
+                <parameter name="manager">111</parameter>
+                <parameter name="ssn">707-95-9482</parameter>
+                <parameter name="address1">8899 FreeBSD Drive&lt;script&gt;alert(document.cookie)&lt;/script&gt; </parameter>
+                <parameter name="address2">New York, NY</parameter>
+                <parameter name="title">Engineer</parameter>
+                <parameter name="phoneNumber">610-282-1103</parameter>
+                <parameter name="disciplinaryDate">61502</parameter>
+                <parameter name="description">Enjoys watching others struggle in exercises.</parameter>
+                <parameter name="ccn">6981754825854136</parameter>
+                <parameter name="action">UpdateProfile</parameter>
+                <parameter name="salary">110000</parameter>
+                <parameter name="firstName">Bruce</parameter>
+                <parameter name="employee_id">108</parameter>
             </parameters>
         </input>
     </inputs>
     <outputs>
         <output>
-            <source>&lt;div id="lesson_wrapper"&gt; 
- &lt;div id="lesson_header"&gt; 
- &lt;/div&gt; 
- &lt;div class="lesson_workspace"&gt; 
-  &lt;div id="lesson_login"&gt; 
-   &lt;div id="lesson_login_txt"&gt; 
-    &lt;form id="form1" name="form1" method="post" action="attack?Screen=248&amp;amp;menu=900"&gt; 
-     &lt;label&gt; &lt;select name="employee_id"&gt; &lt;option value="101" selected="selected"&gt; Larry Stooge (employee) &lt;/option&gt; &lt;option value="102"&gt; Moe Stooge (manager) &lt;/option&gt; &lt;option value="103"&gt; Curly Stooge (employee) &lt;/option&gt; &lt;option value="104"&gt; Eric Walker (employee) &lt;/option&gt; &lt;option value="105"&gt; Tom Cat (employee) &lt;/option&gt; &lt;option value="106"&gt; Jerry Mouse (hr) &lt;/option&gt; &lt;option value="107"&gt; David Giambi (manager) &lt;/option&gt; &lt;option value="108"&gt; Bruce McGuirre (employee) &lt;/option&gt; &lt;option value="109"&gt; Sean Livingston (employee) &lt;/option&gt; &lt;option value="110"&gt; Joanne McDougal (hr) &lt;/option&gt; &lt;option value="111"&gt; John Wayne (admin) &lt;/option&gt; &lt;option value="112"&gt; Neville Bartholomew (admin) &lt;/option&gt; &lt;/select&gt; &lt;/label&gt; 
-     &lt;br /&gt; 
-     &lt;label&gt; Password &lt;input name="password" type="password" size="10" maxlength="8" /&gt; &lt;/label&gt; 
-     &lt;br /&gt; 
-     &lt;input type="submit" name="action" value="Login" /&gt; 
-    &lt;/form&gt; 
-   &lt;/div&gt; 
+            <source>&lt;div id="lesson_header"&gt; 
+&lt;/div&gt; 
+&lt;div class="lesson_workspace"&gt; 
+ &lt;div id="lesson_login"&gt; 
+  &lt;div id="lesson_login_txt"&gt; 
+   &lt;form id="form1" name="form1" method="post" action="attack?Screen=172&amp;amp;menu=900"&gt; 
+    &lt;label&gt; &lt;select name="employee_id"&gt; &lt;option value="101" selected="selected"&gt; Larry Stooge (employee) &lt;/option&gt; &lt;option value="102"&gt; Moe Stooge (manager) &lt;/option&gt; &lt;option value="103"&gt; Curly Stooge (employee) &lt;/option&gt; &lt;option value="104"&gt; Eric Walker (employee) &lt;/option&gt; &lt;option value="105"&gt; Tom Cat (employee) &lt;/option&gt; &lt;option value="106"&gt; Jerry Mouse (hr) &lt;/option&gt; &lt;option value="107"&gt; David Giambi (manager) &lt;/option&gt; &lt;option value="108"&gt; Bruce McGuirre (employee) &lt;/option&gt; &lt;option value="109"&gt; Sean Livingston (employee) &lt;/option&gt; &lt;option value="110"&gt; Joanne McDougal (hr) &lt;/option&gt; &lt;option value="111"&gt; John Wayne (admin) &lt;/option&gt; &lt;option value="112"&gt; Neville Bartholomew (admin) &lt;/option&gt; &lt;/select&gt; &lt;/label&gt; 
+    &lt;br /&gt; 
+    &lt;label&gt; Password &lt;input name="password" type="password" size="10" maxlength="8" /&gt; &lt;/label&gt; 
+    &lt;br /&gt; 
+    &lt;input type="submit" name="action" value="Login" /&gt; 
+   &lt;/form&gt; 
   &lt;/div&gt; 
  &lt;/div&gt; 
 &lt;/div&gt;</source>
             <parameters/>
         </output>
         <output>
-            <source>&lt;div id="lesson_wrapper"&gt; 
- &lt;div id="lesson_header"&gt; 
+            <source>&lt;div id="lesson_header"&gt; 
+&lt;/div&gt; 
+&lt;div class="lesson_workspace"&gt; 
+ &lt;div class="lesson_title_box"&gt; 
+  &lt;strong&gt; Welcome Back &lt;/strong&gt; 
+  &lt;span class="lesson_text_db"&gt; John &lt;/span&gt; - Staff Listing Page 
  &lt;/div&gt; 
- &lt;div class="lesson_workspace"&gt; 
-  &lt;div class="lesson_title_box"&gt; 
-   &lt;strong&gt; Welcome Back &lt;/strong&gt; 
-   &lt;span class="lesson_text_db"&gt; John &lt;/span&gt; - Staff Listing Page 
-  &lt;/div&gt; 
-  &lt;br /&gt; 
-  &lt;br /&gt; 
-  &lt;br /&gt; 
-  &lt;p&gt; Select from the list below &lt;/p&gt; 
-  &lt;form id="form1" name="form1" method="post" action="attack?Screen=248&amp;amp;menu=900"&gt; 
-   &lt;table width="60%" border="0" cellpadding="3"&gt; 
-    &lt;tbody&gt; 
-     &lt;tr&gt; 
-      &lt;td&gt; &lt;label&gt; &lt;select name="employee_id" size="11"&gt; &lt;option selected="" value="101"&gt; Larry Stooge (employee) &lt;/option&gt; &lt;option value="102"&gt; Moe Stooge (manager) &lt;/option&gt; &lt;option value="103"&gt; Curly Stooge (employee) &lt;/option&gt; &lt;option value="104"&gt; Eric Walker (employee) &lt;/option&gt; &lt;option value="105"&gt; Tom Cat (employee) &lt;/option&gt; &lt;option value="106"&gt; Jerry Mouse (hr) &lt;/option&gt; &lt;option value="107"&gt; David Giambi (manager) &lt;/option&gt; &lt;option value="108"&gt; Bruce McGuirre (employee) &lt;/option&gt; &lt;option value="109"&gt; Sean Livingston (employee) &lt;/option&gt; &lt;option value="110"&gt; Joanne McDougal (hr) &lt;/option&gt; &lt;option value="111"&gt; John Wayne (admin) &lt;/option&gt; &lt;/select&gt; &lt;/label&gt; &lt;/td&gt; 
-      &lt;td&gt; &lt;input type="submit" name="action" value="SearchStaff" /&gt; &lt;br /&gt; &lt;input type="submit" name="action" value="ViewProfile" /&gt; &lt;br /&gt; &lt;input type="submit" disabled="" name="action" value="CreateProfile" /&gt; &lt;br /&gt; &lt;input type="submit" name="action" value="DeleteProfile" /&gt; &lt;br /&gt; &lt;br /&gt; &lt;input type="submit" name="action" value="Logout" /&gt; &lt;/td&gt; 
-     &lt;/tr&gt; 
-    &lt;/tbody&gt; 
-   &lt;/table&gt; 
+ &lt;br /&gt; 
+ &lt;br /&gt; 
+ &lt;br /&gt; 
+ &lt;p&gt; Select from the list below &lt;/p&gt; 
+ &lt;form id="form1" name="form1" method="post" action="attack?Screen=172&amp;amp;menu=900"&gt; 
+  &lt;table width="60%" border="0" cellpadding="3"&gt; 
+   &lt;tbody&gt; 
+    &lt;tr&gt; 
+     &lt;td&gt; &lt;label&gt; &lt;select name="employee_id" size="11"&gt; &lt;option selected="" value="101"&gt; Larry Stooge (employee) &lt;/option&gt; &lt;option value="102"&gt; Moe Stooge (manager) &lt;/option&gt; &lt;option value="103"&gt; Curly Stooge (employee) &lt;/option&gt; &lt;option value="104"&gt; Eric Walker (employee) &lt;/option&gt; &lt;option value="105"&gt; Tom Cat (employee) &lt;/option&gt; &lt;option value="106"&gt; Jerry Mouse (hr) &lt;/option&gt; &lt;option value="107"&gt; David Giambi (manager) &lt;/option&gt; &lt;option value="108"&gt; Bruce McGuirre (employee) &lt;/option&gt; &lt;option value="109"&gt; Sean Livingston (employee) &lt;/option&gt; &lt;option value="110"&gt; Joanne McDougal (hr) &lt;/option&gt; &lt;option value="111"&gt; John Wayne (admin) &lt;/option&gt; &lt;/select&gt; &lt;/label&gt; &lt;/td&gt; 
+     &lt;td&gt; &lt;input type="submit" name="action" value="SearchStaff" /&gt; &lt;br /&gt; &lt;input type="submit" name="action" value="ViewProfile" /&gt; &lt;br /&gt; &lt;input type="submit" disabled="" name="action" value="CreateProfile" /&gt; &lt;br /&gt; &lt;input type="submit" name="action" value="DeleteProfile" /&gt; &lt;br /&gt; &lt;br /&gt; &lt;input type="submit" name="action" value="Logout" /&gt; &lt;/td&gt; 
+    &lt;/tr&gt; 
+   &lt;/tbody&gt; 
+  &lt;/table&gt; 
+ &lt;/form&gt; 
+&lt;/div&gt;</source>
+            <parameters>
+                <parameter>0/div[1]/div[0]/div[1]/span</parameter>
+            </parameters>
+        </output>
+        <output>
+            <source>&lt;div id="lesson_header"&gt; 
+&lt;/div&gt; 
+&lt;div class="lesson_workspace"&gt; 
+ &lt;div id="lesson_search"&gt; 
+  &lt;form id="form1" name="form1" method="post" action="attack?Screen=172&amp;amp;menu=900"&gt; 
+   &lt;label&gt; Name &lt;input class="lesson_text_db" type="text" name="search_name" /&gt; &lt;/label&gt; 
+   &lt;br /&gt; 
+   &lt;input type="submit" name="action" value="FindProfile" /&gt; 
   &lt;/form&gt; 
  &lt;/div&gt; 
 &lt;/div&gt;</source>
             <parameters/>
         </output>
         <output>
-            <source>&lt;div id="lesson_wrapper"&gt; 
- &lt;div id="lesson_header"&gt; 
- &lt;/div&gt; 
- &lt;div class="lesson_workspace"&gt; 
-  &lt;div id="lesson_search"&gt; 
-   &lt;form id="form1" name="form1" method="post" action="attack?Screen=248&amp;amp;menu=900"&gt; 
-    &lt;label&gt; Name &lt;input class="lesson_text_db" type="text" name="search_name" /&gt; &lt;/label&gt; 
-    &lt;br /&gt; 
-    &lt;input type="submit" name="action" value="FindProfile" /&gt; 
-   &lt;/form&gt; 
-  &lt;/div&gt; 
- &lt;/div&gt; 
-&lt;/div&gt;</source>
-            <parameters/>
-        </output>
-        <output>
-            <source>&lt;div id="lesson_wrapper"&gt; 
- &lt;div id="lesson_header"&gt; 
- &lt;/div&gt; 
- &lt;div class="lesson_workspace"&gt; 
-  &lt;!--
+            <source>&lt;div id="lesson_header"&gt; 
+&lt;/div&gt; 
+&lt;div class="lesson_workspace"&gt; 
+ &lt;!--
 STAGE 4 FIXES Look for the &lt;-- STAGE 4 - FIX
 --&gt; 
-  &lt;div class="lesson_title_box"&gt; 
-   &lt;strong&gt; Welcome Back &lt;/strong&gt; 
-   &lt;span class="lesson_text_db"&gt; John &lt;/span&gt; 
-  &lt;/div&gt; 
-  &lt;div class="lesson_text"&gt; 
-   &lt;table&gt; 
-    &lt;tbody&gt; 
-     &lt;tr&gt; 
-      &lt;td&gt; First Name: &lt;/td&gt; 
-      &lt;td&gt; Bruce &lt;/td&gt; 
-      &lt;td&gt; Last Name: &lt;/td&gt; 
-      &lt;td&gt; McGuirre &lt;/td&gt; 
-     &lt;/tr&gt; 
-     &lt;tr&gt; 
-      &lt;td&gt; Street: &lt;/td&gt; 
-      &lt;td&gt; 
-       &lt;!-- STAGE 4 - FIX  Note that the description value below gets encoded and address1 here is not --&gt; 8899 FreeBSD Drive &lt;script&gt;&#13;
+ &lt;div class="lesson_title_box"&gt; 
+  &lt;strong&gt; Welcome Back &lt;/strong&gt; 
+  &lt;span class="lesson_text_db"&gt; John &lt;/span&gt; 
+ &lt;/div&gt; 
+ &lt;div class="lesson_text"&gt; 
+  &lt;table&gt; 
+   &lt;tbody&gt; 
+    &lt;tr&gt; 
+     &lt;td&gt; First Name: &lt;/td&gt; 
+     &lt;td&gt; Bruce &lt;/td&gt; 
+     &lt;td&gt; Last Name: &lt;/td&gt; 
+     &lt;td&gt; McGuirre &lt;/td&gt; 
+    &lt;/tr&gt; 
+    &lt;tr&gt; 
+     &lt;td&gt; Street: &lt;/td&gt; 
+     &lt;td&gt; 
+      &lt;!-- STAGE 4 - FIX  Note that the description value below gets encoded and address1 here is not --&gt; 8899 FreeBSD Drive &lt;script&gt;&#13;
 //&lt;![CDATA[&#13;
 alert(document.cookie)&#13;
 //]]&gt;&#13;
                         &lt;/script&gt; &lt;/td&gt; 
-      &lt;td&gt; City/State: &lt;/td&gt; 
-      &lt;td&gt; New York, NY &lt;/td&gt; 
-     &lt;/tr&gt; 
-     &lt;tr&gt; 
-      &lt;td&gt; Phone: &lt;/td&gt; 
-      &lt;td&gt; 610-282-1103 &lt;/td&gt; 
-      &lt;td&gt; Start Date: &lt;/td&gt; 
-      &lt;td&gt; 3012000 &lt;/td&gt; 
-     &lt;/tr&gt; 
-     &lt;tr&gt; 
-      &lt;td&gt; SSN: &lt;/td&gt; 
-      &lt;td&gt; 707-95-9482 &lt;/td&gt; 
-      &lt;td&gt; Salary: &lt;/td&gt; 
-      &lt;td&gt; 110000 &lt;/td&gt; 
-     &lt;/tr&gt; 
-     &lt;tr&gt; 
-      &lt;td&gt; Credit Card: &lt;/td&gt; 
-      &lt;td&gt; 6981754825854136 &lt;/td&gt; 
-      &lt;td&gt; Credit Card Limit: &lt;/td&gt; 
-      &lt;td&gt; 30000 &lt;/td&gt; 
-     &lt;/tr&gt; 
-     &lt;tr&gt; 
-      &lt;td&gt; Comments: &lt;/td&gt; 
-      &lt;td&gt; 
-       &lt;!-- Encode data that might contain HTML content to protect against XSS --&gt; Enjoys watching others struggle in exercises. &lt;/td&gt; 
-      &lt;td&gt; Manager: &lt;/td&gt; 
-      &lt;td&gt; 107 &lt;/td&gt; 
-     &lt;/tr&gt; 
-     &lt;tr&gt; 
-      &lt;td&gt; Disciplinary Explanation: &lt;/td&gt; 
-      &lt;td&gt; Tortuous Boot Camp workout at 5am. Employees felt sick. &lt;/td&gt; 
-      &lt;td&gt; Disciplinary Action Dates: &lt;/td&gt; 
-      &lt;td&gt; 61502 &lt;/td&gt; 
-     &lt;/tr&gt; 
-    &lt;/tbody&gt; 
-   &lt;/table&gt; 
-  &lt;/div&gt; 
-  &lt;div class="lesson_buttons_bottom"&gt; 
-   &lt;table width="460" height="20" border="0" cellpadding="0" cellspacing="0"&gt; 
-    &lt;tbody&gt; 
-     &lt;tr&gt; 
-      &lt;td width="50"&gt; 
-       &lt;form method="POST" action="attack?Screen=248&amp;amp;menu=900"&gt; 
-        &lt;input type="hidden" name="employee_id" value="108" /&gt; 
-        &lt;input type="submit" name="action" value="ListStaff" /&gt; 
-       &lt;/form&gt; &lt;/td&gt; 
-      &lt;td width="50"&gt; 
-       &lt;form method="POST" action="attack?Screen=248&amp;amp;menu=900"&gt; 
-        &lt;input type="hidden" name="employee_id" value="108" /&gt; 
-        &lt;input type="submit" name="action" value="EditProfile" /&gt; 
-       &lt;/form&gt; &lt;/td&gt; 
-      &lt;td width="60"&gt; 
-       &lt;form method="POST" action="attack?Screen=248&amp;amp;menu=900"&gt; 
-        &lt;input type="hidden" name="employee_id" value="108" /&gt; 
-        &lt;input type="submit" name="action" value="DeleteProfile" /&gt; 
-       &lt;/form&gt; &lt;/td&gt; 
-      &lt;td width="190"&gt; &amp;nbsp; &lt;/td&gt; 
-      &lt;td width="76"&gt; 
-       &lt;form method="POST"&gt; 
-        &lt;input type="submit" name="action" value="Logout" /&gt; 
-       &lt;/form&gt; &lt;/td&gt; 
-     &lt;/tr&gt; 
-    &lt;/tbody&gt; 
-   &lt;/table&gt; 
-  &lt;/div&gt; 
+     &lt;td&gt; City/State: &lt;/td&gt; 
+     &lt;td&gt; New York, NY &lt;/td&gt; 
+    &lt;/tr&gt; 
+    &lt;tr&gt; 
+     &lt;td&gt; Phone: &lt;/td&gt; 
+     &lt;td&gt; 610-282-1103 &lt;/td&gt; 
+     &lt;td&gt; Start Date: &lt;/td&gt; 
+     &lt;td&gt; 3012000 &lt;/td&gt; 
+    &lt;/tr&gt; 
+    &lt;tr&gt; 
+     &lt;td&gt; SSN: &lt;/td&gt; 
+     &lt;td&gt; 707-95-9482 &lt;/td&gt; 
+     &lt;td&gt; Salary: &lt;/td&gt; 
+     &lt;td&gt; 110000 &lt;/td&gt; 
+    &lt;/tr&gt; 
+    &lt;tr&gt; 
+     &lt;td&gt; Credit Card: &lt;/td&gt; 
+     &lt;td&gt; 6981754825854136 &lt;/td&gt; 
+     &lt;td&gt; Credit Card Limit: &lt;/td&gt; 
+     &lt;td&gt; 30000 &lt;/td&gt; 
+    &lt;/tr&gt; 
+    &lt;tr&gt; 
+     &lt;td&gt; Comments: &lt;/td&gt; 
+     &lt;td&gt; 
+      &lt;!-- Encode data that might contain HTML content to protect against XSS --&gt; Enjoys watching others struggle in exercises. &lt;/td&gt; 
+     &lt;td&gt; Manager: &lt;/td&gt; 
+     &lt;td&gt; 107 &lt;/td&gt; 
+    &lt;/tr&gt; 
+    &lt;tr&gt; 
+     &lt;td&gt; Disciplinary Explanation: &lt;/td&gt; 
+     &lt;td&gt; Tortuous Boot Camp workout at 5am. Employees felt sick. &lt;/td&gt; 
+     &lt;td&gt; Disciplinary Action Dates: &lt;/td&gt; 
+     &lt;td&gt; 61502 &lt;/td&gt; 
+    &lt;/tr&gt; 
+   &lt;/tbody&gt; 
+  &lt;/table&gt; 
+ &lt;/div&gt; 
+ &lt;div class="lesson_buttons_bottom"&gt; 
+  &lt;table width="460" height="20" border="0" cellpadding="0" cellspacing="0"&gt; 
+   &lt;tbody&gt; 
+    &lt;tr&gt; 
+     &lt;td width="50"&gt; 
+      &lt;form method="POST" action="attack?Screen=172&amp;amp;menu=900"&gt; 
+       &lt;input type="hidden" name="employee_id" value="108" /&gt; 
+       &lt;input type="submit" name="action" value="ListStaff" /&gt; 
+      &lt;/form&gt; &lt;/td&gt; 
+     &lt;td width="50"&gt; 
+      &lt;form method="POST" action="attack?Screen=172&amp;amp;menu=900"&gt; 
+       &lt;input type="hidden" name="employee_id" value="108" /&gt; 
+       &lt;input type="submit" name="action" value="EditProfile" /&gt; 
+      &lt;/form&gt; &lt;/td&gt; 
+     &lt;td width="60"&gt; 
+      &lt;form method="POST" action="attack?Screen=172&amp;amp;menu=900"&gt; 
+       &lt;input type="hidden" name="employee_id" value="108" /&gt; 
+       &lt;input type="submit" name="action" value="DeleteProfile" /&gt; 
+      &lt;/form&gt; &lt;/td&gt; 
+     &lt;td width="190"&gt; &amp;nbsp; &lt;/td&gt; 
+     &lt;td width="76"&gt; 
+      &lt;form method="POST"&gt; 
+       &lt;input type="submit" name="action" value="Logout" /&gt; 
+      &lt;/form&gt; &lt;/td&gt; 
+    &lt;/tr&gt; 
+   &lt;/tbody&gt; 
+  &lt;/table&gt; 
  &lt;/div&gt; 
 &lt;/div&gt;</source>
-            <parameters/>
-        </output>
-        <output>
-            <source>&lt;div id="lesson_wrapper"&gt; 
- &lt;div id="lesson_header"&gt; 
- &lt;/div&gt; 
- &lt;div class="lesson_workspace"&gt; 
-  &lt;div class="lesson_title_box"&gt; 
-   &lt;strong&gt; Welcome Back &lt;/strong&gt; 
-   &lt;span class="lesson_text_db"&gt; John &lt;/span&gt; 
-  &lt;/div&gt; 
-  &lt;div class="lesson_text"&gt; 
-   &lt;form id="form1" name="form1" method="post" action="attack?Screen=248&amp;amp;menu=900"&gt; 
-    &lt;table&gt; 
-     &lt;tbody&gt; 
-      &lt;tr&gt; 
-       &lt;td&gt; First Name: &lt;/td&gt; 
-       &lt;td&gt; &lt;input class="lesson_text_db" name="firstName" type="text" value="John" /&gt; &lt;/td&gt; 
-       &lt;td&gt; Last Name: &lt;/td&gt; 
-       &lt;td&gt; &lt;input class="lesson_text_db" name="lastName" type="text" value="Wayne" /&gt; &lt;/td&gt; 
-      &lt;/tr&gt; 
-      &lt;tr&gt; 
-       &lt;td&gt; Street: &lt;/td&gt; 
-       &lt;td&gt; &lt;input class="lesson_text_db" name="address1" type="text" value="129 Third St" /&gt; &lt;/td&gt; 
-       &lt;td&gt; City/State: &lt;/td&gt; 
-       &lt;td&gt; &lt;input class="lesson_text_db" name="address2" type="text" value="New York, NY" /&gt; &lt;/td&gt; 
-      &lt;/tr&gt; 
-      &lt;tr&gt; 
-       &lt;td&gt; Phone: &lt;/td&gt; 
-       &lt;td&gt; &lt;input class="lesson_text_db" name="phoneNumber" type="text" value="610-213-1134" /&gt; &lt;/td&gt; 
-       &lt;td&gt; Start Date: &lt;/td&gt; 
-       &lt;td&gt; &lt;input class="lesson_text_db" name="startDate" type="text" value="1012001" /&gt; &lt;/td&gt; 
-      &lt;/tr&gt; 
-      &lt;tr&gt; 
-       &lt;td&gt; SSN: &lt;/td&gt; 
-       &lt;td&gt; &lt;input class="lesson_text_db" name="ssn" type="text" value="129-69-4572" /&gt; &lt;/td&gt; 
-       &lt;td&gt; Salary: &lt;/td&gt; 
-       &lt;td&gt; &lt;input class="lesson_text_db" name="salary" type="text" value="200000" /&gt; &lt;/td&gt; 
-      &lt;/tr&gt; 
-      &lt;tr&gt; 
-       &lt;td&gt; Credit Card: &lt;/td&gt; 
-       &lt;td&gt; &lt;input class="lesson_text_db" name="ccn" type="text" value="4437334565679921" /&gt; &lt;/td&gt; 
-       &lt;td&gt; Credit Card Limit: &lt;/td&gt; 
-       &lt;td&gt; &lt;input class="lesson_text_db" name="ccnLimit" type="text" value="300" /&gt; &lt;/td&gt; 
-      &lt;/tr&gt; 
-      &lt;tr&gt; 
-       &lt;td&gt; Comments: &lt;/td&gt; 
-       &lt;td&gt; &lt;input class="lesson_text_db" name="description" type="text" value="" /&gt; &lt;/td&gt; 
-       &lt;td&gt; Manager: &lt;/td&gt; 
-       &lt;td&gt; &lt;select class="lesson_text_db" name="manager"&gt; &lt;option value="101" selected="selected"&gt; Larry Stooge &lt;/option&gt; &lt;option value="102"&gt; Moe Stooge &lt;/option&gt; &lt;option value="103"&gt; Curly Stooge &lt;/option&gt; &lt;option value="104"&gt; Eric Walker &lt;/option&gt; &lt;option value="105"&gt; Tom Cat &lt;/option&gt; &lt;option value="106"&gt; Jerry Mouse &lt;/option&gt; &lt;option value="107"&gt; David Giambi &lt;/option&gt; &lt;option value="108"&gt; Bruce McGuirre &lt;/option&gt; &lt;option value="109"&gt; Sean Livingston &lt;/option&gt; &lt;option value="110"&gt; Joanne McDougal &lt;/option&gt; &lt;option value="111"&gt; John Wayne &lt;/option&gt; &lt;/select&gt; &lt;/td&gt; 
-      &lt;/tr&gt; 
-      &lt;tr&gt; 
-       &lt;td&gt; Disciplinary Explanation: &lt;/td&gt; 
-       &lt;td&gt; &lt;textarea name="disciplinaryNotes" cols="16" rows="3" class="lesson_text_db"&gt;&lt;/textarea&gt; &lt;/td&gt; 
-       &lt;td&gt; Disciplinary Action Dates: &lt;/td&gt; 
-       &lt;td&gt; &lt;input class="lesson_text_db" name="disciplinaryDate" type="text" value="112005" /&gt; &lt;/td&gt; 
-      &lt;/tr&gt; 
-     &lt;/tbody&gt; 
-    &lt;/table&gt; 
-    &lt;br /&gt; 
-    &lt;div class="lesson_buttons_bottom"&gt; 
-     &lt;table width="460" height="20" border="0" cellpadding="0" cellspacing="0"&gt; 
-      &lt;tbody&gt; 
-       &lt;tr&gt; 
-        &lt;td width="57"&gt; &lt;input type="submit" name="action" value="ViewProfile" /&gt; &lt;/td&gt; 
-        &lt;td width="81"&gt; &lt;input name="employee_id" type="hidden" value="111" /&gt; &lt;input name="title" type="hidden" value="CTO" /&gt; &lt;input type="submit" name="action" value="UpdateProfile" /&gt; &lt;/td&gt; 
-        &lt;td width="211"&gt; &lt;/td&gt;
-        &lt;td width="83"&gt; &lt;input type="submit" name="action" value="Logout" /&gt; &lt;/td&gt; 
-       &lt;/tr&gt; 
-      &lt;/tbody&gt; 
-     &lt;/table&gt; 
-    &lt;/div&gt; 
-   &lt;/form&gt; 
-  &lt;/div&gt; 
- &lt;/div&gt; 
-&lt;/div&gt;</source>
-            <parameters/>
+            <parameters>
+                <parameter>0/div[1]/div[1]/div[0]/table[0]/tbody[6]/tr[3]/td</parameter>
+                <parameter>0/div[1]/div[1]/div[0]/table[0]/tbody[2]/tr[1]/td</parameter>
+                <parameter>0/div[1]/div[1]/div[0]/table[0]/tbody[5]/tr[3]/td</parameter>
+                <parameter>0/div[1]/div[1]/div[0]/table[0]/tbody[4]/tr[1]/td</parameter>
+                <parameter>0/div[1]/div[1]/div[0]/table[0]/tbody[1]/tr[1]/td</parameter>
+                <parameter>0/div[1]/div[1]/div[0]/table[0]/tbody[5]/tr[1]/td</parameter>
+                <parameter>0/div[1]/div[1]/div[0]/table[0]/tbody[2]/tr[3]/td</parameter>
+                <parameter>0/div[1]/div[1]/div[0]/table[0]/tbody[6]/tr[1]/td</parameter>
+                <parameter>0/div[1]/div[1]/div[0]/table[0]/tbody[3]/tr[3]/td</parameter>
+                <parameter>0/div[1]/div[1]/div[0]/table[0]/tbody[3]/tr[1]/td</parameter>
+                <parameter>0/div[1]/div[1]/div[0]/table[0]/tbody[0]/tr[3]/td</parameter>
+                <parameter>0/div[1]/div[1]/div[0]/table[0]/tbody[0]/tr[1]/td</parameter>
+                <parameter>0/div[1]/div[1]/div[0]/table[0]/tbody[4]/tr[3]/td</parameter>
+                <parameter>0/div[1]/div[1]/div[0]/table[0]/tbody[5]/tr[3]/td</parameter>
+            </parameters>
         </output>
         <output>
             <source/>
+            <parameters/>
+        </output>
+        <output>
+            <source>&lt;div id="lesson_header"&gt; 
+&lt;/div&gt; 
+&lt;div class="lesson_workspace"&gt; 
+ &lt;div class="lesson_title_box"&gt; 
+  &lt;strong&gt; Welcome Back &lt;/strong&gt; 
+  &lt;span class="lesson_text_db"&gt; John &lt;/span&gt; 
+ &lt;/div&gt; 
+ &lt;div class="lesson_text"&gt; 
+  &lt;form id="form1" name="form1" method="post" action="attack?Screen=172&amp;amp;menu=900"&gt; 
+   &lt;table&gt; 
+    &lt;tbody&gt; 
+     &lt;tr&gt; 
+      &lt;td&gt; First Name: &lt;/td&gt; 
+      &lt;td&gt; &lt;input class="lesson_text_db" name="firstName" type="text" value="Bruce" /&gt; &lt;/td&gt; 
+      &lt;td&gt; Last Name: &lt;/td&gt; 
+      &lt;td&gt; &lt;input class="lesson_text_db" name="lastName" type="text" value="McGuirre" /&gt; &lt;/td&gt; 
+     &lt;/tr&gt; 
+     &lt;tr&gt; 
+      &lt;td&gt; Street: &lt;/td&gt; 
+      &lt;td&gt; &lt;input class="lesson_text_db" name="address1" type="text" value="8899 FreeBSD Drive&amp;lt;script&amp;gt;alert(document.cookie)&amp;lt;/script&amp;gt; " /&gt; &lt;/td&gt; 
+      &lt;td&gt; City/State: &lt;/td&gt; 
+      &lt;td&gt; &lt;input class="lesson_text_db" name="address2" type="text" value="New York, NY" /&gt; &lt;/td&gt; 
+     &lt;/tr&gt; 
+     &lt;tr&gt; 
+      &lt;td&gt; Phone: &lt;/td&gt; 
+      &lt;td&gt; &lt;input class="lesson_text_db" name="phoneNumber" type="text" value="610-282-1103" /&gt; &lt;/td&gt; 
+      &lt;td&gt; Start Date: &lt;/td&gt; 
+      &lt;td&gt; &lt;input class="lesson_text_db" name="startDate" type="text" value="3012000" /&gt; &lt;/td&gt; 
+     &lt;/tr&gt; 
+     &lt;tr&gt; 
+      &lt;td&gt; SSN: &lt;/td&gt; 
+      &lt;td&gt; &lt;input class="lesson_text_db" name="ssn" type="text" value="707-95-9482" /&gt; &lt;/td&gt; 
+      &lt;td&gt; Salary: &lt;/td&gt; 
+      &lt;td&gt; &lt;input class="lesson_text_db" name="salary" type="text" value="110000" /&gt; &lt;/td&gt; 
+     &lt;/tr&gt; 
+     &lt;tr&gt; 
+      &lt;td&gt; Credit Card: &lt;/td&gt; 
+      &lt;td&gt; &lt;input class="lesson_text_db" name="ccn" type="text" value="6981754825854136" /&gt; &lt;/td&gt; 
+      &lt;td&gt; Credit Card Limit: &lt;/td&gt; 
+      &lt;td&gt; &lt;input class="lesson_text_db" name="ccnLimit" type="text" value="30000" /&gt; &lt;/td&gt; 
+     &lt;/tr&gt; 
+     &lt;tr&gt; 
+      &lt;td&gt; Comments: &lt;/td&gt; 
+      &lt;td&gt; &lt;input class="lesson_text_db" name="description" type="text" value="Enjoys watching others struggle in exercises." /&gt; &lt;/td&gt; 
+      &lt;td&gt; Manager: &lt;/td&gt; 
+      &lt;td&gt; &lt;select class="lesson_text_db" name="manager"&gt; &lt;option value="101" selected="selected"&gt; Larry Stooge &lt;/option&gt; &lt;option value="102"&gt; Moe Stooge &lt;/option&gt; &lt;option value="103"&gt; Curly Stooge &lt;/option&gt; &lt;option value="104"&gt; Eric Walker &lt;/option&gt; &lt;option value="105"&gt; Tom Cat &lt;/option&gt; &lt;option value="106"&gt; Jerry Mouse &lt;/option&gt; &lt;option value="107"&gt; David Giambi &lt;/option&gt; &lt;option value="108"&gt; Bruce McGuirre &lt;/option&gt; &lt;option value="109"&gt; Sean Livingston &lt;/option&gt; &lt;option value="110"&gt; Joanne McDougal &lt;/option&gt; &lt;option value="111"&gt; John Wayne &lt;/option&gt; &lt;/select&gt; &lt;/td&gt; 
+     &lt;/tr&gt; 
+     &lt;tr&gt; 
+      &lt;td&gt; Disciplinary Explanation: &lt;/td&gt; 
+      &lt;td&gt; &lt;textarea name="disciplinaryNotes" cols="16" rows="3" class="lesson_text_db"&gt;Tortuous Boot Camp workout at 5am. Employees felt sick.&lt;/textarea&gt; &lt;/td&gt; 
+      &lt;td&gt; Disciplinary Action Dates: &lt;/td&gt; 
+      &lt;td&gt; &lt;input class="lesson_text_db" name="disciplinaryDate" type="text" value="61502" /&gt; &lt;/td&gt; 
+     &lt;/tr&gt; 
+    &lt;/tbody&gt; 
+   &lt;/table&gt; 
+   &lt;br /&gt; 
+   &lt;div class="lesson_buttons_bottom"&gt; 
+    &lt;table width="460" height="20" border="0" cellpadding="0" cellspacing="0"&gt; 
+     &lt;tbody&gt; 
+      &lt;tr&gt; 
+       &lt;td width="57"&gt; &lt;input type="submit" name="action" value="ViewProfile" /&gt; &lt;/td&gt; 
+       &lt;td width="81"&gt; &lt;input name="employee_id" type="hidden" value="108" /&gt; &lt;input name="title" type="hidden" value="Engineer" /&gt; &lt;input type="submit" name="action" value="UpdateProfile" /&gt; &lt;/td&gt; 
+       &lt;td width="211"&gt; &lt;/td&gt;
+       &lt;td width="83"&gt; &lt;input type="submit" name="action" value="Logout" /&gt; &lt;/td&gt; 
+      &lt;/tr&gt; 
+     &lt;/tbody&gt; 
+    &lt;/table&gt; 
+   &lt;/div&gt; 
+  &lt;/form&gt; 
+ &lt;/div&gt; 
+&lt;/div&gt;</source>
             <parameters/>
         </output>
     </outputs>

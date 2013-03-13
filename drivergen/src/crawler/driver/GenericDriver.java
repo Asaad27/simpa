@@ -40,12 +40,12 @@ import crawler.configuration.Configuration;
 
 import drivers.efsm.real.LowWebDriver;
 
-public class GenericDriver extends LowWebDriver {
+public abstract class GenericDriver extends LowWebDriver {
 	
 	protected WebClient client = null;
-	private Configuration config = null; 
-	private List<Input> inputs;
-	private List<Output> outputs;
+	public static Configuration config = null; 
+	public List<Input> inputs;
+	public List<Output> outputs;
 	
 	public GenericDriver(String xml) throws IOException{
 		inputs = new ArrayList<Input>();
@@ -65,8 +65,11 @@ public class GenericDriver extends LowWebDriver {
 		}
 		client.setCredentialsProvider(creds);
 		initConnection();
+		updateParameters();
 	}
 	
+	protected abstract void updateParameters();
+
 	public String getSystemName(){
 		return config.getName();
 	}
@@ -83,14 +86,25 @@ public class GenericDriver extends LowWebDriver {
 		}
 		
 		ParameterizedOutput po = null;
-		Output out = new Output(source);
-		
-		
+		Output out = new Output(source, false);
+		for (int i = 0; i < outputs.size(); i++) {
+			if (out.isEquivalentTo(outputs.get(i))) {
+				po = new ParameterizedOutput(getOutputSymbols().get(i));
+				for(String p : outputs.get(i).getParams()){
+					po.getParameters().add(new Parameter(extractParam(out, p), Types.STRING));
+				}
+			}
+		}
 		
 		LogManager.logRequest(pi, po);
 		return po;
 	}
 	
+	private String extractParam(Output out, String p) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	private HTTPData getValuesForInput(Input in, ParameterizedInput pi) {
 		HTTPData data = new HTTPData();
 		if (in.getType() == Type.FORM) {
@@ -102,7 +116,6 @@ public class GenericDriver extends LowWebDriver {
 		}
 		return data;
 	}
-	
 	
 	private String submit(Input in, ParameterizedInput pi) throws MalformedURLException{
 		WebRequest request = null;
@@ -150,6 +163,7 @@ public class GenericDriver extends LowWebDriver {
 			config.setPort(Integer.parseInt(root.getElementsByTagName("port").item(0).getTextContent()));
 			config.setBasicAuthUser(root.getElementsByTagName("basicAuthUser").item(0).getTextContent());
 			config.setBasicAuthPass(root.getElementsByTagName("basicAuthPass").item(0).getTextContent());
+			config.setLimitSelector(root.getElementsByTagName("limitSelector").item(0).getTextContent());
 			ArrayList<String> rtParam = new ArrayList<String>();
 			Node n = root.getElementsByTagName("runtimeParameters").item(0);
 			for(int i=0; i<n.getChildNodes().getLength(); i++){
@@ -182,7 +196,7 @@ public class GenericDriver extends LowWebDriver {
 			NodeList outputs = root.getElementsByTagName("outputs").item(0).getChildNodes();
 			for (int i=0; i<outputs.getLength(); i++){
 				if (outputs.item(i).getNodeName().equals("output")){
-					Output out = new Output(outputs.item(i).getChildNodes().item(1).getTextContent());					
+					Output out = new Output(outputs.item(i).getChildNodes().item(1).getTextContent(), true);					
 					for(int j=0; j<outputs.item(i).getChildNodes().item(3).getChildNodes().getLength(); j++){
 						if (outputs.item(i).getChildNodes().item(3).getChildNodes().item(j).getNodeName().equals("parameter")){
 							String value = outputs.item(i).getChildNodes().item(3).getChildNodes().item(j).getTextContent();
@@ -249,9 +263,6 @@ public class GenericDriver extends LowWebDriver {
 	}
 
 	@Override
-	public void initConnection() {
-		// TODO Auto-generated method stub
-		
-	}
+	public abstract void initConnection();
 
 }

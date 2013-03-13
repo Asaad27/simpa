@@ -6,6 +6,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
+import crawler.driver.GenericDriver;
 import crawler.page.PageTreeNode;
 
 
@@ -15,6 +16,7 @@ public class Output {
 	private List<String> params = null;
 	private PageTreeNode pt = null;
 	private boolean mark = false;
+	private List<Input> from = null;
 	
 	public boolean isMark() {
 		return mark;
@@ -30,6 +32,17 @@ public class Output {
 
 	public Output(){
 		params = new ArrayList<String>();
+		from = new ArrayList<Input>();
+	}
+	
+	public void addFrom(Input i){
+		if (!from.contains(i)) from.add(i);
+	}
+	
+	public boolean isNewFrom(Input i){
+		boolean n = from.contains(i);
+		if (!n) from.add(i);
+		return !n;
 	}
 
 	public int getState() {
@@ -40,19 +53,26 @@ public class Output {
 		this.state = state;
 	}
 
-	public Output(Document doc) {
-		this.source = doc.getAllElements();
-		if (!DriverGenerator.config.getLimitSelector().isEmpty()) this.source = doc.select(DriverGenerator.config.getLimitSelector());		
-		this.params = new ArrayList<String>();
-		pt = new PageTreeNode(doc);
-	}
-	
-	public Output(String source) {
-		Document doc = Jsoup.parse(source);
+	public Output(Document doc, Input from) {
+		this();
+		this.from.add(from);
 		this.source = doc.getAllElements();
 		if (!DriverGenerator.config.getLimitSelector().isEmpty()) this.source = doc.select(DriverGenerator.config.getLimitSelector());
-		this.params = new ArrayList<String>();
-		pt = new PageTreeNode(doc);
+		if (GenericDriver.config!=null && !GenericDriver.config.getLimitSelector().isEmpty()) this.source = doc.select(GenericDriver.config.getLimitSelector());
+		pt = new PageTreeNode(Jsoup.parse(this.source.html()));
+	}
+	
+	public Output(String source, boolean raw) {
+		this();
+		Document doc = Jsoup.parse(source);
+		this.source = doc.getAllElements();
+		if (!raw){
+			if (DriverGenerator.config!=null && !DriverGenerator.config.getLimitSelector().isEmpty()) this.source = doc.select(DriverGenerator.config.getLimitSelector());
+			if (GenericDriver.config!=null && !GenericDriver.config.getLimitSelector().isEmpty()) this.source = doc.select(GenericDriver.config.getLimitSelector());
+			pt = new PageTreeNode(Jsoup.parse(getDoc().html()));
+		}else{
+			pt = new PageTreeNode(doc);
+		}		
 	}
 
 	public List<String> getParams() {
@@ -65,5 +85,5 @@ public class Output {
 	
 	public boolean isEquivalentTo(Output to) {
 		return pt.equals(to.pt);
-	}		
+	}
 }

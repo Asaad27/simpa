@@ -10,7 +10,7 @@ import org.jsoup.nodes.Node;
 
 public class PageTreeNode extends GenericTreeNode<String> {
 	
-	public Set<String> excludedNode = new HashSet<String>(Arrays.asList(new String[] {
+	public static Set<String> excludedNode = new HashSet<String>(Arrays.asList(new String[] {
 			"#document", "#text", "span", "font", "a", "center", "bold", "italic", "style", "base", "param", "script", "noscript",
 			"b", "i", "tt", "sub", "sup", "big", "small", "img", "br", "tr", "td", "option", "#comment", "#data", "strong"
 			}));
@@ -20,15 +20,14 @@ public class PageTreeNode extends GenericTreeNode<String> {
 	}
 	
 	public PageTreeNode(Document doc){
-		super(doc.body().nodeName());
-		extractPageTree(doc.body().childNodes(), this);
+		super("root");
+		extractPageTree(doc.childNodes(), this);
 	}
 	
     private void extractPageTree(List<Node> childNodes, PageTreeNode pt) {
 		for(Node n : childNodes){
 			if (!excludedNode.contains(n.nodeName())){
 				PageTreeNode tmp = new PageTreeNode(n.nodeName());
-				if (n.nodeName().equals("form")) tmp.setData(n.nodeName()+"["+n.attr("action")+"]");
 				extractPageTree(n.childNodes(), tmp);
 				pt.addChild(tmp);
 			}else{

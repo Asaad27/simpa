@@ -10,6 +10,7 @@
   "enableCSS" : false,
   "enableJS" : false,
   "timeout" : 2000,
+  "runtimeParameters" : [ "Screen" ],
   "data" : {
     "manager" : "110",
     "employee_id" : "111",

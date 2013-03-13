@@ -49,6 +49,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 import crawler.Input.Type;
 import crawler.configuration.Configuration;
+import crawler.page.PageTreeNode;
 
 
 public abstract class DriverGenerator {
@@ -153,6 +154,9 @@ public abstract class DriverGenerator {
 	}
 
 	private boolean addInput(Input in) {
+		if (in.getAddress().contains("passcheck")){
+			System.out.println("suce");
+		}
 		for (Input i : inputs) {
 			if (i.equals(in)
 					|| ((config.getActionByParameter() != null) && (in.getParams().get(config.getActionByParameter()) != null) && (i.getParams().get(config.getActionByParameter()) != null)
@@ -177,9 +181,11 @@ public abstract class DriverGenerator {
 			if (i.getAddress().equals(in.getAddress())){
 				int diff = 0;
 				for(String paramName : i.getParams().keySet()){
-					if (in.getParams().get(paramName).size() == 1 && i.getParams().get(paramName).size() == 1){
-						if (Utils.isNumeric(in.getParams().get(paramName).get(0)) && Utils.isNumeric(i.getParams().get(paramName).get(0))){
-							if (!in.getParams().get(paramName).get(0).equals(i.getParams().get(paramName).get(0))) diff++;
+					if (in.getParams().get(paramName) != null && i.getParams().get(paramName) != null){
+						if (in.getParams().get(paramName).size() == 1 && i.getParams().get(paramName).size() == 1){
+							if (Utils.isNumeric(in.getParams().get(paramName).get(0)) && Utils.isNumeric(i.getParams().get(paramName).get(0))){
+								if (!in.getParams().get(paramName).get(0).equals(i.getParams().get(paramName).get(0))) diff++;
+							}
 						}
 					}
 				}
@@ -376,13 +382,13 @@ public abstract class DriverGenerator {
 		}
 }
 			
-	private void inference() {
+	private void inference() {/*
 		for(int i=0; i<outputs.size(); i++){
 			reset();
 			currentNode.clear();
 			currentNode.add(i);
 			randomWalk(i);		
-		}
+		}*/
 	}
 
 	private List<Input> getTransitionsNotMarkedFromOutput(int i) {
@@ -404,7 +410,7 @@ public abstract class DriverGenerator {
 	}
 
 	private int crawl(Document d, Input from, String content) {
-		int node = updateOutput(d);
+		int node = updateOutput(d, from);
 		currentNode.add(node);
 		Element lesson = null;
 		if (!config.getLimitSelector().isEmpty()) lesson = d.select(config.getLimitSelector()).first();  
@@ -504,12 +510,13 @@ public abstract class DriverGenerator {
 		}
 	}
 
-	private int updateOutput(Document d) {
-		Output o = new Output(d);
+	private int updateOutput(Document d, Input from) {
+		Output o = new Output(d, from);
 		if (d.toString().isEmpty()) return 0;
 		else{
 			for (int i = 0; i < outputs.size(); i++) {
 				if (o.isEquivalentTo(outputs.get(i))) {
+					if (outputs.get(i).isNewFrom(from)) findParameters(sequence, outputs.get(i));
 					return i;
 				}
 			}
@@ -580,7 +587,7 @@ public abstract class DriverGenerator {
 		for (int i=0; i<5; i++){
 			try {
 				sendSequences();
-				Output variant = new Output(submitRandom(inputToFuzz));
+				Output variant = new Output(submitRandom(inputToFuzz), false);
 				if (out.isEquivalentTo(variant)){
 					diff.addAll(findDifferences(out, variant));
 				}
@@ -617,10 +624,12 @@ public abstract class DriverGenerator {
 				for(String tag : pos) xpath += tag;
 				diff.add(xpath);
 			}
-			for(int i=0; i<first.children().size(); i++){
-				pos.add("[" + String.valueOf(i) + "]");
-				findDifferences(first.child(i), second.child(i), diff, pos);
-				pos.remove(pos.size()-1);
+			if (first.children().size() == second.children().size()){
+				for(int i=0; i<first.children().size(); i++){
+					pos.add("[" + String.valueOf(i) + "]");
+					findDifferences(first.child(i), second.child(i), diff, pos);
+					pos.remove(pos.size()-1);
+				}
 			}
 			pos.remove(pos.size()-1);
 		}
@@ -667,6 +676,9 @@ public abstract class DriverGenerator {
             n = doc.createElement("port");
             n.setTextContent(String.valueOf(config.getPort()));
             esettings.appendChild(n);
+            n = doc.createElement("limitSelector");
+            n.setTextContent(config.getLimitSelector());
+            esettings.appendChild(n);
             n = doc.createElement("basicAuthUser");
             n.setTextContent(config.getBasicAuthUser());
             esettings.appendChild(n);
@@ -704,7 +716,7 @@ public abstract class DriverGenerator {
             for (Output o : outputs){
             	org.w3c.dom.Element eoutput = doc.createElement("output");
             	org.w3c.dom.Element ediff = doc.createElement("source");
-            	ediff.setTextContent(o.getDoc().toString());
+            	ediff.setTextContent(o.getDoc().html());
             	eoutput.appendChild(ediff);
             	org.w3c.dom.Element eparams = doc.createElement("parameters");
             	for (String value : o.getParams()){
