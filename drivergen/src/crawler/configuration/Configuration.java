@@ -126,6 +126,7 @@ public class Configuration {
 	}
 
 	public String getLimitSelector() {
+		if (limitSelector == null) return "";
 		return limitSelector;
 	}
 

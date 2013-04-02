@@ -57,7 +57,7 @@ public class Output {
 		this();
 		this.from.add(from);
 		this.source = doc.getAllElements();
-		if (!DriverGenerator.config.getLimitSelector().isEmpty()) this.source = doc.select(DriverGenerator.config.getLimitSelector());
+		if (GenericDriver.config!=null && !DriverGenerator.config.getLimitSelector().isEmpty()) this.source = doc.select(DriverGenerator.config.getLimitSelector());
 		if (GenericDriver.config!=null && !GenericDriver.config.getLimitSelector().isEmpty()) this.source = doc.select(GenericDriver.config.getLimitSelector());
 		pt = new PageTreeNode(Jsoup.parse(this.source.html()));
 	}

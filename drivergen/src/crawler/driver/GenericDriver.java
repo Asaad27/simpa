@@ -15,6 +15,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.jsoup.select.Elements;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -23,6 +24,7 @@ import org.xml.sax.SAXException;
 import tools.HTTPData;
 import tools.HTTPRequest;
 import tools.HTTPResponse;
+import tools.Utils;
 import tools.loggers.LogManager;
 import automata.efsm.Parameter;
 import automata.efsm.ParameterizedInput;
@@ -38,6 +40,7 @@ import crawler.Output;
 import crawler.Input.Type;
 import crawler.configuration.Configuration;
 
+import drivers.efsm.EFSMDriver.Types;
 import drivers.efsm.real.LowWebDriver;
 
 public abstract class GenericDriver extends LowWebDriver {
@@ -101,8 +104,12 @@ public abstract class GenericDriver extends LowWebDriver {
 	}
 	
 	private String extractParam(Output out, String p) {
-		// TODO Auto-generated method stub
-		return null;
+		String path[] = p.split("/");
+		org.jsoup.nodes.Element e = out.getDoc().get(Integer.parseInt(path[0]));
+		for(int i=1; i<path.length; i++){
+			e = e.child(Integer.parseInt(path[i]));
+		}
+		return e.text();
 	}
 
 	private HTTPData getValuesForInput(Input in, ParameterizedInput pi) {
@@ -230,8 +237,19 @@ public abstract class GenericDriver extends LowWebDriver {
 
 	@Override
 	public HashMap<String, List<ArrayList<Parameter>>> getDefaultParamValues() {
-		// TODO Auto-generated method stub
-		return null;
+		HashMap<String, List<ArrayList<Parameter>>> defaultParamValues = new HashMap<String, List<ArrayList<Parameter>>>();		
+		ArrayList<ArrayList<Parameter>> params = null;
+		
+		int index = 0;
+		for(Input i : inputs)
+		{
+			params = new ArrayList<ArrayList<Parameter>>();
+			//
+			//params.add():
+			//defaultParamValues.put("input_" + String.valueOf(index);
+			index++;
+		}
+		return defaultParamValues;
 	}
 
 	@Override

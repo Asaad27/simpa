@@ -24,14 +24,15 @@ public class Main {
 	
 	public static void testCrawler(){
 		//DriverGenerator g = DriverGenerator.getDriver("WGStoredXSS");
-		DriverGenerator g = DriverGenerator.getDriver("WackoPicko");
+		///DriverGenerator g = DriverGenerator.getDriver("WackoPicko");
+		DriverGenerator g = DriverGenerator.getDriver("BookStore");
 		g.start();
 		g.exportToDot();
 		g.exportToXML();
 	}
 	
 	public static void testDriver() throws IOException{
-		GenericDriver d = new WGStoredXSSDriver("abs//WebGoat_Stored_XSS.xml");
+		GenericDriver d = new WGStoredXSSDriver();
 		System.out.println("System name   : " + d.getSystemName());
 		System.out.println("Input list: ");
 		int i, n = d.getInputSymbols().size();

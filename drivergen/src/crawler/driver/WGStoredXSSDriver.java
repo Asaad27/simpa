@@ -18,8 +18,9 @@ public class WGStoredXSSDriver extends GenericDriver {
 	
 	private String screen;
 
-	public WGStoredXSSDriver(String xml) throws IOException {
-		super(xml);
+	public WGStoredXSSDriver() throws IOException {
+		
+		super("..//drivergen//abs//WebGoat_Stored_XSS.xml");
 	}
 
 	@Override

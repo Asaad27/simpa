@@ -85,7 +85,7 @@ public class SIMPA {
 	private static Driver loadDriver(String system) throws Exception{
 		Driver driver;
 		try{
-			driver = (Driver) Class.forName(system).newInstance();
+			driver = (Driver) Class.forName(system).newInstance();			
 			LogManager.logConsole("System : " + driver.getSystemName());
 			return driver;
 		} catch (InstantiationException e) {

@@ -618,7 +618,7 @@ public abstract class DriverGenerator {
 	
 	private void findDifferences(Element first, Element second, List<String> diff, List<String> pos) {
 		if (first.nodeName().equals(second.nodeName())){
-			pos.add("/" + first.nodeName());
+			pos.add("/");
 			if (!first.ownText().equals(second.ownText())){
 				String xpath = "";
 				for(String tag : pos) xpath += tag;
@@ -626,7 +626,7 @@ public abstract class DriverGenerator {
 			}
 			if (first.children().size() == second.children().size()){
 				for(int i=0; i<first.children().size(); i++){
-					pos.add("[" + String.valueOf(i) + "]");
+					pos.add(String.valueOf(i));
 					findDifferences(first.child(i), second.child(i), diff, pos);
 					pos.remove(pos.size()-1);
 				}
