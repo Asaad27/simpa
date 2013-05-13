@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -222,9 +223,11 @@ public class ARFF {
 								.getInputParameters().get(i).type) + "\n");
 			i = 0;
 			List<Types> realTypes = getTypesOfParams(transition);
+			
 			for (Map.Entry<String, List<Parameter>> entry : transition.getParamsData(0).getAutomataState().entrySet()) {
 				for (int j = 0; j < entry.getValue().size(); j++) {
-					writer.write("@ATTRIBUTE saved" + Utils.capitalize(paramNames.get(entry.getKey()).get(j)) + " "
+					if (!paramNames.get(entry.getKey()).isEmpty())
+						writer.write("@ATTRIBUTE saved" + Utils.capitalize(paramNames.get(entry.getKey()).get(j)) + (new Random().nextLong()) + " "
 							+ convertTypes(realTypes.get(i)) + "\n");
 					i++;
 				}				

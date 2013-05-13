@@ -9,7 +9,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import automata.efsm.Parameter;
 import automata.efsm.ParameterizedInput;
-
 import crawler.DriverGenerator;
 import crawler.configuration.Configuration;
 import crawler.driver.GenericDriver;

@@ -15,7 +15,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.jsoup.select.Elements;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -24,7 +23,6 @@ import org.xml.sax.SAXException;
 import tools.HTTPData;
 import tools.HTTPRequest;
 import tools.HTTPResponse;
-import tools.Utils;
 import tools.loggers.LogManager;
 import automata.efsm.Parameter;
 import automata.efsm.ParameterizedInput;
@@ -36,11 +34,9 @@ import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 import crawler.Input;
-import crawler.Output;
 import crawler.Input.Type;
+import crawler.Output;
 import crawler.configuration.Configuration;
-
-import drivers.efsm.EFSMDriver.Types;
 import drivers.efsm.real.LowWebDriver;
 
 public abstract class GenericDriver extends LowWebDriver {
@@ -244,20 +240,45 @@ public abstract class GenericDriver extends LowWebDriver {
 		for(Input i : inputs)
 		{
 			params = new ArrayList<ArrayList<Parameter>>();
-			//
-			//params.add():
-			//defaultParamValues.put("input_" + String.valueOf(index);
+			// Only one
+			ArrayList<Parameter> one = new ArrayList<Parameter>();
+			for(String key : i.getParams().keySet()){
+				one.add(new Parameter(i.getParams().get(key).get(0), Types.STRING));
+			}
+			params.add(one);
+			defaultParamValues.put("input_" + String.valueOf(index), params);
 			index++;
 		}
 		return defaultParamValues;
 	}
-
+	
 	@Override
 	public TreeMap<String, List<String>> getParameterNames() {
-		// TODO Auto-generated method stub
-		return null;
+		TreeMap<String, List<String>> res = new TreeMap<String, List<String>>();
+		int index = 0;
+		for(Input i : inputs)
+		{
+			List<String> names = new ArrayList<String>();
+			for(String key : i.getParams().keySet()){
+				names.add(key);
+			}
+			res.put("input_" + String.valueOf(index), names);
+			index++;
+		}
+		index = 0;
+		for(Output o : outputs)
+		{
+			List<String> names = new ArrayList<String>();
+			for(int n=0; n< o.getParams().size(); n++){
+				names.add("output_" + String.valueOf(index) + "_param" + String.valueOf(n));
+			}
+			res.put("output_" + String.valueOf(index), names);
+			index++;
+		}
+		return res;
 	}
 	
+	@Override
 	public List<String> getInputSymbols() {
 		List<String> is = new ArrayList<String>();
 		for (int i=0; i<inputs.size(); i++){
@@ -266,6 +287,7 @@ public abstract class GenericDriver extends LowWebDriver {
 		return is;
 	}
 
+	@Override
 	public List<String> getOutputSymbols() {
 		List<String> os = new ArrayList<String>();
 		for (int i=0; i<outputs.size(); i++){

@@ -43,5 +43,6 @@
 	<classpathentry kind="lib" path="lib/xercesImpl-2.6.2.jar"/>
 	<classpathentry kind="lib" path="lib/xml-apis-1.0.b2.jar"/>
 	<classpathentry kind="lib" path="lib/xsdlib-20060615.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/DriverGenerator"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

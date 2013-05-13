@@ -12,7 +12,7 @@ import tools.loggers.TextLogger;
 import drivers.Driver;
 
 public class SIMPA {
-	public final static String name = "KIT";
+	public final static String name = "SIMPA";
 	private static Driver driver;
 	
 	private static void init(String[] args) {

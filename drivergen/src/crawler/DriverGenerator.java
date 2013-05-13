@@ -24,7 +24,9 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
 import main.Main;
+
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.impl.client.BasicCredentialsProvider;
@@ -49,7 +51,6 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 import crawler.Input.Type;
 import crawler.configuration.Configuration;
-import crawler.page.PageTreeNode;
 
 
 public abstract class DriverGenerator {
