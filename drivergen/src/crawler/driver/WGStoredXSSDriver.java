@@ -2,8 +2,10 @@ package crawler.driver;
 
 import java.io.IOException;
 import java.net.URL;
+
 import tools.HTTPData;
 import tools.loggers.LogManager;
+
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.WebRequest;

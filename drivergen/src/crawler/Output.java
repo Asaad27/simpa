@@ -21,6 +21,10 @@ public class Output {
 	public boolean isMark() {
 		return mark;
 	}
+	
+	public PageTreeNode getPageTree(){
+		return pt;
+	}
 
 	public void setMark() {
 		this.mark = true;

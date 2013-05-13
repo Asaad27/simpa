@@ -95,8 +95,15 @@ public abstract class GenericDriver extends LowWebDriver {
 			}
 		}
 		
-		LogManager.logRequest(pi, po);
-		return po;
+		if (po != null){
+			LogManager.logRequest(pi, po);
+			return po;
+		}else{
+			System.out.println("wtf");
+			System.out.println(source);
+			System.out.println(out.getPageTree());
+			return null;
+		}		
 	}
 	
 	private String extractParam(Output out, String p) {
@@ -206,6 +213,8 @@ public abstract class GenericDriver extends LowWebDriver {
 							out.getParams().add(value);
 						}							
 					}
+					System.out.println(out.getPageTree());
+					System.out.println("-----------------------------------");
 					this.outputs.add(out);
 				}
 			}

@@ -331,6 +331,11 @@ public abstract class DriverGenerator {
 		comments.add("Duration : " + ((System.nanoTime()-duration)/1000000000.00) + " secs");
 		comments.add("Requests : " + requests);
 
+
+		System.out.println();
+		System.out.println("[+] Merging inputs");
+		mergeInputs();
+		
 		System.out.println();
 		System.out.println("[+] Inputs (" + inputs.size() + ")");
 		for (Input in : inputs) {
@@ -347,16 +352,43 @@ public abstract class DriverGenerator {
 		for (Transition t : transitions) {
 			System.out.println("    " + t);
 		}
-
-		System.out.println();
-		System.out.println("[+] Collapsing nodes into states");
-		inference();
+		
+		//System.out.println();
+		//System.out.println("[+] Collapsing nodes into states");
+		//inference();
 		
 		System.out.println();
 		System.out.println("[+] Comments (" + comments.size() + ")");
 		Iterator<String> iter = comments.iterator();
 		while (iter.hasNext())
 			System.out.println("    " + iter.next());
+		System.out.flush();
+	}
+
+	private void mergeInputs() {
+		List<Input> mergedInput = new ArrayList<Input>();
+		Input discintIn, anInput;
+		List<String> paramValues;
+		while (inputs.size()>0){
+			discintIn  = inputs.get(0);
+			for(int j=inputs.size()-1; j>=0; j--){
+				anInput = inputs.get(j);
+				if (discintIn.getMethod().equals(anInput.getMethod()) && discintIn.getAddress().equals(anInput.getAddress())){
+					for (String param : anInput.getParams().keySet()){
+						paramValues = anInput.getParams().get(param);
+						if (discintIn.getParams().get(param) == null) discintIn.getParams().put(param, paramValues);
+						else{							
+							for(String paramValue : paramValues){
+								if (!discintIn.getParams().get(param).contains(paramValue)) discintIn.getParams().get(param).add(paramValue); 
+							}
+						}
+					}
+					inputs.remove(j);
+				}				
+			}
+			mergedInput.add(discintIn);
+		}
+		this.inputs = mergedInput;
 	}
 
 	private void initColor() {
@@ -381,7 +413,7 @@ public abstract class DriverGenerator {
 			if (nextnode != currentNode.get(currentNode.size()-1)) currentNode.add(nextnode);
 			randomWalk(nextnode);				
 		}
-}
+	}
 			
 	private void inference() {/*
 		for(int i=0; i<outputs.size(); i++){
