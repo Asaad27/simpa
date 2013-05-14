@@ -9,7 +9,7 @@
   "actionByParameter" : "action",
   "enableCSS" : false,
   "enableJS" : false,
-  "timeout" : 2000,
+  "timeout" : 10000,
   "runtimeParameters" : [ "Screen" ],
   "data" : {
     "manager" : "110",

@@ -155,9 +155,6 @@ public abstract class DriverGenerator {
 	}
 
 	private boolean addInput(Input in) {
-		if (in.getAddress().contains("passcheck")){
-			System.out.println("suce");
-		}
 		for (Input i : inputs) {
 			if (i.equals(in)
 					|| ((config.getActionByParameter() != null) && (in.getParams().get(config.getActionByParameter()) != null) && (i.getParams().get(config.getActionByParameter()) != null)
@@ -280,6 +277,7 @@ public abstract class DriverGenerator {
 				if (page.getWebResponse().getStatusCode() != 200) return null;
 				requests++;
 			} catch (Exception e) {
+				e.printStackTrace();
 				return null;
 			}
 			return page.asXml();
@@ -298,6 +296,7 @@ public abstract class DriverGenerator {
 				if (page.getWebResponse().getStatusCode() != 200) return null;
 				requests++;
 			} catch (Exception e) {
+				e.printStackTrace();
 				return null;
 			}
 			return page.asXml();
@@ -326,15 +325,12 @@ public abstract class DriverGenerator {
 		long duration = System.nanoTime();
 		for (String url : urlsToCrawl) {
 			Input in = new Input("http://" + config.getHost() + ":" + config.getPort() + url);
-			if (addInput(in)) crawlInput(in);
+			crawlInput(in);
 		}
-		comments.add("Duration : " + ((System.nanoTime()-duration)/1000000000.00) + " secs");
-		comments.add("Requests : " + requests);
-
 
 		System.out.println();
 		System.out.println("[+] Merging inputs");
-		mergeInputs();
+		//mergeInputs();
 		
 		System.out.println();
 		System.out.println("[+] Inputs (" + inputs.size() + ")");
@@ -347,22 +343,25 @@ public abstract class DriverGenerator {
 		System.out.println("[+] Outputs (" + outputs.size() + ")");
 
 		System.out.println();
+		System.out.println("[+] Stats");
+		System.out.println("    Duration : " + ((System.nanoTime()-duration)/1000000000.00) + " secs");
+		System.out.println("    Requests : " + requests);
+		
+		System.out.println();
 		System.out
 				.println("[+] Model (" + transitions.size() + " transitions)");
 		for (Transition t : transitions) {
 			System.out.println("    " + t);
 		}
 		
-		//System.out.println();
-		//System.out.println("[+] Collapsing nodes into states");
-		//inference();
-		
+	
 		System.out.println();
 		System.out.println("[+] Comments (" + comments.size() + ")");
 		Iterator<String> iter = comments.iterator();
 		while (iter.hasNext())
 			System.out.println("    " + iter.next());
 		System.out.flush();
+		
 	}
 
 	private void mergeInputs() {
@@ -402,44 +401,6 @@ public abstract class DriverGenerator {
 			colors.add(Integer.toHexString(c.getRed())+Integer.toHexString(c.getGreen())+Integer.toHexString(c.getBlue()));
 		}		
 		Collections.shuffle(colors);
-	}
-
-	private void randomWalk(int i) {
-		System.out.println("    Walking from node " + i);
-		Input oneInput = Utils.randIn(getMissingInputFromOutput(i));
-		if (oneInput == null) oneInput = Utils.randIn(getTransitionsNotMarkedFromOutput(i));
-		if (oneInput != null){		
-			int nextnode = crawlInput(oneInput);
-			if (nextnode != currentNode.get(currentNode.size()-1)) currentNode.add(nextnode);
-			randomWalk(nextnode);				
-		}
-	}
-			
-	private void inference() {/*
-		for(int i=0; i<outputs.size(); i++){
-			reset();
-			currentNode.clear();
-			currentNode.add(i);
-			randomWalk(i);		
-		}*/
-	}
-
-	private List<Input> getTransitionsNotMarkedFromOutput(int i) {
-		List<Input> ret = new ArrayList<Input>();
-		ret.addAll(inputs);
-		for(Transition t: transitions){
-			if (t.getFrom()!=i || t.getTo()==i || outputs.get(t.getTo()).isMark()) ret.remove(t.getBy());
-		}
-		return ret;
-	}
-
-	private List<Input> getMissingInputFromOutput(int i) {
-		List<Input> ret = new ArrayList<Input>();
-		ret.addAll(inputs);
-		for(Transition t: transitions){
-			if (t.getFrom()==i) ret.remove(t.getBy());
-		}
-		return ret;
 	}
 
 	private int crawl(Document d, Input from, String content) {
@@ -593,6 +554,7 @@ public abstract class DriverGenerator {
 			try {
 				page = client.getPage(request);
 			} catch (Exception e) {
+				e.printStackTrace();
 				return null;
 			}
 			return page.asXml();
@@ -607,6 +569,7 @@ public abstract class DriverGenerator {
 			try {
 				page = client.getPage(link.substring(0, link.length()-1));
 			} catch (Exception e) {
+				e.printStackTrace();
 				return null;
 			}
 			return page.asXml();
@@ -749,7 +712,7 @@ public abstract class DriverGenerator {
             for (Output o : outputs){
             	org.w3c.dom.Element eoutput = doc.createElement("output");
             	org.w3c.dom.Element ediff = doc.createElement("source");
-            	ediff.setTextContent(o.getDoc().html());
+            	ediff.setTextContent(o.getSource());
             	eoutput.appendChild(ediff);
             	org.w3c.dom.Element eparams = doc.createElement("parameters");
             	for (String value : o.getParams()){
@@ -767,7 +730,7 @@ public abstract class DriverGenerator {
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
             DOMSource source = new DOMSource(doc);
-            StreamResult xml = new StreamResult(new File("abs//" + config.getName()+ ".xml"));
+            StreamResult xml = new StreamResult(new File("abs" + File.separatorChar + config.getName()+ ".xml").toURI().getPath());
             transformer.transform(source, xml); 
         } catch (Exception e) {
             e.printStackTrace();

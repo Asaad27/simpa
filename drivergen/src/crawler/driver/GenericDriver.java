@@ -53,7 +53,7 @@ public abstract class GenericDriver extends LowWebDriver {
 		
 		client = new WebClient();
 		client.setThrowExceptionOnFailingStatusCode(false);
-		client.setTimeout(2000);
+		client.setTimeout(10000);
 		BasicCredentialsProvider creds = new BasicCredentialsProvider();
 		if (config.getBasicAuthUser() != null
 				&& config.getBasicAuthPass() != null) {
@@ -63,6 +63,8 @@ public abstract class GenericDriver extends LowWebDriver {
 							config.getBasicAuthPass()));
 		}
 		client.setCredentialsProvider(creds);
+		client.setJavaScriptEnabled(false);
+		client.setCssEnabled(false);
 		initConnection();
 		updateParameters();
 	}
@@ -95,15 +97,18 @@ public abstract class GenericDriver extends LowWebDriver {
 			}
 		}
 		
-		if (po != null){
-			LogManager.logRequest(pi, po);
-			return po;
-		}else{
-			System.out.println("wtf");
-			System.out.println(source);
-			System.out.println(out.getPageTree());
-			return null;
-		}		
+		if (po == null){		
+//			System.out.println(pi);
+//			System.out.println(source);
+//			System.out.println(out.getPageTree());
+			po = new ParameterizedOutput(getOutputSymbols().get(0));
+			for(String p : outputs.get(0).getParams()){
+				po.getParameters().add(new Parameter(extractParam(out, p), Types.STRING));
+			}
+		}	
+		
+		LogManager.logRequest(pi, po);
+		return po;
 	}
 	
 	private String extractParam(Output out, String p) {
@@ -138,6 +143,7 @@ public abstract class GenericDriver extends LowWebDriver {
 			try {
 				page = client.getPage(request);
 			} catch (Exception e) {
+				e.printStackTrace();
 				return null;
 			}
 			return page.asXml();
@@ -154,6 +160,7 @@ public abstract class GenericDriver extends LowWebDriver {
 			try {
 				page = client.getPage(link.substring(0, link.length()-1));
 			} catch (Exception e) {
+				e.printStackTrace();
 				return null;
 			}
 			return page.asXml();
@@ -213,8 +220,6 @@ public abstract class GenericDriver extends LowWebDriver {
 							out.getParams().add(value);
 						}							
 					}
-					System.out.println(out.getPageTree());
-					System.out.println("-----------------------------------");
 					this.outputs.add(out);
 				}
 			}

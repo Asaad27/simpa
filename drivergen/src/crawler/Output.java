@@ -11,27 +11,23 @@ import crawler.page.PageTreeNode;
 
 
 public class Output {
-	private int state = 0;
-	private Elements source = null;
+	private Elements doc;
+	private String source = null;
 	private List<String> params = null;
 	private PageTreeNode pt = null;
-	private boolean mark = false;
 	private List<Input> from = null;
+	private int state;
 	
-	public boolean isMark() {
-		return mark;
+	public String getSource(){
+		return source;
+	}
+
+	public Elements getDoc(){
+		return doc;
 	}
 	
 	public PageTreeNode getPageTree(){
 		return pt;
-	}
-
-	public void setMark() {
-		this.mark = true;
-	}
-	
-	public void cleanMark() {
-		this.mark = false;
 	}
 
 	public Output(){
@@ -58,33 +54,41 @@ public class Output {
 	}
 
 	public Output(Document doc, Input from) {
-		this();
+		this();		
 		this.from.add(from);
-		this.source = doc.getAllElements();
-		if (GenericDriver.config!=null && !DriverGenerator.config.getLimitSelector().isEmpty()) this.source = doc.select(DriverGenerator.config.getLimitSelector());
-		if (GenericDriver.config!=null && !GenericDriver.config.getLimitSelector().isEmpty()) this.source = doc.select(GenericDriver.config.getLimitSelector());
-		pt = new PageTreeNode(Jsoup.parse(this.source.html()));
+		this.source = doc.html();
+		this.doc = doc.getAllElements();
+		if (DriverGenerator.config!=null && !DriverGenerator.config.getLimitSelector().isEmpty()){
+			this.doc = doc.select(DriverGenerator.config.getLimitSelector());
+			this.source = this.doc.html();
+		}
+		if (GenericDriver.config!=null && !GenericDriver.config.getLimitSelector().isEmpty()){
+			this.doc = doc.select(GenericDriver.config.getLimitSelector());
+			this.source = this.doc.html();
+		}
+		pt = new PageTreeNode(Jsoup.parse(this.source));
 	}
 	
 	public Output(String source, boolean raw) {
-		this();
+		this();		
 		Document doc = Jsoup.parse(source);
-		this.source = doc.getAllElements();
+		this.source = doc.html();
+		this.doc = doc.getAllElements();
 		if (!raw){
-			if (DriverGenerator.config!=null && !DriverGenerator.config.getLimitSelector().isEmpty()) this.source = doc.select(DriverGenerator.config.getLimitSelector());
-			if (GenericDriver.config!=null && !GenericDriver.config.getLimitSelector().isEmpty()) this.source = doc.select(GenericDriver.config.getLimitSelector());
-			pt = new PageTreeNode(Jsoup.parse(getDoc().html()));
-		}else{
-			pt = new PageTreeNode(doc);
-		}		
+			if (DriverGenerator.config!=null && !DriverGenerator.config.getLimitSelector().isEmpty()){
+				this.doc = doc.select(DriverGenerator.config.getLimitSelector());
+				this.source = this.doc.html();
+			}
+			if (GenericDriver.config!=null && !GenericDriver.config.getLimitSelector().isEmpty()){
+				this.doc = doc.select(GenericDriver.config.getLimitSelector());
+				this.source = this.doc.html();
+			}
+		}	
+		pt = new PageTreeNode(Jsoup.parse(this.source));
 	}
 
 	public List<String> getParams() {
 		return params;
-	}
-
-	public Elements getDoc() {
-		return source;
 	}
 	
 	public boolean isEquivalentTo(Output to) {

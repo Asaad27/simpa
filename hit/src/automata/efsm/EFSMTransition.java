@@ -146,6 +146,7 @@ public class EFSMTransition extends Transition {
 	
 	public String toRawDot(){
 		StringBuffer dot = new StringBuffer(from + " -> " + to + "[label=\"" + input + "/" + output);
+		/*
 		if (outputFunction instanceof GeneratedOutputFunction){
 			dot.append("\\n" + ((GeneratedOutputFunction)outputFunction).toString());			
 		}else{
@@ -153,6 +154,7 @@ public class EFSMTransition extends Transition {
 				dot.append("\\n" + dti);
 			}
 		}
+		*/
 		dot.append("\"];");
 		return dot.toString();
 	}

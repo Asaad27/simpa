@@ -9,10 +9,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Node;
 
 public class PageTreeNode extends GenericTreeNode<String> {
-	
+
 	public static Set<String> excludedNode = new HashSet<String>(Arrays.asList(new String[] {
 			"#document", "#text", "span", "font", "a", "center", "bold", "italic", "style", "base", "param", "script", "noscript",
-			"b", "i", "tt", "sub", "sup", "big", "small", "img", "br", "tr", "td", "option", "#comment", "#data", "strong"
+			"b", "i", "tt", "sub", "meta", "title", "head", "tbody", "sup", "big", "small", "img", "br", "tr", "td", "option", "#comment", "#data", "strong"
 			}));
 
 	public PageTreeNode(String nodeName){

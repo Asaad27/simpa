@@ -135,7 +135,7 @@ public class LiDataTable {
 				if ((item.get(i).getInputParametersValues().equals(item.get(j).getInputParametersValues())) &&
 					(item.get(i).getAutomataStateValues().equals(item.get(j).getAutomataStateValues()))){
 					for(int k=0; k<item.get(i).getOutputParameters().size(); k++){
-						if (!(item.get(i).getOutputParameters().get(k).value.equals(item.get(j).getOutputParameters().get(k).value))){
+						if (item.get(j).getOutputParameters().size()>k && !(item.get(i).getOutputParameters().get(k).value.equals(item.get(j).getOutputParameters().get(k).value))){
 							boolean exists = false;
 							for(ArrayList<Parameter> old : oldParams){
 								if (old.equals(item.get(i).getInputParameters())){
