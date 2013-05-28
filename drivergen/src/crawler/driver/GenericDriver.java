@@ -23,6 +23,7 @@ import org.xml.sax.SAXException;
 import tools.HTTPData;
 import tools.HTTPRequest;
 import tools.HTTPResponse;
+import tools.Utils;
 import tools.loggers.LogManager;
 import automata.efsm.Parameter;
 import automata.efsm.ParameterizedInput;
@@ -91,8 +92,12 @@ public abstract class GenericDriver extends LowWebDriver {
 		for (int i = 0; i < outputs.size(); i++) {
 			if (out.isEquivalentTo(outputs.get(i))) {
 				po = new ParameterizedOutput(getOutputSymbols().get(i));
-				for(String p : outputs.get(i).getParams()){
-					po.getParameters().add(new Parameter(extractParam(out, p), Types.STRING));
+				if (outputs.get(i).getParams().isEmpty()){
+					po.getParameters().add(new Parameter("200", Types.STRING));
+				}else{
+					for(String p : outputs.get(i).getParams()){
+						po.getParameters().add(new Parameter(extractParam(out, p), Types.STRING));
+					}
 				}
 			}
 		}
@@ -206,6 +211,7 @@ public abstract class GenericDriver extends LowWebDriver {
 						}
 							
 					}
+					if (in.getParams().isEmpty()) in.getParams().put("noparam", Utils.createArrayList("novalue"));
 					this.inputs.add(in);
 				}
 			}
@@ -283,8 +289,12 @@ public abstract class GenericDriver extends LowWebDriver {
 		for(Output o : outputs)
 		{
 			List<String> names = new ArrayList<String>();
-			for(int n=0; n< o.getParams().size(); n++){
-				names.add("output_" + String.valueOf(index) + "_param" + String.valueOf(n));
+			if (o.getParams().isEmpty()){
+				names.add("output_" + String.valueOf(index) + "_status");
+			}else{
+				for(int n=0; n< o.getParams().size(); n++){
+					names.add("output_" + String.valueOf(index) + "_param" + String.valueOf(n));
+				}
 			}
 			res.put("output_" + String.valueOf(index), names);
 			index++;
@@ -315,8 +325,5 @@ public abstract class GenericDriver extends LowWebDriver {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	@Override
-	public abstract void initConnection();
 
 }

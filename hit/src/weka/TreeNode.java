@@ -51,12 +51,17 @@ public class TreeNode {
 	}
 	
 	public void loadFromString(Classifier cl){
-		lines = cl.toString().split("\n");
-		while (!lines[currLine].isEmpty()) currLine++;
-		currLine++;
-		while (nodeLevel() == 0){
-			child.add(readNode(0));			
-		}
+		lines = cl.toString().split("\n");	
+			while (!lines[currLine].isEmpty()) currLine++;
+			currLine++;
+			if (currLine == 4){
+				data = lines[2].substring(lines[2].indexOf(": ")+2, lines[2].indexOf("(", lines[2].indexOf(": ")+2)).trim();
+				condition = "(true)";
+			}else{
+				while (nodeLevel() == 0){
+					child.add(readNode(0));			
+				}
+			}
 	}
 
 	private List<String> getPredicatesFor_Rec(String leaf, String c, List<String> pred){

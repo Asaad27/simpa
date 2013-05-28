@@ -2,6 +2,8 @@ package crawler.driver;
 
 import java.io.IOException;
 
+import com.gargoylesoftware.htmlunit.WebClient;
+
 import tools.loggers.LogManager;
 
 public class BookStoreDriver extends GenericDriver {
@@ -13,6 +15,8 @@ public class BookStoreDriver extends GenericDriver {
 
 	@Override
 	public void reset() {
+		super.reset();
+		client = new WebClient();		
 	}
 		
 	public void initConnection() {

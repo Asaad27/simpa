@@ -330,7 +330,7 @@ public abstract class DriverGenerator {
 
 		System.out.println();
 		System.out.println("[+] Merging inputs");
-		//mergeInputs();
+		mergeInputs();
 		
 		System.out.println();
 		System.out.println("[+] Inputs (" + inputs.size() + ")");
