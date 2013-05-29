@@ -202,16 +202,25 @@ public abstract class GenericDriver extends LowWebDriver {
 					in.setMethod(HttpMethod.valueOf(inputs.item(i).getAttributes().getNamedItem("method").getNodeValue()));
 					in.setType(Type.valueOf(inputs.item(i).getAttributes().getNamedItem("type").getNodeValue()));			
 					
+					int nbValue = 0;
 					for(int j=0; j<inputs.item(i).getChildNodes().item(1).getChildNodes().getLength(); j++){
-						if (inputs.item(i).getChildNodes().item(1).getChildNodes().item(j).getNodeName().equals("parameter")){
-							String name = inputs.item(i).getChildNodes().item(1).getChildNodes().item(j).getAttributes().getNamedItem("name").getNodeValue();
-							String value = inputs.item(i).getChildNodes().item(1).getChildNodes().item(j).getTextContent();
-							if (in.getParams().get(name) == null) in.getParams().put(name, new ArrayList<String>());
-							in.getParams().get(name).add(value);
-						}
-							
+						if (inputs.item(i).getChildNodes().item(1).getChildNodes().item(j).getNodeName().equals("parametersCombination")){
+							nbValue++;
+							for(int k=0; k<inputs.item(i).getChildNodes().item(1).getChildNodes().item(j).getChildNodes().getLength(); k++){
+								if (inputs.item(i).getChildNodes().item(1).getChildNodes().item(j).getChildNodes().item(k).getNodeName().equals("parameter")){
+									String name = inputs.item(i).getChildNodes().item(1).getChildNodes().item(j).getChildNodes().item(k).getAttributes().getNamedItem("name").getNodeValue();
+									String value = inputs.item(i).getChildNodes().item(1).getChildNodes().item(j).getChildNodes().item(k).getTextContent();
+									if (in.getParams().get(name) == null) in.getParams().put(name, new ArrayList<String>());
+									in.getParams().get(name).add(value);
+								}							
+							}
+						}							
 					}
-					if (in.getParams().isEmpty()) in.getParams().put("noparam", Utils.createArrayList("novalue"));
+					in.setNbValues(nbValue);
+					if (in.getParams().isEmpty()){
+						in.getParams().put("noparam", Utils.createArrayList("novalue"));
+						in.setNbValues(1);
+					}
 					this.inputs.add(in);
 				}
 			}
@@ -255,17 +264,19 @@ public abstract class GenericDriver extends LowWebDriver {
 	public HashMap<String, List<ArrayList<Parameter>>> getDefaultParamValues() {
 		HashMap<String, List<ArrayList<Parameter>>> defaultParamValues = new HashMap<String, List<ArrayList<Parameter>>>();		
 		ArrayList<ArrayList<Parameter>> params = null;
-		
+		ArrayList<Parameter> one = null;		
 		int index = 0;
 		for(Input i : inputs)
 		{
 			params = new ArrayList<ArrayList<Parameter>>();
-			// Only one
-			ArrayList<Parameter> one = new ArrayList<Parameter>();
-			for(String key : i.getParams().keySet()){
-				one.add(new Parameter(i.getParams().get(key).get(0), Types.STRING));
+			int nbParam = i.getNbValues();
+			for(int k=0; k<nbParam; k++){
+				one = new ArrayList<Parameter>();
+				for(String key : i.getParams().keySet()){				
+					one.add(new Parameter(i.getParams().get(key).get(k), Types.STRING));
+				}
+				params.add(one);
 			}
-			params.add(one);
 			defaultParamValues.put("input_" + String.valueOf(index), params);
 			index++;
 		}

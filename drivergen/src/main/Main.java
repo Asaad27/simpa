@@ -13,6 +13,7 @@ import crawler.DriverGenerator;
 import crawler.configuration.Configuration;
 import crawler.driver.BookStoreDriver;
 import crawler.driver.GenericDriver;
+import crawler.driver.WGBypassBLDriver;
 import crawler.driver.WGStoredXSSDriver;
 
 
@@ -24,35 +25,26 @@ public class Main {
 	public static void testCrawler(){
 		//DriverGenerator g = DriverGenerator.getDriver("WGStoredXSS");
 		///DriverGenerator g = DriverGenerator.getDriver("WackoPicko");
-		DriverGenerator g = DriverGenerator.getDriver("BookStore");
+		//DriverGenerator g = DriverGenerator.getDriver("BookStore");
+		DriverGenerator g = DriverGenerator.getDriver("WGBypassBL");
 		g.start();
 		g.exportToDot();
 		g.exportToXML();
 	}
 	
 	public static void testDriver() throws IOException{
-		GenericDriver d = new WGStoredXSSDriver();
+		GenericDriver d = new WGBypassBLDriver();
 		System.out.println("System name   : " + d.getSystemName());
 		System.out.println("Input list: ");
 		int i, n = d.getInputSymbols().size();
 		for(i=0; i<n; i++){
 			System.out.println(d.getInputSymbols().get(i) + " " + d.inputs.get(i).getMethod() + " " + d.inputs.get(i).getAddress() + " " + d.inputs.get(i).getParams());
 		}
-		n = d.getOutputSymbols().size();
-		System.out.println("Output list: ");
-		for(i=0; i<n; i++){
-			PrintWriter ecri = new PrintWriter(new FileWriter("tmp" + File.separator + "page" + i));
-			ecri.write(d.outputs.get(i).getSource());
-			ecri.close();
-			ecri = new PrintWriter(new FileWriter("tmp" + File.separator + "tree" + i));
-			ecri.write(d.outputs.get(i).getPageTree().toString());
-			ecri.close();
-		}
 	}
 	
 	public static void main(String[] args) throws Exception{
 		//testJSON();
-		testCrawler();
+		//testCrawler();
 		testDriver();
 	}
 

@@ -122,7 +122,7 @@ public class ARFF {
 			List<Types> realTypes = getTypesOfParams(list);
 			for (Map.Entry<String, List<Parameter>> entry : list.get(0).getParamsData(0).getAutomataState().entrySet()) {
 				for (int j = 0; j < entry.getValue().size(); j++) {
-					writer.write("@ATTRIBUTE saved" + Utils.capitalize(paramNames.get(entry.getKey()).get(j)) + " "
+					writer.write("@ATTRIBUTE saved" + Utils.capitalize(paramNames.get(entry.getKey()).get(j))  +"_" + Math.abs((new Random().nextLong()))+ " "
 							+ convertTypes(realTypes.get(currentParamIndex++)) + "\n");
 				}
 				i++;

@@ -1,0 +1,18 @@
+{
+  "host" : "localhost",
+  "port" : 8080,
+  "basicAuthUser" : "guest",
+  "basicAuthPass" : "guest",
+  "name" : "WebGoat_Bypass_BL",
+  "limitSelector" : "#lesson_wrapper",
+  "noFollow" : [ "^javascript:", "^http://" ],
+  "actionByParameter" : "action",
+  "enableCSS" : false,
+  "enableJS" : false,
+  "timeout" : 2000,
+  "runtimeParameters" : [ "Screen" ],
+  "data" : {
+    "employee_id" : "105",
+    "password" : "tom"
+  }
+}

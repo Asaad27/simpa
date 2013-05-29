@@ -206,7 +206,7 @@ public abstract class DriverGenerator {
 			}
 		}
 		inputs.add(in);
-		if (config.getActionByParameter() != null) {
+		/*if (config.getActionByParameter() != null) {
 			for (int i = 0; i < inputs.size()-1; i++) {
 				if ((inputs.get(i).getAddress().equals(in.getAddress())) &&
 					(in.getParams().get(config.getActionByParameter()) != null) &&
@@ -222,7 +222,7 @@ public abstract class DriverGenerator {
 					}
 				}
 			}
-		}
+		}*/
 		for (int i = 0; i < inputs.size()-1; i++) {
 			if ((inputs.get(i).getAddress().equals(in.getAddress())) && (inputs.get(i).getParams().isEmpty() && in.getParams().size()>0))
 			{
@@ -330,7 +330,7 @@ public abstract class DriverGenerator {
 
 		System.out.println();
 		System.out.println("[+] Merging inputs");
-		mergeInputs();
+		//mergeInputs();
 		
 		System.out.println();
 		System.out.println("[+] Inputs (" + inputs.size() + ")");
@@ -696,14 +696,17 @@ public abstract class DriverGenerator {
             	einput.setAttribute("method", String.valueOf(i.getMethod()));
             	einput.setAttribute("address", i.getAddress());
             	org.w3c.dom.Element eparams = doc.createElement("parameters");
+            	org.w3c.dom.Element eparamsComb = doc.createElement("parametersCombination");
             	for(String name : i.getParams().keySet()){
             		for (String value : i.getParams().get(name)){
             			org.w3c.dom.Element eparam = doc.createElement("parameter");
             			eparam.setAttribute("name", name);
             			eparam.setTextContent(value);
-            			eparams.appendChild(eparam);
+            			eparamsComb.appendChild(eparam);
+            			break;
             		}
             	}
+            	eparams.appendChild(eparamsComb);
             	einput.appendChild(eparams);
             	einputs.appendChild(einput);
             }            
@@ -715,11 +718,12 @@ public abstract class DriverGenerator {
             	ediff.setTextContent(o.getSource());
             	eoutput.appendChild(ediff);
             	org.w3c.dom.Element eparams = doc.createElement("parameters");
+            	
             	for (String value : o.getParams()){
         			org.w3c.dom.Element eparam = doc.createElement("parameter");
-        			eparam.setTextContent(value);
-        			eparams.appendChild(eparam);
+        			eparam.setTextContent(value);        			
         		}
+            	
             	eoutput.appendChild(eparams);
             	eoutputs.appendChild(eoutput);
             }             

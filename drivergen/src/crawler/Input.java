@@ -15,6 +15,7 @@ public class Input {
 		LINK, FORM;
 	}
 	
+	private int nbValues = 0;
 	private Type type = null;
 	private HttpMethod method = null;
 	private String address = null;
@@ -22,6 +23,14 @@ public class Input {
 	
 	public Input(){
 		params = new HashMap<String, List<String>>();
+	}
+	
+	public void setNbValues(int val) {
+		this.nbValues = val;
+	}
+	
+	public int getNbValues() {
+		return this.nbValues;
 	}
 
 	public void setType(Type type) {
