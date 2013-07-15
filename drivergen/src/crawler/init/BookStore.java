@@ -8,11 +8,10 @@ import org.codehaus.jackson.map.JsonMappingException;
 import crawler.DriverGenerator;
 import crawler.Input;
 
-
 public class BookStore extends DriverGenerator{
 	
 	public BookStore() throws JsonParseException, JsonMappingException, IOException{
-		super("bookstore.json");
+		super("BookStore.json");
 		initConnection();
 	}
 	
@@ -26,6 +25,6 @@ public class BookStore extends DriverGenerator{
 
 	@Override
 	protected String prettyprint(Input in) {
-		return in.getAddress().substring(32);
+		return in.getAddress();
 	}
 }
