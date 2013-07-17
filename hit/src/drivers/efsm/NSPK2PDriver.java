@@ -16,32 +16,39 @@ public class NSPK2PDriver extends EFSMDriver {
 	}
 
 	@Override
-	public HashMap<String, List<ArrayList<Parameter>>> getDefaultParamValues(){
-		HashMap<String, List<ArrayList<Parameter>>> defaultParamValues = new HashMap<String, List<ArrayList<Parameter>>>();		
+	public HashMap<String, List<ArrayList<Parameter>>> getDefaultParamValues() {
+		HashMap<String, List<ArrayList<Parameter>>> defaultParamValues = new HashMap<String, List<ArrayList<Parameter>>>();
 		ArrayList<ArrayList<Parameter>> params = null;
-		
-		//m1
+
+		// m1
 		{
-			params = new ArrayList<ArrayList<Parameter>>();	
-			params.add(Utils.createArrayList(new Parameter("666", Types.NUMERIC), new Parameter("5", Types.NUMERIC)));
-			defaultParamValues.put("m1", params);		
+			params = new ArrayList<ArrayList<Parameter>>();
+			params.add(Utils.createArrayList(
+					new Parameter("666", Types.NUMERIC), new Parameter("5",
+							Types.NUMERIC)));
+			defaultParamValues.put("m1", params);
 		}
-		
-		//m3
+
+		// m3
 		{
-			params = new ArrayList<ArrayList<Parameter>>();	
-			params.add(Utils.createArrayList(new Parameter("666", Types.NUMERIC), new Parameter("10", Types.NUMERIC)));
+			params = new ArrayList<ArrayList<Parameter>>();
+			params.add(Utils.createArrayList(
+					new Parameter("666", Types.NUMERIC), new Parameter("10",
+							Types.NUMERIC)));
 			defaultParamValues.put("m3", params);
 		}
 		return defaultParamValues;
 	}
 
 	@Override
-	public TreeMap<String, List<String>> getParameterNames(){
+	public TreeMap<String, List<String>> getParameterNames() {
 		TreeMap<String, List<String>> defaultParamNames = new TreeMap<String, List<String>>();
-		defaultParamNames.put("m1", Utils.createArrayList("default1", "sendedID"));
-		defaultParamNames.put("m2", Utils.createArrayList("receivedID", "receivedSessionID"));
-		defaultParamNames.put("m3", Utils.createArrayList("default2", "sendedSessionID"));
+		defaultParamNames.put("m1",
+				Utils.createArrayList("default1", "sendedID"));
+		defaultParamNames.put("m2",
+				Utils.createArrayList("receivedID", "receivedSessionID"));
+		defaultParamNames.put("m3",
+				Utils.createArrayList("default2", "sendedSessionID"));
 		defaultParamNames.put("KO", Utils.createArrayList("default3"));
 		defaultParamNames.put("OK", Utils.createArrayList("default4"));
 		return defaultParamNames;

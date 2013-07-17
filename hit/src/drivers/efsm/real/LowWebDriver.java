@@ -31,35 +31,40 @@ import drivers.efsm.EFSMDriver;
  *  
  */
 
-public abstract class LowWebDriver extends EFSMDriver{
+public abstract class LowWebDriver extends EFSMDriver {
 	public String systemHost;
 	public int systemPort;
-	
+
 	public CookieManager cookie;
-	
-	public LowWebDriver(){
+
+	public LowWebDriver() {
 		super(null);
 		this.cookie = new CookieManager();
 	}
-	
-	public HTTPResponse executeWeb(HTTPRequest req){
+
+	public HTTPResponse executeWeb(HTTPRequest req) {
 		return new HTTPResponse(TCPSend.Send(systemHost, systemPort, req));
 	}
-	
+
 	public ParameterizedOutput execute(ParameterizedInput pi) {
 		numberOfAtomicRequest++;
 		HTTPRequest req = abstractToConcrete(pi);
 		ParameterizedOutput po = new ParameterizedOutput();
-		if (req != null) po = concreteToAbstract(executeWeb(req));
+		if (req != null)
+			po = concreteToAbstract(executeWeb(req));
 		LogManager.logRequest(pi, po);
 		return po;
 	}
-	
-	public abstract HTTPRequest abstractToConcrete(ParameterizedInput pi);
-	
-	public abstract ParameterizedOutput concreteToAbstract(HTTPResponse resp);
 
-	public abstract void initConnection();
-		
+	public HTTPRequest abstractToConcrete(ParameterizedInput pi) {
+		return null;
+	}
+
+	public ParameterizedOutput concreteToAbstract(HTTPResponse resp) {
+		return null;
+	}
+
+	public void initConnection() {
+	};
 
 }

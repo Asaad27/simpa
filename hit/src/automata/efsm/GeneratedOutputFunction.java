@@ -8,41 +8,46 @@ import main.Options;
 import tools.Utils;
 import drivers.efsm.EFSMDriver.Types;
 
-public class GeneratedOutputFunction implements IOutputFunction, Serializable{
+public class GeneratedOutputFunction implements IOutputFunction, Serializable {
 	private static final long serialVersionUID = 2354232336322191833L;
 
 	private Guard guard = null;
 	private int nbOutputParams = 1;
 	private int nbInputParams = 1;
 	private List<String> isNdv = null;
-	
-	public GeneratedOutputFunction(int nbInputParams, int nbOutputParams){
+
+	public GeneratedOutputFunction(int nbInputParams, int nbOutputParams) {
 		guard = new Guard(nbInputParams);
 		this.nbOutputParams = nbOutputParams;
 		this.nbInputParams = nbInputParams;
 		this.isNdv = new ArrayList<String>();
-		for(int i=0; i<nbOutputParams; i++) this.isNdv.add("");
+		for (int i = 0; i < nbOutputParams; i++)
+			this.isNdv.add("");
 	}
-		
-	public Guard getGuard(){
+
+	public Guard getGuard() {
 		return guard;
 	}
-	
-	public void setGuard(Guard g){
+
+	public void setGuard(Guard g) {
 		guard = g;
 	}
 
 	@Override
-	public List<Parameter> process(EFSM automata, List<Parameter> inputParameters) {
-		if (guard.isTrue(automata, inputParameters)){
+	public List<Parameter> process(EFSM automata,
+			List<Parameter> inputParameters) {
+		if (guard.isTrue(automata, inputParameters)) {
 			List<Parameter> param = new ArrayList<Parameter>();
-			for(int i=0; i<nbOutputParams; i++){
-				if (!isNdv.get(i).equals("")){
-					String ndvVal = String.valueOf(Utils.randIntBetween(Options.DOMAINSIZE*100, Options.DOMAINSIZE*1000));
+			for (int i = 0; i < nbOutputParams; i++) {
+				if (!isNdv.get(i).equals("")) {
+					String ndvVal = String.valueOf(Utils
+							.randIntBetween(Options.DOMAINSIZE * 100,
+									Options.DOMAINSIZE * 1000));
 					param.add(new Parameter(ndvVal, Types.NUMERIC));
 					guard.memory.put(isNdv.get(i), ndvVal);
-				}else{
-					param.add(new Parameter(inputParameters.get(i%nbInputParams).value, Types.NUMERIC));
+				} else {
+					param.add(new Parameter(inputParameters.get(i
+							% nbInputParams).value, Types.NUMERIC));
 				}
 			}
 			return param;
@@ -53,11 +58,12 @@ public class GeneratedOutputFunction implements IOutputFunction, Serializable{
 	public void generateNdv(int nbNdv) {
 		isNdv.set(Utils.randInt(nbOutputParams), "ndv" + nbNdv);
 	}
-	
-	public String toString(){
+
+	public String toString() {
 		String g = guard.toString();
-		for(int i=0; i<isNdv.size(); i++)
-			if (!isNdv.get(i).equals("")) g += "\\n" + "outp" + i + " = " + isNdv.get(i);
+		for (int i = 0; i < isNdv.size(); i++)
+			if (!isNdv.get(i).equals(""))
+				g += "\\n" + "outp" + i + " = " + isNdv.get(i);
 		return g;
 	}
 }

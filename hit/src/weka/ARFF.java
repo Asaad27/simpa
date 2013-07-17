@@ -41,11 +41,11 @@ import drivers.efsm.EFSMDriver.Types;
 public class ARFF {
 	private static int iOut = 0;
 	private static List<String> gSymbols = new ArrayList<String>();
-	
-	public static List<String> getGlobalSymbols(){
+
+	public static List<String> getGlobalSymbols() {
 		return gSymbols;
 	}
-	
+
 	private static String convertTypes(Types type) {
 		switch (type) {
 		case NOMINAL:
@@ -72,10 +72,10 @@ public class ARFF {
 			return "'s" + filterSymName(param.value) + "'";
 		default:
 			LogManager.logException("", new Exception("Undefined type"));
-		}			
+		}
 		return null;
 	}
-	
+
 	private static String convertInit(Parameter param, Types type) {
 		switch (type) {
 		case NOMINAL:
@@ -87,56 +87,70 @@ public class ARFF {
 			gSymbols.add("s" + filterSymName(param.value));
 			return "'s" + filterSymName(param.value) + "'";
 		default:
-			LogManager.logException("", new Exception("Undefined type"));	
+			LogManager.logException("", new Exception("Undefined type"));
 		}
 		return null;
 	}
-	
-	private static String filterSymName(String name){
+
+	private static String filterSymName(String name) {
 		String allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 		String result = "";
-		for (int i=0; i<name.length(); i++){
-			if (allowed.indexOf(name.charAt(i)) != -1) result += name.charAt(i);
+		for (int i = 0; i < name.length(); i++) {
+			if (allowed.indexOf(name.charAt(i)) != -1)
+				result += name.charAt(i);
 		}
 		return result;
 	}
 
-	public static String generateFileForPredicate(
-			List<EFSMTransition> list, TreeMap<String, List<String>> paramNames) {
+	public static String generateFileForPredicate(List<EFSMTransition> list,
+			TreeMap<String, List<String>> paramNames) {
 		File file = null;
 		File dir = new File(Options.OUTDIR + Options.DIRARFF);
 		Writer writer = null;
-		int i = 0; int currentParamIndex = 0;
+		int i = 0;
+		int currentParamIndex = 0;
 		try {
 			if (!dir.isDirectory() && !dir.mkdirs())
-					throw new IOException("unable to create " + dir.getName() + " directory");
-			file = new File(dir.getAbsolutePath() + File.separator 	+ "from" + list.get(0).getFrom() + ".arff");
+				throw new IOException("unable to create " + dir.getName()
+						+ " directory");
+			file = new File(dir.getAbsolutePath() + File.separator + "from"
+					+ list.get(0).getFrom() + ".arff");
 			writer = new BufferedWriter(new FileWriter(file));
 			writer.write("@RELATION 'from" + list.get(0).getFrom() + "'\n");
 			for (i = 0; i < list.get(0).getParamsData(0).getInputParameters()
 					.size(); i++)
-				writer.write("@ATTRIBUTE " + Utils.capitalize(paramNames.get(list.get(0).getInput()).get(i))	+ " "
+				writer.write("@ATTRIBUTE "
+						+ Utils.capitalize(paramNames.get(
+								list.get(0).getInput()).get(i))
+						+ " "
 						+ convertTypes(list.get(0).getParamsData(0)
 								.getInputParameters().get(i).type) + "\n");
-			i=0; currentParamIndex = 0;
+			i = 0;
+			currentParamIndex = 0;
 			List<Types> realTypes = getTypesOfParams(list);
-			for (Map.Entry<String, List<Parameter>> entry : list.get(0).getParamsData(0).getAutomataState().entrySet()) {
+			for (Map.Entry<String, List<Parameter>> entry : list.get(0)
+					.getParamsData(0).getAutomataState().entrySet()) {
 				for (int j = 0; j < entry.getValue().size(); j++) {
-					writer.write("@ATTRIBUTE saved" + Utils.capitalize(paramNames.get(entry.getKey()).get(j))  +"_" + Math.abs((new Random().nextLong()))+ " "
-							+ convertTypes(realTypes.get(currentParamIndex++)) + "\n");
+					writer.write("@ATTRIBUTE saved"
+							+ Utils.capitalize(paramNames.get(entry.getKey())
+									.get(j)) + "_"
+							+ Math.abs((new Random().nextLong())) + " "
+							+ convertTypes(realTypes.get(currentParamIndex++))
+							+ "\n");
 				}
 				i++;
 			}
 			writer.write("@ATTRIBUTE class {");
 			Set<String> dests = new HashSet<String>();
-			for(EFSMTransition t : list) dests.add(t.getTo() + t.getOutput());
-			Object[] destsA = dests.toArray(); 
-			writer.write((String)destsA[0]);
+			for (EFSMTransition t : list)
+				dests.add(t.getTo() + t.getOutput());
+			Object[] destsA = dests.toArray();
+			writer.write((String) destsA[0]);
 			for (i = 1; i < destsA.length; i++) {
-				writer.write("," + (String)destsA[i]);
+				writer.write("," + (String) destsA[i]);
 			}
 			writer.write("}\n");
-			
+
 			writer.write("@DATA\n");
 			for (EFSMTransition t : list) {
 				for (LiDataTableItem dti : t.getParamsData()) {
@@ -144,12 +158,14 @@ public class ARFF {
 					for (Parameter p : dti.getInputParameters())
 						line.append(convertValue(p) + ", ");
 					i = 0;
-					for (Parameter p  : dti.getAutomataStateParams()) {
-						if (p.type == realTypes.get(i)) line.append(convertValue(p) + ", ");
-						else line.append(convertInit(p, realTypes.get(i)) + ", ");
+					for (Parameter p : dti.getAutomataStateParams()) {
+						if (p.type == realTypes.get(i))
+							line.append(convertValue(p) + ", ");
+						else
+							line.append(convertInit(p, realTypes.get(i)) + ", ");
 						i++;
 					}
-					line.append(t.getTo()+t.getOutput() + "\n");
+					line.append(t.getTo() + t.getOutput() + "\n");
 					writer.write(line.toString());
 				}
 			}
@@ -158,8 +174,9 @@ public class ARFF {
 			LogManager.logTransition("Generate raw datafile : "
 					+ file.getName());
 			return file.getPath();
-		} catch (IndexOutOfBoundsException e){
-			LogManager.logException("Error in generating datafile ("+file.getName()+")", e);
+		} catch (IndexOutOfBoundsException e) {
+			LogManager.logException(
+					"Error in generating datafile (" + file.getName() + ")", e);
 			System.exit(0);
 		} catch (IOException e) {
 			LogManager.logException("Unable to generate arff file", e);
@@ -171,72 +188,86 @@ public class ARFF {
 	@SuppressWarnings("unchecked")
 	private static List<Types> getTypesOfParams(Object transList) {
 		List<EFSMTransition> list = null;
-		if (transList instanceof EFSMTransition){
+		if (transList instanceof EFSMTransition) {
 			list = new ArrayList<EFSMTransition>();
-			list.add((EFSMTransition)transList);
-		}else{
-			list = (ArrayList<EFSMTransition>)transList;
+			list.add((EFSMTransition) transList);
+		} else {
+			list = (ArrayList<EFSMTransition>) transList;
 		}
-		
+
 		List<ArrayList<Parameter>> simplifiedList = new ArrayList<ArrayList<Parameter>>();
-		for(EFSMTransition trans : list){
-			for (LiDataTableItem dti : trans.getParamsData()){
-				simplifiedList.add((ArrayList<Parameter>)dti.getAutomataStateParams());
+		for (EFSMTransition trans : list) {
+			for (LiDataTableItem dti : trans.getParamsData()) {
+				simplifiedList.add((ArrayList<Parameter>) dti
+						.getAutomataStateParams());
 			}
 		}
-		
+
 		List<Types> typeList = new ArrayList<Types>();
-		
-		for (int i=0; i<simplifiedList.get(0).size(); i++){
+
+		for (int i = 0; i < simplifiedList.get(0).size(); i++) {
 			Parameter param = simplifiedList.get(0).get(i);
-			if (param.isInit()){
-				for(int j=1; j<simplifiedList.size(); j++){
-					if (!simplifiedList.get(j).get(i).isInit()){
+			if (param.isInit()) {
+				for (int j = 1; j < simplifiedList.size(); j++) {
+					if (!simplifiedList.get(j).get(i).isInit()) {
 						param = simplifiedList.get(j).get(i);
 						break;
 					}
 				}
 			}
 			typeList.add(param.type);
-		}	
+		}
 		return typeList;
 	}
 
-	public static String generateFileForVar(EFSMTransition transition, TreeMap<String, List<String>> paramNames) {
+	public static String generateFileForVar(EFSMTransition transition,
+			TreeMap<String, List<String>> paramNames) {
 		File file = null;
 		File dir = new File(Options.OUTDIR + Options.DIRARFF);
 		Writer writer = null;
 		int i = 0;
 		try {
 			if (!dir.isDirectory() && !dir.mkdirs())
-					throw new IOException("unable to create " + dir.getName()
-							+ " directory");
+				throw new IOException("unable to create " + dir.getName()
+						+ " directory");
 			file = new File(dir.getAbsolutePath() + File.separator
 					+ transition.getFrom() + "-" + transition.getTo() + ".arff");
 			writer = new BufferedWriter(new FileWriter(file));
-			writer.write("@RELATION '" + transition.getFrom() + "-" + transition.getTo()
-					+ "'\n");
+			writer.write("@RELATION '" + transition.getFrom() + "-"
+					+ transition.getTo() + "'\n");
 			for (i = 0; i < transition.getParamsData(0).getInputParameters()
 					.size(); i++)
-				writer.write("@ATTRIBUTE "+ Utils.capitalize(paramNames.get(transition.getInput()).get(i))	+ " "
+				writer.write("@ATTRIBUTE "
+						+ Utils.capitalize(paramNames
+								.get(transition.getInput()).get(i))
+						+ " "
 						+ convertTypes(transition.getParamsData(0)
 								.getInputParameters().get(i).type) + "\n");
 			i = 0;
 			List<Types> realTypes = getTypesOfParams(transition);
-			
-			for (Map.Entry<String, List<Parameter>> entry : transition.getParamsData(0).getAutomataState().entrySet()) {
+
+			for (Map.Entry<String, List<Parameter>> entry : transition
+					.getParamsData(0).getAutomataState().entrySet()) {
 				for (int j = 0; j < entry.getValue().size(); j++) {
 					if (!paramNames.get(entry.getKey()).isEmpty())
-						writer.write("@ATTRIBUTE saved" + Utils.capitalize(paramNames.get(entry.getKey()).get(j)) +"_" + Math.abs((new Random().nextLong())) + " "
-							+ convertTypes(realTypes.get(i)) + "\n");
-					else System.out.println(entry.getKey());
+						writer.write("@ATTRIBUTE saved"
+								+ Utils.capitalize(paramNames.get(
+										entry.getKey()).get(j)) + "_"
+								+ Math.abs((new Random().nextLong())) + " "
+								+ convertTypes(realTypes.get(i)) + "\n");
+					else
+						System.out.println(entry.getKey());
 					i++;
-				}				
+				}
 			}
 			for (i = 0; i < transition.getParamsData(0).getOutputParameters()
 					.size(); i++)
-				writer.write("@ATTRIBUTE "+ Utils.capitalize(paramNames.get(transition.getOutput()).get(i)) + " "
-						+ convertTypes(transition.getParamsData(0).getOutputParameters().get(i).type) + "\n");
+				writer.write("@ATTRIBUTE "
+						+ Utils.capitalize(paramNames.get(
+								transition.getOutput()).get(i))
+						+ " "
+						+ convertTypes(transition.getParamsData(0)
+								.getOutputParameters().get(i).type) + "\n");
 
 			writer.write("@DATA\n");
 			for (LiDataTableItem dti : transition.getParamsData()) {
@@ -244,9 +275,11 @@ public class ARFF {
 				for (Parameter p : dti.getInputParameters())
 					line.append(convertValue(p) + ", ");
 				i = 0;
-				for (Parameter p  : dti.getAutomataStateParams()) {
-					if (p.type == realTypes.get(i)) line.append(convertValue(p) + ", ");
-					else line.append(convertInit(p, realTypes.get(i)) + ", ");
+				for (Parameter p : dti.getAutomataStateParams()) {
+					if (p.type == realTypes.get(i))
+						line.append(convertValue(p) + ", ");
+					else
+						line.append(convertInit(p, realTypes.get(i)) + ", ");
 					i++;
 				}
 				for (Parameter p : dti.getOutputParameters())
@@ -289,8 +322,9 @@ public class ARFF {
 			}
 			ArffSaver saver = new ArffSaver();
 			saver.setInstances(data);
-			newFile = new File(Options.OUTDIR + Options.DIRARFF + File.separatorChar
-					+ Utils.removeExtension(dataFile) + "_step1.arff");
+			newFile = new File(Options.OUTDIR + Options.DIRARFF
+					+ File.separatorChar + Utils.removeExtension(dataFile)
+					+ "_step1.arff");
 			saver.setFile(newFile);
 			saver.writeBatch();
 			LogManager.logData(constantOutputs.size()
@@ -299,9 +333,11 @@ public class ARFF {
 		} catch (FileNotFoundException e) {
 			LogManager.logException("No such a file : " + dataFile, e);
 		} catch (IOException e) {
-			LogManager.logException("Error reading arff file ("+dataFile+")", e);
+			LogManager.logException("Error reading arff file (" + dataFile
+					+ ")", e);
 		} catch (Exception e) {
-			LogManager.logException("Unknown error in processing file ("+dataFile+")", e);
+			LogManager.logException("Unknown error in processing file ("
+					+ dataFile + ")", e);
 		}
 		return dataFile;
 	}
@@ -314,9 +350,10 @@ public class ARFF {
 			File newFile = null;
 			int nbAttrFilteredNom = 0;
 			int nbAttrFilteredRem = 0;
-			
+
 			iOut = data.numAttributes() - 1;
-			while (!data.attribute(iOut).name().startsWith("saved")) iOut--;
+			while (!data.attribute(iOut).name().startsWith("saved"))
+				iOut--;
 
 			for (int i = data.numAttributes() - 1; i >= 0; i--) {
 				if (data.attribute(i).isString()) {
@@ -342,23 +379,26 @@ public class ARFF {
 					data = Filter.useFilter(data, r);
 				}
 			}
-			
+
 			if (data.numAttributes() > 0) {
 				ArffSaver saver = new ArffSaver();
 				saver.setInstances(data);
-				newFile = new File(Options.OUTDIR + Options.DIRARFF + File.separatorChar
-						+ Utils.removeExtension(dataFile) + "_filtered.arff");
+				newFile = new File(Options.OUTDIR + Options.DIRARFF
+						+ File.separatorChar + Utils.removeExtension(dataFile)
+						+ "_filtered.arff");
 				saver.setFile(newFile);
 				saver.writeBatch();
-				LogManager.logData("Filtered attributes : "
-						+ nbAttrFilteredNom + " String->Nominal and "
-						+ nbAttrFilteredRem + " removed");
+				LogManager.logData("Filtered attributes : " + nbAttrFilteredNom
+						+ " String->Nominal and " + nbAttrFilteredRem
+						+ " removed");
 				return newFile.getPath();
 			}
 		} catch (IOException e) {
-			LogManager.logException("Error reading arff file ("+dataFile+")", e);
+			LogManager.logException("Error reading arff file (" + dataFile
+					+ ")", e);
 		} catch (Exception e) {
-			LogManager.logException("Unknown error in processing file ("+dataFile+")", e);
+			LogManager.logException("Unknown error in processing file ("
+					+ dataFile + ")", e);
 		}
 		LogManager.logData("Keeping datafile unfiltered");
 		return dataFile;
@@ -394,23 +434,26 @@ public class ARFF {
 					data = Filter.useFilter(data, r);
 				}
 			}
-			
+
 			if (data.numAttributes() > 0) {
 				ArffSaver saver = new ArffSaver();
 				saver.setInstances(data);
-				newFile = new File(Options.OUTDIR + Options.DIRARFF + File.separatorChar
-						+ Utils.removeExtension(dataFile) + "_filtered.arff");
+				newFile = new File(Options.OUTDIR + Options.DIRARFF
+						+ File.separatorChar + Utils.removeExtension(dataFile)
+						+ "_filtered.arff");
 				saver.setFile(newFile);
 				saver.writeBatch();
-				LogManager.logData("Filtered attributes : "
-						+ nbAttrFilteredNom + " String->Nominal and "
-						+ nbAttrFilteredRem + " removed");
+				LogManager.logData("Filtered attributes : " + nbAttrFilteredNom
+						+ " String->Nominal and " + nbAttrFilteredRem
+						+ " removed");
 				return newFile.getPath();
 			}
 		} catch (IOException e) {
-			LogManager.logException("Error reading arff file ("+dataFile+")", e);
+			LogManager.logException("Error reading arff file (" + dataFile
+					+ ")", e);
 		} catch (Exception e) {
-			LogManager.logException("Unknown error in processing file ("+dataFile+")", e);
+			LogManager.logException("Unknown error in processing file ("
+					+ dataFile + ")", e);
 		}
 		LogManager.logData("Keeping datafile unfiltered");
 		return dataFile;
@@ -424,38 +467,44 @@ public class ARFF {
 			reader.close();
 
 			data.setClassIndex(data.attribute("class").index());
-			
+
 			List<Instance> listUniqInstance = checkOnlyOneInstance(data);
-			if (!listUniqInstance.isEmpty()){
-				for(Instance inst : listUniqInstance){
-					LogManager.logInfo("Only one instance of " + inst.stringValue(data.classIndex()) + " in " + dataFile);
+			if (!listUniqInstance.isEmpty()) {
+				for (Instance inst : listUniqInstance) {
+					LogManager.logInfo("Only one instance of "
+							+ inst.stringValue(data.classIndex()) + " in "
+							+ dataFile);
 				}
-			}else{
+			} else {
 				node = new TreeNode();
 				Classifier cl = null;
-				try{
+				try {
 					cl = new J48();
 					cl.setOptions(weka.core.Utils.splitOptions("-C 0.25 -M 1"));
-					cl.buildClassifier(data);				
+					cl.buildClassifier(data);
 					node.loadFromString(cl);
-				}catch(StringIndexOutOfBoundsException e){
-					try{
-						cl.setOptions(weka.core.Utils.splitOptions("-R -N 3 -Q 1 -M 2"));
+				} catch (StringIndexOutOfBoundsException e) {
+					try {
+						cl.setOptions(weka.core.Utils
+								.splitOptions("-R -N 3 -Q 1 -M 2"));
 						cl.buildClassifier(data);
 						node = new TreeNode();
 						node.loadFromString(cl);
-					}catch(StringIndexOutOfBoundsException f){
-						try{
-							cl.setOptions(weka.core.Utils.splitOptions("-R -N 3 -Q 1 -B -M 2"));
+					} catch (StringIndexOutOfBoundsException f) {
+						try {
+							cl.setOptions(weka.core.Utils
+									.splitOptions("-R -N 3 -Q 1 -B -M 2"));
 							cl.buildClassifier(data);
 							node = new TreeNode();
 							node.loadFromString(cl);
-						}catch(StringIndexOutOfBoundsException g){
-							try{
+						} catch (StringIndexOutOfBoundsException g) {
+							try {
 								MyClassifier mcl = new MyClassifier(data);
 								node = mcl.buildTreeNode();
-							}catch(Exception h){
-								LogManager.logError("Unable to get a tree with data in " + new File(dataFile).getName());
+							} catch (Exception h) {
+								LogManager
+										.logError("Unable to get a tree with data in "
+												+ new File(dataFile).getName());
 								node = null;
 							}
 						}
@@ -469,31 +518,34 @@ public class ARFF {
 			LogManager.logException("No such a file : " + dataFile, e);
 			node = null;
 		} catch (IOException e) {
-			LogManager.logException("Error reading arff file ("+dataFile+")", e);
+			LogManager.logException("Error reading arff file (" + dataFile
+					+ ")", e);
 			node = null;
 		} catch (Exception e) {
-			LogManager.logException("Unknown error in processing file ("+dataFile+")", e);
+			LogManager.logException("Unknown error in processing file ("
+					+ dataFile + ")", e);
 			node = null;
 		}
 		return node;
 	}
 
 	private static List<Instance> checkOnlyOneInstance(Instances data) {
-		List<Instance> res = new ArrayList<Instance>();		
+		List<Instance> res = new ArrayList<Instance>();
 		Map<String, List<Instance>> allinsts = new TreeMap<String, List<Instance>>();
-		for(int i=0; i<data.numInstances(); i++){
+		for (int i = 0; i < data.numInstances(); i++) {
 			String c = data.instance(i).stringValue(data.classIndex());
 			List<Instance> l = allinsts.get(c);
-			if (l == null){
+			if (l == null) {
 				l = new ArrayList<Instance>();
 				l.add(data.instance(i));
 				allinsts.put(c, l);
-			}else{
+			} else {
 				l.add(data.instance(i));
 			}
 		}
-		for(String dest : allinsts.keySet()){
-			if (allinsts.get(dest).size()==1) res.add(allinsts.get(dest).get(0));
+		for (String dest : allinsts.keySet()) {
+			if (allinsts.get(dest).size() == 1)
+				res.add(allinsts.get(dest).get(0));
 		}
 		return res;
 	}
@@ -511,7 +563,8 @@ public class ARFF {
 				data.setClassIndex(i);
 				differentOutputs.add(data.attribute(i).name());
 
-				if (data.attribute(i).type() == Attribute.NUMERIC && !Options.FORCE_J48) {
+				if (data.attribute(i).type() == Attribute.NUMERIC
+						&& !Options.FORCE_J48) {
 					M5P m5 = new M5P();
 					m5.setOptions(weka.core.Utils.splitOptions("-M 4.0"));
 					m5.buildClassifier(data);
@@ -519,35 +572,42 @@ public class ARFF {
 					ExpressionTreeNode en = new ExpressionTreeNode();
 					en.loadFromString(m5);
 
-					label.addVar(data.attribute(i).name() + " = " + en.toString());
-				} else {					
+					label.addVar(data.attribute(i).name() + " = "
+							+ en.toString());
+				} else {
 					if (data.attribute(i).isNumeric()) {
 						NumericToNominal f = new NumericToNominal();
 						f.setOptions(weka.core.Utils.splitOptions("-R "
 								+ String.valueOf(i + 1)));
 						f.setInputFormat(data);
 						data = Filter.useFilter(data, f);
-					}				
-					
+					}
+
 					Classifier cl = new J48();
 					cl.setOptions(weka.core.Utils.splitOptions("-C 0.25 -M 2"));
 					cl.buildClassifier(data);
 
 					node = new TreeNode();
-					try{
+					try {
 						node.loadFromString(cl);
 
 						ArrayList<String> diffValues = new ArrayList<String>();
-						for(int j=0; j<data.attribute(i).numValues(); j++){
-							if (!diffValues.contains(data.attribute(i).value(j))) diffValues.add(data.attribute(i).value(j));
-						}					
-						for(String val : diffValues){
-							for(String pred : node.getPredicatesFor(val)){
-								label.addVar(pred + " => " + data.attribute(i).name() + " = " + val);
+						for (int j = 0; j < data.attribute(i).numValues(); j++) {
+							if (!diffValues
+									.contains(data.attribute(i).value(j)))
+								diffValues.add(data.attribute(i).value(j));
+						}
+						for (String val : diffValues) {
+							for (String pred : node.getPredicatesFor(val)) {
+								label.addVar(pred + " => "
+										+ data.attribute(i).name() + " = "
+										+ val);
 							}
 						}
-					}catch (StringIndexOutOfBoundsException e){
-						LogManager.logException("Warning : Unable to find more than one class (" + dataFile +")", e);
+					} catch (StringIndexOutOfBoundsException e) {
+						LogManager.logException(
+								"Warning : Unable to find more than one class ("
+										+ dataFile + ")", e);
 					}
 				}
 				Remove r = new Remove();
@@ -559,8 +619,9 @@ public class ARFF {
 
 			ArffSaver saver = new ArffSaver();
 			saver.setInstances(data);
-			newFile = new File(Options.OUTDIR + Options.DIRARFF + File.separatorChar
-					+ Utils.removeExtension(dataFile) + "_step2.arff");
+			newFile = new File(Options.OUTDIR + Options.DIRARFF
+					+ File.separatorChar + Utils.removeExtension(dataFile)
+					+ "_step2.arff");
 			saver.setFile(newFile);
 			saver.writeBatch();
 			LogManager.logData(differentOutputs.size()
@@ -569,9 +630,11 @@ public class ARFF {
 		} catch (FileNotFoundException e) {
 			LogManager.logException("No such a file : " + dataFile, e);
 		} catch (IOException e) {
-			LogManager.logException("Error reading arff file ("+dataFile+")", e);
+			LogManager.logException("Error reading arff file (" + dataFile
+					+ ")", e);
 		} catch (Exception e) {
-			LogManager.logException("Unknown error in processing file ("+dataFile+")", e);
+			LogManager.logException("Unknown error in processing file ("
+					+ dataFile + ")", e);
 		}
 		return dataFile;
 	}
@@ -583,52 +646,58 @@ public class ARFF {
 			reader.close();
 			File newFile = null;
 			int nbEquals = 0;
-			int outIndex = data.numAttributes()-1;
-			
+			int outIndex = data.numAttributes() - 1;
+
 			Map<String, List<Instance>> allinsts = new TreeMap<String, List<Instance>>();
-			for(int i=0; i<data.numInstances(); i++){
+			for (int i = 0; i < data.numInstances(); i++) {
 				String c = data.instance(i).stringValue(outIndex);
 				List<Instance> l = allinsts.get(c);
-				if (l == null){
+				if (l == null) {
 					l = new ArrayList<Instance>();
 					l.add(data.instance(i));
 					allinsts.put(c, l);
-				}else{
+				} else {
 					l.add(data.instance(i));
 				}
 			}
-		
+
 			Set<Relation> allRelation = new HashSet<Relation>();
-					
-			for(String dest : allinsts.keySet()){
+
+			for (String dest : allinsts.keySet()) {
 				List<Instance> l = allinsts.get(dest);
 				allRelation.addAll(Relation.findOn(l));
 			}
-			
+
 			Instances newData = new Instances(data);
 			int relCount = 0;
-			
-			for(Relation re : allRelation){
-				switch(re.getType()){
-				case EQUALS : nbEquals++;
-							break;
+
+			for (Relation re : allRelation) {
+				switch (re.getType()) {
+				case EQUALS:
+					nbEquals++;
+					break;
 				}
-				newData.insertAttributeAt(new Attribute("rel" + (relCount++), re.getValues()), newData.numAttributes()-1);
-				for (int i=0; i<newData.numInstances(); i++) {
-					if (re.isTrueOn(newData.instance(i))) newData.instance(i).setValue(newData.numAttributes()-2, re.toString());
-					else newData.instance(i).setValue(newData.numAttributes()-2, re.toNotString());
+				newData.insertAttributeAt(new Attribute("rel" + (relCount++),
+						re.getValues()), newData.numAttributes() - 1);
+				for (int i = 0; i < newData.numInstances(); i++) {
+					if (re.isTrueOn(newData.instance(i)))
+						newData.instance(i).setValue(
+								newData.numAttributes() - 2, re.toString());
+					else
+						newData.instance(i).setValue(
+								newData.numAttributes() - 2, re.toNotString());
 				}
 			}
 
 			if (newData.numAttributes() > 0 && !allRelation.isEmpty()) {
 				ArffSaver saver = new ArffSaver();
 				saver.setInstances(newData);
-				newFile = new File(Options.OUTDIR + Options.DIRARFF + File.separatorChar
-						+ Utils.removeExtension(dataFile) + "_related.arff");
+				newFile = new File(Options.OUTDIR + Options.DIRARFF
+						+ File.separatorChar + Utils.removeExtension(dataFile)
+						+ "_related.arff");
 				saver.setFile(newFile);
 				saver.writeBatch();
-				LogManager.logData("Relation found : "
-						+ nbEquals + " Equals");
+				LogManager.logData("Relation found : " + nbEquals + " Equals");
 				return newFile.getPath();
 			}
 		} catch (IllegalArgumentException e) {
@@ -636,13 +705,15 @@ public class ARFF {
 		} catch (UnassignedDatasetException e) {
 			LogManager.logException("Error reading instance (No Dataset)", e);
 		} catch (IOException e) {
-			LogManager.logException("Error reading arff file ("+dataFile+")", e);
+			LogManager.logException("Error reading arff file (" + dataFile
+					+ ")", e);
 		} catch (Exception e) {
-			LogManager.logException("Unknown error in processing file ("+dataFile+")", e);
+			LogManager.logException("Unknown error in processing file ("
+					+ dataFile + ")", e);
 		}
 		return dataFile;
 	}
-	
+
 	public static String handleRelatedDataForOutput(String dataFile) {
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(dataFile));
@@ -650,58 +721,64 @@ public class ARFF {
 			reader.close();
 			File newFile = null;
 			int nbEquals = 0;
-			int outIndex = data.numAttributes()-1;
-			
+			int outIndex = data.numAttributes() - 1;
+
 			List<Relation> allRelation = new ArrayList<Relation>();
-			
-			while(outIndex > iOut && !data.attribute(outIndex).isNumeric()){			
+
+			while (outIndex > iOut && !data.attribute(outIndex).isNumeric()) {
 				Map<String, List<Instance>> allinsts = new TreeMap<String, List<Instance>>();
-				for(int i=0; i<data.numInstances(); i++){
+				for (int i = 0; i < data.numInstances(); i++) {
 					String c = data.instance(i).stringValue(outIndex);
 					List<Instance> l = allinsts.get(c);
-					if (l == null){
+					if (l == null) {
 						l = new ArrayList<Instance>();
 						l.add(data.instance(i));
 						allinsts.put(c, l);
-					}else{
+					} else {
 						l.add(data.instance(i));
 					}
-				}			
-						
-				for(String dest : allinsts.keySet()){
+				}
+
+				for (String dest : allinsts.keySet()) {
 					List<Instance> l = allinsts.get(dest);
 					allRelation.addAll(Relation.findOn(l));
-				}	
-				
+				}
+
 				outIndex--;
 			}
-			
+
 			Instances newData = new Instances(data);
 			int relCount = 0;
-			
-			for(Relation re : allRelation){
-				switch(re.getType()){
-				case EQUALS : nbEquals++;
-							break;
+
+			for (Relation re : allRelation) {
+				switch (re.getType()) {
+				case EQUALS:
+					nbEquals++;
+					break;
 				}
-				newData.insertAttributeAt(new Attribute("rel" + (relCount++), re.getValues()), newData.numAttributes()-1);
-				for (int i=0; i<newData.numInstances(); i++) {
-					if (re.isTrueOn(newData.instance(i))) newData.instance(i).setValue(newData.numAttributes()-2, re.toString());
-					else newData.instance(i).setValue(newData.numAttributes()-2, re.toNotString());
+				newData.insertAttributeAt(new Attribute("rel" + (relCount++),
+						re.getValues()), newData.numAttributes() - 1);
+				for (int i = 0; i < newData.numInstances(); i++) {
+					if (re.isTrueOn(newData.instance(i)))
+						newData.instance(i).setValue(
+								newData.numAttributes() - 2, re.toString());
+					else
+						newData.instance(i).setValue(
+								newData.numAttributes() - 2, re.toNotString());
 				}
 			}
-			
+
 			iOut += allRelation.size();
 
 			if (newData.numAttributes() > 0 && !allRelation.isEmpty()) {
 				ArffSaver saver = new ArffSaver();
 				saver.setInstances(newData);
-				newFile = new File(Options.OUTDIR + Options.DIRARFF + File.separatorChar
-						+ Utils.removeExtension(dataFile) + "_related.arff");
+				newFile = new File(Options.OUTDIR + Options.DIRARFF
+						+ File.separatorChar + Utils.removeExtension(dataFile)
+						+ "_related.arff");
 				saver.setFile(newFile);
 				saver.writeBatch();
-				LogManager.logData("Relation found : "
-						+ nbEquals + " Equals");
+				LogManager.logData("Relation found : " + nbEquals + " Equals");
 				return newFile.getPath();
 			}
 		} catch (IllegalArgumentException e) {
@@ -709,9 +786,11 @@ public class ARFF {
 		} catch (UnassignedDatasetException e) {
 			LogManager.logException("Error reading instance (No Dataset)", e);
 		} catch (IOException e) {
-			LogManager.logException("Error reading arff file ("+dataFile+")", e);
+			LogManager.logException("Error reading arff file (" + dataFile
+					+ ")", e);
 		} catch (Exception e) {
-			LogManager.logException("Unknown error in processing file ("+dataFile+")", e);
+			LogManager.logException("Unknown error in processing file ("
+					+ dataFile + ")", e);
 		}
 		return dataFile;
 	}

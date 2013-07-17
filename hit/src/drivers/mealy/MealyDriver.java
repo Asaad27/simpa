@@ -16,14 +16,14 @@ import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
 import drivers.Driver;
 
-public class MealyDriver extends Driver{
+public class MealyDriver extends Driver {
 	protected Mealy automata;
 	protected State currentState;
 	protected List<InputSequence> forcedCE;
 	private int nbStates = 0;
 	private String name = null;
-	
-	public MealyDriver(Mealy automata){
+
+	public MealyDriver(Mealy automata) {
 		super();
 		type = DriverType.MEALY;
 		this.automata = automata;
@@ -31,110 +31,117 @@ public class MealyDriver extends Driver{
 		this.nbStates = automata.getStateCount();
 		this.name = automata.getName();
 	}
-	
+
 	public MealyDriver(String name) {
 		this.name = name;
 		this.automata = null;
 	}
 
-	public List<String> getStats(){
-		return Utils.createArrayList(
-				String.valueOf(nbStates),
-				String.valueOf(getInputSymbols().size()),
-				String.valueOf(getOutputSymbols().size()),
-				String.valueOf(((float)numberOfAtomicRequest/numberOfRequest)),
-				String.valueOf(numberOfRequest),
-				String.valueOf(((float)duration/1000000000)),
-				String.valueOf(automata.getTransitionCount()));
+	public List<String> getStats() {
+		return Utils.createArrayList(String.valueOf(nbStates), String
+				.valueOf(getInputSymbols().size()), String
+				.valueOf(getOutputSymbols().size()), String
+				.valueOf(((float) numberOfAtomicRequest / numberOfRequest)),
+				String.valueOf(numberOfRequest), String
+						.valueOf(((float) duration / 1000000000)), String
+						.valueOf(automata.getTransitionCount()));
 	}
-	
+
 	protected List<InputSequence> getForcedCE() {
 		return null;
 	}
 
 	public String execute(String input) {
 		String output = null;
-		if (input.length()>0){
-			if (addtolog) numberOfAtomicRequest++;
+		if (input.length() > 0) {
+			if (addtolog)
+				numberOfAtomicRequest++;
 			MealyTransition currentTrans = null;
-			for(MealyTransition t : (List<MealyTransition>)automata.getTransitions()){
-				if (t.getFrom().equals(currentState) && t.getInput().equals(input)){
+			for (MealyTransition t : (List<MealyTransition>) automata
+					.getTransitions()) {
+				if (t.getFrom().equals(currentState)
+						&& t.getInput().equals(input)) {
 					currentTrans = t;
 					break;
 				}
 			}
-			if (currentTrans != null){
+			if (currentTrans != null) {
 				output = new String(currentTrans.getOutput());
-				currentState = currentTrans.getTo();					
-			}else{
+				currentState = currentTrans.getTo();
+			} else {
 				output = new String();
 			}
-			if (addtolog) LogManager.logRequest(input, output);
+			if (addtolog)
+				LogManager.logRequest(input, output);
 		}
 		return output;
 	}
-	
-	public List<String> getInputSymbols(){
+
+	public List<String> getInputSymbols() {
 		List<String> is = new ArrayList<String>();
-		for(MealyTransition t : automata.getTransitions()){
-			if (!is.contains(t.getInput())) is.add(t.getInput());
+		for (MealyTransition t : automata.getTransitions()) {
+			if (!is.contains(t.getInput()))
+				is.add(t.getInput());
 		}
 		Collections.sort(is);
 		return is;
 	}
-	
-	public List<String> getOutputSymbols(){
+
+	public List<String> getOutputSymbols() {
 		List<String> os = new ArrayList<String>();
-		for(MealyTransition t : automata.getTransitions()){
-			if (!os.contains(t.getOutput())) os.add(t.getOutput());
+		for (MealyTransition t : automata.getTransitions()) {
+			if (!os.contains(t.getOutput()))
+				os.add(t.getOutput());
 		}
 		Collections.sort(os);
-		return os;		
+		return os;
 	}
-		
+
 	@Override
-	public String getSystemName(){
+	public String getSystemName() {
 		return name;
 	}
-	
-	public InputSequence getCounterExample(Automata c){
+
+	public InputSequence getCounterExample(Automata c) {
 		LogManager.logInfo("Searching counter example");
 		boolean found = false;
 		InputSequence ce = null;
-		if (forcedCE != null && !forcedCE.isEmpty()){
+		if (forcedCE != null && !forcedCE.isEmpty()) {
 			found = true;
 			ce = forcedCE.remove(0);
 			LogManager.logInfo("Counter example found (forced) : " + ce);
-		}else if (!Options.STOP_ON_CE_SEARCH){
-			LmConjecture conj = (LmConjecture)c;
+		} else if (!Options.STOP_ON_CE_SEARCH) {
+			LmConjecture conj = (LmConjecture) c;
 			int maxTries = 100000;
 			List<String> is = getInputSymbols();
 			MealyDriver conjDriver = new MealyDriver(conj);
 			stopLog();
 			conjDriver.stopLog();
 			int i = 0;
-			while(i<maxTries && !found){
+			while (i < maxTries && !found) {
 				ce = InputSequence.generate(is, Utils.randIntBetween(1, 12));
 				OutputSequence osSystem = new OutputSequence();
 				OutputSequence osConj = new OutputSequence();
 				reset();
 				conjDriver.reset();
-				if (ce.getLength()>0){
-					for(String input : ce.sequence){
+				if (ce.getLength() > 0) {
+					for (String input : ce.sequence) {
 						String _sys = execute(input);
 						String _conj = conjDriver.execute(input);
-						if (_sys.length()>0){
+						if (_sys.length() > 0) {
 							osSystem.addOutput(_sys);
 							osConj.addOutput(_conj);
 						}
-						if (!_sys.equals(_conj) && (osSystem.getLength()>0 && !osSystem.getLastSymbol().isEmpty())){
+						if (!_sys.equals(_conj)
+								&& (osSystem.getLength() > 0 && !osSystem
+										.getLastSymbol().isEmpty())) {
 							found = true;
 							ce = ce.getIthPreffix(osSystem.getLength());
 							LogManager.logInfo("Counter example found : " + ce);
 							LogManager.logInfo("On system : " + osSystem);
 							LogManager.logInfo("On conjecture : " + osConj);
 							break;
-						}				
+						}
 					}
 					i++;
 				}
@@ -143,37 +150,43 @@ public class MealyDriver extends Driver{
 			conjDriver.startLog();
 		}
 
-		if (!found) LogManager.logInfo("No counter example found");
-		
-		return (found?ce:null);		
+		if (!found)
+			LogManager.logInfo("No counter example found");
+
+		return (found ? ce : null);
 	}
-		
+
 	@Override
-	public void reset(){
+	public void reset() {
 		super.reset();
-		if (automata != null){
+		if (automata != null) {
 			automata.reset();
 			currentState = automata.getInitialState();
 		}
 	}
 
 	public boolean isCounterExample(Object ce, Object c) {
-		if (ce == null) return false;
-		InputSequence realCe = (InputSequence)ce;
-		LmConjecture conj = (LmConjecture)c;
+		if (ce == null)
+			return false;
+		InputSequence realCe = (InputSequence) ce;
+		LmConjecture conj = (LmConjecture) c;
 		MealyDriver conjDriver = new MealyDriver(conj);
 		stopLog();
 		conjDriver.stopLog();
 		reset();
 		conjDriver.reset();
 		boolean isCe = false;
-		for(int i=0; i<realCe.getLength(); i++){
-			for(String input : realCe.sequence){
-				if (!execute(input).equals(conjDriver.execute(input))) { isCe = true; break; };	
+		for (int i = 0; i < realCe.getLength(); i++) {
+			for (String input : realCe.sequence) {
+				if (!execute(input).equals(conjDriver.execute(input))) {
+					isCe = true;
+					break;
+				}
+				;
 			}
 		}
 		startLog();
 		conjDriver.startLog();
 		return isCe;
-	}	
+	}
 }

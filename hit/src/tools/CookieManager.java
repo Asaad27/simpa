@@ -8,15 +8,15 @@ public class CookieManager {
 	public CookieManager() {
 		cookies = new HashMap<String, String>();
 	}
-	
-	public String get(String name){
+
+	public String get(String name) {
 		return cookies.get(name);
 	}
 
-	public String set(String name, String value){
+	public String set(String name, String value) {
 		return cookies.put(name, value);
 	}
-	
+
 	public String getCookieLine() {
 		StringBuffer b = new StringBuffer();
 		for (String key : cookies.keySet()) {
@@ -34,7 +34,7 @@ public class CookieManager {
 			String[] cookie;
 			for (String info : infos) {
 				cookie = info.split("=");
-				if (!cookie[0].toLowerCase().equals("httponly")){
+				if (!cookie[0].toLowerCase().equals("httponly")) {
 					cookies.put(cookie[0].trim(), cookie[1].trim());
 				}
 			}
@@ -46,6 +46,6 @@ public class CookieManager {
 	}
 
 	public boolean isEmpty() {
-		return cookies.size()==0;
+		return cookies.size() == 0;
 	}
 }

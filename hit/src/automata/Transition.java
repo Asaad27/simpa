@@ -8,13 +8,13 @@ public abstract class Transition implements Serializable {
 	protected State from;
 	protected State to;
 	protected String input;
-	
-	public Transition(State from, State to, String input){
+
+	public Transition(State from, State to, String input) {
 		this.from = from;
 		this.to = to;
 		this.input = input;
 	}
-	
+
 	public State getFrom() {
 		return from;
 	}
@@ -32,7 +32,7 @@ public abstract class Transition implements Serializable {
 	}
 
 	@Override
-	public String toString(){
+	public String toString() {
 		return from + " to " + to + " by " + input;
 	}
 }

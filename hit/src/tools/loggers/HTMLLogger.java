@@ -41,7 +41,7 @@ public class HTMLLogger implements ILogger {
 	private DateFormat tfm;
 	private DateFormat filenameFm;
 	private Writer writer = null;
-	
+
 	public HTMLLogger() {
 		file = null;
 		dir = new File(Options.OUTDIR + "log");
@@ -51,22 +51,26 @@ public class HTMLLogger implements ILogger {
 		try {
 			if (!dir.isDirectory()) {
 				if (!dir.mkdirs())
-					throw new IOException("unable to create " + dir.getAbsolutePath()
-							+ " directory");
+					throw new IOException("unable to create "
+							+ dir.getAbsolutePath() + " directory");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void logControlTable(LiControlTable l) {
-		try {		
+		try {
 			int nbSymbols = l.inputSymbols.size();
-			StringBuffer s = new StringBuffer("<li class=\"controltable\">\n<table>\n<tr class=\"header\">\n<td></td>");			
-			for(int i=0; i<nbSymbols; i++) s.append("<td>" + l.inputSymbols.get(i) + "</td>");
+			StringBuffer s = new StringBuffer(
+					"<li class=\"controltable\">\n<table>\n<tr class=\"header\">\n<td></td>");
+			for (int i = 0; i < nbSymbols; i++)
+				s.append("<td>" + l.inputSymbols.get(i) + "</td>");
 			s.append("\n</tr>\n");
-			for(LiControlTableRow ctr : l.S) s.append(printRows(ctr, "#F9FFF9"));
-			for(LiControlTableRow ctr : l.R) s.append(printRows(ctr, "#FFF9F9"));
+			for (LiControlTableRow ctr : l.S)
+				s.append(printRows(ctr, "#F9FFF9"));
+			for (LiControlTableRow ctr : l.R)
+				s.append(printRows(ctr, "#FFF9F9"));
 			s.append("</table>\n</li>");
 			writer.write(s.toString());
 		} catch (IOException e) {
@@ -76,13 +80,17 @@ public class HTMLLogger implements ILogger {
 
 	@Override
 	public void logDataTable(LiDataTable l) {
-		try {		
+		try {
 			int nbSymbols = l.inputSymbols.size();
-			StringBuffer s = new StringBuffer("<li class=\"datatable\">\n<table>\n<tr class=\"header\">\n<td></td>");		
-			for(int i=0; i<nbSymbols; i++) s.append("<td>" + l.inputSymbols.get(i) + "</td>");
+			StringBuffer s = new StringBuffer(
+					"<li class=\"datatable\">\n<table>\n<tr class=\"header\">\n<td></td>");
+			for (int i = 0; i < nbSymbols; i++)
+				s.append("<td>" + l.inputSymbols.get(i) + "</td>");
 			s.append("\n</tr>\n");
-			for(LiDataTableRow ctr : l.S) s.append(printRows(ctr, "#F9FFF9"));
-			for(LiDataTableRow ctr : l.R) s.append(printRows(ctr, "#FFF9F9"));
+			for (LiDataTableRow ctr : l.S)
+				s.append(printRows(ctr, "#F9FFF9"));
+			for (LiDataTableRow ctr : l.R)
+				s.append(printRows(ctr, "#FFF9F9"));
 			s.append("</table>\n</li><br/>");
 			writer.write(s.toString());
 		} catch (IOException e) {
@@ -93,30 +101,35 @@ public class HTMLLogger implements ILogger {
 	@Override
 	public void logEnd() {
 		try {
-				writer.flush();
-				writer.write("</ul>\n");
-				writer.write("</body>\n");
-				writer.write("</html>\n");
-				writer.flush();
-				writer.close();
-				if (Options.LOG_HTML && Options.AUTO_OPEN_HTML) Utils.browse(file);
+			writer.flush();
+			writer.write("</ul>\n");
+			writer.write("</body>\n");
+			writer.write("</html>\n");
+			writer.flush();
+			writer.close();
+			if (Options.LOG_HTML && Options.AUTO_OPEN_HTML)
+				Utils.browse(file);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	@Override
-	public void logError(String s) {}
+	public void logError(String s) {
+	}
 
 	@Override
-	public void logException(String m, Exception e) {}
+	public void logException(String m, Exception e) {
+	}
 
 	@Override
 	public void logInfo(String s) {
 		try {
 			writer.flush();
 			writer.write("<li class=\"info\">\n");
-			writer.write("<span class=\"date\">" + tfm.format(new Date()) + "</span><span class=\"content\">" + Utils.escapeHTML(s) + "</span>");
+			writer.write("<span class=\"date\">" + tfm.format(new Date())
+					+ "</span><span class=\"content\">" + Utils.escapeHTML(s)
+					+ "</span>");
 			writer.write("</li>\n");
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -128,7 +141,12 @@ public class HTMLLogger implements ILogger {
 		try {
 			writer.flush();
 			writer.write("<li class=\"request\">\n");
-			writer.write("<span class=\"date\">" + tfm.format(new Date()) + "</span><span class=\"content\"><span class=\"pi\">" + Utils.escapeHTML(pi.toString()) + "</span> -> <span class=\"po\">" + Utils.escapeHTML(po.toString()) + "</span></span>\n</li>\n");
+			writer.write("<span class=\"date\">" + tfm.format(new Date())
+					+ "</span><span class=\"content\"><span class=\"pi\">"
+					+ Utils.escapeHTML(pi.toString())
+					+ "</span> -> <span class=\"po\">"
+					+ Utils.escapeHTML(po.toString())
+					+ "</span></span>\n</li>\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -137,21 +155,33 @@ public class HTMLLogger implements ILogger {
 	@Override
 	public void logStart() {
 		try {
-			file = new File(dir.getAbsolutePath() + File.separator
-					+ filenameFm.format(new Date()) + "_" +  Options.SYSTEM + ".html");
+			if (Options.GENERICDRIVER) {
+				File tmp = new File(Options.SYSTEM);
+				file = new File(dir.getAbsolutePath() + File.separator
+						+ filenameFm.format(new Date()) + "_" + tmp.getName()
+						+ ".html");
+			} else {
+				file = new File(dir.getAbsolutePath() + File.separator
+						+ filenameFm.format(new Date()) + "_" + Options.SYSTEM
+						+ ".html");
+			}
 			writer = new BufferedWriter(new FileWriter(file));
 			writer.flush();
 			writer.write("<html>\n");
 			writer.write("<head>\n");
-			writer.write("<title>" + SIMPA.name + " - " + dfm.format(new Date()) + " - " + Options.SYSTEM + "</title>\n");
+			writer.write("<title>" + SIMPA.name + " - "
+					+ dfm.format(new Date()) + " - " + Options.SYSTEM
+					+ "</title>\n");
 			writer.write("<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />\n");
 			writer.write("<style type=\"text/css\">\n");
-			writer.write(Utils.fileContentOf(new File("log").getAbsolutePath() + File.separator + "style.css"));
+			writer.write(Utils.fileContentOf(new File("log").getAbsolutePath()
+					+ File.separator + "style.css"));
 			writer.write("</style>\n");
 			writer.write("</head>\n");
 			writer.write("<body>\n");
 			writer.write("<div id=\"info\">\n");
-			writer.write(SIMPA.name + " - " + dfm.format(new Date()) + " - " + Options.SYSTEM);
+			writer.write(SIMPA.name + " - " + dfm.format(new Date()) + " - "
+					+ Options.SYSTEM);
 			writer.write("</div>\n");
 			writer.write("<ul>\n");
 		} catch (IOException e) {
@@ -159,31 +189,41 @@ public class HTMLLogger implements ILogger {
 		}
 	}
 
-	private StringBuffer printRows(LmControlTableRow ctr, String color){
-		
-		StringBuffer s = new StringBuffer("<tr style=\"background-color:"+color+"\">\n<td class=\"header\">" + ctr.getIS().toString() + "</td>");
-		for(int i=0; i<ctr.getColumCount(); i++){
+	private StringBuffer printRows(LmControlTableRow ctr, String color) {
+
+		StringBuffer s = new StringBuffer("<tr style=\"background-color:"
+				+ color + "\">\n<td class=\"header\">" + ctr.getIS().toString()
+				+ "</td>");
+		for (int i = 0; i < ctr.getColumCount(); i++) {
 			LmControlTableItem acti = ctr.getColumn(i);
 			s.append("<td><table class=\"cti\">");
 			s.append("<tr>");
-			s.append("<td><span class=\"outputsymbol\">"  + (acti.isOmegaSymbol()?Options.SYMBOL_OMEGA_UP:acti.getOutputSymbol()) + "</span></td>");
+			s.append("<td><span class=\"outputsymbol\">"
+					+ (acti.isOmegaSymbol() ? Options.SYMBOL_OMEGA_UP : acti
+							.getOutputSymbol()) + "</span></td>");
 			s.append("</tr>");
 			s.append("</table></td>");
 		}
 		s.append("</tr>");
 		return s;
 	}
-	
-	private StringBuffer printRows(LiControlTableRow ctr, String color){
-		
-		StringBuffer s = new StringBuffer("<tr style=\"background-color:"+color+"\">\n<td class=\"header\">" + ctr.getPIS().toString() + "</td>");
-		for(int i=0; i<ctr.getColumCount(); i++){
+
+	private StringBuffer printRows(LiControlTableRow ctr, String color) {
+
+		StringBuffer s = new StringBuffer("<tr style=\"background-color:"
+				+ color + "\">\n<td class=\"header\">"
+				+ ctr.getPIS().toString() + "</td>");
+		for (int i = 0; i < ctr.getColumCount(); i++) {
 			ArrayList<LiControlTableItem> acti = ctr.getColum(i);
 			s.append("<td><table class=\"cti\">");
-			for (LiControlTableItem cti : acti){
+			for (LiControlTableItem cti : acti) {
 				s.append("<tr>");
-				s.append("<td><span class=\"inputparam\">"  + cti.getParameters().toString() + "<span>,</td>" + 
-						 "<td><span class=\"outputsymbol\">"  + (cti.isOmegaSymbol()?Options.SYMBOL_OMEGA_UP:cti.getOutputSymbol()) + "</span></td>");
+				s.append("<td><span class=\"inputparam\">"
+						+ cti.getParameters().toString()
+						+ "<span>,</td>"
+						+ "<td><span class=\"outputsymbol\">"
+						+ (cti.isOmegaSymbol() ? Options.SYMBOL_OMEGA_UP : cti
+								.getOutputSymbol()) + "</span></td>");
 				s.append("</tr>");
 			}
 			s.append("</table></td>");
@@ -192,19 +232,28 @@ public class HTMLLogger implements ILogger {
 		return s;
 	}
 
-	private StringBuffer printRows(LiDataTableRow dtr, String color){
-		StringBuffer s = new StringBuffer("<tr style=\"background-color:"+color+"\"><td class=\"header\">" + dtr.getPIS().toString() + "</td>");
-		for(int i=0; i<dtr.getColumCount(); i++){
+	private StringBuffer printRows(LiDataTableRow dtr, String color) {
+		StringBuffer s = new StringBuffer("<tr style=\"background-color:"
+				+ color + "\"><td class=\"header\">" + dtr.getPIS().toString()
+				+ "</td>");
+		for (int i = 0; i < dtr.getColumCount(); i++) {
 			ArrayList<LiDataTableItem> acti = dtr.getColum(i);
 			s.append("<td><table class=\"dti\">");
-			for (LiDataTableItem cti : acti){
+			for (LiDataTableItem cti : acti) {
 				s.append("<tr>");
-				s.append("<td>(<span class=\"inputparam\">"  + cti.getInputParameters().toString() + "</span>,</td>" + 
-						 "<td><span class=\"state\">"  + cti.getAutomataState().values().toString() + "</span>) -></td>" + 
-						 "<td><span class=\"outputparam\">"  + (cti.getOutputParameters().isEmpty()?Options.SYMBOL_OMEGA_LOW:cti.getOutputParameters().toString()) + "</span></td>");
+				s.append("<td>(<span class=\"inputparam\">"
+						+ cti.getInputParameters().toString()
+						+ "</span>,</td>"
+						+ "<td><span class=\"state\">"
+						+ cti.getAutomataState().values().toString()
+						+ "</span>) -></td>"
+						+ "<td><span class=\"outputparam\">"
+						+ (cti.getOutputParameters().isEmpty() ? Options.SYMBOL_OMEGA_LOW
+								: cti.getOutputParameters().toString())
+						+ "</span></td>");
 				s.append("</tr>");
 			}
-			s.append("</table></td>"); 
+			s.append("</table></td>");
 		}
 		s.append("</tr>");
 		return s;
@@ -215,7 +264,8 @@ public class HTMLLogger implements ILogger {
 		try {
 			writer.flush();
 			writer.write("<li class=\"reset\">\n");
-			writer.write("<span class=\"date\">" + tfm.format(new Date()) + "</span><span class=\"content\">reset</span>");
+			writer.write("<span class=\"date\">" + tfm.format(new Date())
+					+ "</span><span class=\"content\">reset</span>");
 			writer.write("</li>\n");
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -229,8 +279,8 @@ public class HTMLLogger implements ILogger {
 			writer.write("<li class=\"stat\">\n");
 			writer.write("<div id=\"stats\">\n");
 
-			writer.write("<span>" +s +"</span>");
-			
+			writer.write("<span>" + s + "</span>");
+
 			writer.write("</div>\n");
 			writer.write("</li>\n");
 		} catch (IOException e) {
@@ -243,7 +293,7 @@ public class HTMLLogger implements ILogger {
 		String s = null;
 		try {
 			writer.flush();
-			switch (step){
+			switch (step) {
 			case LogManager.STEPNDV:
 				writer.write("<li class=\"ndv\">\n");
 				s = "NonDeterministicValue : " + NDV.class.cast(o).toString();
@@ -254,10 +304,13 @@ public class HTMLLogger implements ILogger {
 				break;
 			case LogManager.STEPNCR:
 				writer.write("<li class=\"ncr\">\n");
-				if (o instanceof ParameterizedInputSequence)				
-					s = "NonClosedRow : " + ParameterizedInputSequence.class.cast(o).toString();
+				if (o instanceof ParameterizedInputSequence)
+					s = "NonClosedRow : "
+							+ ParameterizedInputSequence.class.cast(o)
+									.toString();
 				else
-					s = "NonClosedRow : " + InputSequence.class.cast(o).toString();	
+					s = "NonClosedRow : "
+							+ InputSequence.class.cast(o).toString();
 				break;
 			case LogManager.STEPNDF:
 				writer.write("<li class=\"ndf\">\n");
@@ -265,10 +318,11 @@ public class HTMLLogger implements ILogger {
 				break;
 			case LogManager.STEPOTHER:
 				writer.write("<li class=\"stepunknown\">\n");
-				s = (String)o;
+				s = (String) o;
 				break;
 			}
-			writer.write("<span class=\"date\">" + tfm.format(new Date()) + "</span><span class=\"content\">" + s +"</span>");
+			writer.write("<span class=\"date\">" + tfm.format(new Date())
+					+ "</span><span class=\"content\">" + s + "</span>");
 			writer.write("</li>\n");
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -280,7 +334,8 @@ public class HTMLLogger implements ILogger {
 		try {
 			writer.flush();
 			writer.write("<li class=\"data\">\n");
-			writer.write("<span class=\"date\">" + tfm.format(new Date()) + "</span><span class=\"content\">" + data + "</span>");
+			writer.write("<span class=\"date\">" + tfm.format(new Date())
+					+ "</span><span class=\"content\">" + data + "</span>");
 			writer.write("</li>\n");
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -292,7 +347,8 @@ public class HTMLLogger implements ILogger {
 		try {
 			writer.flush();
 			writer.write("<li class=\"transition\">\n");
-			writer.write("<span class=\"date\">" + tfm.format(new Date()) + "</span><span class=\"content\">" + trans + "</span>");
+			writer.write("<span class=\"date\">" + tfm.format(new Date())
+					+ "</span><span class=\"content\">" + trans + "</span>");
 			writer.write("</li>\n");
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -314,7 +370,8 @@ public class HTMLLogger implements ILogger {
 		try {
 			writer.flush();
 			writer.write("<li class=\"image\">\n");
-			writer.write("<center><img src=\"data:image/svg+xml;base64," + Base64.encodeFromFile(path) + "\"/></center>");
+			writer.write("<center><img src=\"data:image/svg+xml;base64,"
+					+ Base64.encodeFromFile(path) + "\"/></center>");
 			writer.write("</li>\n");
 			writer.flush();
 		} catch (IOException e) {
@@ -327,7 +384,9 @@ public class HTMLLogger implements ILogger {
 		try {
 			writer.flush();
 			writer.write("<li class=\"concrete\">\n");
-			writer.write("<span class=\"date\">" + tfm.format(new Date()) + "</span>Concrete :<br/><span class=\"content\">" + Utils.escapeHTML(data) + "<br/></span>");
+			writer.write("<span class=\"date\">" + tfm.format(new Date())
+					+ "</span>Concrete :<br/><span class=\"content\">"
+					+ Utils.escapeHTML(data) + "<br/></span>");
 			writer.write("</li>\n");
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -338,19 +397,20 @@ public class HTMLLogger implements ILogger {
 	public void logParameters(Map<String, Integer> params) {
 		try {
 			logSpace();
-			StringBuffer s = new StringBuffer("<li class=\"symbols_and_params\">\n<table>\n<tr class=\"header\">\n");			
+			StringBuffer s = new StringBuffer(
+					"<li class=\"symbols_and_params\">\n<table>\n<tr class=\"header\">\n");
 			s.append("<td>Name</td>");
 			ArrayList<String> keys = new ArrayList<String>(params.keySet());
 			Collections.sort(keys);
-			for(String k : keys){
-				s.append("<td>"+k+"</td>");
+			for (String k : keys) {
+				s.append("<td>" + k + "</td>");
 			}
 			s.append("\n</tr><tr class=\"value\">\n");
 			s.append("<td>Nb of parameters</td>");
-			for(String k : keys){
-				s.append("<td>"+params.get(k)+"</td>");
+			for (String k : keys) {
+				s.append("<td>" + params.get(k) + "</td>");
 			}
-			s.append("\n</tr>\n");			
+			s.append("\n</tr>\n");
 			s.append("</table>\n</li>");
 			writer.write(s.toString());
 			logSpace();
@@ -358,8 +418,8 @@ public class HTMLLogger implements ILogger {
 			e.printStackTrace();
 		}
 	}
-	
-	private void logSpace(){
+
+	private void logSpace() {
 		try {
 			writer.write("<li>&nbsp;</li>\n");
 		} catch (IOException e) {
@@ -372,7 +432,11 @@ public class HTMLLogger implements ILogger {
 		try {
 			writer.flush();
 			writer.write("<li class=\"request\">\n");
-			writer.write("<span class=\"date\">" + tfm.format(new Date()) + "</span><span class=\"content\"><span class=\"pi\">" + input + "</span> -> <span class=\"po\">" + (output.length()>0?output:Options.SYMBOL_OMEGA_LOW) + "</span></span>\n</li>\n");
+			writer.write("<span class=\"date\">" + tfm.format(new Date())
+					+ "</span><span class=\"content\"><span class=\"pi\">"
+					+ input + "</span> -> <span class=\"po\">"
+					+ (output.length() > 0 ? output : Options.SYMBOL_OMEGA_LOW)
+					+ "</span></span>\n</li>\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -380,18 +444,22 @@ public class HTMLLogger implements ILogger {
 
 	@Override
 	public void logControlTable(LmControlTable ct) {
-		try {		
+		try {
 			int nbCols = ct.getColsCount();
-			StringBuffer s = new StringBuffer("<li class=\"controltable\">\n<table>\n<tr class=\"header\">\n<td></td>");			
-			for(int i=0; i<nbCols; i++) s.append("<td>" + ct.getColSuffix(i) + "</td>");
+			StringBuffer s = new StringBuffer(
+					"<li class=\"controltable\">\n<table>\n<tr class=\"header\">\n<td></td>");
+			for (int i = 0; i < nbCols; i++)
+				s.append("<td>" + ct.getColSuffix(i) + "</td>");
 			s.append("\n</tr>\n");
-			for(LmControlTableRow ctr : ct.S) s.append(printRows(ctr, "#F9FFF9"));
-			for(LmControlTableRow ctr : ct.R) s.append(printRows(ctr, "#FFF9F9"));
+			for (LmControlTableRow ctr : ct.S)
+				s.append(printRows(ctr, "#F9FFF9"));
+			for (LmControlTableRow ctr : ct.R)
+				s.append(printRows(ctr, "#FFF9F9"));
 			s.append("</table>\n</li><li>&nbsp;</li>");
 			writer.write(s.toString());
 		} catch (IOException e) {
 			e.printStackTrace();
-		}		
+		}
 	}
 
 	@Override

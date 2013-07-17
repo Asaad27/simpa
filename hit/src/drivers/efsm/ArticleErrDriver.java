@@ -14,23 +14,23 @@ public class ArticleErrDriver extends EFSMDriver {
 	public ArticleErrDriver() {
 		super(ArticleErr.getAutomata());
 	}
-	
+
 	@Override
-	public HashMap<String, List<ArrayList<Parameter>>> getDefaultParamValues(){
-		HashMap<String, List<ArrayList<Parameter>>> defaultParamValues = new HashMap<String, List<ArrayList<Parameter>>>();		
+	public HashMap<String, List<ArrayList<Parameter>>> getDefaultParamValues() {
+		HashMap<String, List<ArrayList<Parameter>>> defaultParamValues = new HashMap<String, List<ArrayList<Parameter>>>();
 		ArrayList<ArrayList<Parameter>> params = null;
-		
-		//a
+
+		// a
 		{
-			params = new ArrayList<ArrayList<Parameter>>();	
+			params = new ArrayList<ArrayList<Parameter>>();
 			params.add(Utils.createArrayList(new Parameter("5", Types.NUMERIC)));
 			params.add(Utils.createArrayList(new Parameter("6", Types.NUMERIC)));
-			defaultParamValues.put("a", params);		
+			defaultParamValues.put("a", params);
 		}
-		
-		//b
+
+		// b
 		{
-			params = new ArrayList<ArrayList<Parameter>>();	
+			params = new ArrayList<ArrayList<Parameter>>();
 			params.add(Utils.createArrayList(new Parameter("2", Types.NUMERIC)));
 			params.add(Utils.createArrayList(new Parameter("3", Types.NUMERIC)));
 			defaultParamValues.put("b", params);

@@ -6,15 +6,15 @@ import java.util.List;
 import automata.mealy.InputSequence;
 import examples.mealy.SFM11Stefen;
 
-public class SFM11StefenDriver extends MealyDriver{
+public class SFM11StefenDriver extends MealyDriver {
 
 	public SFM11StefenDriver() {
 		super(SFM11Stefen.getAutomata());
 	}
-	
+
 	protected List<InputSequence> getForcedCE() {
 		List<InputSequence> forcedCE = new ArrayList<InputSequence>();
-		
+
 		InputSequence seq = new InputSequence();
 		seq.addInput("pod");
 		seq.addInput("water");
@@ -22,7 +22,7 @@ public class SFM11StefenDriver extends MealyDriver{
 		seq.addInput("water");
 		seq.addInput("button");
 		forcedCE.add(seq);
-		
+
 		seq = new InputSequence();
 		seq.addInput("clean");
 		seq.addInput("clean");
@@ -32,7 +32,7 @@ public class SFM11StefenDriver extends MealyDriver{
 		seq.addInput("button");
 		seq.addInput("clean");
 		forcedCE.add(seq);
-		
+
 		return forcedCE;
 	}
 }

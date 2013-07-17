@@ -34,31 +34,31 @@ import drivers.efsm.EFSMDriver;
  *  
  */
 
-public abstract class HighWebDriver extends EFSMDriver{
+public abstract class HighWebDriver extends EFSMDriver {
 	public String systemHost;
 	public int systemPort;
-	
+
 	public WebClient webClient;
 	public HtmlPage currentPage;
-	
-	public HighWebDriver(){
+
+	public HighWebDriver() {
 		super(null);
 		webClient = new WebClient();
 		currentPage = null;
 	}
-	
-	public HTTPResponse executeWeb(HTTPRequest req){
+
+	public HTTPResponse executeWeb(HTTPRequest req) {
 		return new HTTPResponse(TCPSend.Send(systemHost, systemPort, req));
 	}
-	
+
 	public ParameterizedOutput execute(ParameterizedInput pi) {
 		numberOfAtomicRequest++;
 		ParameterizedOutput po = concreteToAbstract(abstractToConcrete(pi));
 		LogManager.logRequest(pi, po);
 		return po;
 	}
-	
+
 	public abstract HtmlPage abstractToConcrete(ParameterizedInput pi);
-	
+
 	public abstract ParameterizedOutput concreteToAbstract(HtmlPage resp);
 }

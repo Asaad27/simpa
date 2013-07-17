@@ -26,14 +26,14 @@ import drivers.efsm.EFSMDriver;
  *  
  */
 
-public abstract class RealDriver extends EFSMDriver{
+public abstract class RealDriver extends EFSMDriver {
 	public String systemHost;
 	public int systemPort;
-	
-	public RealDriver(){
+
+	public RealDriver() {
 		super(null);
 	}
 
 	public abstract ParameterizedOutput execute(ParameterizedInput pi);
-	
+
 }

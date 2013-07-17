@@ -41,8 +41,8 @@ public class TextLogger implements ILogger {
 	private DateFormat filenameFm;
 	private Writer writer = null;
 	private String ret = null;
-	
-	public TextLogger(){
+
+	public TextLogger() {
 		ret = System.getProperty("line.separator");
 		dir = new File(Options.OUTDIR + "log");
 		filenameFm = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS");
@@ -51,8 +51,8 @@ public class TextLogger implements ILogger {
 		try {
 			if (!dir.isDirectory()) {
 				if (!dir.mkdirs())
-					throw new IOException("unable to create " + dir.getAbsolutePath()
-							+ " directory");
+					throw new IOException("unable to create "
+							+ dir.getAbsolutePath() + " directory");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -63,25 +63,32 @@ public class TextLogger implements ILogger {
 		try {
 			int nbSymbols = l.inputSymbols.size();
 			ArrayList<Integer> width = new ArrayList<Integer>();
-			for(int i=0; i<nbSymbols+1; i++) width.add(0);
+			for (int i = 0; i < nbSymbols + 1; i++)
+				width.add(0);
 			final List<LiControlTableRow> allRows = l.getAllRows();
-			for (LiControlTableRow ctr : allRows){
-				width.set(0, Math.max(ctr.getPIS().toString().length(), width.get(0)));
-				for(int i=0; i<nbSymbols; i++){
+			for (LiControlTableRow ctr : allRows) {
+				width.set(0, Math.max(ctr.getPIS().toString().length(),
+						width.get(0)));
+				for (int i = 0; i < nbSymbols; i++) {
 					int maxwidth = 0;
-					for(LiControlTableItem cti : ctr.getColum(i)){
-						maxwidth = Math.max(cti.toString().length(), maxwidth); 
+					for (LiControlTableItem cti : ctr.getColum(i)) {
+						maxwidth = Math.max(cti.toString().length(), maxwidth);
 					}
-					if (maxwidth>width.get(i+1)) width.set(i+1, maxwidth);
+					if (maxwidth > width.get(i + 1))
+						width.set(i + 1, maxwidth);
 				}
 			}
-			StringBuffer s = new StringBuffer(ret + printLine(width, l.inputSymbols.size()));		
+			StringBuffer s = new StringBuffer(ret
+					+ printLine(width, l.inputSymbols.size()));
 			s.append(tfm.format(new Date()) + "|" + pad("", width.get(0)) + "|");
-			for(int i=0; i<nbSymbols; i++) s.append(pad(l.inputSymbols.get(i), width.get(i+1)) + "|");
+			for (int i = 0; i < nbSymbols; i++)
+				s.append(pad(l.inputSymbols.get(i), width.get(i + 1)) + "|");
 			s.append(ret + printLine(width, nbSymbols));
-			for(LiControlTableRow ctr : l.S) s.append(printRows(ctr, width));
+			for (LiControlTableRow ctr : l.S)
+				s.append(printRows(ctr, width));
 			s.append(printLine(width, nbSymbols));
-			for(LiControlTableRow ctr : l.R) s.append(printRows(ctr, width));
+			for (LiControlTableRow ctr : l.R)
+				s.append(printRows(ctr, width));
 			s.append(printLine(width, nbSymbols));
 			writer.write(s.toString() + ret);
 			writer.flush();
@@ -89,31 +96,39 @@ public class TextLogger implements ILogger {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void logControlTable(LmControlTable l) {
 		try {
 			int nbCols = l.getColsCount();
 			ArrayList<Integer> width = new ArrayList<Integer>();
-			for(int i=0; i<nbCols+1; i++) width.add(0);
+			for (int i = 0; i < nbCols + 1; i++)
+				width.add(0);
 			final List<LmControlTableRow> allRows = l.getAllRows();
-			for(int i=0; i<nbCols; i++){
+			for (int i = 0; i < nbCols; i++) {
 				int suffixLength = l.getColSuffix(i).toString().length();
-				if (width.get(i+1)<suffixLength) width.set(i+1, suffixLength);
+				if (width.get(i + 1) < suffixLength)
+					width.set(i + 1, suffixLength);
 			}
-			for (LmControlTableRow ctr : allRows){
-				width.set(0, Math.max(ctr.getIS().toString().length(), width.get(0)));
-				for(int i=0; i<nbCols; i++){
+			for (LmControlTableRow ctr : allRows) {
+				width.set(0,
+						Math.max(ctr.getIS().toString().length(), width.get(0)));
+				for (int i = 0; i < nbCols; i++) {
 					int maxwidth = ctr.getColumn(i).getOutputSymbol().length();
-					if (maxwidth>width.get(i+1)) width.set(i+1, maxwidth);
+					if (maxwidth > width.get(i + 1))
+						width.set(i + 1, maxwidth);
 				}
 			}
-			StringBuffer s = new StringBuffer(ret + printLine(width, nbCols));		
+			StringBuffer s = new StringBuffer(ret + printLine(width, nbCols));
 			s.append(tfm.format(new Date()) + "|" + pad("", width.get(0)) + "|");
-			for(int i=0; i<nbCols; i++) s.append(pad(l.getColSuffix(i).toString(), width.get(i+1)) + "|");
+			for (int i = 0; i < nbCols; i++)
+				s.append(pad(l.getColSuffix(i).toString(), width.get(i + 1))
+						+ "|");
 			s.append(ret + printLine(width, nbCols));
-			for(LmControlTableRow ctr : l.S) s.append(printRows(ctr, width));
+			for (LmControlTableRow ctr : l.S)
+				s.append(printRows(ctr, width));
 			s.append(printLine(width, nbCols));
-			for(LmControlTableRow ctr : l.R) s.append(printRows(ctr, width));
+			for (LmControlTableRow ctr : l.R)
+				s.append(printRows(ctr, width));
 			s.append(printLine(width, nbCols));
 			writer.write(s.toString() + ret);
 			writer.flush();
@@ -124,29 +139,36 @@ public class TextLogger implements ILogger {
 
 	@Override
 	public void logDataTable(LiDataTable l) {
-		try{
+		try {
 			int nbSymbols = l.inputSymbols.size();
 			ArrayList<Integer> width = new ArrayList<Integer>();
-			for(int i=0; i<nbSymbols+1; i++) width.add(0);
+			for (int i = 0; i < nbSymbols + 1; i++)
+				width.add(0);
 			final List<LiDataTableRow> allRows = l.getAllRows();
-			for (LiDataTableRow dtr : allRows){
-				width.set(0, Math.max(dtr.getPIS().toString().length(), width.get(0)));
-				for(int i=0; i<nbSymbols; i++){
+			for (LiDataTableRow dtr : allRows) {
+				width.set(0, Math.max(dtr.getPIS().toString().length(),
+						width.get(0)));
+				for (int i = 0; i < nbSymbols; i++) {
 					int maxwidth = 0;
-					for(LiDataTableItem dti : dtr.getColum(i)){
-						maxwidth = Math.max(dti.toString().length(), maxwidth); 
+					for (LiDataTableItem dti : dtr.getColum(i)) {
+						maxwidth = Math.max(dti.toString().length(), maxwidth);
 					}
-					if (maxwidth>width.get(i+1)) width.set(i+1, maxwidth);
+					if (maxwidth > width.get(i + 1))
+						width.set(i + 1, maxwidth);
 				}
 			}
 			StringBuffer s = new StringBuffer(printLine(width, nbSymbols));
-			s.append(tfm.format(new Date()) + "|" + pad(" ", width.get(0)) + "|");
-			for(int i=0; i<nbSymbols; i++) s.append(pad(l.inputSymbols.get(i), width.get(i+1)) + "|");
+			s.append(tfm.format(new Date()) + "|" + pad(" ", width.get(0))
+					+ "|");
+			for (int i = 0; i < nbSymbols; i++)
+				s.append(pad(l.inputSymbols.get(i), width.get(i + 1)) + "|");
 			s.append(ret);
 			s.append(printLine(width, nbSymbols));
-			for(LiDataTableRow dtr : l.S) s.append(printRows(dtr,width));
+			for (LiDataTableRow dtr : l.S)
+				s.append(printRows(dtr, width));
 			s.append(printLine(width, nbSymbols));
-			for(LiDataTableRow dtr : l.R) s.append(printRows(dtr, width));
+			for (LiDataTableRow dtr : l.R)
+				s.append(printRows(dtr, width));
 			s.append(printLine(width, nbSymbols));
 			writer.write(s.toString() + ret);
 			writer.flush();
@@ -166,24 +188,26 @@ public class TextLogger implements ILogger {
 	}
 
 	@Override
-	public void logError(String s) {}
-	
+	public void logError(String s) {
+	}
+
 	@Override
-	public void logException(String m, Exception e) {}
-	
+	public void logException(String m, Exception e) {
+	}
+
 	@Override
 	public void logInfo(String s) {
-	try{
-		writer.write(tfm.format(new Date()) + s + ret);
-		writer.flush();
-	} catch (IOException e) {
-		e.printStackTrace();
-	}
+		try {
+			writer.write(tfm.format(new Date()) + s + ret);
+			writer.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void logRequest(ParameterizedInput pi, ParameterizedOutput po) {
-		try{
+		try {
 			writer.write(tfm.format(new Date()) + pi + " -> " + po + ret);
 			writer.flush();
 		} catch (IOException e) {
@@ -193,147 +217,169 @@ public class TextLogger implements ILogger {
 
 	@Override
 	public void logStart() {
-		try{
+		try {
 			file = new File(dir.getAbsolutePath() + File.separator
-					+ filenameFm.format(new Date()) + "_" +  Options.SYSTEM + ".txt");
+					+ filenameFm.format(new Date()) + "_" + Options.SYSTEM
+					+ ".txt");
 			writer = new BufferedWriter(new FileWriter(file));
-			writer.write(SIMPA.name + " - " + dfm.format(new Date()) + " - " + Options.SYSTEM + ret + ret);
+			writer.write(SIMPA.name + " - " + dfm.format(new Date()) + " - "
+					+ Options.SYSTEM + ret + ret);
 			writer.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private StringBuffer pad(String s, int size){
+	private StringBuffer pad(String s, int size) {
 		StringBuffer res = new StringBuffer();
 		int before = size - s.length() + 1;
-		for (int i=0; i<before; i++) res.append(" ");
+		for (int i = 0; i < before; i++)
+			res.append(" ");
 		return res.append(s + " ");
 	}
 
-	private StringBuffer printLine(ArrayList<Integer> width, int NbSymbols){
+	private StringBuffer printLine(ArrayList<Integer> width, int NbSymbols) {
 		StringBuffer s = new StringBuffer(tfm.format(new Date()) + "|");
-		for(int i=0; i<NbSymbols+1; i++){
-			for(int j=0; j<width.get(i)+2; j++) s.append("-");
+		for (int i = 0; i < NbSymbols + 1; i++) {
+			for (int j = 0; j < width.get(i) + 2; j++)
+				s.append("-");
 		}
-		return s.append("--|"+ret);
+		return s.append("--|" + ret);
 	}
-	
-	private StringBuffer printRows(LmControlTableRow ctr, ArrayList<Integer> width){
+
+	private StringBuffer printRows(LmControlTableRow ctr,
+			ArrayList<Integer> width) {
 		int height = 0;
-		StringBuffer s = new StringBuffer(tfm.format(new Date()) + "|" + pad(ctr.getIS().toString(), width.get(0)) + "|");
-		for(int i=0; i<ctr.getColumCount(); i++){
+		StringBuffer s = new StringBuffer(tfm.format(new Date()) + "|"
+				+ pad(ctr.getIS().toString(), width.get(0)) + "|");
+		for (int i = 0; i < ctr.getColumCount(); i++) {
 			LmControlTableItem acti = ctr.getColumn(i);
-			s.append(pad(acti.toString(), width.get(i+1)) + "|"); 
+			s.append(pad(acti.toString(), width.get(i + 1)) + "|");
 			height = 1;
 		}
 		s.append(ret);
-		for(int i=1; i<height; i++){
+		for (int i = 1; i < height; i++) {
 			s.append(tfm.format(new Date()) + "|" + pad("", width.get(0)) + "|");
-			for(int j=0; j<ctr.getColumCount(); j++){
-				s.append(pad("", width.get(j+1)) + "|");
+			for (int j = 0; j < ctr.getColumCount(); j++) {
+				s.append(pad("", width.get(j + 1)) + "|");
 			}
 			s.append(ret);
 		}
 		return s;
 	}
 
-	private StringBuffer printRows(LiControlTableRow ctr, ArrayList<Integer> width){
+	private StringBuffer printRows(LiControlTableRow ctr,
+			ArrayList<Integer> width) {
 		int height = 0;
-		StringBuffer s = new StringBuffer(tfm.format(new Date()) + "|" + pad(ctr.getPIS().toString(), width.get(0)) + "|");
-		for(int i=0; i<ctr.getColumCount(); i++){
+		StringBuffer s = new StringBuffer(tfm.format(new Date()) + "|"
+				+ pad(ctr.getPIS().toString(), width.get(0)) + "|");
+		for (int i = 0; i < ctr.getColumCount(); i++) {
 			ArrayList<LiControlTableItem> acti = ctr.getColum(i);
-			if (acti.size()>0)  s.append(pad(acti.get(0).toString(), width.get(i+1)) + "|"); else s.append(pad("", width.get(i+1)) + "|"); 
+			if (acti.size() > 0)
+				s.append(pad(acti.get(0).toString(), width.get(i + 1)) + "|");
+			else
+				s.append(pad("", width.get(i + 1)) + "|");
 			height = Math.max(height, acti.size());
 		}
 		s.append(ret);
-		for(int i=1; i<height; i++){
+		for (int i = 1; i < height; i++) {
 			s.append(tfm.format(new Date()) + "|" + pad("", width.get(0)) + "|");
-			for(int j=0; j<ctr.getColumCount(); j++){
+			for (int j = 0; j < ctr.getColumCount(); j++) {
 				ArrayList<LiControlTableItem> acti = ctr.getColum(j);
-				if (acti.size()>i) s.append(pad(acti.get(i).toString(), width.get(j+1)) + "|");
-				else s.append(pad("", width.get(j+1)) + "|");
+				if (acti.size() > i)
+					s.append(pad(acti.get(i).toString(), width.get(j + 1))
+							+ "|");
+				else
+					s.append(pad("", width.get(j + 1)) + "|");
 			}
 			s.append(ret);
 		}
 		return s;
 	}
 
-	private StringBuffer printRows(LiDataTableRow dtr, ArrayList<Integer> width){
+	private StringBuffer printRows(LiDataTableRow dtr, ArrayList<Integer> width) {
 		int height = 0;
-		StringBuffer s = new StringBuffer(tfm.format(new Date()) + "|" + pad(dtr.getPIS().toString(), width.get(0)) + "|");
-		for(int i=0; i<dtr.getColumCount(); i++){
+		StringBuffer s = new StringBuffer(tfm.format(new Date()) + "|"
+				+ pad(dtr.getPIS().toString(), width.get(0)) + "|");
+		for (int i = 0; i < dtr.getColumCount(); i++) {
 			ArrayList<LiDataTableItem> adti = dtr.getColum(i);
-			if (adti.size()>0) s.append(pad(adti.get(0).toString(), width.get(i+1)) + "|"); else s.append(pad("", width.get(i+1)) + "|"); 
+			if (adti.size() > 0)
+				s.append(pad(adti.get(0).toString(), width.get(i + 1)) + "|");
+			else
+				s.append(pad("", width.get(i + 1)) + "|");
 			height = Math.max(height, adti.size());
 		}
 		s.append(ret);
-		for(int i=1; i<height; i++){
+		for (int i = 1; i < height; i++) {
 			s.append(tfm.format(new Date()) + "|" + pad("", width.get(0)) + "|");
-			for(int j=0; j<dtr.getColumCount(); j++){
+			for (int j = 0; j < dtr.getColumCount(); j++) {
 				ArrayList<LiDataTableItem> adti = dtr.getColum(j);
-				if (adti.size()>i) s.append(pad(adti.get(i).toString(), width.get(j+1)) + "|");
-				else s.append(pad("", width.get(j+1)) + "|");
+				if (adti.size() > i)
+					s.append(pad(adti.get(i).toString(), width.get(j + 1))
+							+ "|");
+				else
+					s.append(pad("", width.get(j + 1)) + "|");
 			}
 			s.append(ret);
-		}	
+		}
 		return s;
 	}
 
 	@Override
 	public void logReset() {
-	try{
-		writer.write(tfm.format(new Date()) + "reset" + ret);
-		writer.flush();
-	} catch (IOException e) {
-		e.printStackTrace();
-	}
+		try {
+			writer.write(tfm.format(new Date()) + "reset" + ret);
+			writer.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void logStat(String s) {
-		try{
+		try {
 			writer.write(ret + tfm.format(new Date()) + s);
 			writer.flush();
-	} catch (IOException e) {
-		e.printStackTrace();
-	}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void logStep(int step, Object o) {
 		String s = null;
-			switch (step){
-			case LogManager.STEPNDV:
-				s = "NDV : " + NDV.class.cast(o).toString();
-				break;
-			case LogManager.STEPNBP:
-				s = "NBP : " + NBP.class.cast(o).toString();
-				break;
-			case LogManager.STEPNCR:
-				if (o instanceof ParameterizedInputSequence)				
-					s = "NCR : " + ParameterizedInputSequence.class.cast(o).toString();
-				else
-					s = "NCR : " + InputSequence.class.cast(o).toString();
-				break;
-			case LogManager.STEPNDF:
-				s = "NDF : " + NDF.class.cast(o).toString();
-				break;
-			case LogManager.STEPOTHER:
-				s = (String)o;
-				break;
-			}
-			try{
-				writer.write(tfm.format(new Date()) + s + ret);
-				writer.flush();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		switch (step) {
+		case LogManager.STEPNDV:
+			s = "NDV : " + NDV.class.cast(o).toString();
+			break;
+		case LogManager.STEPNBP:
+			s = "NBP : " + NBP.class.cast(o).toString();
+			break;
+		case LogManager.STEPNCR:
+			if (o instanceof ParameterizedInputSequence)
+				s = "NCR : "
+						+ ParameterizedInputSequence.class.cast(o).toString();
+			else
+				s = "NCR : " + InputSequence.class.cast(o).toString();
+			break;
+		case LogManager.STEPNDF:
+			s = "NDF : " + NDF.class.cast(o).toString();
+			break;
+		case LogManager.STEPOTHER:
+			s = (String) o;
+			break;
+		}
+		try {
+			writer.write(tfm.format(new Date()) + s + ret);
+			writer.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void logData(String data) {
-		try{
+		try {
 			writer.write(tfm.format(new Date()) + "        " + data + ret);
 			writer.flush();
 		} catch (IOException e) {
@@ -343,53 +389,59 @@ public class TextLogger implements ILogger {
 
 	@Override
 	public void logTransition(String trans) {
-		try{
+		try {
 			writer.write(tfm.format(new Date()) + trans + ret);
 			writer.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}	
+		}
 	}
 
 	@Override
 	public void logLine() {
-		try{
-			writer.write(ret + "-----------------------------------------------------------------------"+ret+ret);
+		try {
+			writer.write(ret
+					+ "-----------------------------------------------------------------------"
+					+ ret + ret);
 			writer.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}		
+		}
 	}
 
 	@Override
 	public void logImage(String path) {
-		try{
-			writer.write(tfm.format(new Date()) + "See image here : " + path + ret);
+		try {
+			writer.write(tfm.format(new Date()) + "See image here : " + path
+					+ ret);
 			writer.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}		
+		}
 		// ASCII art ? :)
 	}
 
 	@Override
 	public void logConcrete(String data) {
-		try{
-			writer.write(tfm.format(new Date()) + "Concrete : "+ret+"------------"+ret + data + ret + "------------" + ret);
+		try {
+			writer.write(tfm.format(new Date()) + "Concrete : " + ret
+					+ "------------" + ret + data + ret + "------------" + ret);
 			writer.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}					
+		}
 	}
 
 	@Override
 	public void logParameters(Map<String, Integer> params) {
-		try{
-			writer.write(tfm.format(new Date()) + "Symbols and parameters :" + ret + ret);
+		try {
+			writer.write(tfm.format(new Date()) + "Symbols and parameters :"
+					+ ret + ret);
 			ArrayList<String> keys = new ArrayList<String>(params.keySet());
 			Collections.sort(keys);
-			for(String k : keys){
-				writer.write(tfm.format(new Date()) + "Symbol " + k + "has " + params.get(k) + " parameters" + ret);
+			for (String k : keys) {
+				writer.write(tfm.format(new Date()) + "Symbol " + k + "has "
+						+ params.get(k) + " parameters" + ret);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -398,7 +450,7 @@ public class TextLogger implements ILogger {
 
 	@Override
 	public void logRequest(String input, String ouput) {
-		try{
+		try {
 			writer.write(tfm.format(new Date()) + input + " -> " + ouput + ret);
 			writer.flush();
 		} catch (IOException e) {
@@ -409,7 +461,7 @@ public class TextLogger implements ILogger {
 	@Override
 	public void logObservationTree(ObservationNode root) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

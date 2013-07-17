@@ -1,4 +1,5 @@
 package tools;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.TreeMap;
@@ -11,11 +12,11 @@ import drivers.efsm.EFSMDriver.Types;
 
 public class ASLanEntity {
 	private String name;
-	private TreeMap<String, String> arguments, symbols,gsymbols;
+	private TreeMap<String, String> arguments, symbols, gsymbols;
 	private TreeMap<Types, String> mappingKITASLan;
 	private String functions;
-	
-	public ASLanEntity(String name){
+
+	public ASLanEntity(String name) {
 		this.name = name;
 		arguments = new TreeMap<String, String>();
 		addArgument("Actor", "agent");
@@ -29,39 +30,41 @@ public class ASLanEntity {
 		mappingKITASLan.put(Types.NOMINAL, "text");
 		gsymbols.put("system", "agent");
 	}
-	
-	public void addSymbol(String name, String type){
-		symbols.put(name,  type);
+
+	public void addSymbol(String name, String type) {
+		symbols.put(name, type);
 	}
-	
-	public void addGlobalSymbol(String name, String type){
-		gsymbols.put(name,  type);
+
+	public void addGlobalSymbol(String name, String type) {
+		gsymbols.put(name, type);
 	}
-	
-	public void addArgument(String name, String type){
-		arguments.put(name,  type);
+
+	public void addArgument(String name, String type) {
+		arguments.put(name, type);
 	}
-	
-	public String toString(){
+
+	public String toString() {
 		String ent = header();
 		ent += "specification " + name.replace(" ", "_").toUpperCase() + "\n";
 		ent += "channel_model CCM\n";
 		ent += "\n";
 		ent += "entity Environment {\n";
-		ent +=    printGlobalSymbols();
-		ent += "  entity " + name.replace(" ", "_").toUpperCase() + "(" + printArguments() + "){\n";
-		ent +=      printSymbols();
+		ent += printGlobalSymbols();
+		ent += "  entity " + name.replace(" ", "_").toUpperCase() + "("
+				+ printArguments() + "){\n";
+		ent += printSymbols();
 		ent += "    body {\n";
 		ent += "      State := 0;\n";
 		ent += "      while (true){\n";
 		ent += "        select {\n";
-		ent +=          printFunctions();
+		ent += printFunctions();
 		ent += "        }\n";
 		ent += "      }\n";
 		ent += "    }\n";
 		ent += "  }\n";
 		ent += "  body {\n";
-		ent += "    new "+ name.replace(" ", "_").toUpperCase() +"(system" + printActors() + ");\n";
+		ent += "    new " + name.replace(" ", "_").toUpperCase() + "(system"
+				+ printActors() + ");\n";
 		ent += "    %% TO BE COMPLETED\n";
 		ent += "  }\n";
 		ent += "}\n";
@@ -70,12 +73,13 @@ public class ASLanEntity {
 
 	private String printActors() {
 		char agent = 'a';
-		if (arguments.isEmpty()) return "";
-		else{
+		if (arguments.isEmpty())
+			return "";
+		else {
 			String arg = "";
-			for(int i=0; i<arguments.size()-1; i++){
+			for (int i = 0; i < arguments.size() - 1; i++) {
 				arg += ", " + agent++;
-			}			
+			}
 			return arg;
 		}
 	}
@@ -87,139 +91,173 @@ public class ASLanEntity {
 	private String printFunctions() {
 		return functions;
 	}
-	
+
 	private String printGlobalSymbols() {
-		if (gsymbols.isEmpty()) return "";
-		else{
+		if (gsymbols.isEmpty())
+			return "";
+		else {
 			char agent = 'a';
-			for(int i=0; i<arguments.size()-1; i++){
+			for (int i = 0; i < arguments.size() - 1; i++) {
 				gsymbols.put(String.valueOf(agent++), "agent");
-			}			
-			
+			}
+
 			String sym = "  symbols\n";
-			for(String key : gsymbols.keySet()){
+			for (String key : gsymbols.keySet()) {
 				sym += "    " + key + " : " + gsymbols.get(key) + ";\n";
-			}			
+			}
 			return sym + "\n";
 		}
 	}
 
 	private String printSymbols() {
-		if (symbols.isEmpty()) return "";
-		else{
+		if (symbols.isEmpty())
+			return "";
+		else {
 			String sym = "    symbols\n";
-			for(String key : symbols.keySet()){
-				sym += "      " + Utils.capitalize(key) + " : " + symbols.get(key) + ";\n";
-			}			
+			for (String key : symbols.keySet()) {
+				sym += "      " + Utils.capitalize(key) + " : "
+						+ symbols.get(key) + ";\n";
+			}
 			return sym + "\n";
 		}
 	}
 
 	private String printArguments() {
-		if (arguments.isEmpty()) return "";
-		else{
+		if (arguments.isEmpty())
+			return "";
+		else {
 			String arg = "";
-			for(String key : arguments.keySet()){
+			for (String key : arguments.keySet()) {
 				arg += key + " : " + arguments.get(key) + ", ";
-			}			
-			return arg.substring(0, arg.length()-2);
+			}
+			return arg.substring(0, arg.length() - 2);
 		}
 	}
 
 	public void loadFromEFSM(LiConjecture conjecture) {
-		for (String sym : conjecture.gSymbols){
+		for (String sym : conjecture.gSymbols) {
 			gsymbols.put(sym, "text");
-		}	
+		}
 		functions = "";
 		conjecture.cleanMark();
-		for(int i=0; i<conjecture.getStateCount(); i++){
-			functions += "          on(State = " + i + "): {\n"; 
+		for (int i = 0; i < conjecture.getStateCount(); i++) {
+			functions += "          on(State = " + i + "): {\n";
 			writeState(conjecture, conjecture.getState(i));
 			functions += "          }\n";
-		}		
+		}
 	}
-	
+
 	private void writeState(LiConjecture conjecture, State state) {
 		functions += "            select {\n";
-		for(String input : conjecture.getInputSymbols()){
-			List<EFSMTransition> currentTrans = conjecture.getTransitionFromWithInput(state, input, true);
-			if (!currentTrans.isEmpty()){
-				List<String> paramNames = conjecture.getParamNames(currentTrans.get(0).getInput());
-				functions += "              on(Other -> Actor: " + currentTrans.get(0).getInput().toLowerCase() + "(";
+		for (String input : conjecture.getInputSymbols()) {
+			List<EFSMTransition> currentTrans = conjecture
+					.getTransitionFromWithInput(state, input, true);
+			if (!currentTrans.isEmpty()) {
+				List<String> paramNames = conjecture.getParamNames(currentTrans
+						.get(0).getInput());
+				functions += "              on(Other -> Actor: "
+						+ currentTrans.get(0).getInput().toLowerCase() + "(";
 				String param = "";
-				if (!paramNames.isEmpty()){
+				if (!paramNames.isEmpty()) {
 					functions += "?" + Utils.capitalize(paramNames.get(0));
 					param += "text";
 				}
-				for(int i=1; i<paramNames.size(); i++){
+				for (int i = 1; i < paramNames.size(); i++) {
 					functions += ", ?" + Utils.capitalize(paramNames.get(i));
 					param += ", text";
 				}
-				gsymbols.put(currentTrans.get(0).getInput().toLowerCase() + "(" + param + ")", "message");
+				gsymbols.put(currentTrans.get(0).getInput().toLowerCase() + "("
+						+ param + ")", "message");
 				functions += ")): {\n";
-				for(EFSMTransition t : currentTrans){
+				for (EFSMTransition t : currentTrans) {
 					String space = "                ";
-					if (!conjecture.getLabelForTransition(t).getPredicates().isEmpty()){
+					if (!conjecture.getLabelForTransition(t).getPredicates()
+							.isEmpty()) {
 						space += "  ";
 						functions += "                if (";
-						List<String> predicates = conjecture.getLabelForTransition(t).getPredicates();
+						List<String> predicates = conjecture
+								.getLabelForTransition(t).getPredicates();
 						Collections.sort(predicates);
 						functions += Utils.joinAndClean(predicates, " | ");
 						functions += "){\n";
-					}	
-					
-					for(Parameter p : conjecture.getLabelForTransition(t).getInput().getParameters()){
+					}
+
+					for (Parameter p : conjecture.getLabelForTransition(t)
+							.getInput().getParameters()) {
 						symbols.put(p.value, mappingKITASLan.get(p.type));
 					}
-					
-					for(String s : conjecture.getLabelForTransition(t).getOutputFunctions()){
-						if (s.indexOf("=>") == -1){
+
+					for (String s : conjecture.getLabelForTransition(t)
+							.getOutputFunctions()) {
+						if (s.indexOf("=>") == -1) {
 							String[] value = s.split(" = ");
-							if (value[1].startsWith("\"Ndv")) functions += space + value[0] + " := fresh();\n";
-							else{
-								try{
-									Float.parseFloat(value[1].substring(1, value[1].length()-1));
-									functions += space + value[0] + " := " + value[1].substring(1, value[1].length()-1).trim() + ";\n";
-								}catch(NumberFormatException e){
-									functions += space + value[0] + " := " + value[1].trim() + ";\n";
+							if (value[1].startsWith("\"Ndv"))
+								functions += space + value[0]
+										+ " := fresh();\n";
+							else {
+								try {
+									Float.parseFloat(value[1].substring(1,
+											value[1].length() - 1));
+									functions += space
+											+ value[0]
+											+ " := "
+											+ value[1].substring(1,
+													value[1].length() - 1)
+													.trim() + ";\n";
+								} catch (NumberFormatException e) {
+									functions += space + value[0] + " := "
+											+ value[1].trim() + ";\n";
 									addGlobalSymbol(value[1].trim(), "text");
-								}							
+								}
 							}
-						}else{
+						} else {
 							String[] value1 = s.split(" => ");
 							String[] value2 = value1[1].split(" = ");
-							functions += space + "if (" + Utils.filter(value1[0]) + "){\n";
-							functions += space + "  " + value2[0] + " := " + value2[1] + ";\n";
+							functions += space + "if ("
+									+ Utils.filter(value1[0]) + "){\n";
+							functions += space + "  " + value2[0] + " := "
+									+ value2[1] + ";\n";
 							functions += space + "}\n";
 						}
 					}
-					paramNames = conjecture.getParamNames(conjecture.getLabelForTransition(t).getOutput().getOutputSymbol());
-					functions += space + "Actor -> Other: " + conjecture.getLabelForTransition(t).getOutput().getOutputSymbol().toLowerCase() +"(";
+					paramNames = conjecture.getParamNames(conjecture
+							.getLabelForTransition(t).getOutput()
+							.getOutputSymbol());
+					functions += space
+							+ "Actor -> Other: "
+							+ conjecture.getLabelForTransition(t).getOutput()
+									.getOutputSymbol().toLowerCase() + "(";
 					param = "";
-					if (!paramNames.isEmpty()){
+					if (!paramNames.isEmpty()) {
 						functions += Utils.capitalize(paramNames.get(0));
 						param += "text";
 					}
-					for(int i=1; i<paramNames.size(); i++){
+					for (int i = 1; i < paramNames.size(); i++) {
 						functions += ", " + Utils.capitalize(paramNames.get(i));
 						param += ", text";
 					}
 					functions += ");\n";
-					gsymbols.put(conjecture.getLabelForTransition(t).getOutput().getOutputSymbol().toLowerCase() + "(" + param + ")", "message");
-					
-					for(Parameter p : conjecture.getLabelForTransition(t).getOutput().getParameters()){
+					gsymbols.put(conjecture.getLabelForTransition(t)
+							.getOutput().getOutputSymbol().toLowerCase()
+							+ "(" + param + ")", "message");
+
+					for (Parameter p : conjecture.getLabelForTransition(t)
+							.getOutput().getParameters()) {
 						symbols.put(p.value, mappingKITASLan.get(p.type));
 					}
 
-					if (!conjecture.getLabelForTransition(t).getPredicates().isEmpty()){
-						functions += "                  State := " + t.getTo().getId() + ";\n";
+					if (!conjecture.getLabelForTransition(t).getPredicates()
+							.isEmpty()) {
+						functions += "                  State := "
+								+ t.getTo().getId() + ";\n";
 						functions += "                }\n";
-					}else{
-						functions += "                State := " + t.getTo().getId() + ";\n";
+					} else {
+						functions += "                State := "
+								+ t.getTo().getId() + ";\n";
 					}
 				}
 				functions += "              }\n";
-			}							
+			}
 		}
 		functions += "            }\n";
 	}

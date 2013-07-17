@@ -1,14 +1,14 @@
 package main;
 
 public class Options {
-	
+
 	// Test or not
-	
+
 	public static boolean TEST = false;
 	public static boolean STAT = false;
-	
+
 	// Unicode characters
-	
+
 	public static final String SYMBOL_AND = "\u2227";
 	public static final String SYMBOL_OR = "\u2228";
 	public static final String SYMBOL_OMEGA_UP = "\u03a9";
@@ -16,21 +16,22 @@ public class Options {
 	public static final String SYMBOL_EPSILON = "\u03b5";
 	public static final String SYMBOL_SIGMA = "\u03a3";
 	public static final String SYMBOL_NOT_EQUAL = "\u2260";
-	
+
 	public static String DIRGRAPH = "out";
 	public static String DIRARFF = "arff";
 	public static String DIRTEST = "test";
 	public static String DIRLOG = "log";
 	public static String DIRASLAN = "model";
-	
+
 	// Tools available
-	
+
 	public static boolean WEKA = true;
 	public static boolean GRAPHVIZ = true;
-	
+
 	// Algorithm's options
-	
+
 	public static boolean TREEINFERENCE = false;
+	public static boolean GENERICDRIVER = false;
 	public static String INITIAL_INPUT_SYMBOLS = "";
 	public static String INITIAL_INPUT_SEQUENCES = "";
 	public static boolean INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = true;
@@ -38,19 +39,19 @@ public class Options {
 	public static boolean REUSE_OP_IFNEEDED = false;
 	public static boolean FORCE_J48 = false;
 	public static boolean STOP_ON_CE_SEARCH = false;
-	
-	// Output's options 
-		
+
+	// Output's options
+
 	public static boolean LOG_TEXT = false;
 	public static boolean LOG_HTML = false;
 	public static boolean AUTO_OPEN_HTML = false;
-	
+
 	public static String SYSTEM = "";
 	public static String OUTDIR = System.getProperty("user.dir");
-	
+
 	// SIMPATest's options
 	public static int RETEST = -1;
-	
+
 	public static int NBTEST = 1;
 	public static int MINSTATES = 20;
 	public static int MAXSTATES = 20;

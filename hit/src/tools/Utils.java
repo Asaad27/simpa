@@ -21,54 +21,75 @@ import tools.loggers.LogManager;
 
 public class Utils {
 	private static Random rand = new Random();
-	
-	public static boolean isNumeric(String str)
-	{
-	  return str.matches("-?\\d+(\\.\\d+)?");
+
+	public static boolean isWindows() {
+		return (System.getProperty("os.name").toLowerCase().indexOf("win") >= 0);
 	}
-	
-	public static int getStatusCode(String response){
+
+	public static boolean isMac() {
+		return (System.getProperty("os.name").toLowerCase().indexOf("mac") >= 0);
+	}
+
+	public static boolean isUnix() {
+		String OS = System.getProperty("os.name").toLowerCase();
+		return (OS.indexOf("nix") >= 0 || OS.indexOf("nux") >= 0 || OS
+				.indexOf("aix") > 0);
+	}
+
+	public static boolean isSolaris() {
+		return (System.getProperty("os.name").toLowerCase().indexOf("sunos") >= 0);
+	}
+
+	public static boolean isNumeric(String str) {
+		return str.matches("-?\\d+(\\.\\d+)?");
+	}
+
+	public static boolean is64bit() {
+		return (System.getenv("ProgramW6432") != null);
+	}
+
+	public static int getStatusCode(String response) {
 		String[] resp = response.split("\n");
 		String[] status = resp[0].trim().split(" ");
 		return Integer.parseInt(status[1]);
 	}
-	
-	public static String nextSymbols(String current){
-		for(int i=current.length()-1; i>=0; i--){
-			if (current.charAt(i) == 'z'){
+
+	public static String nextSymbols(String current) {
+		for (int i = current.length() - 1; i >= 0; i--) {
+			if (current.charAt(i) == 'z') {
 				current = resetCharAt(current, i);
-				if (i == 0) return "a" + current;
-			}else{
+				if (i == 0)
+					return "a" + current;
+			} else {
 				current = incCharAt(current, i);
 				break;
 			}
 		}
 		return current;
 	}
-	
-	public static String decapitalize(String s){
+
+	public static String decapitalize(String s) {
 		return s.substring(0, 1).toLowerCase() + s.substring(1);
 	}
-	
+
 	public static String resetCharAt(String s, int pos) {
-		  StringBuffer buf = new StringBuffer(s);
-		  buf.setCharAt( pos, 'a');
-		  return buf.toString();
+		StringBuffer buf = new StringBuffer(s);
+		buf.setCharAt(pos, 'a');
+		return buf.toString();
 	}
-	
+
 	public static String incCharAt(String s, int pos) {
-		  StringBuffer buf = new StringBuffer(s);
-		  buf.setCharAt( pos, (char)(buf.charAt(pos) +1));
-		  return buf.toString();
+		StringBuffer buf = new StringBuffer(s);
+		buf.setCharAt(pos, (char) (buf.charAt(pos) + 1));
+		return buf.toString();
 	}
-	
 
 	public static String capitalize(String s) {
 		if (s.length() == 0)
 			return s;
 		return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
 	}
-	
+
 	public static String exec(String cmd) {
 		String output = null;
 		try {
@@ -81,7 +102,7 @@ public class Utils {
 		}
 		return output;
 	}
-	
+
 	public static String escapeTags(String original) {
 		if (original == null)
 			return "";
@@ -111,66 +132,75 @@ public class Utils {
 
 	}
 
-	public static boolean randBoolWithPercent(int p){
+	public static boolean randBoolWithPercent(int p) {
 		return rand.nextInt(100) < p;
 	}
-	
-    public static void copyFile(File in, File out) throws IOException {
-            FileChannel inChannel = new FileInputStream(in).getChannel();
-            FileChannel outChannel = new FileOutputStream(out).getChannel();
-            try {
-                inChannel.transferTo(0, inChannel.size(),
-                        outChannel);
-            }finally {
-                if (inChannel != null) inChannel.close();
-                if (outChannel != null) outChannel.close();
-            }
-        }
-	
-	public static int randIntBetween(int a, int b){
-		if (a == b) return a;
-		else if (a>b){
+
+	public static void copyFile(File in, File out) throws IOException {
+		FileChannel inChannel = new FileInputStream(in).getChannel();
+		FileChannel outChannel = new FileOutputStream(out).getChannel();
+		try {
+			inChannel.transferTo(0, inChannel.size(), outChannel);
+		} finally {
+			if (inChannel != null)
+				inChannel.close();
+			if (outChannel != null)
+				outChannel.close();
+		}
+	}
+
+	public static int randIntBetween(int a, int b) {
+		if (a == b)
+			return a;
+		else if (a > b) {
 			a -= b;
 			b += a;
-			a = b-a;
-		} 
-		return rand.nextInt(b-a+1) + a;
+			a = b - a;
+		}
+		return rand.nextInt(b - a + 1) + a;
 	}
-	
-	public static <T> T randIn(List<T> l){
-		if (l.isEmpty()) return null;
-		else return l.get(rand.nextInt(l.size()));
+
+	public static <T> T randIn(List<T> l) {
+		if (l.isEmpty())
+			return null;
+		else
+			return l.get(rand.nextInt(l.size()));
 	}
-	
-	public static String filter(Object s){
-		return s.toString().replaceAll(Options.SYMBOL_AND, "&").
-				    replaceAll(Options.SYMBOL_NOT_EQUAL, "!=").
-				    replaceAll(Options.SYMBOL_OR, "|").
-				    replaceAll(" saved", " ");
+
+	public static String filter(Object s) {
+		return s.toString().replaceAll(Options.SYMBOL_AND, "&")
+				.replaceAll(Options.SYMBOL_NOT_EQUAL, "!=")
+				.replaceAll(Options.SYMBOL_OR, "|").replaceAll(" saved", " ");
 	}
-	
-	public static <T> String joinAndClean(List<T> l, String sep){
+
+	public static <T> String joinAndClean(List<T> l, String sep) {
 		String res = null;
-		if (!l.isEmpty()) res = filter(l.get(0).toString());
-		for(int i=1; i<l.size(); i++) res += sep + filter(l.get(i).toString());
+		if (!l.isEmpty())
+			res = filter(l.get(0).toString());
+		for (int i = 1; i < l.size(); i++)
+			res += sep + filter(l.get(i).toString());
 		return res;
 	}
-	
-	public static <T> T randIn(T l[]){
-		if (l.length == 0) return null;
-		else return l[rand.nextInt(l.length)];
+
+	public static <T> T randIn(T l[]) {
+		if (l.length == 0)
+			return null;
+		else
+			return l[rand.nextInt(l.length)];
 	}
-	
-	public static int randInt(int max){
+
+	public static int randInt(int max) {
 		return rand.nextInt(max);
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	public static <T> T randIn(Set<T> l){
-		if (l.size()>0) return (T)l.toArray()[rand.nextInt(l.size())];
-		else return null;
+	public static <T> T randIn(Set<T> l) {
+		if (l.size() > 0)
+			return (T) l.toArray()[rand.nextInt(l.size())];
+		else
+			return null;
 	}
-	
+
 	public static void browse(File log) {
 		String os = System.getProperty("os.name").toLowerCase();
 		Runtime rt = Runtime.getRuntime();
@@ -181,13 +211,13 @@ public class Utils {
 			} else if (os.indexOf("mac") >= 0) {
 				rt.exec("open " + log.getAbsolutePath());
 			} else if (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0) {
-				String[] browsers = {"epiphany", "firefox", "mozilla",
+				String[] browsers = { "epiphany", "firefox", "mozilla",
 						"konqueror", "netscape", "opera", "links", "lynx" };
 				StringBuffer cmd = new StringBuffer();
 				for (int i = 0; i < browsers.length; i++)
 					cmd.append((i == 0 ? "" : " || ") + browsers[i] + " \""
 							+ log.getAbsolutePath() + "\" ");
-				rt.exec(new String[] {"sh", "-c", cmd.toString() });
+				rt.exec(new String[] { "sh", "-c", cmd.toString() });
 			}
 		} catch (Exception e) {
 			LogManager.logException("Unable to start the browser", e);
@@ -209,14 +239,14 @@ public class Utils {
 		resultat &= path.delete();
 		return (resultat);
 	}
-	
+
 	public static boolean createDir(File dir) {
-		if (dir != null && !dir.isDirectory()){
+		if (dir != null && !dir.isDirectory()) {
 			dir.mkdirs();
 		}
 		return dir.isDirectory();
 	}
-	
+
 	public static boolean cleanDir(File dir) {
 		return deleteDir(dir) && createDir(dir);
 	}
@@ -241,106 +271,113 @@ public class Utils {
 	}
 
 	public static final String escapeHTML(String source) {
-	      return source.replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\n", "<br/>").replaceAll(" ", "&nbsp;");
-	  }
+		return source.replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+				.replaceAll("\n", "<br/>").replaceAll(" ", "&nbsp;");
+	}
 
 	public static String removeExtension(String s) {
-	    String separator = "" + File.separatorChar;
-	    String filename;
-	    int lastSeparatorIndex = s.lastIndexOf(separator);
-	    if (lastSeparatorIndex == -1) {
-	        filename = s;
-	    } else {
-	        filename = s.substring(lastSeparatorIndex + 1);
-	    }
-	    int extensionIndex = filename.lastIndexOf(".");
-	    if (extensionIndex == -1)
-	        return filename;
-	    return filename.substring(0, extensionIndex);
+		String separator = "" + File.separatorChar;
+		String filename;
+		int lastSeparatorIndex = s.lastIndexOf(separator);
+		if (lastSeparatorIndex == -1) {
+			filename = s;
+		} else {
+			filename = s.substring(lastSeparatorIndex + 1);
+		}
+		int extensionIndex = filename.lastIndexOf(".");
+		if (extensionIndex == -1)
+			return filename;
+		return filename.substring(0, extensionIndex);
 	}
 
 	public static String makePath(String absolutePath) {
-		if (!absolutePath.endsWith(File.separator)) absolutePath += File.separator;
+		if (!absolutePath.endsWith(File.separator))
+			absolutePath += File.separator;
 		return absolutePath;
 	}
-	
+
 	public static float meanOfCSVField(String filename, int i) {
-		try{
+		try {
 			float mean = 0;
-			BufferedReader br = new BufferedReader( new FileReader(filename));
+			BufferedReader br = new BufferedReader(new FileReader(filename));
 			String strLine = "";
 			StringTokenizer st = null;
 			int lineNumber = 0;
 			br.readLine();
-			while( (strLine = br.readLine()) != null)
-			{
+			while ((strLine = br.readLine()) != null) {
 				st = new StringTokenizer(strLine, ",");
 				int token = 0;
-				while(token<i) { token++; st.nextToken(); }
-				String c = (st.hasMoreTokens()?st.nextToken():null);
-				if (c!=null) mean += Float.parseFloat(c);
+				while (token < i) {
+					token++;
+					st.nextToken();
+				}
+				String c = (st.hasMoreTokens() ? st.nextToken() : null);
+				if (c != null)
+					mean += Float.parseFloat(c);
 				lineNumber++;
 			}
 			br.close();
-			return mean/lineNumber;			 
-		}
-		catch(Exception e){
-			return -1;                  
+			return mean / lineNumber;
+		} catch (Exception e) {
+			return -1;
 		}
 	}
 
 	public static float percentOfCSVField(String filename, int i, String value) {
-		try{
+		try {
 			float nb = 0;
-			BufferedReader br = new BufferedReader( new FileReader(filename));
+			BufferedReader br = new BufferedReader(new FileReader(filename));
 			String strLine = "";
 			StringTokenizer st = null;
 			int lineNumber = 0;
 			br.readLine();
-			while( (strLine = br.readLine()) != null)
-			{
+			while ((strLine = br.readLine()) != null) {
 				st = new StringTokenizer(strLine, ",");
 				int token = 0;
-				while(token<i) { token++; st.nextToken(); }
-				String c = (st.hasMoreTokens()?st.nextToken():null);
-				if (c!=null && c.equals(value)) nb++;
+				while (token < i) {
+					token++;
+					st.nextToken();
+				}
+				String c = (st.hasMoreTokens() ? st.nextToken() : null);
+				if (c != null && c.equals(value))
+					nb++;
 				lineNumber++;
 			}
 			br.close();
-			return 100*nb/lineNumber;			 
-		}
-		catch(Exception e){
-			return -1;                  
+			return 100 * nb / lineNumber;
+		} catch (Exception e) {
+			return -1;
 		}
 	}
-	
-	public static String space(int length){
+
+	public static String space(int length) {
 		String s = "";
-		for(int i=0; i<length; i++) s += " ";
+		for (int i = 0; i < length; i++)
+			s += " ";
 		return s;
 	}
 
 	public static String fileContentOf(String filename) {
 		String content = "";
-		try{
-			
+		try {
+
 			BufferedReader br = new BufferedReader(new FileReader(filename));
 			String strLine = "";
-			while( (strLine = br.readLine()) != null)
-			{
+			while ((strLine = br.readLine()) != null) {
 				content += strLine + "\n";
 			}
 			br.close();
-		}catch(Exception e){}
+		} catch (Exception e) {
+		}
 		return content;
 	}
 
 	public static String randString() {
 		return "random" + Utils.randInt(1000);
 	}
-	
+
 	public static int minimum(int a, int b, int c) {
-        return Math.min(Math.min(a, b), c);
+		return Math.min(Math.min(a, b), c);
 	}
 
 	public static void saveToFile(String s, String filename) {

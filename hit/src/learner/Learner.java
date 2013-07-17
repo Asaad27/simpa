@@ -9,28 +9,29 @@ import drivers.Driver;
 
 public abstract class Learner {
 	protected boolean addtolog = true;
-	
-	public void stopLog(){
+
+	public void stopLog() {
 		addtolog = false;
 	}
-	
-	public void startLog(){
+
+	public void startLog() {
 		addtolog = true;
 	}
-	
+
 	public abstract Automata createConjecture();
-	
+
 	public abstract void learn();
-	
-	public static Learner getLearnerFor(Driver driver) throws Exception{
-		switch(driver.type){
+
+	public static Learner getLearnerFor(Driver driver) throws Exception {
+		switch (driver.type) {
 		case EFSM:
 			return new LiLearner(driver);
 		case MEALY:
-			if (Options.TREEINFERENCE) return new ZLearner(driver);
+			if (Options.TREEINFERENCE)
+				return new ZLearner(driver);
 			return new LmLearner(driver);
 		default:
 			return null;
 		}
-	}	
+	}
 }
