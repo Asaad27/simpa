@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TreeMap;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -25,7 +26,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import main.Main;
+import main.Options;
 
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -44,19 +45,20 @@ import tools.HTTPData;
 import tools.Utils;
 import tools.loggers.LogManager;
 
+import com.gargoylesoftware.htmlunit.CookieManager;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.util.Cookie;
 
 import crawler.Input.Type;
-import crawler.configuration.Configuration;
 
 
-public abstract class DriverGenerator {
+public class DriverGenerator {
 	protected List<String> urlsToCrawl = null;
 	protected List<Input> inputs = null;
-	protected HashMap<String, String> formValues = null;
+	protected HashMap<String, ArrayList<String>> formValues = null;
 	protected List<Input> sequence = null;
 	protected WebClient client = null;
 	protected HashSet<String> comments = null;
@@ -73,6 +75,7 @@ public abstract class DriverGenerator {
 		ObjectMapper mapper = new ObjectMapper();
 		config = mapper.readValue(new File("conf" + File.separator + configFileName),
 				Configuration.class);
+		config.check();
 		urlsToCrawl = new ArrayList<>();
 		inputs = new ArrayList<Input>();
 		sequence = new ArrayList<Input>();
@@ -81,9 +84,15 @@ public abstract class DriverGenerator {
 		outputs = new ArrayList<Output>();
 		client = new WebClient();
 		client.setThrowExceptionOnFailingStatusCode(false);
-		client.setTimeout(config.getTimeout());
-		client.setCssEnabled(config.isEnableCSS());
-		client.setJavaScriptEnabled(config.isEnableJS());
+		client.setTimeout(Options.TIMEOUT);
+		client.setCssEnabled(Options.CSS);
+		client.setJavaScriptEnabled(Options.JS);
+		CookieManager cm = new CookieManager();
+		for (String cookie : config.getCookies().split("[; ]")){
+			String[] cookieValues = cookie.split("=");
+			cm.addCookie(new Cookie(config.getHost(), cookieValues[0], cookieValues[1]));
+		}		
+		client.setCookieManager(cm);
 		BasicCredentialsProvider creds = new BasicCredentialsProvider();
 		if (config.getBasicAuthUser() != null
 				&& config.getBasicAuthPass() != null) {
@@ -94,40 +103,16 @@ public abstract class DriverGenerator {
 		}
 		client.setCredentialsProvider(creds);
 		formValues = config.getData();
-		addUrl(config.getFirstURL());
+		for (String url : config.getURLs()) addUrl(url);
 		currentNode = new ArrayList<Integer>();
 		currentNode.add(0);
-	}
-
-	public static DriverGenerator getDriver(String system) {
-		try {
-			return (DriverGenerator) Class.forName(
-					"crawler.init." + system)
-					.newInstance();
-		} catch (InstantiationException e) {
-			LogManager.logException("Unable to instantiate " + system
-					+ " driver", e);
-		} catch (IllegalAccessException e) {
-			LogManager.logException("Illegal access to class " + system
-					+ " driver", e);
-		} catch (ClassNotFoundException e) {
-			LogManager.logException("Unable to find " + system + " driver", e);
-		}
-		return null;
 	}
 
 	public String getName() {
 		return config.getName();
 	}
 
-	protected abstract void reset();
-	
-	protected abstract void initConnection();
-	
-	protected abstract String prettyprint(Input in);
-
 	private void sendSequences() {
-		reset();
 		for (Input in : sequence) {
 			try {
 				submit(in);
@@ -194,7 +179,8 @@ public abstract class DriverGenerator {
 		for (String key : in.getParams().keySet()) {
 			List<String> values = in.getParams().get(key);
 			if (values.isEmpty()) {
-				String providedValue = formValues.get(key);
+				// TODO
+				String providedValue = formValues.get(key).get(0);
 				if (providedValue != null)
 					values.add(providedValue);
 				else {
@@ -240,11 +226,12 @@ public abstract class DriverGenerator {
 	private HTTPData getValuesForInput(Input in) {
 		HTTPData data = new HTTPData();
 		if (in.getType() == Type.FORM) {
-			HashMap<String, List<String>> inputs = in.getParams();
+			TreeMap<String, List<String>> inputs = in.getParams();
 			for (String key : inputs.keySet()) {
 				List<String> values = inputs.get(key);
 				if (values.isEmpty() || values.size() > 1) {
-					String newValue = formValues.get(key);
+					// TODO
+					String newValue = formValues.get(key).get(0);
 					if (newValue == null) {
 						if (values.size() > 1) {
 							newValue = Utils.randIn(values);
@@ -309,35 +296,23 @@ public abstract class DriverGenerator {
 			urlsToCrawl.add(url);
 	}
 
-	private void banner() {
-		System.out
-				.println("---------------------------------------------------------------------");
-		System.out
-				.println("|                    "+Main.NAME+"                    |");
-		System.out
-				.println("---------------------------------------------------------------------");
-		System.out.println();
-	}
-
 	public void start() {
-		banner();
 		System.out.println("[+] Crawling ...");
 		long duration = System.nanoTime();
 		for (String url : urlsToCrawl) {
-			Input in = new Input("http://" + config.getHost() + ":" + config.getPort() + url);
+			Input in = new Input(url);
 			crawlInput(in);
 		}
 
-		System.out.println();
-		System.out.println("[+] Merging inputs");
-		//mergeInputs();
+		if (config.getMerge()){
+			System.out.println();
+			System.out.println("[+] Merging inputs");
+			mergeInputs();
+		}
 		
 		System.out.println();
 		System.out.println("[+] Inputs (" + inputs.size() + ")");
-		for (Input in : inputs) {
-			if (!config.getRuntimeParameters().isEmpty()) in.cleanRuntimeParameters(config.getRuntimeParameters()); 
-			System.out.println("    " + in);
-		}
+		for (Input in : inputs) System.out.println("    " + in);
 
 		System.out.println();
 		System.out.println("[+] Outputs (" + outputs.size() + ")");
@@ -504,8 +479,15 @@ public abstract class DriverGenerator {
 		}
 	}
 
+	private String prettyprint(Input by) {
+		if (config.getActionByParameter() == null || config.getActionByParameter().isEmpty()) return by.getAddress();
+		List<String> possibleActions = by.getParams().get(config.getActionByParameter());
+		if (possibleActions==null || possibleActions.isEmpty()) return by.getAddress();
+		else return possibleActions.get(0);
+	}
+
 	private int updateOutput(Document d, Input from) {
-		Output o = new Output(d, from);
+		Output o = new Output(d, from, config.getLimitSelector());
 		if (d.toString().isEmpty()) return 0;
 		else{
 			for (int i = 0; i < outputs.size(); i++) {
@@ -524,7 +506,7 @@ public abstract class DriverGenerator {
 	private HTTPData getRandomValuesForInput(Input in) {
 		HTTPData data = new HTTPData();
 		if (in.getType() == Type.FORM) {
-			HashMap<String, List<String>> inputs = in.getParams();
+			TreeMap<String, List<String>> inputs = in.getParams();
 			for (String key : inputs.keySet()) {
 				List<String> values = inputs.get(key);
 				if (values.isEmpty() || values.size() > 1) {
@@ -583,7 +565,7 @@ public abstract class DriverGenerator {
 		for (int i=0; i<5; i++){
 			try {
 				sendSequences();
-				Output variant = new Output(submitRandom(inputToFuzz), false);
+				Output variant = new Output(submitRandom(inputToFuzz), false, config.getLimitSelector());
 				if (out.isEquivalentTo(variant)){
 					diff.addAll(findDifferences(out, variant));
 				}
@@ -659,8 +641,8 @@ public abstract class DriverGenerator {
             icBuilder = icFactory.newDocumentBuilder();
             org.w3c.dom.Document doc = icBuilder.newDocument();
             org.w3c.dom.Element edriver = doc.createElement("driver");
-            edriver.setAttribute("version", Main.VERSION);
-            edriver.setAttribute("generator", Main.NAME);
+            edriver.setAttribute("version", Options.VERSION);
+            edriver.setAttribute("generator", Options.NAME);
             edriver.setAttribute("date", String.valueOf(new Date().getTime()));
             org.w3c.dom.Element esettings = doc.createElement("settings");
             Node n = doc.createElement("target");
@@ -675,18 +657,14 @@ public abstract class DriverGenerator {
             n = doc.createElement("limitSelector");
             n.setTextContent(config.getLimitSelector());
             esettings.appendChild(n);
+            n = doc.createElement("cookies");
+            n.setTextContent(config.getCookies());
+            esettings.appendChild(n);
             n = doc.createElement("basicAuthUser");
             n.setTextContent(config.getBasicAuthUser());
             esettings.appendChild(n);
             n = doc.createElement("basicAuthPass");
             n.setTextContent(config.getBasicAuthPass());
-            esettings.appendChild(n);
-            n = doc.createElement("runtimeParameters");
-            for(String rt : config.getRuntimeParameters()){
-            	org.w3c.dom.Element eparams = doc.createElement("parameter");
-            	eparams.setTextContent(rt);
-            	n.appendChild(eparams);
-            }            
             esettings.appendChild(n);
             edriver.appendChild(esettings);            
             org.w3c.dom.Element einputs = doc.createElement("inputs");
@@ -721,7 +699,8 @@ public abstract class DriverGenerator {
             	
             	for (String value : o.getParams()){
         			org.w3c.dom.Element eparam = doc.createElement("parameter");
-        			eparam.setTextContent(value);        			
+        			eparam.setTextContent(value);
+        			eparams.appendChild(eparam);
         		}
             	
             	eoutput.appendChild(eparams);

@@ -6,7 +6,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
-import crawler.driver.GenericDriver;
 import crawler.page.PageTreeNode;
 
 
@@ -53,34 +52,26 @@ public class Output {
 		this.state = state;
 	}
 
-	public Output(Document doc, Input from) {
+	public Output(Document doc, Input from, String limitSelector) {
 		this();		
 		this.from.add(from);
 		this.source = doc.html();
 		this.doc = doc.getAllElements();
-		if (DriverGenerator.config!=null && !DriverGenerator.config.getLimitSelector().isEmpty()){
+		if (limitSelector!=null && !limitSelector.isEmpty()){
 			this.doc = doc.select(DriverGenerator.config.getLimitSelector());
-			this.source = this.doc.html();
-		}
-		if (GenericDriver.config!=null && !GenericDriver.config.getLimitSelector().isEmpty()){
-			this.doc = doc.select(GenericDriver.config.getLimitSelector());
 			this.source = this.doc.html();
 		}
 		pt = new PageTreeNode(Jsoup.parse(this.source));
 	}
 	
-	public Output(String source, boolean raw) {
+	public Output(String source, boolean raw, String limitSelector) {
 		this();		
 		Document doc = Jsoup.parse(source);
 		this.source = doc.html();
 		this.doc = doc.getAllElements();
 		if (!raw){
-			if (DriverGenerator.config!=null && !DriverGenerator.config.getLimitSelector().isEmpty()){
-				this.doc = doc.select(DriverGenerator.config.getLimitSelector());
-				this.source = this.doc.html();
-			}
-			if (GenericDriver.config!=null && !GenericDriver.config.getLimitSelector().isEmpty()){
-				this.doc = doc.select(GenericDriver.config.getLimitSelector());
+			if (limitSelector!=null && !limitSelector.isEmpty()){
+				this.doc = doc.select(limitSelector);
 				this.source = this.doc.html();
 			}
 		}	

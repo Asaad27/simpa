@@ -3,6 +3,7 @@ package crawler;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 import org.jsoup.nodes.Element;
 
@@ -19,10 +20,10 @@ public class Input {
 	private Type type = null;
 	private HttpMethod method = null;
 	private String address = null;
-	private HashMap<String, List<String>> params = null;
+	private TreeMap<String, List<String>> params = null;
 	
 	public Input(){
-		params = new HashMap<String, List<String>>();
+		params = new TreeMap<String, List<String>>();
 	}
 	
 	public void setNbValues(int val) {
@@ -41,14 +42,14 @@ public class Input {
 		this.method = method;
 	}
 
-	public void setParams(HashMap<String, List<String>> params) {
+	public void setParams(TreeMap<String, List<String>> params) {
 		this.params = params;
 	}
 
 	public Input(String link) {
 		this.type = Type.LINK;
 		this.method = HttpMethod.GET;
-		this.params = new HashMap<String, List<String>>();
+		this.params = new TreeMap<String, List<String>>();
 		if (link.indexOf("?") != -1) {
 			this.address = link.split("\\?")[0];
 			if (link.split("\\?").length>1){
@@ -67,7 +68,7 @@ public class Input {
 		}
 	}
 
-	public Input(HttpMethod m, String address, HashMap<String, List<String>> params) {
+	public Input(HttpMethod m, String address, TreeMap<String, List<String>> params) {
 		this.type = Type.FORM;
 		this.method = m;
 		this.address = address;
@@ -125,7 +126,7 @@ public class Input {
 			inputs.put(input.attr("name"), values);
 		}
 		for (Element submit : form.select("input[type=submit]")) {
-			HashMap<String, List<String>> inputsCopy = new HashMap<>();
+			TreeMap<String, List<String>> inputsCopy = new TreeMap<>();
 			inputsCopy.putAll(inputs);
 			if (submit.hasAttr("name") && !submit.attr("name").isEmpty())
 				inputsCopy.put(submit.attr("name"),
@@ -133,7 +134,7 @@ public class Input {
 			l.add(new Input(method, address, inputsCopy));
 		}
 		for (Element submit : form.select("input[type=image]")) {
-			HashMap<String, List<String>> inputsCopy = new HashMap<>();
+			TreeMap<String, List<String>> inputsCopy = new TreeMap<>();
 			inputsCopy.putAll(inputs);
 			if (submit.hasAttr("name") && !submit.attr("name").isEmpty())
 				inputsCopy.put(submit.attr("name"),
@@ -144,7 +145,7 @@ public class Input {
 		return l;
 	}
 
-	public HashMap<String, List<String>> getParams() {
+	public TreeMap<String, List<String>> getParams() {
 		return params;
 	}
 

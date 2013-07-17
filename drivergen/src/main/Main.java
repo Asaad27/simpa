@@ -1,55 +1,98 @@
 package main;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import crawler.Configuration;
 import crawler.DriverGenerator;
-import crawler.configuration.Configuration;
-import crawler.driver.BookStoreDriver;
-import crawler.driver.GenericDriver;
-import crawler.driver.WGBypassBLDriver;
-import crawler.driver.WGStoredXSSDriver;
 
 
 public class Main {
 	
-	public static String VERSION = "1.0";
-	public static String NAME = "TIC - The Inference Crawler";
-	
-	public static void testCrawler(){
-		//DriverGenerator g = DriverGenerator.getDriver("WGStoredXSS");
-		///DriverGenerator g = DriverGenerator.getDriver("WackoPicko");
-		//DriverGenerator g = DriverGenerator.getDriver("BookStore");
-		DriverGenerator g = DriverGenerator.getDriver("WGBypassBL");
-		g.start();
-		g.exportToDot();
-		g.exportToXML();
-	}
-	
-	public static void testDriver() throws IOException{
-		GenericDriver d = new WGBypassBLDriver();
-		System.out.println("System name   : " + d.getSystemName());
-		System.out.println("Input list: ");
-		int i, n = d.getInputSymbols().size();
-		for(i=0; i<n; i++){
-			System.out.println(d.getInputSymbols().get(i) + " " + d.inputs.get(i).getMethod() + " " + d.inputs.get(i).getAddress() + " " + d.inputs.get(i).getParams());
-		}
-	}
-	
-	public static void main(String[] args) throws Exception{
-		//testJSON();
-		//testCrawler();
-		testDriver();
-	}
+	public static Options Options;	
 
 	public static void testJSON() throws JsonGenerationException, JsonMappingException, IOException {
 		ObjectMapper m = new ObjectMapper();
 		m.writeValue(new File("test.json"), new Configuration());
+	}
+	
+	
+	public static void hello(){
+		System.out.println("************************************************************************");
+		System.out.println("******************       Test Driver Generator       *******************");
+		System.out.println("************************************************************************");
+		System.out.println("");		
+	}
+	
+	public static void check(String[] args){	
+		int i=0;
+		try {			
+			for(i = 0; i < args.length; i++){
+				if (args[i].equals("--log")) main.Options.LOG = true;
+				else if (args[i].equals("--help") || args[i].equals("-h")) usage();
+				else if (args[i].equals("--open")) main.Options.OPEN_LOG = true;
+				else if (args[i].equals("--css")) main.Options.CSS = true;
+				else if (args[i].equals("--js")) main.Options.JS = true;
+				else if (args[i].equals("--timeout")) main.Options.TIMEOUT = Integer.parseInt(args[++i]);
+				else main.Options.INPUT = args[i];
+			}			
+			if (main.Options.INPUT.isEmpty()) usage();			
+		} catch (NumberFormatException e) {
+			System.err.println("Error parsing argument (number) : " + args[i]);
+			System.exit(0);
+		}		
+	}
+	
+	public static void launch(){
+		DriverGenerator g;
+		try {
+			g = new DriverGenerator(main.Options.INPUT);
+			g.start();
+			g.exportToDot();
+			g.exportToXML();
+		} catch (JsonParseException e) {
+			System.err.println("Error : Unable to parse JSON file");
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			System.err.println("Error : Unable to map JSON data to options");
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.err.println("Error : File is not readable");
+			e.printStackTrace();
+		}	
+	}
+	
+	public static void main(String[] args) throws Exception{
+		hello();
+		check(args);
+		try {
+			launch();
+		}catch (Exception e) {
+			System.err.println("Unexpected error");
+			e.printStackTrace(System.err);
+		}
+	}
+
+	public static void usage(){
+		System.out.println("Usage : TIC [options] config_file.json");
+		System.out.println("");
+		System.out.println("Options");
+		System.out.println("> Crawling");
+		System.out.println("    --timeout 10000   : Timeout in milliseconds");
+		System.out.println("    --css             : Enable CSS rendering (May slow down the crawler)");
+		System.out.println("    --js              : Enable JS execution (May slow down the crawler)");
+		System.out.println("> General");
+		System.out.println("    --log             : Generate HTML log");
+		System.out.println("    --open            : Open log at the end of driver generation");
+		System.out.println("    --help | -h       : Show help");
+		System.out.println();
+		System.out.println("Example : TIC --log webgoat.json");
+		System.out.println();
+		System.exit(0);
 	}
 }

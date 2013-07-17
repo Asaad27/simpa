@@ -1,20 +1,39 @@
 {
-  "host" : "localhost",
-  "port" : 8080,
   "basicAuthUser" : "guest",
   "basicAuthPass" : "guest",
   "name" : "WebGoat_Stored_XSS",
   "limitSelector" : "#lesson_wrapper",
   "noFollow" : [ "^javascript:", "^http://" ],
+  "cookies" : "JSESSIONID=5D3D31D48B94D77EB05735F23B3A4D96",
   "actionByParameter" : "action",
-  "enableCSS" : false,
-  "enableJS" : false,
-  "timeout" : 10000,
-  "runtimeParameters" : [ "Screen" ],
+  "mergeInputs" : false,
+  "urls" : [ "http://localhost:8080/WebGoat/attack?Screen=20&menu=900&stage=1" ],
+  "data" : {
+    "manager" : ["110"],
+    "employee_id" : ["111"],
+    "password" : ["john"],
+    "search_name" : ["Bruce"]
+  }
+}
+
+/*
+
+
+  "basicAuthUser" : "guest",
+  "basicAuthPass" : "guest",
+  "name" : "WebGoat_Stored_XSS",
+  "limitSelector" : "#lesson_wrapper",
+  "noFollow" : [ "^javascript:", "^http://" ],
+  "cookies" : "JSESSIONID=F118B9176C4AEC240A249B51333069A6",
+  "actionByParameter" : "action",
+  "mergeInputs" : false,
+  "urls" : [ "http://localhost:8080/WebGoat/attack?Screen=20&menu=900&stage=1" ],
   "data" : {
     "manager" : "110",
     "employee_id" : "111",
     "password" : "john",
     "search_name" : "Bruce"
   }
-}
+
+
+*/
