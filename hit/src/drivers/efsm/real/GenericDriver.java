@@ -7,11 +7,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.logging.Level;
 
+import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.impl.client.BasicCredentialsProvider;
@@ -49,16 +52,28 @@ public class GenericDriver extends LowWebDriver {
 		inputs = new ArrayList<Input>();
 		outputs = new ArrayList<Output>();
 		config = LoadConfig(xml);
-
+		LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
+	    java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF); 
+	    java.util.logging.Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.OFF);
 		client = new WebClient();
 		client.setThrowExceptionOnFailingStatusCode(false);
 		client.setTimeout(10000);
 		CookieManager cm = new CookieManager();
-
-		for (String cookie : config.getCookies().split("[; ]")) {
-			String[] cookieValues = cookie.split("=");
-			cm.addCookie(new Cookie(config.getHost(), cookieValues[0],
-					cookieValues[1]));
+		if (config.getCookies() != null){
+			String cookieValue = null;
+			while (cookieValue == null){
+				cookieValue = (String)JOptionPane.showInputDialog(null, "Cookies value required :",
+							"Loading test driver ...",
+							JOptionPane.PLAIN_MESSAGE,
+							null,
+							null,
+							config.getCookies());
+			}
+			for (String cookie : config.getCookies().split("[; ]")) {
+				String[] cookieValues = cookie.split("=");
+				cm.addCookie(new Cookie(config.getHost(), cookieValues[0],
+						cookieValues[1]));
+			}			
 		}
 		client.setCookieManager(cm);
 		BasicCredentialsProvider creds = new BasicCredentialsProvider();

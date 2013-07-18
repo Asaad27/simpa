@@ -4,24 +4,28 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import tools.Utils;
 import tools.loggers.LogManager;
 
 public class Configuration {
-	private String host = "";
+	private String host = null;
 	private int port = 0;
 	private String basicAuthUser = null;
 	private String basicAuthPass = null;
 	private String name = null;
-	private String limitSelector = "html";
+	private String limitSelector = null;
 	private HashMap<String, ArrayList<String>> paramValues = null;
 	private ArrayList<String> noFollow = null;
 	private ArrayList<String> urls = null;
 	private String actionByParameter = null;
 	private String cookies = null;
+	private String reset = null;
 	private boolean mergeInputs = false;	
 	
-	public ArrayList<String> getURLs(){
+	public List<String> getURLs(){
 		return urls;
 	}
 
@@ -33,6 +37,14 @@ public class Configuration {
 
 	public void setHost(String host) {
 		this.host = host;
+	}
+	
+	public String getReset() {
+		return reset;
+	}
+
+	public void setReset(String reset) {
+		this.reset = reset;
 	}
 
 	public void setPort(int port) {
@@ -71,8 +83,7 @@ public class Configuration {
 		return actionByParameter;
 	}
 
-	public ArrayList<String> getNoFollow() {
-		if (noFollow == null) noFollow = new ArrayList<String>();
+	public List<String> getNoFollow() {		
 		return noFollow;
 	}
 
@@ -81,8 +92,11 @@ public class Configuration {
 	}
 	
 	public String getCookies() {
-		if (cookies.endsWith(";") || cookies.endsWith(" ")) return cookies;
-		else return cookies + ";";
+		if (cookies != null){
+			if (cookies.endsWith(";") || cookies.endsWith(" ")) return cookies;
+			else return cookies + ";";
+		}else
+			return null;
 	}
 
 
@@ -107,7 +121,7 @@ public class Configuration {
 		return limitSelector;
 	}
 
-	public HashMap<String, ArrayList<String>> getData() {
+	public Map<String, ArrayList<String>> getData() {
 		if (paramValues == null) paramValues = new HashMap<String, ArrayList<String>>();
 		return paramValues;
 	}
@@ -121,19 +135,21 @@ public class Configuration {
 		if (!urls.isEmpty()){
 			try {
 				aURL = new URL(urls.get(0));
-				if (host.isEmpty()){
-					host = aURL.getHost();
-				}
-				if (port == 0){
-					port = aURL.getPort();
-				}
+				host = aURL.getHost();
+				port = aURL.getPort();
 			} catch (MalformedURLException e) {
-				LogManager.logError("Unable to parse the url provided.");
-				e.printStackTrace();
+				LogManager.logException("Unable to parse the url provided.", e);
 			}		
 		}else{
-			LogManager.logError("No url provided. Please check the configuration file.");
+			LogManager.logFatalError("No url provided. Please check the configuration file.");
 		}
+		if (name==null || name.isEmpty()) LogManager.logFatalError("No system name provided. Please check the configuration file.");
+		if (limitSelector==null || limitSelector.isEmpty()) LogManager.logFatalError("No selector provided. Please check the configuration file.");
+		if (actionByParameter != null && actionByParameter.isEmpty()) actionByParameter = null;
+		if (cookies != null && cookies.isEmpty()) cookies = null;
+		if (reset != null && reset.isEmpty()) reset = null;
+		if (noFollow == null) noFollow = new ArrayList<String>();
+		Utils.generateCombinationOfSet(paramValues);
 	}
 
 	public void setCookies(String cookies) {

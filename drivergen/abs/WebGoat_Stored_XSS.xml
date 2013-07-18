@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?><driver date="1374080554771" generator="TIC" version="1.0">
+<?xml version="1.0" encoding="UTF-8"?><driver date="1374160009314" generator="TIC" version="1.0">
     <settings>
         <target>WebGoat_Stored_XSS</target>
         <host>localhost</host>
         <port>8080</port>
         <limitSelector>#lesson_wrapper</limitSelector>
-        <cookies>JSESSIONID=5D3D31D48B94D77EB05735F23B3A4D96;</cookies>
+        <cookies>JSESSIONID=BE48F7DCBA178BBE84206564A9E67492;</cookies>
         <basicAuthUser>guest</basicAuthUser>
         <basicAuthPass>guest</basicAuthPass>
     </settings>
@@ -147,7 +147,9 @@
   &lt;/table&gt; 
  &lt;/form&gt; 
 &lt;/div&gt;</source>
-            <parameters/>
+            <parameters>
+                <parameter>0/1/0/1/</parameter>
+            </parameters>
         </output>
         <output>
             <source>&lt;div id="lesson_header"&gt; 

@@ -498,15 +498,10 @@ public class ARFF {
 							node = new TreeNode();
 							node.loadFromString(cl);
 						} catch (StringIndexOutOfBoundsException g) {
-							try {
-								MyClassifier mcl = new MyClassifier(data);
-								node = mcl.buildTreeNode();
-							} catch (Exception h) {
-								LogManager
-										.logError("Unable to get a tree with data in "
-												+ new File(dataFile).getName());
-								node = null;
-							}
+							LogManager
+							.logError("Unable to get a tree with data in "
+									+ new File(dataFile).getName());
+							node = null;
 						}
 					}
 				}

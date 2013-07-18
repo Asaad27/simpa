@@ -1,26 +1,16 @@
 package main;
 
-import java.io.File;
 import java.io.IOException;
 
-import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
 
-import crawler.Configuration;
 import crawler.DriverGenerator;
 
 
 public class Main {
 	
-	public static Options Options;	
-
-	public static void testJSON() throws JsonGenerationException, JsonMappingException, IOException {
-		ObjectMapper m = new ObjectMapper();
-		m.writeValue(new File("test.json"), new Configuration());
-	}
-	
+	public static Options Options;		
 	
 	public static void hello(){
 		System.out.println("************************************************************************");
@@ -33,9 +23,7 @@ public class Main {
 		int i=0;
 		try {			
 			for(i = 0; i < args.length; i++){
-				if (args[i].equals("--log")) main.Options.LOG = true;
-				else if (args[i].equals("--help") || args[i].equals("-h")) usage();
-				else if (args[i].equals("--open")) main.Options.OPEN_LOG = true;
+				if (args[i].equals("--help") || args[i].equals("-h")) usage();
 				else if (args[i].equals("--css")) main.Options.CSS = true;
 				else if (args[i].equals("--js")) main.Options.JS = true;
 				else if (args[i].equals("--timeout")) main.Options.TIMEOUT = Integer.parseInt(args[++i]);
@@ -87,8 +75,6 @@ public class Main {
 		System.out.println("    --css             : Enable CSS rendering (May slow down the crawler)");
 		System.out.println("    --js              : Enable JS execution (May slow down the crawler)");
 		System.out.println("> General");
-		System.out.println("    --log             : Generate HTML log");
-		System.out.println("    --open            : Open log at the end of driver generation");
 		System.out.println("    --help | -h       : Show help");
 		System.out.println();
 		System.out.println("Example : TIC --log webgoat.json");

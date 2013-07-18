@@ -12,11 +12,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Level;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -28,8 +29,10 @@ import javax.xml.transform.stream.StreamResult;
 
 import main.Options;
 
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -58,7 +61,7 @@ import crawler.Input.Type;
 public class DriverGenerator {
 	protected List<String> urlsToCrawl = null;
 	protected List<Input> inputs = null;
-	protected HashMap<String, ArrayList<String>> formValues = null;
+	protected Map<String, ArrayList<String>> formValues = null;
 	protected List<Input> sequence = null;
 	protected WebClient client = null;
 	protected HashSet<String> comments = null;
@@ -82,16 +85,21 @@ public class DriverGenerator {
 		comments = new HashSet<String>();
 		transitions = new ArrayList<Transition>();
 		outputs = new ArrayList<Output>();
+		LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
+	    java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF); 
+	    java.util.logging.Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.OFF);
 		client = new WebClient();
 		client.setThrowExceptionOnFailingStatusCode(false);
 		client.setTimeout(Options.TIMEOUT);
 		client.setCssEnabled(Options.CSS);
 		client.setJavaScriptEnabled(Options.JS);
 		CookieManager cm = new CookieManager();
-		for (String cookie : config.getCookies().split("[; ]")){
-			String[] cookieValues = cookie.split("=");
-			cm.addCookie(new Cookie(config.getHost(), cookieValues[0], cookieValues[1]));
-		}		
+		if (config.getCookies() != null){
+			for (String cookie : config.getCookies().split("[; ]")){
+				String[] cookieValues = cookie.split("=");
+				cm.addCookie(new Cookie(config.getHost(), cookieValues[0], cookieValues[1]));
+			}		
+		}
 		client.setCookieManager(cm);
 		BasicCredentialsProvider creds = new BasicCredentialsProvider();
 		if (config.getBasicAuthUser() != null
@@ -113,11 +121,24 @@ public class DriverGenerator {
 	}
 
 	private void sendSequences() {
+		reset();
 		for (Input in : sequence) {
 			try {
 				submit(in);
 			} catch (FailingHttpStatusCodeException | IOException e) {
 				LogManager.logException("Unable to execute sequence", e);
+			}
+		}
+	}
+	
+	private void reset(){
+		if (config.getReset() != null){
+			try {
+				client.getPage(config.getReset());
+			}catch (HttpHostConnectException e) {
+				LogManager.logFatalError("Unable to connect to host");
+			}catch (Exception e) {
+				LogManager.logException("Error resetting application", e);
 			}
 		}
 	}
@@ -180,15 +201,17 @@ public class DriverGenerator {
 			List<String> values = in.getParams().get(key);
 			if (values.isEmpty()) {
 				// TODO
-				String providedValue = formValues.get(key).get(0);
-				if (providedValue != null)
-					values.add(providedValue);
-				else {
-					values.add(Utils.randString());
+				String providedValue;
+				if (formValues.get(key) == null || formValues.get(key).isEmpty()){
+					providedValue = Utils.randString();
 					comments.add("No values for "
-							+ key
-							+ ", random string used. You may need to provide useful value.");
+						+ key
+						+ ", random string used. You may need to provide useful value.");
+					
+				}else {
+					providedValue = formValues.get(key).get(0);
 				}
+				values.add(providedValue);
 			}
 		}
 		inputs.add(in);
@@ -231,8 +254,8 @@ public class DriverGenerator {
 				List<String> values = inputs.get(key);
 				if (values.isEmpty() || values.size() > 1) {
 					// TODO
-					String newValue = formValues.get(key).get(0);
-					if (newValue == null) {
+					String newValue;
+					if (formValues.get(key) == null || formValues.get(key).isEmpty()) {
 						if (values.size() > 1) {
 							newValue = Utils.randIn(values);
 						} else {
@@ -241,6 +264,8 @@ public class DriverGenerator {
 									+ ", random string used. Please provide one value.");
 							newValue = Utils.randString();
 						}
+					}else{
+						newValue = formValues.get(key).get(0);
 					}
 					data.add(key, newValue);
 				} else {
@@ -263,6 +288,9 @@ public class DriverGenerator {
 				page = client.getPage(request);
 				if (page.getWebResponse().getStatusCode() != 200) return null;
 				requests++;
+			}catch (HttpHostConnectException e) {
+				LogManager.logFatalError("Unable to connect to host");
+				return null;
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
@@ -282,7 +310,10 @@ public class DriverGenerator {
 				page = client.getPage(link.substring(0, link.length()-1));
 				if (page.getWebResponse().getStatusCode() != 200) return null;
 				requests++;
-			} catch (Exception e) {
+			}catch (HttpHostConnectException e) {
+				LogManager.logFatalError("Unable to connect to host");
+				return null;
+			}catch (Exception e) {
 				e.printStackTrace();
 				return null;
 			}
@@ -299,6 +330,7 @@ public class DriverGenerator {
 	public void start() {
 		System.out.println("[+] Crawling ...");
 		long duration = System.nanoTime();
+		reset();
 		for (String url : urlsToCrawl) {
 			Input in = new Input(url);
 			crawlInput(in);
@@ -471,16 +503,14 @@ public class DriverGenerator {
 			}
 			writer.write("}\n");
 			writer.close();
-			File imagePath = GraphViz.dotToFile(file.getPath());
-			if (imagePath != null)
-				LogManager.logImage(imagePath.getPath());
+			GraphViz.dotToFile(file.getPath());
 		} catch (IOException e) {
 			LogManager.logException("Error writing dot file", e);
 		}
 	}
 
 	private String prettyprint(Input by) {
-		if (config.getActionByParameter() == null || config.getActionByParameter().isEmpty()) return by.getAddress();
+		if (config.getActionByParameter() == null) return by.getAddress();
 		List<String> possibleActions = by.getParams().get(config.getActionByParameter());
 		if (possibleActions==null || possibleActions.isEmpty()) return by.getAddress();
 		else return possibleActions.get(0);

@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -21,6 +22,37 @@ import tools.loggers.LogManager;
 public class Utils {
 	private static Random rand = new Random();
 	
+	public static List<HTTPData> generateCombinationOfSet(HashMap<String, ArrayList<String>> data){
+		List<HTTPData> comb = new ArrayList<HTTPData>();
+		List<String> nameList = new ArrayList<String>();
+		List<ArrayList<String>> dataList = new ArrayList<ArrayList<String>>();
+		
+		for (String k : data.keySet()){
+			nameList.add(k);
+			dataList.add(data.get(k));			
+		}
+		
+		generateCombinationOfSetRec(comb, nameList, dataList, new ArrayList<Integer>(data.size()));
+		return comb;
+	}
+
+	private static void generateCombinationOfSetRec(List<HTTPData> comb,
+			List<String> nameList, List<ArrayList<String>> dataList, ArrayList<Integer> list) {
+		if (list.size() == nameList.size()){
+			HTTPData d = new HTTPData();
+			for(int i=0; i< list.size(); i++){
+				d.add(nameList.get(i), dataList.get(i).get(list.get(i)));
+			}
+			comb.add(d);
+		}else{
+			for(int i=0; i<dataList.get(list.size()).size(); i++){
+				list.add(i);
+				generateCombinationOfSetRec(comb, nameList, dataList, list);
+				list.remove(list.size()-1);
+			}
+		}		
+	}
+
 	public static boolean isWindows() {
 		return (System.getProperty("os.name").toLowerCase().indexOf("win") >= 0);
 	}

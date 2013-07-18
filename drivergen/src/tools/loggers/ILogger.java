@@ -6,6 +6,7 @@ public interface ILogger {
 	public void logEnd();
 	public void logReset();
 	public void logError(String s);
+	public void logFatalError(String s);
 	public void logException(String s, Exception e);
 	public void logInfo(String s);
 	public void logStart();
