@@ -71,8 +71,26 @@ public class EFSMTransition extends Transition {
 		public void addVar(String v) {
 			var.add(v);
 		}
-
-		public String toDotString() {
+		
+		public String toString() {
+			StringBuffer s = new StringBuffer();
+			s.append(input + "\\n");
+			Collections.sort(predicates);
+			if (predicates.size()>0){
+				s.append(predicates.get(0));
+				for(int i=1; i<predicates.size(); i++) s.append(" " + Options.SYMBOL_OR + " " + predicates.get(i));
+				s.append(",\\n");
+			}
+			Collections.sort(var);
+			if (var.size()>0){
+				s.append(var.get(0) + ",");
+				for(int i=1; i<var.size(); i++) s.append("\\n" + var.get(i) + ",");
+				s.append("\\n");
+			}
+			return s.append(output).toString().replaceAll("\"", "\\\\\"");
+		}
+		
+		public String toDotString(){
 			StringBuffer s = new StringBuffer();
 			s.append(input + "\\n");
 			Collections.sort(predicates);

@@ -87,26 +87,29 @@ public class LiConjecture extends automata.efsm.EFSM {
 			LogManager.logException("Error writing dot file", e);
 		}
 	}
-
-	public void fillVar(EFSMTransition t, Label label) {
-		String dataFile = ARFF.generateFileForVar(t, paramNames);
-		dataFile = ARFF.filterFileForVar(dataFile);
-		dataFile = ARFF.handleConstantOutput(dataFile, label);
-		dataFile = ARFF.handleRelatedDataForOutput(dataFile);
-		dataFile = ARFF.handleDifferentOutput(dataFile, label, t);
+	
+	public void fillVar(EFSMTransition t, Label label){
+		/*String dataFile = weka.Classifier.generateFileForVar(t, paramNames);
+		dataFile = weka.Classifier.handleConstantOutput(dataFile, label);
+		dataFile = weka.Classifier.handleRelatedDataForOutput(dataFile);
+		dataFile = weka.Classifier.handleDifferentOutput(dataFile, label);
+		*/
+		 String dataFile = ARFF.generateFileForVar(t, paramNames);
+		 dataFile = ARFF.filterFileForVar(dataFile);
+		 dataFile = ARFF.handleConstantOutput(dataFile, label);
+		 dataFile = ARFF.handleRelatedDataForOutput(dataFile);
+		 dataFile = ARFF.handleDifferentOutput(dataFile, label, t); 
 	}
 
 	private void fillPredicate(List<EFSMTransition> list,
 			Map<String, Label> labels) {
 		if (list.size() > 1) {
 			String dataFile = ARFF.generateFileForPredicate(list, paramNames);
-			dataFile = ARFF.filterFileForPredicate(dataFile);
-			dataFile = ARFF.handleRelatedDataForPredicate(dataFile);
-			TreeNode node = ARFF.handlePredicate(dataFile);
-			if (node != null) {
-				for (EFSMTransition t : list) {
-					for (String pred : node.getPredicatesFor(t.getTo()
-							+ t.getOutput())) {
+			dataFile = weka.Classifier.filterArff(dataFile);
+			TreeNode node = weka.Classifier.Classify(dataFile, -1);
+			if(node != null){
+				for(EFSMTransition t : list){
+					for(String pred : node.getPredicatesFor(t.getTo()+t.getOutput())){
 						labels.get(t.toString()).addPredicate(pred);
 					}
 				}

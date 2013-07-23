@@ -42,6 +42,9 @@ public class ARFF {
 	private static int iOut = 0;
 	private static List<String> gSymbols = new ArrayList<String>();
 
+	public static int getIOut(){
+		return iOut;
+	}
 	public static List<String> getGlobalSymbols() {
 		return gSymbols;
 	}
@@ -459,7 +462,7 @@ public class ARFF {
 		return dataFile;
 	}
 
-	public static TreeNode handlePredicate(String dataFile) {
+	/*public static TreeNode handlePredicate(String dataFile) {
 		TreeNode node = null;
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(dataFile));
@@ -523,7 +526,7 @@ public class ARFF {
 		}
 		return node;
 	}
-
+*/
 	private static List<Instance> checkOnlyOneInstance(Instances data) {
 		List<Instance> res = new ArrayList<Instance>();
 		Map<String, List<Instance>> allinsts = new TreeMap<String, List<Instance>>();
@@ -558,8 +561,7 @@ public class ARFF {
 				data.setClassIndex(i);
 				differentOutputs.add(data.attribute(i).name());
 
-				if (data.attribute(i).type() == Attribute.NUMERIC
-						&& !Options.FORCE_J48) {
+				if (data.attribute(i).type() == Attribute.NUMERIC && !Options.FORCE_J48) {
 					M5P m5 = new M5P();
 					m5.setOptions(weka.core.Utils.splitOptions("-M 4.0"));
 					m5.buildClassifier(data);
@@ -567,42 +569,35 @@ public class ARFF {
 					ExpressionTreeNode en = new ExpressionTreeNode();
 					en.loadFromString(m5);
 
-					label.addVar(data.attribute(i).name() + " = "
-							+ en.toString());
-				} else {
-					if (data.attribute(i).isNumeric()) {
+					label.addVar(data.attribute(i).name() + " = " + en.toString());
+				} else {					
+					/*if (data.attribute(i).isNumeric()) {
 						NumericToNominal f = new NumericToNominal();
 						f.setOptions(weka.core.Utils.splitOptions("-R "
 								+ String.valueOf(i + 1)));
 						f.setInputFormat(data);
 						data = Filter.useFilter(data, f);
-					}
-
-					Classifier cl = new J48();
+					}*/				
+					
+					/*Classifier cl = new J48();
 					cl.setOptions(weka.core.Utils.splitOptions("-C 0.25 -M 2"));
-					cl.buildClassifier(data);
+					cl.buildClassifier(data);*/
 
-					node = new TreeNode();
-					try {
-						node.loadFromString(cl);
+					node = weka.Classifier.Classify(dataFile, i);
+					try{
+					//	node.loadFromString(cl);
 
 						ArrayList<String> diffValues = new ArrayList<String>();
-						for (int j = 0; j < data.attribute(i).numValues(); j++) {
-							if (!diffValues
-									.contains(data.attribute(i).value(j)))
-								diffValues.add(data.attribute(i).value(j));
-						}
-						for (String val : diffValues) {
-							for (String pred : node.getPredicatesFor(val)) {
-								label.addVar(pred + " => "
-										+ data.attribute(i).name() + " = "
-										+ val);
+						for(int j=0; j<data.attribute(i).numValues(); j++){
+							if (!diffValues.contains(data.attribute(i).value(j))) diffValues.add(data.attribute(i).value(j));
+						}					
+						for(String val : diffValues){
+							for(String pred : node.getPredicatesFor(val)){
+								label.addVar(pred + " => " + data.attribute(i).name() + " = " + val);
 							}
 						}
-					} catch (StringIndexOutOfBoundsException e) {
-						LogManager.logException(
-								"Warning : Unable to find more than one class ("
-										+ dataFile + ")", e);
+					}catch (StringIndexOutOfBoundsException e){
+						LogManager.logException("Warning : Unable to find more than one class (" + dataFile +")", e);
 					}
 				}
 				Remove r = new Remove();
@@ -614,9 +609,8 @@ public class ARFF {
 
 			ArffSaver saver = new ArffSaver();
 			saver.setInstances(data);
-			newFile = new File(Options.OUTDIR + Options.DIRARFF
-					+ File.separatorChar + Utils.removeExtension(dataFile)
-					+ "_step2.arff");
+			newFile = new File(Options.OUTDIR + Options.DIRARFF + File.separatorChar
+					+ Utils.removeExtension(dataFile) + "_step2.arff");
 			saver.setFile(newFile);
 			saver.writeBatch();
 			LogManager.logData(differentOutputs.size()
@@ -625,11 +619,9 @@ public class ARFF {
 		} catch (FileNotFoundException e) {
 			LogManager.logException("No such a file : " + dataFile, e);
 		} catch (IOException e) {
-			LogManager.logException("Error reading arff file (" + dataFile
-					+ ")", e);
+			LogManager.logException("Error reading arff file ("+dataFile+")", e);
 		} catch (Exception e) {
-			LogManager.logException("Unknown error in processing file ("
-					+ dataFile + ")", e);
+			LogManager.logException("Unknown error in processing file ("+dataFile+")", e);
 		}
 		return dataFile;
 	}
@@ -721,6 +713,8 @@ public class ARFF {
 			List<Relation> allRelation = new ArrayList<Relation>();
 
 			while (outIndex > iOut && !data.attribute(outIndex).isNumeric()) {
+				System.out.println("data att : " + data.attribute(outIndex).name());
+				
 				Map<String, List<Instance>> allinsts = new TreeMap<String, List<Instance>>();
 				for (int i = 0; i < data.numInstances(); i++) {
 					String c = data.instance(i).stringValue(outIndex);
@@ -733,10 +727,11 @@ public class ARFF {
 						l.add(data.instance(i));
 					}
 				}
-
+				
 				for (String dest : allinsts.keySet()) {
 					List<Instance> l = allinsts.get(dest);
 					allRelation.addAll(Relation.findOn(l));
+					System.out.println(allRelation.toString());
 				}
 
 				outIndex--;
