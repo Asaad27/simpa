@@ -69,7 +69,7 @@ public class GenericDriver extends LowWebDriver {
 							null,
 							config.getCookies());
 			}
-			for (String cookie : config.getCookies().split("[; ]")) {
+			for (String cookie : cookieValue.split("[; ]")) {
 				String[] cookieValues = cookie.split("=");
 				cm.addCookie(new Cookie(config.getHost(), cookieValues[0],
 						cookieValues[1]));

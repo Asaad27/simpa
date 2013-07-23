@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -276,6 +277,15 @@ public class Utils {
 			list.add(element);
 		}
 		return list;
+	}
+	
+	@SafeVarargs
+	public static <T> HashSet<T> createHashSet(T... elements) {
+		HashSet<T> set = new HashSet<T>();
+		for (T element : elements) {
+			set.add(element);
+		}
+		return set;
 	}
 
 	public static final String escapeHTML(String source) {

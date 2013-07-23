@@ -23,8 +23,17 @@ public class Configuration {
 	private String actionByParameter = null;
 	private String cookies = null;
 	private String reset = null;
-	private boolean mergeInputs = false;	
+	private boolean mergeInputs = false;
+	private boolean smallestSet = false;
 	
+	public boolean keepSmallSet() {
+		return smallestSet;
+	}
+
+	public void setsmallestSet(boolean b) {
+		this.smallestSet = b;
+	}
+
 	public List<String> getURLs(){
 		return urls;
 	}

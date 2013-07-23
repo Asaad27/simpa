@@ -7,6 +7,7 @@ import java.util.TreeMap;
 
 import org.jsoup.nodes.Element;
 
+import tools.HTTPData;
 import tools.Utils;
 
 import com.gargoylesoftware.htmlunit.HttpMethod;
@@ -21,6 +22,7 @@ public class Input {
 	private HttpMethod method = null;
 	private String address = null;
 	private TreeMap<String, List<String>> params = null;
+	private HTTPData paramValues = null;
 	
 	public Input(){
 		params = new TreeMap<String, List<String>>();

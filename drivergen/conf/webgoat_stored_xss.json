@@ -8,6 +8,7 @@
   "reset" : "http://localhost:8080/WebGoat/attack?Screen=20&menu=900&Restart=20",
   "actionByParameter" : "action",
   "mergeInputs" : false,
+  "smallestSet" : false,
   "urls" : [ "http://localhost:8080/WebGoat/attack?Screen=20&menu=900&stage=1" ],
   "data" : {
     "manager" : ["110"],
@@ -29,6 +30,7 @@
   "reset" : "http://localhost:8080/WebGoat/attack?Screen=20&menu=900&Restart=20",
   "actionByParameter" : "action",
   "mergeInputs" : false,
+  "smallestSet" : false,
   "urls" : [ "http://localhost:8080/WebGoat/attack?Screen=20&menu=900&stage=1" ],
   "data" : {
     "manager" : ["110"],

@@ -16,9 +16,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
 
+import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -95,10 +97,20 @@ public class DriverGenerator {
 		client.setJavaScriptEnabled(Options.JS);
 		CookieManager cm = new CookieManager();
 		if (config.getCookies() != null){
-			for (String cookie : config.getCookies().split("[; ]")){
+			String cookieValue = null;
+			while (cookieValue == null){
+				cookieValue = (String)JOptionPane.showInputDialog(null, "Cookies value required :",
+							"Loading configuration ...",
+							JOptionPane.PLAIN_MESSAGE,
+							null,
+							null,
+							config.getCookies());
+			}
+			for (String cookie : cookieValue.split("[; ]")) {
 				String[] cookieValues = cookie.split("=");
-				cm.addCookie(new Cookie(config.getHost(), cookieValues[0], cookieValues[1]));
-			}		
+				cm.addCookie(new Cookie(config.getHost(), cookieValues[0],
+						cookieValues[1]));
+			}			
 		}
 		client.setCookieManager(cm);
 		BasicCredentialsProvider creds = new BasicCredentialsProvider();
@@ -214,8 +226,9 @@ public class DriverGenerator {
 				values.add(providedValue);
 			}
 		}
-		inputs.add(in);
-		/*if (config.getActionByParameter() != null) {
+		inputs.add(in);		
+		
+		if (config.getActionByParameter() != null && config.keepSmallSet()) {
 			for (int i = 0; i < inputs.size()-1; i++) {
 				if ((inputs.get(i).getAddress().equals(in.getAddress())) &&
 					(in.getParams().get(config.getActionByParameter()) != null) &&
@@ -231,7 +244,8 @@ public class DriverGenerator {
 					}
 				}
 			}
-		}*/
+		}
+		
 		for (int i = 0; i < inputs.size()-1; i++) {
 			if ((inputs.get(i).getAddress().equals(in.getAddress())) && (inputs.get(i).getParams().isEmpty() && in.getParams().size()>0))
 			{
@@ -429,6 +443,7 @@ public class DriverGenerator {
 			for (Element aform : forms) {
 				List<Input> formList = Input.extractInputsFromForm(aform);
 				for (Input in : formList) {
+					addProvidedParameter(in);
 					if (addInput(in)) {
 						sendSequences();
 						int next = crawlInput(in);
@@ -456,6 +471,16 @@ public class DriverGenerator {
 		}
 		currentNode.remove(currentNode.size()-1);
 		return node;
+	}
+
+	private void addProvidedParameter(Input in) {
+		for(String name : in.getParams().keySet()){
+			if (config.getData().get(name) != null){
+				for (String value : config.getData().get(name)){
+					if (!in.getParams().get(name).contains(value)) in.getParams().get(name).add(value);
+				}
+			}
+		}		
 	}
 
 	private Collection<Element> findFormsIn(String content, String baseUri) {
@@ -590,7 +615,7 @@ public class DriverGenerator {
 	}
 	
 	private void findParameters(List<Input> sequence, Output out) {
-		HashSet<String> diff = new HashSet<String>();
+		Set<String> diff = new HashSet<String>();
 		Input inputToFuzz = sequence.remove(sequence.size()-1);
 		for (int i=0; i<5; i++){
 			try {
@@ -609,8 +634,8 @@ public class DriverGenerator {
 		System.out.println("        " + out.getParams().size() + " output parameters");
 	}
 
-	private List<String> findDifferences(Output first, Output second) {
-		List<String> diff = new ArrayList<String>();
+	private Set<String> findDifferences(Output first, Output second) {
+		Set<String> diff = new HashSet<String>();
 		List<String> pos = new ArrayList<String>();
 		Elements firstE = first.getDoc();
 		Elements secondE = second.getDoc();
@@ -624,7 +649,7 @@ public class DriverGenerator {
 		return diff;
 	}
 	
-	private void findDifferences(Element first, Element second, List<String> diff, List<String> pos) {
+	private void findDifferences(Element first, Element second, Set<String> diff, List<String> pos) {
 		if (first.nodeName().equals(second.nodeName())){
 			pos.add("/");
 			if (!first.ownText().equals(second.ownText())){

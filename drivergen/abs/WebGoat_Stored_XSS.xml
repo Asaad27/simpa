@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><driver date="1374160009314" generator="TIC" version="1.0">
+<?xml version="1.0" encoding="UTF-8"?><driver date="1374285313446" generator="TIC" version="1.0">
     <settings>
         <target>WebGoat_Stored_XSS</target>
         <host>localhost</host>
@@ -53,8 +53,30 @@
         <input address="http://localhost:8080/WebGoat/attack?Screen=20&amp;menu=900" method="POST" type="FORM">
             <parameters>
                 <parametersCombination>
-                    <parameter name="action">CreateProfile</parameter>
-                    <parameter name="employee_id">101</parameter>
+                    <parameter name="action">EditProfile</parameter>
+                    <parameter name="employee_id">111</parameter>
+                </parametersCombination>
+            </parameters>
+        </input>
+        <input address="http://localhost:8080/WebGoat/attack?Screen=20&amp;menu=900" method="POST" type="FORM">
+            <parameters>
+                <parametersCombination>
+                    <parameter name="action">UpdateProfile</parameter>
+                    <parameter name="address1">129 Third St</parameter>
+                    <parameter name="address2">New York, NY</parameter>
+                    <parameter name="ccn">4437334565679921</parameter>
+                    <parameter name="ccnLimit">300</parameter>
+                    <parameter name="description">random851</parameter>
+                    <parameter name="disciplinaryDate">112005</parameter>
+                    <parameter name="employee_id">111</parameter>
+                    <parameter name="firstName">John</parameter>
+                    <parameter name="lastName">Wayne</parameter>
+                    <parameter name="manager">101</parameter>
+                    <parameter name="phoneNumber">610-213-1134</parameter>
+                    <parameter name="salary">200000</parameter>
+                    <parameter name="ssn">129-69-4572</parameter>
+                    <parameter name="startDate">1012001</parameter>
+                    <parameter name="title">CTO</parameter>
                 </parametersCombination>
             </parameters>
         </input>
@@ -62,6 +84,14 @@
             <parameters>
                 <parametersCombination>
                     <parameter name="action">DeleteProfile</parameter>
+                    <parameter name="employee_id">111</parameter>
+                </parametersCombination>
+            </parameters>
+        </input>
+        <input address="http://localhost:8080/WebGoat/attack?Screen=20&amp;menu=900" method="POST" type="FORM">
+            <parameters>
+                <parametersCombination>
+                    <parameter name="action">CreateProfile</parameter>
                     <parameter name="employee_id">101</parameter>
                 </parametersCombination>
             </parameters>
@@ -71,36 +101,6 @@
                 <parametersCombination>
                     <parameter name="action">Logout</parameter>
                     <parameter name="employee_id">101</parameter>
-                </parametersCombination>
-            </parameters>
-        </input>
-        <input address="http://localhost:8080/WebGoat/attack?Screen=20&amp;menu=900" method="POST" type="FORM">
-            <parameters>
-                <parametersCombination>
-                    <parameter name="action">EditProfile</parameter>
-                    <parameter name="employee_id">108</parameter>
-                </parametersCombination>
-            </parameters>
-        </input>
-        <input address="http://localhost:8080/WebGoat/attack?Screen=20&amp;menu=900" method="POST" type="FORM">
-            <parameters>
-                <parametersCombination>
-                    <parameter name="action">UpdateProfile</parameter>
-                    <parameter name="address1">8899 FreeBSD Drive&lt;script&gt;alert(document.cookie)&lt;/script&gt; </parameter>
-                    <parameter name="address2">New York, NY</parameter>
-                    <parameter name="ccn">6981754825854136</parameter>
-                    <parameter name="ccnLimit">30000</parameter>
-                    <parameter name="description">Enjoys watching others struggle in exercises.</parameter>
-                    <parameter name="disciplinaryDate">61502</parameter>
-                    <parameter name="employee_id">108</parameter>
-                    <parameter name="firstName">Bruce</parameter>
-                    <parameter name="lastName">McGuirre</parameter>
-                    <parameter name="manager">101</parameter>
-                    <parameter name="phoneNumber">610-282-1103</parameter>
-                    <parameter name="salary">110000</parameter>
-                    <parameter name="ssn">707-95-9482</parameter>
-                    <parameter name="startDate">3012000</parameter>
-                    <parameter name="title">Engineer</parameter>
                 </parametersCombination>
             </parameters>
         </input>
@@ -274,11 +274,19 @@ alert(document.cookie)&#13;
                 <parameter>0/1/1/0/0/5/1/</parameter>
                 <parameter>0/1/1/0/0/0/1/</parameter>
                 <parameter>0/1/1/0/0/5/3/</parameter>
+                <parameter>0/1/1/0/0/1/1/</parameter>
+                <parameter>0/1/1/0/0/0/3/</parameter>
+                <parameter>0/1/1/0/0/6/3/</parameter>
+                <parameter>0/1/1/0/0/2/1/</parameter>
+                <parameter>0/1/1/0/0/2/3/</parameter>
+                <parameter>0/1/1/0/0/3/1/</parameter>
+                <parameter>0/1/1/0/0/6/1/</parameter>
+                <parameter>0/1/1/0/0/3/3/</parameter>
+                <parameter>0/1/1/0/0/4/1/</parameter>
+                <parameter>0/1/1/0/0/4/3/</parameter>
+                <parameter>0/1/1/0/0/5/1/</parameter>
+                <parameter>0/1/1/0/0/0/1/</parameter>
             </parameters>
-        </output>
-        <output>
-            <source/>
-            <parameters/>
         </output>
         <output>
             <source>&lt;div id="lesson_header"&gt; 
@@ -294,45 +302,45 @@ alert(document.cookie)&#13;
     &lt;tbody&gt; 
      &lt;tr&gt; 
       &lt;td&gt; First Name: &lt;/td&gt; 
-      &lt;td&gt; &lt;input class="lesson_text_db" name="firstName" type="text" value="Bruce" /&gt; &lt;/td&gt; 
+      &lt;td&gt; &lt;input class="lesson_text_db" name="firstName" type="text" value="John" /&gt; &lt;/td&gt; 
       &lt;td&gt; Last Name: &lt;/td&gt; 
-      &lt;td&gt; &lt;input class="lesson_text_db" name="lastName" type="text" value="McGuirre" /&gt; &lt;/td&gt; 
+      &lt;td&gt; &lt;input class="lesson_text_db" name="lastName" type="text" value="Wayne" /&gt; &lt;/td&gt; 
      &lt;/tr&gt; 
      &lt;tr&gt; 
       &lt;td&gt; Street: &lt;/td&gt; 
-      &lt;td&gt; &lt;input class="lesson_text_db" name="address1" type="text" value="8899 FreeBSD Drive&amp;lt;script&amp;gt;alert(document.cookie)&amp;lt;/script&amp;gt; " /&gt; &lt;/td&gt; 
+      &lt;td&gt; &lt;input class="lesson_text_db" name="address1" type="text" value="129 Third St" /&gt; &lt;/td&gt; 
       &lt;td&gt; City/State: &lt;/td&gt; 
       &lt;td&gt; &lt;input class="lesson_text_db" name="address2" type="text" value="New York, NY" /&gt; &lt;/td&gt; 
      &lt;/tr&gt; 
      &lt;tr&gt; 
       &lt;td&gt; Phone: &lt;/td&gt; 
-      &lt;td&gt; &lt;input class="lesson_text_db" name="phoneNumber" type="text" value="610-282-1103" /&gt; &lt;/td&gt; 
+      &lt;td&gt; &lt;input class="lesson_text_db" name="phoneNumber" type="text" value="610-213-1134" /&gt; &lt;/td&gt; 
       &lt;td&gt; Start Date: &lt;/td&gt; 
-      &lt;td&gt; &lt;input class="lesson_text_db" name="startDate" type="text" value="3012000" /&gt; &lt;/td&gt; 
+      &lt;td&gt; &lt;input class="lesson_text_db" name="startDate" type="text" value="1012001" /&gt; &lt;/td&gt; 
      &lt;/tr&gt; 
      &lt;tr&gt; 
       &lt;td&gt; SSN: &lt;/td&gt; 
-      &lt;td&gt; &lt;input class="lesson_text_db" name="ssn" type="text" value="707-95-9482" /&gt; &lt;/td&gt; 
+      &lt;td&gt; &lt;input class="lesson_text_db" name="ssn" type="text" value="129-69-4572" /&gt; &lt;/td&gt; 
       &lt;td&gt; Salary: &lt;/td&gt; 
-      &lt;td&gt; &lt;input class="lesson_text_db" name="salary" type="text" value="110000" /&gt; &lt;/td&gt; 
+      &lt;td&gt; &lt;input class="lesson_text_db" name="salary" type="text" value="200000" /&gt; &lt;/td&gt; 
      &lt;/tr&gt; 
      &lt;tr&gt; 
       &lt;td&gt; Credit Card: &lt;/td&gt; 
-      &lt;td&gt; &lt;input class="lesson_text_db" name="ccn" type="text" value="6981754825854136" /&gt; &lt;/td&gt; 
+      &lt;td&gt; &lt;input class="lesson_text_db" name="ccn" type="text" value="4437334565679921" /&gt; &lt;/td&gt; 
       &lt;td&gt; Credit Card Limit: &lt;/td&gt; 
-      &lt;td&gt; &lt;input class="lesson_text_db" name="ccnLimit" type="text" value="30000" /&gt; &lt;/td&gt; 
+      &lt;td&gt; &lt;input class="lesson_text_db" name="ccnLimit" type="text" value="300" /&gt; &lt;/td&gt; 
      &lt;/tr&gt; 
      &lt;tr&gt; 
       &lt;td&gt; Comments: &lt;/td&gt; 
-      &lt;td&gt; &lt;input class="lesson_text_db" name="description" type="text" value="Enjoys watching others struggle in exercises." /&gt; &lt;/td&gt; 
+      &lt;td&gt; &lt;input class="lesson_text_db" name="description" type="text" value="" /&gt; &lt;/td&gt; 
       &lt;td&gt; Manager: &lt;/td&gt; 
       &lt;td&gt; &lt;select class="lesson_text_db" name="manager"&gt; &lt;option value="101" selected="selected"&gt; Larry Stooge &lt;/option&gt; &lt;option value="102"&gt; Moe Stooge &lt;/option&gt; &lt;option value="103"&gt; Curly Stooge &lt;/option&gt; &lt;option value="104"&gt; Eric Walker &lt;/option&gt; &lt;option value="105"&gt; Tom Cat &lt;/option&gt; &lt;option value="106"&gt; Jerry Mouse &lt;/option&gt; &lt;option value="107"&gt; David Giambi &lt;/option&gt; &lt;option value="108"&gt; Bruce McGuirre &lt;/option&gt; &lt;option value="109"&gt; Sean Livingston &lt;/option&gt; &lt;option value="110"&gt; Joanne McDougal &lt;/option&gt; &lt;option value="111"&gt; John Wayne &lt;/option&gt; &lt;/select&gt; &lt;/td&gt; 
      &lt;/tr&gt; 
      &lt;tr&gt; 
       &lt;td&gt; Disciplinary Explanation: &lt;/td&gt; 
-      &lt;td&gt; &lt;textarea name="disciplinaryNotes" cols="16" rows="3" class="lesson_text_db"&gt;Tortuous Boot Camp workout at 5am. Employees felt sick.&lt;/textarea&gt; &lt;/td&gt; 
+      &lt;td&gt; &lt;textarea name="disciplinaryNotes" cols="16" rows="3" class="lesson_text_db"&gt;&lt;/textarea&gt; &lt;/td&gt; 
       &lt;td&gt; Disciplinary Action Dates: &lt;/td&gt; 
-      &lt;td&gt; &lt;input class="lesson_text_db" name="disciplinaryDate" type="text" value="61502" /&gt; &lt;/td&gt; 
+      &lt;td&gt; &lt;input class="lesson_text_db" name="disciplinaryDate" type="text" value="112005" /&gt; &lt;/td&gt; 
      &lt;/tr&gt; 
     &lt;/tbody&gt; 
    &lt;/table&gt; 
@@ -342,7 +350,7 @@ alert(document.cookie)&#13;
      &lt;tbody&gt; 
       &lt;tr&gt; 
        &lt;td width="57"&gt; &lt;input type="submit" name="action" value="ViewProfile" /&gt; &lt;/td&gt; 
-       &lt;td width="81"&gt; &lt;input name="employee_id" type="hidden" value="108" /&gt; &lt;input name="title" type="hidden" value="Engineer" /&gt; &lt;input type="submit" name="action" value="UpdateProfile" /&gt; &lt;/td&gt; 
+       &lt;td width="81"&gt; &lt;input name="employee_id" type="hidden" value="111" /&gt; &lt;input name="title" type="hidden" value="CTO" /&gt; &lt;input type="submit" name="action" value="UpdateProfile" /&gt; &lt;/td&gt; 
        &lt;td width="211"&gt; &lt;/td&gt;
        &lt;td width="83"&gt; &lt;input type="submit" name="action" value="Logout" /&gt; &lt;/td&gt; 
       &lt;/tr&gt; 
@@ -352,6 +360,12 @@ alert(document.cookie)&#13;
   &lt;/form&gt; 
  &lt;/div&gt; 
 &lt;/div&gt;</source>
+            <parameters>
+                <parameter>0/1/1/0/0/0/6/1/0/</parameter>
+            </parameters>
+        </output>
+        <output>
+            <source/>
             <parameters/>
         </output>
     </outputs>
