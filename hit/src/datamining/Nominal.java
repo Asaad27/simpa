@@ -1,6 +1,6 @@
-package weka;
-import java.util.LinkedList;
+package datamining;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 public class Nominal <T> {
 	LinkedList<T> m_nominal;

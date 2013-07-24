@@ -1,14 +1,12 @@
-package weka;
+package datamining;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
  
 public class ID3 {
-	
-	private int indexBestAttribut;
 	
 	public static TreeNode Run(ArrayList<LinkedList> columns_attributes,  LinkedList<String> col_class,
 			Map<String, Nominal<String>> map_attributes, Map<Integer, String> array_attributes, int index_class) {

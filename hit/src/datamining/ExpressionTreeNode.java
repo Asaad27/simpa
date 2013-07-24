@@ -1,4 +1,4 @@
-package weka;
+package datamining;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package weka;
+package datamining;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -20,8 +20,6 @@ import learner.efsm.table.LiDataTableItem;
 import main.Options;
 import tools.Utils;
 import tools.loggers.LogManager;
-import weka.classifiers.Classifier;
-import weka.classifiers.trees.J48;
 import weka.classifiers.trees.M5P;
 import weka.core.Attribute;
 import weka.core.Instance;
@@ -29,7 +27,6 @@ import weka.core.Instances;
 import weka.core.UnassignedDatasetException;
 import weka.core.converters.ArffSaver;
 import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.NumericToNominal;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.filters.unsupervised.attribute.StringToNominal;
 import automata.Transition;
@@ -527,7 +524,7 @@ public class ARFF {
 		return node;
 	}
 */
-	private static List<Instance> checkOnlyOneInstance(Instances data) {
+	/*private static List<Instance> checkOnlyOneInstance(Instances data) {
 		List<Instance> res = new ArrayList<Instance>();
 		Map<String, List<Instance>> allinsts = new TreeMap<String, List<Instance>>();
 		for (int i = 0; i < data.numInstances(); i++) {
@@ -546,7 +543,7 @@ public class ARFF {
 				res.add(allinsts.get(dest).get(0));
 		}
 		return res;
-	}
+	}*/
 
 	public static String handleDifferentOutput(String dataFile, Label label,
 			Transition t) {
@@ -583,7 +580,7 @@ public class ARFF {
 					cl.setOptions(weka.core.Utils.splitOptions("-C 0.25 -M 2"));
 					cl.buildClassifier(data);*/
 
-					node = weka.Classifier.Classify(dataFile, i);
+					node = datamining.Classifier.Classify(dataFile, i);
 					try{
 					//	node.loadFromString(cl);
 

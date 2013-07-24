@@ -1,4 +1,4 @@
-package weka;
+package datamining;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import main.Options;
 
 public class Condition extends LinkedList<Tag> {
+	private static final long serialVersionUID = -6467576331816693683L;
+
 	public Condition() {
 		super();
 	}

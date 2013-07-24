@@ -115,8 +115,7 @@ public class SIMPATestEFSM {
 							LogManager.addLogger(new TextLogger());
 						LogManager.start();
 
-						RandomEFSM rEFSM = new RandomEFSM();
-						driver = new RandomEFSMDriver(rEFSM);
+						driver = new RandomEFSMDriver();
 						LiLearner lilearner = new LiLearner(driver);
 						lilearner.learn();
 						driver.logStats();

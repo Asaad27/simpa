@@ -1,13 +1,11 @@
-package weka;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Scanner;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.LinkedList;
-
+package datamining;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Scanner;
 	
 public class ArffReader {
 	

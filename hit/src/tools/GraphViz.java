@@ -38,7 +38,6 @@ public class GraphViz{
 			p.waitFor();
 			return p.exitValue();
 		} catch (IOException e) {
-			e.printStackTrace();
 			try {
 				DOT = Utils.exec("which dot");
 				String[] newargs = { DOT, "-V" };

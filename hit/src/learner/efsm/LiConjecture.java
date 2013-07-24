@@ -20,10 +20,10 @@ import tools.GraphViz;
 import tools.Utils;
 import tools.XMLModel;
 import tools.loggers.LogManager;
-import weka.TreeNode;
 import automata.State;
 import automata.efsm.EFSMTransition;
 import automata.efsm.EFSMTransition.Label;
+import datamining.TreeNode;
 import drivers.Driver;
 import drivers.efsm.EFSMDriver;
 
@@ -88,13 +88,13 @@ public class LiConjecture extends automata.efsm.EFSM {
 	}
 	
 	public void fillVar(EFSMTransition t, Label label){
-		String dataFile = weka.Classifier.generateFileForVar(t, paramNames);
+		String dataFile = datamining.Classifier.generateFileForVar(t, paramNames);
 		System.out.println("\n\n\nfile : "+ dataFile);
-		dataFile = weka.Classifier.handleConstantOutput(dataFile, label);
+		dataFile = datamining.Classifier.handleConstantOutput(dataFile, label);
 		System.out.println("file : "+ dataFile);
-		dataFile = weka.Classifier.handleRelatedDataForOutput(dataFile);
+		dataFile = datamining.Classifier.handleRelatedDataForOutput(dataFile);
 		System.out.println("file : "+ dataFile);
-		dataFile = weka.Classifier.handleDifferentOutput(dataFile, label);
+		dataFile = datamining.Classifier.handleDifferentOutput(dataFile, label);
 		System.out.println(""+label.toDotString());
 		
 		/* String dataFile = ARFF.generateFileForVar(t, paramNames);
@@ -107,9 +107,9 @@ public class LiConjecture extends automata.efsm.EFSM {
 	private void fillPredicate(List<EFSMTransition> list,
 			Map<String, Label> labels) {
 		if (list.size() > 1) {
-			String dataFile = weka.Classifier.generateFileForPredicate(list, paramNames);
-			dataFile = weka.Classifier.filterArff(dataFile);
-			TreeNode node = weka.Classifier.Classify(dataFile, -1);
+			String dataFile = datamining.Classifier.generateFileForPredicate(list, paramNames);
+			dataFile = datamining.Classifier.filterArff(dataFile);
+			TreeNode node = datamining.Classifier.Classify(dataFile, -1);
 			if(node != null){
 				for(EFSMTransition t : list){
 					for(String pred : node.getPredicatesFor(t.getTo()+t.getOutput())){
@@ -151,7 +151,7 @@ public class LiConjecture extends automata.efsm.EFSM {
 									labels);
 						}
 					}
-					gSymbols = weka.Classifier.getGlobalSymbols();
+					gSymbols = datamining.Classifier.getGlobalSymbols();
 
 					for (EFSMTransition t : getTransitions()) {
 						writer.write("\t" + t.getFrom() + " -> " + t.getTo()

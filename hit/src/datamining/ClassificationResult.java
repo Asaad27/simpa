@@ -1,9 +1,11 @@
-package weka;
+package datamining;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.HashMap;
 
 public class ClassificationResult extends HashMap<String, Prediction> {
+	private static final long serialVersionUID = 5242833613182727636L;
+
 	public ClassificationResult() {
 		super();
 	}

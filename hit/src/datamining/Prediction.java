@@ -1,11 +1,12 @@
-package weka;
+package datamining;
 
-import java.util.Iterator;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import main.Options;
 
 public class Prediction extends ArrayList<Condition>{
+	private static final long serialVersionUID = -7461576989004249870L;
 	String final_state;
 	
 	public Prediction (String f_state) {

@@ -1,4 +1,4 @@
-package weka;
+package datamining;
 
 public class Tag {
 	String m_attribute;
