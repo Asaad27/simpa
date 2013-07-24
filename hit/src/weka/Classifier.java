@@ -97,7 +97,7 @@ public class Classifier {
 		}	
 		return null;
 	}
-private static List<String> gSymbols = new ArrayList<String>();
+	private static List<String> gSymbols = new ArrayList<String>();
 	
 	public static List<String> getGlobalSymbols(){
 		return gSymbols;
@@ -308,7 +308,7 @@ private static List<String> gSymbols = new ArrayList<String>();
 				}
 				for (Parameter p : dti.getOutputParameters())
 					line.append(convertValue(p) + ",");
-				writer.write(line.substring(0, line.length() - 2) + "\n");
+				writer.write(line.substring(0, line.length() - 1) + "\n");
 			}
 			writer.flush();
 			writer.close();
@@ -368,7 +368,9 @@ private static List<String> gSymbols = new ArrayList<String>();
 		Iterator<String> itr = col_a.iterator();
 		Iterator<String> itr2 = col_b.iterator();
 		while (itr.hasNext()) {
-			if (itr.next().equals(itr2.next())) {
+			String i1 = itr.next();
+			String i2 = itr2.next();
+			if (i1.equals(i2) && !i1.contains("sinit")) {
 				corr++;
 			}
 		}
@@ -636,6 +638,7 @@ private static List<String> gSymbols = new ArrayList<String>();
 				TreeNode DT = ID3.Run(columns_attributes, col_class, map_attributes, array_attributes, i);
 				DT = TreeNode.Optimize(DT);
 				
+				System.out.println("Tree : \n "+ TreeNode.toString(DT));
 				String className = array_attributes.get(i);
 				LinkedList<String> diffvalues = map_attributes.get(className).getLinkedList();
 				

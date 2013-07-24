@@ -20,7 +20,6 @@ import tools.GraphViz;
 import tools.Utils;
 import tools.XMLModel;
 import tools.loggers.LogManager;
-import weka.ARFF;
 import weka.TreeNode;
 import automata.State;
 import automata.efsm.EFSMTransition;
@@ -89,22 +88,26 @@ public class LiConjecture extends automata.efsm.EFSM {
 	}
 	
 	public void fillVar(EFSMTransition t, Label label){
-		/*String dataFile = weka.Classifier.generateFileForVar(t, paramNames);
+		String dataFile = weka.Classifier.generateFileForVar(t, paramNames);
+		System.out.println("\n\n\nfile : "+ dataFile);
 		dataFile = weka.Classifier.handleConstantOutput(dataFile, label);
+		System.out.println("file : "+ dataFile);
 		dataFile = weka.Classifier.handleRelatedDataForOutput(dataFile);
+		System.out.println("file : "+ dataFile);
 		dataFile = weka.Classifier.handleDifferentOutput(dataFile, label);
-		*/
-		 String dataFile = ARFF.generateFileForVar(t, paramNames);
+		System.out.println(""+label.toDotString());
+		
+		/* String dataFile = ARFF.generateFileForVar(t, paramNames);
 		 dataFile = ARFF.filterFileForVar(dataFile);
 		 dataFile = ARFF.handleConstantOutput(dataFile, label);
 		 dataFile = ARFF.handleRelatedDataForOutput(dataFile);
-		 dataFile = ARFF.handleDifferentOutput(dataFile, label, t); 
+		 dataFile = ARFF.handleDifferentOutput(dataFile, label, t);*/
 	}
 
 	private void fillPredicate(List<EFSMTransition> list,
 			Map<String, Label> labels) {
 		if (list.size() > 1) {
-			String dataFile = ARFF.generateFileForPredicate(list, paramNames);
+			String dataFile = weka.Classifier.generateFileForPredicate(list, paramNames);
 			dataFile = weka.Classifier.filterArff(dataFile);
 			TreeNode node = weka.Classifier.Classify(dataFile, -1);
 			if(node != null){
@@ -114,6 +117,8 @@ public class LiConjecture extends automata.efsm.EFSM {
 					}
 				}
 			}
+
+			System.out.println(""+labels.toString());
 		}
 	}
 
@@ -146,7 +151,7 @@ public class LiConjecture extends automata.efsm.EFSM {
 									labels);
 						}
 					}
-					gSymbols = ARFF.getGlobalSymbols();
+					gSymbols = weka.Classifier.getGlobalSymbols();
 
 					for (EFSMTransition t : getTransitions()) {
 						writer.write("\t" + t.getFrom() + " -> " + t.getTo()
