@@ -127,7 +127,6 @@ public class LiConjecture extends automata.efsm.EFSM {
 		Writer writer = null;
 		File file = null;
 		File dir = new File(Options.OUTDIR + Options.DIRGRAPH);
-		if (Options.WEKA) {
 			LogManager.logInfo("Exporting final conjecture to file");
 			try {
 				if (Utils.createDir(dir)) {
@@ -171,9 +170,8 @@ public class LiConjecture extends automata.efsm.EFSM {
 					LogManager.logError("unable to create " + dir.getName()
 							+ " directory");
 			} catch (IOException e) {
-				e.printStackTrace();
+				LogManager.logException("Error exporting conjecture to dot", e);
 			}
-		}
 	}
 
 	public static void serialize(LiConjecture o, String filename) {

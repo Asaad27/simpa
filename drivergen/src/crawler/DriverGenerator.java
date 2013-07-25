@@ -75,10 +75,11 @@ public class DriverGenerator {
 
 	protected static Configuration config = null;
 
+	@SuppressWarnings("deprecation")
 	public DriverGenerator(String configFileName) throws JsonParseException,
 			JsonMappingException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
-		config = mapper.readValue(new File("conf" + File.separator + configFileName),
+		config = mapper.readValue(new File(configFileName),
 				Configuration.class);
 		config.check();
 		urlsToCrawl = new ArrayList<>();
@@ -92,9 +93,9 @@ public class DriverGenerator {
 	    java.util.logging.Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.OFF);
 		client = new WebClient();
 		client.setThrowExceptionOnFailingStatusCode(false);
-		client.setTimeout(Options.TIMEOUT);
-		client.setCssEnabled(Options.CSS);
-		client.setJavaScriptEnabled(Options.JS);
+		client.getOptions().setTimeout(Options.TIMEOUT);
+		client.getOptions().setCssEnabled(Options.CSS);
+		client.getOptions().setJavaScriptEnabled(Options.JS);
 		CookieManager cm = new CookieManager();
 		if (config.getCookies() != null){
 			String cookieValue = null;
@@ -768,11 +769,15 @@ public class DriverGenerator {
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
             DOMSource source = new DOMSource(doc);
-            StreamResult xml = new StreamResult(new File("abs" + File.separatorChar + config.getName()+ ".xml").toURI().getPath());
-            transformer.transform(source, xml); 
+            
+            File dir = new File("abs");
+   			if (!dir.isDirectory() && !dir.mkdirs())
+   				throw new IOException("unable to create " + dir.getName()
+   						+ " directory");
+   			StreamResult xml = new StreamResult(new File("abs" + File.separator + config.getName()+ ".xml").toURI().getPath());
+            transformer.transform(source, xml);
         } catch (Exception e) {
-            e.printStackTrace();
-        }
-		
+        	LogManager.logException("Error writing xml file", e);
+        }		
 	}
 }

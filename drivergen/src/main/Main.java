@@ -67,7 +67,7 @@ public class Main {
 	}
 
 	public static void usage(){
-		System.out.println("Usage : TIC [options] config_file.json");
+		System.out.println("Usage : TDG [options] config_file.json");
 		System.out.println("");
 		System.out.println("Options");
 		System.out.println("> Crawling");
@@ -77,7 +77,7 @@ public class Main {
 		System.out.println("> General");
 		System.out.println("    --help | -h       : Show help");
 		System.out.println();
-		System.out.println("Example : TIC --log webgoat.json");
+		System.out.println("Example : TDG webgoat.json");
 		System.out.println();
 		System.exit(0);
 	}
