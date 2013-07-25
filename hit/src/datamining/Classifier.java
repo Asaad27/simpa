@@ -1,5 +1,6 @@
 package datamining;
 
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -11,7 +12,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -20,15 +20,19 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.Arrays;
 
-import learner.efsm.table.LiDataTableItem;
-import main.Options;
 import tools.Utils;
 import tools.loggers.LogManager;
+import drivers.efsm.EFSMDriver.Types;
+
+import automata.Transition;
 import automata.efsm.EFSMTransition;
 import automata.efsm.EFSMTransition.Label;
 import automata.efsm.Parameter;
-import drivers.efsm.EFSMDriver.Types;
+
+import learner.efsm.table.LiDataTableItem;
+import main.Options;
 
 public class Classifier {
 
@@ -629,13 +633,34 @@ public class Classifier {
 			Map<String, Type> type_attributes = reader.getTypeAttributes();
 			Map<Integer, String> array_attributes = reader.getArrayAttributes();
 			ArrayList<LinkedList> columns_attributes = reader.getColumnsAttributes();
+			boolean rel_find = false;
+			
+			Iterator it = array_attributes.entrySet().iterator();
+			while (it.hasNext()) {
+				Map.Entry<Integer, String> pairs = (Map.Entry<Integer, String>)it.next();
+				String [] str = pairs.getValue().split(".equals.");
+				if (str.length < 2)
+					continue;
+				if (str[0].contains("saved") || str [1].contains("saved"))
+					continue;
+				LinkedList<String> L_class = new LinkedList<String>();
+				for(int i = iOut; i < columns_attributes.size(); i++)
+					L_class.add(array_attributes.get(i));
+				if (L_class.contains(str[0]) || L_class.contains(str[1])) {
+					rel_find = true;
+					label.addVar(str[0] + " = " + str[1]);
+				}
+			}
+			
+			if (rel_find)
+				return dataFile;
+			
 			for(int i  = array_attributes.size() - 1; i > iOut; i--) {
 				
 				LinkedList<String> col_class = new LinkedList<String>(columns_attributes.get(i));
 				TreeNode DT = ID3.Run(columns_attributes, col_class, map_attributes, array_attributes, i);
 				DT = TreeNode.Optimize(DT);
-				
-				System.out.println("Tree : \n "+ TreeNode.toString(DT));
+			
 				String className = array_attributes.get(i);
 				LinkedList<String> diffvalues = map_attributes.get(className).getLinkedList();
 				
@@ -736,6 +761,7 @@ public class Classifier {
 			ArffReader reader = new ArffReader(dataFile);
 			ArrayList<LinkedList> columns_attributes = reader.getColumnsAttributes();
 			Map<Integer, String> array_attributes = reader.getArrayAttributes();
+			Map<String, Type> type_attributes = reader.getTypeAttributes();
 			
 			int outIndex = array_attributes.size() - 1;
 			
@@ -762,7 +788,7 @@ public class Classifier {
 					List<String> f_str = Arrays.asList(t_str);
 					List<String> l_str = new ArrayList<String>();
 					for(int i = 0; i < f_str.size(); i++) {
-						if (i != outIndex)
+						//if (i != outIndex)
 							l_str.add(new String(f_str.get(i)));
 					}
 					
@@ -803,7 +829,6 @@ public class Classifier {
 							}
 						}
 					}
-					System.out.println(L_att.toString());
 				}
 				outIndex--;
 			}

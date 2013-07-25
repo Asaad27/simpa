@@ -11,6 +11,12 @@ public class Type {
 		this.type = new String(t);
 	}
 	
+	public boolean isNumeric() {
+		if (type.toUpperCase().contains("NUMERIC"))
+			return true;
+		return false;
+	}
+	
 	public String get() {
 		return type;
 	}

@@ -89,11 +89,11 @@ public class LiConjecture extends automata.efsm.EFSM {
 	
 	public void fillVar(EFSMTransition t, Label label){
 		String dataFile = datamining.Classifier.generateFileForVar(t, paramNames);
-		System.out.println("\n\n\nfile : "+ dataFile);
+		//System.out.println("\n\n\nfile : "+ dataFile);
 		dataFile = datamining.Classifier.handleConstantOutput(dataFile, label);
-		System.out.println("file : "+ dataFile);
+		//System.out.println("file : "+ dataFile);
 		dataFile = datamining.Classifier.handleRelatedDataForOutput(dataFile);
-		System.out.println("file : "+ dataFile);
+		//System.out.println("file : "+ dataFile);
 		dataFile = datamining.Classifier.handleDifferentOutput(dataFile, label);
 		System.out.println(""+label.toDotString());
 		
@@ -117,7 +117,6 @@ public class LiConjecture extends automata.efsm.EFSM {
 					}
 				}
 			}
-
 			System.out.println(""+labels.toString());
 		}
 	}
