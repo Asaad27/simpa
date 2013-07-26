@@ -18,7 +18,7 @@ import automata.efsm.ParameterizedOutput;
 public class WGStoredXSSDriver extends LowWebDriver {
 
 	private String basicAuth = "Basic Z3Vlc3Q6Z3Vlc3Q="; // guest:guest in
-															// base64
+														 // base64
 	private String screen = null;
 
 	public WGStoredXSSDriver() {

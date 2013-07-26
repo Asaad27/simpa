@@ -21,5 +21,6 @@
 	<classpathentry kind="lib" path="lib/htmlunit/serializer-2.7.1.jar"/>
 	<classpathentry kind="lib" path="lib/htmlunit/xalan-2.7.1.jar"/>
 	<classpathentry kind="lib" path="lib/htmlunit/xml-apis-1.4.01.jar"/>
+	<classpathentry kind="lib" path="lib/htmlunit/xercesImpl-2.10.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -123,7 +123,6 @@ public class SIMPA {
 			LogManager.logConsole("System : " + driver.getSystemName());
 			return driver;
 		} catch (InstantiationException e) {
-			e.printStackTrace();
 			throw new Exception("Unable to instantiate the driver : " + system);
 		} catch (IllegalAccessException e) {
 			throw new Exception("Unable to access the driver : " + system);
@@ -167,7 +166,16 @@ public class SIMPA {
 		System.out.println("Options");
 		System.out.println("> General");
 		System.out.println("    --help | -h       : Show help");
-		System.out.println("> Algorithm");
+		System.out.println("> Algorithm EFSM");
+		System.out
+				.println("    --generic         : Use generic driver");
+		System.out
+				.println("    --reuseop         : Reuse output parameter for non closed row");
+		System.out
+				.println("    --forcej48        : Force the use of J48 algorithm instead of M5P for numeric classes");
+		System.out
+				.println("    --supportmin (20) : Minimal support for relation (1-100)");
+		System.out.println("> Algorithm ZQ");
 		System.out
 				.println("    --tree            : Use tree inference (if available) instead of table");
 		System.out
@@ -178,12 +186,6 @@ public class SIMPA {
 				.println("    --I=X             : Initial input symbols set to X");
 		System.out
 				.println("    --stopatce        : Stop at counter example search");
-		System.out
-				.println("    --reuseop         : Reuse output parameter for non closed row");
-		System.out
-				.println("    --forcej48        : Force the use of J48 algorithm instead of M5P for numeric classes");
-		System.out
-				.println("    --supportmin (20) : Minimal support for relation (1-100)");
 		System.out.println("> Output");
 		System.out
 				.println("    --outdir (.)      : Where to save arff and graph files");
@@ -193,7 +195,7 @@ public class SIMPA {
 				.println("    --openhtml        : Open HTML log automatically");
 		System.out.println();
 		System.out
-				.println("Ex: KIT drivers.efsm.NSPKDriver --outdir mydir --text");
+				.println("Ex: SIMPA drivers.efsm.NSPKDriver --outdir mydir --text");
 		System.out.println();
 		System.exit(0);
 	}

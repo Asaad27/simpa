@@ -201,6 +201,7 @@ public class GenericDriver extends LowWebDriver {
 		config = new Configuration();
 		try {
 			DocumentBuilder db = dbf.newDocumentBuilder();
+			db.setErrorHandler(null);
 			org.w3c.dom.Document dom = db.parse(xml);
 			Element root = dom.getDocumentElement();
 			config.setName(root.getElementsByTagName("target").item(0)
@@ -298,12 +299,10 @@ public class GenericDriver extends LowWebDriver {
 					this.outputs.add(out);
 				}
 			}
-		} catch (ParserConfigurationException pce) {
-			pce.printStackTrace();
-		} catch (SAXException se) {
-			se.printStackTrace();
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
+		}catch (ParserConfigurationException|SAXException e){
+			LogManager.logException("Error parsing the xml file \"" + xml + "\"",  e);
+		}catch (IOException e) {
+			LogManager.logException("Unable to read the file \"" + xml + "\"",  e);
 		}
 		return config;
 	}

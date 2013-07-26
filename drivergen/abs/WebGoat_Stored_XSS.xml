@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><driver date="1374285313446" generator="TIC" version="1.0">
+<?xml version="1.0" encoding="UTF-8"?><driver date="1374850090048" generator="TIC" version="1.0">
     <settings>
         <target>WebGoat_Stored_XSS</target>
         <host>localhost</host>
@@ -66,7 +66,7 @@
                     <parameter name="address2">New York, NY</parameter>
                     <parameter name="ccn">4437334565679921</parameter>
                     <parameter name="ccnLimit">300</parameter>
-                    <parameter name="description">random851</parameter>
+                    <parameter name="description">random89</parameter>
                     <parameter name="disciplinaryDate">112005</parameter>
                     <parameter name="employee_id">111</parameter>
                     <parameter name="firstName">John</parameter>
@@ -260,32 +260,32 @@ alert(document.cookie)&#13;
  &lt;/div&gt; 
 &lt;/div&gt;</source>
             <parameters>
+                <parameter>0/1/1/0/0/6/1/</parameter>
                 <parameter>0/1/1/0/0/5/3/</parameter>
                 <parameter>0/1/1/0/0/1/1/</parameter>
-                <parameter>0/1/1/0/0/0/3/</parameter>
-                <parameter>0/1/1/0/0/6/3/</parameter>
-                <parameter>0/1/1/0/0/2/1/</parameter>
-                <parameter>0/1/1/0/0/2/3/</parameter>
-                <parameter>0/1/1/0/0/3/1/</parameter>
-                <parameter>0/1/1/0/0/6/1/</parameter>
                 <parameter>0/1/1/0/0/3/3/</parameter>
+                <parameter>0/1/1/0/0/0/3/</parameter>
                 <parameter>0/1/1/0/0/4/1/</parameter>
                 <parameter>0/1/1/0/0/4/3/</parameter>
                 <parameter>0/1/1/0/0/5/1/</parameter>
+                <parameter>0/1/1/0/0/6/3/</parameter>
                 <parameter>0/1/1/0/0/0/1/</parameter>
+                <parameter>0/1/1/0/0/2/1/</parameter>
+                <parameter>0/1/1/0/0/3/1/</parameter>
+                <parameter>0/1/1/0/0/2/3/</parameter>
+                <parameter>0/1/1/0/0/6/1/</parameter>
                 <parameter>0/1/1/0/0/5/3/</parameter>
                 <parameter>0/1/1/0/0/1/1/</parameter>
-                <parameter>0/1/1/0/0/0/3/</parameter>
-                <parameter>0/1/1/0/0/6/3/</parameter>
-                <parameter>0/1/1/0/0/2/1/</parameter>
-                <parameter>0/1/1/0/0/2/3/</parameter>
-                <parameter>0/1/1/0/0/3/1/</parameter>
-                <parameter>0/1/1/0/0/6/1/</parameter>
                 <parameter>0/1/1/0/0/3/3/</parameter>
+                <parameter>0/1/1/0/0/0/3/</parameter>
                 <parameter>0/1/1/0/0/4/1/</parameter>
                 <parameter>0/1/1/0/0/4/3/</parameter>
                 <parameter>0/1/1/0/0/5/1/</parameter>
+                <parameter>0/1/1/0/0/6/3/</parameter>
                 <parameter>0/1/1/0/0/0/1/</parameter>
+                <parameter>0/1/1/0/0/2/1/</parameter>
+                <parameter>0/1/1/0/0/3/1/</parameter>
+                <parameter>0/1/1/0/0/2/3/</parameter>
             </parameters>
         </output>
         <output>
@@ -351,7 +351,7 @@ alert(document.cookie)&#13;
       &lt;tr&gt; 
        &lt;td width="57"&gt; &lt;input type="submit" name="action" value="ViewProfile" /&gt; &lt;/td&gt; 
        &lt;td width="81"&gt; &lt;input name="employee_id" type="hidden" value="111" /&gt; &lt;input name="title" type="hidden" value="CTO" /&gt; &lt;input type="submit" name="action" value="UpdateProfile" /&gt; &lt;/td&gt; 
-       &lt;td width="211"&gt; &lt;/td&gt;
+       &lt;td width="211"&gt;&lt;/td&gt; 
        &lt;td width="83"&gt; &lt;input type="submit" name="action" value="Logout" /&gt; &lt;/td&gt; 
       &lt;/tr&gt; 
      &lt;/tbody&gt; 
@@ -360,9 +360,7 @@ alert(document.cookie)&#13;
   &lt;/form&gt; 
  &lt;/div&gt; 
 &lt;/div&gt;</source>
-            <parameters>
-                <parameter>0/1/1/0/0/0/6/1/0/</parameter>
-            </parameters>
+            <parameters/>
         </output>
         <output>
             <source/>
