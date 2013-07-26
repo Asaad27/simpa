@@ -48,6 +48,7 @@ public class GenericDriver extends LowWebDriver {
 	public List<Input> inputs;
 	public List<Output> outputs;
 
+	@SuppressWarnings("deprecation")
 	public GenericDriver(String xml) throws IOException {
 		inputs = new ArrayList<Input>();
 		outputs = new ArrayList<Output>();
@@ -57,7 +58,7 @@ public class GenericDriver extends LowWebDriver {
 	    java.util.logging.Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.OFF);
 		client = new WebClient();
 		client.setThrowExceptionOnFailingStatusCode(false);
-		client.setTimeout(10000);
+		client.getOptions().setTimeout(10000);
 		CookieManager cm = new CookieManager();
 		if (config.getCookies() != null){
 			String cookieValue = null;

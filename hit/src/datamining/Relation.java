@@ -5,7 +5,6 @@ import java.util.List;
 
 import main.Options;
 import tools.loggers.LogManager;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.UnassignedDatasetException;
 
@@ -138,10 +137,10 @@ public class Relation {
 		return res + name2;
 	}
 
-	public FastVector getValues() {
-		FastVector fv = new FastVector();
-		fv.addElement(this.toString());
-		fv.addElement(this.toNotString());
+	public List<String> getValues() {
+		List<String> fv = new ArrayList<String>();
+		fv.add(this.toString());
+		fv.add(this.toNotString());
 		return fv;
 	}
 

@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -20,18 +21,15 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Arrays;
-
-import tools.Utils;
-import tools.loggers.LogManager;
-import drivers.efsm.EFSMDriver.Types;
-
-import automata.efsm.EFSMTransition;
-import automata.efsm.EFSMTransition.Label;
-import automata.efsm.Parameter;
 
 import learner.efsm.table.LiDataTableItem;
 import main.Options;
+import tools.Utils;
+import tools.loggers.LogManager;
+import automata.efsm.EFSMTransition;
+import automata.efsm.EFSMTransition.Label;
+import automata.efsm.Parameter;
+import drivers.efsm.EFSMDriver.Types;
 
 public class Classifier {
 
