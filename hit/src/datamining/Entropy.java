@@ -30,9 +30,9 @@ public class Entropy {
 		}
 		
 		// Apply Shannon Entropy's formula
-		Iterator it = frequencies.entrySet().iterator();
+		Iterator<Map.Entry<String, Float>> it = frequencies.entrySet().iterator();
 		while (it.hasNext()) {
-			Map.Entry<String, Float> pairs = (Map.Entry<String, Float>)it.next(); 
+			Map.Entry<String, Float> pairs = it.next(); 
 			if (pairs.getValue() != 0 && pairs.getValue() < 1)
 				entropy -= pairs.getValue() * Math.log(pairs.getValue()) / Math.log(2);
 			//it.remove();
@@ -41,7 +41,7 @@ public class Entropy {
 		return entropy;
 	}
 	
-	public static float gain (LinkedList<String> column_class, LinkedList<String> column, Nominal enum_class, Nominal enum_col, float global_entropy) {
+	public static float gain (LinkedList<String> column_class, LinkedList<String> column, Nominal<String> enum_class, Nominal<String> enum_col, float global_entropy) {
 		float gain = global_entropy;
 		
 		LinkedList<String> possible_values = enum_col.getLinkedList();
@@ -66,7 +66,7 @@ public class Entropy {
 		return gain / Entropy._Entropy(column, enum_col);
 	}	
 	
-	public static float gainO (LinkedList<String> column_class, LinkedList<String> column, Nominal enum_class, Nominal enum_col, float global_entropy) {
+	public static float gainO (LinkedList<String> column_class, LinkedList<String> column, Nominal<String> enum_class, Nominal<String> enum_col, float global_entropy) {
 		float gain = global_entropy;
 		Map<String, Integer> HM_index = new HashMap<String, Integer>();
 		LinkedList<String> possible_values = enum_col.getLinkedList();

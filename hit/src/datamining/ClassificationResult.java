@@ -12,9 +12,9 @@ public class ClassificationResult extends HashMap<String, Prediction> {
 	
 	public String toString() {
 		String str = new String("");
-		Iterator it = this.entrySet().iterator();
+		Iterator<Map.Entry<String, Prediction>> it = this.entrySet().iterator();
 		while (it.hasNext()) {
-			Map.Entry<String, Prediction> pairs = (Map.Entry<String, Prediction>)it.next(); 
+			Map.Entry<String, Prediction> pairs = it.next(); 
 			str += pairs.getValue().toString() + "\n";
 		}
 		return str;

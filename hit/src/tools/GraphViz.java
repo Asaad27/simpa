@@ -7,7 +7,7 @@ import main.Options;
 import tools.loggers.LogManager;
 
 public class GraphViz{
-   private static String DOT = "C:\\Users\\max\\Downloads\\graphviz-2.30.1\\release\\bin\\dot";
+   private static String DOT = "dot";
    
    public static File dotToFile(String filename)
    {
@@ -38,7 +38,6 @@ public class GraphViz{
 			p.waitFor();
 			return p.exitValue();
 		} catch (IOException e) {
-			e.printStackTrace();
 			try {
 				DOT = Utils.exec("which dot");
 				String[] newargs = { DOT, "-V" };

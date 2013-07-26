@@ -26,7 +26,6 @@ import tools.Utils;
 import tools.loggers.LogManager;
 import drivers.efsm.EFSMDriver.Types;
 
-import automata.Transition;
 import automata.efsm.EFSMTransition;
 import automata.efsm.EFSMTransition.Label;
 import automata.efsm.Parameter;
@@ -44,51 +43,30 @@ public class Classifier {
 	
 	public static TreeNode Classify(String dataFile, int indexClass) {
 		try {
-			TreeNode FinalTree = new TreeNode();
 			int index_class = 0;
 			
 			ArffReader reader = new ArffReader(dataFile);
 			
-			//Get Relation
-			String relation = reader.getRelation();
-			
 			//Get Attributes and enum
 			Map<String, Nominal<String>> map_attributes = reader.getMapAttributes();
 			
-			//Get Types
-			Map<String, Type> type_attributes = reader.getTypeAttributes();
-
 			//Get Attributes List 
 			Map<Integer, String> array_attributes = reader.getArrayAttributes();
 
 			//Get Data columns
-			ArrayList<LinkedList> columns_attributes = reader.getColumnsAttributes();
+			List<LinkedList<String>> columns_attributes = reader.getColumnsAttributes();
 			
 			if (indexClass < 0)
 				index_class = reader.getIndexClass();
 			
 			//Create Col_class
 			LinkedList<String> col_class = new LinkedList<String>(columns_attributes.get(index_class));
-			float global_entropy = Entropy._Entropy(col_class, map_attributes.get(array_attributes.get(index_class)));
-			float g = Entropy.gain(col_class, columns_attributes.get(2), map_attributes.get(array_attributes.get(index_class)), map_attributes.get(array_attributes.get(2)), global_entropy);
-			//float f = Entropy.gainO(col_class, columns_attributes.get(2), map_attributes.get(array_attributes.get(index_class)), map_attributes.get(array_attributes.get(2)), global_entropy);
-			
 			
 			//ID3
-			
-			long start = System.currentTimeMillis();
-			TreeNode DT = ID3.Run(columns_attributes, col_class, map_attributes, array_attributes, index_class);
-			long endID3 = System.currentTimeMillis();
-			
-			
+			TreeNode DT = ID3.Run(columns_attributes, col_class, map_attributes, array_attributes, index_class);			
 			
 			//Optimization
-			long startOpt = System.currentTimeMillis();
 			DT = TreeNode.Optimize(DT);
-			long endOpt = System.currentTimeMillis();
-			
-			//Prediction
-			ClassificationResult result = TreeNode.Predict(DT);
 			
 			return DT;
 			
@@ -324,9 +302,8 @@ public class Classifier {
 	
 	public static String filterDoubleLines(String dataFile) {
 		File fileNew = null;
-		Writer writer = null;
 		
-		fileNew = new File(Options.OUTDIR + File.separatorChar +"arff" +File.separatorChar
+		fileNew = new File(Options.OUTDIR + File.separator +"arff" +File.separator
 				+ filename(dataFile) + "_filtered.arff");
 		
 		try {
@@ -401,58 +378,14 @@ public class Classifier {
 		return dataFile.substring(index, dataFile.length()-5);
 	}
 	
-	private static String writeRel(String dataFile, String newAtt, LinkedList<String> col) {
-		File fileNew = null;
-		Writer writer = null;
-		
-		fileNew = new File(Options.OUTDIR + File.separatorChar +"arff" +File.separatorChar
-				+ filename(dataFile) + "_related.arff");
-		try {
-			//Set up writting 
-			FileWriter fw = new FileWriter (fileNew);
-			BufferedWriter bw = new BufferedWriter (fw);
-			PrintWriter fileOutput = new PrintWriter (bw); 
-					 	
-			//Set up reading 
-			InputStream ips=new FileInputStream(dataFile); 
-			InputStreamReader ipsr=new InputStreamReader(ips);
-			BufferedReader br=new BufferedReader(ipsr);
-			String ligne = new String("");
-			
-			//process
-			boolean attr = true;
-			while (!ligne.toUpperCase().equals("@DATA")) {
-				ligne = br.readLine();
-				if (attr && ligne.toLowerCase().contains("@attribute")) {
-					fileOutput.println("@attribute "+newAtt + " STRING");
-					attr = false;
-				}
-				fileOutput.println (ligne);
-			}
-			
-			Iterator<String> itr = col.iterator();
-			while ((ligne=br.readLine())!=null && itr.hasNext()) {
-				fileOutput.println(itr.next() +","+ligne);
-			}
-			
-			br.close();
-			fileOutput.close();
-			return fileNew.toString();
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
 	public static String addRel(String dataFile) {
 		try {
 			String NewFile = dataFile;
 			ArffReader reader = new ArffReader(dataFile);
-			ArrayList<LinkedList> columns_attributes = reader.getColumnsAttributes();
+			List<LinkedList<String>> columns_attributes = reader.getColumnsAttributes();
 			Map<Integer, String> array_attributes = reader.getArrayAttributes();
-			ArrayList<LinkedList<String>> L_col = new ArrayList<LinkedList<String>>();
-			ArrayList<String> L_att = new ArrayList<String>();
+			List<LinkedList<String>> L_col = new ArrayList<LinkedList<String>>();
+			List<String> L_att = new ArrayList<String>();
 			
 			for (int i = 0; i < columns_attributes.size(); i++) {
 				for (int j = 0; j < i; j++) {
@@ -485,10 +418,7 @@ public class Classifier {
 	}
 	
 	public static String RemoveCol(String dataFile, ArrayList<Integer> nbCol) {
-		File fileNew = null;
-		Writer writer = null;
-		
-		fileNew = new File(Options.OUTDIR + File.separatorChar + "arff" +File.separatorChar
+		File fileNew = new File(Options.OUTDIR + File.separatorChar + "arff" +File.separatorChar
 				+ filename(dataFile) + "_step1.arff");
 		try {
 			//Set up writting 
@@ -544,27 +474,12 @@ public class Classifier {
 	private static String setIOut(String dataFile) {
 		try {
 			ArffReader reader = new ArffReader(dataFile);
-			Map<String, Nominal<String>> map_attributes = reader.getMapAttributes();
-			Map<String, Type> type_attributes = reader.getTypeAttributes();
 			Map<Integer, String> array_attributes = reader.getArrayAttributes();
-			ArrayList<LinkedList> columns_attributes = reader.getColumnsAttributes();
 			
 			iOut = array_attributes.size() - 1;
 			while (!array_attributes.get(iOut).startsWith("saved")) 
 				iOut--;
-			
-			/*ArrayList<Integer> L_idx = new ArrayList<Integer>();  
-			Iterator itr = array_attributes.entrySet().iterator();
-			while(itr.hasNext()) {
-				Map.Entry<Integer, String> pairs = (Map.Entry<Integer, String>)itr.next();
-				LinkedList<String> ll = map_attributes.get(pairs.getValue()).getLinkedList();
-				if (ll.size() == 1 && ll.get(0).contains("init")) {
-					L_idx.add(pairs.getKey());
-					iOut--;
-				}
-			}
-			
-			return RemoveCol(dataFile, L_idx);*/
+
 			return dataFile;
 		}
 		catch (Exception e) {
@@ -592,7 +507,6 @@ public class Classifier {
 			}
 			
 			int i = 0;
-			int nbRem = 0;
 			while (!ligne.toUpperCase().contains("@DATA")) {
 				String [] tab_line = ligne.split(" ");
 				if(tab_line != null) {
@@ -602,7 +516,6 @@ public class Classifier {
 							L_idx.add(i);
 							label.addVar(array_attributes.get(i) + " = "
 									+ map_attributes.get(str).getLinkedList().get(0));
-							nbRem++;
 						}
 					}
 				}
@@ -621,23 +534,17 @@ public class Classifier {
 		return null;
 	}
 	
-	public static String handleDifferentOutput(String dataFile, Label label) {
-		TreeNode FinalTree = new TreeNode();
-		int index_class = 0;
-		
+	public static String handleDifferentOutput(String dataFile, Label label) {	
 		try {
 			ArffReader reader = new ArffReader(dataFile);
-			
-			String relation = reader.getRelation();
 			Map<String, Nominal<String>> map_attributes = reader.getMapAttributes();
-			Map<String, Type> type_attributes = reader.getTypeAttributes();
 			Map<Integer, String> array_attributes = reader.getArrayAttributes();
-			ArrayList<LinkedList> columns_attributes = reader.getColumnsAttributes();
+			List<LinkedList<String>> columns_attributes = reader.getColumnsAttributes();
 			boolean rel_find = false;
 			
-			Iterator it = array_attributes.entrySet().iterator();
+			Iterator<Map.Entry<Integer, String>> it = array_attributes.entrySet().iterator();
 			while (it.hasNext()) {
-				Map.Entry<Integer, String> pairs = (Map.Entry<Integer, String>)it.next();
+				Map.Entry<Integer, String> pairs = it.next();
 				String [] str = pairs.getValue().split(".equals.");
 				if (str.length < 2)
 					continue;
@@ -682,9 +589,8 @@ public class Classifier {
 		return dataFile;
 	}
 	
-	private static String writeRelForOutput(String dataFile, ArrayList<String> L_att, ArrayList<LinkedList<String>> L_col, int nb_att) {
+	private static String writeRelForOutput(String dataFile, List<String> L_att, List<LinkedList<String>> L_col, int nb_att) {
 		File fileNew = null;
-		Writer writer = null;
 		
 		fileNew = new File(Options.OUTDIR + File.separatorChar+"arff" +File.separatorChar
 				+ filename(dataFile) + "_related.arff");
@@ -723,7 +629,7 @@ public class Classifier {
 			ligne = br.readLine();
 			fileOutput.println(ligne);
 			
-			LinkedList<Iterator> it = new LinkedList<Iterator>();
+			LinkedList<Iterator<String>> it = new LinkedList<Iterator<String>>();
 			for (int i = 0; i < L_col.size(); i++) {
 				it.add(L_col.get(i).iterator());
 			}
@@ -759,12 +665,10 @@ public class Classifier {
 	public static String handleRelatedDataForOutput(String dataFile) {
 		try {
 			ArffReader reader = new ArffReader(dataFile);
-			ArrayList<LinkedList> columns_attributes = reader.getColumnsAttributes();
+			List<LinkedList<String>> columns_attributes = reader.getColumnsAttributes();
 			Map<Integer, String> array_attributes = reader.getArrayAttributes();
-			Map<String, Type> type_attributes = reader.getTypeAttributes();
-			
+		
 			int outIndex = array_attributes.size() - 1;
-			
 
 			ArrayList<LinkedList<String>> L_col = new ArrayList<LinkedList<String>>();
 			ArrayList<String> L_att = new ArrayList<String>();

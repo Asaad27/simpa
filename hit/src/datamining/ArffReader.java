@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 	
@@ -14,7 +15,7 @@ public class ArffReader {
 	private Map<String, Type> type_attributes;
 	private Map<Integer, String> array_attributes;
 	private Map<String[], String> hash_train;
-	private ArrayList<LinkedList> columns_attributes;
+	private List<LinkedList<String>> columns_attributes;
 	private Map<String, Nominal<String>> map_attributes;
 	private String relation;
 	private int indexClass;
@@ -49,7 +50,7 @@ public class ArffReader {
 		return array_attributes;
 	}
 	
-	public ArrayList<LinkedList> getColumnsAttributes() {
+	public List<LinkedList<String>> getColumnsAttributes() {
 		return columns_attributes;
 	}
 	
@@ -156,7 +157,7 @@ public class ArffReader {
 		String current = new String();
 		int size = array_attributes.size();
 		
-		columns_attributes = new ArrayList<LinkedList>();
+		columns_attributes = new ArrayList<LinkedList<String>>();
 		for (int i = 0; i < size; i++) 
             columns_attributes.add(new LinkedList<String>());
 		

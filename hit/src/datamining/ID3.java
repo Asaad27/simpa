@@ -3,12 +3,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
  
 public class ID3 {
 	
-	public static TreeNode Run(ArrayList<LinkedList> columns_attributes,  LinkedList<String> col_class,
+	public static TreeNode Run(List<LinkedList<String>> columns_attributes,  LinkedList<String> col_class,
 			Map<String, Nominal<String>> map_attributes, Map<Integer, String> array_attributes, int index_class) {
 		/*System.out.println("----------------- Running ID3 ------------------------");
 		System.out.println("\n--> array_attributes : ");
@@ -41,7 +42,7 @@ public class ID3 {
 			TreeNode.AddChildrenNode(NewNode, new TreeNode(leaf));
 		}
 		else if (Global_Entropy == 0) {
-			String value = (String)col_class.get(0);
+			String value = col_class.get(0);
 			String attribute = new String("class");
 			Tag leaf = new Tag(attribute, value);
 			TreeNode.AddChildrenNode(NewNode, new TreeNode(leaf));
@@ -69,13 +70,12 @@ public class ID3 {
 				String current = new String(itr.next());
 				
 				// Create columns_attributes_next
-				ArrayList<LinkedList> columns_attributes_next = new ArrayList<LinkedList>(FilterColAtt(columns_attributes, current, best_column));
+				List<LinkedList<String>> columns_attributes_next = new ArrayList<LinkedList<String>>(FilterColAtt(columns_attributes, current, best_column));
 
 				// Create col_class_next 
 				LinkedList<String> col_class_next = new LinkedList<String>(columns_attributes_next.get(index_class_next));
 			
 				String attribute_name = array_attributes.get(best_column);
-				String value = current;
 				Tag tag_child = new Tag(attribute_name, current);
 
 				TreeNode Child = ID3.Run(columns_attributes_next, col_class_next, map_attributes_next, array_attributes_next, index_class_next);
@@ -107,19 +107,18 @@ public class ID3 {
 		}
 		
 		//Select best
-		Iterator it2 = counter.entrySet().iterator();
+		Iterator<Map.Entry<String, Integer>> it2 = counter.entrySet().iterator();
 		while (it2.hasNext()) {
-			Map.Entry<String, Integer> pairs = (Map.Entry<String, Integer>)it2.next();
+			Map.Entry<String, Integer> pairs =it2.next();
 			if (pairs.getValue() > nb_most_present) {
 				nb_most_present = pairs.getValue();
 				most_present = pairs.getKey();
 			}
-			//it.remove();
 		}
 		return most_present;
 	}
 	
-	private static int SelectBestColumn (LinkedList<String> column_class, ArrayList<LinkedList> columns_attributes, Map<String, 
+	private static int SelectBestColumn (LinkedList<String> column_class, List<LinkedList<String>> columns_attributes, Map<String, 
 			Nominal<String>> map_attributes, Map<Integer, String> array_attributes, int index_class, float Global_Entropy) {
 		int best_column = 0;
 		float best_gain = 0;
@@ -136,15 +135,9 @@ public class ID3 {
 		return best_column;
 	}
 	
-	private static int GetIndexColAtt (int index, int index_class) {
-		if (index < index_class)
-			return index;
-		return index - 1;
-	}
-	
-	private static ArrayList<LinkedList> DeleteColumn (ArrayList<LinkedList> columns_attributes, int index) {
+	private static List<LinkedList<String>> DeleteColumn (List<LinkedList<String>> columns_attributes, int index) {
 		int size = columns_attributes.size();
-		ArrayList<LinkedList> col_att = new ArrayList<LinkedList>();
+		List<LinkedList<String>> col_att = new ArrayList<LinkedList<String>>();
 		for (int i = 0; i < size; i++) {
 			if (i != index) {
 	            col_att.add(new LinkedList<String>(columns_attributes.get(i)));
@@ -153,10 +146,10 @@ public class ID3 {
 		return col_att;
 	}
 	
-	private static ArrayList<LinkedList> FilterColAtt(ArrayList<LinkedList> columns_attributes, String value, int index) {
-		ArrayList<Iterator> LL_it = new ArrayList<Iterator>();
+	private static List<LinkedList<String>> FilterColAtt(List<LinkedList<String>> columns_attributes, String value, int index) {
+		List<Iterator<String>> LL_it = new ArrayList<Iterator<String>>();
 		String [] LL_values = new String[columns_attributes.size()];
-		ArrayList<LinkedList> filter = new ArrayList<LinkedList>();
+		List<LinkedList<String>> filter = new ArrayList<LinkedList<String>>();
 		
 		for (int i = 0; i < columns_attributes.size(); i++) {
 			LL_it.add(columns_attributes.get(i).iterator());
@@ -183,15 +176,14 @@ public class ID3 {
 	private static Map<Integer, String> FilterArrAtt(Map<Integer, String> array_attributes, int best_column) {
 		Map<Integer, String> arr_att = new HashMap<Integer, String>();
 		
-		Iterator it = array_attributes.entrySet().iterator();
+		Iterator<Map.Entry<Integer, String>> it = array_attributes.entrySet().iterator();
 		while (it.hasNext()) {
-			Map.Entry<Integer, String> pairs = (Map.Entry<Integer, String>)it.next(); 
+			Map.Entry<Integer, String> pairs = it.next(); 
 			if (pairs.getKey() < best_column) {
 				arr_att.put(pairs.getKey(), pairs.getValue());
 			}
 			else if (pairs.getKey() > best_column)
 				arr_att.put(pairs.getKey()-1, pairs.getValue());
-			//it.remove();
 		}
 		return arr_att;
 	}
