@@ -1,0 +1,28 @@
+{
+  "host" : "localhost",
+  "port" : 8080,
+  "basicAuthUser" : null,
+  "basicAuthPass" : null,
+  "name" : "GotoCode",
+  "urls" : [ "http://localhost:8080/bookstore/Default.jsp"],
+  "noFollow" : [ "^javascript:.*", "^mailto:.*", ".*codecharge.com.*", ".*amazon.com.*" ],
+  "data" : {
+  	"Login" : ["admin", "guest"],
+  	"Password" : ["admin", "guest"],
+  	"category_id" : [1,2,3],
+  	"name" : ["Beginning Active Server Pages 3.0"],
+  	"author" : ["David Buser"],
+  	"pricemin" : [10],
+  	"pricemax" : [30],
+  	"querystring" : ["item_id"],
+  	"ret_page" : ["%2FBS%2FBookDetail.jsp"],
+  	"FormRecommended_Page" : [1,2],
+  	"member_login" : ["guest"],
+  	"member_password" : ["guest"],
+  	"first_name" : ["David"],
+  	"last_name" : ["Buser"],
+  	"email" : ["pey@gmail.com"],
+  	"address" : ["boulevard Joffre"],
+  	"card_type_id" : [1,2]
+   }
+}

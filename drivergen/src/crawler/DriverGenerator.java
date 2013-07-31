@@ -52,6 +52,8 @@ import tools.loggers.LogManager;
 
 import com.gargoylesoftware.htmlunit.CookieManager;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.Page;
+import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -298,7 +300,7 @@ public class DriverGenerator {
 			request = new WebRequest(new URL(in.getAddress()), in.getMethod());
 			request.setRequestParameters(values.getNameValueData());
 			request.setAdditionalHeader("Connection", "Close");
-			HtmlPage page;
+			Page page;
 			try {
 				page = client.getPage(request);
 				if (page.getWebResponse().getStatusCode() != 200) return null;
@@ -310,7 +312,8 @@ public class DriverGenerator {
 				e.printStackTrace();
 				return null;
 			}
-			return page.asXml();
+			if (page instanceof TextPage) return ((TextPage)page).getContent();
+			else return ((HtmlPage)page).asXml();
 		}else if (in.getType()==Type.LINK){		
 			String link = in.getAddress() + "?";
 			if (!in.getParams().isEmpty()){

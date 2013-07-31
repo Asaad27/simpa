@@ -153,7 +153,7 @@ public class Configuration {
 			LogManager.logFatalError("No url provided. Please check the configuration file.");
 		}
 		if (name==null || name.isEmpty()) LogManager.logFatalError("No system name provided. Please check the configuration file.");
-		if (limitSelector==null || limitSelector.isEmpty()) LogManager.logFatalError("No selector provided. Please check the configuration file.");
+		if (limitSelector==null || limitSelector.isEmpty()) limitSelector = "html";
 		if (actionByParameter != null && actionByParameter.isEmpty()) actionByParameter = null;
 		if (cookies != null && cookies.isEmpty()) cookies = null;
 		if (reset != null && reset.isEmpty()) reset = null;
