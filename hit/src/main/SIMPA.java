@@ -45,6 +45,8 @@ public class SIMPA {
 					Options.GENERICDRIVER = true;
 				else if (args[i].equals("--tree"))
 					Options.TREEINFERENCE = true;
+				else if (args[i].equals("--weka"))
+					Options.WEKA = true;
 				else if (args[i].equals("--help") || args[i].equals("-h"))
 					usage();
 				else if (args[i].startsWith("--supportmin"))
@@ -77,14 +79,16 @@ public class SIMPA {
 		if (Options.SUPPORT_MIN < 1 || Options.SUPPORT_MIN > 100)
 			throw new Exception("Minimal between 1 and 100 include needed");
 
-		try {
-			Options.WEKA = weka.core.Version.MAJOR >= 3;
-			if (!Options.WEKA)
+		if (Options.WEKA == true){
+			try {
+				Options.WEKA = weka.core.Version.MAJOR >= 3;
+				if (!Options.WEKA)
+					LogManager
+							.logError("Warning : Weka version >= 3 needed. Please update Weka.");
+			} catch (Exception e) {
 				LogManager
-						.logError("Warning : Weka version >= 3 needed. Please update Weka.");
-		} catch (Exception e) {
-			LogManager
-					.logError("Warning : Unable to use Weka. Check the buildpath.");
+						.logError("Warning : Unable to use Weka. Check the buildpath.");
+			}
 		}
 
 		if (GraphViz.check() != 0) {
@@ -173,6 +177,8 @@ public class SIMPA {
 				.println("    --reuseop         : Reuse output parameter for non closed row");
 		System.out
 				.println("    --forcej48        : Force the use of J48 algorithm instead of M5P for numeric classes");
+		System.out
+				.println("    --weka            : Force the use of Weka");
 		System.out
 				.println("    --supportmin (20) : Minimal support for relation (1-100)");
 		System.out.println("> Algorithm ZQ");
