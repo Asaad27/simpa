@@ -20,7 +20,7 @@ public class UDPSend {
 		try {
 			CSeqHeader nSeq = (CSeqHeader) request.getHeader("CSeq");
 			DatagramSocket sendSocket = new DatagramSocket();
-			sendSocket.setSoTimeout(5000);
+			sendSocket.setSoTimeout(10000);
 
 			DatagramPacket dataSend = new DatagramPacket(request.toString()
 					.getBytes(), request.toString().getBytes().length,

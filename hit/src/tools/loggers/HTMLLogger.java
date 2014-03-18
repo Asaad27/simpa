@@ -21,6 +21,7 @@ import learner.efsm.table.LiDataTableRow;
 import learner.efsm.table.NBP;
 import learner.efsm.table.NDF;
 import learner.efsm.table.NDV;
+import learner.efsm.tree.XObservationNode;
 import learner.mealy.table.LmControlTable;
 import learner.mealy.table.LmControlTableItem;
 import learner.mealy.table.LmControlTableRow;
@@ -465,6 +466,11 @@ public class HTMLLogger implements ILogger {
 	@Override
 	public void logObservationTree(ObservationNode root) {
 		logImage(root.toDot().getAbsolutePath());
+	}
+
+	@Override
+	public void logXObservationTree(XObservationNode root) {
+		logImage(root.toDot().getAbsolutePath());		
 	}
 
 }

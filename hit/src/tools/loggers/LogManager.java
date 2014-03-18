@@ -8,6 +8,7 @@ import java.util.Map;
 
 import learner.efsm.table.LiControlTable;
 import learner.efsm.table.LiDataTable;
+import learner.efsm.tree.XObservationNode;
 import learner.mealy.table.LmControlTable;
 import learner.mealy.tree.ObservationNode;
 import main.Options;
@@ -54,7 +55,8 @@ public class LogManager {
 	public static void logConsole(String s) {
 		if (!Options.TEST) {
 			System.out.flush();
-			System.out.println(tfm.format(new Date()) + s);
+			//System.out.println(tfm.format(new Date()) + s);
+			System.out.println(s);
 		}
 	}
 
@@ -142,5 +144,10 @@ public class LogManager {
 	public static void logObservationTree(ObservationNode root) {
 		for (ILogger l : loggers)
 			l.logObservationTree(root);
+	}
+
+	public static void logXObservationTree(XObservationNode root) {
+		for (ILogger l : loggers)
+			l.logXObservationTree(root);
 	}
 }

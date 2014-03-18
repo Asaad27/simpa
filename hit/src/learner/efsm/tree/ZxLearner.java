@@ -1,4 +1,4 @@
-package learner.mealy.tree;
+package learner.efsm.tree;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,17 +13,18 @@ import automata.State;
 import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
 import drivers.Driver;
+import drivers.efsm.real.SimpleClient;
 import drivers.mealy.MealyDriver;
 
-public class ZLearner extends Learner {
-	private MealyDriver driver;
+public class ZxLearner extends Learner {
+	private SimpleClient driver;
 	private List<InputSequence> z;
 	private List<String> i;
-	private ObservationNode u;
-	private List<ObservationNode> states;
+	private XObservationNode u;
+	private List<XObservationNode> states;
 
-	public ZLearner(Driver driver) {
-		this.driver = (MealyDriver) driver;
+	public ZxLearner(Driver driver) {
+		this.driver = (SimpleClient) driver;
 
 		// Initialize I and Z with specified options
 		if (Options.INITIAL_INPUT_SYMBOLS.length() > 0)
@@ -46,7 +47,7 @@ public class ZLearner extends Learner {
 			this.i = driver.getInputSymbols();
 
 		// an observation tree U, initialized with {e}.
-		this.u = new ObservationNode();
+		this.u = new XObservationNode();
 
 		LogManager.logConsole("Options : I -> " + i.toString());
 		LogManager.logConsole("Options : Z -> " + z.toString());
@@ -81,14 +82,14 @@ public class ZLearner extends Learner {
 		LogManager.logInfo("I : " + i.toString());
 
 		// 1. q0 := e, Q : = {q0}
-		this.states = new ArrayList<ObservationNode>();
+		this.states = new ArrayList<XObservationNode>();
 
 		// 2. for (each state u of U being traversed during Breadth First Search
 		List<Node> queue = new ArrayList<Node>();
 		queue.add(u);
-		ObservationNode currentNode = null;
+		XObservationNode currentNode = null;
 		while (!queue.isEmpty()) {
-			currentNode = (ObservationNode) queue.remove(0);
+			currentNode = (XObservationNode) queue.remove(0);
 
 			// 2. such that u has no labelled predecessor
 			if (noLabelledPred(currentNode)) {
@@ -96,7 +97,7 @@ public class ZLearner extends Learner {
 				extendNodeWithInputSeqs(currentNode, z);
 
 				// 5. if (u is Z-equivalent to a traversed state w of U)
-				ObservationNode w = findFirstEquivalent(currentNode, z);
+				XObservationNode w = findFirstEquivalent(currentNode, z);
 				if (w != null) {
 					// 6. Label u with w
 					currentNode.label = w.state;
@@ -142,7 +143,7 @@ public class ZLearner extends Learner {
 
 		// 4. while there exists an unprocessed counterexample CE
 		do {
-			ce = driver.getCounterExample(Z_Q);
+			ce = null; //driver.getCounterExample(Z_Q);
 			if (ce != null) {
 				LogManager.logInfo("Adding the counter example to tree");
 
@@ -159,10 +160,10 @@ public class ZLearner extends Learner {
 
 	}
 
-	private boolean noLabelledPred(ObservationNode node) {
+	private boolean noLabelledPred(XObservationNode node) {
 		boolean noLabelledPred = true;
 		while (node.parent != null) {
-			ObservationNode parent = (ObservationNode) node.parent;
+			XObservationNode parent = (XObservationNode) node.parent;
 			if (parent.isLabelled())
 				return false;
 			node = parent;
@@ -191,13 +192,13 @@ public class ZLearner extends Learner {
 		return 0;
 	}
 
-	private ObservationNode findFirstEquivalent(ObservationNode node,
+	private XObservationNode findFirstEquivalent(XObservationNode node,
 			List<InputSequence> z) {
 		List<Node> queue = new ArrayList<Node>();
 		queue.add(u);
-		ObservationNode currentNode = null;
+		XObservationNode currentNode = null;
 		while (!queue.isEmpty()) {
-			currentNode = (ObservationNode) queue.get(0);
+			currentNode = (XObservationNode) queue.get(0);
 			if (currentNode.id == node.id)
 				break;
 			if (compareNodesUsingSeqs(node, currentNode, z) == 0)
@@ -208,7 +209,7 @@ public class ZLearner extends Learner {
 		return null;
 	}
 
-	private void addState(ObservationNode node) {
+	private void addState(XObservationNode node) {
 		node.state = states.size();
 
 		// ADDED
@@ -258,7 +259,7 @@ public class ZLearner extends Learner {
 		// LogManager.logObservationTree(u);
 	}
 
-	private void labelNodesRec(LmConjecture q, ObservationNode node, State s,
+	private void labelNodesRec(LmConjecture q, XObservationNode node, State s,
 			boolean label) {
 		if (label)
 			node.label = s.getId();
@@ -268,7 +269,7 @@ public class ZLearner extends Learner {
 			for (Node n : node.children) {
 				MealyTransition t = q.getTransitionFromWithInput(s, n.input);
 				if (t != null)
-					labelNodesRec(q, (ObservationNode) n, t.getTo(), label);
+					labelNodesRec(q, (XObservationNode) n, t.getTo(), label);
 			}
 		}
 	}
@@ -285,15 +286,15 @@ public class ZLearner extends Learner {
 	}
 
 	private InputSequence findInconsistencyRec(LmConjecture c, State s,
-			ObservationNode node, InputSequence ce) {
+			XObservationNode node, InputSequence ce) {
 		if (!node.children.isEmpty()) {
 			for (Node n : node.children) {
-				if (!((ObservationNode) n).isState())
+				if (!((XObservationNode) n).isState())
 					ce.addInput(n.input);
 				MealyTransition t = c.getTransitionFromWithInput(s, n.input);
 				if (t != null && t.getOutput().equals(n.output)) {
 					InputSequence otherCE = findInconsistencyRec(c, t.getTo(),
-							(ObservationNode) n, ce);
+							(XObservationNode) n, ce);
 					if (otherCE != null) {
 						boolean processed = false;
 						for (InputSequence seq : z) {
@@ -320,7 +321,7 @@ public class ZLearner extends Learner {
 							return ce.removeFirstInput();
 					}
 				}
-				if (!((ObservationNode) n).isState())
+				if (!((XObservationNode) n).isState())
 					ce.removeLastInput();
 			}
 		}
@@ -338,17 +339,17 @@ public class ZLearner extends Learner {
 			seq.removeFirstInput();
 		}
 		if (seq.getLength() > 0) {
-			driver.reset();
-			for (String input : previousSeq.sequence) {
-				driver.execute(input);
-			}
-			for (String input : seq.sequence) {
-				if (currentNode.haveChildBy(input))
-					currentNode = currentNode.childBy(input);
-				else
-					currentNode = currentNode.addChild(new ObservationNode(
-							input, driver.execute(input)));
-			}
+//			driver.reset();
+//			for (String input : previousSeq.sequence) {
+//				driver.execute(input);
+//			}
+//			for (String input : seq.sequence) {
+//				if (currentNode.haveChildBy(input))
+//					currentNode = currentNode.childBy(input);
+//				else
+//					currentNode = currentNode.addChild(new XObservationNode(
+//							input, driver.execute(input)));
+//			}
 		}
 	}
 
@@ -364,16 +365,16 @@ public class ZLearner extends Learner {
 
 	public LmConjecture createConjecture() {
 		LogManager.logInfo("Building conjecture");
-		LogManager.logObservationTree(u);
+		LogManager.logXObservationTree(u);
 
 		LmConjecture c = new LmConjecture(driver);
 
 		for (int i = 0; i < states.size(); i++)
 			c.addState(new State("S" + i, i == 0));
 
-		for (ObservationNode s : states) {
+		for (XObservationNode s : states) {
 			for (String input : i) {
-				ObservationNode child = (ObservationNode) s.childBy(input);
+				XObservationNode child = (XObservationNode) s.childBy(input);
 				if (child.output.length() > 0) {
 					if (child.isState())
 						c.addTransition(new MealyTransition(c, c

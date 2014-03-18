@@ -4,6 +4,7 @@ import java.util.Map;
 
 import learner.efsm.table.LiControlTable;
 import learner.efsm.table.LiDataTable;
+import learner.efsm.tree.XObservationNode;
 import learner.mealy.table.LmControlTable;
 import learner.mealy.tree.ObservationNode;
 import automata.efsm.ParameterizedInput;
@@ -49,4 +50,6 @@ public interface ILogger {
 	public void logParameters(Map<String, Integer> params);
 
 	public void logObservationTree(ObservationNode root);
+
+	public void logXObservationTree(XObservationNode root);
 }

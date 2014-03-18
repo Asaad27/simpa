@@ -29,7 +29,7 @@ import tools.UDPSend;
 import tools.Utils;
 import tools.loggers.LogManager;
 
-public class SIPDriver extends RealDriver {
+public class SIPDriverSip2Sip extends RealDriver {
 
 	private SipStack stack = null;
 	private SipPhone phone = null;
@@ -44,7 +44,7 @@ public class SIPDriver extends RealDriver {
 	private AuthorizationHeader lastInvite = null;
 	private RecordRouteHeader lastRoute = null;
 
-	public SIPDriver() {
+	public SIPDriverSip2Sip() {
 		super("SIP");
 		try {
 			stack = new SipStack(SipStack.DEFAULT_PROTOCOL,
@@ -64,9 +64,9 @@ public class SIPDriver extends RealDriver {
 		try {
 			if (input.equals("REGISTER")) {
 				cseq++;
-				URI uri = addr_factory.createURI("sip:iptel.org");
+				URI uri = addr_factory.createURI("sip:sip2sip.info");
 				Address to_address = addr_factory.createAddress(addr_factory
-						.createURI("sip:user1test@iptel.org"));
+						.createURI("sip:user3test@sip2sip.info"));
 				ArrayList<ViaHeader> viaHeaders = new ArrayList<ViaHeader>();
 				ViaHeader via = (ViaHeader) phone.getViaHeaders().get(0);
 				via.setBranch("z9hG4bK3" + cseq + "2632");
@@ -75,7 +75,7 @@ public class SIPDriver extends RealDriver {
 				req = msg_factory.createRequest(
 						uri,
 						Request.REGISTER,
-						hdr_factory.createCallIdHeader("KARIM1@" + HOST),
+						hdr_factory.createCallIdHeader("STARGATE@" + HOST),
 						hdr_factory.createCSeqHeader(cseq, Request.REGISTER),
 						hdr_factory.createFromHeader(phone.getAddress(),
 								phone.generateNewTag()),
@@ -83,13 +83,13 @@ public class SIPDriver extends RealDriver {
 						viaHeaders, hdr_factory.createMaxForwardsHeader(70));
 
 				Address contact_address = addr_factory
-						.createAddress("sip:user1test@" + HOST + ":" + PORT);
+						.createAddress("sip:user3test@" + HOST + ":" + PORT);
 				req.addHeader(hdr_factory.createContactHeader(contact_address));
 				ArrayList<String> userAgents = new ArrayList<String>();
 				userAgents.add("SIMPA/SIPClient");
 				req.addHeader(hdr_factory.createUserAgentHeader(userAgents));
 
-				String respStr = UDPSend.Send("iptel.org", 5060, req);
+				String respStr = UDPSend.Send("sip2sip.info", 5060, req);
 				Response resp = msg_factory.createResponse(respStr);
 
 				if (resp != null && resp.getHeader("WWW-Authenticate") != null) {
@@ -102,7 +102,7 @@ public class SIPDriver extends RealDriver {
 
 					req = msg_factory
 							.createRequest(uri, Request.REGISTER, hdr_factory
-									.createCallIdHeader("KARIM1@" + HOST),
+									.createCallIdHeader("STARGATE@" + HOST),
 									hdr_factory.createCSeqHeader(cseq,
 											Request.REGISTER), hdr_factory
 											.createFromHeader(
@@ -124,7 +124,7 @@ public class SIPDriver extends RealDriver {
 					auth_hdr.setAlgorithm("MD5");
 					auth_hdr.setNonce(auth.getNonce());
 					auth_hdr.setRealm(auth.getRealm());
-					auth_hdr.setUsername("user1test");
+					auth_hdr.setUsername("user3test");
 					auth_hdr.setURI(uri);
 
 					DigestClientAuthenticationMethod m = new DigestClientAuthenticationMethod();
@@ -140,19 +140,19 @@ public class SIPDriver extends RealDriver {
 				cseq++;
 				lastInvite = null;
 				lastRoute = null;
-				URI to = addr_factory.createURI("sip:1000@iptel.org");
+				URI to = addr_factory.createURI("sip:4444@proxy.sipthor.net");
 				Address to_address = addr_factory.createAddress(to);
 				ArrayList<ViaHeader> viaHeaders = new ArrayList<ViaHeader>();
 				ViaHeader via = (ViaHeader) phone.getViaHeaders().get(0);
 				via.setBranch("z9hG4bK3" + cseq + "2632");
 				viaHeaders.add(via);
 				Address contact_address = addr_factory
-						.createAddress("sip:user1test@" + HOST + ":" + PORT);
+						.createAddress("sip:user3test@" + HOST + ":" + PORT);
 
 				req = msg_factory.createRequest(
 						to,
 						Request.INVITE,
-						hdr_factory.createCallIdHeader("KARIM1@" + HOST),
+						hdr_factory.createCallIdHeader("STARGATE@" + HOST),
 						hdr_factory.createCSeqHeader(cseq, Request.INVITE),
 						(lastResp == null ? hdr_factory.createFromHeader(
 								phone.getAddress(), phone.generateNewTag())
@@ -181,7 +181,7 @@ public class SIPDriver extends RealDriver {
 					auth_hdr.setAlgorithm("MD5");
 					auth_hdr.setNonce(auth.getNonce());
 					auth_hdr.setRealm(auth.getRealm());
-					auth_hdr.setUsername("user1test");
+					auth_hdr.setUsername("user3test");
 					auth_hdr.setURI(to);
 
 					DigestClientAuthenticationMethod m = new DigestClientAuthenticationMethod();
@@ -195,7 +195,7 @@ public class SIPDriver extends RealDriver {
 				}
 
 			} else if (input.equals("ACK")) {
-				URI to = addr_factory.createURI("sip:1000@iptel.org");
+				URI to = addr_factory.createURI("4444@proxy.sipthor.net");
 				Address to_address = addr_factory.createAddress(to);
 				ArrayList<ViaHeader> viaHeaders = new ArrayList<ViaHeader>();
 				ViaHeader via = (ViaHeader) phone.getViaHeaders().get(0);
@@ -205,7 +205,7 @@ public class SIPDriver extends RealDriver {
 				req = msg_factory.createRequest(
 						to,
 						Request.ACK,
-						hdr_factory.createCallIdHeader("KARIM1@" + HOST),
+						hdr_factory.createCallIdHeader("STARGATE@" + HOST),
 						hdr_factory.createCSeqHeader(cseq, Request.ACK),
 						(lastResp == null ? hdr_factory.createFromHeader(
 								phone.getAddress(), phone.generateNewTag())
@@ -220,7 +220,7 @@ public class SIPDriver extends RealDriver {
 				}
 			} else if (input.equals("BYE")) {
 				cseq++;
-				URI to = addr_factory.createURI("sip:1000@iptel.org");
+				URI to = addr_factory.createURI("4444@proxy.sipthor.net");
 				Address to_address = addr_factory.createAddress(to);
 				ArrayList<ViaHeader> viaHeaders = new ArrayList<ViaHeader>();
 				ViaHeader via = (ViaHeader) phone.getViaHeaders().get(0);
@@ -230,7 +230,7 @@ public class SIPDriver extends RealDriver {
 				req = msg_factory.createRequest(
 						to,
 						Request.BYE,
-						hdr_factory.createCallIdHeader("KARIM1@" + HOST),
+						hdr_factory.createCallIdHeader("STARGATE@" + HOST),
 						hdr_factory.createCSeqHeader(cseq, Request.BYE),
 						(lastResp == null ? hdr_factory.createFromHeader(
 								phone.getAddress(), phone.generateNewTag())
@@ -245,7 +245,7 @@ public class SIPDriver extends RealDriver {
 							.getAddress()));
 				}
 
-				String respStr = UDPSend.Send("iptel.org", 5060, req);
+				String respStr = UDPSend.Send("sip2sip.info", 5060, req);
 				Response resp = msg_factory.createResponse(respStr);
 
 				if (resp != null
@@ -260,7 +260,7 @@ public class SIPDriver extends RealDriver {
 					req = msg_factory.createRequest(
 							to,
 							Request.BYE,
-							hdr_factory.createCallIdHeader("KARIM1@" + HOST),
+							hdr_factory.createCallIdHeader("STARGATE@" + HOST),
 							hdr_factory.createCSeqHeader(cseq, Request.BYE),
 							(lastResp == null ? hdr_factory.createFromHeader(
 									phone.getAddress(), phone.generateNewTag())
@@ -277,7 +277,7 @@ public class SIPDriver extends RealDriver {
 					auth_hdr.setAlgorithm("MD5");
 					auth_hdr.setNonce(auth.getNonce());
 					auth_hdr.setRealm(auth.getRealm());
-					auth_hdr.setUsername("user1test");
+					auth_hdr.setUsername("user3test");
 					auth_hdr.setURI(to);
 
 					DigestClientAuthenticationMethod m = new DigestClientAuthenticationMethod();
@@ -308,7 +308,7 @@ public class SIPDriver extends RealDriver {
 		Response resp = null;
 		String output = null;
 		try {
-			String respStr = UDPSend.Send("iptel.org", 5060, req);
+			String respStr = UDPSend.Send("sip2sip.info", 5060, req);
 			LogManager.logInfo("\n" + respStr);
 			if (!respStr.equals("Timeout")) {
 				resp = msg_factory.createResponse(respStr);
@@ -337,8 +337,8 @@ public class SIPDriver extends RealDriver {
 			if (phone != null) {
 				phone.dispose();
 			}
-			phone = stack.createSipPhone("iptel.org", SipStack.PROTOCOL_UDP,
-					5060, "sip:user1test@iptel.org");
+			phone = stack.createSipPhone("sip2sip.info", SipStack.PROTOCOL_UDP,
+					5060, "sip:user3test@sip2sip.info");
 			lastResp = null;
 		} catch (Exception e) {
 			LogManager.logException("Error reseting SIP driver", e);

@@ -22,6 +22,7 @@ import learner.efsm.table.LiDataTableRow;
 import learner.efsm.table.NBP;
 import learner.efsm.table.NDF;
 import learner.efsm.table.NDV;
+import learner.efsm.tree.XObservationNode;
 import learner.mealy.table.LmControlTable;
 import learner.mealy.table.LmControlTableItem;
 import learner.mealy.table.LmControlTableRow;
@@ -462,6 +463,12 @@ public class TextLogger implements ILogger {
 	public void logObservationTree(ObservationNode root) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void logXObservationTree(XObservationNode root) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
