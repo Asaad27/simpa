@@ -176,13 +176,10 @@ public class MealyDriver extends Driver {
 		reset();
 		conjDriver.reset();
 		boolean isCe = false;
-		for (int i = 0; i < realCe.getLength(); i++) {
-			for (String input : realCe.sequence) {
-				if (!execute(input).equals(conjDriver.execute(input))) {
-					isCe = true;
-					break;
-				}
-				;
+		for (String input : realCe.sequence) {
+			if (!execute(input).equals(conjDriver.execute(input))) {
+				isCe = true;
+				break;
 			}
 		}
 		startLog();

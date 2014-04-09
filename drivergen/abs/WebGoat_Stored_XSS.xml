@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><driver date="1374880992678" generator="TIC" version="1.0">
+<?xml version="1.0" encoding="UTF-8"?><driver date="1378893729855" generator="TIC" version="1.0">
     <settings>
         <target>WebGoat_Stored_XSS</target>
         <host>localhost</host>
@@ -66,7 +66,7 @@
                     <parameter name="address2">New York, NY</parameter>
                     <parameter name="ccn">4437334565679921</parameter>
                     <parameter name="ccnLimit">300</parameter>
-                    <parameter name="description">random755</parameter>
+                    <parameter name="description">random585</parameter>
                     <parameter name="disciplinaryDate">112005</parameter>
                     <parameter name="employee_id">111</parameter>
                     <parameter name="firstName">John</parameter>
