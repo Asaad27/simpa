@@ -3,8 +3,6 @@ package learner.mealy.table;
 import java.util.ArrayList;
 import java.util.List;
 
-import tools.loggers.LogManager;
-
 import automata.mealy.InputSequence;
 
 public class LmControlTable {
