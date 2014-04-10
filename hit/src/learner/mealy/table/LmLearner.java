@@ -127,18 +127,24 @@ public class LmLearner extends Learner {
 	public void learn() {
 		LogManager.logConsole("Inferring the system");
 		boolean finished = false;
+		boolean potentialNewNonClosedRows = true;
 		InputSequence ce = null;
 		completeTable();
 		LogManager.logControlTable(cTable);
 		while (!finished) {
+			potentialNewNonClosedRows = true;
 			finished = true;
-			int alreadyNonClosed = 0;
-			for (int nonClosedRow : cTable.getNonClosedRows()) {
-				finished = false;
-				LogManager.logStep(LogManager.STEPNCR,
-						cTable.R.get(nonClosedRow).getIS());
-				handleNonClosed(nonClosedRow - (alreadyNonClosed++));
-				LogManager.logControlTable(cTable);
+			while (potentialNewNonClosedRows) {
+				potentialNewNonClosedRows = false;
+				int alreadyNonClosed = 0;
+				for (int nonClosedRow : cTable.getNonClosedRows()) {
+					potentialNewNonClosedRows=true;
+					finished = false;
+					LogManager.logStep(LogManager.STEPNCR,
+							cTable.R.get(nonClosedRow).getIS());
+					handleNonClosed(nonClosedRow - (alreadyNonClosed++));
+					LogManager.logControlTable(cTable);
+				}
 			}
 			stopLog();
 			LmConjecture conj = createConjecture();
