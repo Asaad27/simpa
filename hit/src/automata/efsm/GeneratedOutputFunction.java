@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import main.Options;
+import main.simpa.Options;
 import tools.Utils;
 import drivers.efsm.EFSMDriver.Types;
 

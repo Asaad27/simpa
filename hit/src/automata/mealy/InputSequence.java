@@ -3,7 +3,7 @@ package automata.mealy;
 import java.util.ArrayList;
 import java.util.List;
 
-import main.Options;
+import main.simpa.Options;
 import tools.Utils;
 
 public class InputSequence implements Cloneable {
@@ -14,7 +14,7 @@ public class InputSequence implements Cloneable {
 	}
 
 	public InputSequence(String input) {
-		sequence = new ArrayList<String>();
+		this();
 		sequence.add(input);
 	}
 

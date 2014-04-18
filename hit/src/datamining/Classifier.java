@@ -23,7 +23,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import learner.efsm.table.LiDataTableItem;
-import main.Options;
+import main.simpa.Options;
 import tools.Utils;
 import tools.loggers.LogManager;
 import automata.efsm.EFSMTransition;
@@ -521,6 +521,7 @@ public class Classifier {
 				ligne = br.readLine();
 				i++;
 			}
+			br.close();
 			
 
 			NewFile = RemoveCol(NewFile, L_idx);

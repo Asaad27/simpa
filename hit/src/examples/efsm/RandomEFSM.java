@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import main.Options;
+import main.simpa.Options;
 import tools.Utils;
 import tools.loggers.LogManager;
 import automata.State;

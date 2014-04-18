@@ -3,7 +3,7 @@ package datamining;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import main.Options;
+import main.simpa.Options;
 
 public class Condition extends LinkedList<Tag> {
 	private static final long serialVersionUID = -6467576331816693683L;

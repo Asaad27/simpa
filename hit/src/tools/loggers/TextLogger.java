@@ -27,8 +27,8 @@ import learner.mealy.table.LmControlTable;
 import learner.mealy.table.LmControlTableItem;
 import learner.mealy.table.LmControlTableRow;
 import learner.mealy.tree.ObservationNode;
-import main.Options;
-import main.SIMPA;
+import main.simpa.Options;
+import main.simpa.SIMPA;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedInputSequence;
 import automata.efsm.ParameterizedOutput;
@@ -58,6 +58,12 @@ public class TextLogger implements ILogger {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void logFatalError(String s) {
+		System.err.flush();
+		System.err.println("[!] "+ s);
+		System.exit(1);
 	}
 
 	public void logControlTable(LiControlTable l) {

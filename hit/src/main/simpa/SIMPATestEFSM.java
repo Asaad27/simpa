@@ -1,4 +1,4 @@
-package main;
+package main.simpa;
 
 import java.io.File;
 import java.text.SimpleDateFormat;

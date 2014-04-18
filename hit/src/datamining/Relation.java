@@ -3,7 +3,7 @@ package datamining;
 import java.util.ArrayList;
 import java.util.List;
 
-import main.Options;
+import main.simpa.Options;
 import tools.loggers.LogManager;
 import weka.core.Instance;
 import weka.core.UnassignedDatasetException;

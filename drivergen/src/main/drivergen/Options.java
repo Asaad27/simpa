@@ -1,4 +1,4 @@
-package main;
+package main.drivergen;
 
 import tools.GraphViz;
 

@@ -1,4 +1,4 @@
-package main;
+package main.simpa;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -14,7 +14,7 @@ import drivers.Driver;
 import drivers.efsm.real.GenericDriver;
 
 public class SIMPA {
-	public final static String name = "SIMPA";
+	public final static String name = SIMPA.class.getSimpleName();
 	private static Driver driver;
 
 	private static void init(String[] args) {

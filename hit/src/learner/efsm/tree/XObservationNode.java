@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 import learner.mealy.Node;
-import main.Options;
+import main.simpa.Options;
 import tools.GraphViz;
 import tools.loggers.LogManager;
 

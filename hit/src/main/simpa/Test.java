@@ -1,4 +1,4 @@
-package main;
+package main.simpa;
 
 public class Test {
 

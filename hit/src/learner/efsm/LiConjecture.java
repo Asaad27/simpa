@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import main.Options;
+import main.simpa.Options;
 import tools.ASLanEntity;
 import tools.GraphViz;
 import tools.Utils;

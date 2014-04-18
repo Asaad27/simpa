@@ -23,6 +23,10 @@ public class MealyTransition extends Transition {
 	public void setOutput(String symbol) {
 		output = symbol;
 	}
+	
+	public boolean isLoop(){
+		return from.equals(to);
+	}
 
 	@Override
 	public String toString() {
@@ -35,5 +39,9 @@ public class MealyTransition extends Transition {
 
 	public String getName() {
 		return from + "-" + to;
+	}
+	
+	public int hashCode(){
+		return (from + input).hashCode();
 	}
 }

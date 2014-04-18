@@ -24,6 +24,8 @@ public interface ILogger {
 	public void logError(String s);
 
 	public void logException(String s, Exception e);
+	
+	public void logFatalError(String s);
 
 	public void logInfo(String s);
 

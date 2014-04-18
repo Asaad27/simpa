@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import main.Options;
+import main.simpa.Options;
 import tools.Utils;
 
 public class Relation implements Serializable {
@@ -31,6 +31,10 @@ public class Relation implements Serializable {
 		case EQUALSTOVALUE:
 			op1 = Utils.randInt(nbInputParam);
 			op2i = Utils.randInt(Options.DOMAINSIZE);
+			break;
+		case NDVCHECK:
+			break;
+		default:
 			break;
 		}
 	}

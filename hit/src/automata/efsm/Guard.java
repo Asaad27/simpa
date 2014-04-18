@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import main.Options;
+import main.simpa.Options;
 import drivers.efsm.EFSMDriver.Types;
 
 public class Guard implements Serializable {
@@ -111,6 +111,10 @@ public class Guard implements Serializable {
 			switch (r.type) {
 			case EQUALSTOVALUE:
 				ll.get(r.op1).value = String.valueOf(r.op2i);
+			case NDVCHECK:
+				break;
+			default:
+				break;
 			}
 		}
 

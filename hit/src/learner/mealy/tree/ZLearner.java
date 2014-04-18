@@ -7,7 +7,7 @@ import java.util.List;
 import learner.Learner;
 import learner.mealy.LmConjecture;
 import learner.mealy.Node;
-import main.Options;
+import main.simpa.Options;
 import tools.loggers.LogManager;
 import automata.State;
 import automata.mealy.InputSequence;

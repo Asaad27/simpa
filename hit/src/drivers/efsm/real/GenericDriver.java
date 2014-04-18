@@ -37,21 +37,21 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.util.Cookie;
 
 import crawler.Configuration;
-import crawler.Input;
-import crawler.Input.Type;
-import crawler.Output;
+import crawler.WebInput;
+import crawler.WebInput.Type;
+import crawler.WebOutput;
 
 public class GenericDriver extends LowWebDriver {
 
 	protected WebClient client = null;
 	public static Configuration config = null;
-	public List<Input> inputs;
-	public List<Output> outputs;
+	public List<WebInput> inputs;
+	public List<WebOutput> outputs;
 
 	@SuppressWarnings("deprecation")
 	public GenericDriver(String xml) throws IOException {
-		inputs = new ArrayList<Input>();
-		outputs = new ArrayList<Output>();
+		inputs = new ArrayList<WebInput>();
+		outputs = new ArrayList<WebOutput>();
 		config = LoadConfig(xml);
 		LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
 	    java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF); 
@@ -96,7 +96,7 @@ public class GenericDriver extends LowWebDriver {
 
 	public ParameterizedOutput execute(ParameterizedInput pi) {
 		numberOfAtomicRequest++;
-		Input in = inputs.get(Integer.parseInt(pi.getInputSymbol().substring(
+		WebInput in = inputs.get(Integer.parseInt(pi.getInputSymbol().substring(
 				pi.getInputSymbol().indexOf("_") + 1)));
 
 		String source = null;
@@ -107,7 +107,7 @@ public class GenericDriver extends LowWebDriver {
 		}
 
 		ParameterizedOutput po = null;
-		Output out = new Output(source, false, config.getLimitSelector());
+		WebOutput out = new WebOutput(source, false, config.getLimitSelector());
 		for (int i = 0; i < outputs.size(); i++) {
 			if (out.isEquivalentTo(outputs.get(i))) {
 				po = new ParameterizedOutput(getOutputSymbols().get(i));
@@ -138,7 +138,7 @@ public class GenericDriver extends LowWebDriver {
 		return po;
 	}
 
-	private String extractParam(Output out, String p) {
+	private String extractParam(WebOutput out, String p) {
 		String path[] = p.split("/");
 		org.jsoup.nodes.Element e = out.getDoc().get(Integer.parseInt(path[0]));
 		for (int i = 1; i < path.length; i++) {
@@ -147,7 +147,7 @@ public class GenericDriver extends LowWebDriver {
 		return e.text();
 	}
 
-	private HTTPData getValuesForInput(Input in, ParameterizedInput pi) {
+	private HTTPData getValuesForInput(WebInput in, ParameterizedInput pi) {
 		HTTPData data = new HTTPData();
 		if (in.getType() == Type.FORM) {
 			TreeMap<String, List<String>> inputs = in.getParams();
@@ -159,7 +159,7 @@ public class GenericDriver extends LowWebDriver {
 		return data;
 	}
 
-	private String submit(Input in, ParameterizedInput pi)
+	private String submit(WebInput in, ParameterizedInput pi)
 			throws MalformedURLException {
 		WebRequest request = null;
 		HTTPData values = getValuesForInput(in, pi);
@@ -223,7 +223,7 @@ public class GenericDriver extends LowWebDriver {
 					.getChildNodes();
 			for (int i = 0; i < inputs.getLength(); i++) {
 				if (inputs.item(i).getNodeName().equals("input")) {
-					Input in = new Input();
+					WebInput in = new WebInput();
 					in.setType(Type.valueOf(inputs.item(i).getAttributes()
 							.getNamedItem("type").getNodeValue()));
 					in.setAddress(inputs.item(i).getAttributes()
@@ -282,7 +282,7 @@ public class GenericDriver extends LowWebDriver {
 					.getChildNodes();
 			for (int i = 0; i < outputs.getLength(); i++) {
 				if (outputs.item(i).getNodeName().equals("output")) {
-					Output out = new Output(outputs.item(i).getChildNodes()
+					WebOutput out = new WebOutput(outputs.item(i).getChildNodes()
 							.item(1).getTextContent(), true,
 							config.getLimitSelector());
 					for (int j = 0; j < outputs.item(i).getChildNodes().item(3)
@@ -313,7 +313,7 @@ public class GenericDriver extends LowWebDriver {
 		ArrayList<ArrayList<Parameter>> params = null;
 		ArrayList<Parameter> one = null;
 		int index = 0;
-		for (Input i : inputs) {
+		for (WebInput i : inputs) {
 			params = new ArrayList<ArrayList<Parameter>>();
 			int nbParam = i.getNbValues();
 			for (int k = 0; k < nbParam; k++) {
@@ -334,7 +334,7 @@ public class GenericDriver extends LowWebDriver {
 	public TreeMap<String, List<String>> getParameterNames() {
 		TreeMap<String, List<String>> res = new TreeMap<String, List<String>>();
 		int index = 0;
-		for (Input i : inputs) {
+		for (WebInput i : inputs) {
 			List<String> names = new ArrayList<String>();
 			for (String key : i.getParams().keySet()) {
 				names.add(key);
@@ -343,7 +343,7 @@ public class GenericDriver extends LowWebDriver {
 			index++;
 		}
 		index = 0;
-		for (Output o : outputs) {
+		for (WebOutput o : outputs) {
 			List<String> names = new ArrayList<String>();
 			if (o.getParams().isEmpty()) {
 				names.add("output_" + String.valueOf(index) + "_status");

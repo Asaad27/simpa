@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import main.Options;
+import main.simpa.Options;
 import automata.efsm.Parameter;
 
 public class LiDataTableItem implements Serializable {

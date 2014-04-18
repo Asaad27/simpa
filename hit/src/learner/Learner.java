@@ -3,7 +3,7 @@ package learner;
 import learner.efsm.table.LiLearner;
 import learner.mealy.table.LmLearner;
 import learner.mealy.tree.ZLearner;
-import main.Options;
+import main.simpa.Options;
 import automata.Automata;
 import drivers.Driver;
 

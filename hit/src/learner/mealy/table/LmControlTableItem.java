@@ -1,6 +1,6 @@
 package learner.mealy.table;
 
-import main.Options;
+import main.simpa.Options;
 import automata.mealy.Mealy;
 
 public class LmControlTableItem {

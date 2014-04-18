@@ -26,8 +26,8 @@ import learner.mealy.table.LmControlTable;
 import learner.mealy.table.LmControlTableItem;
 import learner.mealy.table.LmControlTableRow;
 import learner.mealy.tree.ObservationNode;
-import main.Options;
-import main.SIMPA;
+import main.simpa.Options;
+import main.simpa.SIMPA;
 import tools.Base64;
 import tools.Utils;
 import automata.efsm.ParameterizedInput;
@@ -471,6 +471,15 @@ public class HTMLLogger implements ILogger {
 	@Override
 	public void logXObservationTree(XObservationNode root) {
 		logImage(root.toDot().getAbsolutePath());		
+	}
+
+	@Override
+	public void logFatalError(String s) {
+		try {
+			writer.write("<li>"+s+"</li>\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

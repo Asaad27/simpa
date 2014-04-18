@@ -7,9 +7,12 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import main.Options;
+import main.simpa.Options;
 import tools.GraphViz;
 import tools.loggers.LogManager;
 import automata.Automata;
@@ -18,30 +21,26 @@ import automata.State;
 public class Mealy extends Automata implements Serializable {
 	private static final long serialVersionUID = 3590635279837551088L;
 
-	protected List<MealyTransition> transitions;
+	protected Map<Integer, MealyTransition> transitions;
 
 	public final static String OMEGA = "omega|symbol";
 	public final static String EPSILON = "espilon|symbol";
 
 	public Mealy(String name) {
 		super(name);
-		transitions = new ArrayList<MealyTransition>();
+		transitions = new HashMap<Integer, MealyTransition>();
 	}
 
 	public Boolean addTransition(MealyTransition t) {
-		return transitions.add(t);
+		if (!transitions.containsKey(t.hashCode())){
+		   transitions.put(t.hashCode(), t);
+		   return true;
+		}
+		return false;
 	}
-
-	public List<MealyTransition> getTransitions() {
-		return transitions;
-	}
-
-	public MealyTransition getTransition(int index) {
-		return transitions.get(index);
-	}
-
-	public MealyTransition removeTransition(int index) {
-		return transitions.remove(index);
+	
+	public Collection<MealyTransition> getTransitions() {
+		return transitions.values();
 	}
 
 	public int getTransitionCount() {
@@ -52,13 +51,9 @@ public class Mealy extends Automata implements Serializable {
 		return getTransitionFrom(s, true);
 	}
 
-	public List<MealyTransition> getTransitionTo(State s) {
-		return getTransitionFrom(s, true);
-	}
-
 	public List<MealyTransition> getTransitionFrom(State s, boolean loop) {
 		List<MealyTransition> res = new ArrayList<MealyTransition>();
-		for (MealyTransition t : transitions) {
+		for (MealyTransition t : transitions.values()) {
 			if (t.getFrom().equals(s)) {
 				if (t.getTo().equals(s)) {
 					if (loop)
@@ -70,34 +65,14 @@ public class Mealy extends Automata implements Serializable {
 		return res;
 	}
 
-	public List<MealyTransition> getTransitionTo(State s, boolean loop) {
-		List<MealyTransition> res = new ArrayList<MealyTransition>();
-		for (MealyTransition t : transitions) {
-			if (t.getTo().equals(s)) {
-				if (t.getFrom().equals(s)) {
-					if (loop)
-						res.add(t);
-				} else
-					res.add(t);
-			}
-		}
-		return res;
-	}
-
 	public MealyTransition getTransitionFromWithInput(State s, String input) {
-		for (MealyTransition t : getTransitionFrom(s)) {
-			if (t.getInput().equals(input))
-				return t;
-		}
-		return null;
+		return transitions.get((s + input).hashCode());
 	}
 
 	public MealyTransition getTransitionFromWithInput(State s, String input,
 			boolean loop) {
-		for (MealyTransition t : getTransitionFrom(s, loop)) {
-			if (t.getInput().equals(input))
-				return t;
-		}
+		MealyTransition t = getTransitionFromWithInput(s, input);
+		if ((t.isLoop() && loop) || !t.isLoop()) return t;
 		return null;
 	}
 

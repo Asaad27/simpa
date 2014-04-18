@@ -83,7 +83,7 @@ public class LmLearner extends Learner {
 				}
 			}
 		}
-		for (int i = c.getTransitionCount() - 1; i >= 0; i--) {
+/*		for (int i = c.getTransitionCount() - 1; i >= 0; i--) {
 			for (int j = i - 1; j >= 0; j--) {
 				MealyTransition t1 = c.getTransition(i);
 				MealyTransition t2 = c.getTransition(j);
@@ -95,7 +95,7 @@ public class LmLearner extends Learner {
 					break;
 				}
 			}
-		}
+		}*/
 
 		LogManager.logInfo("Conjecture have " + c.getStateCount()
 				+ " states and " + c.getTransitionCount() + " transitions : ");

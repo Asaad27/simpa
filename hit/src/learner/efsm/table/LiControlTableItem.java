@@ -3,7 +3,7 @@ package learner.efsm.table;
 import java.io.Serializable;
 import java.util.List;
 
-import main.Options;
+import main.simpa.Options;
 import automata.efsm.EFSM;
 import automata.efsm.Parameter;
 

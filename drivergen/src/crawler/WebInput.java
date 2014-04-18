@@ -10,7 +10,7 @@ import tools.Utils;
 
 import com.gargoylesoftware.htmlunit.HttpMethod;
 
-public class Input {
+public class WebInput {
 	public enum Type {
 		LINK, FORM;
 	}
@@ -21,7 +21,7 @@ public class Input {
 	private String address = null;
 	private TreeMap<String, List<String>> params = null;
 	
-	public Input(){
+	public WebInput(){
 		params = new TreeMap<String, List<String>>();
 	}
 	
@@ -45,7 +45,7 @@ public class Input {
 		this.params = params;
 	}
 
-	public Input(String link) {
+	public WebInput(String link) {
 		this.type = Type.LINK;
 		this.method = HttpMethod.GET;
 		this.params = new TreeMap<String, List<String>>();
@@ -67,15 +67,15 @@ public class Input {
 		}
 	}
 
-	public Input(HttpMethod m, String address, TreeMap<String, List<String>> params) {
+	public WebInput(HttpMethod m, String address, TreeMap<String, List<String>> params) {
 		this.type = Type.FORM;
 		this.method = m;
 		this.address = address;
 		this.params = params;
 	}
 
-	public static List<Input> extractInputsFromForm(Element form) {
-		List<Input> l = new ArrayList<Input>();
+	public static List<WebInput> extractInputsFromForm(Element form) {
+		List<WebInput> l = new ArrayList<WebInput>();
 
 		HttpMethod method = HttpMethod.GET;
 		if (form.attr("method").toLowerCase().equals("post"))
@@ -130,7 +130,7 @@ public class Input {
 			if (submit.hasAttr("name") && !submit.attr("name").isEmpty())
 				inputsCopy.put(submit.attr("name"),
 						Utils.createArrayList(submit.attr("value")));
-			l.add(new Input(method, address, inputsCopy));
+			l.add(new WebInput(method, address, inputsCopy));
 		}
 		for (Element submit : form.select("input[type=image]")) {
 			TreeMap<String, List<String>> inputsCopy = new TreeMap<>();
@@ -138,7 +138,7 @@ public class Input {
 			if (submit.hasAttr("name") && !submit.attr("name").isEmpty())
 				inputsCopy.put(submit.attr("name"),
 						Utils.createArrayList(submit.attr("value")));
-			l.add(new Input(method, address, inputsCopy));
+			l.add(new WebInput(method, address, inputsCopy));
 		}
 
 		return l;
@@ -168,7 +168,7 @@ public class Input {
 		return "[" + method + ", " + address + ", " + params + "]";
 	}
 
-	public boolean equals(Input to) {
+	public boolean equals(WebInput to) {
 		if (!address.equals(to.address))
 			return false;
 		for (String input : params.keySet()) {
@@ -219,7 +219,7 @@ public class Input {
 		}
 	}
 
-	public boolean isAlmostEquals(Input to) {
+	public boolean isAlmostEquals(WebInput to) {
 		if (!address.equals(to.address))
 			return false;
 		

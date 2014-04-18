@@ -1,4 +1,4 @@
-package main;
+package main.simpa;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -180,6 +180,7 @@ public class SIMPATestMealy {
 			LogManager
 					.logError("Warning: Unable to find GraphViz and converting dot to image files");
 		}
+		Options.GRAPHVIZ = false; // disable graphviz
 
 		File f = new File(Options.OUTDIR + File.separator + Options.DIRTEST);
 		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
@@ -205,7 +206,7 @@ public class SIMPATestMealy {
 			throw new Exception("Minimal number of output symbols >= 1 needed");
 		if (Options.MINOUTPUTSYM > Options.MAXOUTPUTSYM)
 			throw new Exception(
-					"Minimal number of output symbols <= Maximal number of output symbols needed");
+					"Minimal number of output symbols < Maximal number of output symbols needed");
 
 	}
 

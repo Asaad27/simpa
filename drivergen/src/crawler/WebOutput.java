@@ -9,12 +9,12 @@ import org.jsoup.select.Elements;
 import crawler.page.PageTreeNode;
 
 
-public class Output {
+public class WebOutput {
 	private Elements doc;
 	private String source = null;
 	private List<String> params = null;
 	private PageTreeNode pt = null;
-	private List<Input> from = null;
+	private List<WebInput> from = null;
 	private int state;
 	
 	public String getSource(){
@@ -29,16 +29,16 @@ public class Output {
 		return pt;
 	}
 
-	public Output(){
+	public WebOutput(){
 		params = new ArrayList<String>();
-		from = new ArrayList<Input>();
+		from = new ArrayList<WebInput>();
 	}
 	
-	public void addFrom(Input i){
+	public void addFrom(WebInput i){
 		if (!from.contains(i)) from.add(i);
 	}
 	
-	public boolean isNewFrom(Input i){
+	public boolean isNewFrom(WebInput i){
 		boolean n = from.contains(i);
 		if (!n) from.add(i);
 		return !n;
@@ -52,7 +52,7 @@ public class Output {
 		this.state = state;
 	}
 
-	public Output(Document doc, Input from, String limitSelector) {
+	public WebOutput(Document doc, WebInput from, String limitSelector) {
 		this();		
 		this.from.add(from);
 		this.source = doc.html();
@@ -64,7 +64,7 @@ public class Output {
 		pt = new PageTreeNode(Jsoup.parse(this.source));
 	}
 	
-	public Output(String source, boolean raw, String limitSelector) {
+	public WebOutput(String source, boolean raw, String limitSelector) {
 		this();		
 		Document doc = Jsoup.parse(source);
 		this.source = doc.html();
@@ -82,7 +82,7 @@ public class Output {
 		return params;
 	}
 	
-	public boolean isEquivalentTo(Output to) {
+	public boolean isEquivalentTo(WebOutput to) {
 		return pt.equals(to.pt);
 	}
 }

@@ -11,7 +11,7 @@ import learner.efsm.table.LiDataTable;
 import learner.efsm.tree.XObservationNode;
 import learner.mealy.table.LmControlTable;
 import learner.mealy.tree.ObservationNode;
-import main.Options;
+import main.simpa.Options;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedOutput;
 
@@ -35,6 +35,11 @@ public class LogManager {
 		for (ILogger l : loggers)
 			l.logEnd();
 		// System.exit(0);
+	}
+	
+	public static void logFatalError(String s) {
+		for (ILogger l : loggers)
+			l.logFatalError(s);
 	}
 
 	public static void logControlTable(LmControlTable ct) {

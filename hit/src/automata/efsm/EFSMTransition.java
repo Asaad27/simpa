@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.TreeMap;
 
 import learner.efsm.table.LiDataTableItem;
-import main.Options;
+import main.simpa.Options;
 import automata.State;
 import automata.Transition;
 import drivers.efsm.EFSMDriver.Types;

@@ -1,4 +1,4 @@
-package main;
+package main.simpa;
 
 public class Options {
 
@@ -52,14 +52,14 @@ public class Options {
 	// SIMPATest's options
 	public static int RETEST = -1;
 
-	public static int NBTEST = 1;
+	public static int NBTEST = 1000;
 	public static int MINSTATES = 20;
 	public static int MAXSTATES = 20;
 	public static int TRANSITIONPERCENT = 2;
-	public static int MININPUTSYM = 10;
-	public static int MAXINPUTSYM = 10;
-	public static int MINOUTPUTSYM = 10;
-	public static int MAXOUTPUTSYM = 10;
+	public static int MININPUTSYM = 5;
+	public static int MAXINPUTSYM = 5;
+	public static int MINOUTPUTSYM = 5;
+	public static int MAXOUTPUTSYM = 5;
 	public static int MINPARAMETER = 1;
 	public static int MAXPARAMETER = 1;
 	public static int DOMAINSIZE = 10;

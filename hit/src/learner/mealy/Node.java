@@ -5,7 +5,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-import main.Options;
+import main.simpa.Options;
 
 public class Node {
 	public static int GLOBALID = 1;

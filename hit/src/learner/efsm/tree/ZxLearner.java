@@ -7,14 +7,13 @@ import java.util.List;
 import learner.Learner;
 import learner.mealy.LmConjecture;
 import learner.mealy.Node;
-import main.Options;
+import main.simpa.Options;
 import tools.loggers.LogManager;
 import automata.State;
 import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
 import drivers.Driver;
 import drivers.efsm.real.SimpleClient;
-import drivers.mealy.MealyDriver;
 
 public class ZxLearner extends Learner {
 	private SimpleClient driver;
@@ -131,6 +130,7 @@ public class ZxLearner extends Learner {
 		return ret;
 	}
 
+	@SuppressWarnings("unused")
 	public void learn() {
 		LogManager.logConsole("Inferring the system");
 		InputSequence ce;

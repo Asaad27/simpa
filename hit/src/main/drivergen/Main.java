@@ -1,4 +1,4 @@
-package main;
+package main.drivergen;
 
 import java.io.IOException;
 
@@ -24,12 +24,12 @@ public class Main {
 		try {			
 			for(i = 0; i < args.length; i++){
 				if (args[i].equals("--help") || args[i].equals("-h")) usage();
-				else if (args[i].equals("--css")) main.Options.CSS = true;
-				else if (args[i].equals("--js")) main.Options.JS = true;
-				else if (args[i].equals("--timeout")) main.Options.TIMEOUT = Integer.parseInt(args[++i]);
-				else main.Options.INPUT = args[i];
+				else if (args[i].equals("--css")) main.drivergen.Options.CSS = true;
+				else if (args[i].equals("--js")) main.drivergen.Options.JS = true;
+				else if (args[i].equals("--timeout")) main.drivergen.Options.TIMEOUT = Integer.parseInt(args[++i]);
+				else main.drivergen.Options.INPUT = args[i];
 			}			
-			if (main.Options.INPUT.isEmpty()) usage();			
+			if (main.drivergen.Options.INPUT.isEmpty()) usage();			
 		} catch (NumberFormatException e) {
 			System.err.println("Error parsing argument (number) : " + args[i]);
 			System.exit(0);
@@ -39,7 +39,7 @@ public class Main {
 	public static void launch(){
 		DriverGenerator g;
 		try {
-			g = new DriverGenerator(main.Options.INPUT);
+			g = new DriverGenerator(main.drivergen.Options.INPUT);
 			g.start();
 			g.exportToDot();
 			g.exportToXML();
@@ -67,7 +67,7 @@ public class Main {
 	}
 
 	public static void usage(){
-		System.out.println("Usage : TDG [options] config_file.json");
+		System.out.println("Usage : "+Main.class.getSimpleName()+" [options] config_file.json");
 		System.out.println("");
 		System.out.println("Options");
 		System.out.println("> Crawling");
@@ -77,7 +77,7 @@ public class Main {
 		System.out.println("> General");
 		System.out.println("    --help | -h       : Show help");
 		System.out.println();
-		System.out.println("Example : TDG webgoat.json");
+		System.out.println("Example : "+Main.class.getSimpleName()+" webgoat.json");
 		System.out.println();
 		System.exit(0);
 	}

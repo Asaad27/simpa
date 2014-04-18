@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import learner.efsm.table.LiDataTableItem;
-import main.Options;
+import main.simpa.Options;
 import tools.Utils;
 import tools.loggers.LogManager;
 import weka.classifiers.trees.M5P;

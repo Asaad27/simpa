@@ -11,12 +11,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import main.Options;
+import main.simpa.Options;
 import tools.loggers.LogManager;
 
 public class Utils {
@@ -135,10 +136,43 @@ public class Utils {
 	public static boolean randBoolWithPercent(int p) {
 		return rand.nextInt(100) < p;
 	}
+	
+	public static List<HTTPData> generateCombinationOfSet(HashMap<String, ArrayList<String>> data){
+		List<HTTPData> comb = new ArrayList<HTTPData>();
+		List<String> nameList = new ArrayList<String>();
+		List<ArrayList<String>> dataList = new ArrayList<ArrayList<String>>();
+		
+		for (String k : data.keySet()){
+			nameList.add(k);
+			dataList.add(data.get(k));			
+		}
+		
+		generateCombinationOfSetRec(comb, nameList, dataList, new ArrayList<Integer>(data.size()));
+		return comb;
+	}
+
+	private static void generateCombinationOfSetRec(List<HTTPData> comb,
+			List<String> nameList, List<ArrayList<String>> dataList, ArrayList<Integer> list) {
+		if (list.size() == nameList.size()){
+			HTTPData d = new HTTPData();
+			for(int i=0; i< list.size(); i++){
+				d.add(nameList.get(i), dataList.get(i).get(list.get(i)));
+			}
+			comb.add(d);
+		}else{
+			for(int i=0; i<dataList.get(list.size()).size(); i++){
+				list.add(i);
+				generateCombinationOfSetRec(comb, nameList, dataList, list);
+				list.remove(list.size()-1);
+			}
+		}		
+	}	
 
 	public static void copyFile(File in, File out) throws IOException {
-		FileChannel inChannel = new FileInputStream(in).getChannel();
-		FileChannel outChannel = new FileOutputStream(out).getChannel();
+		FileInputStream fin = new FileInputStream(in);
+		FileOutputStream fou = new FileOutputStream(out);
+		FileChannel inChannel = fin.getChannel();
+		FileChannel outChannel = fou.getChannel();
 		try {
 			inChannel.transferTo(0, inChannel.size(), outChannel);
 		} finally {
@@ -146,6 +180,8 @@ public class Utils {
 				inChannel.close();
 			if (outChannel != null)
 				outChannel.close();
+			fin.close();
+			fou.close();
 		}
 	}
 

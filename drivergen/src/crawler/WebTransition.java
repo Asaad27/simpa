@@ -1,11 +1,11 @@
 package crawler;
 
-public class Transition {
+public class WebTransition {
 	private int from;
 	private int to;
-	private Input by;
+	private WebInput by;
 
-	public Transition(int from, int to, Input by) {
+	public WebTransition(int from, int to, WebInput by) {
 		super();
 		this.from = from;
 		this.to = to;
@@ -20,11 +20,11 @@ public class Transition {
 		return to;
 	}
 
-	public Input getBy() {
+	public WebInput getBy() {
 		return by;
 	}
 	
-	public void setBy(Input i) {
+	public void setBy(WebInput i) {
 		this.by = i;
 	}
 

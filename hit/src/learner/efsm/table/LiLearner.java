@@ -9,7 +9,7 @@ import java.util.TreeMap;
 
 import learner.Learner;
 import learner.efsm.LiConjecture;
-import main.Options;
+import main.simpa.Options;
 import tools.loggers.LogManager;
 import automata.State;
 import automata.efsm.EFSMTransition;

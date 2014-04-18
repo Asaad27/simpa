@@ -3,7 +3,7 @@ package tools;
 import java.io.File;
 import java.io.IOException;
 
-import main.Options;
+import main.drivergen.Options;
 import tools.loggers.LogManager;
 
 public class GraphViz {

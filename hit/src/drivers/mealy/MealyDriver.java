@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import learner.mealy.LmConjecture;
-import main.Options;
+import main.simpa.Options;
 import tools.Utils;
 import tools.loggers.LogManager;
 import automata.Automata;
@@ -56,15 +56,7 @@ public class MealyDriver extends Driver {
 		if (input.length() > 0) {
 			if (addtolog)
 				numberOfAtomicRequest++;
-			MealyTransition currentTrans = null;
-			for (MealyTransition t : (List<MealyTransition>) automata
-					.getTransitions()) {
-				if (t.getFrom().equals(currentState)
-						&& t.getInput().equals(input)) {
-					currentTrans = t;
-					break;
-				}
-			}
+			MealyTransition currentTrans = automata.getTransitionFromWithInput(currentState, input);
 			if (currentTrans != null) {
 				output = new String(currentTrans.getOutput());
 				currentState = currentTrans.getTo();
@@ -112,7 +104,7 @@ public class MealyDriver extends Driver {
 			LogManager.logInfo("Counter example found (forced) : " + ce);
 		} else if (!Options.STOP_ON_CE_SEARCH) {
 			LmConjecture conj = (LmConjecture) c;
-			int maxTries = 100000;
+			int maxTries = 10000;
 			List<String> is = getInputSymbols();
 			MealyDriver conjDriver = new MealyDriver(conj);
 			stopLog();

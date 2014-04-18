@@ -3,7 +3,7 @@ package datamining;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import main.Options;
+import main.simpa.Options;
 
 public class Prediction extends ArrayList<Condition>{
 	private static final long serialVersionUID = -7461576989004249870L;

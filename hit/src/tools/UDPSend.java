@@ -28,9 +28,10 @@ public class UDPSend {
 			DatagramPacket dataRecv = new DatagramPacket(buffer, buffer.length);
 
 			sendSocket.send(dataSend);
-			if (request.getMethod().equals(Request.ACK))
+			if (request.getMethod().equals(Request.ACK)){
+				sendSocket.close();
 				return "Timeout";
-			else {
+			} else {
 				int code = -1;
 				long seq = -1;
 				if (request.getMethod().equals("INVITE")) {
