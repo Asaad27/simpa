@@ -47,7 +47,7 @@ public class SIMPAStats {
 
 				Options.OUTDIR = dir;
 			}
-
+			stat.close();
 		} catch (Exception e) {
 			LogManager.logException("Unexpected error at test", e);
 		}

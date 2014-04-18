@@ -107,12 +107,14 @@ public class InputSequence implements Cloneable {
 	}
 
 	public InputSequence removeLastInput() {
-		sequence.remove(sequence.size() - 1);
+		if (!sequence.isEmpty())
+			sequence.remove(sequence.size() - 1);
 		return this;
 	}
 
 	public InputSequence removeFirstInput() {
-		sequence.remove(0);
+		if (!sequence.isEmpty())
+			sequence.remove(0);
 		return this;
 	}
 

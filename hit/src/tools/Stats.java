@@ -12,10 +12,12 @@ public class Stats {
 	private BufferedWriter writer = null;
 	private File f;
 	private int recordCount;
+	private String filename = null;
 
 	public Stats(String filename) {
 		try {
 			recordCount = 0;
+			this.filename = filename;
 			f = new File(filename);
 			f.getAbsoluteFile().getParentFile().mkdirs();
 			writer = new BufferedWriter(new FileWriter(f));
@@ -24,6 +26,10 @@ public class Stats {
 					+ ")", e);
 			writer = null;
 		}
+	}
+
+	public String getFilename() {
+		return filename;
 	}
 
 	public void setHeaders(List<String> headers) {

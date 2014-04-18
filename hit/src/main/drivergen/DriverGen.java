@@ -8,7 +8,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 import crawler.DriverGenerator;
 
 
-public class Main {
+public class DriverGen {
 	
 	public static Options Options;		
 	
@@ -67,7 +67,7 @@ public class Main {
 	}
 
 	public static void usage(){
-		System.out.println("Usage : "+Main.class.getSimpleName()+" [options] config_file.json");
+		System.out.println("Usage : "+DriverGen.class.getSimpleName()+" [options] config_file.json");
 		System.out.println("");
 		System.out.println("Options");
 		System.out.println("> Crawling");
@@ -77,7 +77,7 @@ public class Main {
 		System.out.println("> General");
 		System.out.println("    --help | -h       : Show help");
 		System.out.println();
-		System.out.println("Example : "+Main.class.getSimpleName()+" webgoat.json");
+		System.out.println("Example : "+DriverGen.class.getSimpleName()+" webgoat.json");
 		System.out.println();
 		System.exit(0);
 	}

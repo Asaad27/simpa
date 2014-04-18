@@ -10,10 +10,12 @@ public class RandomMealyDriver extends MealyDriver {
 
 	public RandomMealyDriver() {
 		super(new RandomMealy());
+		Utils.setSeed(((RandomMealy) automata).getSeed());
 	}
 
 	public RandomMealyDriver(Mealy a) {
 		super(a);
+		Utils.setSeed(((RandomMealy) automata).getSeed());
 	}
 
 	public static List<String> getStatHeaders() {

@@ -109,13 +109,18 @@ public class SIMPATestMealy {
 						driver.logStats();
 
 						stats.addRecord(((RandomMealyDriver) driver).getStats());
+					} catch (Exception e){
+						e.printStackTrace();
 					} finally {
 						LogManager.end();
-						LogManager.clear();
-						System.gc();
 					}
 				}
 				stats.close();
+				System.out.println("[+] Stats");
+				System.out.println("    Avg. requests length : " + Utils.meanOfCSVField(stats.getFilename(), 4));
+				System.out.println("    Avg. requests : " + Utils.meanOfCSVField(stats.getFilename(), 5));
+				System.out.println("    Avg. duration : " + Utils.meanOfCSVField(stats.getFilename(), 6));
+				
 			} else {
 				System.out.println("[+] Retesting automaton " + Options.RETEST);
 				Options.OUTDIR = Utils.makePath(dir + Options.RETEST);
@@ -138,8 +143,6 @@ public class SIMPATestMealy {
 					driver.logStats();
 				} finally {
 					LogManager.end();
-					LogManager.clear();
-					System.gc();
 				}
 			}
 			if (!Options.STAT)
@@ -180,7 +183,7 @@ public class SIMPATestMealy {
 			LogManager
 					.logError("Warning: Unable to find GraphViz and converting dot to image files");
 		}
-		Options.GRAPHVIZ = false; // disable graphviz
+		Options.GRAPHVIZ = false;
 
 		File f = new File(Options.OUTDIR + File.separator + Options.DIRTEST);
 		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())

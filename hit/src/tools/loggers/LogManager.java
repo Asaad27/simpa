@@ -137,10 +137,6 @@ public class LogManager {
 			l.logConcrete(data);
 	}
 
-	public static void clear() {
-		loggers.clear();
-	}
-
 	public static void logSymbolsParameters(Map<String, Integer> params) {
 		for (ILogger l : loggers)
 			l.logParameters(params);
@@ -148,11 +144,13 @@ public class LogManager {
 
 	public static void logObservationTree(ObservationNode root) {
 		for (ILogger l : loggers)
-			l.logObservationTree(root);
+			if (Options.GRAPHVIZ)
+				l.logObservationTree(root);
 	}
 
 	public static void logXObservationTree(XObservationNode root) {
 		for (ILogger l : loggers)
-			l.logXObservationTree(root);
+			if (Options.GRAPHVIZ)
+				l.logXObservationTree(root);
 	}
 }

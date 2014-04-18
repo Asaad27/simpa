@@ -3,6 +3,7 @@ package learner.mealy;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import main.simpa.Options;
@@ -13,10 +14,10 @@ public class Node {
 	public String input = null;
 	public String output = null;
 	public Node parent = null;
-	public List<Node> children = null;
+	public HashMap<String,Node> children = null;
 
 	public Node() {
-		children = new ArrayList<Node>();
+		children = new HashMap<String, Node>();
 	}
 
 	public Node(String input, String output) {
@@ -30,7 +31,7 @@ public class Node {
 	}
 
 	public Node addChild(Node node) {
-		children.add(node);
+		children.put(node.input, node);
 		node.setParent(this);
 		node.id = GLOBALID++;
 		return node;
@@ -40,20 +41,8 @@ public class Node {
 		parent = node;
 	}
 
-	public boolean haveChildBy(String inputSymbol) {
-		for (Node n : children) {
-			if (n.input.equals(inputSymbol))
-				return true;
-		}
-		return false;
-	}
-
 	public Node childBy(String inputSymbol) {
-		for (Node n : children) {
-			if (n.input.equals(inputSymbol))
-				return n;
-		}
-		return null;
+		return children.get(inputSymbol);
 	}
 
 	protected void toDotWrite(Writer w) throws IOException {
@@ -62,7 +51,7 @@ public class Node {
 		Node currentNode = null;
 		while (!queue.isEmpty()) {
 			currentNode = queue.get(0);
-			for (Node n : currentNode.children) {
+			for (Node n : currentNode.children.values()) {
 				w.write("    node"
 						+ currentNode.id
 						+ " -> node"
@@ -76,7 +65,7 @@ public class Node {
 								: Options.SYMBOL_OMEGA_LOW) + "\"]\n");
 			}
 			queue.remove(0);
-			queue.addAll(currentNode.children);
+			queue.addAll(currentNode.children.values());
 		}
 	}
 

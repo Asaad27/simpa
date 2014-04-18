@@ -2,6 +2,7 @@ package learner.mealy.tree;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import learner.Learner;
@@ -84,7 +85,7 @@ public class ZLearner extends Learner {
 		this.states = new ArrayList<ObservationNode>();
 
 		// 2. for (each state u of U being traversed during Breadth First Search
-		List<Node> queue = new ArrayList<Node>();
+		List<Node> queue = new LinkedList<Node>();
 		queue.add(u);
 		ObservationNode currentNode = null;
 		while (!queue.isEmpty()) {
@@ -108,7 +109,7 @@ public class ZLearner extends Learner {
 					extendNodeWithSymbols(currentNode, i);
 				}
 			}
-			queue.addAll(currentNode.children);
+			queue.addAll(currentNode.children.values());
 		}
 
 		// 11. for (each transition (u, ab, v), such that neither state u nor
@@ -172,20 +173,15 @@ public class ZLearner extends Learner {
 
 	private int compareNodesUsingSeqs(Node node1, Node node2,
 			List<InputSequence> z) {
+		Node currentNode1 = null, currentNode2 = null;
 		for (InputSequence seq : z) {
-			Node currentNode1 = node1;
-			Node currentNode2 = node2;
-			InputSequence dfs = new InputSequence();
+			currentNode1 = node1;
+			currentNode2 = node2;
 			for (String input : seq.sequence) {
-				dfs.addInput(input);
-				if (!currentNode1.haveChildBy(input)
-						|| !currentNode2.haveChildBy(input))
-					return -1;
-				if (!currentNode1.childBy(input).output.equals(currentNode2
-						.childBy(input).output))
-					return -1;
 				currentNode1 = currentNode1.childBy(input);
 				currentNode2 = currentNode2.childBy(input);
+				if (currentNode1 == null || currentNode2 == null) return -1;
+				if (!currentNode1.output.equals(currentNode2.output)) return 1;
 			}
 		}
 		return 0;
@@ -193,17 +189,16 @@ public class ZLearner extends Learner {
 
 	private ObservationNode findFirstEquivalent(ObservationNode node,
 			List<InputSequence> z) {
-		List<Node> queue = new ArrayList<Node>();
+		List<Node> queue = new LinkedList<Node>();
 		queue.add(u);
 		ObservationNode currentNode = null;
 		while (!queue.isEmpty()) {
-			currentNode = (ObservationNode) queue.get(0);
+			currentNode = (ObservationNode) queue.remove(0);
 			if (currentNode.id == node.id)
 				break;
-			if (compareNodesUsingSeqs(node, currentNode, z) == 0)
+			if (compareNodesUsingSeqs(node, currentNode, z) == 0 && currentNode.isState())
 				return currentNode;
-			queue.remove(0);
-			queue.addAll(currentNode.children);
+			queue.addAll(currentNode.children.values());
 		}
 		return null;
 	}
@@ -255,7 +250,7 @@ public class ZLearner extends Learner {
 	private void labelNodes(LmConjecture q) {
 		LogManager.logInfo("Labeling nodes");
 		labelNodesRec(q, u, q.getInitialState(), false);
-		// LogManager.logObservationTree(u);
+		LogManager.logObservationTree(u);
 	}
 
 	private void labelNodesRec(LmConjecture q, ObservationNode node, State s,
@@ -265,7 +260,7 @@ public class ZLearner extends Learner {
 		if (node.isLabelled())
 			label = true;
 		if (!node.children.isEmpty()) {
-			for (Node n : node.children) {
+			for (Node n : node.children.values()) {
 				MealyTransition t = q.getTransitionFromWithInput(s, n.input);
 				if (t != null)
 					labelNodesRec(q, (ObservationNode) n, t.getTo(), label);
@@ -287,7 +282,7 @@ public class ZLearner extends Learner {
 	private InputSequence findInconsistencyRec(LmConjecture c, State s,
 			ObservationNode node, InputSequence ce) {
 		if (!node.children.isEmpty()) {
-			for (Node n : node.children) {
+			for (Node n : node.children.values()) {
 				if (!((ObservationNode) n).isState())
 					ce.addInput(n.input);
 				MealyTransition t = c.getTransitionFromWithInput(s, n.input);
@@ -332,7 +327,7 @@ public class ZLearner extends Learner {
 		InputSequence seq = sequence.clone();
 		InputSequence previousSeq = getPreviousInputSequenceFromNode(currentNode);
 		while (seq.getLength() > 0
-				&& currentNode.haveChildBy(seq.getFirstSymbol())) {
+				&& currentNode.childBy(seq.getFirstSymbol()) != null) {
 			currentNode = currentNode.childBy(seq.getFirstSymbol());
 			previousSeq.addInput(seq.getFirstSymbol());
 			seq.removeFirstInput();
@@ -343,7 +338,7 @@ public class ZLearner extends Learner {
 				driver.execute(input);
 			}
 			for (String input : seq.sequence) {
-				if (currentNode.haveChildBy(input))
+				if (currentNode.childBy(input) != null)
 					currentNode = currentNode.childBy(input);
 				else
 					currentNode = currentNode.addChild(new ObservationNode(
@@ -374,15 +369,20 @@ public class ZLearner extends Learner {
 		for (ObservationNode s : states) {
 			for (String input : i) {
 				ObservationNode child = (ObservationNode) s.childBy(input);
-				if (child.output.length() > 0) {
+				if (!child.output.isEmpty()) {
 					if (child.isState())
 						c.addTransition(new MealyTransition(c, c
 								.getState(s.state), c.getState(child.state),
 								input, child.output));
-					else
-						c.addTransition(new MealyTransition(c, c
-								.getState(s.state), c.getState(child.label),
+					else{
+						if (child.label == -1){
+							System.out.println("suce");
+						}
+						c.addTransition(new MealyTransition(c,
+								c.getState(s.state),
+								c.getState(child.label),
 								input, child.output));
+					}
 				}
 			}
 		}

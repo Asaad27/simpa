@@ -129,7 +129,6 @@ public class SIMPATestEFSM {
 						stats.addRecord(((RandomEFSMDriver) driver).getStats());
 					} finally {
 						LogManager.end();
-						LogManager.clear();
 						System.gc();
 					}
 				}
@@ -160,8 +159,6 @@ public class SIMPATestEFSM {
 					c.exportToDot();
 				} finally {
 					LogManager.end();
-					LogManager.clear();
-					System.gc();
 				}
 			}
 			if (!Options.STAT)

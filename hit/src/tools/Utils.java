@@ -22,6 +22,10 @@ import tools.loggers.LogManager;
 
 public class Utils {
 	private static Random rand = new Random();
+	
+	public static void setSeed(long seed){
+		rand.setSeed(seed);
+	}
 
 	public static boolean isWindows() {
 		return (System.getProperty("os.name").toLowerCase().indexOf("win") >= 0);
@@ -223,6 +227,10 @@ public class Utils {
 			return null;
 		else
 			return l[rand.nextInt(l.length)];
+	}
+	
+	public static long randLong() {
+		return rand.nextLong();
 	}
 
 	public static int randInt(int max) {

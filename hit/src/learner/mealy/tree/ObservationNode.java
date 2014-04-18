@@ -46,7 +46,7 @@ public class ObservationNode extends Node {
 					+ " [style=\"rounded,filled\", fillcolor=\"#" + "E0FEEE"
 					+ "\", color=\"#666666" + "\", shape=record, label=\"{"
 					+ state + " | " + label + "}\"]\n");
-		for (Node n : children) {
+		for (Node n : children.values()) {
 			((ObservationNode) n).toDotCreateNodes(w);
 		}
 	}

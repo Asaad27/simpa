@@ -108,7 +108,7 @@ public class ZxLearner extends Learner {
 					extendNodeWithSymbols(currentNode, i);
 				}
 			}
-			queue.addAll(currentNode.children);
+			queue.addAll(currentNode.children.values());
 		}
 
 		// 11. for (each transition (u, ab, v), such that neither state u nor
@@ -179,12 +179,12 @@ public class ZxLearner extends Learner {
 			InputSequence dfs = new InputSequence();
 			for (String input : seq.sequence) {
 				dfs.addInput(input);
-				if (!currentNode1.haveChildBy(input)
+/*				if (!currentNode1.haveChildBy(input)
 						|| !currentNode2.haveChildBy(input))
 					return -1;
 				if (!currentNode1.childBy(input).output.equals(currentNode2
 						.childBy(input).output))
-					return -1;
+					return -1;*/
 				currentNode1 = currentNode1.childBy(input);
 				currentNode2 = currentNode2.childBy(input);
 			}
@@ -204,7 +204,7 @@ public class ZxLearner extends Learner {
 			if (compareNodesUsingSeqs(node, currentNode, z) == 0)
 				return currentNode;
 			queue.remove(0);
-			queue.addAll(currentNode.children);
+			queue.addAll(currentNode.children.values());
 		}
 		return null;
 	}
@@ -266,7 +266,7 @@ public class ZxLearner extends Learner {
 		if (node.isLabelled())
 			label = true;
 		if (!node.children.isEmpty()) {
-			for (Node n : node.children) {
+			for (Node n : node.children.values()) {
 				MealyTransition t = q.getTransitionFromWithInput(s, n.input);
 				if (t != null)
 					labelNodesRec(q, (XObservationNode) n, t.getTo(), label);
@@ -288,7 +288,7 @@ public class ZxLearner extends Learner {
 	private InputSequence findInconsistencyRec(LmConjecture c, State s,
 			XObservationNode node, InputSequence ce) {
 		if (!node.children.isEmpty()) {
-			for (Node n : node.children) {
+			for (Node n : node.children.values()) {
 				if (!((XObservationNode) n).isState())
 					ce.addInput(n.input);
 				MealyTransition t = c.getTransitionFromWithInput(s, n.input);
@@ -332,13 +332,13 @@ public class ZxLearner extends Learner {
 		Node currentNode = node;
 		InputSequence seq = sequence.clone();
 		InputSequence previousSeq = getPreviousInputSequenceFromNode(currentNode);
-		while (seq.getLength() > 0
-				&& currentNode.haveChildBy(seq.getFirstSymbol())) {
-			currentNode = currentNode.childBy(seq.getFirstSymbol());
-			previousSeq.addInput(seq.getFirstSymbol());
-			seq.removeFirstInput();
-		}
-		if (seq.getLength() > 0) {
+//		while (seq.getLength() > 0
+//				&& currentNode.haveChildBy(seq.getFirstSymbol())) {
+//			currentNode = currentNode.childBy(seq.getFirstSymbol());
+//			previousSeq.addInput(seq.getFirstSymbol());
+//			seq.removeFirstInput();
+//		}
+//		if (seq.getLength() > 0) {
 //			driver.reset();
 //			for (String input : previousSeq.sequence) {
 //				driver.execute(input);
@@ -350,7 +350,7 @@ public class ZxLearner extends Learner {
 //					currentNode = currentNode.addChild(new XObservationNode(
 //							input, driver.execute(input)));
 //			}
-		}
+//		}
 	}
 
 	private InputSequence getPreviousInputSequenceFromNode(Node node) {

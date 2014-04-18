@@ -21,6 +21,7 @@ public class RandomMealy extends Mealy implements Serializable {
 
 	private List<String> inputSymbols = null;
 	private List<String> outputSymbols = null;
+	private long seed = 0;
 
 	public static String replaceCharAt(String s, int pos, char c) {
 		StringBuffer buf = new StringBuffer(s);
@@ -48,11 +49,16 @@ public class RandomMealy extends Mealy implements Serializable {
 	public RandomMealy() {
 		super("Random");
 		LogManager.logStep(LogManager.STEPOTHER, "Generating random Mealy");
+		seed = Utils.randLong();
 		generateSymbols();
 		createStates();
 		createTransitions();
 		// exportToDot();
-		// RandomMealy.serialize(this);
+		RandomMealy.serialize(this);
+	}
+	
+	public long getSeed(){
+		return seed;
 	}
 
 	public static void serialize(RandomMealy o) {
@@ -91,7 +97,7 @@ public class RandomMealy extends Mealy implements Serializable {
 	private void createTransitions() {
 		for (State s1 : states) {
 			for (String is : inputSymbols) {
-				if (Utils.randBoolWithPercent(50)) {
+				if (Utils.randBoolWithPercent(90)) {
 					addTransition(new MealyTransition(this, s1,
 							Utils.randIn(states), is,
 							Utils.randIn(outputSymbols)));

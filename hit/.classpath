@@ -41,5 +41,6 @@
 	<classpathentry kind="lib" path="lib/htmlunit/xml-apis-1.4.01.jar"/>
 	<classpathentry kind="lib" path="lib/json/jackson-core-asl-1.9.11.jar"/>
 	<classpathentry kind="lib" path="lib/json/jackson-mapper-asl-1.9.11.jar"/>
+	<classpathentry kind="lib" path="lib/gephi-toolkit.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
