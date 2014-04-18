@@ -375,9 +375,6 @@ public class ZLearner extends Learner {
 								.getState(s.state), c.getState(child.state),
 								input, child.output));
 					else{
-						if (child.label == -1){
-							System.out.println("suce");
-						}
 						c.addTransition(new MealyTransition(c,
 								c.getState(s.state),
 								c.getState(child.label),
