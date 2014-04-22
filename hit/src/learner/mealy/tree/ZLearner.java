@@ -108,6 +108,9 @@ public class ZLearner extends Learner {
 					// 9. Extend_Node(A, u, I)
 					extendNodeWithSymbols(currentNode, i);
 				}
+			}else{
+				currentNode.label = -1;
+				currentNode.state = -1;
 			}
 			queue.addAll(currentNode.children.values());
 		}
@@ -196,7 +199,7 @@ public class ZLearner extends Learner {
 			currentNode = (ObservationNode) queue.remove(0);
 			if (currentNode.id == node.id)
 				break;
-			if (compareNodesUsingSeqs(node, currentNode, z) == 0 && currentNode.isState())
+			if (currentNode.isState() && (compareNodesUsingSeqs(node, currentNode, z) == 0))
 				return currentNode;
 			queue.addAll(currentNode.children.values());
 		}
@@ -392,6 +395,9 @@ public class ZLearner extends Learner {
 		for (MealyTransition t : c.getTransitions())
 			LogManager.logTransition(t.toString());
 		LogManager.logLine();
+		
+		System.out.print(c.getStateCount() + "\r");
+		System.out.flush();
 
 		c.exportToDot();
 

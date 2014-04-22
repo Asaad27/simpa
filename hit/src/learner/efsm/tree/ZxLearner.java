@@ -201,7 +201,7 @@ public class ZxLearner extends Learner {
 			currentNode = (XObservationNode) queue.get(0);
 			if (currentNode.id == node.id)
 				break;
-			if (compareNodesUsingSeqs(node, currentNode, z) == 0)
+			if (compareNodesUsingSeqs(node, currentNode, z) == 0 && currentNode.isState())
 				return currentNode;
 			queue.remove(0);
 			queue.addAll(currentNode.children.values());

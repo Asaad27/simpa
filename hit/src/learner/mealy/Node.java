@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import main.simpa.Options;
@@ -24,10 +25,6 @@ public class Node {
 		this();
 		this.input = input;
 		this.output = output;
-	}
-
-	public void clearChildren() {
-		children.clear();
 	}
 
 	public Node addChild(Node node) {
