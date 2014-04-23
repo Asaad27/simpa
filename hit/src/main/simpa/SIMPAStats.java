@@ -27,12 +27,12 @@ public class SIMPAStats {
 			Stats stat = new Stats("global.csv");
 			stat.setHeaders(Utils.createArrayList("State", "Requests",
 					"Duration", "Transitions"));
-			int[] states = { 50, 100, 200, 300, 500, 750, 1000, 2000 };
+			int[] states = { 50, 100, 200, 300, 500, 750, 1000, 2000, 3000, 5000, 7500, 10000 };
 			for (int i : states) {
 				Options.MINSTATES = i;
 				Options.MAXSTATES = i;
 
-				System.out.println("State = " + i);
+				System.out.println("|+] State = " + i);
 
 				SIMPATestMealy.main(args);
 

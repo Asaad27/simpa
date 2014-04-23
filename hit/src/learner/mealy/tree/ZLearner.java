@@ -1,10 +1,12 @@
 package learner.mealy.tree;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 import learner.Learner;
 import learner.mealy.LmConjecture;
 import learner.mealy.Node;
@@ -75,21 +77,45 @@ public class ZLearner extends Learner {
 		// 7. Return the last labelled observation tree (global) and quotient.
 		return K;
 	}
+	
+	private String getTracesFromNode(Node n, List<InputSequence> seqs){
+		StringBuilder s = new StringBuilder();
+		for(InputSequence seq : seqs){
+			s.append(getTraceFromNode(n, seq));
+		}
+		return s.toString();
+	}
+	
+	private String getTraceFromNode(Node n, InputSequence seq){
+		StringBuilder s = new StringBuilder();
+		for(String i : seq.sequence){
+			n = (ObservationNode)n.childBy(i);
+			if (n == null) return "|";
+			else s.append(n.output);
+		}
+		return s.toString();
+	}
 
 	private LmConjecture buildQuotient(List<InputSequence> z) {
 		LogManager.logInfo("Build Quotient");
 		LogManager.logInfo("Z : " + z.toString());
 		LogManager.logInfo("I : " + i.toString());
+		Deque<Node> queue = null;
+		ObservationNode currentNode = null;
 
 		// 1. q0 := e, Q : = {q0}
 		this.states = new ArrayList<ObservationNode>();
+		
+		//1.5 CachedEquivalent
+		Map<String, Node> cache = new HashMap<String, Node>();
+
 
 		// 2. for (each state u of U being traversed during Breadth First Search
-		List<Node> queue = new LinkedList<Node>();
+		queue = new ArrayDeque<Node>();
 		queue.add(u);
-		ObservationNode currentNode = null;
+		currentNode = null;
 		while (!queue.isEmpty()) {
-			currentNode = (ObservationNode) queue.remove(0);
+			currentNode = (ObservationNode) queue.pollFirst();
 
 			// 2. such that u has no labelled predecessor
 			if (noLabelledPred(currentNode)) {
@@ -97,7 +123,7 @@ public class ZLearner extends Learner {
 				extendNodeWithInputSeqs(currentNode, z);
 
 				// 5. if (u is Z-equivalent to a traversed state w of U)
-				ObservationNode w = findFirstEquivalent(currentNode, z);
+				ObservationNode w = (ObservationNode) cache.get(getTracesFromNode(currentNode, z));
 				if (w != null) {
 					// 6. Label u with w
 					currentNode.label = w.state;
@@ -107,6 +133,8 @@ public class ZLearner extends Learner {
 					addState(currentNode);
 					// 9. Extend_Node(A, u, I)
 					extendNodeWithSymbols(currentNode, i);
+					// 9.5
+					cache.put(getTracesFromNode(currentNode, z), currentNode);
 				}
 			}else{
 				currentNode.label = -1;
@@ -160,7 +188,7 @@ public class ZLearner extends Learner {
 
 			}
 		} while (ce != null);
-
+		System.out.println();
 	}
 
 	private boolean noLabelledPred(ObservationNode node) {
@@ -172,38 +200,6 @@ public class ZLearner extends Learner {
 			node = parent;
 		}
 		return noLabelledPred;
-	}
-
-	private int compareNodesUsingSeqs(Node node1, Node node2,
-			List<InputSequence> z) {
-		Node currentNode1 = null, currentNode2 = null;
-		for (InputSequence seq : z) {
-			currentNode1 = node1;
-			currentNode2 = node2;
-			for (String input : seq.sequence) {
-				currentNode1 = currentNode1.childBy(input);
-				currentNode2 = currentNode2.childBy(input);
-				if (currentNode1 == null || currentNode2 == null) return -1;
-				if (!currentNode1.output.equals(currentNode2.output)) return 1;
-			}
-		}
-		return 0;
-	}
-
-	private ObservationNode findFirstEquivalent(ObservationNode node,
-			List<InputSequence> z) {
-		List<Node> queue = new LinkedList<Node>();
-		queue.add(u);
-		ObservationNode currentNode = null;
-		while (!queue.isEmpty()) {
-			currentNode = (ObservationNode) queue.remove(0);
-			if (currentNode.id == node.id)
-				break;
-			if (currentNode.isState() && (compareNodesUsingSeqs(node, currentNode, z) == 0))
-				return currentNode;
-			queue.addAll(currentNode.children.values());
-		}
-		return null;
 	}
 
 	private void addState(ObservationNode node) {
@@ -284,26 +280,14 @@ public class ZLearner extends Learner {
 
 	private InputSequence findInconsistencyRec(LmConjecture c, State s,
 			ObservationNode node, InputSequence ce) {
-		if (!node.children.isEmpty()) {
-			for (Node n : node.children.values()) {
-				if (!((ObservationNode) n).isState())
-					ce.addInput(n.input);
-				MealyTransition t = c.getTransitionFromWithInput(s, n.input);
-				if (t != null && t.getOutput().equals(n.output)) {
-					InputSequence otherCE = findInconsistencyRec(c, t.getTo(),
-							(ObservationNode) n, ce);
-					if (otherCE != null) {
-						boolean processed = false;
-						for (InputSequence seq : z) {
-							if (seq.equals(ce)) {
-								processed = true;
-								break;
-							}
-						}
-						if (!processed && ce.getLength() > 0)
-							return otherCE;
-					}
-				} else {
+		for (Node n : node.children.values()) {
+			if (!((ObservationNode) n).isState())
+				ce.addInput(n.input);
+			MealyTransition t = c.getTransitionFromWithInput(s, n.input);
+			if (t != null && t.getOutput().equals(n.output)) {
+				InputSequence otherCE = findInconsistencyRec(c, t.getTo(),
+						(ObservationNode) n, ce);
+				if (otherCE != null) {
 					boolean processed = false;
 					for (InputSequence seq : z) {
 						if (seq.equals(ce)) {
@@ -311,16 +295,26 @@ public class ZLearner extends Learner {
 							break;
 						}
 					}
-					if (ce.getLength() == 1 && !processed)
-						return ce;
-					else {
-						if (ce.getLength() > 1)
-							return ce.removeFirstInput();
+					if (!processed && ce.getLength() > 0)
+						return otherCE;
+				}
+			} else {
+				boolean processed = false;
+				for (InputSequence seq : z) {
+					if (seq.equals(ce)) {
+						processed = true;
+						break;
 					}
 				}
-				if (!((ObservationNode) n).isState())
-					ce.removeLastInput();
+				if (ce.getLength() == 1 && !processed)
+					return ce;
+				else {
+					if (ce.getLength() > 1)
+						return ce.removeFirstInput();
+				}
 			}
+			if (!((ObservationNode) n).isState())
+				ce.removeLastInput();
 		}
 		return null;
 	}
@@ -396,7 +390,7 @@ public class ZLearner extends Learner {
 			LogManager.logTransition(t.toString());
 		LogManager.logLine();
 		
-		System.out.print(c.getStateCount() + "\r");
+		System.out.print("      states : " + c.getStateCount() + "\r");
 		System.out.flush();
 
 		c.exportToDot();

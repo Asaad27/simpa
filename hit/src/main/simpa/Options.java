@@ -52,14 +52,14 @@ public class Options {
 	// SIMPATest's options
 	public static int RETEST = -1;
 
-	public static int NBTEST = 100;
-	public static int MINSTATES = 100;
-	public static int MAXSTATES = 1010000;
+	public static int NBTEST = 1;
+	public static int MINSTATES = 10000;
+	public static int MAXSTATES = 10000;
 	public static int TRANSITIONPERCENT = 20;
-	public static int MININPUTSYM = 10;
-	public static int MAXINPUTSYM = 10;
-	public static int MINOUTPUTSYM = 10;
-	public static int MAXOUTPUTSYM = 10;
+	public static int MININPUTSYM = 50;
+	public static int MAXINPUTSYM = 50;
+	public static int MINOUTPUTSYM = 50;
+	public static int MAXOUTPUTSYM = 50;
 	
 	// EFSM
 	public static int MINPARAMETER = 1;

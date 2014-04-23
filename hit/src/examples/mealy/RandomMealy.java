@@ -53,8 +53,8 @@ public class RandomMealy extends Mealy implements Serializable {
 		generateSymbols();
 		createStates();
 		createTransitions();
-		// exportToDot();
-		RandomMealy.serialize(this);
+		if (!Options.TEST) exportToDot();
+		//RandomMealy.serialize(this);
 	}
 	
 	public long getSeed(){

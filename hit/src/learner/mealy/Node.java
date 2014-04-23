@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import main.simpa.Options;
 
@@ -15,7 +15,8 @@ public class Node {
 	public String input = null;
 	public String output = null;
 	public Node parent = null;
-	public HashMap<String,Node> children = null;
+	public Map<String,Node> children = null;
+
 
 	public Node() {
 		children = new HashMap<String, Node>();

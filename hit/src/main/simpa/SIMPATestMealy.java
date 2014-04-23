@@ -16,7 +16,7 @@ import drivers.mealy.RandomMealyDriver;
 import examples.mealy.RandomMealy;
 
 public class SIMPATestMealy {
-	public final static String name = "KITestMealy";
+	public final static String name = "SIMPA Test Mealy";
 
 	private static void init(String[] args) {
 		if (!Options.STAT)
@@ -169,16 +169,7 @@ public class SIMPATestMealy {
 		if (major < 1 || minor < 5)
 			throw new Exception("Java >=1.5 needed");
 
-		try {
-			Options.WEKA = weka.core.Version.MAJOR >= 3;
-			if (!Options.WEKA)
-				throw new Exception();
-		} catch (Exception e) {
-			LogManager
-					.logError("Warning : Unable to find Weka and make the final conjecture");
-		}
-
-		if (GraphViz.check() != 0) {
+		if (GraphViz.check() != 0 && !Options.TEST) {
 			Options.GRAPHVIZ = false;
 			LogManager
 					.logError("Warning: Unable to find GraphViz and converting dot to image files");

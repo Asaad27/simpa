@@ -38,13 +38,13 @@ public class MealyDriver extends Driver {
 	}
 
 	public List<String> getStats() {
-		return Utils.createArrayList(String.valueOf(nbStates), String
-				.valueOf(getInputSymbols().size()), String
-				.valueOf(getOutputSymbols().size()), String
-				.valueOf(((float) numberOfAtomicRequest / numberOfRequest)),
-				String.valueOf(numberOfRequest), String
-						.valueOf(((float) duration / 1000000000)), String
-						.valueOf(automata.getTransitionCount()));
+		return Utils.createArrayList(String.valueOf(nbStates),
+				String.valueOf(getInputSymbols().size()),
+				String.valueOf(getOutputSymbols().size()),
+				String.valueOf(((float) numberOfAtomicRequest / numberOfRequest)),
+				String.valueOf(numberOfRequest),
+				String.valueOf(((float) duration / 1000000000)),
+				String.valueOf(automata.getTransitionCount()));
 	}
 
 	protected List<InputSequence> getForcedCE() {

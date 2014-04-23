@@ -329,9 +329,9 @@ public class ZxLearner extends Learner {
 	}
 
 	private void askInputSequenceToNode(Node node, InputSequence sequence) {
-		Node currentNode = node;
-		InputSequence seq = sequence.clone();
-		InputSequence previousSeq = getPreviousInputSequenceFromNode(currentNode);
+//		Node currentNode = node;
+//		InputSequence seq = sequence.clone();
+//		InputSequence previousSeq = getPreviousInputSequenceFromNode(currentNode);
 //		while (seq.getLength() > 0
 //				&& currentNode.haveChildBy(seq.getFirstSymbol())) {
 //			currentNode = currentNode.childBy(seq.getFirstSymbol());
