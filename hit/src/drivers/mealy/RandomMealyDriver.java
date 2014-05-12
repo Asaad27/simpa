@@ -10,17 +10,17 @@ public class RandomMealyDriver extends MealyDriver {
 
 	public RandomMealyDriver() {
 		super(new RandomMealy());
-		Utils.setSeed(((RandomMealy) automata).getSeed());
+		//Utils.setSeed(((RandomMealy) automata).getSeed());
 	}
 
 	public RandomMealyDriver(Mealy a) {
 		super(a);
-		Utils.setSeed(((RandomMealy) automata).getSeed());
+		//Utils.setSeed(((RandomMealy) automata).getSeed());
 	}
 
 	public static List<String> getStatHeaders() {
 		return Utils.createArrayList("States", "Inputs", "Outputs", "ARL",
-				"Requests", "Duration", "Transitions");
+				"Requests", "Duration", "Transitions","CElength","Rounds","Seeds","Number of suffixes");
 	}
 
 }

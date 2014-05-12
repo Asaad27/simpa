@@ -7,10 +7,12 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import learner.Learner;
 import learner.mealy.LmConjecture;
 import learner.mealy.Node;
 import main.simpa.Options;
+import tools.Utils;
 import tools.loggers.LogManager;
 import automata.State;
 import automata.mealy.InputSequence;
@@ -24,8 +26,10 @@ public class ZLearner extends Learner {
 	private List<String> i;
 	private ObservationNode u;
 	private List<ObservationNode> states;
+	private int rounds;
 
 	public ZLearner(Driver driver) {
+		rounds =0;
 		this.driver = (MealyDriver) driver;
 
 		// Initialize I and Z with specified options
@@ -61,8 +65,9 @@ public class ZLearner extends Learner {
 		// 1. while there exists a witness w for state q in U such that its
 		// input projection is not in Z
 		do {
+			sortZ();
 			inconsistency = findInconsistency(K);
-			if (inconsistency != null) {
+			if (inconsistency != null ) {
 				// 4. Z' = Z U {w|I} and I' = I U inp(w)
 				// 6. Z = Z' and I = I'
 				z = extendInputSequencesWith(z, inconsistency);
@@ -174,12 +179,14 @@ public class ZLearner extends Learner {
 
 		// 4. while there exists an unprocessed counterexample CE
 		do {
-			ce = driver.getCounterExample(Z_Q);
+			rounds++;
+			sortZ();
+			ce = driver.getCounterExample2(Z_Q,0.05);
 			if (ce != null) {
 				LogManager.logInfo("Adding the counter example to tree");
 
 				// 5. U = U U CE
-				askInputSequenceToNode(u, ce);
+				askInputSequenceToNode(u, ce,false);
 
 				// LogManager.logObservationTree(u);
 
@@ -213,13 +220,13 @@ public class ZLearner extends Learner {
 
 	private void extendNodeWithInputSeqs(Node node, List<InputSequence> Z) {
 		for (InputSequence seq : Z) {
-			askInputSequenceToNode(node, seq);
+			askInputSequenceToNode(node, seq,false);
 		}
 	}
 
 	private void extendNodeWithSymbols(Node node, List<String> symbols) {
 		for (String symbol : symbols) {
-			askInputSequenceToNode(node, new InputSequence(symbol));
+			askInputSequenceToNode(node, new InputSequence(symbol),true);
 		}
 	}
 
@@ -275,6 +282,7 @@ public class ZLearner extends Learner {
 			LogManager.logInfo("Inconsistency found : " + ce);
 		else
 			LogManager.logInfo("No inconsistency found");
+		//return driver.isCounterExample(ce, c)? ce : null;
 		return ce;
 	}
 
@@ -319,7 +327,7 @@ public class ZLearner extends Learner {
 		return null;
 	}
 
-	private void askInputSequenceToNode(Node node, InputSequence sequence) {
+	private void askInputSequenceToNode(Node node, InputSequence sequence,boolean isIExtension) {
 		Node currentNode = node;
 		InputSequence seq = sequence.clone();
 		InputSequence previousSeq = getPreviousInputSequenceFromNode(currentNode);
@@ -330,6 +338,18 @@ public class ZLearner extends Learner {
 			seq.removeFirstInput();
 		}
 		if (seq.getLength() > 0) {
+			//seq = seq.addInputSequence(InputSequence.generate(driver.getInputSymbols(), Utils.randIntBetween(1, 5)));
+			InputSequence freeSuffix=new InputSequence();
+			if(isIExtension){
+				if(!z.isEmpty()){
+					freeSuffix = z.get(0);
+				}
+			}
+			else{
+				//freeSuffix = findGoodZSuffix(seq);
+				//freeSuffix = new InputSequence();
+			}
+			seq = seq.addInputSequence(freeSuffix);
 			driver.reset();
 			for (String input : previousSeq.sequence) {
 				driver.execute(input);
@@ -342,6 +362,24 @@ public class ZLearner extends Learner {
 							input, driver.execute(input)));
 			}
 		}
+	}
+
+	private InputSequence findGoodZSuffix(InputSequence seq) {
+		InputSequence ir = seq.clone();
+		ir = ir.removeFirstInput();
+		InputSequence zj = null;
+		for(InputSequence zi : z){
+			if(ir.clone().isPrefixOf(zi.clone())){
+				zj = zi.clone();	
+				break;
+			}
+		}
+		if(zj ==null){
+			//return InputSequence.generate(driver.getInputSymbols(), 1);
+			return new InputSequence();
+		}
+			System.out.print("+1 ");
+		return zj.getIthSuffix(ir.getLength());
 	}
 
 	private InputSequence getPreviousInputSequenceFromNode(Node node) {
@@ -393,8 +431,36 @@ public class ZLearner extends Learner {
 		System.out.print("      states : " + c.getStateCount() + "\r");
 		System.out.flush();
 
-		c.exportToDot();
+		//c.exportToDot();
 
 		return c;
 	}
+	
+	@Override
+	public int getRounds(){
+		return rounds;
+	}
+	
+	public List<InputSequence> getZ(){
+		return z;
+	}
+	
+	public void sortZ(){
+		int length = z.size();
+		List<InputSequence> auxZ = new ArrayList<>(length);
+		for(int i=0;i<length;i++){
+			InputSequence a = new InputSequence();
+			for(InputSequence is : z){
+				if(is.getLength()>a.getLength()){
+					a=is;
+				}
+			}
+			auxZ.add(a);
+			z.remove(a);
+		}
+		z = auxZ;
+		
+	}
+	
+	
 }

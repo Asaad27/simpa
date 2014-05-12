@@ -2,6 +2,7 @@ package learner;
 
 import learner.efsm.table.LiLearner;
 import learner.mealy.table.LmLearner;
+import learner.mealy.tree.SigmaLearner;
 import learner.mealy.tree.ZLearner;
 import main.simpa.Options;
 import automata.Automata;
@@ -27,11 +28,17 @@ public abstract class Learner {
 		case EFSM:
 			return new LiLearner(driver);
 		case MEALY:
+			if(Options.SIGMAINFERENCE)
+				return new SigmaLearner(driver);
 			if (Options.TREEINFERENCE)
 				return new ZLearner(driver);
 			return new LmLearner(driver);
 		default:
 			return null;
 		}
+	}
+
+	public int getRounds() {
+		return 0;
 	}
 }

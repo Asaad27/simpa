@@ -40,7 +40,7 @@ public class RandomMealy extends Mealy implements Serializable {
 		}
 		int o = 0;
 		outputSymbols = new ArrayList<String>();
-		nbSym = Utils.randIntBetween(Options.MININPUTSYM, Options.MAXINPUTSYM);
+		nbSym = Utils.randIntBetween(Options.MINOUTPUTSYM, Options.MAXOUTPUTSYM); //TODO input->output
 		for (int i = 0; i < nbSym; i++) {
 			outputSymbols.add(String.valueOf(o++));
 		}
@@ -97,7 +97,7 @@ public class RandomMealy extends Mealy implements Serializable {
 	private void createTransitions() {
 		for (State s1 : states) {
 			for (String is : inputSymbols) {
-				if (Utils.randBoolWithPercent(90)) {
+				if (Utils.randBoolWithPercent(Options.TRANSITIONPERCENT)) {
 					addTransition(new MealyTransition(this, s1,
 							Utils.randIn(states), is,
 							Utils.randIn(outputSymbols)));

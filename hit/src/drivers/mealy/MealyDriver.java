@@ -22,6 +22,7 @@ public class MealyDriver extends Driver {
 	protected List<InputSequence> forcedCE;
 	private int nbStates = 0;
 	private String name = null;
+	private int CElength;
 
 	public MealyDriver(Mealy automata) {
 		super();
@@ -30,11 +31,13 @@ public class MealyDriver extends Driver {
 		this.forcedCE = getForcedCE();
 		this.nbStates = automata.getStateCount();
 		this.name = automata.getName();
+		CElength = 0;
 	}
 
 	public MealyDriver(String name) {
 		this.name = name;
 		this.automata = null;
+		CElength=0;
 	}
 
 	public List<String> getStats() {
@@ -44,7 +47,8 @@ public class MealyDriver extends Driver {
 				String.valueOf(((float) numberOfAtomicRequest / numberOfRequest)),
 				String.valueOf(numberOfRequest),
 				String.valueOf(((float) duration / 1000000000)),
-				String.valueOf(automata.getTransitionCount()));
+				String.valueOf(automata.getTransitionCount()),
+				String.valueOf(CElength));
 	}
 
 	protected List<InputSequence> getForcedCE() {
@@ -145,8 +149,90 @@ public class MealyDriver extends Driver {
 		if (!found)
 			LogManager.logInfo("No counter example found");
 
+		//modif stats longueur CE
+		if(found){
+			if(addtolog){
+				if(ce.getLength()>CElength){
+					CElength= ce.getLength();
+				}
+			}
+			
+		}
 		return (found ? ce : null);
 	}
+	
+
+	public InputSequence getCounterExample2(Automata c,double resetProbability) {
+		LogManager.logInfo("Searching counter example");
+		boolean found = false;
+		InputSequence ce = null;
+		if (forcedCE != null && !forcedCE.isEmpty()) {
+			found = true;
+			ce = forcedCE.remove(0);
+			LogManager.logInfo("Counter example found (forced) : " + ce);
+		} else if (!Options.STOP_ON_CE_SEARCH) {
+			LmConjecture conj = (LmConjecture) c;
+			int maxTries = 10000;
+			List<String> is = getInputSymbols();
+			MealyDriver conjDriver = new MealyDriver(conj);
+			stopLog();
+			conjDriver.stopLog();
+			int i = 0;
+			ce = new InputSequence();
+			OutputSequence osSystem = new OutputSequence();
+			OutputSequence osConj = new OutputSequence();
+			reset();
+			conjDriver.reset();
+			while (i < maxTries && !found) {
+				if(Utils.randBoolWithProbability(resetProbability)){
+				ce = new InputSequence();
+				osSystem = new OutputSequence();
+				osConj = new OutputSequence();
+				reset();
+				conjDriver.reset();
+					}
+					else{
+						String symbol =Utils.randIn(is);
+						ce.addInput(symbol);
+						String _sys = execute(symbol);
+						String _conj = conjDriver.execute(symbol);
+						if (_sys.length() > 0) {
+							osSystem.addOutput(_sys);
+							osConj.addOutput(_conj);
+						}
+						if (!_sys.equals(_conj)
+								&& (osSystem.getLength() > 0 && !osSystem
+										.getLastSymbol().isEmpty())) {
+							found = true;
+							LogManager.logInfo("Counter example found : " + ce);
+							LogManager.logInfo("On system : " + osSystem);
+							LogManager.logInfo("On conjecture : " + osConj);
+							break;
+						}
+					}
+				
+				
+			i++;	
+			}
+			startLog();
+			conjDriver.startLog();
+		}
+
+		if (!found)
+			LogManager.logInfo("No counter example found");
+
+		//modif stats longueur CE
+		if(found){
+			if(addtolog){
+				if(ce.getLength()>CElength){
+					CElength= ce.getLength();
+				}
+			}
+			
+		}
+		return (found ? ce : null);
+	}
+
 
 	@Override
 	public void reset() {
@@ -177,5 +263,9 @@ public class MealyDriver extends Driver {
 		startLog();
 		conjDriver.startLog();
 		return isCe;
+	}
+
+	public Mealy getAutomaton() {
+		return automata;
 	}
 }

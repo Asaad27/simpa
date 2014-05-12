@@ -129,4 +129,12 @@ public class InputSequence implements Cloneable {
 	public void prependInput(String input) {
 		sequence.add(0, input);
 	}
+	public boolean isPrefixOf(InputSequence b){
+		if(this.getLength()>b.getLength()){
+			return false;
+		}
+		if(this.getLength()==0)
+			return true;
+		return this.getFirstSymbol().equals(b.getFirstSymbol()) && this.removeFirstInput().isPrefixOf(b.removeFirstInput());
+	}
 }

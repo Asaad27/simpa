@@ -21,9 +21,11 @@ import main.simpa.Options;
 import tools.loggers.LogManager;
 
 public class Utils {
-	private static Random rand = new Random();
+	private static Random rand = new Random(0L);
 	
 	public static void setSeed(long seed){
+		System.out.println(seed);
+		rand = new Random();
 		rand.setSeed(seed);
 	}
 
@@ -433,5 +435,10 @@ public class Utils {
 		} catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
 		}
+	}
+
+	public static boolean randBoolWithProbability(double resetProbability) {
+		
+		return rand.nextFloat()<resetProbability;
 	}
 }
