@@ -30,7 +30,8 @@ public class Options {
 
 	// Algorithm's options
 
-	public static boolean TREEINFERENCE = false;
+	public static boolean SIGMAINFERENCE = true;
+	public static boolean TREEINFERENCE = true;
 	public static boolean GENERICDRIVER = false;
 	public static String INITIAL_INPUT_SYMBOLS = "";
 	public static String INITIAL_INPUT_SEQUENCES = "";
@@ -47,19 +48,20 @@ public class Options {
 	public static boolean AUTO_OPEN_HTML = false;
 
 	public static String SYSTEM = "";
-	public static String OUTDIR = System.getProperty("user.dir");
+	public static String OUTDIR = "D:/Stage ENSIMAG/archive test";
+			//"D:/Stage ENSIMAG/archive test";
 
 	// SIMPATest's options
 	public static int RETEST = -1;
 
-	public static int NBTEST = 1;
-	public static int MINSTATES = 10000;
-	public static int MAXSTATES = 10000;
-	public static int TRANSITIONPERCENT = 20;
-	public static int MININPUTSYM = 50;
-	public static int MAXINPUTSYM = 50;
-	public static int MINOUTPUTSYM = 50;
-	public static int MAXOUTPUTSYM = 50;
+	public static int NBTEST = 200;
+	public static int MINSTATES = 80;
+	public static int MAXSTATES = 80;
+	public static int TRANSITIONPERCENT = 50;
+	public static int MININPUTSYM = 5;
+	public static int MAXINPUTSYM = 5;
+	public static int MINOUTPUTSYM = 5;
+	public static int MAXOUTPUTSYM = 5;
 	
 	// EFSM
 	public static int MINPARAMETER = 1;
