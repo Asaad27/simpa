@@ -82,18 +82,57 @@ public class LiControlTableRow {
 		return ((pis.sequence.size() == 1) && (pis.getLastSymbol()
 				.equals(EFSM.EPSILON)));
 	}
-
+	
 	public boolean isEquivalentTo(LiControlTableRow aRow) {
+		return isEquivalentToNumber(aRow);
+	}
+
+	public boolean isEquivalentToSet(LiControlTableRow aRow) {
 		HashSet<String> setISa = new HashSet<String>();
 		HashSet<String> setISb = new HashSet<String>();
 		for (int i = 0; i < getColumCount(); i++) {
 			setISa.clear();
 			setISb.clear();
-			for (int j = 0; j < getSizeOfColumn(i); j++)
+			for (int j = 0; j < getSizeOfColumn(i); j++){
 				setISa.add(getItemInColumn(i, j).getOutputSymbol());
-			for (int j = 0; j < aRow.getSizeOfColumn(i); j++)
+			}
+			for (int j = 0; j < aRow.getSizeOfColumn(i); j++){
 				setISb.add(aRow.getItemInColumn(i, j).getOutputSymbol());
+			}
 			if (!setISa.equals(setISb))
+				return false;
+		}
+		return true;
+	}
+	
+	public boolean isEquivalentToAll(LiControlTableRow aRow) {
+		ArrayList<String> setISa = new ArrayList<String>();
+		ArrayList<String> setISb = new ArrayList<String>();
+		for (int i = 0; i < getColumCount(); i++) {
+			setISa.clear();
+			setISb.clear();
+			for (int j = 0; j < getSizeOfColumn(i); j++){
+				setISa.add(getItemInColumn(i, j).getOutputSymbol());
+			}
+			for (int j = 0; j < aRow.getSizeOfColumn(i); j++){
+				setISb.add(aRow.getItemInColumn(i, j).getOutputSymbol());
+			}
+			if (!setISa.equals(setISb))
+				return false;
+		}
+		return true;
+	}
+	
+	public boolean isEquivalentToNumber(LiControlTableRow aRow) {
+		for (int i = 0; i < getColumCount(); i++) {
+			int a=0, b=0;
+			for (int j = 0; j < getSizeOfColumn(i); j++){
+				if (getItemInColumn(i, j).getOutputSymbol().equals("miss")) a++;
+			}
+			for (int j = 0; j < aRow.getSizeOfColumn(i); j++){
+				if (aRow.getItemInColumn(i, j).getOutputSymbol().equals("miss")) b++;
+			}
+			if (a != b)
 				return false;
 		}
 		return true;

@@ -23,7 +23,10 @@ import tools.loggers.LogManager;
 import automata.State;
 import automata.efsm.EFSMTransition;
 import automata.efsm.EFSMTransition.Label;
-import datamining.TreeNode;
+import datamining.free.FreeARFF;
+import datamining.free.TreeNode;
+import datamining.weka.WekaARFF;
+import datamining.weka.WekaTreeNode;
 import drivers.Driver;
 import drivers.efsm.EFSMDriver;
 
@@ -88,36 +91,50 @@ public class LiConjecture extends automata.efsm.EFSM {
 	}
 	
 	public void fillVar(EFSMTransition t, Label label){
-		String dataFile = datamining.Classifier.generateFileForVar(t, paramNames);
-		//System.out.println("\n\n\nfile : "+ dataFile);
-		dataFile = datamining.Classifier.handleConstantOutput(dataFile, label);
-		//System.out.println("file : "+ dataFile);
-		dataFile = datamining.Classifier.handleRelatedDataForOutput(dataFile);
-		//System.out.println("file : "+ dataFile);
-		dataFile = datamining.Classifier.handleDifferentOutput(dataFile, label);
-		System.out.println(""+label.toDotString());
-		
-		/* String dataFile = ARFF.generateFileForVar(t, paramNames);
-		 dataFile = ARFF.filterFileForVar(dataFile);
-		 dataFile = ARFF.handleConstantOutput(dataFile, label);
-		 dataFile = ARFF.handleRelatedDataForOutput(dataFile);
-		 dataFile = ARFF.handleDifferentOutput(dataFile, label, t);*/
+		if (Options.WEKA){
+			String dataFile = WekaARFF.generateFileForVar(t, paramNames);
+			dataFile = WekaARFF.filterFileForVar(dataFile);
+			dataFile = WekaARFF.handleConstantOutput(dataFile, label);
+			dataFile = WekaARFF.handleRelatedDataForOutput(dataFile);
+			dataFile = WekaARFF.handleDifferentOutput(dataFile, label, t);		
+			
+		}else{
+			String dataFile = FreeARFF.generateFileForVar(t, paramNames);
+			dataFile = FreeARFF.handleConstantOutput(dataFile, label);
+			dataFile = FreeARFF.handleRelatedDataForOutput(dataFile);
+			dataFile = FreeARFF.handleDifferentOutput(dataFile, label, t);			
+		}		 
 	}
 
 	private void fillPredicate(List<EFSMTransition> list,
 			Map<String, Label> labels) {
 		if (list.size() > 1) {
-			String dataFile = datamining.Classifier.generateFileForPredicate(list, paramNames);
-			dataFile = datamining.Classifier.filterArff(dataFile);
-			TreeNode node = datamining.Classifier.Classify(dataFile, -1);
-			if(node != null){
-				for(EFSMTransition t : list){
-					for(String pred : node.getPredicatesFor(t.getTo()+t.getOutput())){
-						labels.get(t.toString()).addPredicate(pred);
+			if (Options.WEKA){				
+				String dataFile = WekaARFF.generateFileForPredicate(list, paramNames);
+				dataFile = WekaARFF.filterFileForPredicate(dataFile);
+				dataFile = WekaARFF.handleRelatedDataForPredicate(dataFile);
+				WekaTreeNode node = WekaARFF.handlePredicate(dataFile);
+				if(node != null){
+					for(EFSMTransition t : list){
+						for(String pred : node.getPredicatesFor(t.getTo()+t.getOutput())){
+							labels.get(t.toString()).addPredicate(pred);
+						}
+					}
+				}
+				
+			}else{
+				String dataFile = datamining.free.Classifier.generateFileForPredicate(list, paramNames);
+				dataFile = datamining.free.Classifier.filterArff(dataFile);
+				TreeNode node = datamining.free.Classifier.Classify(dataFile, -1);
+				if(node != null){
+					for(EFSMTransition t : list){
+						for(String pred : node.getPredicatesFor(t.getTo()+t.getOutput())){
+							labels.get(t.toString()).addPredicate(pred);
+						}
 					}
 				}
 			}
-			System.out.println(""+labels.toString());
+			
 		}
 	}
 
@@ -149,17 +166,13 @@ public class LiConjecture extends automata.efsm.EFSM {
 									labels);
 						}
 					}
-					gSymbols = datamining.Classifier.getGlobalSymbols();
+					gSymbols = WekaARFF.getGlobalSymbols();
 
-					for (EFSMTransition t : getTransitions()) {
-						writer.write("\t" + t.getFrom() + " -> " + t.getTo()
-								+ "[label=\""
-								+ labels.get(t.toString()).toDotString()
-								+ "\"];" + "\n");
+					for (EFSMTransition t : getTransitions()){
+						writer.write("\t" + t.getFrom() + " -> " + t.getTo() + "[label=\"" + labels.get(t.toString()).toDotString() + "\"];" + "\n");            	
 					}
 					writer.write("}\n");
-					if (writer != null)
-						writer.close();
+					if (writer != null) writer.close();
 					LogManager.logInfo("Conjecture have been exported to "
 							+ file.getName());
 					File imagePath = GraphViz.dotToFile(file.getPath());

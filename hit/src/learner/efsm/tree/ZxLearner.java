@@ -13,37 +13,20 @@ import automata.State;
 import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
 import drivers.Driver;
-import drivers.efsm.real.SimpleClient;
+import drivers.efsm.real.ScanDriver;
 
 public class ZxLearner extends Learner {
-	private SimpleClient driver;
+	private ScanDriver driver;
 	private List<InputSequence> z;
 	private List<String> i;
 	private XObservationNode u;
 	private List<XObservationNode> states;
 
 	public ZxLearner(Driver driver) {
-		this.driver = (SimpleClient) driver;
+		this.driver = (ScanDriver) driver;
 
-		// Initialize I and Z with specified options
-		if (Options.INITIAL_INPUT_SYMBOLS.length() > 0)
-			this.i = Arrays.asList(Options.INITIAL_INPUT_SYMBOLS.split(","));
-		else
-			this.i = new ArrayList<String>();
+		this.i = new ArrayList<String>();
 		this.z = new ArrayList<InputSequence>();
-		if (Options.INITIAL_INPUT_SEQUENCES.length() > 0) {
-			for (String inputSeqString : Options.INITIAL_INPUT_SEQUENCES
-					.split(",")) {
-				InputSequence seq = new InputSequence();
-				for (String inputSym : inputSeqString.split("-")) {
-					seq.addInput(inputSym);
-				}
-				z.add(seq);
-			}
-		}
-
-		if (Options.INITIAL_INPUT_SYMBOLS_EQUALS_TO_X)
-			this.i = driver.getInputSymbols();
 
 		// an observation tree U, initialized with {e}.
 		this.u = new XObservationNode();

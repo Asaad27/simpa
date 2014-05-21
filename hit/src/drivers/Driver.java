@@ -12,7 +12,7 @@ public abstract class Driver {
 	public long duration = 0;
 
 	public enum DriverType {
-		NONE, EFSM, MEALY, DFA
+		NONE, EFSM, MEALY, DFA, SCAN
 	};
 
 	public DriverType type = DriverType.NONE;

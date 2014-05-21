@@ -95,9 +95,9 @@ public class EFSMTransition extends Transition {
 			s.append(input + "\\n");
 			Collections.sort(predicates);
 			if (predicates.size() > 0) {
-				s.append(predicates.get(0));
+				s.append("("+predicates.get(0)+")");
 				for (int i = 1; i < predicates.size(); i++)
-					s.append(" " + Options.SYMBOL_OR + " " + predicates.get(i));
+					s.append(" " + Options.SYMBOL_OR + " (" + predicates.get(i)+")");
 				s.append(",\\n");
 			}
 			Collections.sort(var);
@@ -107,7 +107,7 @@ public class EFSMTransition extends Transition {
 					s.append("\\n" + var.get(i) + ",");
 				s.append("\\n");
 			}
-			return s.append(output).toString().replaceAll("\"", "\\\\\"");
+			return s.append(output).toString().replaceAll("\"", "\\\\\"").replaceAll("_[0-9]{5,}", "");
 		}
 	}
 

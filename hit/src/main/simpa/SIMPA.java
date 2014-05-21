@@ -3,7 +3,6 @@ package main.simpa;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
 import learner.Learner;
 import tools.GraphViz;
 import tools.Utils;
@@ -12,6 +11,7 @@ import tools.loggers.LogManager;
 import tools.loggers.TextLogger;
 import drivers.Driver;
 import drivers.efsm.real.GenericDriver;
+import drivers.efsm.real.ScanDriver;
 
 public class SIMPA {
 	public final static String name = SIMPA.class.getSimpleName();
@@ -41,6 +41,8 @@ public class SIMPA {
 					Options.AUTO_OPEN_HTML = true;
 				else if (args[i].equals("--forcej48"))
 					Options.FORCE_J48 = true;
+				else if (args[i].equals("--scan"))
+					Options.SCAN = true;				
 				else if (args[i].equals("--generic"))
 					Options.GENERICDRIVER = true;
 				else if (args[i].equals("--tree"))
@@ -121,7 +123,9 @@ public class SIMPA {
 		try {
 			if (Options.GENERICDRIVER) {
 				driver = (Driver) new GenericDriver(system);
-			} else {
+			}else if (Options.SCAN){
+				driver = (Driver) new ScanDriver(system); 
+			}else {
 				driver = (Driver) Class.forName(system).newInstance();
 			}
 			LogManager.logConsole("System : " + driver.getSystemName());

@@ -24,6 +24,8 @@ public abstract class Learner {
 
 	public static Learner getLearnerFor(Driver driver) throws Exception {
 		switch (driver.type) {
+		case SCAN:
+			return new ZLearner(driver);
 		case EFSM:
 			return new LiLearner(driver);
 		case MEALY:

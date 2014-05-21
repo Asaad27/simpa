@@ -30,6 +30,7 @@ public class Options {
 
 	// Algorithm's options
 
+	public static boolean SCAN = false;
 	public static boolean TREEINFERENCE = false;
 	public static boolean GENERICDRIVER = false;
 	public static String INITIAL_INPUT_SYMBOLS = "";
