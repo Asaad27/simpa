@@ -160,6 +160,7 @@ public class EFSMTransition extends Transition {
 
 	public Label initializeLabel(TreeMap<String, List<String>> paramNames) {
 		Label l = new Label(input, output);
+		System.out.println(paramsData.get(0).getInputParameters());
 		for (int i = 0; i < paramsData.get(0).getInputParameters().size(); i++) {
 			l.addInputParam(new Parameter(paramNames.get(input).get(i),
 					Types.STRING));

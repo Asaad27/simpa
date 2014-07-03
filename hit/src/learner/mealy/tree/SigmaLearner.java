@@ -7,12 +7,10 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import learner.Learner;
 import learner.mealy.LmConjecture;
 import learner.mealy.Node;
 import main.simpa.Options;
-import tools.Utils;
 import tools.loggers.LogManager;
 import automata.State;
 import automata.mealy.InputSequence;
@@ -20,7 +18,7 @@ import automata.mealy.MealyTransition;
 import drivers.Driver;
 import drivers.mealy.MealyDriver;
 
-public class ZLearner extends Learner {
+public class SigmaLearner extends Learner {
 	private MealyDriver driver;
 	private List<InputSequence> z;
 	private List<String> i;
@@ -29,7 +27,7 @@ public class ZLearner extends Learner {
 	private int rounds;
 	private int conjStates;
 
-	public ZLearner(Driver driver) {
+	public SigmaLearner(Driver driver) {
 		rounds =0;
 		this.driver = (MealyDriver) driver;
 
@@ -59,6 +57,39 @@ public class ZLearner extends Learner {
 		LogManager.logConsole("Options : I -> " + i.toString());
 		LogManager.logConsole("Options : Z -> " + z.toString());
 	}
+	
+	public SigmaLearner(Driver driver,List<InputSequence> z) {
+		rounds =0;
+		this.driver = (MealyDriver) driver;
+
+		// Initialize I and Z with specified options
+		if (Options.INITIAL_INPUT_SYMBOLS.length() > 0)
+			this.i = Arrays.asList(Options.INITIAL_INPUT_SYMBOLS.split(","));
+		else
+			this.i = new ArrayList<String>();
+		this.z = new ArrayList<InputSequence>();
+		if (Options.INITIAL_INPUT_SEQUENCES.length() > 0) {
+			for (String inputSeqString : Options.INITIAL_INPUT_SEQUENCES
+					.split(",")) {
+				InputSequence seq = new InputSequence();
+				for (String inputSym : inputSeqString.split("-")) {
+					seq.addInput(inputSym);
+				}
+				z.add(seq);
+			}
+		}
+		
+		this.z=z;
+
+		if (Options.INITIAL_INPUT_SYMBOLS_EQUALS_TO_X)
+			this.i = driver.getInputSymbols();
+
+		// an observation tree U, initialized with {e}.
+		this.u = new ObservationNode();
+
+		LogManager.logConsole("Options : I -> " + i.toString());
+		LogManager.logConsole("Options : Z -> " + z.toString());
+	}
 
 	private LmConjecture fixPointConsistency(LmConjecture K) {
 		InputSequence inconsistency;
@@ -66,9 +97,8 @@ public class ZLearner extends Learner {
 		// 1. while there exists a witness w for state q in U such that its
 		// input projection is not in Z
 		do {
-			sortZ();
 			inconsistency = findInconsistency(K);
-			if (inconsistency != null ) {
+			if (inconsistency != null) {
 				// 4. Z' = Z U {w|I} and I' = I U inp(w)
 				// 6. Z = Z' and I = I'
 				z = extendInputSequencesWith(z, inconsistency);
@@ -169,33 +199,14 @@ public class ZLearner extends Learner {
 	}
 
 	public void learn() {
+		sortZ();
 		LogManager.logConsole("Inferring the system");
-		InputSequence ce;
+		
 
 		// 1. Build-quotient(A, I, Z, {€}) returning U and K = (Q, q0, I, O, hK)
 		LmConjecture Z_Q = buildQuotient(z);
-
-		// 2. Fix_Point_Consistency(A, I, Z, U, K)
+		
 		Z_Q = fixPointConsistency(Z_Q);
-
-		// 4. while there exists an unprocessed counterexample CE
-		do {
-			rounds++;
-			sortZ();
-			ce = driver.getCounterExample2(Z_Q,0.05);
-			if (ce != null) {
-				LogManager.logInfo("Adding the counter example to tree");
-
-				// 5. U = U U CE
-				askInputSequenceToNode(u, ce,false);
-
-				// LogManager.logObservationTree(u);
-
-				// 6. Fix_Point_Consistency(A, I, Z, U, K)
-				Z_Q = fixPointConsistency(Z_Q);
-
-			}
-		} while (ce != null);
 		System.out.println();
 		conjStates=Z_Q.getStateCount();
 	}
@@ -222,13 +233,13 @@ public class ZLearner extends Learner {
 
 	private void extendNodeWithInputSeqs(Node node, List<InputSequence> Z) {
 		for (InputSequence seq : Z) {
-			askInputSequenceToNode(node, seq,false);
+			askInputSequenceToNode(node, seq);
 		}
 	}
 
 	private void extendNodeWithSymbols(Node node, List<String> symbols) {
 		for (String symbol : symbols) {
-			askInputSequenceToNode(node, new InputSequence(symbol),true);
+			askInputSequenceToNode(node, new InputSequence(symbol));
 		}
 	}
 
@@ -284,7 +295,6 @@ public class ZLearner extends Learner {
 			LogManager.logInfo("Inconsistency found : " + ce);
 		else
 			LogManager.logInfo("No inconsistency found");
-		//return driver.isCounterExample(ce, c)? ce : null;
 		return ce;
 	}
 
@@ -329,7 +339,7 @@ public class ZLearner extends Learner {
 		return null;
 	}
 
-	private void askInputSequenceToNode(Node node, InputSequence sequence,boolean isIExtension) {
+	private void askInputSequenceToNode(Node node, InputSequence sequence) {
 		Node currentNode = node;
 		InputSequence seq = sequence.clone();
 		InputSequence previousSeq = getPreviousInputSequenceFromNode(currentNode);
@@ -340,18 +350,8 @@ public class ZLearner extends Learner {
 			seq.removeFirstInput();
 		}
 		if (seq.getLength() > 0) {
-			//seq = seq.addInputSequence(InputSequence.generate(driver.getInputSymbols(), Utils.randIntBetween(1, 5)));
-			InputSequence freeSuffix=new InputSequence();
-			if(isIExtension){
-				if(!z.isEmpty()){
-					freeSuffix = z.get(0);
-				}
-			}
-			else{
-				//freeSuffix = findGoodZSuffix(seq);
-				//freeSuffix = new InputSequence();
-			}
-			seq = seq.addInputSequence(freeSuffix);
+			if(!z.isEmpty())
+			seq = seq.addInputSequence(z.get(0));
 			driver.reset();
 			for (String input : previousSeq.sequence) {
 				driver.execute(input);
@@ -364,24 +364,6 @@ public class ZLearner extends Learner {
 							input, driver.execute(input)));
 			}
 		}
-	}
-
-	private InputSequence findGoodZSuffix(InputSequence seq) {
-		InputSequence ir = seq.clone();
-		ir = ir.removeFirstInput();
-		InputSequence zj = null;
-		for(InputSequence zi : z){
-			if(ir.clone().isPrefixOf(zi.clone())){
-				zj = zi.clone();	
-				break;
-			}
-		}
-		if(zj ==null){
-			//return InputSequence.generate(driver.getInputSymbols(), 1);
-			return new InputSequence();
-		}
-			System.out.print("+1 ");
-		return zj.getIthSuffix(ir.getLength());
 	}
 
 	private InputSequence getPreviousInputSequenceFromNode(Node node) {
@@ -443,10 +425,6 @@ public class ZLearner extends Learner {
 		return rounds;
 	}
 	
-	public List<InputSequence> getZ(){
-		return z;
-	}
-	
 	public void sortZ(){
 		int length = z.size();
 		List<InputSequence> auxZ = new ArrayList<>(length);
@@ -461,11 +439,9 @@ public class ZLearner extends Learner {
 			z.remove(a);
 		}
 		z = auxZ;
-		
 	}
+	
 	public int conjStates(){
 		return conjStates;
 	}
-	
-	
 }

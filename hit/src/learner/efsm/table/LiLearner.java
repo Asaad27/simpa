@@ -231,8 +231,8 @@ public class LiLearner extends Learner {
 
 		c.exportToRawDot();
 		c.exportToDot();
-		c.exportToAslan();
-		c.exportToXML();
+		//c.exportToAslan();
+		//c.exportToXML();
 		return c;
 	}
 

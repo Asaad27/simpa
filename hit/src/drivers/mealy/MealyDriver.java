@@ -35,6 +35,7 @@ public class MealyDriver extends Driver {
 	}
 
 	public MealyDriver(String name) {
+		type = DriverType.MEALY;
 		this.name = name;
 		this.automata = null;
 		CElength=0;

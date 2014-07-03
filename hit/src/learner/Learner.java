@@ -1,6 +1,7 @@
 package learner;
 
 import learner.efsm.table.LiLearner;
+import learner.efsm.tree.ZxLearner;
 import learner.mealy.table.LmLearner;
 import learner.mealy.tree.SigmaLearner;
 import learner.mealy.tree.ZLearner;

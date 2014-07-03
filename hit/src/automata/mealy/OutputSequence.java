@@ -6,6 +6,32 @@ import java.util.List;
 import main.simpa.Options;
 
 public class OutputSequence implements Cloneable {
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((sequence == null) ? 0 : sequence.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		OutputSequence other = (OutputSequence) obj;
+		if (sequence == null) {
+			if (other.sequence != null)
+				return false;
+		} else if (!sequence.equals(other.sequence))
+			return false;
+		return true;
+	}
+
 	public List<String> sequence;
 
 	public OutputSequence() {
@@ -40,7 +66,23 @@ public class OutputSequence implements Cloneable {
 		}
 		return newis;
 	}
+	
+	public OutputSequence getIthPreffix(int end) {
+		OutputSequence newis = new OutputSequence();
+		for (int i = 0; i < end; i++) {
+			newis.addOutput(new String(sequence.get(i)));
+		}
+		return newis;
+	}
 
+	public OutputSequence subSequence(int start, int end){
+		OutputSequence newis = new OutputSequence();
+		for (int i = start; i < end; i++) {
+			newis.addOutput(new String(sequence.get(i)));
+		}
+		return newis;
+	}
+	
 	public boolean equals(OutputSequence o) {
 		if (sequence.size() != o.sequence.size())
 			return false;

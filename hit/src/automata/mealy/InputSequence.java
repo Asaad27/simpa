@@ -7,6 +7,31 @@ import main.simpa.Options;
 import tools.Utils;
 
 public class InputSequence implements Cloneable {
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((sequence == null) ? 0 : sequence.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		InputSequence other = (InputSequence) obj;
+		if (sequence == null) {
+			if (other.sequence != null)
+				return false;
+		} else if (!sequence.equals(other.sequence))
+			return false;
+		return true;
+	}
 	public List<String> sequence;
 
 	public InputSequence() {
@@ -32,6 +57,13 @@ public class InputSequence implements Cloneable {
 		return sequence.size();
 	}
 
+	public InputSequence getSuffixBegginingAt(int start) {
+		InputSequence newis = new InputSequence();
+		for (int i = start; i < sequence.size(); i++) {
+			newis.addInput(new String(sequence.get(i)));
+		}
+		return newis;
+	}
 	public InputSequence getIthSuffix(int start) {
 		InputSequence newis = new InputSequence();
 		for (int i = sequence.size() - start; i < sequence.size(); i++) {
@@ -43,6 +75,14 @@ public class InputSequence implements Cloneable {
 	public InputSequence getIthPreffix(int end) {
 		InputSequence newis = new InputSequence();
 		for (int i = 0; i < end; i++) {
+			newis.addInput(new String(sequence.get(i)));
+		}
+		return newis;
+	}
+	
+	public InputSequence subSequence(int start, int end){
+		InputSequence newis = new InputSequence();
+		for (int i = start; i < end; i++) {
 			newis.addInput(new String(sequence.get(i)));
 		}
 		return newis;
@@ -136,5 +176,9 @@ public class InputSequence implements Cloneable {
 		if(this.getLength()==0)
 			return true;
 		return this.getFirstSymbol().equals(b.getFirstSymbol()) && this.removeFirstInput().isPrefixOf(b.removeFirstInput());
+	}
+	
+	public boolean isFollowedBy(int start, InputSequence suffix){
+		return suffix.clone().isPrefixOf(this.getSuffixBegginingAt(start).clone());
 	}
 }

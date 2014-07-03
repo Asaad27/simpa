@@ -41,5 +41,22 @@
 	<classpathentry kind="lib" path="lib/htmlunit/xml-apis-1.4.01.jar"/>
 	<classpathentry kind="lib" path="lib/json/jackson-core-asl-1.9.11.jar"/>
 	<classpathentry kind="lib" path="lib/json/jackson-mapper-asl-1.9.11.jar"/>
+	<classpathentry kind="lib" path="lib/learnlib/guava-16.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/learnlib/learnlib-algorithm-features-10.jar"/>
+	<classpathentry kind="lib" path="lib/learnlib/learnlib-build-tools-10.jar"/>
+	<classpathentry kind="lib" path="lib/learnlib/learnlib-cache-10.jar"/>
+	<classpathentry kind="lib" path="lib/learnlib/learnlib-counterexamples-10.jar"/>
+	<classpathentry kind="lib" path="lib/learnlib/learnlib-dhc-10.jar"/>
+	<classpathentry kind="lib" path="lib/learnlib/learnlib-lstar-baseline-10.jar"/>
+	<classpathentry kind="lib" path="lib/learnlib/learnlib-lstar-generic-10.jar"/>
+	<classpathentry kind="lib" path="lib/learnlib/trove4j-3.0.3.jar"/>
+	<classpathentry kind="lib" path="lib/learnlib/automata-api-0.4.0.jar"/>
+	<classpathentry kind="lib" path="lib/learnlib/automata-commons-dotutil-0.4.0.jar"/>
+	<classpathentry kind="lib" path="lib/learnlib/automata-commons-util-0.4.0.jar"/>
+	<classpathentry kind="lib" path="lib/learnlib/automata-core-0.4.0.jar"/>
+	<classpathentry kind="lib" path="lib/learnlib/automata-incremental-0.4.0.jar"/>
+	<classpathentry kind="lib" path="lib/learnlib/automata-util-0.4.0.jar"/>
+	<classpathentry kind="lib" path="lib/learnlib/learnlib-basic-eqtests-10-modif.jar"/>
+	<classpathentry kind="lib" path="lib/learnlib/learnlib-core-10-sigma.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

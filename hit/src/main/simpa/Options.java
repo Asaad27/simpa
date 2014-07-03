@@ -30,7 +30,7 @@ public class Options {
 
 	// Algorithm's options
 
-	public static boolean SIGMAINFERENCE = true;
+	public static boolean SIGMAINFERENCE = false;
 	public static boolean TREEINFERENCE = true;
 	public static boolean GENERICDRIVER = false;
 	public static String INITIAL_INPUT_SYMBOLS = "";
@@ -55,8 +55,8 @@ public class Options {
 	public static int RETEST = -1;
 
 	public static int NBTEST = 200;
-	public static int MINSTATES = 80;
-	public static int MAXSTATES = 80;
+	public static int MINSTATES = 1280;
+	public static int MAXSTATES = 1280;
 	public static int TRANSITIONPERCENT = 50;
 	public static int MININPUTSYM = 5;
 	public static int MAXINPUTSYM = 5;

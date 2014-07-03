@@ -259,6 +259,9 @@ public class Classifier {
 			List<Types> realTypes = getTypesOfParams(transition);
 			
 			for (Map.Entry<String, List<Parameter>> entry : transition.getParamsData(0).getAutomataState().entrySet()) {
+				System.out.println("entry key :"+entry.getKey());
+				System.out.println("entry value:"+entry.getValue());
+				System.out.println(paramNames);
 				for (int j = 0; j < entry.getValue().size(); j++) {
 					if (!paramNames.get(entry.getKey()).isEmpty())
 						writer.write("@ATTRIBUTE saved" + Utils.capitalize(paramNames.get(entry.getKey()).get(j)) +"_" + Math.abs((new Random().nextLong())) + " "

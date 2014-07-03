@@ -20,7 +20,7 @@ public class RandomMealyDriver extends MealyDriver {
 
 	public static List<String> getStatHeaders() {
 		return Utils.createArrayList("States", "Inputs", "Outputs", "ARL",
-				"Requests", "Duration", "Transitions","CElength","Rounds","Seeds","Number of suffixes");
+				"Requests", "Duration", "Transitions","CElength","Rounds","Seeds","Number of suffixes","number of states in conjecture");
 	}
 
 }

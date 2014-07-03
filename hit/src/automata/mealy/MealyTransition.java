@@ -34,7 +34,8 @@ public class MealyTransition extends Transition {
 	}
 
 	public String toDot() {
-		return from + " -> " + to + "[label=\"" + input + "/" + output + "\"];";
+		System.out.println(from + " -> " + to + "[label=\"" + input + "/" + output + "\"];");
+		return from + " -> " + to + "[label=\"" + input + "/" + output + "\"];"; // A -> B[label="a/0"]
 	}
 
 	public String getName() {

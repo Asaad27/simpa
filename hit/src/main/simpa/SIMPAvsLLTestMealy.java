@@ -141,11 +141,12 @@ public class SIMPAvsLLTestMealy {
 						"FLR", cs, "WITHOUT");
 				runnerList.add(runner5);
 				
+				/*
 				LLRunner runner5b = new LLRunner(Options.OUTDIR
 						+ "/statsLL_L_FLR_LLDIC.csv", inputs, Options.NBTEST, "L*",
 						"FLR", cs, "LLDIC");
 				runnerList.add(runner5b);
-				
+				*/
 				LLRunner runner5c = new LLRunner(Options.OUTDIR
 						+ "/statsLL_L_FLR_NEWDIC.csv", inputs, Options.NBTEST, "L*",
 						"FLR", cs, "NEWDIC");
@@ -180,7 +181,7 @@ public class SIMPAvsLLTestMealy {
 						+ "/statsLL_L_1B1.csv", inputs, Options.NBTEST, "L*",
 						"1B1", cs, true);
 				runnerList.add(runner11);
-*/
+*/List<InputSequence> halfZ = new ArrayList<>();
 				for (i = 1; i <= Options.NBTEST; i++) {
 					long seed = System.currentTimeMillis();
 					Utils.setSeed(seed);
@@ -197,12 +198,22 @@ public class SIMPAvsLLTestMealy {
 						driver = new RandomMealyDriver();
 						l = new ZLearner(driver);
 						l.learn();
+						halfZ = new ArrayList<>();
 						List<InputSequence> auxZ = new ArrayList<>(l.getZ());
+						System.out.println("Z :"+l.getZ());
+						System.out.println("auxZ :"+auxZ);
+						for(int j=0;j<(l.getZ().size()/2);j++){
+							
+							halfZ.add(auxZ.remove(Utils.randIntBetween(0, l.getZ().size()-1-j)));
+							System.out.println("halfZ :"+halfZ);
+						}
 						
+						System.out.println("halfZ :"+halfZ);
+						auxZ = new ArrayList<>(l.getZ());
 						Utils.setSeed(seed);
 						driver2 = new RandomMealyDriver();
 						SigmaLearner sl = new SigmaLearner(driver2,auxZ);
-						System.out.println("Z :"+l.getZ());
+						
 						sl.learn();
 						
 						
@@ -214,6 +225,7 @@ public class SIMPAvsLLTestMealy {
 						statlist.add(String.valueOf(l.getRounds()));
 						statlist.add(String.valueOf(seed));
 						statlist.add(String.valueOf(l.getZ().size()));
+						statlist.add(String.valueOf(sl.conjStates()));
 						stats.addRecord(statlist);
 					} finally {
 						
