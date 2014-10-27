@@ -24,9 +24,10 @@ public class Entropy {
 		Iterator<String> itr_freq = column.iterator();
 		while (itr_freq.hasNext()) {
 			String current = itr_freq.next();
-			float freq = frequencies.get(current);
-			frequencies.remove(current);
-			frequencies.put(current, freq + 1 / column_size);
+			if (frequencies.containsKey(current)){
+				float freq = frequencies.get(current);
+				frequencies.put(current, freq + 1 / column_size);
+			}
 		}
 		
 		// Apply Shannon Entropy's formula
@@ -43,7 +44,6 @@ public class Entropy {
 	
 	public static float gain (LinkedList<String> column_class, LinkedList<String> column, Nominal<String> enum_class, Nominal<String> enum_col, float global_entropy) {
 		float gain = global_entropy;
-		
 		LinkedList<String> possible_values = enum_col.getLinkedList();
 		
 		LinkedList<String> Sv = new LinkedList<String>();

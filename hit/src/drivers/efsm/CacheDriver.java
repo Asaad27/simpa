@@ -4,15 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
-
 import tools.Utils;
 import tools.loggers.LogManager;
 import automata.efsm.Parameter;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedOutput;
-import examples.efsm.LRUCache;
+import examples.efsm.FIFOCache;
 import examples.efsm.MemoryCache;
-import examples.efsm.PLRUCache;
 
 public class CacheDriver extends EFSMDriver{
 	
@@ -20,7 +18,7 @@ public class CacheDriver extends EFSMDriver{
 	
 	public CacheDriver(){
 		super(null);
-		this.cache = new LRUCache(4);
+		this.cache = new FIFOCache(4);
 	}
 	
 
@@ -75,7 +73,7 @@ public class CacheDriver extends EFSMDriver{
 		HashMap<String, List<ArrayList<Parameter>>> defaultParamValues = new HashMap<String, List<ArrayList<Parameter>>>();
 		ArrayList<ArrayList<Parameter>> params = null;
 		params = new ArrayList<ArrayList<Parameter>>();
-		for(int i=0; i<cache.getNumBlock()*2; i++)
+		for(int i=0; i<cache.getNumBlock()+1; i++)
 			params.add(Utils.createArrayList(new Parameter(String.valueOf(i+1), Types.NUMERIC)));		
 		defaultParamValues.put("access", params);
 

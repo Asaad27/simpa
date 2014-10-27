@@ -8,9 +8,9 @@ import java.util.Map;
 
 import learner.efsm.table.LiControlTable;
 import learner.efsm.table.LiDataTable;
-import learner.efsm.tree.XObservationNode;
+import learner.efsm.tree.ZXObservationNode;
 import learner.mealy.table.LmControlTable;
-import learner.mealy.tree.ObservationNode;
+import learner.mealy.tree.ZObservationNode;
 import main.simpa.Options;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedOutput;
@@ -142,13 +142,13 @@ public class LogManager {
 			l.logParameters(params);
 	}
 
-	public static void logObservationTree(ObservationNode root) {
+	public static void logObservationTree(ZObservationNode root) {
 		for (ILogger l : loggers)
 			if (Options.GRAPHVIZ)
 				l.logObservationTree(root);
 	}
 
-	public static void logXObservationTree(XObservationNode root) {
+	public static void logXObservationTree(ZXObservationNode root) {
 		for (ILogger l : loggers)
 			if (Options.GRAPHVIZ)
 				l.logXObservationTree(root);

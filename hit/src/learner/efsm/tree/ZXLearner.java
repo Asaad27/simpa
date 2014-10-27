@@ -1,8 +1,12 @@
 package learner.efsm.tree;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import learner.Learner;
 import learner.mealy.LmConjecture;
@@ -14,25 +18,27 @@ import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
 import drivers.Driver;
 import drivers.efsm.real.ScanDriver;
+import drivers.mealy.MealyDriver;
 
-public class ZxLearner extends Learner {
+public class ZXLearner extends Learner {
 	private ScanDriver driver;
 	private List<InputSequence> z;
 	private List<String> i;
-	private XObservationNode u;
-	private List<XObservationNode> states;
+	private ZXObservationNode u;
+	private List<ZXObservationNode> states;
 
-	public ZxLearner(Driver driver) {
+	public ZXLearner(Driver driver) {
 		this.driver = (ScanDriver) driver;
 
 		this.i = new ArrayList<String>();
 		this.z = new ArrayList<InputSequence>();
 
 		// an observation tree U, initialized with {e}.
-		this.u = new XObservationNode();
+		this.u = new ZXObservationNode();
 
 		LogManager.logConsole("Options : I -> " + i.toString());
 		LogManager.logConsole("Options : Z -> " + z.toString());
+		LogManager.logConsole("Options : Urls -> " + Options.URLS);
 	}
 
 	private LmConjecture fixPointConsistency(LmConjecture K) {
@@ -57,21 +63,45 @@ public class ZxLearner extends Learner {
 		// 7. Return the last labelled observation tree (global) and quotient.
 		return K;
 	}
+	
+	private String getTracesFromNode(Node n, List<InputSequence> seqs){
+		StringBuilder s = new StringBuilder();
+		for(InputSequence seq : seqs){
+			s.append(getTraceFromNode(n, seq));
+		}
+		return s.toString();
+	}
+	
+	private String getTraceFromNode(Node n, InputSequence seq){
+		StringBuilder s = new StringBuilder();
+		for(String i : seq.sequence){
+			n = (ZXObservationNode)n.childBy(i);
+			if (n == null) return "|";
+			else s.append(n.output);
+		}
+		return s.toString();
+	}
 
 	private LmConjecture buildQuotient(List<InputSequence> z) {
 		LogManager.logInfo("Build Quotient");
 		LogManager.logInfo("Z : " + z.toString());
 		LogManager.logInfo("I : " + i.toString());
+		Deque<Node> queue = null;
+		ZXObservationNode currentNode = null;
 
 		// 1. q0 := e, Q : = {q0}
-		this.states = new ArrayList<XObservationNode>();
+		this.states = new ArrayList<ZXObservationNode>();
+		
+		//1.5 CachedEquivalent
+		Map<String, Node> cache = new HashMap<String, Node>();
+
 
 		// 2. for (each state u of U being traversed during Breadth First Search
-		List<Node> queue = new ArrayList<Node>();
+		queue = new ArrayDeque<Node>();
 		queue.add(u);
-		XObservationNode currentNode = null;
+		currentNode = null;
 		while (!queue.isEmpty()) {
-			currentNode = (XObservationNode) queue.remove(0);
+			currentNode = (ZXObservationNode) queue.pollFirst();
 
 			// 2. such that u has no labelled predecessor
 			if (noLabelledPred(currentNode)) {
@@ -79,7 +109,7 @@ public class ZxLearner extends Learner {
 				extendNodeWithInputSeqs(currentNode, z);
 
 				// 5. if (u is Z-equivalent to a traversed state w of U)
-				XObservationNode w = findFirstEquivalent(currentNode, z);
+				ZXObservationNode w = (ZXObservationNode) cache.get(getTracesFromNode(currentNode, z));
 				if (w != null) {
 					// 6. Label u with w
 					currentNode.label = w.state;
@@ -89,7 +119,12 @@ public class ZxLearner extends Learner {
 					addState(currentNode);
 					// 9. Extend_Node(A, u, I)
 					extendNodeWithSymbols(currentNode, i);
+					// 9.5
+					cache.put(getTracesFromNode(currentNode, z), currentNode);
 				}
+			}else{
+				currentNode.label = -1;
+				currentNode.state = -1;
 			}
 			queue.addAll(currentNode.children.values());
 		}
@@ -113,7 +148,6 @@ public class ZxLearner extends Learner {
 		return ret;
 	}
 
-	@SuppressWarnings("unused")
 	public void learn() {
 		LogManager.logConsole("Inferring the system");
 		InputSequence ce;
@@ -124,29 +158,13 @@ public class ZxLearner extends Learner {
 		// 2. Fix_Point_Consistency(A, I, Z, U, K)
 		Z_Q = fixPointConsistency(Z_Q);
 
-		// 4. while there exists an unprocessed counterexample CE
-		do {
-			ce = null; //driver.getCounterExample(Z_Q);
-			if (ce != null) {
-				LogManager.logInfo("Adding the counter example to tree");
-
-				// 5. U = U U CE
-				askInputSequenceToNode(u, ce);
-
-				// LogManager.logObservationTree(u);
-
-				// 6. Fix_Point_Consistency(A, I, Z, U, K)
-				Z_Q = fixPointConsistency(Z_Q);
-
-			}
-		} while (ce != null);
-
+		System.out.println();
 	}
 
-	private boolean noLabelledPred(XObservationNode node) {
+	private boolean noLabelledPred(ZXObservationNode node) {
 		boolean noLabelledPred = true;
 		while (node.parent != null) {
-			XObservationNode parent = (XObservationNode) node.parent;
+			ZXObservationNode parent = (ZXObservationNode) node.parent;
 			if (parent.isLabelled())
 				return false;
 			node = parent;
@@ -154,45 +172,7 @@ public class ZxLearner extends Learner {
 		return noLabelledPred;
 	}
 
-	private int compareNodesUsingSeqs(Node node1, Node node2,
-			List<InputSequence> z) {
-		for (InputSequence seq : z) {
-			Node currentNode1 = node1;
-			Node currentNode2 = node2;
-			InputSequence dfs = new InputSequence();
-			for (String input : seq.sequence) {
-				dfs.addInput(input);
-/*				if (!currentNode1.haveChildBy(input)
-						|| !currentNode2.haveChildBy(input))
-					return -1;
-				if (!currentNode1.childBy(input).output.equals(currentNode2
-						.childBy(input).output))
-					return -1;*/
-				currentNode1 = currentNode1.childBy(input);
-				currentNode2 = currentNode2.childBy(input);
-			}
-		}
-		return 0;
-	}
-
-	private XObservationNode findFirstEquivalent(XObservationNode node,
-			List<InputSequence> z) {
-		List<Node> queue = new ArrayList<Node>();
-		queue.add(u);
-		XObservationNode currentNode = null;
-		while (!queue.isEmpty()) {
-			currentNode = (XObservationNode) queue.get(0);
-			if (currentNode.id == node.id)
-				break;
-			if (compareNodesUsingSeqs(node, currentNode, z) == 0 && currentNode.isState())
-				return currentNode;
-			queue.remove(0);
-			queue.addAll(currentNode.children.values());
-		}
-		return null;
-	}
-
-	private void addState(XObservationNode node) {
+	private void addState(ZXObservationNode node) {
 		node.state = states.size();
 
 		// ADDED
@@ -239,10 +219,10 @@ public class ZxLearner extends Learner {
 	private void labelNodes(LmConjecture q) {
 		LogManager.logInfo("Labeling nodes");
 		labelNodesRec(q, u, q.getInitialState(), false);
-		// LogManager.logObservationTree(u);
+		//LogManager.logObservationTree(u);
 	}
 
-	private void labelNodesRec(LmConjecture q, XObservationNode node, State s,
+	private void labelNodesRec(LmConjecture q, ZXObservationNode node, State s,
 			boolean label) {
 		if (label)
 			node.label = s.getId();
@@ -252,7 +232,7 @@ public class ZxLearner extends Learner {
 			for (Node n : node.children.values()) {
 				MealyTransition t = q.getTransitionFromWithInput(s, n.input);
 				if (t != null)
-					labelNodesRec(q, (XObservationNode) n, t.getTo(), label);
+					labelNodesRec(q, (ZXObservationNode) n, t.getTo(), label);
 			}
 		}
 	}
@@ -269,27 +249,15 @@ public class ZxLearner extends Learner {
 	}
 
 	private InputSequence findInconsistencyRec(LmConjecture c, State s,
-			XObservationNode node, InputSequence ce) {
-		if (!node.children.isEmpty()) {
-			for (Node n : node.children.values()) {
-				if (!((XObservationNode) n).isState())
-					ce.addInput(n.input);
-				MealyTransition t = c.getTransitionFromWithInput(s, n.input);
-				if (t != null && t.getOutput().equals(n.output)) {
-					InputSequence otherCE = findInconsistencyRec(c, t.getTo(),
-							(XObservationNode) n, ce);
-					if (otherCE != null) {
-						boolean processed = false;
-						for (InputSequence seq : z) {
-							if (seq.equals(ce)) {
-								processed = true;
-								break;
-							}
-						}
-						if (!processed && ce.getLength() > 0)
-							return otherCE;
-					}
-				} else {
+			ZXObservationNode node, InputSequence ce) {
+		for (Node n : node.children.values()) {
+			if (!((ZXObservationNode) n).isState())
+				ce.addInput(n.input);
+			MealyTransition t = c.getTransitionFromWithInput(s, n.input);
+			if (t != null && t.getOutput().equals(n.output)) {
+				InputSequence otherCE = findInconsistencyRec(c, t.getTo(),
+						(ZXObservationNode) n, ce);
+				if (otherCE != null) {
 					boolean processed = false;
 					for (InputSequence seq : z) {
 						if (seq.equals(ce)) {
@@ -297,43 +265,53 @@ public class ZxLearner extends Learner {
 							break;
 						}
 					}
-					if (ce.getLength() == 1 && !processed)
-						return ce;
-					else {
-						if (ce.getLength() > 1)
-							return ce.removeFirstInput();
+					if (!processed && ce.getLength() > 0)
+						return otherCE;
+				}
+			} else {
+				boolean processed = false;
+				for (InputSequence seq : z) {
+					if (seq.equals(ce)) {
+						processed = true;
+						break;
 					}
 				}
-				if (!((XObservationNode) n).isState())
-					ce.removeLastInput();
+				if (ce.getLength() == 1 && !processed)
+					return ce;
+				else {
+					if (ce.getLength() > 1)
+						return ce.removeFirstInput();
+				}
 			}
+			if (!((ZXObservationNode) n).isState())
+				ce.removeLastInput();
 		}
 		return null;
 	}
 
 	private void askInputSequenceToNode(Node node, InputSequence sequence) {
-//		Node currentNode = node;
-//		InputSequence seq = sequence.clone();
-//		InputSequence previousSeq = getPreviousInputSequenceFromNode(currentNode);
-//		while (seq.getLength() > 0
-//				&& currentNode.haveChildBy(seq.getFirstSymbol())) {
-//			currentNode = currentNode.childBy(seq.getFirstSymbol());
-//			previousSeq.addInput(seq.getFirstSymbol());
-//			seq.removeFirstInput();
-//		}
-//		if (seq.getLength() > 0) {
-//			driver.reset();
-//			for (String input : previousSeq.sequence) {
-//				driver.execute(input);
-//			}
-//			for (String input : seq.sequence) {
-//				if (currentNode.haveChildBy(input))
-//					currentNode = currentNode.childBy(input);
-//				else
-//					currentNode = currentNode.addChild(new XObservationNode(
-//							input, driver.execute(input)));
-//			}
-//		}
+		Node currentNode = node;
+		InputSequence seq = sequence.clone();
+		InputSequence previousSeq = getPreviousInputSequenceFromNode(currentNode);
+		while (seq.getLength() > 0
+				&& currentNode.childBy(seq.getFirstSymbol()) != null) {
+			currentNode = currentNode.childBy(seq.getFirstSymbol());
+			previousSeq.addInput(seq.getFirstSymbol());
+			seq.removeFirstInput();
+		}
+		if (seq.getLength() > 0) {
+			driver.reset();
+			for (String input : previousSeq.sequence) {
+				//driver.execute(input);
+			}
+			for (String input : seq.sequence) {
+				//if (currentNode.childBy(input) != null)
+				//	currentNode = currentNode.childBy(input);
+				//else
+					//currentNode = currentNode.addChild(new ZXObservationNode(
+					//		input, driver.execute(input)));
+			}
+		}
 	}
 
 	private InputSequence getPreviousInputSequenceFromNode(Node node) {
@@ -348,25 +326,27 @@ public class ZxLearner extends Learner {
 
 	public LmConjecture createConjecture() {
 		LogManager.logInfo("Building conjecture");
-		LogManager.logXObservationTree(u);
+		//LogManager.logObservationTree(u);
 
 		LmConjecture c = new LmConjecture(driver);
 
 		for (int i = 0; i < states.size(); i++)
 			c.addState(new State("S" + i, i == 0));
 
-		for (XObservationNode s : states) {
+		for (ZXObservationNode s : states) {
 			for (String input : i) {
-				XObservationNode child = (XObservationNode) s.childBy(input);
-				if (child.output.length() > 0) {
+				ZXObservationNode child = (ZXObservationNode) s.childBy(input);
+				if (!child.output.isEmpty()) {
 					if (child.isState())
 						c.addTransition(new MealyTransition(c, c
 								.getState(s.state), c.getState(child.state),
 								input, child.output));
-					else
-						c.addTransition(new MealyTransition(c, c
-								.getState(s.state), c.getState(child.label),
+					else{
+						c.addTransition(new MealyTransition(c,
+								c.getState(s.state),
+								c.getState(child.label),
 								input, child.output));
+					}
 				}
 			}
 		}
@@ -379,6 +359,9 @@ public class ZxLearner extends Learner {
 		for (MealyTransition t : c.getTransitions())
 			LogManager.logTransition(t.toString());
 		LogManager.logLine();
+		
+		System.out.print("      states : " + c.getStateCount() + "\r");
+		System.out.flush();
 
 		c.exportToDot();
 

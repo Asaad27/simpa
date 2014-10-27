@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
-
 import learner.efsm.table.LiControlTable;
 import learner.efsm.table.LiControlTableItem;
 import learner.efsm.table.LiControlTableRow;
@@ -21,11 +20,11 @@ import learner.efsm.table.LiDataTableRow;
 import learner.efsm.table.NBP;
 import learner.efsm.table.NDF;
 import learner.efsm.table.NDV;
-import learner.efsm.tree.XObservationNode;
+import learner.efsm.tree.ZXObservationNode;
 import learner.mealy.table.LmControlTable;
 import learner.mealy.table.LmControlTableItem;
 import learner.mealy.table.LmControlTableRow;
-import learner.mealy.tree.ObservationNode;
+import learner.mealy.tree.ZObservationNode;
 import main.simpa.Options;
 import main.simpa.SIMPA;
 import tools.Base64;
@@ -464,12 +463,12 @@ public class HTMLLogger implements ILogger {
 	}
 
 	@Override
-	public void logObservationTree(ObservationNode root) {
+	public void logObservationTree(ZObservationNode root) {
 		logImage(root.toDot().getAbsolutePath());
 	}
 
 	@Override
-	public void logXObservationTree(XObservationNode root) {
+	public void logXObservationTree(ZXObservationNode root) {
 		logImage(root.toDot().getAbsolutePath());		
 	}
 

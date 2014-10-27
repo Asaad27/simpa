@@ -1,5 +1,7 @@
 package main.simpa;
 
+import java.util.List;
+
 public class Options {
 
 	// Test or not
@@ -48,6 +50,7 @@ public class Options {
 	public static boolean AUTO_OPEN_HTML = false;
 
 	public static String SYSTEM = "";
+	public static List<String> URLS = null;
 	public static String OUTDIR = System.getProperty("user.dir");
 
 	// SIMPATest's options

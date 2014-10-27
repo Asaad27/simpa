@@ -1,17 +1,18 @@
 {
-  "host" : "localhost",
-  "port" : 8080,
   "basicAuthUser" : null,
   "basicAuthPass" : null,
-  "name" : "GotoCode",
+  "name" : "Garros",
   "limitSelector" : null,
-  "enableCSS" : false,
-  "enableJS" : false,
-  "timeout" : 2000,  
-  "firstURL" : "/bookstore/Default.jsp",
-  "noFollow" : [ "^javascript:.*", "^mailto:.*", ".*codecharge.com.*", ".*amazon.com.*" ],
+  "noFollow" : [ "^javascript:", "^http://", "#" ],
+  "actionByParameter" :null,
+  "mergeInputs" : false,
+  "smallestSet" : false,
+  "urls" : [ "http://ensimag.grenoble-inp.fr/" ],
   "data" : {
-  	"Login" : "admin",
-  	"Password" : "admin"
-   }
+    "manager" : ["110"],
+    "employee_id" : ["111"],
+    "password" : ["john"],
+    "search_name" : ["Bruce"]
+  }
 }
+

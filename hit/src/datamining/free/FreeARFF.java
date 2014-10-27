@@ -255,8 +255,6 @@ public class FreeARFF {
 										entry.getKey()).get(j)) + "_"
 								+ Math.abs((new Random().nextLong())) + " "
 								+ convertTypes(realTypes.get(i)) + "\n");
-					else
-						System.out.println(entry.getKey());
 					i++;
 				}
 			}
@@ -694,7 +692,6 @@ public class FreeARFF {
 			List<Relation> allRelation = new ArrayList<Relation>();
 
 			while (outIndex > iOut && !data.attribute(outIndex).isNumeric()) {
-				System.out.println("data att : " + data.attribute(outIndex).name());
 				
 				Map<String, List<Instance>> allinsts = new TreeMap<String, List<Instance>>();
 				for (int i = 0; i < data.numInstances(); i++) {
@@ -712,7 +709,6 @@ public class FreeARFF {
 				for (String dest : allinsts.keySet()) {
 					List<Instance> l = allinsts.get(dest);
 					allRelation.addAll(Relation.findOn(l));
-					System.out.println(allRelation.toString());
 				}
 
 				outIndex--;

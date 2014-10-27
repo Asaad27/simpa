@@ -84,7 +84,7 @@ public class LiControlTableRow {
 	}
 	
 	public boolean isEquivalentTo(LiControlTableRow aRow) {
-		return isEquivalentToNumber(aRow);
+		return isEquivalentToSet(aRow);
 	}
 
 	public boolean isEquivalentToSet(LiControlTableRow aRow) {

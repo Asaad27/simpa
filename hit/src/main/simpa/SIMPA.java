@@ -2,7 +2,9 @@ package main.simpa;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+
 import learner.Learner;
 import tools.GraphViz;
 import tools.Utils;
@@ -42,7 +44,11 @@ public class SIMPA {
 				else if (args[i].equals("--forcej48"))
 					Options.FORCE_J48 = true;
 				else if (args[i].equals("--scan"))
-					Options.SCAN = true;				
+					Options.SCAN = true;	
+				else if (args[i].equals("--urls")){
+					Options.URLS = new ArrayList<String>();
+					for(String url : args[++i].split(";")) Options.URLS.add(url);
+				}
 				else if (args[i].equals("--generic"))
 					Options.GENERICDRIVER = true;
 				else if (args[i].equals("--tree"))

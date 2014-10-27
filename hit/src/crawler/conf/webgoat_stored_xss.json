@@ -4,7 +4,7 @@
   "name" : "WebGoat_Stored_XSS",
   "limitSelector" : "#lesson_wrapper",
   "noFollow" : [ "^javascript:", "^http://" ],
-  "cookies" : "JSESSIONID=BE48F7DCBA178BBE84206564A9E67492",
+  "cookies" : "JSESSIONID=D081069197384F4A4B2A31772A5A1AA8",
   "reset" : "http://localhost:8080/WebGoat/attack?Screen=20&menu=900&Restart=20",
   "actionByParameter" : "action",
   "mergeInputs" : false,

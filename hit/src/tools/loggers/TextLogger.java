@@ -22,11 +22,11 @@ import learner.efsm.table.LiDataTableRow;
 import learner.efsm.table.NBP;
 import learner.efsm.table.NDF;
 import learner.efsm.table.NDV;
-import learner.efsm.tree.XObservationNode;
+import learner.efsm.tree.ZXObservationNode;
 import learner.mealy.table.LmControlTable;
 import learner.mealy.table.LmControlTableItem;
 import learner.mealy.table.LmControlTableRow;
-import learner.mealy.tree.ObservationNode;
+import learner.mealy.tree.ZObservationNode;
 import main.simpa.Options;
 import main.simpa.SIMPA;
 import automata.efsm.ParameterizedInput;
@@ -466,13 +466,13 @@ public class TextLogger implements ILogger {
 	}
 
 	@Override
-	public void logObservationTree(ObservationNode root) {
+	public void logObservationTree(ZObservationNode root) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void logXObservationTree(XObservationNode root) {
+	public void logXObservationTree(ZXObservationNode root) {
 		// TODO Auto-generated method stub
 		
 	}

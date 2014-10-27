@@ -229,7 +229,6 @@ public class WekaARFF {
 					if (!paramNames.get(entry.getKey()).isEmpty())
 						writer.write("@ATTRIBUTE saved" + Utils.capitalize(paramNames.get(entry.getKey()).get(j)) +"_" + Math.abs((new Random().nextLong())) + " "
 							+ convertTypes(realTypes.get(i)) + "\n");
-					else System.out.println(entry.getKey());
 					i++;
 				}				
 			}

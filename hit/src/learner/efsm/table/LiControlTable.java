@@ -108,12 +108,6 @@ public class LiControlTable {
 					break;
 				}
 			}
-			for (int j : ncr) {
-				if (R.get(i).isEquivalentTo(R.get(j))) {
-					rowIsClosed = true;
-					break;
-				}
-			}
 			if (!rowIsClosed)
 				ncr.add(i);
 		}

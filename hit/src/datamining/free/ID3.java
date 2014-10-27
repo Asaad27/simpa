@@ -122,9 +122,11 @@ public class ID3 {
 			Nominal<String>> map_attributes, Map<Integer, String> array_attributes, int index_class, float Global_Entropy) {
 		int best_column = 0;
 		float best_gain = 0;
+		float gain = 0;
 		for (int i = 0; i < columns_attributes.size(); i++) {
 			if (i != index_class) {
-				float gain = Entropy.gain(column_class, columns_attributes.get(i), map_attributes.get(array_attributes.get(index_class)), map_attributes.get(array_attributes.get(i)), Global_Entropy);
+				if (map_attributes.get(array_attributes.get(i)) != null)
+					Entropy.gain(column_class, columns_attributes.get(i), map_attributes.get(array_attributes.get(index_class)), map_attributes.get(array_attributes.get(i)), Global_Entropy);
 				
 				if (gain > best_gain) {
 					best_gain = gain;
