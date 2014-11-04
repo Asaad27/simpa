@@ -7,6 +7,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import learner.Learner;
 import learner.mealy.LmConjecture;
 import learner.mealy.Node;
@@ -89,7 +90,7 @@ public class ZLearner extends Learner {
 	private String getTraceFromNode(Node n, InputSequence seq){
 		StringBuilder s = new StringBuilder();
 		for(String i : seq.sequence){
-			n = (ZObservationNode)n.childBy(i);
+			n = n.childBy(i);
 			if (n == null) return "|";
 			else s.append(n.output);
 		}

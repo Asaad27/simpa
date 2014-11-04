@@ -1,8 +1,8 @@
 package examples.efsm;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import automata.State;
 import automata.efsm.EFSM;
@@ -24,7 +24,7 @@ public class NSPK2NDV {
 					public List<Parameter> process(EFSM automata,
 							List<Parameter> inputParameters) {
 						List<Parameter> p = new ArrayList<Parameter>();
-						int n = new Random().nextInt(1000);
+						int n = new SecureRandom().nextInt(1000);
 						automata.setMemory("n", String.valueOf(n));
 						p.add(new Parameter(inputParameters.get(0).value,
 								Types.NUMERIC));
@@ -40,7 +40,7 @@ public class NSPK2NDV {
 						if (inputParameters.get(0).value.equals(automata
 								.getMemory("n"))) {
 							List<Parameter> p = new ArrayList<Parameter>();
-							int m = new Random().nextInt(1000);
+							int m = new SecureRandom().nextInt(1000);
 							automata.setMemory("m", String.valueOf(m));
 							p.add(new Parameter(String.valueOf(m),
 									Types.NUMERIC));

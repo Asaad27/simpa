@@ -31,19 +31,19 @@ public class ID3 {
 		TreeNode NewNode = new TreeNode();
 		
 		if (columns_attributes.get(0).size() < 1) {
-			Tag leaf = new Tag(new String("Error"), new String("Error"));
+			Tag leaf = new Tag("Error", "Error");
 			TreeNode.AddChildrenNode(NewNode, new TreeNode(leaf));
 		}
 		else if (columns_attributes.size() == 1)  {// attributNonCible vide
 			Nominal<String> possible_values = map_attributes.get(array_attributes.get(0));
 			String value = MostPresent(columns_attributes.get(0), possible_values.getLinkedList());
-			String attribute = new String("class");
+			String attribute = "class";
 			Tag leaf = new Tag(attribute, value);
 			TreeNode.AddChildrenNode(NewNode, new TreeNode(leaf));
 		}
 		else if (Global_Entropy == 0) {
 			String value = col_class.get(0);
-			String attribute = new String("class");
+			String attribute = "class";
 			Tag leaf = new Tag(attribute, value);
 			TreeNode.AddChildrenNode(NewNode, new TreeNode(leaf));
 		}
@@ -87,7 +87,7 @@ public class ID3 {
 	}
 	
 	private static String MostPresent(LinkedList<String> column, LinkedList<String> possible_values) {
-		String most_present = new String("");
+		String most_present = "";
 		int nb_most_present = 0;
 		Map<String, Integer> counter = new HashMap<String, Integer>();
 		
@@ -155,14 +155,14 @@ public class ID3 {
 		
 		for (int i = 0; i < columns_attributes.size(); i++) {
 			LL_it.add(columns_attributes.get(i).iterator());
-			LL_values[i] = new String("");
+			LL_values[i] = "";
 			filter.add(new LinkedList<String>());
 		}
 		
 		while (LL_it.get(index).hasNext()) {
 			for(int i = 0; i < LL_it.size(); i++) {
 				if (LL_it.get(i).hasNext())
-					LL_values[i] = (String)LL_it.get(i).next();
+					LL_values[i] = LL_it.get(i).next();
 			}
 			
 			if (LL_values[index].equals(value)) {

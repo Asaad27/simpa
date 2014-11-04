@@ -38,7 +38,7 @@ public class LiControlTableItem implements Serializable {
 		StringBuffer s = new StringBuffer();
 		for (int i = 0; i < parameters.size(); i++) {
 			if (i > 0)
-				s.append("|");
+				s.append('|');
 			if (parameters.get(i).ndv != -1)
 				s.append("Ndv" + parameters.get(i).ndv);
 			else

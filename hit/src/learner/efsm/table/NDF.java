@@ -55,8 +55,8 @@ public class NDF implements Cloneable {
 				+ "(");
 		for (int i = 0; i < parameters.size(); i++) {
 			if (i > 0)
-				s.append("/");
-			s.append("(");
+				s.append('/');
+			s.append('(');
 			for (int j = 0; j < parameters.get(i).size(); j++) {
 				if (j > 0)
 					s.append(", ");
@@ -65,8 +65,8 @@ public class NDF implements Cloneable {
 				else
 					s.append(parameters.get(i).get(j).value);
 			}
-			s.append(")");
+			s.append(')');
 		}
-		return s.append(")").toString();
+		return s.append(')').toString();
 	}
 }

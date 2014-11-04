@@ -96,7 +96,7 @@ public class WekaTreeNode {
 		}else{
 			res.append(condition);
 			if (data != null) res.append(" : " + data);
-			res.append("\n");
+			res.append('\n');
 			for(WekaTreeNode ntn : child){
 				res.append(ntn.toString(level+1));				
 			}

@@ -26,7 +26,7 @@ public class Condition extends LinkedList<Tag> {
 	}
 	
 	public String toString() {
-		String str = new String("");
+		String str = "";
 		Iterator<Tag> itr = this.iterator();
 		if (itr.hasNext()) {
 			str += itr.next().toString();

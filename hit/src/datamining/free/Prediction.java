@@ -21,7 +21,7 @@ public class Prediction extends ArrayList<Condition>{
 	}
 	
 	public String toString() {
-		String str = new String("");
+		String str = "";
 		str += final_state+" :\n";
 		Iterator<Condition> itr = this.iterator();
 		if (itr.hasNext()) {

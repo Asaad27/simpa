@@ -87,7 +87,7 @@ public class SIMPA {
 		if (Options.SUPPORT_MIN < 1 || Options.SUPPORT_MIN > 100)
 			throw new Exception("Minimal between 1 and 100 include needed");
 
-		if (Options.WEKA == true){
+		if (Options.WEKA){
 			try {
 				Options.WEKA = weka.core.Version.MAJOR >= 3;
 				if (!Options.WEKA)
@@ -128,9 +128,9 @@ public class SIMPA {
 		Driver driver;
 		try {
 			if (Options.GENERICDRIVER) {
-				driver = (Driver) new GenericDriver(system);
+				driver = new GenericDriver(system);
 			}else if (Options.SCAN){
-				driver = (Driver) new ScanDriver(system); 
+				driver = new ScanDriver(system); 
 			}else {
 				driver = (Driver) Class.forName(system).newInstance();
 			}

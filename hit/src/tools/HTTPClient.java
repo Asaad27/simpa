@@ -3,6 +3,7 @@ package tools;
 import tools.HTTPRequest.Method;
 import tools.HTTPRequest.Version;
 
+
 public class HTTPClient {
 
 	private String creds = null;

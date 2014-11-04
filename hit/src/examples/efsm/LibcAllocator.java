@@ -1,5 +1,6 @@
 package examples.efsm;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -31,7 +32,7 @@ public class LibcAllocator {
 	private ArrayList<ArrayList<Long>> freed = new ArrayList<ArrayList<Long>>();
 	
 	public LibcAllocator() {
-		rn = new Random();
+		rn = new SecureRandom();
 		for (int i = LibcAllocator.minSize; i <= LibcAllocator.maxSize; i++) {
 			this.allocated.add(new ArrayList<Long>());
 			this.freed.add(new ArrayList<Long>());

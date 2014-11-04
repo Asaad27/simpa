@@ -55,7 +55,7 @@ public class ParameterizedInput implements Cloneable, Serializable {
 		StringBuffer s = new StringBuffer();
 		for (int i = 0; i < parameters.size(); i++) {
 			if (i > 0)
-				s.append("|");
+				s.append('|');
 			if (isNdv(i))
 				s.append("Ndv" + parameters.get(i).ndv);
 			else
@@ -96,7 +96,7 @@ public class ParameterizedInput implements Cloneable, Serializable {
 				else
 					s.append(parameters.get(i).value);
 			}
-			s.append(")");
+			s.append(')');
 			return s.toString();
 		}
 	}

@@ -5,8 +5,8 @@ public class Tag {
 	String m_value;
 	
 	public Tag() {
-		m_attribute = new String("");
-		m_value = new String("");
+		m_attribute = "";
+		m_value = "";
 	}
 	
 	public Tag(String attribute, String value) {
@@ -39,7 +39,7 @@ public class Tag {
 	}
 	
 	public String toString() {
-		String str = new String ("");
+		String str = "";
 		str += "("+ m_attribute + " = " + filterStr(m_value)+ ")";
 		return str;
 	}

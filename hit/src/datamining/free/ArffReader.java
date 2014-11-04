@@ -65,7 +65,7 @@ public class ArffReader {
 	private String ArffReadRelation() throws java.io.IOException {
 		boolean end_Relation = false;
 		String current;
-		String relation = new String("");
+		String relation = "";
 		
 		while (m_reader.hasNext() && !(end_Relation)) {
 			current = m_reader.next();
@@ -95,12 +95,12 @@ public class ArffReader {
 	
 	private void ArffReadHeader() throws java.io.IOException {
 		boolean end_Header = false;
-		String currentAttribut = new String ("");
+		String currentAttribut = "";
 		String current;
 		
 		int index_attribute = 0;
 		
-		while (m_reader.hasNext() && ! m_reader.next().toUpperCase().equals("@ATTRIBUTE"));
+		while (m_reader.hasNext() && ! m_reader.next().toUpperCase().equals("@ATTRIBUTE")) continue;
 		
 		while (m_reader.hasNext() && !(end_Header)) {
 			m_reader.reset();

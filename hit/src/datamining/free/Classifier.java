@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -24,7 +25,6 @@ import java.util.TreeMap;
 
 import learner.efsm.table.LiDataTableItem;
 import main.simpa.Options;
-
 import tools.Utils;
 import tools.loggers.LogManager;
 import automata.efsm.EFSMTransition;
@@ -157,7 +157,7 @@ public class Classifier {
 			List<Types> realTypes = getTypesOfParams(list);
 			for (Map.Entry<String, List<Parameter>> entry : list.get(0).getParamsData(0).getAutomataState().entrySet()) {
 				for (int j = 0; j < entry.getValue().size(); j++) {
-					writer.write("@ATTRIBUTE saved" + Utils.capitalize(paramNames.get(entry.getKey()).get(j))  +"_" + Math.abs((new Random().nextLong()))+ " "
+					writer.write("@ATTRIBUTE saved" + Utils.capitalize(paramNames.get(entry.getKey()).get(j))  +"_" + Math.abs((new SecureRandom().nextLong()))+ " "
 							+ convertTypes(realTypes.get(currentParamIndex++)) + "\n");
 				}
 				i++;
@@ -314,7 +314,7 @@ public class Classifier {
 			InputStream ips=new FileInputStream(dataFile); 
 			InputStreamReader ipsr=new InputStreamReader(ips);
 			BufferedReader br=new BufferedReader(ipsr);
-			String ligne = new String("");
+			String ligne = "";
 			
 			//Process
 			while (!ligne.toUpperCase().equals("@DATA")) {
@@ -428,7 +428,7 @@ public class Classifier {
 			InputStream ips=new FileInputStream(dataFile); 
 			InputStreamReader ipsr=new InputStreamReader(ips);
 			BufferedReader br=new BufferedReader(ipsr);
-			String ligne = new String("");
+			String ligne = "";
 			
 			while (!ligne.toUpperCase().contains("@ATTRIBUTE")) {
 				fileOutput.println (ligne);
@@ -448,7 +448,7 @@ public class Classifier {
 			
 			while ((ligne=br.readLine())!=null) {
 				String [] line = ligne.split(",");
-				String str = new String("");
+				String str = "";
 				for (i = 0; i < line.length; i++) {
 					if (!nbCol.contains(i)) {
 						str += line[i];
@@ -497,7 +497,7 @@ public class Classifier {
 			InputStream ips=new FileInputStream(dataFile); 
 			InputStreamReader ipsr=new InputStreamReader(ips);
 			BufferedReader br=new BufferedReader(ipsr);
-			String ligne = new String("");
+			String ligne = "";
 			ArrayList<Integer> L_idx = new ArrayList<Integer>();
 			
 			while (!ligne.toUpperCase().contains("@ATTRIBUTE")) {
@@ -603,7 +603,7 @@ public class Classifier {
 			InputStream ips=new FileInputStream(dataFile); 
 			InputStreamReader ipsr=new InputStreamReader(ips);
 			BufferedReader br=new BufferedReader(ipsr);
-			String ligne = new String("");
+			String ligne = "";
 			
 			//process
 			
@@ -636,7 +636,7 @@ public class Classifier {
 			
 			while ((ligne=br.readLine())!=null) {
 				String [] t_str = ligne.split(",");
-				String res = new String("");
+				String res = "";
 				if (t_str.length > 0) {
 					for(int j = 0; j < t_str.length - 1; j++) {
 						res += t_str[j] + ",";
@@ -677,7 +677,7 @@ public class Classifier {
 				InputStream ips=new FileInputStream(dataFile); 
 				InputStreamReader ipsr=new InputStreamReader(ips);
 				BufferedReader br=new BufferedReader(ipsr);
-				String ligne = new String("");
+				String ligne = "";
 				while (!ligne.toUpperCase().contains("@DATA")) {
 					ligne = br.readLine();
 				}

@@ -42,7 +42,7 @@ public class HTTPRequest {
 		for (String key : headers.keySet()) {
 			s.append(key + ": " + headers.get(key) + "\n");
 		}
-		s.append("\n");
+		s.append('\n');
 		s.append(content);
 		return s.toString();
 	}

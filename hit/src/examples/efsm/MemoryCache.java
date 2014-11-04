@@ -48,7 +48,7 @@ public abstract class MemoryCache {
     public boolean access(Integer block){
         
         
-        if (CacheBlocks.contains(block)==true) {
+        if (CacheBlocks.contains(block)) {
             
             return hitBlock(block);
             

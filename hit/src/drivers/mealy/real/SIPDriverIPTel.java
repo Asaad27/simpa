@@ -68,7 +68,7 @@ public class SIPDriverIPTel extends RealDriver {
 				Address to_address = addr_factory.createAddress(addr_factory
 						.createURI("sip:user1test@iptel.org"));
 				ArrayList<ViaHeader> viaHeaders = new ArrayList<ViaHeader>();
-				ViaHeader via = (ViaHeader) phone.getViaHeaders().get(0);
+				ViaHeader via = phone.getViaHeaders().get(0);
 				via.setBranch("z9hG4bK3" + cseq + "2632");
 				viaHeaders.add(via);
 
@@ -96,7 +96,7 @@ public class SIPDriverIPTel extends RealDriver {
 					cseq++;
 
 					viaHeaders = new ArrayList<ViaHeader>();
-					via = (ViaHeader) phone.getViaHeaders().get(0);
+					via = phone.getViaHeaders().get(0);
 					via.setBranch("z9hG4bK3" + cseq + "2632");
 					viaHeaders.add(via);
 
@@ -143,7 +143,7 @@ public class SIPDriverIPTel extends RealDriver {
 				URI to = addr_factory.createURI("sip:1000@iptel.org");
 				Address to_address = addr_factory.createAddress(to);
 				ArrayList<ViaHeader> viaHeaders = new ArrayList<ViaHeader>();
-				ViaHeader via = (ViaHeader) phone.getViaHeaders().get(0);
+				ViaHeader via = phone.getViaHeaders().get(0);
 				via.setBranch("z9hG4bK3" + cseq + "2632");
 				viaHeaders.add(via);
 				Address contact_address = addr_factory
@@ -198,7 +198,7 @@ public class SIPDriverIPTel extends RealDriver {
 				URI to = addr_factory.createURI("sip:1000@iptel.org");
 				Address to_address = addr_factory.createAddress(to);
 				ArrayList<ViaHeader> viaHeaders = new ArrayList<ViaHeader>();
-				ViaHeader via = (ViaHeader) phone.getViaHeaders().get(0);
+				ViaHeader via = phone.getViaHeaders().get(0);
 				via.setBranch("z9hG4bK3" + cseq + "2632");
 				viaHeaders.add(via);
 
@@ -223,7 +223,7 @@ public class SIPDriverIPTel extends RealDriver {
 				URI to = addr_factory.createURI("sip:1000@iptel.org");
 				Address to_address = addr_factory.createAddress(to);
 				ArrayList<ViaHeader> viaHeaders = new ArrayList<ViaHeader>();
-				ViaHeader via = (ViaHeader) phone.getViaHeaders().get(0);
+				ViaHeader via = phone.getViaHeaders().get(0);
 				via.setBranch("z9hG4bK3" + cseq + "2632");
 				viaHeaders.add(via);
 
@@ -253,7 +253,7 @@ public class SIPDriverIPTel extends RealDriver {
 					cseq++;
 
 					viaHeaders = new ArrayList<ViaHeader>();
-					via = (ViaHeader) phone.getViaHeaders().get(0);
+					via = phone.getViaHeaders().get(0);
 					via.setBranch("z9hG4bK3" + cseq + "2632");
 					viaHeaders.add(via);
 

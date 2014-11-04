@@ -23,7 +23,7 @@ public class Proxy {
 				System.err.println("Exception creating i/o streams:" + e);
 				e.printStackTrace();
 			}
-			myThread = new Thread(this);
+			myThread = new Thread(null, this, "proxy");
 			myThread.start();
 		}
 

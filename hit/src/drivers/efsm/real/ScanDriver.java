@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.logging.Level;
 
-import javax.swing.JOptionPane;
-
 import main.drivergen.Options;
 
 import org.apache.commons.logging.LogFactory;
@@ -20,6 +18,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 
 import tools.HTTPData;
 import tools.loggers.LogManager;
+import automata.efsm.Parameter;
 
 import com.gargoylesoftware.htmlunit.CookieManager;
 import com.gargoylesoftware.htmlunit.Page;
@@ -27,14 +26,10 @@ import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.util.Cookie;
 
 import crawler.WebInput;
 import crawler.WebInput.Type;
 import drivers.efsm.EFSMDriver;
-import automata.efsm.Parameter;
-import automata.efsm.ParameterizedInput;
-import automata.efsm.ParameterizedOutput;
 
 public class ScanDriver extends EFSMDriver {
 	

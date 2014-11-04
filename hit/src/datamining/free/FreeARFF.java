@@ -8,11 +8,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -134,7 +134,7 @@ public class FreeARFF {
 					writer.write("@ATTRIBUTE saved"
 							+ Utils.capitalize(paramNames.get(entry.getKey())
 									.get(j)) + "_"
-							+ Math.abs((new Random().nextLong())) + " "
+							+ Math.abs((new SecureRandom().nextLong())) + " "
 							+ convertTypes(realTypes.get(currentParamIndex++))
 							+ "\n");
 				}
@@ -253,7 +253,7 @@ public class FreeARFF {
 						writer.write("@ATTRIBUTE saved"
 								+ Utils.capitalize(paramNames.get(
 										entry.getKey()).get(j)) + "_"
-								+ Math.abs((new Random().nextLong())) + " "
+								+ Math.abs((new SecureRandom().nextLong())) + " "
 								+ convertTypes(realTypes.get(i)) + "\n");
 					i++;
 				}

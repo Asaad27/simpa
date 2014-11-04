@@ -1,6 +1,6 @@
 package examples.efsm;
 
-import java.util.*; 
+import java.util.ArrayList;
 
 /**
  *
@@ -41,7 +41,7 @@ public class MRUCache extends MemoryCache{
 
         for(int i=0; i < this.memBlocks; i++){
         
-            if(state.get(i) == true){
+            if(state.get(i)){
                 
                 allElementsZeroFlag++;
                 
@@ -67,7 +67,7 @@ public class MRUCache extends MemoryCache{
         
        for(int i=0;i<this.memBlocks;i++){     
      
-           if(state.get(i) == false){
+           if(!state.get(i)){
            this.CacheBlocks.set(i, block);
            state.set(i,true);
            allZeros();

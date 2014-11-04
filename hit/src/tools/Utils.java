@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.channels.FileChannel;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +22,7 @@ import main.simpa.Options;
 import tools.loggers.LogManager;
 
 public class Utils {
-	private static Random rand = new Random();
+	private static Random rand = new SecureRandom();
 	
 	public static void setSeed(long seed){
 		rand.setSeed(seed);
@@ -47,10 +48,6 @@ public class Utils {
 
 	public static boolean isNumeric(String str) {
 		return str.matches("-?\\d+(\\.\\d+)?");
-	}
-
-	public static boolean is64bit() {
-		return (System.getenv("ProgramW6432") != null);
 	}
 
 	public static int getStatusCode(String response) {

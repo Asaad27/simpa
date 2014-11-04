@@ -8,11 +8,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -122,7 +122,7 @@ public class WekaARFF {
 			List<Types> realTypes = getTypesOfParams(list);
 			for (Map.Entry<String, List<Parameter>> entry : list.get(0).getParamsData(0).getAutomataState().entrySet()) {
 				for (int j = 0; j < entry.getValue().size(); j++) {
-					writer.write("@ATTRIBUTE saved" + Utils.capitalize(paramNames.get(entry.getKey()).get(j))  +"_" + Math.abs((new Random().nextLong()))+ " "
+					writer.write("@ATTRIBUTE saved" + Utils.capitalize(paramNames.get(entry.getKey()).get(j))  +"_" + Math.abs((new SecureRandom().nextLong()))+ " "
 							+ convertTypes(realTypes.get(currentParamIndex++)) + "\n");
 				}
 				i++;
@@ -227,7 +227,7 @@ public class WekaARFF {
 			for (Map.Entry<String, List<Parameter>> entry : transition.getParamsData(0).getAutomataState().entrySet()) {
 				for (int j = 0; j < entry.getValue().size(); j++) {
 					if (!paramNames.get(entry.getKey()).isEmpty())
-						writer.write("@ATTRIBUTE saved" + Utils.capitalize(paramNames.get(entry.getKey()).get(j)) +"_" + Math.abs((new Random().nextLong())) + " "
+						writer.write("@ATTRIBUTE saved" + Utils.capitalize(paramNames.get(entry.getKey()).get(j)) +"_" + Math.abs((new SecureRandom().nextLong())) + " "
 							+ convertTypes(realTypes.get(i)) + "\n");
 					i++;
 				}				

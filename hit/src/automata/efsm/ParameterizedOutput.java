@@ -31,7 +31,7 @@ public class ParameterizedOutput implements Cloneable, Serializable {
 	public ParameterizedOutput(String output, Parameter parameter) {
 		this.outputSymbol = output;
 		this.parameters = new ArrayList<Parameter>();
-		this.parameters.add((Parameter) parameter.clone());
+		this.parameters.add(parameter.clone());
 	}
 
 	@Override
@@ -68,7 +68,7 @@ public class ParameterizedOutput implements Cloneable, Serializable {
 				s.append(parameters.get(0).value);
 			for (int i = 1; i < parameters.size(); i++)
 				s.append(", " + parameters.get(i).value);
-			s.append(")");
+			s.append(')');
 			return s.toString();
 		}
 	}

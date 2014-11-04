@@ -1,5 +1,6 @@
 package drivers.efsm;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +57,7 @@ public class AllocatorDriver extends EFSMDriver {
 			
 			List<Parameter> p = new ArrayList<Parameter>();
 			
-			if (pi.getInputSymbol() == AllocatorDriver.FREE) {
+			if (pi.getInputSymbol().equals(AllocatorDriver.FREE)) {
 				int free_result;
 				try {
 					free_result = this.allocator.free(Long.valueOf(pi.getParameterValue(0)));
@@ -110,7 +111,7 @@ public class AllocatorDriver extends EFSMDriver {
 		*/
 		
 		ArrayList<ArrayList<Parameter>> addr_params = new ArrayList<ArrayList<Parameter>>();
-		Random rn = new Random();
+		Random rn = new SecureRandom();
 		for(int i=0; i<1; i++)
 			addr_params.add(Utils.createArrayList(new Parameter(String.valueOf(rn.nextInt()), Types.NOMINAL)));		
 		defaultParamValues.put(AllocatorDriver.FREE, addr_params);

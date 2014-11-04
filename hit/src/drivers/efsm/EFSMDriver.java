@@ -36,7 +36,7 @@ public abstract class EFSMDriver extends Driver {
 		if (!pi.isEpsilonSymbol()) {
 			numberOfAtomicRequest++;
 			EFSMTransition currentTrans = null;
-			for (EFSMTransition t : (List<EFSMTransition>) automata
+			for (EFSMTransition t : automata
 					.getTransitions()) {
 				if (t.getFrom().equals(currentState)
 						&& t.getInput().equals(pi.getInputSymbol())) {

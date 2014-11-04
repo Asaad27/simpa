@@ -109,7 +109,7 @@ public class LiDataTableItem implements Serializable {
 		}
 		res.append("), [");
 		for (List<Parameter> s : automataState.values()) {
-			res.append("(");
+			res.append('(');
 			if (s.size() > 0)
 				res.append(s.get(0).ndv != -1 ? "Ndv" + s.get(0).ndv
 						: s.get(0).value);
@@ -117,13 +117,13 @@ public class LiDataTableItem implements Serializable {
 				res.append(", "
 						+ (s.get(i).ndv != -1 ? "Ndv" + s.get(i).ndv
 								: s.get(i).value));
-			res.append(")");
+			res.append(')');
 		}
 		res.append("] -> ");
 		if (outputParameters.isEmpty())
 			res.append(Options.SYMBOL_OMEGA_LOW);
 		else {
-			res.append("(");
+			res.append('(');
 			for (int i = 0; i < outputParameters.size(); i++) {
 				if (i > 0)
 					res.append(", ");
@@ -132,8 +132,8 @@ public class LiDataTableItem implements Serializable {
 				else
 					res.append(outputParameters.get(i).value);
 			}
-			res.append(")");
+			res.append(')');
 		}
-		return res.append(")").toString();
+		return res.append(')').toString();
 	}
 }

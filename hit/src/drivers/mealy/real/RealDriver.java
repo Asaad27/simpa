@@ -13,10 +13,6 @@ public abstract class RealDriver extends MealyDriver {
 		type = DriverType.MEALY;
 	}
 
-	public void reset() {
-		super.reset();
-	}
-
 	public abstract List<String> getInputSymbols();
 
 	public List<String> getOutputSymbols() {

@@ -11,7 +11,7 @@ public class ClassificationResult extends HashMap<String, Prediction> {
 	}
 	
 	public String toString() {
-		String str = new String("");
+		String str = "";
 		Iterator<Map.Entry<String, Prediction>> it = this.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry<String, Prediction> pairs = it.next(); 

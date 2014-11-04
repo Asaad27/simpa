@@ -241,15 +241,15 @@ public class TextLogger implements ILogger {
 		StringBuffer res = new StringBuffer();
 		int before = size - s.length() + 1;
 		for (int i = 0; i < before; i++)
-			res.append(" ");
-		return res.append(s + " ");
+			res.append(' ');
+		return res.append(s + ' ');
 	}
 
 	private StringBuffer printLine(ArrayList<Integer> width, int NbSymbols) {
-		StringBuffer s = new StringBuffer(tfm.format(new Date()) + "|");
+		StringBuffer s = new StringBuffer(tfm.format(new Date()) + '|');
 		for (int i = 0; i < NbSymbols + 1; i++) {
 			for (int j = 0; j < width.get(i) + 2; j++)
-				s.append("-");
+				s.append('-');
 		}
 		return s.append("--|" + ret);
 	}

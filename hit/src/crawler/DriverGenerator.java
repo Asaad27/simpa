@@ -457,7 +457,7 @@ public class DriverGenerator {
 				}
 			}
 			for (String url : filterUrl(l)) {
-				if (url.startsWith("/"))
+				if (url.charAt(0) == '/')
 					url = d.baseUri().substring(0, d.baseUri().indexOf("/", 7))
 							+ url;
 				else

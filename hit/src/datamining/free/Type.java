@@ -4,7 +4,7 @@ public class Type {
 	String type;
 	
 	public Type() {
-		type = new String("STRING");
+		type = "STRING";
 	}
 	
 	public Type(String t) {

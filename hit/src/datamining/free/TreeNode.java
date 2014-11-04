@@ -39,10 +39,10 @@ public class TreeNode {
        
        public static String toString(TreeNode n) {
     	   if (n == null)
-    		   return new String("");
+    		   return "";
     	   
     	   n.calculHeight();
-	       String str = new String("");
+	       String str = "";
 	       if (n.getHeight() == 0) {
 	    	   Iterator<TreeNode> itr = n.children.iterator();
 		       while(itr.hasNext()) {
@@ -129,7 +129,7 @@ public class TreeNode {
        }
        
       private static String Reduction(TreeNode DT) {
-    	  String val_red = new String("");
+    	  String val_red = "";
     	  Stack<TreeNode> stack_DT = new Stack<TreeNode>();
     	  
     	  stack_DT.push(DT);
@@ -140,7 +140,7 @@ public class TreeNode {
     				  val_red = tmp.getTag().getValue();
     			  }
     			  else if (tmp.isLeaf() && !val_red.equals(tmp.getTag().getValue())) {
-    				  return new String("");
+    				  return "";
     			  }
     			  LinkedList<TreeNode> children = tmp.getChildren();
     			  Iterator<TreeNode> itr = children.iterator();

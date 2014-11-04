@@ -2,7 +2,6 @@ package learner.efsm.tree;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +17,6 @@ import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
 import drivers.Driver;
 import drivers.efsm.real.ScanDriver;
-import drivers.mealy.MealyDriver;
 
 public class ZXLearner extends Learner {
 	private ScanDriver driver;
@@ -75,7 +73,7 @@ public class ZXLearner extends Learner {
 	private String getTraceFromNode(Node n, InputSequence seq){
 		StringBuilder s = new StringBuilder();
 		for(String i : seq.sequence){
-			n = (ZXObservationNode)n.childBy(i);
+			n = n.childBy(i);
 			if (n == null) return "|";
 			else s.append(n.output);
 		}

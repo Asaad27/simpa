@@ -17,7 +17,7 @@ public class NBP {
 		StringBuffer s = new StringBuffer();
 		for (int i = 0; i < params.size(); i++) {
 			if (i > 0)
-				s.append("|");
+				s.append('|');
 			if (params.get(i).ndv != -1)
 				s.append("Ndv" + params.get(i).ndv);
 			else

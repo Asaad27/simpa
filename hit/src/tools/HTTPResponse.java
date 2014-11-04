@@ -52,9 +52,9 @@ public class HTTPResponse {
 		for (String key : headers.keySet()) {
 			s.append(key + ": " + headers.get(key) + "\n");
 		}
-		s.append("\n");
+		s.append('\n');
 		s.append(content);
-		s.append("\n");
+		s.append('\n');
 		return s.toString();
 	}
 

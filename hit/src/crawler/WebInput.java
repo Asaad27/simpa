@@ -85,7 +85,7 @@ public class WebInput {
 		HashMap<String, List<String>> inputs = new HashMap<>();
 
 		String address = form.attr("action");
-		if (address.startsWith("/")) {
+		if (address.charAt(0) == '/') {
 			address = form.baseUri().substring(0,
 					form.baseUri().indexOf("/", 7))
 					+ address;

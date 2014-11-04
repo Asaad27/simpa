@@ -8,7 +8,7 @@ import java.util.Map;
 import main.simpa.Options;
 import drivers.efsm.EFSMDriver.Types;
 
-public class Guard implements Serializable {
+public class Guard implements Serializable, Cloneable {
 	private static final long serialVersionUID = 7535698532882329634L;
 
 	public boolean alwaysTrue = true;
