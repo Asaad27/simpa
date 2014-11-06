@@ -383,10 +383,12 @@ public class LiLearner extends Learner {
 							for (int m = 0; m < pis.sequence.size(); m++)
 								pos.sequence.add(driver.execute(pis.sequence
 										.get(m)));
-							String ndvVal = pos.getLastParameters().get(
+							String ndvVal = "0";
+							try{
+								ndvVal = pos.getLastParameters().get(
 									ndv.paramIndex).value;
-							LogManager.logInfo("Ndv value is : " + ndvVal);
-
+								LogManager.logInfo("Ndv value is : " + ndvVal);
+							}catch(Exception e){															}
 							ndvParam.get(k).value = ndvVal;
 							ParameterizedInput ndvpi = new ParameterizedInput(
 									driver.getInputSymbols().get(i), ndvParam);
