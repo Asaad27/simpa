@@ -155,3 +155,8 @@ img {
 	height:50%;
 	margin:2em;
 }
+
+/* Hiding almost everything, will be displayed by JS checkboxes */
+table, img, .testing, .data, br, .step, .info, .transition {
+	display: none;
+}

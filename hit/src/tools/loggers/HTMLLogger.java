@@ -42,6 +42,8 @@ public class HTMLLogger implements ILogger {
 	private DateFormat tfm;
 	private DateFormat filenameFm;
 	private Writer writer = null;
+	
+	private boolean htmlLogDivOpened = false;
 
 	public HTMLLogger() {
 		file = null;
@@ -62,6 +64,10 @@ public class HTMLLogger implements ILogger {
 
 	public void logControlTable(LiControlTable l) {
 		try {
+			if (htmlLogDivOpened) {
+				writer.write("</div>\n");
+				htmlLogDivOpened = false;
+			}
 			int nbSymbols = l.inputSymbols.size();
 			StringBuffer s = new StringBuffer(
 					"<li class=\"controltable\">\n<table>\n<tr class=\"header\">\n<td></td>");
@@ -174,16 +180,24 @@ public class HTMLLogger implements ILogger {
 					+ dfm.format(new Date()) + " - " + Options.SYSTEM
 					+ "</title>\n");
 			writer.write("<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />\n");
-			writer.write("<style type=\"text/css\">\n");
-			writer.write(Utils.fileContentOf(new File("log").getAbsolutePath()
-					+ File.separator + "style.css"));
-			writer.write("</style>\n");
+			writer.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + new File("log").getAbsolutePath()
+					+ File.separator + "style.css\">\n");
+			writer.write("<script src=\"" + new File("log").getAbsolutePath()
+					+ File.separator + "jquery.min.js\"></script>\n");
+			writer.write("<script src=\"" + new File("log").getAbsolutePath()
+					+ File.separator + "script.js\"></script>\n");
 			writer.write("</head>\n");
 			writer.write("<body>\n");
 			writer.write("<div id=\"info\">\n");
 			writer.write(SIMPA.name + " - " + dfm.format(new Date()) + " - "
 					+ Options.SYSTEM);
 			writer.write("</div>\n");
+			writer.write("<div id=\"controls\">\n" +
+					"<p>Show tables: <input type=\"checkbox\" id=\"showTables\" onclick=\"table_event(this)\" /></p>\n" +
+					"<p>Show logs: <input type=\"checkbox\" id=\"showLogs\" onclick=\"log_event(this)\" /></p>\n" +
+					"<p>Show graphs: <input type=\"checkbox\" id=\"showGraphs\" onclick=\"graph_event(this)\" /></p>\n" +
+					"<p>Show data: <input type=\"checkbox\" id=\"showData\" onclick=\"data_event(this)\" /></p>\n" +
+					"</div>\n");
 			writer.write("<ul>\n");
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -264,6 +278,10 @@ public class HTMLLogger implements ILogger {
 	public void logReset() {
 		try {
 			writer.flush();
+			if (!htmlLogDivOpened) {
+				writer.write("<div class=\"testing\">\n");
+				htmlLogDivOpened = true;
+			}
 			writer.write("<li class=\"reset\">\n");
 			writer.write("<span class=\"date\">" + tfm.format(new Date())
 					+ "</span><span class=\"content\">reset</span>");
@@ -296,15 +314,15 @@ public class HTMLLogger implements ILogger {
 			writer.flush();
 			switch (step) {
 			case LogManager.STEPNDV:
-				writer.write("<li class=\"ndv\">\n");
+				writer.write("<li class=\"step ndv\">\n");
 				s = "NonDeterministicValue : " + NDV.class.cast(o).toString();
 				break;
 			case LogManager.STEPNBP:
-				writer.write("<li class=\"nbp\">\n");
+				writer.write("<li class=\"step nbp\">\n");
 				s = "NonBalancedParameter : " + NBP.class.cast(o).toString();
 				break;
 			case LogManager.STEPNCR:
-				writer.write("<li class=\"ncr\">\n");
+				writer.write("<li class=\"step ncr\">\n");
 				if (o instanceof ParameterizedInputSequence)
 					s = "NonClosedRow : "
 							+ ParameterizedInputSequence.class.cast(o)
@@ -314,11 +332,11 @@ public class HTMLLogger implements ILogger {
 							+ InputSequence.class.cast(o).toString();
 				break;
 			case LogManager.STEPNDF:
-				writer.write("<li class=\"ndf\">\n");
+				writer.write("<li class=\"step ndf\">\n");
 				s = "NonDisputedFree : " + NDF.class.cast(o).toString();
 				break;
 			case LogManager.STEPOTHER:
-				writer.write("<li class=\"stepunknown\">\n");
+				writer.write("<li class=\"step stepunknown\">\n");
 				s = (String) o;
 				break;
 			}
