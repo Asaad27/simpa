@@ -9,6 +9,15 @@ public class NDV implements Cloneable {
 	public int indexNdv;
 	public drivers.efsm.EFSMDriver.Types type;
 
+	
+	/**
+	 * Constructor for a new NDV element 
+	 * 
+	 * @param pis 			Parameterized Input Sequence containing a parameter that is NDV
+	 * @param type 			Type of the NDV 
+	 * @param paramIndex	Index of the input parameter that is NDV value
+	 * @param iNdv			Index of this NDV in NDV list
+	 */
 	public NDV(ParameterizedInputSequence pis, Types type, int paramIndex,
 			int iNdv) {
 		this.paramIndex = paramIndex;

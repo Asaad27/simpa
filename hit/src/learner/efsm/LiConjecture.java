@@ -190,7 +190,7 @@ public class LiConjecture extends automata.efsm.EFSM {
 		FileOutputStream fos = null;
 		ObjectOutputStream oos = null;
 		try {
-			fos = new FileOutputStream(Options.DIRGRAPH + File.separator
+			fos = new FileOutputStream(Options.OUTDIR + Options.DIRGRAPH + File.separator
 					+ filename);
 			oos = new ObjectOutputStream(fos);
 			oos.writeObject(o);
@@ -204,7 +204,7 @@ public class LiConjecture extends automata.efsm.EFSM {
 
 	public static LiConjecture deserialize(String filename) {
 		Object o = null;
-		File f = new File(Options.DIRGRAPH + File.separator + filename);
+		File f = new File(Options.OUTDIR + Options.DIRGRAPH + File.separator + filename);
 		LogManager.logStep(LogManager.STEPOTHER, "Loading LiConjecture from "
 				+ f.getName());
 		try {

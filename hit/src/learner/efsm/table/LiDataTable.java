@@ -11,12 +11,21 @@ import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedInputSequence;
 
 public class LiDataTable {
+	
+	/* List of input symbols, ie.vocabulary */
 	public List<String> inputSymbols;
+	/* Default parameter values for input symbols */
 	private Map<String, List<ArrayList<Parameter>>> defaultParamValues;
+	/* Firsts lines of Data table (cf Angluin algo) */
 	public List<LiDataTableRow> S;
+	/* Final lines of Data table (cf Angluin algo) */
 	public List<LiDataTableRow> R;
+	/* List of parameters declared non deterministic */
 	public List<NDV> ndvList;
 
+	/* Constructor for data table from input symbols, 
+	 * default values
+	 */
 	public LiDataTable(List<String> inputSymbols,
 			Map<String, List<ArrayList<Parameter>>> defaultParamValues) {
 		this.inputSymbols = inputSymbols;
@@ -25,6 +34,7 @@ public class LiDataTable {
 		initialize();
 	}
 
+	/* TODO: considère qu'il n'y a qu'un seul input dans la colonne => à changer */
 	public void addAtCorrespondingPlace(LiDataTableItem dti,
 			ParameterizedInputSequence currentPis) {
 		String lastSymbol = currentPis.getLastSymbol();
@@ -52,26 +62,46 @@ public class LiDataTable {
 		}
 	}
 
+	
 	public void addRowInR(LiDataTableRow row) {
 		R.add(row);
 	}
 
+	
 	public void addRowInS(LiDataTableRow row) {
 		S.add(row);
 	}
 
+
+	/**
+	 * Look for a NDV in any row of the table
+	 * 
+	 * @TODO 	better search ; NDV should be associated w/ input symbols (?) 
+	 * 
+	 * @return 	a NDV object corresponding to the first non-deterministic parameter
+	 *			discovered (ignoring already known ones),  null if no new NDV found
+	 */
 	public NDV findNDV() {
 		final List<LiDataTableRow> allRows = getAllRows();
+		/* Iteration on table rows */
 		for (LiDataTableRow dtr : allRows) {
+			/* Iteration on table columns */
 			for (int j = 0; j < dtr.getColumCount(); j++) {
+				/* if the row is not empty */
 				if (!dtr.getColum(j).isEmpty()) {
 					List<Parameter> params = new ArrayList<Parameter>();
+					/* Look for NDV index in box (i, j) of table */
 					int ndvIndex = newNDVForItem(dtr.getColum(j), params,
 							ndvList.size());
+					/* If a NDV was found */
 					if (ndvIndex != -1) {
+						/* Get input sequence */
 						ParameterizedInputSequence pi = dtr.getPIS();
+						/* Pop output parameter that is NDV */
 						Parameter last = params.remove(params.size() - 1);
+						/* Add column parameter in input sequence */
 						pi.addParameterizedInput(inputSymbols.get(j), params);
+						/* Creation of a new NDV */
 						NDV aNdv = new NDV(pi.removeEmptyInput(), last.type,
 								ndvIndex, ndvList.size());
 						if (!ndvList.contains(aNdv)) {
@@ -85,6 +115,11 @@ public class LiDataTable {
 		return null;
 	}
 
+	/**
+	 * Getter for all rows in the data table
+	 * 
+	 * @return	A lit containing S entries AND R entries
+	 */
 	public List<LiDataTableRow> getAllRows() {
 		List<LiDataTableRow> allRows = new ArrayList<LiDataTableRow>();
 		allRows.addAll(S);
@@ -134,33 +169,58 @@ public class LiDataTable {
 		}
 	}
 
+	
+	/**
+	 *  Find new a NDV in a given box of data table 
+	 * 
+	 * @param item		Content of a cell of the data table (consist of a list of (PIS, POS))
+	 * @param params	List of parameters where to write the sequence where a NDV was found
+	 * @param index		Index of the last NDV already found
+	 * 
+	 * @return			The index of the NDV input parameter in params, -1 if not found
+	 */
 	public int newNDVForItem(List<LiDataTableItem> item,
 			List<Parameter> params, int index) {
 		List<ArrayList<Parameter>> oldParams = new ArrayList<ArrayList<Parameter>>();
 		int currentIndex = 0;
 		for (int i = 0; i < item.size(); i++) {
 			for (int j = i + 1; j < item.size(); j++) {
+				/* If the inputs have the same values */
 				if ((item.get(i).getInputParametersValues().equals(item.get(j)
 						.getInputParametersValues()))
+						/* and if the initial state was the same */
 						&& (item.get(i).getAutomataStateValues().equals(item
 								.get(j).getAutomataStateValues()))) {
+					/* Iteration on output values */
 					for (int k = 0; k < item.get(i).getOutputParameters()
 							.size(); k++) {
+						/* If k in bounds */
 						if (item.get(j).getOutputParameters().size() > k
+								/* and if the values of this output for i and j
+								 * are different
+								 */
 								&& !(item.get(i).getOutputParameters().get(k).value
 										.equals(item.get(j)
 												.getOutputParameters().get(k).value))) {
 							boolean exists = false;
+							/* Iteration on parameters to see if already exists in
+							 * the list */
 							for (ArrayList<Parameter> old : oldParams) {
 								if (old.equals(item.get(i).getInputParameters())) {
 									exists = true;
 									break;
 								}
 							}
+							/* If not, it is a new NDV that we found */
 							if (!exists) {
+								/* Index is the number of previously found NDV 
+								 * So if index == current_index, we already found
+								 * this parameter before */
 								if (currentIndex == index) {
+									/* add all input parameters */
 									params.addAll(item.get(i)
 											.getInputParameters());
+									/* Add output parameter that is NDV */
 									params.add(item.get(i)
 											.getOutputParameters().get(k));
 									return k;
@@ -175,6 +235,7 @@ public class LiDataTable {
 				}
 			}
 		}
+		/* No NDV found, return 0 */
 		return -1;
 	}
 
@@ -228,4 +289,16 @@ public class LiDataTable {
 		}
 		return params;
 	}
+
+	
+	public void addColumnInAllRows() {
+		for (int i = 0; i < R.size(); i++) {
+			R.get(i).addColumn();
+		}
+		for (int i = 0; i < S.size(); i++) {
+			S.get(i).addColumn();
+		}
+		return;	
+	}
+	
 }

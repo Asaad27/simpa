@@ -55,6 +55,9 @@ public class LiDataTableItem implements Serializable {
 		return inputParameters;
 	}
 
+	/**
+	 * @return 	List of input parameters in the given data item
+	 */
 	public List<String> getInputParametersValues() {
 		List<String> res = new ArrayList<String>();
 		for (Parameter p : inputParameters)

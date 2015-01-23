@@ -187,6 +187,15 @@ public class LiControlTable {
 		return S.get(iRow);
 	}
 
+	
+	/**
+	 * Look for rows in data table that start with the pis
+	 * input sequence
+	 * 
+	 * @param 	pis prefix to look for
+	 * @return	A list of rows of Data table that start
+	 * 			with pis
+	 */
 	public List<LiControlTableRow> getRowStartsWith(
 			ParameterizedInputSequence pis) {
 		final List<LiControlTableRow> allRows = getAllRows();
