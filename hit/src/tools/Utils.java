@@ -14,9 +14,13 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
+
+import automata.efsm.Parameter;
+import automata.efsm.ParameterizedInputSequence;
 
 import main.simpa.Options;
 import tools.loggers.LogManager;
@@ -430,5 +434,36 @@ public class Utils {
 		} catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
 		}
+	}
+	
+
+	
+	public static ArrayList<ParameterizedInputSequence> generatePermutations(
+										ParameterizedInputSequence querie, 
+										int index, 
+										Map<String, List<ArrayList<Parameter>>> defaultParamValues) {
+		ArrayList<ParameterizedInputSequence> qlist = new ArrayList<ParameterizedInputSequence>();
+		if (index == querie.getLength() - 1) {
+			// System.out.println("Length: " + querie.getLength() + " ; last symbol: " + querie.getLastSymbol());
+			for (int i = 0; i < defaultParamValues.get(querie.getLastSymbol()).size(); i++) {
+				ParameterizedInputSequence pis = new ParameterizedInputSequence();
+				pis.addParameterizedInput(querie.getLastSymbol(), defaultParamValues.get(querie.getLastSymbol()).get(i));
+				qlist.add(pis);
+			}
+			return qlist;
+		}
+		ArrayList<ParameterizedInputSequence> sub_qlist = generatePermutations(querie, index + 1, defaultParamValues);
+		for (int i = 0; i < defaultParamValues.get(querie.getSymbol(index)).size(); i++) {
+			for (int j = 0 ; j < sub_qlist.size(); j++) { 
+				ParameterizedInputSequence pis = new ParameterizedInputSequence();
+				pis.addParameterizedInput(querie.getSymbol(index), defaultParamValues.get(querie.getSymbol(index)).get(i));
+				for (int k = 0; k < sub_qlist.get(j).getLength(); k++) {
+					pis.addParameterizedInput(sub_qlist.get(j).getSymbol(k), sub_qlist.get(j).getParameter(k)); 
+				}
+				qlist.add(pis);
+				// System.out.println("Adding: " + pis);
+			}
+		}
+		return qlist;	
 	}
 }
