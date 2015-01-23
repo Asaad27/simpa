@@ -40,7 +40,7 @@ public class LibcAllocator {
 	public static int GENERIC_ERROR = -99;
 	
 	private boolean PARAMETERIZED = false;
-	private boolean SPECIFIC_RETURN_CODES = true;
+	private boolean SPECIFIC_RETURN_CODES = false;
 	
 	public int memSize = 1000;
 	private int memUsed = 0;
@@ -54,7 +54,7 @@ public class LibcAllocator {
 		this.PARAMETERIZED = parameterized;
 		this.blockSizes.add(this.memSize);
 		this.blockSizes.add(this.memSize/2);
-		this.blockSizes.add(this.memSize/4);
+		this.blockSizes.add(this.memSize/10);
 		return;
 	}
 	
