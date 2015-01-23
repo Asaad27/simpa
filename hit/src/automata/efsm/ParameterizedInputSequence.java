@@ -76,6 +76,14 @@ public class ParameterizedInputSequence implements Cloneable, Serializable {
 		return pi;
 	}
 
+	
+	/**
+	 * Check whether this starts with pis
+	 * 
+	 * @param pis 	Sequence of inputs to test
+	 * @return		True if this starts with pis, false otherwise (e.g. if pis is longer than
+	 * 				this, return false)
+	 */
 	public boolean startsWith(ParameterizedInputSequence pis) {
 		if (pis.sequence.isEmpty() || sequence.isEmpty())
 			return false;
@@ -119,5 +127,13 @@ public class ParameterizedInputSequence implements Cloneable, Serializable {
 					+ sequence.get(i).getParamHash();
 		}
 		return hash;
+	}
+
+	public String getSymbol(int k) {
+		return sequence.get(k).getInputSymbol();
+	}
+
+	public List<Parameter> getParameter(int k) {
+		return sequence.get(k).getParameters();
 	}
 }
