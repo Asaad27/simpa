@@ -3,6 +3,7 @@ package learner.efsm.table;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -21,13 +22,18 @@ import automata.efsm.ParameterizedOutputSequence;
 import drivers.Driver;
 import drivers.efsm.EFSMDriver;
 import drivers.efsm.EFSMDriver.Types;
+import tools.Utils;
 
 public class LiLearner extends Learner {
 	private EFSMDriver driver;
 	private LiControlTable cTable;
 	private LiDataTable dTable;
 	private Map<String, List<ArrayList<Parameter>>> defaultParamValues;
-
+	private HashMap<String, ArrayList<String>> ndvUsed = new HashMap<String, ArrayList<String>>();
+	private static boolean UNIQUE_NDV = true;
+	private static boolean MARK_USED_NDV = true;
+	
+	
 	public LiLearner(Driver driver) {
 		this.driver = (EFSMDriver) driver;
 		defaultParamValues = this.driver.getDefaultParamValues();
@@ -44,36 +50,57 @@ public class LiLearner extends Learner {
 		for (int i = 0; i < cTable.getCountOfRowsInR(); i++)
 			fillTablesForRow(cTable.getRowInR(i), dTable.getRowInR(i));
 	}
-
+	
+	/* TODO séparer inputs de colonne et inputs de ligne */
 	@SuppressWarnings("unchecked")
 	private void fillTablesForRow(LiControlTableRow ctr, LiDataTableRow dtr) {
 		ParameterizedInputSequence querie = ctr.getPIS();
 		querie.removeEmptyInput();
-		for (int i = 0; i < ctr.getColumCount(); i++) {
-			if (ctr.getColum(i).isEmpty()) {
-				for (int l = 0; l < defaultParamValues.get(
-						cTable.getInputSymbol(i)).size(); l++) {
+		
+		for (int i = 0; i < ctr.getColumCount(); i++) {	
+			if (ctr.getColum(i).isEmpty()) {	
+				ArrayList<ParameterizedInputSequence> qlist = Utils.generatePermutations(ctr.getColumPIS(i), 0, defaultParamValues);
+				for (int l = 0; l < qlist.size(); l++) {
 					driver.reset();
-					querie.addParameterizedInput(ctr.getColumPIS(i)
-							.getLastSymbol(),
-							defaultParamValues.get(cTable.getInputSymbol(i))
-									.get(l));
+					for (int m = 0; m < qlist.get(l).getLength(); m++) {
+						querie.addParameterizedInput(qlist.get(l).getSymbol(m), qlist.get(l).getParameter(m));
+					}
 					ParameterizedInputSequence pis = new ParameterizedInputSequence();
 					ParameterizedOutputSequence pos = new ParameterizedOutputSequence();
+					
 					for (int j = 0; j < querie.sequence.size(); j++) {
-						ParameterizedInput pi = querie.sequence.get(j).clone();
-						for (int k = 0; k < pi.getParameters().size(); k++) {
-							if (pi.isNdv(k)) {
-								pi.setParameterValue(
-										k,
-										findNdvInPos(dTable.getNdv(pi
-												.getNdvIndexForVar(k)), pos, pi
-												.getParameters().get(k)));
+						if (UNIQUE_NDV) {
+							ParameterizedInput pi = querie.sequence.get(j).clone();
+							for (int k = 0; k < pi.getParameters().size(); k++) {
+								if (pi.isNdv(k)) {
+										System.out.println("Requesting NDV for " + pi.getInputSymbol());
+										pi.setParameterValue(k,
+															findNdvInPos(dTable.getNdv(pi
+																		.getNdvIndexForVar(k)), pos, pi
+																		.getParameters().get(k),
+																		pi.getInputSymbol()
+																	)
+															);
+								}
 							}
+							pis.addParameterizedInput(pi);
+							ParameterizedOutput po = driver.execute(pi);
+							pos.addParameterizedOuput(po);
+						} else {
+							ParameterizedInput pi = querie.sequence.get(j).clone();
+							for (int k = 0; k < pi.getParameters().size(); k++) {
+								if (pi.isNdv(k)) {
+									pi.setParameterValue(
+											k,
+											findNdvInPos(dTable.getNdv(pi
+													.getNdvIndexForVar(k)), pos, pi
+													.getParameters().get(k), pi.getInputSymbol()));
+								}
+							}
+							pis.addParameterizedInput(pi);
+							ParameterizedOutput po = driver.execute(pi);
+							pos.addParameterizedOuput(po);
 						}
-						pis.addParameterizedInput(pi);
-						ParameterizedOutput po = driver.execute(pi);
-						pos.addParameterizedOuput(po);
 					}
 
 					LiControlTableItem cti = new LiControlTableItem(
@@ -108,29 +135,82 @@ public class LiLearner extends Learner {
 							new LiDataTableItem(pis.getLastParameters(),
 									automataState, pos.getLastParameters(), pos
 											.getLastSymbol()));
-
-					querie.removeLastParameterizedInput();
+					for (int m = 0; m < qlist.get(l).getLength(); m++) {
+						querie.removeLastParameterizedInput();
+					}
 				}
 			}
 		}
 	}
 
+	/**
+	 * 
+	 * @param ndv
+	 * @param pos
+	 * @param parameter
+	 * @param pKey
+	 * @return
+	 */
 	private Parameter findNdvInPos(NDV ndv, ParameterizedOutputSequence pos,
-			Parameter parameter) {
+			Parameter parameter, String pKey) {
 		Parameter pNdv = parameter;
 		ParameterizedInputSequence pis = ndv.pis.clone();
 		pis.removeEmptyInput();
-		if (pos.sequence.size() >= pis.sequence.size()) {
-			if (pos.sequence.get(pis.sequence.size() - 1).getParameters()
+		String pNdv_val;
+		
+		if (!this.ndvUsed.containsKey(pKey)) {
+			this.ndvUsed.put(pKey, new ArrayList<String>());
+		}
+		if (!UNIQUE_NDV) {
+			pis.removeEmptyInput();
+			if (pos.sequence.size() >= pis.sequence.size()) {
+				if (pos.sequence.get(pis.sequence.size() - 1).getParameters()
+						.size() > ndv.paramIndex) {
+					pNdv = pos.sequence.get(pis.sequence.size() - 1)
+							.getParameters().get(ndv.paramIndex);
+					pNdv.ndv = ndv.indexNdv;
+					return pNdv;
+				}
+			}
+			return pNdv;
+		}
+		
+		for (int i = pis.sequence.size() - 1; (i < pos.sequence.size() && i >= 0); i--) {
+			if (pos.sequence.get(i).getParameters()
 					.size() > ndv.paramIndex) {
-				pNdv = pos.sequence.get(pis.sequence.size() - 1)
-						.getParameters().get(ndv.paramIndex);
-				pNdv.ndv = ndv.indexNdv;
-				return pNdv;
+				pNdv_val = pos.sequence.get(i)
+					.getParameters().get(ndv.paramIndex).value;
+				if (!this.ndvUsed.get(pKey).contains(pNdv_val)) {
+					pNdv = pos.sequence.get(i)
+							.getParameters().get(ndv.paramIndex);
+					pNdv.ndv = ndv.indexNdv;
+					if (MARK_USED_NDV)
+						this.ndvUsed.get(pKey).add(pNdv.value);
+					return pNdv;
+				}
 			}
 		}
+		
+		for (int i = pis.sequence.size(); (i < pos.sequence.size()); i++) {
+			if (pos.sequence.get(i).getParameters()
+					.size() > ndv.paramIndex) {
+				pNdv_val = pos.sequence.get(i)
+						.getParameters().get(ndv.paramIndex).value;
+				if (!this.ndvUsed.get(pKey).contains(pNdv_val)) {
+					pNdv = pos.sequence.get(i)
+							.getParameters().get(ndv.paramIndex);
+					pNdv.ndv = ndv.indexNdv;
+					if (MARK_USED_NDV)
+						this.ndvUsed.get(pKey).add(pNdv.value);
+					return pNdv;
+				}
+			}
+		}
+		
 		return pNdv;
+		
 	}
+	
 
 	public LiConjecture createConjecture() {
 		LogManager.logConsole("Building the raw conjecture");
@@ -313,21 +393,45 @@ public class LiLearner extends Learner {
 				ParameterizedInputSequence pis = new ParameterizedInputSequence();
 				ParameterizedOutputSequence pos = new ParameterizedOutputSequence();
 				querie.removeEmptyInput();
-				for (int j = 0; j < querie.sequence.size(); j++) {
-					ParameterizedInput api = querie.sequence.get(j).clone();
-					for (int k = 0; k < api.getParameters().size(); k++) {
-						if (api.isNdv(k)) {
-							api.setParameterValue(
-									k,
-									findNdvInPos(dTable.getNdv(api
-											.getNdvIndexForVar(k)), pos, api
-											.getParameters().get(k)));
+
+				if (UNIQUE_NDV) {
+					for (int j = 0; j < querie.sequence.size(); j++) {
+						ParameterizedInput api = querie.sequence.get(j).clone();
+						for (int k = 0; k < api.getParameters().size(); k++) {
+							if (api.isNdv(k)) {
+								System.out.println("Requesting NDV for " + api.getInputSymbol());
+								api.setParameterValue(
+										k,
+										findNdvInPos(dTable.getNdv(api
+												.getNdvIndexForVar(k)), pos, api
+												.getParameters().get(k),
+												api.getInputSymbol()));
+							}
 						}
+						pis.addParameterizedInput(api);
+						ParameterizedOutput po = driver.execute(api);
+						pos.addParameterizedOuput(po);
+						api = querie.sequence.get(j).clone();
 					}
-					pis.addParameterizedInput(api);
-					ParameterizedOutput po = driver.execute(api);
-					pos.addParameterizedOuput(po);
-				}
+					
+				} else {
+					for (int j = 0; j < querie.sequence.size(); j++) {
+						ParameterizedInput api = querie.sequence.get(j).clone();
+						for (int k = 0; k < api.getParameters().size(); k++) {
+							if (api.isNdv(k)) {
+								api.setParameterValue(
+										k,
+										findNdvInPos(dTable.getNdv(api
+												.getNdvIndexForVar(k)), pos, api
+												.getParameters().get(k),
+												api.getParameterValue(0)));
+							}
+						}
+						pis.addParameterizedInput(api);
+						ParameterizedOutput po = driver.execute(api);
+						pos.addParameterizedOuput(po);
+					}
+				}  
 
 				LiControlTableItem ctiNBP = new LiControlTableItem(
 						pis.getLastParameters(), pos.getLastSymbol());
@@ -366,9 +470,13 @@ public class LiLearner extends Learner {
 
 	@SuppressWarnings("unchecked")
 	private void handleNDV(NDV ndv) {
+		/* Let us find all rows starting with the NDV given as parameter */
 		List<LiControlTableRow> ctrs = cTable.getRowStartsWith(ndv.pis);
+		/* Iteration on rows containing NDV */
 		for (LiControlTableRow ctr : ctrs) {
+			/* Iteration on input parameters */
 			for (int i = 0; i < driver.getInputSymbols().size(); i++) {
+				/* Iteration on default values for the current parameter */
 				for (int l = 0; l < defaultParamValues.get(
 						cTable.getInputSymbol(i)).size(); l++) {
 					for (int k = 0; k < defaultParamValues
@@ -437,6 +545,7 @@ public class LiLearner extends Learner {
 		}
 	}
 
+	
 	private void handleNonClosed(int iRow) {
 		ParameterizedInputSequence origPis = cTable.getRowInR(iRow).getPIS();
 		cTable.addRowInS(cTable.removeRowInR(iRow));
@@ -459,9 +568,11 @@ public class LiLearner extends Learner {
 		completeTable();
 	}
 
+
 	public void learn() {
 		LogManager.logConsole("Inferring the system");
 		boolean finished = false;
+		boolean contrex = true;
 		NDV ndv;
 		NBP nbp;
 		NDF ndf;
@@ -469,72 +580,87 @@ public class LiLearner extends Learner {
 		completeTable();
 		LogManager.logControlTable(cTable);
 		LogManager.logDataTable(dTable);
-		while (!finished) {
-			finished = true;
-
-			while ((ndv = dTable.findNDV()) != null) {
-				finished = false;
-				LogManager.logStep(LogManager.STEPNDV, ndv);
-				handleNDV(ndv);
-				LogManager.logControlTable(cTable);
-				LogManager.logDataTable(dTable);
-			}
-			while ((nbp = cTable.getNotBalancedParameter()) != null) {
-				finished = false;
-				LogManager.logStep(LogManager.STEPNBP, nbp);
-				handleNBP(nbp);
-				LogManager.logControlTable(cTable);
-				LogManager.logDataTable(dTable);
-			}
-			int alreadyNonClosed = 0;
-			for (int nonClosedRow : cTable.getNonClosedRows()) {
-				finished = false;
-				int seems = -1;
-				if (Options.REUSE_OP_IFNEEDED
-						&& ((seems = seemsEquivalent(nonClosedRow
-								- alreadyNonClosed)) != -1)
-						&& !cTable.getRowInR(nonClosedRow - alreadyNonClosed)
-								.seems()) {
-					LogManager.logStep(LogManager.STEPOTHER, "Row "
-							+ (nonClosedRow - alreadyNonClosed)
-							+ " in R seems to be equivalent to row " + seems
-							+ " in S");
-					handleSeemsEquivalent(nonClosedRow, seems);
-				} else {
-					LogManager.logStep(LogManager.STEPNCR,
-							cTable.R.get(nonClosedRow).getPIS());
-					handleNonClosed(nonClosedRow - (alreadyNonClosed++));
-				}
-				LogManager.logControlTable(cTable);
-				LogManager.logDataTable(dTable);
-			}
-			while ((ndf = cTable.getDisputedItem()) != null) {
-				finished = false;
-				LogManager.logStep(LogManager.STEPNDF, ndf);
-				handleDisputedRow(ndf);
-				LogManager.logControlTable(cTable);
-				LogManager.logDataTable(dTable);
-			}
-		}
-		LiConjecture conjecture = createConjecture();
-		if (!driver.isCounterExample(ce, conjecture))
-			ce = driver.getCounterExample(conjecture);
-		else
-			LogManager.logInfo("Previous counter example : " + ce
-					+ " is still a counter example for the new conjecture");
-		if (ce != null) {
+		
+		while (contrex) {
+			contrex = false;
 			finished = false;
-			int suffixLength = 1;
-			do {
-				cTable.addColumnInE(ce.getIthSuffix(suffixLength));
-				completeTable();
-				if (!cTable.getNonClosedRows().isEmpty())
-					break;
-				suffixLength++;
-			} while (suffixLength <= ce.getLength());
-			LogManager.logControlTable(cTable);
+			while (!finished) {
+				finished = true;
+	
+				while ((ndv = dTable.findNDV()) != null) {
+					finished = false;
+					LogManager.logStep(LogManager.STEPNDV, ndv);
+					handleNDV(ndv);
+					LogManager.logControlTable(cTable);
+					LogManager.logDataTable(dTable);
+				}
+				while ((nbp = cTable.getNotBalancedParameter()) != null) {
+					finished = false;
+					LogManager.logStep(LogManager.STEPNBP, nbp);
+					handleNBP(nbp);
+					LogManager.logControlTable(cTable);
+					LogManager.logDataTable(dTable);
+				}
+				int alreadyNonClosed = 0;
+				for (int nonClosedRow : cTable.getNonClosedRows()) {
+					finished = false;
+					int seems = -1;
+					if (Options.REUSE_OP_IFNEEDED
+							&& ((seems = seemsEquivalent(nonClosedRow
+									- alreadyNonClosed)) != -1)
+							&& !cTable.getRowInR(nonClosedRow - alreadyNonClosed)
+									.seems()) {
+						LogManager.logStep(LogManager.STEPOTHER, "Row "
+								+ (nonClosedRow - alreadyNonClosed)
+								+ " in R seems to be equivalent to row " + seems
+								+ " in S");
+						handleSeemsEquivalent(nonClosedRow, seems);
+					} else {
+						LogManager.logStep(LogManager.STEPNCR,
+								cTable.R.get(nonClosedRow).getPIS());
+						handleNonClosed(nonClosedRow - (alreadyNonClosed++));
+					}
+					LogManager.logControlTable(cTable);
+					LogManager.logDataTable(dTable);
+				}
+				while ((ndf = cTable.getDisputedItem()) != null) {
+					finished = false;
+					LogManager.logStep(LogManager.STEPNDF, ndf);
+					handleDisputedRow(ndf);
+					LogManager.logControlTable(cTable);
+					LogManager.logDataTable(dTable);
+				}
+			}
+			LiConjecture conjecture = createConjecture();
+			if (!driver.isCounterExample(ce, conjecture))
+				ce = driver.getCounterExample(conjecture);
+			else
+				LogManager.logInfo("Previous counter example : " + ce
+						+ " is still a counter example for the new conjecture");
+			if (ce != null) {
+				contrex = true;
+				System.out.println("[LEARNER] GETTING COUNTER-EXAMPLE: " + ce + " " + ce.getLength() + " " + ce.getLastSymbol());
+				finished = false;
+				int suffixLength = 1;
+				do {
+					System.out.println("[LEARNER] Let's go for column " + ce.getIthSuffix(suffixLength));
+					LogManager.logControlTable(cTable);
+					cTable.addColumnInE(ce.getIthSuffix(suffixLength));
+					dTable.addColumnInAllRows();
+					LogManager.logControlTable(cTable);
+					completeTable();
+					if (!cTable.getNonClosedRows().isEmpty()) {
+						System.out.println("[LEARNER] Breaking");
+						break;
+					}
+					suffixLength++;
+				} while (suffixLength <= ce.getLength());
+				LogManager.logControlTable(cTable);
+				LogManager.logDataTable(dTable);
+			}
 		}
 	}
+
 
 	private void handleSeemsEquivalent(int nonClosedRow, int seems) {
 		LiControlTableRow ctr = cTable.getRowInR(nonClosedRow);

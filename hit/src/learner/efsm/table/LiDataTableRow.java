@@ -22,6 +22,10 @@ public class LiDataTableRow {
 		return cols.get(index);
 	}
 
+	public void addColumn() {
+		cols.add(new ArrayList<LiDataTableItem>());
+	}
+	
 	public int getColumCount() {
 		return cols.size();
 	}
@@ -33,4 +37,5 @@ public class LiDataTableRow {
 	public ParameterizedInputSequence getPIS() {
 		return pis.clone();
 	}
+
 }
