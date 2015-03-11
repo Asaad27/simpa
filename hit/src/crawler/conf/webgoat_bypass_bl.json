@@ -17,23 +17,3 @@
     "search_name" : ["Bruce"]
   }
 }
-
-
-{
-  "host" : "localhost",
-  "port" : 8080,
-  "basicAuthUser" : "guest",
-  "basicAuthPass" : "guest",
-  "name" : "WebGoat_Bypass_BL",
-  "limitSelector" : "#lesson_wrapper",
-  "noFollow" : [ "^javascript:", "^http://" ],
-  "cookies" : "JSESSIONID=BE48F7DCBA178BBE84206564A9E67492",
-  "reset" : "http://localhost:8080/WebGoat/attack?Screen=20&menu=900&Restart=20",
-  "actionByParameter" : "action",
-  "mergeInputs" : false,
-  "smallestSet" : false,
-  "data" : {
-    "employee_id" : "105",
-    "password" : "tom"
-  }
-}
