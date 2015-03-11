@@ -69,20 +69,37 @@ public class DriverGenerator {
 	 * The user-provided urls used as entry points
 	 */
 	protected List<String> urlsToCrawl = null;
+	/**
+	 * List of already used inputs
+	 */
 	protected List<WebInput> inputs = null;
+	/**
+	 * Data provided by the user that will be given as input for forms
+	 */
 	protected Map<String, ArrayList<String>> formValues = null;
 	/**
-	 * The current sequence of WebInput used for crawling
+	 * Current sequence of WebInput used for crawling
 	 */
 	protected LinkedList<WebInput> sequence = null;
 	protected WebClient client = null;
 	protected HashSet<String> comments = null;
+	/**
+	 * List of already encountered output pages
+	 */
 	protected ArrayList<WebOutput> outputs = null;
+	/**
+	 * List of transitions between pages, defined by two node numbers and one
+	 * input
+	 */
 	protected ArrayList<WebTransition> transitions = null;
+	/**
+	 * Stack of the numbers of the nodes used for crawling to the current page
+	 * (cf. sequence)
+	 */
 	protected LinkedList<Integer> currentNode = null;
 	protected List<String> colors = null;
 	/**
-	 * The number of sent requests
+	 * Number of sent requests
 	 */
 	protected int requests = 0;
 
@@ -148,6 +165,10 @@ public class DriverGenerator {
 		return config.getName();
 	}
 
+	/**
+	 * Reset the web application (if possible), and send all the inputs in
+	 * sequence.
+	 */
 	private void sendSequences() {
 		reset();
 		for (WebInput in : sequence) {
@@ -159,6 +180,9 @@ public class DriverGenerator {
 		}
 	}
 
+	/**
+	 * Reset the application using the provided url (if any).
+	 */
 	private void reset() {
 		if (config.getReset() != null) {
 			try {
@@ -171,6 +195,13 @@ public class DriverGenerator {
 		}
 	}
 
+	/**
+	 * Retrieve the addresses from links, and filter out those which match the
+	 * given regexs.
+	 *
+	 * @param links The links elements to be filtered
+	 * @return A list of filtered urls (relative or absolute)
+	 */
 	private List<String> filterUrl(Elements links) {
 		List<String> urls = new ArrayList<>();
 		for (Element e : links) {
@@ -192,41 +223,75 @@ public class DriverGenerator {
 		return urls;
 	}
 
+	/**
+	 * Verifies if the given input meets a set of requirements (cf. method
+	 * body). If so, the input is added to the list of stored inputs, and
+	 * corresponding inputs already stored might be deleted.
+	 *
+	 * @param in The input to add
+	 * @return True if the input was successfully added, False otherwise
+	 */
 	private boolean addInput(WebInput in) {
+		TreeMap<String, List<String>> inParams = in.getParams();
+
 		for (WebInput i : inputs) {
-			if (i.equals(in)
-				|| ((config.getActionByParameter() != null) && (in.getParams().get(config.getActionByParameter()) != null) && (i.getParams().get(config.getActionByParameter()) != null)
-				&& (i.getParams()
-				.get(config.getActionByParameter())
-				.equals(in.getParams().get(
-						config.getActionByParameter()))) && i
-				.getParams().size() < in.getParams().size())) {
+			TreeMap<String, List<String>> iParams = i.getParams();
+
+			if (i.equals(in)) {
 				return false;
 			}
-			if ((i.getAddress().equals(in.getAddress())) && (!i.getParams().isEmpty() && in.getParams().isEmpty())) {
+
+			//If the navigation is done by an "action parameter" ...
+			if ((config.getActionByParameter() != null)) {
+				List<String> inActionParameterValues = inParams.get(config.getActionByParameter());
+				List<String> iActionParameterValues = iParams.get(config.getActionByParameter());
+
+				//... and there is another input with the same values for its action parameter, but with less parameters
+				if ((inActionParameterValues != null)
+					&& (iActionParameterValues != null)
+					&& (iActionParameterValues.equals(inActionParameterValues))
+					&& iParams.size() < inParams.size()) {
+					return false;
+				}
+			}
+
+			//If there is another input with the same address and at least one parameter, whereas the candidate input has no parameters
+			if (i.getAddress().equals(in.getAddress())
+				&& !iParams.isEmpty()
+				&& inParams.isEmpty()) {
 				return false;
 			}
 		}
 
 		for (WebInput i : inputs) {
-			if ((config.getActionByParameter() != null)
-				&& (in.getParams().get(config.getActionByParameter()) != null)
-				&& (i.getParams().get(config.getActionByParameter()) != null)
-				&& (i.getParams().get(config.getActionByParameter()).equals(in.getParams().get(config.getActionByParameter()))) && i.isAlmostEquals(in)) {
-				return false;
+			TreeMap<String, List<String>> iParams = i.getParams();
+
+			if ((config.getActionByParameter() != null)) {
+				List<String> inActionParameterValues = inParams.get(config.getActionByParameter());
+				List<String> iActionParameterValues = iParams.get(config.getActionByParameter());
+
+				// If there is another input with the same values for its action parameter, and almost equal to the candidate input
+				if ((inActionParameterValues != null)
+					&& (iActionParameterValues != null)
+					&& (iActionParameterValues.equals(inActionParameterValues))
+					&& i.isAlmostEquals(in)) {
+					return false;
+				}
 			}
 		}
 
 		for (WebInput i : inputs) {
+			TreeMap<String, List<String>> iParams = i.getParams();
 			//do not add if another input with the same address has at least one
-			//different numeric parameter value
+			//different numeric parameter value (to avoid "gallery" pages)
+			//TODO : modify this to match the specs in Karim's paper page 82
 			if (i.getAddress().equals(in.getAddress())) {
 				int diff = 0;
-				for (String paramName : i.getParams().keySet()) {
-					if (in.getParams().get(paramName) != null && i.getParams().get(paramName) != null) {
-						if (in.getParams().get(paramName).size() == 1 && i.getParams().get(paramName).size() == 1) {
-							if (Utils.isNumeric(in.getParams().get(paramName).get(0)) && Utils.isNumeric(i.getParams().get(paramName).get(0))) {
-								if (!in.getParams().get(paramName).get(0).equals(i.getParams().get(paramName).get(0))) {
+				for (String paramName : iParams.keySet()) {
+					if (inParams.get(paramName) != null && iParams.get(paramName) != null) {
+						if (inParams.get(paramName).size() == 1 && iParams.get(paramName).size() == 1) {
+							if (Utils.isNumeric(inParams.get(paramName).get(0)) && Utils.isNumeric(iParams.get(paramName).get(0))) {
+								if (!inParams.get(paramName).get(0).equals(iParams.get(paramName).get(0))) {
 									diff++;
 								}
 							}
@@ -239,8 +304,9 @@ public class DriverGenerator {
 			}
 		}
 
-		for (String key : in.getParams().keySet()) {
-			List<String> values = in.getParams().get(key);
+		//For each parameter without value, we assign a user-provided value, or a random string otherwise.
+		for (String key : inParams.keySet()) {
+			List<String> values = inParams.get(key);
 			if (values.isEmpty()) {
 				// TODO
 				String providedValue;
@@ -258,25 +324,40 @@ public class DriverGenerator {
 		}
 		inputs.add(in);
 
+		//If the navigation is done by an action parameter, and the option "keep smallest set" is activated
 		if (config.getActionByParameter() != null && config.keepSmallSet()) {
+			List<String> inActionParameterValues = inParams.get(config.getActionByParameter());
+
 			for (int i = 0; i < inputs.size() - 1; i++) {
+
+				TreeMap<String, List<String>> iParams = inputs.get(i).getParams();
+				List<String> iActionParameterValues = iParams.get(config.getActionByParameter());
+
+				//If there is another input with the same address, but more parameters, we remove it
 				if ((inputs.get(i).getAddress().equals(in.getAddress()))
-					&& (in.getParams().get(config.getActionByParameter()) != null)
-					&& (inputs.get(i).getParams().get(config.getActionByParameter()) != null)
-					&& (inputs.get(i).getParams().get(config.getActionByParameter()).equals(in.getParams().get(config.getActionByParameter())))
-					&& ((inputs.get(i).getParams().size() > in.getParams().size()))) {
+					&& (inActionParameterValues != null)
+					&& (iActionParameterValues != null)
+					&& (iActionParameterValues.equals(inActionParameterValues))
+					&& (iParams.size() > inParams.size())) {
 					WebInput removed = inputs.remove(i);
 					for (int t = transitions.size() - 1; t >= 0; t--) {
 						if (transitions.get(t).getBy() == removed) {
 							transitions.get(t).setBy(in);
 						}
 					}
+					i--;
 				}
 			}
 		}
 
 		for (int i = 0; i < inputs.size() - 1; i++) {
-			if ((inputs.get(i).getAddress().equals(in.getAddress())) && (inputs.get(i).getParams().isEmpty() && in.getParams().size() > 0)) {
+			WebInput wi = inputs.get(i);
+			TreeMap<String, List<String>> iParams = wi.getParams();
+
+			//If there is another input with the same address, no parameters, and the added input has at least one parameter, it is removed
+			if ((wi.getAddress().equals(in.getAddress()))
+				&& (iParams.isEmpty()
+				&& !inParams.isEmpty())) {
 				WebInput removed = inputs.remove(i);
 				for (int t = transitions.size() - 1; t >= 0; t--) {
 					if (transitions.get(t).getBy() == removed) {
@@ -288,6 +369,14 @@ public class DriverGenerator {
 		return true;
 	}
 
+	/**
+	 * If the input is a form, verifies for each parameter if there is an unique
+	 * assigned value. If multiple values are present, picks one already present
+	 * in the WebInput, or an user-provided one. Otherwise, generates a random
+	 * value.
+	 *
+	 * @return An HTTPData object with every parameter/value couples
+	 */
 	private HTTPData getValuesForInput(WebInput in) {
 		HTTPData data = new HTTPData();
 		if (in.getType() == Type.FORM) {
@@ -318,8 +407,15 @@ public class DriverGenerator {
 		return data;
 	}
 
+	/**
+	 * Execute a WebInput object by sending a concrete HTTP request
+	 *
+	 * @param in
+	 * @return
+	 * @throws MalformedURLException
+	 */
 	private String submit(WebInput in) throws MalformedURLException {
-		WebRequest request = null;
+		WebRequest request;
 		HTTPData values = getValuesForInput(in);
 		if (in.getType() == Type.FORM) {
 			request = new WebRequest(new URL(in.getAddress()), in.getMethod());
@@ -500,10 +596,9 @@ public class DriverGenerator {
 				}
 			}
 			for (String url : filterUrl(links)) {
-				URL absURL = null;
 				try {
-					absURL = new URL(new URL(d.baseUri()), url);
-					url = absURL.toString();	
+					URL absURL = new URL(new URL(d.baseUri()), url);
+					url = absURL.toString();
 				} catch (MalformedURLException ex) {
 					Logger.getLogger(DriverGenerator.class.getName()).log(Level.SEVERE, null, ex);
 					continue;
@@ -523,12 +618,23 @@ public class DriverGenerator {
 		return node;
 	}
 
+	/**
+	 * Add or replace the existing parameters by those provided by the user.
+	 * If input parameter values contains all the provided values, then they will be
+	 * replaced by the provided values only.
+	 * Else, the provided values will be added
+	 * @param in The WebInput to modify
+	 */
 	private void addProvidedParameter(WebInput in) {
 		for (String name : in.getParams().keySet()) {
 			if (config.getData().get(name) != null) {
-				for (String value : config.getData().get(name)) {
-					if (!in.getParams().get(name).contains(value)) {
-						in.getParams().get(name).add(value);
+				if (in.getParams().get(name).containsAll(config.getData().get(name))) {
+					in.getParams().put(name, config.getData().get(name));
+				} else {
+					for (String value : config.getData().get(name)) {
+						if (!in.getParams().get(name).contains(value)) {
+							in.getParams().get(name).add(value);
+						}
 					}
 				}
 			}
