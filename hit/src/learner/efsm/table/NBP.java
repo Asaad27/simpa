@@ -18,8 +18,8 @@ public class NBP {
 		for (int i = 0; i < params.size(); i++) {
 			if (i > 0)
 				s.append('|');
-			if (params.get(i).ndv != -1)
-				s.append("Ndv" + params.get(i).ndv);
+			if (params.get(i).isNDV())
+				s.append("Ndv" + params.get(i).getNdv());
 			else
 				s.append(params.get(i).value);
 		}
@@ -27,7 +27,7 @@ public class NBP {
 	}
 
 	public void setNdvIndex(int iVar, int iNdv) {
-		this.params.get(iVar).ndv = iNdv;
+		this.params.get(iVar).setNdv(iNdv);
 	}
 
 	@Override
@@ -37,8 +37,8 @@ public class NBP {
 			if (i > 0)
 				s.append(", ");
 			s.append(params.get(i).value);
-			if (params.get(i).ndv != -1)
-				s.append("(Ndv" + params.get(i).ndv + ")");
+			if (params.get(i).isNDV())
+				s.append("(Ndv" + params.get(i).getNdv() + ")");
 		}
 		return s.append(") for input symbol " + (iInputSymbol + 1)).toString();
 	}

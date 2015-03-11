@@ -9,7 +9,7 @@ public class Parameter implements Cloneable, Serializable {
 
 	public String value;
 	public Types type;
-	public int ndv = -1;
+	private int ndv = -1;
 
 	public Parameter(String v, Types t) {
 		this.value = v;
@@ -43,4 +43,16 @@ public class Parameter implements Cloneable, Serializable {
 	public boolean isNDV() {
 		return ndv != -1;
 	}
+
+	public void setNdv(int ndv) {
+		if(this.ndv == -1 && ndv != -1){
+			System.err.println("Parameter [" + this.value + "] is now considered as a NDV : " + ndv);
+		}
+		this.ndv = ndv;
+	}
+
+	public int getNdv() {
+		return ndv;
+	}
+
 }

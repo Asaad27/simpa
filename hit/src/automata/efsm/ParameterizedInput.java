@@ -40,7 +40,7 @@ public class ParameterizedInput implements Cloneable, Serializable {
 	}
 
 	public int getNdvIndexForVar(int iVar) {
-		return parameters.get(iVar).ndv;
+		return parameters.get(iVar).getNdv();
 	}
 
 	public List<Parameter> getParameters() {
@@ -57,7 +57,7 @@ public class ParameterizedInput implements Cloneable, Serializable {
 			if (i > 0)
 				s.append('|');
 			if (isNdv(i))
-				s.append("Ndv" + parameters.get(i).ndv);
+				s.append("Ndv" + parameters.get(i).getNdv());
 			else
 				s.append(parameters.get(i).value);
 		}
@@ -69,17 +69,17 @@ public class ParameterizedInput implements Cloneable, Serializable {
 	}
 
 	public boolean isNdv(int iVar) {
-		return parameters.get(iVar).ndv != -1;
+		return parameters.get(iVar).isNDV();
 	}
 
 	public void setNdvIndexForVar(int iVar, int iNdv) {
-		parameters.get(iVar).ndv = iNdv;
+		parameters.get(iVar).setNdv(iNdv);
 	}
 
 	public void setParameterValue(int paramIndex, Parameter p) {
 		parameters.get(paramIndex).value = p.value;
 		parameters.get(paramIndex).type = p.type;
-		parameters.get(paramIndex).ndv = p.ndv;
+		parameters.get(paramIndex).setNdv(p.getNdv());
 	}
 
 	@Override
@@ -92,7 +92,7 @@ public class ParameterizedInput implements Cloneable, Serializable {
 				if (i > 0)
 					s.append(", ");
 				if (isNdv(i))
-					s.append("Ndv" + parameters.get(i).ndv);
+					s.append("Ndv" + parameters.get(i).getNdv());
 				else
 					s.append(parameters.get(i).value);
 			}

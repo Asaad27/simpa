@@ -27,7 +27,7 @@ public class LiControlTableItem implements Serializable {
 	}
 
 	public Integer getParameterNDVIndex(int iParameter) {
-		return parameters.get(iParameter).ndv;
+		return parameters.get(iParameter).getNdv();
 	}
 
 	public List<Parameter> getParameters() {
@@ -39,8 +39,8 @@ public class LiControlTableItem implements Serializable {
 		for (int i = 0; i < parameters.size(); i++) {
 			if (i > 0)
 				s.append('|');
-			if (parameters.get(i).ndv != -1)
-				s.append("Ndv" + parameters.get(i).ndv);
+			if (parameters.get(i).isNDV())
+				s.append("Ndv" + parameters.get(i).getNdv());
 			else
 				s.append(parameters.get(i).value);
 		}
@@ -52,7 +52,7 @@ public class LiControlTableItem implements Serializable {
 	}
 
 	public void setNdv(int indexParam, int indexNdv) {
-		parameters.get(indexParam).ndv = indexNdv;
+		parameters.get(indexParam).setNdv(indexNdv);
 	}
 
 	@Override
@@ -61,10 +61,10 @@ public class LiControlTableItem implements Serializable {
 		for (int i = 0; i < parameters.size(); i++) {
 			if (i > 0)
 				res.append(", ");
-			if (parameters.get(i).ndv == -1)
+			if (!parameters.get(i).isNDV())
 				res.append(parameters.get(i).value);
 			else
-				res.append("Ndv" + parameters.get(i).ndv);
+				res.append("Ndv" + parameters.get(i).getNdv());
 		}
 		return res
 				.append("), "

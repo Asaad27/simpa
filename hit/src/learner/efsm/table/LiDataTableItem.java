@@ -74,7 +74,7 @@ public class LiDataTableItem implements Serializable {
 	}
 
 	public void setNdvParam(int i, int iNdv) {
-		outputParameters.get(i).ndv = iNdv;
+		outputParameters.get(i).setNdv(iNdv);
 	}
 
 	public boolean equals(Object to) {
@@ -114,11 +114,11 @@ public class LiDataTableItem implements Serializable {
 		for (List<Parameter> s : automataState.values()) {
 			res.append('(');
 			if (s.size() > 0)
-				res.append(s.get(0).ndv != -1 ? "Ndv" + s.get(0).ndv
+				res.append(s.get(0).isNDV() ? "Ndv" + s.get(0).getNdv()
 						: s.get(0).value);
 			for (int i = 1; i < s.size(); i++)
 				res.append(", "
-						+ (s.get(i).ndv != -1 ? "Ndv" + s.get(i).ndv
+						+ (s.get(i).isNDV() ? "Ndv" + s.get(i).getNdv()
 								: s.get(i).value));
 			res.append(')');
 		}
@@ -130,8 +130,8 @@ public class LiDataTableItem implements Serializable {
 			for (int i = 0; i < outputParameters.size(); i++) {
 				if (i > 0)
 					res.append(", ");
-				if (outputParameters.get(i).ndv != -1)
-					res.append("Ndv" + outputParameters.get(i).ndv);
+				if (outputParameters.get(i).isNDV())
+					res.append("Ndv" + outputParameters.get(i).getNdv());
 				else
 					res.append(outputParameters.get(i).value);
 			}

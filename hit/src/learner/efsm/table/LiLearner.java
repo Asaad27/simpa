@@ -168,7 +168,7 @@ public class LiLearner extends Learner {
 						.size() > ndv.paramIndex) {
 					pNdv = pos.sequence.get(pis.sequence.size() - 1)
 							.getParameters().get(ndv.paramIndex);
-					pNdv.ndv = ndv.indexNdv;
+					pNdv.setNdv(ndv.indexNdv);
 					return pNdv;
 				}
 			}
@@ -183,7 +183,7 @@ public class LiLearner extends Learner {
 				if (!this.ndvUsed.get(pKey).contains(pNdv_val)) {
 					pNdv = pos.sequence.get(i)
 							.getParameters().get(ndv.paramIndex);
-					pNdv.ndv = ndv.indexNdv;
+					pNdv.setNdv(ndv.indexNdv);
 					if (MARK_USED_NDV)
 						this.ndvUsed.get(pKey).add(pNdv.value);
 					return pNdv;
@@ -199,7 +199,7 @@ public class LiLearner extends Learner {
 				if (!this.ndvUsed.get(pKey).contains(pNdv_val)) {
 					pNdv = pos.sequence.get(i)
 							.getParameters().get(ndv.paramIndex);
-					pNdv.ndv = ndv.indexNdv;
+					pNdv.setNdv(ndv.indexNdv);
 					if (MARK_USED_NDV)
 						this.ndvUsed.get(pKey).add(pNdv.value);
 					return pNdv;
@@ -436,7 +436,7 @@ public class LiLearner extends Learner {
 				LiControlTableItem ctiNBP = new LiControlTableItem(
 						pis.getLastParameters(), pos.getLastSymbol());
 				for (int j = 0; j < nbp.params.size(); j++) {
-					ctiNBP.setNdv(j, nbp.params.get(j).ndv);
+					ctiNBP.setNdv(j, nbp.params.get(j).getNdv());
 				}
 				ctr.addAtColumn(nbp.iInputSymbol, ctiNBP);
 

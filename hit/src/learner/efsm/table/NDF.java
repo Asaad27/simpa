@@ -60,8 +60,8 @@ public class NDF implements Cloneable {
 			for (int j = 0; j < parameters.get(i).size(); j++) {
 				if (j > 0)
 					s.append(", ");
-				if (parameters.get(i).get(j).ndv != -1)
-					s.append("Ndv" + parameters.get(i).get(j).ndv);
+				if (parameters.get(i).get(j).isNDV())
+					s.append("Ndv" + parameters.get(i).get(j).getNdv());
 				else
 					s.append(parameters.get(i).get(j).value);
 			}

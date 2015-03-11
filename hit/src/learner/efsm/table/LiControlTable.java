@@ -267,7 +267,7 @@ public class LiControlTable {
 		StringBuffer hashA = new StringBuffer();
 		for (int i = 0; i < A.size(); i++) {
 			if (A.get(i).isNDV()) {
-				hashA.append("(ndv" + A.get(i).ndv + ")");
+				hashA.append("(ndv" + A.get(i).getNdv() + ")");
 			} else {
 				hashA.append("(" + A.get(i).value + ")");
 			}
@@ -275,7 +275,7 @@ public class LiControlTable {
 		StringBuffer hashB = new StringBuffer();
 		for (int i = 0; i < B.size(); i++) {
 			if (B.get(i).isNDV()) {
-				hashB.append("(ndv" + B.get(i).ndv + ")");
+				hashB.append("(ndv" + B.get(i).getNdv() + ")");
 			} else {
 				hashB.append("(" + B.get(i).value + ")");
 			}
