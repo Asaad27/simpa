@@ -127,6 +127,7 @@ public class DriverGenerator {
 		client.getOptions().setTimeout(Options.TIMEOUT);
 		client.getOptions().setCssEnabled(Options.CSS);
 		client.getOptions().setJavaScriptEnabled(Options.JS);
+		client.getOptions().setUseInsecureSSL(true);
 		CookieManager cm = new CookieManager();
 		if (config.getCookies() != null) {
 			String cookieValue = null;
@@ -325,43 +326,45 @@ public class DriverGenerator {
 		}
 		inputs.add(in);
 
+		Iterator<WebInput> iterInputs;
 		//If the navigation is done by an action parameter, and the option "keep smallest set" is activated
 		if (config.getActionByParameter() != null && config.keepSmallSet()) {
 			List<String> inActionParameterValues = inParams.get(config.getActionByParameter());
-
-			for (int i = 0; i < inputs.size() - 1; i++) {
-
-				TreeMap<String, List<String>> iParams = inputs.get(i).getParams();
+			
+			iterInputs = inputs.iterator();
+			while(iterInputs.hasNext()){
+				WebInput wi = iterInputs.next();
+				TreeMap<String, List<String>> iParams = wi.getParams();
 				List<String> iActionParameterValues = iParams.get(config.getActionByParameter());
 
 				//If there is another input with the same address, but more parameters, we remove it
-				if ((inputs.get(i).getAddress().equals(in.getAddress()))
-					&& (inActionParameterValues != null)
-					&& (iActionParameterValues != null)
-					&& (iActionParameterValues.equals(inActionParameterValues))
-					&& (iParams.size() > inParams.size())) {
-					WebInput removed = inputs.remove(i);
+				if ((wi.getAddress().equals(in.getAddress()))
+						&& (inActionParameterValues != null)
+						&& (iActionParameterValues != null)
+						&& (iActionParameterValues.equals(inActionParameterValues))
+						&& (iParams.size() > inParams.size())) {
+					iterInputs.remove();
 					for (int t = transitions.size() - 1; t >= 0; t--) {
-						if (transitions.get(t).getBy() == removed) {
+						if (transitions.get(t).getBy() == wi) {
 							transitions.get(t).setBy(in);
 						}
 					}
-					i--;
 				}
 			}
 		}
 
-		for (int i = 0; i < inputs.size() - 1; i++) {
-			WebInput wi = inputs.get(i);
+		iterInputs = inputs.iterator();
+		while(iterInputs.hasNext()){
+			WebInput wi = iterInputs.next();
 			TreeMap<String, List<String>> iParams = wi.getParams();
 
 			//If there is another input with the same address, no parameters, and the added input has at least one parameter, it is removed
 			if ((wi.getAddress().equals(in.getAddress()))
-				&& (iParams.isEmpty()
-				&& !inParams.isEmpty())) {
-				WebInput removed = inputs.remove(i);
+					&& iParams.isEmpty()
+					&& !inParams.isEmpty()) {
+				iterInputs.remove();
 				for (int t = transitions.size() - 1; t >= 0; t--) {
-					if (transitions.get(t).getBy() == removed) {
+					if (transitions.get(t).getBy() == wi) {
 						transitions.get(t).setBy(in);
 					}
 				}
@@ -625,10 +628,11 @@ public class DriverGenerator {
 	}
 
 	/**
-	 * Add or replace the existing parameters by those provided by the user.
-	 * If input parameter values contains all the provided values, then they will be
-	 * replaced by the provided values only.
-	 * Else, the provided values will be added
+	 * Add or replace the existing parameters by those provided by the user. If
+	 * input parameter values contains all the provided values, then they will
+	 * be replaced by the provided values only. Else, the provided values will
+	 * be added
+	 *
 	 * @param in The WebInput to modify
 	 */
 	private void addProvidedParameter(WebInput in) {
@@ -771,6 +775,7 @@ public class DriverGenerator {
 			HtmlPage page;
 			try {
 				page = client.getPage(request);
+				requests++;
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
@@ -786,6 +791,7 @@ public class DriverGenerator {
 			HtmlPage page;
 			try {
 				page = client.getPage(link.substring(0, link.length() - 1));
+				requests++;
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
@@ -889,6 +895,9 @@ public class DriverGenerator {
 			esettings.appendChild(n);
 			n = doc.createElement("port");
 			n.setTextContent(String.valueOf(config.getPort()));
+			esettings.appendChild(n);
+			n = doc.createElement("reset");
+			n.setTextContent(config.getReset());
 			esettings.appendChild(n);
 			n = doc.createElement("limitSelector");
 			n.setTextContent(config.getLimitSelector());
