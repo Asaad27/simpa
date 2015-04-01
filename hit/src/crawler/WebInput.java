@@ -15,7 +15,7 @@ import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class WebInput {
+public class WebInput implements Cloneable {
 
 	public enum Type {
 
@@ -27,15 +27,39 @@ public class WebInput {
 	private HttpMethod method = null;
 	private String address = null;
 	private TreeMap<String, List<String>> params = null;
+	/**
+	 * The previous input that led to this one
+	 */
+	private WebInput prev = null;
+	/**
+	 * The associated output
+	 */
+	private WebOutput output = null;
 
 	public WebInput() {
 		params = new TreeMap<>();
+	}
+	
+	public WebInput getPrev() {
+		return prev;
+	}
+
+	public void setPrev(WebInput prev) {
+		this.prev = prev;
+	}
+
+	public WebOutput getOutput() {
+		return output;
+	}
+
+	public void setOutput(WebOutput output) {
+		this.output = output;
 	}
 
 	public void setNbValues(int val) {
 		this.nbValues = val;
 	}
-
+	
 	public int getNbValues() {
 		return this.nbValues;
 	}
@@ -175,24 +199,31 @@ public class WebInput {
 		return address;
 	}
 
+	public String getAddressWithParameters() {
+		return getAddressWithParameters(false);
+	}
+	
 	/**
 	 * Returns the input address concatenated with its parameters
-	 * 
+	 *
+	 * @param randomized If set, randomly pick a single value for each parameter from existing ones
 	 * @return The address with parameters
 	 */
-	public String getAddressWithParameters() {
+	public String getAddressWithParameters(boolean randomized) {
 		if (this.method != HttpMethod.GET) {
 			throw new IllegalArgumentException("Internal error : this method should "
 				+ "not be called for an input with a method other than GET");
 		}
-		String address = this.address + "?";
+		String addr = this.address + "?";
 		for (String key : params.keySet()) {
-			for (String value : params.get(key)) {
-				address += key + "=" + value + "&";
+			if (randomized) {
+				addr += key + "=" + Utils.randIn(params.get(key)) + "&";
+			} else for (String value : params.get(key)) {
+				addr += key + "=" + value + "&";
 			}
 		}
-		address = address.substring(0, address.length() - 1);
-		return address;
+		addr = addr.substring(0, addr.length() - 1);
+		return addr;
 	}
 
 	public void setAddress(String address) {
@@ -204,6 +235,11 @@ public class WebInput {
 		return "[" + method + ", " + address + ", " + params + "]";
 	}
 
+	@Override
+	public int hashCode() {
+		return this.toString().hashCode();
+	}
+	
 	public boolean equals(WebInput to) {
 		if (!address.equals(to.address)) {
 			return false;
@@ -284,4 +320,10 @@ public class WebInput {
 		}
 	}
 
+	@Override
+	protected Object clone() throws CloneNotSupportedException {
+		WebInput wi = (WebInput) super.clone();
+		wi.params = (TreeMap<String, List<String>>) this.params.clone();
+		return wi;
+	}
 }

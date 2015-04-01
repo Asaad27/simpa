@@ -16,7 +16,7 @@ public class WebOutput {
 	private List<String> params = null;
 	private PageTreeNode pt = null;
 	private List<WebInput> from = null;
-	private int state;
+	private int state = 0;
 
 	public String getSource() {
 		return source;

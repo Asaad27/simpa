@@ -185,7 +185,7 @@ public class DriverGenerator {
 	/**
 	 * Reset the application using the provided url (if any).
 	 */
-	private void reset() {
+	protected void reset() {
 		if (config.getReset() != null) {
 			try {
 				client.getPage(config.getReset());
@@ -204,7 +204,7 @@ public class DriverGenerator {
 	 * @param links The links elements to be filtered
 	 * @return A list of filtered urls (relative or absolute)
 	 */
-	private List<String> filterUrl(Elements links) {
+	protected List<String> filterUrl(Elements links) {
 		List<String> urls = new ArrayList<>();
 		for (Element e : links) {
 			String to = e.attr("href");
@@ -226,14 +226,13 @@ public class DriverGenerator {
 	}
 
 	/**
-	 * Verifies if the given input meets a set of requirements (cf. method
-	 * body). If so, the input is added to the list of stored inputs, and
-	 * corresponding inputs already stored might be deleted.
+	 * The set of requirements verified on an input in order to be added
+	 * (heuristics from Karim's experiments)
 	 *
-	 * @param in The input to add
-	 * @return True if the input was successfully added, False otherwise
+	 * @param in
+	 * @return
 	 */
-	private boolean addInput(WebInput in) {
+	protected final boolean isInputWorthKeeping(WebInput in) {
 		TreeMap<String, List<String>> inParams = in.getParams();
 
 		for (WebInput i : inputs) {
@@ -306,6 +305,23 @@ public class DriverGenerator {
 			}
 		}
 
+		return true;
+	}
+
+	/**
+	 * Verifies if the given input meets a set of requirements (cf. method
+	 * body). If so, the input is added to the list of stored inputs, and
+	 * corresponding inputs already stored might be deleted.
+	 *
+	 * @param in The input to add
+	 * @return True if the input was successfully added, False otherwise
+	 */
+	protected boolean addInput(WebInput in) {
+		if (!isInputWorthKeeping(in)) {
+			return false;
+		}
+
+		TreeMap<String, List<String>> inParams = in.getParams();
 		//For each parameter without value, we assign a user-provided value, or a random string otherwise.
 		for (String key : inParams.keySet()) {
 			List<String> values = inParams.get(key);
@@ -373,15 +389,21 @@ public class DriverGenerator {
 		return true;
 	}
 
+	protected HTTPData getHTTPDataFromInput(WebInput in) {
+		return getHTTPDataFromInput(in, false);
+	}
+
 	/**
-	 * If the input is a form, verifies for each parameter if there is an unique
-	 * assigned value. If multiple values are present, picks one already present
-	 * in the WebInput, or an user-provided one. Otherwise, generates a random
-	 * value.
+	 * If the input uses POST method, verifies for each parameter if there is an
+	 * unique assigned value. If multiple values are present, picks one already
+	 * present in the WebInput, or an user-provided one. Otherwise, generates a
+	 * random value.
 	 *
+	 * @param in
+	 * @param randomized If true, randomize the parameters values
 	 * @return An HTTPData object with every parameter/value couples
 	 */
-	private HTTPData getHTTPDataFromInput(WebInput in) {
+	protected HTTPData getHTTPDataFromInput(WebInput in, boolean randomized) {
 		HTTPData data = new HTTPData();
 		if (in.getMethod() == HttpMethod.POST) {
 			TreeMap<String, List<String>> params = in.getParams();
@@ -391,25 +413,26 @@ public class DriverGenerator {
 				if (values.size() == 1) {
 					//... this value is used.
 					data.add(key, values.get(0));
-				//If no or multiple values are present in this input ...
+					//If no or multiple values are present in this input ...
 				} else {
-					// TODO
 					String newValue;
 					// ... and the user did not provide any value ...
-					if (formValues.get(key) == null || formValues.get(key).isEmpty()) {
+					if (randomized || formValues.get(key) == null || formValues.get(key).isEmpty()) {
 						// ... and multiple values are present in this input ...
 						if (values.size() > 1) {
 							// ... a random value from those present is used.
 							newValue = Utils.randIn(values);
-						// ... and no value is present in the input ...
+							// ... and no value is present in the input ...
 						} else {
 							// ... a random string is used.
-							comments.add("Multiple values for "
-								+ key
-								+ ", random string used. Please provide one value.");
+							if (!randomized) {
+								comments.add("No values for "
+										+ key
+										+ ", random string used. Please provide one value.");
+							}
 							newValue = Utils.randString();
 						}
-					//... and the user provided one or multiple values ...
+						//... and the user provided one or multiple values ...
 					} else {
 						//... the first value is used
 						newValue = formValues.get(key).get(0);
@@ -430,7 +453,7 @@ public class DriverGenerator {
 	 * @return
 	 * @throws MalformedURLException
 	 */
-	private String submit(WebInput in) throws MalformedURLException {
+	protected String submit(WebInput in) throws MalformedURLException {
 		WebRequest request;
 		if (in.getMethod() == HttpMethod.POST) {
 			HTTPData values = getHTTPDataFromInput(in);
@@ -477,7 +500,7 @@ public class DriverGenerator {
 		return null;
 	}
 
-	public void addUrl(String url) {
+	public final void addUrl(String url) {
 		if (url != null && !"".equals(url)) {
 			urlsToCrawl.add(url);
 		}
@@ -571,7 +594,7 @@ public class DriverGenerator {
 		Collections.shuffle(colors);
 	}
 
-	private int crawl(Document d, WebInput from, String content) {
+	protected int crawl(Document d, WebInput from, String content) {
 		int node = updateOutput(d, from);
 		currentNode.addLast(node);
 		Element lesson;
@@ -651,8 +674,8 @@ public class DriverGenerator {
 		}
 	}
 
-	private Collection<Element> findFormsIn(String content, String baseUri) {
-		List<Element> el = new ArrayList<Element>();
+	protected Collection<Element> findFormsIn(String content, String baseUri) {
+		List<Element> el = new ArrayList<>();
 		int nextForm = content.indexOf("<form ");
 		while (nextForm != -1) {
 			Document d = Jsoup.parseBodyFragment(content.substring(nextForm, content.indexOf("</form", nextForm)));
@@ -715,6 +738,15 @@ public class DriverGenerator {
 		}
 	}
 
+	protected WebOutput findEquivalentOutput(WebOutput to) {
+		for (WebOutput current : outputs) {
+			if (to.isEquivalentTo(current)) {
+				return current;
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Checks if the output page has already been seen, and if so, checks if it
 	 * is the first time we access it with the given input.
@@ -724,23 +756,23 @@ public class DriverGenerator {
 	 * @return The index of the output page in the collection of all the
 	 * previously encountered pages
 	 */
-	private int updateOutput(Document d, WebInput from) {
+	protected int updateOutput(Document d, WebInput from) {
 		WebOutput o = new WebOutput(d, from, config.getLimitSelector());
-		if (d.toString().isEmpty()) {
-			return 0;
-		} else {
-			for (int i = 0; i < outputs.size(); i++) {
-				if (o.isEquivalentTo(outputs.get(i))) {
-					if (outputs.get(i).isNewFrom(from)) {
-						findParameters(outputs.get(i));
-					}
-					return i;
-				}
+		return updateOutput(o, from);
+	}
+
+	protected int updateOutput(WebOutput out, WebInput from) {
+		WebOutput equivalent = findEquivalentOutput(out);
+		if (equivalent != null) {
+			if (equivalent.isNewFrom(from)) {
+				findParameters(equivalent);
 			}
+			return equivalent.getState();
 		}
-		outputs.add(o);
+		outputs.add(out);
+		out.setState(outputs.size() - 1);
 		System.out.println("        New page !");
-		findParameters(o);
+		findParameters(out);
 		return outputs.size() - 1;
 	}
 
@@ -750,7 +782,9 @@ public class DriverGenerator {
 			TreeMap<String, List<String>> inputParams = in.getParams();
 			for (String key : inputParams.keySet()) {
 				List<String> values = inputParams.get(key);
-				if (values.isEmpty() || values.size() > 1) {
+				if (values.size() == 1) {
+					data.add(key, values.get(0));
+				} else {
 					String newValue = null;
 					if (values.size() > 1) {
 						newValue = Utils.randIn(values);
@@ -758,8 +792,6 @@ public class DriverGenerator {
 						newValue = Utils.randString();
 					}
 					data.add(key, newValue);
-				} else {
-					data.add(key, values.get(0));
 				}
 			}
 		}
@@ -801,7 +833,7 @@ public class DriverGenerator {
 		return null;
 	}
 
-	private void findParameters(WebOutput out) {
+	protected void findParameters(WebOutput out) {
 		Set<String> diff = new HashSet<>();
 		WebInput inputToFuzz = sequence.removeLast();
 		for (int i = 0; i < 5; i++) {
@@ -821,9 +853,9 @@ public class DriverGenerator {
 		System.out.println("        " + out.getParams().size() + " output parameters");
 	}
 
-	private Set<String> findDifferences(WebOutput first, WebOutput second) {
-		Set<String> diff = new HashSet<String>();
-		List<String> pos = new ArrayList<String>();
+	protected Set<String> findDifferences(WebOutput first, WebOutput second) {
+		Set<String> diff = new HashSet<>();
+		List<String> pos = new ArrayList<>();
 		Elements firstE = first.getDoc();
 		Elements secondE = second.getDoc();
 		if (firstE.size() == secondE.size()) {
@@ -836,7 +868,7 @@ public class DriverGenerator {
 		return diff;
 	}
 
-	private void findDifferences(Element first, Element second, Set<String> diff, List<String> pos) {
+	protected void findDifferences(Element first, Element second, Set<String> diff, List<String> pos) {
 		if (first.nodeName().equals(second.nodeName())) {
 			pos.add("/");
 			if (!first.ownText().equals(second.ownText())) {
@@ -857,7 +889,7 @@ public class DriverGenerator {
 		}
 	}
 
-	private int crawlInput(WebInput in) {
+	protected int crawlInput(WebInput in) {
 		sequence.addLast(in);
 		System.out.println("    " + (in.getType() == Type.FORM ? "f" : "l") + " " + in.getAddress() + ' ' + in.getParams());
 

@@ -6,6 +6,7 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
 import crawler.DriverGenerator;
+import crawler.DriverGeneratorBFS;
 
 
 public class DriverGen {
