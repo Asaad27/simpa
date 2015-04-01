@@ -68,30 +68,28 @@ public class WebOutput {
 
 	public WebOutput(Document document, WebInput from, String limitSelector) {
 		this();
-		this.from.add(from);
-		this.source = document.html();
-		this.doc = document.getAllElements();
+		if (from != null) {
+			this.from.add(from);
+		}
 		if (limitSelector != null && !limitSelector.isEmpty()) {
-			this.doc = document.select(DriverGenerator.config.getLimitSelector());
+			this.doc = document.select(limitSelector);
 			this.source = this.doc.html();
+		} else {
+			this.doc = document.getAllElements();
+			this.source = document.html();
 		}
 		pt = new PageTreeNode(Jsoup.parse(this.source));
 	}
 
-	public WebOutput(String source, boolean raw, String limitSelector) {
-		this();
-		Document document = Jsoup.parse(source);
-		this.source = document.html();
-		this.doc = document.getAllElements();
-		if (!raw) {
-			if (limitSelector != null && !limitSelector.isEmpty()) {
-				this.doc = document.select(limitSelector);
-				this.source = this.doc.html();
-			}
-		}
-		pt = new PageTreeNode(Jsoup.parse(this.source));
+	public WebOutput(String source, String limitSelector) {
+		this(Jsoup.parse(source), null, limitSelector);
 	}
 
+	public WebOutput(String source) {
+		this(Jsoup.parse(source), null, null);
+	}
+
+	
 	public List<String> getParams() {
 		return params;
 	}

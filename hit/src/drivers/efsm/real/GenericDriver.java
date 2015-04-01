@@ -118,7 +118,7 @@ public class GenericDriver extends LowWebDriver {
 
 		ParameterizedOutput po = null;
 		//Creates the WebOutput object from html source
-		WebOutput out = new WebOutput(source, false, config.getLimitSelector());
+		WebOutput out = new WebOutput(source, config.getLimitSelector()); //TODO add 'from' ?
 		//Looks for a equivalent output from the already visited ones
 		for (int i = 0; i < outputs.size(); i++) {
 			if (out.isEquivalentTo(outputs.get(i))) {
@@ -297,7 +297,7 @@ public class GenericDriver extends LowWebDriver {
 					continue;
 				}
 				String source = outputNode.getChildNodes().item(1).getTextContent();
-				WebOutput out = new WebOutput(source, true, config.getLimitSelector());
+				WebOutput out = new WebOutput(source);
 				NodeList parameterNodesList = outputNode.getChildNodes().item(3).getChildNodes();
 				for (int j = 0; j < parameterNodesList.getLength(); j++) {
 					if (!parameterNodesList.item(j).getNodeName().equals("parameter")) {

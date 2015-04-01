@@ -801,7 +801,7 @@ public class DriverGenerator {
 		for (int i = 0; i < 5; i++) {
 			try {
 				sendSequences();
-				WebOutput variant = new WebOutput(submitRandom(inputToFuzz), false, config.getLimitSelector());
+				WebOutput variant = new WebOutput(submitRandom(inputToFuzz), config.getLimitSelector());
 				if (out.isEquivalentTo(variant)) {
 					diff.addAll(findDifferences(out, variant));
 				}
