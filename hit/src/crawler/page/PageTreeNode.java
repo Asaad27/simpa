@@ -39,9 +39,10 @@ public class PageTreeNode extends GenericTreeNode<String> {
 	public boolean equals(PageTreeNode to) {
 		if (!data.equals(to.data)) return false;
 		else{
-			if (getNumberOfChildren() != to.getNumberOfChildren()) return false;
+			int numberOfChildren = getNumberOfChildren();
+			if (numberOfChildren != to.getNumberOfChildren()) return false;
 			else{
-				for(int i=0; i<getNumberOfChildren(); i++){
+				for(int i=0; i<numberOfChildren; i++){
 					if (!((PageTreeNode)getChildAt(i)).equals((PageTreeNode)to.getChildAt(i))) return false;
 				}
 			}

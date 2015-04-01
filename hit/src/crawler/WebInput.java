@@ -101,6 +101,14 @@ public class WebInput {
 			Logger.getLogger(DriverGenerator.class.getName()).log(Level.SEVERE, null, ex);
 		}
 
+		for (Element textarea : form.select("textarea")){
+			List<String> values = new ArrayList<String>();
+			if(!"".equals(textarea.text())){
+				values.add(textarea.text());
+			}
+			inputs.put(textarea.attr("name"), values);
+		}
+		
 		for (Element input : form.select("input[type=text]")) {
 			inputs.put(
 				input.attr("name"),
@@ -164,6 +172,26 @@ public class WebInput {
 	}
 
 	public String getAddress() {
+		return address;
+	}
+
+	/**
+	 * Returns the input address concatenated with its parameters
+	 * 
+	 * @return The address with parameters
+	 */
+	public String getAddressWithParameters() {
+		if (this.method != HttpMethod.GET) {
+			throw new IllegalArgumentException("Internal error : this method should "
+				+ "not be called for an input with a method other than GET");
+		}
+		String address = this.address + "?";
+		for (String key : params.keySet()) {
+			for (String value : params.get(key)) {
+				address += key + "=" + value + "&";
+			}
+		}
+		address = address.substring(0, address.length() - 1);
 		return address;
 	}
 

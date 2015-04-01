@@ -40,6 +40,7 @@ import crawler.Configuration;
 import crawler.WebInput;
 import crawler.WebInput.Type;
 import crawler.WebOutput;
+import org.w3c.dom.Node;
 
 public class GenericDriver extends LowWebDriver {
 
@@ -90,15 +91,24 @@ public class GenericDriver extends LowWebDriver {
 		client.setCssEnabled(false);
 	}
 
+	@Override
 	public String getSystemName() {
 		return config.getName();
 	}
 
+	@Override
 	public ParameterizedOutput execute(ParameterizedInput pi) {
 		numberOfAtomicRequest++;
-		WebInput in = inputs.get(Integer.parseInt(pi.getInputSymbol().substring(
-				pi.getInputSymbol().indexOf("_") + 1)));
+		//By parsing the "input_X" string, recovers the Xth input
+		WebInput in = inputs.get(
+			Integer.parseInt(
+				pi.getInputSymbol().substring(
+					pi.getInputSymbol().indexOf("_") + 1
+				)
+			)
+		);
 
+		//Sends the output and store the source output
 		String source = null;
 		try {
 			source = submit(in, pi);
@@ -107,13 +117,18 @@ public class GenericDriver extends LowWebDriver {
 		}
 
 		ParameterizedOutput po = null;
+		//Creates the WebOutput object from html source
 		WebOutput out = new WebOutput(source, false, config.getLimitSelector());
+		//Looks for a equivalent output from the already visited ones
 		for (int i = 0; i < outputs.size(); i++) {
 			if (out.isEquivalentTo(outputs.get(i))) {
 				po = new ParameterizedOutput(getOutputSymbols().get(i));
+				//If equivalent output has no output parameters...
 				if (outputs.get(i).getParams().isEmpty()) {
+					//...create a default one ("200") for po
 					po.getParameters().add(new Parameter("200", Types.STRING));
 				} else {
+					//...else, adds to po every parameter stored in the output
 					for (String p : outputs.get(i).getParams()) {
 						po.getParameters().add(
 								new Parameter(extractParam(out, p),
@@ -219,91 +234,87 @@ public class GenericDriver extends LowWebDriver {
 			config.setCookies(root.getElementsByTagName("cookies").item(0)
 					.getTextContent());
 
-			NodeList inputs = root.getElementsByTagName("inputs").item(0)
-					.getChildNodes();
-			for (int i = 0; i < inputs.getLength(); i++) {
-				if (inputs.item(i).getNodeName().equals("input")) {
-					WebInput in = new WebInput();
-					in.setType(Type.valueOf(inputs.item(i).getAttributes()
-							.getNamedItem("type").getNodeValue()));
-					in.setAddress(inputs.item(i).getAttributes()
-							.getNamedItem("address").getNodeValue());
-					in.setMethod(HttpMethod.valueOf(inputs.item(i)
-							.getAttributes().getNamedItem("method")
-							.getNodeValue()));
-					in.setType(Type.valueOf(inputs.item(i).getAttributes()
-							.getNamedItem("type").getNodeValue()));
-
-					int nbValue = 0;
-					for (int j = 0; j < inputs.item(i).getChildNodes().item(1)
-							.getChildNodes().getLength(); j++) {
-						if (inputs.item(i).getChildNodes().item(1)
-								.getChildNodes().item(j).getNodeName()
-								.equals("parametersCombination")) {
-							nbValue++;
-							for (int k = 0; k < inputs.item(i).getChildNodes()
-									.item(1).getChildNodes().item(j)
-									.getChildNodes().getLength(); k++) {
-								if (inputs.item(i).getChildNodes().item(1)
-										.getChildNodes().item(j)
-										.getChildNodes().item(k).getNodeName()
-										.equals("parameter")) {
-									String name = inputs.item(i)
-											.getChildNodes().item(1)
-											.getChildNodes().item(j)
-											.getChildNodes().item(k)
-											.getAttributes()
-											.getNamedItem("name")
-											.getNodeValue();
-									String value = inputs.item(i)
-											.getChildNodes().item(1)
-											.getChildNodes().item(j)
-											.getChildNodes().item(k)
-											.getTextContent();
-									if (in.getParams().get(name) == null)
-										in.getParams().put(name,
-												new ArrayList<String>());
-									in.getParams().get(name).add(value);
-								}
-							}
-						}
-					}
-					in.setNbValues(nbValue);
-					if (in.getParams().isEmpty()) {
-						in.getParams().put("noparam",
-								Utils.createArrayList("novalue"));
-						in.setNbValues(1);
-					}
-					this.inputs.add(in);
+			Node inputsNode = root.getElementsByTagName("inputs").item(0);
+			NodeList inputNodesList = inputsNode.getChildNodes();
+			for (int i = 0; i < inputNodesList.getLength(); i++) {
+				if (!inputNodesList.item(i).getNodeName().equals("input")) {
+					continue;
 				}
+
+				Node inputNode = inputNodesList.item(i);
+				WebInput in = new WebInput();
+				in.setAddress(inputNode.getAttributes()
+					.getNamedItem("address").getNodeValue());
+				in.setMethod(HttpMethod.valueOf(inputNode
+					.getAttributes().getNamedItem("method")
+					.getNodeValue()));
+				in.setType(Type.valueOf(inputNode.getAttributes()
+					.getNamedItem("type").getNodeValue()));
+
+				int nbValue = 0;
+				if (!inputNode.getChildNodes().item(1).getNodeName().equals("parameters")) {
+					continue;
+				}
+
+				Node parametersNode = inputNode.getChildNodes().item(1);
+				NodeList parametersCombinationNodesList = parametersNode.getChildNodes();
+				for (int j = 0; j < parametersCombinationNodesList.getLength(); j++) {
+					if (!parametersCombinationNodesList.item(j).getNodeName().equals("parametersCombination")) {
+						continue;
+					}
+					Node parametersCombinationNode = parametersCombinationNodesList.item(j);
+					nbValue++;
+
+					for (int k = 0; k < parametersCombinationNode.getChildNodes().getLength(); k++) {
+						if (!parametersCombinationNode.getChildNodes().item(k).getNodeName().equals("parameter")) {
+							continue;
+						}
+
+						Node parameterNode = parametersCombinationNode.getChildNodes().item(k);
+						String name = parameterNode.getAttributes().getNamedItem("name").getNodeValue();
+						String value = parameterNode.getTextContent();
+						if (in.getParams().get(name) == null) {
+							in.getParams().put(name,
+								new ArrayList<String>());
+						}
+						in.getParams().get(name).add(value);
+					}
+				}
+				in.setNbValues(nbValue);
+				if (in.getParams().isEmpty()) {
+					in.getParams().put("noparam",
+						Utils.createArrayList("novalue"));
+					in.setNbValues(1);
+				}
+				this.inputs.add(in);
 			}
 
-			NodeList outputs = root.getElementsByTagName("outputs").item(0)
-					.getChildNodes();
-			for (int i = 0; i < outputs.getLength(); i++) {
-				if (outputs.item(i).getNodeName().equals("output")) {
-					WebOutput out = new WebOutput(outputs.item(i).getChildNodes()
-							.item(1).getTextContent(), true,
-							config.getLimitSelector());
-					for (int j = 0; j < outputs.item(i).getChildNodes().item(3)
-							.getChildNodes().getLength(); j++) {
-						if (outputs.item(i).getChildNodes().item(3)
-								.getChildNodes().item(j).getNodeName()
-								.equals("parameter")) {
-							String value = outputs.item(i).getChildNodes()
-									.item(3).getChildNodes().item(j)
-									.getTextContent();
-							out.getParams().add(value);
-						}
-					}
-					this.outputs.add(out);
+			NodeList outputNodesList = root.getElementsByTagName("outputs").item(0)
+				.getChildNodes();
+			for (int i = 0; i < outputNodesList.getLength(); i++) {
+				Node outputNode = outputNodesList.item(i);
+				if (!outputNode.getNodeName().equals("output")) {
+					continue;
 				}
+				String source = outputNode.getChildNodes().item(1).getTextContent();
+				WebOutput out = new WebOutput(source, true, config.getLimitSelector());
+				NodeList parameterNodesList = outputNode.getChildNodes().item(3).getChildNodes();
+				for (int j = 0; j < parameterNodesList.getLength(); j++) {
+					if (!parameterNodesList.item(j).getNodeName().equals("parameter")) {
+						continue;
+					}
+					String value = parameterNodesList.item(j).getTextContent();
+					out.getParams().add(value);
+				}
+				this.outputs.add(out);
+
 			}
-		}catch (ParserConfigurationException|SAXException e){
-			LogManager.logException("Error parsing the xml file \"" + xml + "\"",  e);
-		}catch (IOException e) {
-			LogManager.logException("Unable to read the file \"" + xml + "\"",  e);
+		} catch (ParserConfigurationException | SAXException e) {
+			LogManager.logException("Error parsing the xml file \"" + xml + "\"", e);
+		} catch (IOException e) {
+			LogManager.logException("Unable to read the file \"" + xml + "\"", e);
 		}
+		config.check();
 		return config;
 	}
 

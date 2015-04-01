@@ -52,6 +52,7 @@ import tools.loggers.LogManager;
 
 import com.gargoylesoftware.htmlunit.CookieManager;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -377,32 +378,44 @@ public class DriverGenerator {
 	 *
 	 * @return An HTTPData object with every parameter/value couples
 	 */
-	private HTTPData getValuesForInput(WebInput in) {
+	private HTTPData getHTTPDataFromInput(WebInput in) {
 		HTTPData data = new HTTPData();
-		if (in.getType() == Type.FORM) {
+		if (in.getMethod() == HttpMethod.POST) {
 			TreeMap<String, List<String>> params = in.getParams();
 			for (String key : params.keySet()) {
 				List<String> values = params.get(key);
-				if (values.isEmpty() || values.size() > 1) {
+				//If a single value for this parameter is present in the input...
+				if (values.size() == 1) {
+					//... this value is used.
+					data.add(key, values.get(0));
+				//If no or multiple values are present in this input ...
+				} else {
 					// TODO
 					String newValue;
+					// ... and the user did not provide any value ...
 					if (formValues.get(key) == null || formValues.get(key).isEmpty()) {
+						// ... and multiple values are present in this input ...
 						if (values.size() > 1) {
+							// ... a random value from those present is used.
 							newValue = Utils.randIn(values);
+						// ... and no value is present in the input ...
 						} else {
+							// ... a random string is used.
 							comments.add("Multiple values for "
 								+ key
 								+ ", random string used. Please provide one value.");
 							newValue = Utils.randString();
 						}
+					//... and the user provided one or multiple values ...
 					} else {
+						//... the first value is used
 						newValue = formValues.get(key).get(0);
 					}
 					data.add(key, newValue);
-				} else {
-					data.add(key, values.get(0));
 				}
 			}
+		} else {
+			System.err.println("Internal error : form with GET method not yet implemented");
 		}
 		return data;
 	}
@@ -416,8 +429,8 @@ public class DriverGenerator {
 	 */
 	private String submit(WebInput in) throws MalformedURLException {
 		WebRequest request;
-		HTTPData values = getValuesForInput(in);
-		if (in.getType() == Type.FORM) {
+		if (in.getMethod() == HttpMethod.POST) {
+			HTTPData values = getHTTPDataFromInput(in);
 			request = new WebRequest(new URL(in.getAddress()), in.getMethod());
 			request.setRequestParameters(values.getNameValueData());
 			request.setAdditionalHeader("Connection", "Close");
@@ -440,18 +453,11 @@ public class DriverGenerator {
 			} else {
 				return ((HtmlPage) page).asXml();
 			}
-		} else if (in.getType() == Type.LINK) {
-			String link = in.getAddress() + "?";
-			if (!in.getParams().isEmpty()) {
-				for (String name : in.getParams().keySet()) {
-					for (String value : in.getParams().get(name)) {
-						link += name + "=" + value + "&";
-					}
-				}
-			}
+		} else if (in.getMethod() == HttpMethod.GET) {
+			String link = in.getAddressWithParameters();
 			HtmlPage page;
 			try {
-				page = client.getPage(link.substring(0, link.length() - 1));
+				page = client.getPage(link);
 				if (page.getWebResponse().getStatusCode() != 200) {
 					return null;
 				}
