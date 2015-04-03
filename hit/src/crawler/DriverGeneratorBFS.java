@@ -16,11 +16,12 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -46,8 +47,7 @@ public class DriverGeneratorBFS extends DriverGenerator {
 		super(configFileName);
 	}
 
-
-	protected String sendInputChain(WebInput input, boolean withoutLast) throws MalformedURLException {
+	protected WebOutput sendInputChain(WebInput input, boolean withoutLast) throws MalformedURLException {
 		reset();
 
 		//prepare the chain of input to send
@@ -61,12 +61,18 @@ public class DriverGeneratorBFS extends DriverGenerator {
 			curr = curr.getPrev();
 		}
 
-		String result = null;
+		String resultString = null;
 		for (WebInput currentInput : inputChain) {
 			WebInput currentInputComplete = checkInputParameters(currentInput);
-			result = sendInput(currentInputComplete);
+			resultString = sendInput(currentInputComplete);
 		}
-		return result;
+
+		if (resultString == null || resultString.equals("")) {
+			return null;
+		} else {
+			return new WebOutput(resultString, input, config.getLimitSelector());
+		}
+
 	}
 
 	protected String sendInput(WebInput input) throws MalformedURLException {
@@ -93,9 +99,11 @@ public class DriverGeneratorBFS extends DriverGenerator {
 		try {
 			page = client.getPage(request);
 			requests++;
+			/* TODO : Task 32
 			if (page.getWebResponse().getStatusCode() != 200) {
 				return null;
 			}
+			*/
 		} catch (HttpHostConnectException e) {
 			LogManager.logFatalError("Unable to connect to host");
 			return null;
@@ -156,14 +164,14 @@ public class DriverGeneratorBFS extends DriverGenerator {
 					System.out.println("Current : " + currentInput);
 					System.out.println("\tDepth " + depth);
 					//actually crawl the input and stores the output
-					String outputString = sendInputChain(currentInput, false);
-					if (outputString == null || outputString.equals("")) {
-						continue;
+					WebOutput currentOutput = sendInputChain(currentInput, false);
+					if(currentOutput == null){
+						comments.add("The input " +  currentInput + " has been filtered out. "
+								+ "If it's a link to a non-html page (e.g. a *.jpg), "
+								+ "please consider adding a matching \"noFollow\" pattern "
+								+ "to the JSON config file to improve crawling speed");
+						inputs.remove(currentInput);
 					}
-					String baseURI = currentInput.getAddress();
-					Document doc = Jsoup.parse(outputString);
-					doc.setBaseUri(baseURI);
-					WebOutput currentOutput = new WebOutput(doc, currentInput, config.getLimitSelector());
 					currentInput.setOutput(currentOutput);
 
 					//check if output is new ?
@@ -199,48 +207,83 @@ public class DriverGeneratorBFS extends DriverGenerator {
 	 *
 	 * @param d The output page
 	 * @param from The input used to access the page
-	 * @return The index of the output page in the collection of all the
-	 * previously encountered pages
 	 */
-	@Override
-	protected int updateOutput(Document d, WebInput from) {
+	protected void updateOutput(Document d, WebInput from) {
 		WebOutput o = new WebOutput(d, from, config.getLimitSelector());
-		return updateOutput(o, from);
+		updateOutput(o, from);
 	}
 
-	@Override
-	protected int updateOutput(WebOutput out, WebInput from) {
+	protected void updateOutput(WebOutput out, WebInput from) {
 		WebOutput equivalent = findEquivalentOutput(out);
 		if (equivalent != null) {
 			if (equivalent.isNewFrom(from)) {
 				findParameters(equivalent, from);
 			}
-			return equivalent.getState();
+			out.setState(equivalent.getState());
+			return;
 		}
 		outputs.add(out);
 		out.setState(outputs.size() - 1);
 		System.out.println("        New page !");
 		findParameters(out, from);
-		return outputs.size() - 1;
 	}
 
 	private void findParameters(WebOutput equivalent, WebInput inputToFuzz) {
-		Set<String> diff = new HashSet<>();
+		Map<String, String> diff = new HashMap<>();
 		for (int i = 0; i < 5; i++) {
 			try {
 				sendInputChain(inputToFuzz, true);
 				String result = sendInput(inputToFuzz, true);
 				WebOutput variant = new WebOutput(result, config.getLimitSelector());
 				if (equivalent.isEquivalentTo(variant)) {
-					diff.addAll(findDifferences(equivalent, variant));
+					diff.putAll(findDifferences(equivalent, variant));
 				}
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
 			}
 
 		}
-		equivalent.getParams().addAll(diff);
-		System.out.println("        " + equivalent.getParams().size() + " output parameters");
+		equivalent.addAllParams(diff);
+		System.out.println("        " + equivalent.getParamsNumber() + " output parameters");
+	}
+
+	protected Map<String, String> findDifferences(WebOutput first, WebOutput second) {
+		Map<String, String> differences = new HashMap<>();
+		LinkedList<String> pos = new LinkedList<>();
+		Elements firstE = first.getDoc();
+		Elements secondE = second.getDoc();
+		if (firstE.size() == secondE.size()) {
+			for (int i = 0; i < firstE.size(); i++) {
+				pos.addLast(String.valueOf(i));
+				findDifferences(firstE.get(i), secondE.get(i), differences, pos);
+				pos.removeLast();
+			}
+		}
+		return differences;
+	}
+
+	protected void findDifferences(Element first, Element second, Map<String, String> diff, LinkedList<String> pos) {
+		if (!first.nodeName().equals(second.nodeName())) {
+			return;
+		}
+
+		pos.addLast("/");
+		if (!first.ownText().equals(second.ownText())) {
+			String xpath = "";
+			for (String tag : pos) {
+				xpath += tag;
+			}
+			diff.put(xpath, first.ownText());
+
+		}
+		if (first.children().size() == second.children().size()) {
+			for (int i = 0; i < first.children().size(); i++) {
+				pos.addLast(String.valueOf(i));
+				findDifferences(first.child(i), second.child(i), diff, pos);
+				pos.removeLast();
+			}
+		}
+		pos.removeLast();
 	}
 
 	private List<WebInput> extractInputs(WebOutput wo) {

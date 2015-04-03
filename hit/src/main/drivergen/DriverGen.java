@@ -40,7 +40,7 @@ public class DriverGen {
 	public static void launch(){
 		DriverGenerator g;
 		try {
-			g = new DriverGenerator(main.drivergen.Options.INPUT);
+			g = new DriverGeneratorBFS(main.drivergen.Options.INPUT);
 			g.start();
 			g.exportToDot();
 			g.exportToXML();

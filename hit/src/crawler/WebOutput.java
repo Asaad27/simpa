@@ -8,12 +8,18 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 import crawler.page.PageTreeNode;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 public class WebOutput {
 
 	private Elements doc;
 	private String source = null;
 	private List<String> params = null;
+	private Map<String, String> paramsValues = null;
 	private PageTreeNode pt = null;
 	private List<WebInput> from = null;
 	private int state = 0;
@@ -32,6 +38,7 @@ public class WebOutput {
 
 	public WebOutput() {
 		params = new ArrayList<>();
+		paramsValues = new HashMap<>();
 		from = new ArrayList<>();
 	}
 
@@ -69,6 +76,7 @@ public class WebOutput {
 	public WebOutput(Document document, WebInput from, String limitSelector) {
 		this();
 		if (from != null) {
+			document.setBaseUri(from.getAddress());
 			this.from.add(from);
 		}
 		if (limitSelector != null && !limitSelector.isEmpty()) {
@@ -81,6 +89,10 @@ public class WebOutput {
 		pt = new PageTreeNode(Jsoup.parse(this.source));
 	}
 
+	public WebOutput(String source, WebInput from, String limitSelector) {
+		this(Jsoup.parse(source), from, limitSelector);
+	}
+	
 	public WebOutput(String source, String limitSelector) {
 		this(Jsoup.parse(source), null, limitSelector);
 	}
@@ -88,13 +100,61 @@ public class WebOutput {
 	public WebOutput(String source) {
 		this(Jsoup.parse(source), null, null);
 	}
-
 	
-	public List<String> getParams() {
+	
+	public boolean isEquivalentTo(WebOutput to) {
+		return pt.equals(to.pt);
+	}
+	
+	
+	/*
+	 * Methods related to parameters access
+	 */
+	
+	/*public List<String> getParams() {
 		return params;
 	}
 
-	public boolean isEquivalentTo(WebOutput to) {
-		return pt.equals(to.pt);
+	public Map<String, String> getParamsValues() {
+		return paramsValues;
+	}*/
+
+	public void removeParam(String paramPath){
+		params.remove(paramPath);
+		paramsValues.remove(paramPath);
+	}
+	
+	public String getParamValue(String paramPath){
+		return paramsValues.get(paramPath);
+	}
+	
+	public String getParam(int index){
+		return params.get(index);
+	}
+	
+	public Iterator<String> getParamsIterator(){
+		return params.iterator();
+	}
+	
+	public void addParam(String paramPath){
+		params.add(paramPath);
+	}
+	
+	public void addParam(String paramPath, String paramValue){
+		addParam(paramPath);
+		paramsValues.put(paramPath, paramValue);
+	}
+	
+	public void addAllParams(Collection<String> paramsPaths){
+		params.addAll(paramsPaths);
+	}
+	
+	public void addAllParams(Map<String,String> paramsPathsValues){
+		params.addAll(paramsPathsValues.keySet());
+		paramsValues.putAll(paramsPathsValues);
+	}
+	
+	public int getParamsNumber(){
+		return params.size();
 	}
 }

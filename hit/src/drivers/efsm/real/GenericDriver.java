@@ -40,6 +40,7 @@ import crawler.Configuration;
 import crawler.WebInput;
 import crawler.WebInput.Type;
 import crawler.WebOutput;
+import java.util.Iterator;
 import org.w3c.dom.Node;
 
 public class GenericDriver extends LowWebDriver {
@@ -124,13 +125,14 @@ public class GenericDriver extends LowWebDriver {
 			if (out.isEquivalentTo(outputs.get(i))) {
 				po = new ParameterizedOutput(getOutputSymbols().get(i));
 				//If equivalent output has no output parameters...
-				if (outputs.get(i).getParams().isEmpty()) {
+				if (outputs.get(i).getParamsNumber() == 0) {
 					//...create a default one ("200") for po
 					po.getParameters().add(new Parameter("200", Types.STRING));
 				} else {
 					//...else, adds to po every parameter stored in the output
-					for (String p : outputs.get(i).getParams()) {
-						po.getParameters().add(
+					for (Iterator<String> iter = outputs.get(i).getParamsIterator() ; iter.hasNext();) {
+						String p = iter.next();
+								po.getParameters().add(
 								new Parameter(extractParam(out, p),
 										Types.STRING));
 					}
@@ -304,7 +306,7 @@ public class GenericDriver extends LowWebDriver {
 						continue;
 					}
 					String value = parameterNodesList.item(j).getTextContent();
-					out.getParams().add(value);
+					out.addParam(value);
 				}
 				this.outputs.add(out);
 
@@ -356,10 +358,10 @@ public class GenericDriver extends LowWebDriver {
 		index = 0;
 		for (WebOutput o : outputs) {
 			List<String> names = new ArrayList<String>();
-			if (o.getParams().isEmpty()) {
+			if (o.getParamsNumber() == 0) {
 				names.add("output_" + String.valueOf(index) + "_status");
 			} else {
-				for (int n = 0; n < o.getParams().size(); n++) {
+				for (int n = 0; n < o.getParamsNumber(); n++) {
 					names.add("output_" + String.valueOf(index) + "_param"
 							+ String.valueOf(n));
 				}

@@ -756,12 +756,12 @@ public class DriverGenerator {
 	 * @return The index of the output page in the collection of all the
 	 * previously encountered pages
 	 */
-	protected int updateOutput(Document d, WebInput from) {
+	private int updateOutput(Document d, WebInput from) {
 		WebOutput o = new WebOutput(d, from, config.getLimitSelector());
 		return updateOutput(o, from);
 	}
 
-	protected int updateOutput(WebOutput out, WebInput from) {
+	private int updateOutput(WebOutput out, WebInput from) {
 		WebOutput equivalent = findEquivalentOutput(out);
 		if (equivalent != null) {
 			if (equivalent.isNewFrom(from)) {
@@ -833,7 +833,7 @@ public class DriverGenerator {
 		return null;
 	}
 
-	protected void findParameters(WebOutput out) {
+	private void findParameters(WebOutput out) {
 		Set<String> diff = new HashSet<>();
 		WebInput inputToFuzz = sequence.removeLast();
 		for (int i = 0; i < 5; i++) {
@@ -849,11 +849,11 @@ public class DriverGenerator {
 
 		}
 		sequence.addLast(inputToFuzz);
-		out.getParams().addAll(diff);
-		System.out.println("        " + out.getParams().size() + " output parameters");
+		out.addAllParams(diff);
+		System.out.println("        " + out.getParamsNumber() + " output parameters");
 	}
 
-	protected Set<String> findDifferences(WebOutput first, WebOutput second) {
+	private Set<String> findDifferences(WebOutput first, WebOutput second) {
 		Set<String> diff = new HashSet<>();
 		List<String> pos = new ArrayList<>();
 		Elements firstE = first.getDoc();
@@ -868,7 +868,7 @@ public class DriverGenerator {
 		return diff;
 	}
 
-	protected void findDifferences(Element first, Element second, Set<String> diff, List<String> pos) {
+	private void findDifferences(Element first, Element second, Set<String> diff, List<String> pos) {
 		if (first.nodeName().equals(second.nodeName())) {
 			pos.add("/");
 			if (!first.ownText().equals(second.ownText())) {
@@ -974,7 +974,8 @@ public class DriverGenerator {
 				eoutput.appendChild(ediff);
 				org.w3c.dom.Element eparams = doc.createElement("parameters");
 
-				for (String value : o.getParams()) {
+				for (Iterator<String> iter = o.getParamsIterator() ; iter.hasNext();) {
+					String value = iter.next();
 					org.w3c.dom.Element eparam = doc.createElement("parameter");
 					eparam.setTextContent(value);
 					eparams.appendChild(eparam);
