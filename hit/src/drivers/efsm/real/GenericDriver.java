@@ -145,7 +145,8 @@ public class GenericDriver extends LowWebDriver {
 			// System.out.println(source);
 			// System.out.println(out.getPageTree());
 			po = new ParameterizedOutput(getOutputSymbols().get(0));
-			for (String p : outputs.get(0).getParams()) {
+			for (Iterator<String> iter = outputs.get(0).getParamsIterator(); iter.hasNext();) {
+				String p = iter.next();
 				po.getParameters().add(
 						new Parameter(extractParam(out, p), Types.STRING));
 			}
