@@ -119,6 +119,19 @@ public class WebOutput {
 		return paramsValues;
 	}*/
 
+	public String extractParam(String paramPath) {
+		String path[] = paramPath.split("/");
+		Element e = doc.get(Integer.parseInt(path[0]));
+		for (int i = 1; i < path.length; i++) {
+			try {
+				e = e.child(Integer.parseInt(path[i]));
+			} catch (Exception ex) {
+				System.err.println("The path does not work on that page");
+				return null;
+			}
+		}
+		return e.ownText();
+	}
 	public void removeParam(String paramPath){
 		params.remove(paramPath);
 		paramsValues.remove(paramPath);

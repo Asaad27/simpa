@@ -133,7 +133,7 @@ public class GenericDriver extends LowWebDriver {
 					for (Iterator<String> iter = outputs.get(i).getParamsIterator() ; iter.hasNext();) {
 						String p = iter.next();
 								po.getParameters().add(
-								new Parameter(extractParam(out, p),
+								new Parameter(out.extractParam(p),
 										Types.STRING));
 					}
 				}
@@ -148,21 +148,12 @@ public class GenericDriver extends LowWebDriver {
 			for (Iterator<String> iter = outputs.get(0).getParamsIterator(); iter.hasNext();) {
 				String p = iter.next();
 				po.getParameters().add(
-						new Parameter(extractParam(out, p), Types.STRING));
+						new Parameter(out.extractParam(p), Types.STRING));
 			}
 		}
 
 		LogManager.logRequest(pi, po);
 		return po;
-	}
-
-	private String extractParam(WebOutput out, String p) {
-		String path[] = p.split("/");
-		org.jsoup.nodes.Element e = out.getDoc().get(Integer.parseInt(path[0]));
-		for (int i = 1; i < path.length; i++) {
-			e = e.child(Integer.parseInt(path[i]));
-		}
-		return e.text();
 	}
 
 	private HTTPData getValuesForInput(WebInput in, ParameterizedInput pi) {
