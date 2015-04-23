@@ -22,7 +22,7 @@ public class Parameter implements Cloneable, Serializable {
 	}
 
 	public Parameter clone() {
-		return new Parameter(new String(value), type, ndv);
+		return new Parameter(value, type, ndv);
 	}
 
 	public boolean equals(Parameter a) {

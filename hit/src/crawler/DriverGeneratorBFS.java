@@ -168,9 +168,10 @@ public class DriverGeneratorBFS extends DriverGenerator {
 					if(currentOutput == null){
 						comments.add("The input " +  currentInput + " has been filtered out. "
 								+ "If it's a link to a non-html page (e.g. a *.jpg), "
-								+ "please consider adding a matching \"noFollow\" pattern "
+								+ "please consider adding a \"noFollow\" pattern "
 								+ "to the JSON config file to improve crawling speed");
 						inputs.remove(currentInput);
+						continue;
 					}
 					currentInput.setOutput(currentOutput);
 
@@ -194,7 +195,8 @@ public class DriverGeneratorBFS extends DriverGenerator {
 
 			}
 			depth++;
-			if (depth > 10) {
+			if (depth > MAX_DEPTH) {
+				System.err.println("Maximum depth reached, stopping crawling");
 				break;
 			}
 		}
@@ -297,13 +299,16 @@ public class DriverGeneratorBFS extends DriverGenerator {
 
 		//Extracts links
 		Elements links = tree.select("a[href]");
-		inputsList.addAll(extractInputsFromLinks(links));
+		if (!links.isEmpty()) {
+			inputsList.addAll(extractInputsFromLinks(links));
+		}
 
 		//Extracts forms
 		Elements forms = new Elements();
 		forms.addAll(findFormsIn(wo.getSource(), wo.getDoc().first().baseUri()));
-		inputsList.addAll(extractInputsFromForms(forms));
-
+		if (!forms.isEmpty()) {
+			inputsList.addAll(extractInputsFromForms(forms));
+		}
 		return inputsList;
 	}
 
@@ -372,22 +377,19 @@ public class DriverGeneratorBFS extends DriverGenerator {
 			htmlInputs.addAll(form.select("input[type=hidden]"));
 			htmlInputs.addAll(form.select("input[type=password]"));
 			htmlInputs.addAll(form.select("textarea"));
-			htmlInputs.addAll(form.select("input[type=image]"));
-			htmlInputs.addAll(form.select("input[type=submit]"));
+			htmlInputs.addAll(form.select("select"));
 
 			//iterates over html input parameters
 			for (Element input : htmlInputs) {
-				boolean inputIsSubmitType = input.attr("type").equals("submit") || input.attr("type").equals("img");
 				boolean inputIsSelectType = input.attr("type").equals("select");
 				String paramName = input.attr("name");
 
 				if (paramName.isEmpty()) {
 					continue;
 				}
-
+				
 				//if the user provided a/some value(s) for this parameter
-				if (config.getData().containsKey(paramName) && !inputIsSubmitType) {
-					LinkedList<WebInput> inputsToAdd = new LinkedList<>();
+				if (config.getData().containsKey(paramName)) {
 					ArrayList<String> providedValues = config.getData().get(paramName);
 
 					/*  if the user provided a single value for this parameter,
@@ -400,17 +402,16 @@ public class DriverGeneratorBFS extends DriverGenerator {
 						 we generate every combination of parameters by duplicating 
 						 the inputs */
 					} else {
+						LinkedList<WebInput> inputsToAdd = new LinkedList<>();
 						for (WebInput wi : currentFormWebInputs) {
-							for (String value : config.getData().get(paramName)) {
-								WebInput tmp = null;
+							for (String value : providedValues) {
 								try {
-									tmp = (WebInput) wi.clone();
+									WebInput tmp = (WebInput) wi.clone();
+									tmp.getParams().put(paramName, Utils.createArrayList(value));
+									inputsToAdd.add(tmp);
 								} catch (CloneNotSupportedException ex) {
-									Logger.getLogger(DriverGeneratorBFS.class.getName()).log(Level.SEVERE, null, ex);
-									System.exit(1); //This should never happen
+									throw new InternalError("This should never happen");
 								}
-								tmp.getParams().put(paramName, Utils.createArrayList(value));
-								inputsToAdd.add(tmp);
 							}
 						}
 						currentFormWebInputs = inputsToAdd;
@@ -440,12 +441,51 @@ public class DriverGeneratorBFS extends DriverGenerator {
 					}
 				}
 			}
+
+			/* Duplicate every input for each value of submit input we found */
+			Elements htmlSubmits = new Elements();
+			htmlSubmits.addAll(form.select("input[type=image]"));
+			htmlSubmits.addAll(form.select("input[type=submit]"));
+
+			if (htmlSubmits.size() == 1) {
+				Element input = htmlSubmits.get(0);
+				String paramName = input.attr("name");
+				String paramValue = input.attr("value");
+
+				if (!paramName.isEmpty() && !paramValue.isEmpty()) {
+					for (WebInput wi : currentFormWebInputs) {
+						wi.getParams().put(paramName, Utils.createArrayList(paramValue));
+					}
+				}
+
+			} else {
+				LinkedList<WebInput> inputsToAdd = new LinkedList<>();
+				for (Element input : htmlSubmits) {
+					String paramName = input.attr("name");
+					String paramValue = input.attr("value");
+
+					if (!paramName.isEmpty() && !paramValue.isEmpty()) {
+						for (WebInput wi : currentFormWebInputs) {
+							try {
+								WebInput tmp = (WebInput) wi.clone();
+								tmp.getParams().put(paramName, Utils.createArrayList(paramValue));
+								inputsToAdd.add(tmp);
+							} catch (CloneNotSupportedException ex) {
+								Logger.getLogger(DriverGeneratorBFS.class.getName()).log(Level.SEVERE, null, ex);
+								System.exit(1); //This should never happen
+							}
+						}
+					}
+				}
+				currentFormWebInputs = inputsToAdd;
+			}
+
 			webInputsList.addAll(currentFormWebInputs);
 		}
 		return webInputsList;
 	}
 
-	private WebInput checkInputParameters(WebInput currentInput) {
+	private void checkInputParameters(WebInput currentInput) {
 		TreeMap<String, List<String>> params = currentInput.getParams();
 		for (String key : params.keySet()) {
 			List<String> values = params.get(key);
@@ -456,7 +496,6 @@ public class DriverGeneratorBFS extends DriverGenerator {
 
 			}
 		}
-		return currentInput;
 	}
 
 }

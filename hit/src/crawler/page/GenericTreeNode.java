@@ -2,6 +2,7 @@ package crawler.page;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class GenericTreeNode<T> {
 
@@ -11,13 +12,13 @@ public class GenericTreeNode<T> {
 
     public GenericTreeNode() {
         super();
-        children = new ArrayList<GenericTreeNode<T>>();
+        children = new ArrayList<>();
         parent = null;
     }
 
     public GenericTreeNode(T data) {
         this();
-        setData(data);
+        this.data = data;
     }
     
     public GenericTreeNode<T> getParent(){
@@ -52,7 +53,7 @@ public class GenericTreeNode<T> {
     }
 
     public void removeChildren() {
-        this.children = new ArrayList<GenericTreeNode<T>>();
+        this.children = new ArrayList<>();
     }
 
     public void removeChildAt(int index) throws IndexOutOfBoundsException {
@@ -71,16 +72,26 @@ public class GenericTreeNode<T> {
         this.data = data;
     }
 
+	@Override
     public String toString() {
-        return getData().toString();
+        return data.toString();
     }
 
-    public boolean equals(GenericTreeNode<T> node) {
-        return node.getData().equals(getData());
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final GenericTreeNode<?> other = (GenericTreeNode<?>) obj;
+		return Objects.equals(this.data, other.data);
+	}
 
+	@Override
     public int hashCode() {
-        return getData().hashCode();
+        return data.hashCode();
     }
 
 	private String space(int depth) {

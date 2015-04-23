@@ -35,22 +35,38 @@ public class PageTreeNode extends GenericTreeNode<String> {
 			}
 		}		
 	}
-	
-	public boolean equals(PageTreeNode to) {
-		if (!data.equals(to.data)) return false;
-		else{
-			int numberOfChildren = getNumberOfChildren();
-			if (numberOfChildren != to.getNumberOfChildren()) return false;
-			else{
-				for(int i=0; i<numberOfChildren; i++){
-					if (!((PageTreeNode)getChildAt(i)).equals((PageTreeNode)to.getChildAt(i))) return false;
-				}
+
+	@Override
+	public boolean equals(Object other) {
+		if (!(other instanceof PageTreeNode)) {
+			return false;
+		}
+		PageTreeNode to = (PageTreeNode) other;
+
+		if (!data.equals(to.data)) {
+			return false;
+		}
+
+		int numberOfChildren = getNumberOfChildren();
+		if (numberOfChildren != to.getNumberOfChildren()) {
+			return false;
+		}
+		
+		for (int i = 0; i < numberOfChildren; i++) {
+			if (!((PageTreeNode) getChildAt(i)).equals((PageTreeNode) to.getChildAt(i))) {
+				return false;
 			}
 		}
 		return true;
 	}
-	
-	public String toString(){
+
+	@Override
+	public String toString() {
 		return toString(0);
+	}
+
+	@Override
+	public int hashCode() {
+		return toString().hashCode();
 	}
 }

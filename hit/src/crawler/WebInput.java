@@ -12,6 +12,7 @@ import tools.Utils;
 import com.gargoylesoftware.htmlunit.HttpMethod;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -218,8 +219,10 @@ public class WebInput implements Cloneable {
 		for (String key : params.keySet()) {
 			if (randomized) {
 				addr += key + "=" + Utils.randIn(params.get(key)) + "&";
-			} else for (String value : params.get(key)) {
-				addr += key + "=" + value + "&";
+			} else {
+				for (String value : params.get(key)) {
+					addr += key + "=" + value + "&";
+				}
 			}
 		}
 		addr = addr.substring(0, addr.length() - 1);
@@ -239,8 +242,13 @@ public class WebInput implements Cloneable {
 	public int hashCode() {
 		return this.toString().hashCode();
 	}
-	
-	public boolean equals(WebInput to) {
+
+	@Override
+	public boolean equals(Object other) {
+		if (!(other instanceof WebInput)) {
+			return false;
+		}
+		WebInput to = (WebInput) other;
 		if (!address.equals(to.address)) {
 			return false;
 		}
@@ -323,7 +331,20 @@ public class WebInput implements Cloneable {
 	@Override
 	protected Object clone() throws CloneNotSupportedException {
 		WebInput wi = (WebInput) super.clone();
-		wi.params = (TreeMap<String, List<String>>) this.params.clone();
+		wi.params = new TreeMap<>();
+
+		for (Map.Entry<String, List<String>> entrySet : params.entrySet()) {
+			String key = entrySet.getKey();
+			List<String> value = entrySet.getValue();
+			ArrayList<String> newList = new ArrayList<>();
+			for (String s : value){
+				newList.add(s);
+			}
+			wi.params.put(key, newList);
+		}
+
+		wi.output = output;
+		wi.prev = prev;
 		return wi;
 	}
 }

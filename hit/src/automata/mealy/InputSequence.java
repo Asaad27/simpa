@@ -2,6 +2,7 @@ package automata.mealy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import main.simpa.Options;
 import tools.Utils;
@@ -10,7 +11,7 @@ public class InputSequence implements Cloneable {
 	public List<String> sequence;
 
 	public InputSequence() {
-		sequence = new ArrayList<String>();
+		sequence = new ArrayList<>();
 	}
 
 	public InputSequence(String input) {
@@ -35,7 +36,7 @@ public class InputSequence implements Cloneable {
 	public InputSequence getIthSuffix(int start) {
 		InputSequence newis = new InputSequence();
 		for (int i = sequence.size() - start; i < sequence.size(); i++) {
-			newis.addInput(new String(sequence.get(i)));
+			newis.addInput(sequence.get(i));
 		}
 		return newis;
 	}
@@ -43,16 +44,16 @@ public class InputSequence implements Cloneable {
 	public InputSequence getIthPreffix(int end) {
 		InputSequence newis = new InputSequence();
 		for (int i = 0; i < end; i++) {
-			newis.addInput(new String(sequence.get(i)));
+			newis.addInput(sequence.get(i));
 		}
 		return newis;
 	}
 
 	@Override
-	public InputSequence clone() {
-		InputSequence newis = new InputSequence();
+	public InputSequence clone() throws CloneNotSupportedException {
+		InputSequence newis = (InputSequence) super.clone();
 		for (String input : sequence) {
-			newis.addInput(new String(input));
+			newis.addInput(input);
 		}
 		return newis;
 	}
@@ -69,6 +70,30 @@ public class InputSequence implements Cloneable {
 		return true;
 	}
 
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		hash = 53 * hash + Objects.hashCode(this.sequence);
+		return hash;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final InputSequence other = (InputSequence) obj;
+		if (!Objects.equals(this.sequence, other.sequence)) {
+			return false;
+		}
+		return true;
+	}
+
+	
+	
 	public String getFirstSymbol() {
 		return sequence.get(0);
 	}
@@ -96,12 +121,12 @@ public class InputSequence implements Cloneable {
 
 	@Override
 	public String toString() {
-		StringBuffer s = new StringBuffer();
+		StringBuilder s = new StringBuilder();
 		if (sequence.isEmpty())
 			s.append(Options.SYMBOL_EPSILON);
 		else {
 			for (String input : sequence)
-				s.append(input.toString());
+				s.append(input);
 		}
 		return s.toString();
 	}

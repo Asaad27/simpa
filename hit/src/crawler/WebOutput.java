@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
+import org.jsoup.nodes.Element;
 
 public class WebOutput {
 
@@ -36,7 +36,7 @@ public class WebOutput {
 		return pt;
 	}
 
-	public WebOutput() {
+	private WebOutput() {
 		params = new ArrayList<>();
 		paramsValues = new HashMap<>();
 		from = new ArrayList<>();
@@ -132,6 +132,12 @@ public class WebOutput {
 		}
 		return e.ownText();
 	}
+	
+	public void removeParam(String paramPath, Iterator<String> iter){
+		iter.remove();
+		paramsValues.remove(paramPath);
+	}
+	
 	public void removeParam(String paramPath){
 		params.remove(paramPath);
 		paramsValues.remove(paramPath);

@@ -61,6 +61,7 @@ public class GenericDriver extends LowWebDriver {
 		client = new WebClient();
 		client.setThrowExceptionOnFailingStatusCode(false);
 		client.getOptions().setTimeout(10000);
+		client.getOptions().setUseInsecureSSL(true);
 		CookieManager cm = new CookieManager();
 		if (config.getCookies() != null){
 			String cookieValue = null;
@@ -140,6 +141,7 @@ public class GenericDriver extends LowWebDriver {
 			}
 		}
 
+		//If a new page is discovered during the inference
 		if (po == null) {
 			// System.out.println(pi);
 			// System.out.println(source);
