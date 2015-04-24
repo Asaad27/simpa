@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
-import crawler.DriverGenerator;
+import crawler.DriverGeneratorDFS;
 import crawler.DriverGeneratorBFS;
 
 
@@ -38,7 +38,7 @@ public class DriverGen {
 	}
 	
 	public static void launch(){
-		DriverGenerator g;
+		DriverGeneratorDFS g;
 		try {
 			g = new DriverGeneratorBFS(main.drivergen.Options.INPUT);
 			g.start();

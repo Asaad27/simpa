@@ -123,7 +123,7 @@ public class WebInput implements Cloneable {
 		try {
 			address = new URL(new URL(form.baseUri()), address).toString();
 		} catch (MalformedURLException ex) {
-			Logger.getLogger(DriverGenerator.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(DriverGeneratorDFS.class.getName()).log(Level.SEVERE, null, ex);
 		}
 
 		for (Element textarea : form.select("textarea")){

@@ -64,7 +64,7 @@ import crawler.WebInput.Type;
 import java.util.LinkedList;
 import java.util.logging.Logger;
 
-public class DriverGenerator {
+public class DriverGeneratorDFS {
 
 	/**
 	 * The user-provided urls used as entry points
@@ -107,7 +107,7 @@ public class DriverGenerator {
 	protected static Configuration config = null;
 
 	@SuppressWarnings("deprecation")
-	public DriverGenerator(String configFileName) throws JsonParseException,
+	public DriverGeneratorDFS(String configFileName) throws JsonParseException,
 		JsonMappingException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		config = mapper.readValue(new File(configFileName),
@@ -632,7 +632,7 @@ public class DriverGenerator {
 					URL absURL = new URL(new URL(d.baseUri()), url);
 					url = absURL.toString();
 				} catch (MalformedURLException ex) {
-					Logger.getLogger(DriverGenerator.class.getName()).log(Level.SEVERE, null, ex);
+					Logger.getLogger(DriverGeneratorDFS.class.getName()).log(Level.SEVERE, null, ex);
 					continue;
 				}
 				WebInput in = new WebInput(url);

@@ -11,7 +11,7 @@ import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import static crawler.DriverGenerator.config;
+import static crawler.DriverGeneratorDFS.config;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -41,7 +41,7 @@ import tools.loggers.LogManager;
  *
  * @author maks
  */
-public class DriverGeneratorBFS extends DriverGenerator {
+public class DriverGeneratorBFS extends DriverGeneratorDFS {
 
 	public DriverGeneratorBFS(String configFileName) throws JsonParseException, JsonMappingException, IOException {
 		super(configFileName);
