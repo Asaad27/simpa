@@ -43,6 +43,7 @@ import tools.loggers.LogManager;
  */
 public class DriverGeneratorBFS extends DriverGenerator {
 
+	private static final boolean NDV_ANALYSIS = true;
 	private static final int MAX_DEPTH = 10;
 
 	public DriverGeneratorBFS(String configFileName) throws JsonParseException, JsonMappingException, IOException {
@@ -67,6 +68,26 @@ public class DriverGeneratorBFS extends DriverGenerator {
 		for (WebInput currentInput : inputChain) {
 			checkInputParameters(currentInput);
 			resultString = sendInput(currentInput);
+
+			/* If it is possible to reset the application, then sending the same 
+			sequence of input should result in the same page with the same output parameters.
+			Therefore, if any parameter is different than the last time the same 
+			input was sent, it is a non-deterministic value and can be removed */
+			if (NDV_ANALYSIS
+					&& config.getReset() != null
+					&& currentInput != input
+					&& currentInput.getOutput() != null
+					&& currentInput.getOutput().getParamsNumber() > 0) {
+				WebOutput currentOutput = new WebOutput(resultString, config.getLimitSelector());
+				WebOutput storedOutput = currentInput.getOutput();
+				for (Iterator<String> iter = storedOutput.getParamsIterator(); iter.hasNext();) {
+					String paramPath = iter.next();
+					if (!currentOutput.extractParam(paramPath).equals(storedOutput.getParamValue(paramPath))) {
+						//System.err.println("The param \"" + storedOutput.getParamValue(paramPath) + "\" has been detected as an ndv and is now removed");
+						storedOutput.removeParam(paramPath, iter);
+					}
+				}
+			}
 		}
 
 		if (resultString == null || resultString.equals("")) {
@@ -239,6 +260,7 @@ public class DriverGeneratorBFS extends DriverGenerator {
 				sendInputChain(inputToFuzz, true);
 				String result = sendInput(inputToFuzz, true);
 				WebOutput variant = new WebOutput(result, config.getLimitSelector());
+				//TODO : add NDV_ANALYSIS here
 				if (equivalent.isEquivalentTo(variant)) {
 					diff.putAll(findDifferences(equivalent, variant));
 				}
