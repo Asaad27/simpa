@@ -50,8 +50,8 @@ public class InputSequence implements Cloneable {
 	}
 
 	@Override
-	public InputSequence clone() throws CloneNotSupportedException {
-		InputSequence newis = (InputSequence) super.clone();
+	public InputSequence clone() {
+		InputSequence newis = new InputSequence();
 		for (String input : sequence) {
 			newis.addInput(input);
 		}

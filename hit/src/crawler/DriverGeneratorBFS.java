@@ -41,7 +41,9 @@ import tools.loggers.LogManager;
  *
  * @author maks
  */
-public class DriverGeneratorBFS extends DriverGeneratorDFS {
+public class DriverGeneratorBFS extends DriverGenerator {
+
+	private static final int MAX_DEPTH = 10;
 
 	public DriverGeneratorBFS(String configFileName) throws JsonParseException, JsonMappingException, IOException {
 		super(configFileName);
@@ -63,8 +65,8 @@ public class DriverGeneratorBFS extends DriverGeneratorDFS {
 
 		String resultString = null;
 		for (WebInput currentInput : inputChain) {
-			WebInput currentInputComplete = checkInputParameters(currentInput);
-			resultString = sendInput(currentInputComplete);
+			checkInputParameters(currentInput);
+			resultString = sendInput(currentInput);
 		}
 
 		if (resultString == null || resultString.equals("")) {
