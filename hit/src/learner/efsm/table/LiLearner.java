@@ -341,7 +341,7 @@ public class LiLearner extends Learner {
 							.getAutomataState().entrySet()) {
 						for (int k = entry.getValue().size(); k < arity.get(j); k++)
 							entry.getValue().add(
-									new Parameter("init", Types.NOMINAL));
+									new Parameter());
 						j++;
 					}
 				}

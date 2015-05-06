@@ -7,10 +7,16 @@ import drivers.efsm.EFSMDriver.Types;
 public class Parameter implements Cloneable, Serializable {
 	private static final long serialVersionUID = 5486744974363387501L;
 
+	public static final String PARAMETER_INIT_VALUE = "init";
 	public String value;
 	public Types type;
 	private int ndv = -1;
 
+	public Parameter(){
+		value = PARAMETER_INIT_VALUE;
+		type = Types.NOMINAL;
+	}
+	
 	public Parameter(String v, Types t) {
 		this.value = v;
 		this.type = t;
@@ -37,7 +43,7 @@ public class Parameter implements Cloneable, Serializable {
 	}
 
 	public boolean isInit() {
-		return value.equals("init") && type == Types.NOMINAL;
+		return value.equals(PARAMETER_INIT_VALUE) && type == Types.NOMINAL;
 	}
 
 	public boolean isNDV() {

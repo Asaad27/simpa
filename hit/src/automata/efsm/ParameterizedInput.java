@@ -14,17 +14,17 @@ public class ParameterizedInput implements Cloneable, Serializable {
 
 	public ParameterizedInput() {
 		this.inputSymbol = EFSM.EPSILON;
-		this.parameters = new ArrayList<Parameter>();
+		this.parameters = new ArrayList<>();
 	}
 
 	public ParameterizedInput(String input) {
 		this.inputSymbol = input;
-		this.parameters = new ArrayList<Parameter>();
+		this.parameters = new ArrayList<>();
 	}
 
-	public ParameterizedInput(String input, List<Parameter> paramaters) {
+	public ParameterizedInput(String input, List<Parameter> parameters) {
 		this.inputSymbol = input;
-		this.parameters = paramaters;
+		this.parameters = parameters;
 	}
 
 	@Override
