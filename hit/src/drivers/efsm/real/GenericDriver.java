@@ -221,6 +221,8 @@ public class GenericDriver extends LowWebDriver {
 					.getTextContent());
 			config.setPort(Integer.parseInt(root.getElementsByTagName("port")
 					.item(0).getTextContent()));
+			config.setReset(root.getElementsByTagName("reset").item(0)
+				.getTextContent());
 			config.setBasicAuthUser(root.getElementsByTagName("basicAuthUser")
 					.item(0).getTextContent());
 			config.setBasicAuthPass(root.getElementsByTagName("basicAuthPass")

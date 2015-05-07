@@ -552,27 +552,40 @@ public abstract class DriverGenerator {
 			esettings.appendChild(n);
 			edriver.appendChild(esettings);
 			org.w3c.dom.Element einputs = doc.createElement("inputs");
-			for (WebInput i : inputs) {
+			LinkedList<WebInput> inputsCopy = new LinkedList<>(inputs);
+			while (!inputsCopy.isEmpty()) {
+				WebInput current = inputsCopy.getFirst();
+
 				org.w3c.dom.Element einput = doc.createElement("input");
-				einput.setAttribute("type", String.valueOf(i.getType()));
-				einput.setAttribute("method", String.valueOf(i.getMethod()));
-				einput.setAttribute("address", i.getAddress());
+				einput.setAttribute("type", String.valueOf(current.getType()));
+				einput.setAttribute("method", String.valueOf(current.getMethod()));
+				einput.setAttribute("address", current.getAddress());
+				einputs.appendChild(einput);
+
 				org.w3c.dom.Element eparams = doc.createElement("parameters");
-				org.w3c.dom.Element eparamsComb = doc.createElement("parametersCombination");
-				for (String name : i.getParams().keySet()) {
-					for (String value : i.getParams().get(name)) {
-						org.w3c.dom.Element eparam = doc.createElement("parameter");
-						eparam.setAttribute("name", name);
-						eparam.setTextContent(value);
-						eparamsComb.appendChild(eparam);
-						break;
+				einput.appendChild(eparams);
+
+				for (Iterator<WebInput> iter = inputsCopy.iterator(); iter.hasNext();) {
+					WebInput i = iter.next();
+					if (i.isLike(current)) {
+						org.w3c.dom.Element eparamsComb = doc.createElement("parametersCombination");
+						eparams.appendChild(eparamsComb);
+
+						for (String name : i.getParams().keySet()) {
+							for (String value : i.getParams().get(name)) {
+								org.w3c.dom.Element eparam = doc.createElement("parameter");
+								eparam.setAttribute("name", name);
+								eparam.setTextContent(value);
+								eparamsComb.appendChild(eparam);
+								break;//TODO : rendre clair le fait qu'on a jamais deux valeurs pour un parametre
+							}
+						}
+						iter.remove();
 					}
 				}
-				eparams.appendChild(eparamsComb);
-				einput.appendChild(eparams);
-				einputs.appendChild(einput);
 			}
 			edriver.appendChild(einputs);
+
 			org.w3c.dom.Element eoutputs = doc.createElement("outputs");
 			for (WebOutput o : outputs) {
 				org.w3c.dom.Element eoutput = doc.createElement("output");

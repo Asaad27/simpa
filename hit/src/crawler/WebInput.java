@@ -23,6 +23,13 @@ public class WebInput implements Cloneable {
 		LINK, FORM;
 	}
 
+	/**
+	 * Inputs that share the same method/type/address/parameters names can be factorised
+	 * into a single input. 
+	 * nbValues represent the number of WebInput sharing this structure. That way,
+	 * params.get(param_name).get(i) is the value of the parameter "param_name", 
+	 * in the i^th WebInput.
+	 */
 	private int nbValues = 0;
 	private Type type = null;
 	private HttpMethod method = null;
@@ -243,6 +250,31 @@ public class WebInput implements Cloneable {
 		return this.toString().hashCode();
 	}
 
+	/**
+	 * Compares two WebInputs. Returns true if they have the same address, method,
+	 * and parameters names
+	 * @param other
+	 * @return 
+	 */
+	public boolean isLike(WebInput other){
+		if (!address.equals(other.address)) {
+			return false;
+		}
+		if(!method.equals(other.method)){
+			return false;
+		}
+		if(!type.equals(other.type)){
+			return false;
+		}
+		for (String input : params.keySet()) {
+			if (other.params.get(input) == null) {
+				return false;
+			}
+		}
+		
+		return params.size() == other.params.size();
+	}
+	
 	@Override
 	public boolean equals(Object other) {
 		if (!(other instanceof WebInput)) {
@@ -252,6 +284,11 @@ public class WebInput implements Cloneable {
 		if (!address.equals(to.address)) {
 			return false;
 		}
+		
+		if(!method.equals(to.method)){
+			return false;
+		}
+		
 		for (String input : params.keySet()) {
 			if (to.params.get(input) == null) {
 				return false;
