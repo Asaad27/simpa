@@ -281,8 +281,6 @@ public class DriverGeneratorBFS extends DriverGenerator {
 	 * @param inputToFuzz the input whose parameters's values are to be fuzzed
 	 */
 	private void findParameters(WebOutput referenceOutput, WebInput inputToFuzz) {
-		if(true)
-			return;
 		Map<String, String> diff = new HashMap<>();
 		for (int i = 0; i < 5; i++) {
 			try {
