@@ -192,6 +192,12 @@ public abstract class DriverGenerator {
 
 	}
 
+	/**
+	 * Start the crawling of the web application from a given entry point
+	 *
+	 * @param start the input to start the crawling with
+	 * @return
+	 */
 	abstract protected int crawlInput(WebInput start);
 
 	/**
@@ -421,6 +427,13 @@ public abstract class DriverGenerator {
 		return data;
 	}
 
+	/**
+	 * Search if in the previously visited outputs there is one which is
+	 * equivalent to the provided output
+	 *
+	 * @param to the output to be compared to the others
+	 * @return an equivalent output if any
+	 */
 	protected WebOutput findEquivalentOutput(WebOutput to) {
 		for (WebOutput current : outputs) {
 			if (to.isEquivalentTo(current)) {
@@ -430,6 +443,13 @@ public abstract class DriverGenerator {
 		return null;
 	}
 
+	/**
+	 * Manually search HTML forms in a document
+	 *
+	 * @param content
+	 * @param baseUri
+	 * @return
+	 */
 	protected Collection<Element> findFormsIn(String content, String baseUri) {
 		List<Element> el = new ArrayList<>();
 		int nextForm = content.indexOf("<form ");

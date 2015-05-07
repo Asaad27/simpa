@@ -36,22 +36,36 @@ import tools.Utils;
 import tools.loggers.LogManager;
 
 /**
- *
- * @author maks
+ * This class implements a web site crawling using a Breadth-first search
  */
 public class DriverGeneratorBFS extends DriverGenerator {
 
+	/**
+	 * Defines if the non-deterministic output parameters (i.e the values that 
+	 * are different for the same sequences of inputs) found during the search 
+	 * should be filtered out
+	 */
 	private static final boolean NDV_ANALYSIS = true;
+	/**
+	 * Defines the maximum depth of the exploration
+	 */
 	private static final int MAX_DEPTH = 10;
 
 	public DriverGeneratorBFS(String configFileName) throws JsonParseException, JsonMappingException, IOException {
 		super(configFileName);
 	}
 
+	/**
+	 * Sends a sequence of inputs to the web application.
+	 * @param input the WebInput containing the sequence to send
+	 * @param withoutLast if true, the last input of the sequence (i.e 'input') will not be sent
+	 * @return the last obtained output
+	 * @throws MalformedURLException 
+	 */
 	protected WebOutput sendInputChain(WebInput input, boolean withoutLast) throws MalformedURLException {
 		reset();
-
-		//prepare the chain of input to send
+		
+		//prepares the chain of input to send
 		LinkedList<WebInput> inputChain = new LinkedList<>();
 		WebInput curr = input;
 		if (withoutLast) {
@@ -70,7 +84,7 @@ public class DriverGeneratorBFS extends DriverGenerator {
 			/* If it is possible to reset the application, then sending the same 
 			sequence of input should result in the same page with the same output parameters.
 			Therefore, if any parameter is different than the last time the same 
-			input was sent, it is a non-deterministic value and can be removed */
+			input sequence was sent, it is a non-deterministic value and can be removed */
 			if (NDV_ANALYSIS
 					&& config.getReset() != null
 					&& currentInput != input
@@ -100,6 +114,13 @@ public class DriverGeneratorBFS extends DriverGenerator {
 		return sendInput(input, false);
 	}
 
+	/**
+	 * Actually send an input to the web application
+	 * @param input the WebInput to send
+	 * @param randomized if true, sends random (or ramdomly picked) values for each parameter 
+	 * @return the content of the output (most likely HTML)
+	 * @throws MalformedURLException 
+	 */
 	protected String sendInput(WebInput input, boolean randomized) throws MalformedURLException {
 		Page page;
 		HttpMethod method = input.getMethod();
@@ -128,11 +149,8 @@ public class DriverGeneratorBFS extends DriverGenerator {
 		} catch (HttpHostConnectException e) {
 			LogManager.logFatalError("Unable to connect to host");
 			return null;
-		} catch (IOException | FailingHttpStatusCodeException e) {
-			e.printStackTrace();
-			return null;
 		} catch (Exception e) {
-			e.printStackTrace();
+			LogManager.logException(null, e);
 			return null;
 		}
 
@@ -147,6 +165,8 @@ public class DriverGeneratorBFS extends DriverGenerator {
 
 	@Override
 	protected int crawlInput(WebInput start) {
+		int depth = 0;
+		boolean first = true;
 		/**
 		 * The inputs corresponding to the current depth
 		 */
@@ -155,12 +175,11 @@ public class DriverGeneratorBFS extends DriverGenerator {
 		 * The inputs of the next depth
 		 */
 		LinkedList<WebInput> inputsToCrawlAfter = new LinkedList<>();
-		int depth = 0;
-		boolean first = true;
 
 		inputsToCrawlAfter.add(start);
 
-		while (!inputsToCrawlAfter.isEmpty()) {
+		while (!inputsToCrawlAfter.isEmpty() && depth <= MAX_DEPTH) {
+			depth++;
 			inputsToCrawl.addAll(inputsToCrawlAfter);
 			inputsToCrawlAfter = new LinkedList<>();
 
@@ -174,7 +193,7 @@ public class DriverGeneratorBFS extends DriverGenerator {
 
 			while (!inputsToCrawl.isEmpty()) {
 				//TODO :
-				//extract group of similar inputs (store similar input in a collection, returns the parameter that makes them similar)
+				//extract group of similar inputs (store similar inputs in a collection, returns the parameter that makes them similar)
 				//for each input of the group
 				//	use the input, store the output
 				//	checks if the output is different from the previously encountered one (map<WebOutput, counter>)
@@ -210,32 +229,34 @@ public class DriverGeneratorBFS extends DriverGenerator {
 						wi.setPrev(currentInput);
 					}
 					inputsToCrawlAfter.addAll(extractedInputs);
+					
 				} catch (MalformedURLException ex) {
 					Logger.getLogger(DriverGeneratorBFS.class.getName()).log(Level.SEVERE, null, ex);
 				}
-
 			}
-			depth++;
-			if (depth > MAX_DEPTH) {
-				System.err.println("Maximum depth reached, stopping crawling");
-				break;
-			}
+		}
+		if (depth > MAX_DEPTH) {
+			System.err.println("Maximum depth reached, stopping crawling");
 		}
 		return 0;
 	}
 
 	/**
-	 * Checks if the output page has already been seen, and if so, checks if it
-	 * is the first time we access it with the given input.
-	 *
-	 * @param d The output page
-	 * @param from The input used to access the page
+	 * @param d The output document to check
+	 * @see updateOutput(WebOutput out, WebInput from)
 	 */
 	protected void updateOutput(Document d, WebInput from) {
 		WebOutput o = new WebOutput(d, from, config.getLimitSelector());
 		updateOutput(o, from);
 	}
 
+	/**
+	 * Checks if the output page has already been seen, and if so, checks if it
+	 * is the first time we access it with the given input.
+	 *
+	 * @param out The output to check
+	 * @param from The input used to access the page
+	 */
 	protected void updateOutput(WebOutput out, WebInput from) {
 		WebOutput equivalent = findEquivalentOutput(out);
 		if (equivalent != null) {
@@ -251,7 +272,16 @@ public class DriverGeneratorBFS extends DriverGenerator {
 		findParameters(out, from);
 	}
 
-	private void findParameters(WebOutput equivalent, WebInput inputToFuzz) {
+	/**
+	 * Search and store the position of the output parameters. 
+	 * Fuzz the values of an input's parameters, and compares the difference 
+	 * between obtained outputs and the reference output.
+	 * @param referenceOutput the output obtained the first time inputToFuzz was used
+	 * @param inputToFuzz the input whose parameters's values are to be fuzzed
+	 */
+	private void findParameters(WebOutput referenceOutput, WebInput inputToFuzz) {
+		if(true)
+			return;
 		Map<String, String> diff = new HashMap<>();
 		for (int i = 0; i < 5; i++) {
 			try {
@@ -259,18 +289,25 @@ public class DriverGeneratorBFS extends DriverGenerator {
 				String result = sendInput(inputToFuzz, true);
 				WebOutput variant = new WebOutput(result, config.getLimitSelector());
 				//TODO : add NDV_ANALYSIS here
-				if (equivalent.isEquivalentTo(variant)) {
-					diff.putAll(findDifferences(equivalent, variant));
+				if (referenceOutput.isEquivalentTo(variant)) {
+					diff.putAll(findDifferences(referenceOutput, variant));
 				}
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
 			}
 
 		}
-		equivalent.addAllParams(diff);
-		System.out.println("        " + equivalent.getParamsNumber() + " output parameters");
+		referenceOutput.addAllParams(diff);
+		System.out.println("        " + referenceOutput.getParamsNumber() + " output parameters");
 	}
 
+	/**
+	 * Find the different values between two equivalent pages
+	 * @param first the first page
+	 * @param second the second page
+	 * @return a structure mapping the paths (in the DOM) of the differences, 
+	 * and a sample value (arbitrarily taken from 'first')
+	 */
 	protected Map<String, String> findDifferences(WebOutput first, WebOutput second) {
 		Map<String, String> differences = new HashMap<>();
 		LinkedList<String> pos = new LinkedList<>();
@@ -279,14 +316,18 @@ public class DriverGeneratorBFS extends DriverGenerator {
 		if (firstE.size() == secondE.size()) {
 			for (int i = 0; i < firstE.size(); i++) {
 				pos.addLast(String.valueOf(i));
-				findDifferences(firstE.get(i), secondE.get(i), differences, pos);
+				findDifferencesRec(firstE.get(i), secondE.get(i), differences, pos);
 				pos.removeLast();
 			}
 		}
 		return differences;
 	}
 
-	protected void findDifferences(Element first, Element second, Map<String, String> diff, LinkedList<String> pos) {
+	/**
+	 * Recursive version of findDifferences
+	 * @see findDifferences(WebOutput first, WebOutput second)
+	 */
+	private void findDifferencesRec(Element first, Element second, Map<String, String> diff, LinkedList<String> pos) {
 		if (!first.nodeName().equals(second.nodeName())) {
 			return;
 		}
@@ -303,13 +344,18 @@ public class DriverGeneratorBFS extends DriverGenerator {
 		if (first.children().size() == second.children().size()) {
 			for (int i = 0; i < first.children().size(); i++) {
 				pos.addLast(String.valueOf(i));
-				findDifferences(first.child(i), second.child(i), diff, pos);
+				findDifferencesRec(first.child(i), second.child(i), diff, pos);
 				pos.removeLast();
 			}
 		}
 		pos.removeLast();
 	}
 
+	/**
+	 * Find all links and forms in a given page
+	 * @param wo The page to be analysed
+	 * @return a list of WebInput representing forms or links
+	 */
 	private List<WebInput> extractInputs(WebOutput wo) {
 		List<WebInput> inputsList = new LinkedList<>();
 		Element tree = wo.getDoc().first();
@@ -335,13 +381,13 @@ public class DriverGeneratorBFS extends DriverGenerator {
 	}
 
 	/**
+	 * Convert the given links into WebInputs.
 	 * Reads the provided links Elements, converts them into absolute URL,
 	 * filters them using the user-provided filters if any, and creates WebInput
 	 * objects.
 	 *
 	 * @param links The links to transform into WebInput
-	 * @param baseURI The URI where the links were found
-	 * @return The list of WebInput
+	 * @return The list of created WebInputs
 	 */
 	private List<WebInput> extractInputsFromLinks(Elements links) {
 		HashSet<String> urls = new HashSet<>();
@@ -372,6 +418,15 @@ public class DriverGeneratorBFS extends DriverGenerator {
 		return webInputs;
 	}
 
+	/**
+	 * Convert the given forms into WebInputs.
+	 * Reads the provided forms element, make combinations of user-provided and 
+	 * already present parameters' values, and creates WebInputs
+	 * objects.
+	 *
+	 * @param links The forms to transform into WebInput
+	 * @return The list of created WebInputs
+	 */
 	private List<WebInput> extractInputsFromForms(Elements forms) {
 		LinkedList<WebInput> webInputsList = new LinkedList<>();
 
@@ -507,6 +562,11 @@ public class DriverGeneratorBFS extends DriverGenerator {
 		return webInputsList;
 	}
 
+	/**
+	 * Verifies if every parameter of the given input has a value.
+	 * If not, fills it with a randomly generated one.
+	 * @param currentInput 
+	 */
 	private void checkInputParameters(WebInput currentInput) {
 		TreeMap<String, List<String>> params = currentInput.getParams();
 		for (String key : params.keySet()) {
