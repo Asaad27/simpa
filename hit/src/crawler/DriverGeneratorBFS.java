@@ -30,6 +30,7 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.FormElement;
 import org.jsoup.select.Elements;
 import tools.HTTPData;
 import tools.Utils;
@@ -373,7 +374,7 @@ public class DriverGeneratorBFS extends DriverGenerator {
 
 		//Extracts forms
 		Elements forms = new Elements();
-		forms.addAll(findFormsIn(wo.getSource(), wo.getDoc().first().baseUri()));
+		forms.addAll(tree.select("form"));
 		if (!forms.isEmpty()) {
 			inputsList.addAll(extractInputsFromForms(forms));
 		}
@@ -430,7 +431,8 @@ public class DriverGeneratorBFS extends DriverGenerator {
 	private List<WebInput> extractInputsFromForms(Elements forms) {
 		LinkedList<WebInput> webInputsList = new LinkedList<>();
 
-		for (Element form : forms) {
+		for (Element el : forms) {
+			FormElement form = (FormElement) el;
 			//The common method of all these inputs
 			HttpMethod method;
 			if (!form.attr("method").isEmpty() && form.attr("method").toLowerCase().equals("post")) {
@@ -448,7 +450,13 @@ public class DriverGeneratorBFS extends DriverGenerator {
 			//The list formed by all the inputs created from the current form
 			List<WebInput> currentFormWebInputs = new LinkedList<>();
 			currentFormWebInputs.add(new WebInput(method, address, new TreeMap<String, List<String>>()));
-
+			/**
+			 * Sometimes, forms' elements are not included in his child nodes, 
+			 * so this should fix the problem (https://github.com/jhy/jsoup/issues/249)
+			 */
+			for (Element elem : form.elements()) {
+				form.appendChild(elem);
+			}
 			Elements htmlInputs = new Elements();//TODO : add other equivalent input types if any
 			htmlInputs.addAll(form.select("input[type=text]"));
 			htmlInputs.addAll(form.select("input[type=hidden]"));
