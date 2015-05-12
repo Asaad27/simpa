@@ -162,6 +162,8 @@ public class Configuration {
 	}
 
 	public void setCookies(String cookies) {
-		this.cookies = cookies;
+		if (!cookies.isEmpty()) {
+			this.cookies = cookies;
+		}
 	}
 }

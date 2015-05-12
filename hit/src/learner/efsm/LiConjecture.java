@@ -138,6 +138,7 @@ public class LiConjecture extends automata.efsm.EFSM {
 		}
 	}
 
+	@Override
 	public void exportToDot() {
 		LogManager.logConsole("Cleaning and exporting the final conjecture");
 		Writer writer = null;

@@ -115,9 +115,12 @@ public class WekaARFF {
 			writer.write("@RELATION 'from" + list.get(0).getFrom() + "'\n");
 			for (i = 0; i < list.get(0).getParamsData(0).getInputParameters()
 					.size(); i++)
-				writer.write("@ATTRIBUTE " + Utils.capitalize(paramNames.get(list.get(0).getInput()).get(i))	+ " "
+				writer.write("@ATTRIBUTE "
+						+ Utils.capitalize(paramNames.get(list.get(0).getInput()).get(i)) 
+						+ " "
 						+ convertTypes(list.get(0).getParamsData(0)
-								.getInputParameters().get(i).type) + "\n");
+								.getInputParameters().get(i).type) 
+						+ "\n");
 			i=0; currentParamIndex = 0;
 			List<Types> realTypes = getTypesOfParams(list);
 			for (Map.Entry<String, List<Parameter>> entry : list.get(0).getParamsData(0).getAutomataState().entrySet()) {
@@ -218,9 +221,12 @@ public class WekaARFF {
 					+ "'\n");
 			for (i = 0; i < transition.getParamsData(0).getInputParameters()
 					.size(); i++)
-				writer.write("@ATTRIBUTE "+ Utils.capitalize(paramNames.get(transition.getInput()).get(i))	+ " "
+				writer.write("@ATTRIBUTE "
+						+ Utils.capitalize(paramNames.get(transition.getInput()).get(i))
+						+ " "
 						+ convertTypes(transition.getParamsData(0)
-								.getInputParameters().get(i).type) + "\n");
+								.getInputParameters().get(i).type) 
+						+ "\n");
 			i = 0;
 			List<Types> realTypes = getTypesOfParams(transition);
 			
@@ -234,8 +240,11 @@ public class WekaARFF {
 			}
 			for (i = 0; i < transition.getParamsData(0).getOutputParameters()
 					.size(); i++)
-				writer.write("@ATTRIBUTE "+ Utils.capitalize(paramNames.get(transition.getOutput()).get(i)) + " "
-						+ convertTypes(transition.getParamsData(0).getOutputParameters().get(i).type) + "\n");
+				writer.write("@ATTRIBUTE "
+						+ Utils.capitalize(paramNames.get(transition.getOutput()).get(i))
+						+ " "
+						+ convertTypes(transition.getParamsData(0).getOutputParameters().get(i).type) 
+						+ "\n");
 
 			writer.write("@DATA\n");
 			for (LiDataTableItem dti : transition.getParamsData()) {

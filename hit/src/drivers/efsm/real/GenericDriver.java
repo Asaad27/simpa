@@ -318,15 +318,15 @@ public class GenericDriver extends LowWebDriver {
 
 	@Override
 	public HashMap<String, List<ArrayList<Parameter>>> getDefaultParamValues() {
-		HashMap<String, List<ArrayList<Parameter>>> defaultParamValues = new HashMap<String, List<ArrayList<Parameter>>>();
+		HashMap<String, List<ArrayList<Parameter>>> defaultParamValues = new HashMap<>();
 		ArrayList<ArrayList<Parameter>> params = null;
 		ArrayList<Parameter> one = null;
 		int index = 0;
 		for (WebInput i : inputs) {
-			params = new ArrayList<ArrayList<Parameter>>();
+			params = new ArrayList<>();
 			int nbParam = i.getNbValues();
 			for (int k = 0; k < nbParam; k++) {
-				one = new ArrayList<Parameter>();
+				one = new ArrayList<>();
 				for (String key : i.getParams().keySet()) {
 					one.add(new Parameter(i.getParams().get(key).get(k),
 							Types.STRING));
@@ -379,7 +379,7 @@ public class GenericDriver extends LowWebDriver {
 
 	@Override
 	public List<String> getOutputSymbols() {
-		List<String> os = new ArrayList<String>();
+		List<String> os = new ArrayList<>();
 		for (int i = 0; i < outputs.size(); i++) {
 			os.add("output_" + i);
 		}

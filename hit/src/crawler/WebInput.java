@@ -116,6 +116,13 @@ public class WebInput implements Cloneable {
 		this.params = params;
 	}
 
+	/**
+	 * Creates WebInput objects from HTML forms. 
+	 * @deprecated inproved version written in DriverGeneratorBFS
+	 * @see DriverGeneratorBFS#extractInputsFromForms(Elements forms)
+	 * @param form
+	 * @return 
+	 */
 	public static List<WebInput> extractInputsFromForm(Element form) {
 		List<WebInput> l = new ArrayList<>();
 

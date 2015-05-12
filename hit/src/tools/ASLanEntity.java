@@ -152,113 +152,113 @@ public class ASLanEntity {
 		for (String input : conjecture.getInputSymbols()) {
 			List<EFSMTransition> currentTrans = conjecture
 					.getTransitionFromWithInput(state, input, true);
-			if (!currentTrans.isEmpty()) {
-				List<String> paramNames = conjecture.getParamNames(currentTrans
-						.get(0).getInput());
-				functions += "              on(Other -> Actor: "
-						+ currentTrans.get(0).getInput().toLowerCase() + "(";
-				String param = "";
+			if (currentTrans.isEmpty()) {
+				break;
+			}
+
+			List<String> paramNames = conjecture.getParamNames(currentTrans
+					.get(0).getInput());
+			functions += "              on(Other -> Actor: "
+					+ currentTrans.get(0).getInput().toLowerCase() + "(";
+			String param = "";
+			if (!paramNames.isEmpty()) {
+				functions += "?" + Utils.capitalize(paramNames.get(0));
+				param += "text";
+			}
+			for (int i = 1; i < paramNames.size(); i++) {
+				functions += ", ?" + Utils.capitalize(paramNames.get(i));
+				param += ", text";
+			}
+			gsymbols.put(currentTrans.get(0).getInput().toLowerCase() + "("
+					+ param + ")", "message");
+			functions += ")): {\n";
+			for (EFSMTransition t : currentTrans) {
+				String space = "                ";
+				if (!conjecture.getLabelForTransition(t).getPredicates()
+						.isEmpty()) {
+					space += "  ";
+					functions += "                if (";
+					List<String> predicates = conjecture
+							.getLabelForTransition(t).getPredicates();
+					Collections.sort(predicates);
+					functions += Utils.joinAndClean(predicates, " | ");
+					functions += "){\n";
+				}
+
+				for (Parameter p : conjecture.getLabelForTransition(t)
+						.getInput().getParameters()) {
+					symbols.put(p.value, mappingKITASLan.get(p.type));
+				}
+
+				for (String s : conjecture.getLabelForTransition(t)
+						.getOutputFunctions()) {
+					if (s.indexOf("=>") == -1) {
+						String[] value = s.split(" = ");
+						if (value[1].startsWith("\"Ndv")) {
+							functions += space + value[0]
+									+ " := fresh();\n";
+						} else {
+							try {
+								float floatValue = Float.parseFloat(value[1]);
+								functions += space
+										+ value[0]
+										+ " := "
+										+ floatValue + ";\n";
+							} catch (NumberFormatException e) {
+								functions += space + value[0] + " := "
+										+ value[1].trim() + ";\n";
+								addGlobalSymbol(value[1].trim(), "text");
+							}
+						}
+					} else {
+						String[] value1 = s.split(" => ");
+						String[] value2 = value1[1].split(" = ");
+						functions += space + "if ("
+								+ Utils.filter(value1[0]) + "){\n";
+						functions += space + "  " + value2[0] + " := "
+								+ value2[1] + ";\n";
+						functions += space + "}\n";
+					}
+				}
+				paramNames = conjecture.getParamNames(conjecture
+						.getLabelForTransition(t).getOutput()
+						.getOutputSymbol());
+				functions += space
+						+ "Actor -> Other: "
+						+ conjecture.getLabelForTransition(t).getOutput()
+						.getOutputSymbol().toLowerCase() + "(";
+				param = "";
 				if (!paramNames.isEmpty()) {
-					functions += "?" + Utils.capitalize(paramNames.get(0));
+					functions += Utils.capitalize(paramNames.get(0));
 					param += "text";
 				}
 				for (int i = 1; i < paramNames.size(); i++) {
-					functions += ", ?" + Utils.capitalize(paramNames.get(i));
+					functions += ", " + Utils.capitalize(paramNames.get(i));
 					param += ", text";
 				}
-				gsymbols.put(currentTrans.get(0).getInput().toLowerCase() + "("
-						+ param + ")", "message");
-				functions += ")): {\n";
-				for (EFSMTransition t : currentTrans) {
-					String space = "                ";
-					if (!conjecture.getLabelForTransition(t).getPredicates()
-							.isEmpty()) {
-						space += "  ";
-						functions += "                if (";
-						List<String> predicates = conjecture
-								.getLabelForTransition(t).getPredicates();
-						Collections.sort(predicates);
-						functions += Utils.joinAndClean(predicates, " | ");
-						functions += "){\n";
-					}
+				functions += ");\n";
+				gsymbols.put(conjecture.getLabelForTransition(t)
+						.getOutput().getOutputSymbol().toLowerCase()
+						+ "(" + param + ")", "message");
 
-					for (Parameter p : conjecture.getLabelForTransition(t)
-							.getInput().getParameters()) {
-						symbols.put(p.value, mappingKITASLan.get(p.type));
-					}
-
-					for (String s : conjecture.getLabelForTransition(t)
-							.getOutputFunctions()) {
-						if (s.indexOf("=>") == -1) {
-							String[] value = s.split(" = ");
-							if (value[1].startsWith("\"Ndv"))
-								functions += space + value[0]
-										+ " := fresh();\n";
-							else {
-								try {
-									Float.parseFloat(value[1].substring(1,
-											value[1].length() - 1));
-									functions += space
-											+ value[0]
-											+ " := "
-											+ value[1].substring(1,
-													value[1].length() - 1)
-													.trim() + ";\n";
-								} catch (NumberFormatException e) {
-									functions += space + value[0] + " := "
-											+ value[1].trim() + ";\n";
-									addGlobalSymbol(value[1].trim(), "text");
-								}
-							}
-						} else {
-							String[] value1 = s.split(" => ");
-							String[] value2 = value1[1].split(" = ");
-							functions += space + "if ("
-									+ Utils.filter(value1[0]) + "){\n";
-							functions += space + "  " + value2[0] + " := "
-									+ value2[1] + ";\n";
-							functions += space + "}\n";
-						}
-					}
-					paramNames = conjecture.getParamNames(conjecture
-							.getLabelForTransition(t).getOutput()
-							.getOutputSymbol());
-					functions += space
-							+ "Actor -> Other: "
-							+ conjecture.getLabelForTransition(t).getOutput()
-									.getOutputSymbol().toLowerCase() + "(";
-					param = "";
-					if (!paramNames.isEmpty()) {
-						functions += Utils.capitalize(paramNames.get(0));
-						param += "text";
-					}
-					for (int i = 1; i < paramNames.size(); i++) {
-						functions += ", " + Utils.capitalize(paramNames.get(i));
-						param += ", text";
-					}
-					functions += ");\n";
-					gsymbols.put(conjecture.getLabelForTransition(t)
-							.getOutput().getOutputSymbol().toLowerCase()
-							+ "(" + param + ")", "message");
-
-					for (Parameter p : conjecture.getLabelForTransition(t)
-							.getOutput().getParameters()) {
-						symbols.put(p.value, mappingKITASLan.get(p.type));
-					}
-
-					if (!conjecture.getLabelForTransition(t).getPredicates()
-							.isEmpty()) {
-						functions += "                  State := "
-								+ t.getTo().getId() + ";\n";
-						functions += "                }\n";
-					} else {
-						functions += "                State := "
-								+ t.getTo().getId() + ";\n";
-					}
+				for (Parameter p : conjecture.getLabelForTransition(t)
+						.getOutput().getParameters()) {
+					symbols.put(p.value, mappingKITASLan.get(p.type));
 				}
-				functions += "              }\n";
+
+				if (!conjecture.getLabelForTransition(t).getPredicates()
+						.isEmpty()) {
+					functions += "                  State := "
+							+ t.getTo().getId() + ";\n";
+					functions += "                }\n";
+				} else {
+					functions += "                State := "
+							+ t.getTo().getId() + ";\n";
+				}
 			}
+			functions += "              }\n";
 		}
+
 		functions += "            }\n";
 	}
 }

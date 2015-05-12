@@ -11,13 +11,19 @@ public class Parameter implements Cloneable, Serializable {
 	public String value;
 	public Types type;
 	private int ndv = -1;
-
+	private boolean init = false;
+	
 	public Parameter(){
 		value = PARAMETER_INIT_VALUE;
 		type = Types.NOMINAL;
+		init = true;
 	}
 	
 	public Parameter(String v, Types t) {
+		if(v.equals(PARAMETER_INIT_VALUE)){
+			throw new IllegalArgumentException("A parameter with default value "
+					+ "must not be manually created. Use empty constructor instead.");
+		}
 		this.value = v;
 		this.type = t;
 	}
@@ -43,7 +49,7 @@ public class Parameter implements Cloneable, Serializable {
 	}
 
 	public boolean isInit() {
-		return value.equals(PARAMETER_INIT_VALUE) && type == Types.NOMINAL;
+		return init;
 	}
 
 	public boolean isNDV() {

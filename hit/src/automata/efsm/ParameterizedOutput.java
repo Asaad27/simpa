@@ -13,33 +13,31 @@ public class ParameterizedOutput implements Cloneable, Serializable {
 
 	public ParameterizedOutput() {
 		this.outputSymbol = EFSM.OMEGA;
-		this.parameters = new ArrayList<Parameter>();
+		this.parameters = new ArrayList<>();
 	}
 
 	public ParameterizedOutput(String output) {
+		this();
 		this.outputSymbol = output;
-		this.parameters = new ArrayList<Parameter>();
 	}
 
 	@SuppressWarnings("unchecked")
-	public ParameterizedOutput(String output, List<Parameter> paramaters) {
-		this.outputSymbol = output;
-		this.parameters = (ArrayList<Parameter>) ((ArrayList<Parameter>) paramaters)
-				.clone();
+	public ParameterizedOutput(String output, List<Parameter> parameters) {
+		this(output);
+		this.parameters = (List<Parameter>) new ArrayList<>(parameters).clone();
 	}
 
 	public ParameterizedOutput(String output, Parameter parameter) {
-		this.outputSymbol = output;
-		this.parameters = new ArrayList<Parameter>();
+		this(output);
 		this.parameters.add(parameter.clone());
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public ParameterizedOutput clone() {
-		return new ParameterizedOutput(outputSymbol,
-				(ArrayList<Parameter>) ((ArrayList<Parameter>) parameters)
-						.clone());
+		ArrayList<Parameter> parametersClone = (ArrayList<Parameter>) 
+				new ArrayList<>(parameters).clone();
+		return new ParameterizedOutput(outputSymbol, parametersClone);
 	}
 
 	public String getOutputSymbol() {

@@ -18,7 +18,13 @@ public class WebOutput {
 
 	private Elements doc;
 	private String source = null;
+	/**
+	 * The list of parameters' names
+	 */
 	private List<String> params = null;
+	/**
+	 * An example of value for each parameter
+	 */
 	private Map<String, String> paramsValues = null;
 	private PageTreeNode pt = null;
 	private List<WebInput> from = null;

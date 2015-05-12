@@ -72,13 +72,15 @@ public class EFSMTransition extends Transition {
 			var.add(v);
 		}
 		
+		@Override
 		public String toString() {
 			StringBuffer s = new StringBuffer();
 			s.append(input + "\\n");
 			Collections.sort(predicates);
 			if (predicates.size()>0){
-				s.append(predicates.get(0));
-				for(int i=1; i<predicates.size(); i++) s.append(" " + Options.SYMBOL_OR + " " + predicates.get(i));
+				s.append("("+predicates.get(0)+")");
+				for(int i=1; i<predicates.size(); i++) 
+					s.append(" " + Options.SYMBOL_OR + " (" + predicates.get(i)+")");
 				s.append(",\\n");
 			}
 			Collections.sort(var);
@@ -91,41 +93,27 @@ public class EFSMTransition extends Transition {
 		}
 		
 		public String toDotString(){
-			StringBuffer s = new StringBuffer();
-			s.append(input + "\\n");
-			Collections.sort(predicates);
-			if (predicates.size() > 0) {
-				s.append("("+predicates.get(0)+")");
-				for (int i = 1; i < predicates.size(); i++)
-					s.append(" " + Options.SYMBOL_OR + " (" + predicates.get(i)+")");
-				s.append(",\\n");
-			}
-			Collections.sort(var);
-			if (var.size() > 0) {
-				s.append(var.get(0) + ",");
-				for (int i = 1; i < var.size(); i++)
-					s.append("\\n" + var.get(i) + ",");
-				s.append("\\n");
-			}
-			return s.append(output).toString().replaceAll("\"", "\\\\\"").replaceAll("_[0-9]{5,}", "");
+			return this.toString().replaceAll("_[0-9]{5,}", "");
 		}
 	}
 
-	public EFSMTransition(EFSM automata, State s1, State s2, String input,
-			String output, List<LiDataTableItem> paramsData) {
+	private EFSMTransition(EFSM automata, State s1, State s2, String input, String output){
 		super(s1, s2, input);
 		this.output = output;
 		this.automata = automata;
+	}
+	
+	public EFSMTransition(EFSM automata, State s1, State s2, String input,
+			String output, List<LiDataTableItem> paramsData) {
+		this(automata, s1, s2, input, output);
 		this.paramsData = paramsData;
 	}
 
 	public EFSMTransition(EFSM automata, State s1, State s2, String input,
 			String output, IOutputFunction of) {
-		super(s1, s2, input);
-		this.output = output;
-		this.automata = automata;
+		this(automata, s1, s2, input, output);
 		this.outputFunction = of;
-		paramsData = new ArrayList<LiDataTableItem>();
+		paramsData = new ArrayList<>();
 		if (of instanceof GeneratedOutputFunction)
 			((GeneratedOutputFunction) of).getGuard().memory = automata.memory;
 	}
