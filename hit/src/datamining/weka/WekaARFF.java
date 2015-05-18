@@ -340,7 +340,7 @@ public class WekaARFF {
 			for (int i = data.numAttributes() - 1; i >= 0; i--) {
 				if (data.numDistinctValues(i) == 1
 						&& (data.attribute(i).type() != Attribute.NUMERIC)
-						&& data.instance(0).stringValue(i).equals("init")) {
+						&& data.instance(0).stringValue(i).equals("s"+Parameter.PARAMETER_INIT_VALUE)) {
 					nbAttrFilteredRem++;
 					iOut--;
 					Remove r = new Remove();

@@ -3,20 +3,30 @@ package automata.efsm;
 import java.io.Serializable;
 
 import drivers.efsm.EFSMDriver.Types;
+import main.simpa.Options;
+import org.apache.commons.lang3.math.NumberUtils;
 
 public class Parameter implements Cloneable, Serializable {
 	private static final long serialVersionUID = 5486744974363387501L;
-
 	public static final String PARAMETER_INIT_VALUE = "init";
+	public static final String PARAMETER_DEFAULT_VALUE = Options.SYMBOL_OMEGA_LOW;
+	
 	public String value;
 	public Types type;
 	private int ndv = -1;
-	private boolean init = false;
 	
 	public Parameter(){
 		value = PARAMETER_INIT_VALUE;
 		type = Types.NOMINAL;
-		init = true;
+	}
+	
+	public Parameter(String v){
+		this.value = v;
+		if (NumberUtils.isNumber(v)){
+			this.type = Types.NUMERIC;
+		} else {
+			this.type = Types.STRING;
+		}
 	}
 	
 	public Parameter(String v, Types t) {
@@ -49,7 +59,7 @@ public class Parameter implements Cloneable, Serializable {
 	}
 
 	public boolean isInit() {
-		return init;
+		return (value == null ? false : value.equals(PARAMETER_INIT_VALUE)) && type == Types.NOMINAL;
 	}
 
 	public boolean isNDV() {

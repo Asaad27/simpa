@@ -1,0 +1,4 @@
+* The class automata.efsm.Parameter has  its "value" and "type" fields
+ public, which makes it difficult to trace back modifications of these
+ values when debugging.
+
