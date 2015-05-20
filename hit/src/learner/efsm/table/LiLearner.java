@@ -605,22 +605,27 @@ public class LiLearner extends Learner {
 				}
 				int alreadyNonClosed = 0;
 				for (int nonClosedRow : cTable.getNonClosedRows()) {
+					int nonClosedRowRealIndex = nonClosedRow - alreadyNonClosed;
 					finished = false;
 					int seems = -1;
 					if (Options.REUSE_OP_IFNEEDED
-							&& ((seems = seemsEquivalent(nonClosedRow
-									- alreadyNonClosed)) != -1)
-							&& !cTable.getRowInR(nonClosedRow - alreadyNonClosed)
+							&& ((seems = seemsEquivalent(nonClosedRowRealIndex)) != -1)
+							&& !cTable.getRowInR(nonClosedRowRealIndex)
 									.seems()) {
 						LogManager.logStep(LogManager.STEPOTHER, "Row "
-								+ (nonClosedRow - alreadyNonClosed)
-								+ " in R seems to be equivalent to row " + seems
+								+ cTable.getRowInR(nonClosedRowRealIndex).getPIS()
+								+ " in R seems to be equivalent to row " 
+								+ cTable.getRowInS(seems).getPIS()
 								+ " in S");
-						handleSeemsEquivalent(nonClosedRow, seems);
-					} else {
+						handleSeemsEquivalent(nonClosedRowRealIndex, seems);
+					} else if (!cTable.isClosedRow(nonClosedRowRealIndex)){
+						//bugfix : this condition prevents adding to S multiple non-closed rows 
+						//representing the same state in the same instance of this loop
+						//TODO : simplify this loop ? (with cTable.getFirstNonClosedRow for example)
 						LogManager.logStep(LogManager.STEPNCR,
-								cTable.R.get(nonClosedRow).getPIS());
-						handleNonClosed(nonClosedRow - (alreadyNonClosed++));
+								cTable.R.get(nonClosedRowRealIndex).getPIS());
+						handleNonClosed(nonClosedRowRealIndex);
+						alreadyNonClosed++;
 					}
 					LogManager.logControlTable(cTable);
 					LogManager.logDataTable(dTable);
@@ -756,36 +761,50 @@ public class LiLearner extends Learner {
 		}
 	}
 
-	private int seemsEquivalent(int nonClosedRow) {
+	/**
+	 * Research the row in S that is the most similar to the non-closed row given in parameter
+	 * @param nonClosedRowIndex the index of the non-closed row
+	 * @return the index of the most similar row in S, or -1 if no row is similar enough
+	 */
+	private int seemsEquivalent(int nonClosedRowIndex) {
 		List<Double> stats = new ArrayList<Double>();
+		LiControlTableRow nonClosedRow = cTable.getRowInR(nonClosedRowIndex);
 		double max = 0;
-		for (int i = 0; i < cTable.getCountOfRowsInS(); i++) {
+		//for each row of S ...
+		for(LiControlTableRow rowOfS : cTable.S){
+		//for (int i = 0; i < cTable.getCountOfRowsInS(); i++) {
 			double diff = 0.0;
 			max = 0;
-			for (int j = 0; j < cTable.getRowInS(i).getColumCount(); j++) {
-				for (int k = 0; k < cTable.getRowInR(nonClosedRow)
-						.getSizeOfColumn(j); k++) {
+			//for each column of the table ...
+			for (int j = 0; j < cTable.getColsCount(); j++) {
+				//... we count a difference for each output symbol in the j^th
+				//cell of the non-closed row that is not in the j^th cell of the 
+				//row of S.
+				for (int k = 0; k < nonClosedRow.getSizeOfColumn(j); k++) {
 					max++;
-					if (cTable.getRowInS(i).getSizeOfColumn(j) < k)
+					if (rowOfS.getSizeOfColumn(j) <= k){
 						diff++;
-					else if (!cTable
-							.getRowInS(i)
-							.getColum(j)
-							.get(k)
-							.getOutputSymbol()
-							.equals(cTable.getRowInR(nonClosedRow).getColum(j)
-									.get(k).getOutputSymbol()))
-						diff++;
+					} else {
+						String outputSymbolRowInS = rowOfS.getColum(j).get(k).getOutputSymbol();
+						String outputSymbolNonClosedRow = nonClosedRow.getColum(j).get(k).getOutputSymbol();
+						if (!outputSymbolRowInS.equals(outputSymbolNonClosedRow)) {
+							diff++;
+						}
+					}
 				}
 			}
+			//store the "difference ratio" between the non-closed row and the row of S
 			stats.add(diff / max);
 		}
+		
+		//select the index of the row of S that is the closest to the non-closed row
 		int indexMin = 0;
 		for (int i = 1; i < stats.size(); i++) {
 			if (stats.get(i) < stats.get(indexMin)) {
 				indexMin = i;
 			}
 		}
+		
 		return (stats.get(indexMin) <= 1 / max ? indexMin : -1);
 	}
 }

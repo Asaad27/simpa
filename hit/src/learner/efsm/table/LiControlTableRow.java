@@ -7,6 +7,7 @@ import java.util.List;
 import automata.efsm.EFSM;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedInputSequence;
+import java.util.Collection;
 
 public class LiControlTableRow {
 	private ParameterizedInputSequence pis;
@@ -137,4 +138,14 @@ public class LiControlTableRow {
 		}
 		return true;
 	}
+	
+	public boolean isEquivalentToARowAmong(Collection<LiControlTableRow> aCollectionOfRows){
+		for(LiControlTableRow aRow : aCollectionOfRows){
+			if (isEquivalentTo(aRow)){
+				return true;
+			}
+		}
+		return false;
+	}
+	
 }

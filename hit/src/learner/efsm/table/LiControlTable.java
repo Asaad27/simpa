@@ -113,7 +113,23 @@ public class LiControlTable {
 		}
 		return ncr;
 	}
-
+	
+	/**
+	 * Checks if the the control table is closed.
+	 * @return the index of the first non-closed row if any; returns -1 otherwise.
+	 */
+	public int getFirstNonClosedRow(){
+		for (int i = 0; i < R.size(); i++) {
+			if (!isClosedRow(i))
+				return i;
+		}
+		return -1;
+	}
+	
+	public boolean isClosedRow(int rowIndexInR){
+		return R.get(rowIndexInR).isEquivalentToARowAmong(S);
+	}
+	
 	public String getInputSymbol(int iSymbol) {
 		return inputSymbols.get(iSymbol);
 	}
