@@ -162,16 +162,16 @@ public class HTMLLogger implements ILogger {
 	@Override
 	public void logStart() {
 		try {
+			String suffix;
 			if (Options.GENERICDRIVER) {
 				File tmp = new File(Options.SYSTEM);
-				file = new File(dir.getAbsolutePath() + File.separator
-						+ filenameFm.format(new Date()) + "_" + tmp.getName()
-						+ ".html");
+				suffix = tmp.getName();
 			} else {
-				file = new File(dir.getAbsolutePath() + File.separator
-						+ filenameFm.format(new Date()) + "_" + Options.SYSTEM
-						+ ".html");
+				suffix = Options.SYSTEM;
 			}
+			file = new File(dir.getAbsolutePath() + File.separator
+					+ filenameFm.format(new Date()) + "_" + suffix
+					+ ".html");
 			writer = new BufferedWriter(new FileWriter(file));
 			writer.flush();
 			writer.write("<html>\n");

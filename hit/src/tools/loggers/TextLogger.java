@@ -224,9 +224,16 @@ public class TextLogger implements ILogger {
 
 	@Override
 	public void logStart() {
+		String suffix;
+		if (Options.GENERICDRIVER) {
+			File tmp = new File(Options.SYSTEM);
+			suffix = tmp.getName();
+		} else {
+			suffix = Options.SYSTEM;
+		}
 		try {
 			file = new File(dir.getAbsolutePath() + File.separator
-					+ filenameFm.format(new Date()) + "_" + Options.SYSTEM
+					+ filenameFm.format(new Date()) + "_" + suffix
 					+ ".txt");
 			writer = new BufferedWriter(new FileWriter(file));
 			writer.write(SIMPA.name + " - " + dfm.format(new Date()) + " - "
