@@ -51,11 +51,11 @@ public class LiControlTableRow {
 			cols.get(iColumn).add(cti);
 	}
 
-	public ArrayList<LiControlTableItem> getColum(int index) {
+	public ArrayList<LiControlTableItem> getColumn(int index) {
 		return cols.get(index);
 	}
 
-	public int getColumCount() {
+	public int getColumnCount() {
 		return cols.size();
 	}
 
@@ -91,7 +91,7 @@ public class LiControlTableRow {
 	public boolean isEquivalentToSet(LiControlTableRow aRow) {
 		HashSet<String> setISa = new HashSet<String>();
 		HashSet<String> setISb = new HashSet<String>();
-		for (int i = 0; i < getColumCount(); i++) {
+		for (int i = 0; i < getColumnCount(); i++) {
 			setISa.clear();
 			setISb.clear();
 			for (int j = 0; j < getSizeOfColumn(i); j++){
@@ -109,7 +109,7 @@ public class LiControlTableRow {
 	public boolean isEquivalentToAll(LiControlTableRow aRow) {
 		ArrayList<String> setISa = new ArrayList<String>();
 		ArrayList<String> setISb = new ArrayList<String>();
-		for (int i = 0; i < getColumCount(); i++) {
+		for (int i = 0; i < getColumnCount(); i++) {
 			setISa.clear();
 			setISb.clear();
 			for (int j = 0; j < getSizeOfColumn(i); j++){
@@ -125,7 +125,7 @@ public class LiControlTableRow {
 	}
 	
 	public boolean isEquivalentToNumber(LiControlTableRow aRow) {
-		for (int i = 0; i < getColumCount(); i++) {
+		for (int i = 0; i < getColumnCount(); i++) {
 			int a=0, b=0;
 			for (int j = 0; j < getSizeOfColumn(i); j++){
 				if (getItemInColumn(i, j).getOutputSymbol().equals("miss")) a++;

@@ -232,7 +232,8 @@ public class WekaARFF {
 			
 			for (Map.Entry<String, List<Parameter>> entry : transition.getParamsData(0).getAutomataState().entrySet()) {
 				for (int j = 0; j < entry.getValue().size(); j++) {
-					if (!paramNames.get(entry.getKey()).isEmpty())
+					if (paramNames.get(entry.getKey()) != null 
+							&& !paramNames.get(entry.getKey()).isEmpty())
 						writer.write("@ATTRIBUTE saved" + Utils.capitalize(paramNames.get(entry.getKey()).get(j)) +"_" + Math.abs((new SecureRandom().nextLong())) + " "
 							+ convertTypes(realTypes.get(i)) + "\n");
 					i++;

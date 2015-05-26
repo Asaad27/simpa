@@ -94,6 +94,9 @@ public class DriverGeneratorBFS extends DriverGenerator {
 				WebOutput storedOutput = currentInput.getOutput();
 				for (Iterator<String> iter = storedOutput.getParamsIterator(); iter.hasNext();) {
 					String paramPath = iter.next();
+					if (currentOutput.extractParam(paramPath) == null) {
+						continue;
+					}
 					if (!currentOutput.extractParam(paramPath).equals(storedOutput.getParamValue(paramPath))) {
 						//System.err.println("The param \"" + storedOutput.getParamValue(paramPath) + "\" has been detected as an ndv and is now removed");
 						storedOutput.removeParam(paramPath, iter);

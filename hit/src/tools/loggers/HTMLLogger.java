@@ -228,8 +228,8 @@ public class HTMLLogger implements ILogger {
 		StringBuffer s = new StringBuffer("<tr style=\"background-color:"
 				+ color + "\">\n<td class=\"header\">"
 				+ ctr.getPIS().toString() + "</td>");
-		for (int i = 0; i < ctr.getColumCount(); i++) {
-			ArrayList<LiControlTableItem> acti = ctr.getColum(i);
+		for (int i = 0; i < ctr.getColumnCount(); i++) {
+			ArrayList<LiControlTableItem> acti = ctr.getColumn(i);
 			s.append("<td><table class=\"cti\">");
 			for (LiControlTableItem cti : acti) {
 				s.append("<tr>");

@@ -78,7 +78,7 @@ public class TextLogger implements ILogger {
 						width.get(0)));
 				for (int i = 0; i < nbSymbols; i++) {
 					int maxwidth = 0;
-					for (LiControlTableItem cti : ctr.getColum(i)) {
+					for (LiControlTableItem cti : ctr.getColumn(i)) {
 						maxwidth = Math.max(cti.toString().length(), maxwidth);
 					}
 					if (maxwidth > width.get(i + 1))
@@ -287,8 +287,8 @@ public class TextLogger implements ILogger {
 		int height = 0;
 		StringBuffer s = new StringBuffer(tfm.format(new Date()) + "|"
 				+ pad(ctr.getPIS().toString(), width.get(0)) + "|");
-		for (int i = 0; i < ctr.getColumCount(); i++) {
-			ArrayList<LiControlTableItem> acti = ctr.getColum(i);
+		for (int i = 0; i < ctr.getColumnCount(); i++) {
+			ArrayList<LiControlTableItem> acti = ctr.getColumn(i);
 			if (acti.size() > 0)
 				s.append(pad(acti.get(0).toString(), width.get(i + 1)) + "|");
 			else
@@ -298,8 +298,8 @@ public class TextLogger implements ILogger {
 		s.append(ret);
 		for (int i = 1; i < height; i++) {
 			s.append(tfm.format(new Date()) + "|" + pad("", width.get(0)) + "|");
-			for (int j = 0; j < ctr.getColumCount(); j++) {
-				ArrayList<LiControlTableItem> acti = ctr.getColum(j);
+			for (int j = 0; j < ctr.getColumnCount(); j++) {
+				ArrayList<LiControlTableItem> acti = ctr.getColumn(j);
 				if (acti.size() > i)
 					s.append(pad(acti.get(i).toString(), width.get(j + 1))
 							+ "|");

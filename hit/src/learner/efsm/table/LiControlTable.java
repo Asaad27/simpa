@@ -72,7 +72,7 @@ public class LiControlTable {
 
 	public NDF getDisputedItem() {
 		for (LiControlTableRow ctr : S) {
-			for (int i = 0; i < ctr.getColumCount(); i++) {
+			for (int i = 0; i < ctr.getColumnCount(); i++) {
 				for (int j = 0; j < ctr.getSizeOfColumn(i); j++) {
 					for (int k = j + 1; k < ctr.getSizeOfColumn(i); k++) {
 						if (!ctr.getItemInColumn(i, j)
@@ -156,7 +156,7 @@ public class LiControlTable {
 						for (int w = 0; w < allRows.get(x).getSizeOfColumn(i); w++) {
 							List<Parameter> parametersB = allRows.get(x)
 									.getItemInColumn(i, w).getParameters();
-							if (paramEquals(parametersA, parametersB)) {
+							if (parametersA.equals(parametersB)) {
 								found = true;
 								break;
 							}

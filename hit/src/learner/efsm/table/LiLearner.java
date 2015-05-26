@@ -57,8 +57,8 @@ public class LiLearner extends Learner {
 		ParameterizedInputSequence querie = ctr.getPIS();
 		querie.removeEmptyInput();
 		
-		for (int i = 0; i < ctr.getColumCount(); i++) {	
-			if (ctr.getColum(i).isEmpty()) {	
+		for (int i = 0; i < ctr.getColumnCount(); i++) {	
+			if (ctr.getColumn(i).isEmpty()) {	
 				ArrayList<ParameterizedInputSequence> qlist = Utils.generatePermutations(ctr.getColumPIS(i), 0, defaultParamValues);
 				for (int l = 0; l < qlist.size(); l++) {
 					driver.reset();
@@ -237,7 +237,7 @@ public class LiLearner extends Learner {
 			State to = c.getState(iTo);
 			String inputSymbol = ctr.getLastPI().getInputSymbol();
 			ArrayList<LiControlTableItem> allControlItems = cTable
-					.getRowInS(iFrom).getColum(
+					.getRowInS(iFrom).getColumn(
 							cTable.getInputSymbols().indexOf(inputSymbol));
 			ArrayList<LiDataTableItem> allDataItems = dTable.getRowInS(
 					iFrom).getColum(
@@ -785,8 +785,8 @@ public class LiLearner extends Learner {
 					if (rowOfS.getSizeOfColumn(j) <= k){
 						diff++;
 					} else {
-						String outputSymbolRowInS = rowOfS.getColum(j).get(k).getOutputSymbol();
-						String outputSymbolNonClosedRow = nonClosedRow.getColum(j).get(k).getOutputSymbol();
+						String outputSymbolRowInS = rowOfS.getColumn(j).get(k).getOutputSymbol();
+						String outputSymbolNonClosedRow = nonClosedRow.getColumn(j).get(k).getOutputSymbol();
 						if (!outputSymbolRowInS.equals(outputSymbolNonClosedRow)) {
 							diff++;
 						}

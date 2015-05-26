@@ -330,6 +330,7 @@ public abstract class DriverGenerator {
 
 				//If there is another input with the same address, but more parameters, we remove it
 				if ((wi.getAddress().equals(in.getAddress()))
+						&& (wi.getMethod().equals(in.getMethod()))
 						&& (inActionParameterValues != null)
 						&& (iActionParameterValues != null)
 						&& (iActionParameterValues.equals(inActionParameterValues))
@@ -351,6 +352,7 @@ public abstract class DriverGenerator {
 
 			//If there is another input with the same address, no parameters, and the added input has at least one parameter, it is removed
 			if ((wi.getAddress().equals(in.getAddress()))
+					&& (wi.getMethod().equals(in.getMethod()))
 					&& iParams.isEmpty()
 					&& !inParams.isEmpty()) {
 				iterInputs.remove();
