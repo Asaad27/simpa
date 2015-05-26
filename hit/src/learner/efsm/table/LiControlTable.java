@@ -280,23 +280,15 @@ public class LiControlTable {
 	}
 
 	private boolean paramEquals(List<Parameter> A, List<Parameter> B) {
-		StringBuffer hashA = new StringBuffer();
+		if (A.size() != B.size()) {
+			return false;
+		}
 		for (int i = 0; i < A.size(); i++) {
-			if (A.get(i).isNDV()) {
-				hashA.append("(ndv" + A.get(i).getNdv() + ")");
-			} else {
-				hashA.append("(" + A.get(i).value + ")");
+			if(!A.get(i).equals(B.get(i))){
+				return false;
 			}
 		}
-		StringBuffer hashB = new StringBuffer();
-		for (int i = 0; i < B.size(); i++) {
-			if (B.get(i).isNDV()) {
-				hashB.append("(ndv" + B.get(i).getNdv() + ")");
-			} else {
-				hashB.append("(" + B.get(i).value + ")");
-			}
-		}
-		return hashA.toString().equals(hashB.toString());
+		return true;
 	}
 
 	public LiControlTableRow removeRowInR(int iRow) {
