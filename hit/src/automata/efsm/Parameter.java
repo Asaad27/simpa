@@ -3,26 +3,33 @@ package automata.efsm;
 import java.io.Serializable;
 
 import drivers.efsm.EFSMDriver.Types;
-import main.simpa.Options;
 import org.apache.commons.lang3.math.NumberUtils;
 
 public class Parameter implements Cloneable, Serializable {
 	private static final long serialVersionUID = 5486744974363387501L;
 	public static final String PARAMETER_INIT_VALUE = "init";
-	public static final String PARAMETER_DEFAULT_VALUE = Options.SYMBOL_OMEGA_LOW;
+	public static final String PARAMETER_NO_VALUE = "novalue";
 	
 	public String value;
 	public Types type;
 	private int ndv = -1;
 	
 	public Parameter(){
-		value = PARAMETER_INIT_VALUE;
-		type = Types.NOMINAL;
+		this.value = PARAMETER_NO_VALUE;
+		this.type = Types.NOMINAL;
 	}
 	
 	public Parameter(String v){
+		if (v== null){
+			this.value = PARAMETER_INIT_VALUE;
+			this.type = Types.NOMINAL;
+			return;
+		}
+		
 		this.value = v;
-		if (NumberUtils.isNumber(v)){
+		if(v.equals(PARAMETER_INIT_VALUE) || v.equals(PARAMETER_NO_VALUE)){
+			this.type = Types.NOMINAL;
+		} else if (NumberUtils.isNumber(v)){
 			this.type = Types.NUMERIC;
 		} else {
 			this.type = Types.STRING;
@@ -30,10 +37,6 @@ public class Parameter implements Cloneable, Serializable {
 	}
 	
 	public Parameter(String v, Types t) {
-		if(v.equals(PARAMETER_INIT_VALUE)){
-			throw new IllegalArgumentException("A parameter with default value "
-					+ "must not be manually created. Use empty constructor instead.");
-		}
 		this.value = v;
 		this.type = t;
 	}

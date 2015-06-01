@@ -102,7 +102,7 @@ public abstract class EFSMDriver extends Driver {
 		s.addAll(getOutputSymbols());
 		for (int i = 0; i < s.size(); i++) {
 			List<Parameter> init = new ArrayList<Parameter>();
-			init.add(new Parameter());
+			init.add(new Parameter(Parameter.PARAMETER_INIT_VALUE));
 			res.put(s.get(i), init);
 		}
 		return res;
