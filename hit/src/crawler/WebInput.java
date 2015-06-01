@@ -232,7 +232,11 @@ public class WebInput implements Cloneable {
 		String addr = this.address + "?";
 		for (String key : params.keySet()) {
 			if (randomized) {
-				addr += key + "=" + Utils.randIn(params.get(key)) + "&";
+				if (params.get(key).size() > 1) {
+					addr += key + "=" + Utils.randIn(params.get(key)) + "&";
+				} else {
+					addr += key + "=" + Utils.randString() + "&";
+				}
 			} else {
 				for (String value : params.get(key)) {
 					addr += key + "=" + value + "&";
