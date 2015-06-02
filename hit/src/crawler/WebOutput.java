@@ -10,8 +10,10 @@ import org.jsoup.select.Elements;
 import crawler.page.PageTreeNode;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import org.jsoup.nodes.Element;
 
 public class WebOutput {
@@ -21,7 +23,7 @@ public class WebOutput {
 	/**
 	 * The list of parameters' names
 	 */
-	private List<String> params = null;
+	private Set<String> params = null;
 	/**
 	 * An example of value for each parameter
 	 */
@@ -43,7 +45,7 @@ public class WebOutput {
 	}
 
 	private WebOutput() {
-		params = new ArrayList<>();
+		params = new HashSet<>();
 		paramsValues = new HashMap<>();
 		from = new ArrayList<>();
 	}
@@ -117,14 +119,6 @@ public class WebOutput {
 	 * Methods related to parameters access
 	 */
 	
-	/*public List<String> getParams() {
-		return params;
-	}
-
-	public Map<String, String> getParamsValues() {
-		return paramsValues;
-	}*/
-
 	public String extractParam(String paramPath) {
 		String path[] = paramPath.split("/");
 		Element e = doc.get(Integer.parseInt(path[0]));
@@ -132,8 +126,8 @@ public class WebOutput {
 			try {
 				e = e.child(Integer.parseInt(path[i]));
 			} catch (Exception ex) {
-				System.err.println("The path does not work on that page");
-				return null;
+				//System.err.println("The path does not work on that page");
+				return "";
 			}
 		}
 		return e.ownText();
@@ -152,11 +146,7 @@ public class WebOutput {
 	public String getParamValue(String paramPath){
 		return paramsValues.get(paramPath);
 	}
-	
-	public String getParam(int index){
-		return params.get(index);
-	}
-	
+		
 	public Iterator<String> getParamsIterator(){
 		return params.iterator();
 	}
