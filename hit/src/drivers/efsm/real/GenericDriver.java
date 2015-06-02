@@ -41,20 +41,29 @@ import crawler.WebInput;
 import crawler.WebInput.Type;
 import crawler.WebOutput;
 import java.util.Iterator;
+import java.util.Map;
+import org.apache.http.conn.HttpHostConnectException;
 import org.w3c.dom.Node;
 
 public class GenericDriver extends LowWebDriver {
 
 	protected WebClient client = null;
 	public static Configuration config = null;
-	public List<WebInput> inputs;
-	public List<WebOutput> outputs;
+	private List<WebInput> inputs;
+	private List<WebOutput> outputs;
+	private Map<WebInput, String> inputSymbols; 
+	private Map<WebOutput, String> outputSymbols;
+	private Map<String, WebInput> inputsFromSymbols;
 
+	private final String NO_PARAM_NAME = "noparam";
+	private final String NO_PARAM_VALUE = Parameter.PARAMETER_NO_VALUE;
+	
 	@SuppressWarnings("deprecation")
 	public GenericDriver(String xml) throws IOException {
 		inputs = new ArrayList<WebInput>();
 		outputs = new ArrayList<WebOutput>();
 		config = LoadConfig(xml);
+		generateSymbols();
 		LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
 	    java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF); 
 	    java.util.logging.Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.OFF);
@@ -101,14 +110,7 @@ public class GenericDriver extends LowWebDriver {
 	@Override
 	public ParameterizedOutput execute(ParameterizedInput pi) {
 		numberOfAtomicRequest++;
-		//By parsing the "input_X" string, recovers the Xth input
-		WebInput in = inputs.get(
-			Integer.parseInt(
-				pi.getInputSymbol().substring(
-					pi.getInputSymbol().indexOf("_") + 1
-				)
-			)
-		);
+		WebInput in = inputsFromSymbols.get(pi.getInputSymbol());
 
 		//Sends the output and store the source output
 		String source = null;
@@ -122,20 +124,26 @@ public class GenericDriver extends LowWebDriver {
 		//Creates the WebOutput object from html source
 		WebOutput out = new WebOutput(source, config.getLimitSelector()); //TODO add 'from' ?
 		//Looks for a equivalent output from the already visited ones
+		boolean equivalentOutputFound = false;
 		for (int i = 0; i < outputs.size(); i++) {
 			if (out.isEquivalentTo(outputs.get(i))) {
+				if (equivalentOutputFound) {
+					throw new InternalError("The current output has more than "
+							+ "one equivalent : this should not happen");
+				} else {
+					equivalentOutputFound = true;
+				}
 				po = new ParameterizedOutput(getOutputSymbols().get(i));
 				//If equivalent output has no output parameters...
 				if (outputs.get(i).getParamsNumber() == 0) {
-					//...create a default one ("200") for po
-					po.getParameters().add(new Parameter("200", Types.STRING));
+					//...create a default one for po
+					po.getParameters().add(new Parameter());
 				} else {
 					//...else, adds to po every parameter stored in the output
 					for (Iterator<String> iter = outputs.get(i).getParamsIterator() ; iter.hasNext();) {
 						String p = iter.next();
 								po.getParameters().add(
-								new Parameter(out.extractParam(p),
-										Types.STRING));
+								new Parameter(out.extractParam(p)));
 					}
 				}
 			}
@@ -146,12 +154,8 @@ public class GenericDriver extends LowWebDriver {
 			// System.out.println(pi);
 			// System.out.println(source);
 			// System.out.println(out.getPageTree());
-			po = new ParameterizedOutput(getOutputSymbols().get(0));
-			for (Iterator<String> iter = outputs.get(0).getParamsIterator(); iter.hasNext();) {
-				String p = iter.next();
-				po.getParameters().add(
-						new Parameter(out.extractParam(p), Types.STRING));
-			}
+			System.err.println("Different page found");
+			po = new ParameterizedOutput();
 		}
 
 		LogManager.logRequest(pi, po);
@@ -161,9 +165,9 @@ public class GenericDriver extends LowWebDriver {
 	private HTTPData getValuesForInput(WebInput in, ParameterizedInput pi) {
 		HTTPData data = new HTTPData();
 		if (in.getType() == Type.FORM) {
-			TreeMap<String, List<String>> inputs = in.getParams();
+			TreeMap<String, List<String>> params = in.getParams();
 			int i = 0;
-			for (String key : inputs.keySet()) {
+			for (String key : params.keySet()) {
 				data.add(key, pi.getParameterValue(i++));
 			}
 		}
@@ -207,6 +211,21 @@ public class GenericDriver extends LowWebDriver {
 		return null;
 	}
 
+	@Override
+	public void reset(){
+		super.reset();
+		if (config.getReset() != null && !config.getReset().isEmpty()) {
+			try {
+				client.getCookieManager().clearCookies();
+				client.getPage(config.getReset());
+			} catch (HttpHostConnectException e) {
+				LogManager.logFatalError("Unable to connect to host");
+			} catch (Exception e) {
+				LogManager.logException("Error resetting application", e);
+			}
+		}
+	}
+	
 	private Configuration LoadConfig(String xml) throws IOException {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		config = new Configuration();
@@ -280,8 +299,8 @@ public class GenericDriver extends LowWebDriver {
 				}
 				in.setNbValues(nbValue);
 				if (in.getParams().isEmpty()) {
-					in.getParams().put("noparam",
-						Utils.createArrayList("novalue"));
+					in.getParams().put(NO_PARAM_NAME,
+						Utils.createArrayList(NO_PARAM_VALUE));
 					in.setNbValues(1);
 				}
 				this.inputs.add(in);
@@ -312,7 +331,6 @@ public class GenericDriver extends LowWebDriver {
 		} catch (IOException e) {
 			LogManager.logException("Unable to read the file \"" + xml + "\"", e);
 		}
-		config.check();
 		return config;
 	}
 
@@ -328,12 +346,11 @@ public class GenericDriver extends LowWebDriver {
 			for (int k = 0; k < nbParam; k++) {
 				one = new ArrayList<>();
 				for (String key : i.getParams().keySet()) {
-					one.add(new Parameter(i.getParams().get(key).get(k),
-							Types.STRING));
+					one.add(new Parameter(i.getParams().get(key).get(k)));
 				}
 				params.add(one);
 			}
-			defaultParamValues.put("input_" + String.valueOf(index), params);
+			defaultParamValues.put(getInputSymbol(i), params);
 			index++;
 		}
 		return defaultParamValues;
@@ -341,40 +358,33 @@ public class GenericDriver extends LowWebDriver {
 
 	@Override
 	public TreeMap<String, List<String>> getParameterNames() {
-		TreeMap<String, List<String>> res = new TreeMap<String, List<String>>();
-		int index = 0;
+		TreeMap<String, List<String>> res = new TreeMap<>();
 		for (WebInput i : inputs) {
-			List<String> names = new ArrayList<String>();
+			List<String> names = new ArrayList<>();
 			for (String key : i.getParams().keySet()) {
 				names.add(key);
 			}
-			res.put("input_" + String.valueOf(index), names);
-			index++;
+			res.put(getInputSymbol(i), names);
 		}
-		index = 0;
 		for (WebOutput o : outputs) {
-			List<String> names = new ArrayList<String>();
+			String outputSymbol = getOutputSymbol(o);
+			List<String> names = new ArrayList<>();
 			if (o.getParamsNumber() == 0) {
-				names.add("output_" + String.valueOf(index) + "_status");
+				names.add(outputSymbol + "_status");
 			} else {
 				for (int n = 0; n < o.getParamsNumber(); n++) {
-					names.add("output_" + String.valueOf(index) + "_param"
+					names.add(outputSymbol + "_param"
 							+ String.valueOf(n));
 				}
 			}
-			res.put("output_" + String.valueOf(index), names);
-			index++;
+			res.put(outputSymbol, names);
 		}
 		return res;
 	}
 
 	@Override
 	public List<String> getInputSymbols() {
-		List<String> is = new ArrayList<String>();
-		for (int i = 0; i < inputs.size(); i++) {
-			is.add("input_" + i);
-		}
-		return is;
+		return new ArrayList(inputSymbols.values());
 	}
 
 	@Override
@@ -384,5 +394,53 @@ public class GenericDriver extends LowWebDriver {
 			os.add("output_" + i);
 		}
 		return os;
+	}
+
+	private void generateSymbols() {
+		inputSymbols = new HashMap<>();
+		for (WebInput i : inputs) {
+			String[] splitedAddress = i.getAddress().split("/");
+			String pageName = splitedAddress[splitedAddress.length - 1];
+			//To be compatible with ASLan++
+			pageName = pageName.replaceAll("[^a-zA-Z_0-9]", "_");
+			if (inputSymbols.containsValue(pageName)) {
+				int counter = 2;
+				while (inputSymbols.containsValue(pageName + "_" + counter)) {
+					counter++;
+				}
+				inputSymbols.put(i, pageName + "_" + counter);
+			} else {
+				inputSymbols.put(i, pageName);
+			}
+		}
+		
+		outputSymbols = new HashMap<>();
+		int i = 0;
+		for (WebOutput o : outputs) {
+			outputSymbols.put(o, "output_" + i);
+			i++;
+		}
+		
+		
+		inputsFromSymbols = new HashMap<>();
+		for (Map.Entry<WebInput, String> entry : inputSymbols.entrySet()) {
+			WebInput key = entry.getKey();
+			String value = entry.getValue();
+			if (inputsFromSymbols.put(value, key) != null) {
+				throw new AssertionError("The symbol " + value + " should be unique");
+			}
+		}
+	}
+	
+	private String getOutputSymbol(WebOutput o) {
+		return outputSymbols.get(o);
+	}
+
+	private String getInputSymbol(WebInput i) {
+		String symbol = inputSymbols.get(i);
+		if (symbol == null) {
+			throw new AssertionError("An input symbol is missing");
+		}
+		return symbol;
 	}
 }
