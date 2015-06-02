@@ -163,11 +163,9 @@ public class LiLearner extends Learner {
 		}
 		if (!UNIQUE_NDV) {
 			pis.removeEmptyInput();
-			if (pos.sequence.size() >= pis.sequence.size()) {
-				if (pos.sequence.get(pis.sequence.size() - 1).getParameters()
-						.size() > ndv.paramIndex) {
-					pNdv = pos.sequence.get(pis.sequence.size() - 1)
-							.getParameters().get(ndv.paramIndex);
+			if (pis.sequence.size() <= pos.sequence.size()) {
+				if (ndv.paramIndex < pos.getLastParameters().size()) {
+					pNdv = pos.getLastParameters().get(ndv.paramIndex);
 					pNdv.setNdv(ndv.indexNdv);
 					return pNdv;
 				}
@@ -176,13 +174,11 @@ public class LiLearner extends Learner {
 		}
 		
 		for (int i = pis.sequence.size() - 1; (i < pos.sequence.size() && i >= 0); i--) {
-			if (pos.sequence.get(i).getParameters()
-					.size() > ndv.paramIndex) {
-				pNdv_val = pos.sequence.get(i)
-					.getParameters().get(ndv.paramIndex).value;
+			List<Parameter> outputParameters = pos.sequence.get(i).getParameters();
+			if (ndv.paramIndex < outputParameters.size()) {
+				pNdv_val = outputParameters.get(ndv.paramIndex).value;
 				if (!this.ndvUsed.get(pKey).contains(pNdv_val)) {
-					pNdv = pos.sequence.get(i)
-							.getParameters().get(ndv.paramIndex);
+					pNdv = outputParameters.get(ndv.paramIndex);
 					pNdv.setNdv(ndv.indexNdv);
 					if (MARK_USED_NDV)
 						this.ndvUsed.get(pKey).add(pNdv.value);
@@ -192,13 +188,10 @@ public class LiLearner extends Learner {
 		}
 		
 		for (int i = pis.sequence.size(); (i < pos.sequence.size()); i++) {
-			if (pos.sequence.get(i).getParameters()
-					.size() > ndv.paramIndex) {
-				pNdv_val = pos.sequence.get(i)
-						.getParameters().get(ndv.paramIndex).value;
+			if (ndv.paramIndex < pos.sequence.get(i).getParameters().size()) {
+				pNdv_val = pos.sequence.get(i).getParameters().get(ndv.paramIndex).value;
 				if (!this.ndvUsed.get(pKey).contains(pNdv_val)) {
-					pNdv = pos.sequence.get(i)
-							.getParameters().get(ndv.paramIndex);
+					pNdv = pos.sequence.get(i).getParameters().get(ndv.paramIndex);
 					pNdv.setNdv(ndv.indexNdv);
 					if (MARK_USED_NDV)
 						this.ndvUsed.get(pKey).add(pNdv.value);
@@ -374,8 +367,11 @@ public class LiLearner extends Learner {
 
 	@SuppressWarnings("unchecked")
 	private void handleNBP(NBP nbp) {
+		//Iterates on every line of the table
 		final List<LiControlTableRow> allRows = cTable.getAllRows();
 		for (LiControlTableRow ctr : allRows) {
+			//Looks for a cell in which the input parameters are different from 
+			//those concerned by the NBP
 			boolean paramExists = false;
 			for (int j = 0; j < ctr.getSizeOfColumn(nbp.iInputSymbol); j++) {
 				if (nbp.getParamHash()
@@ -387,61 +383,49 @@ public class LiLearner extends Learner {
 			}
 			if (!paramExists) {
 				driver.reset();
-				ParameterizedInputSequence querie = ctr.getPIS();
-				querie.addParameterizedInput(new ParameterizedInput(ctr
-						.getColumPIS(nbp.iInputSymbol).getLastSymbol(),
-						nbp.params));
+				
+				//constructs the PIS that will be used to balance the cell
+				ParameterizedInputSequence query = ctr.getPIS();
+				query.addParameterizedInput(
+						new ParameterizedInput(
+								ctr.getColumPIS(nbp.iInputSymbol).getLastSymbol(),//TODO:it assumes that E will never contains sequences (is that true ?) (*)
+								nbp.params)
+				);
+				query.removeEmptyInput();
 
+				//Sends the sequence and store the results in a POS
+				//Before sending, search a velue to give to each NDV
 				ParameterizedInputSequence pis = new ParameterizedInputSequence();
 				ParameterizedOutputSequence pos = new ParameterizedOutputSequence();
-				querie.removeEmptyInput();
-
-				if (UNIQUE_NDV) {
-					for (int j = 0; j < querie.sequence.size(); j++) {
-						ParameterizedInput api = querie.sequence.get(j).clone();
-						for (int k = 0; k < api.getParameters().size(); k++) {
-							if (api.isNdv(k)) {
-								System.out.println("Requesting NDV for " + api.getInputSymbol());
-								api.setParameterValue(
-										k,
-										findNdvInPos(dTable.getNdv(api
-												.getNdvIndexForVar(k)), pos, api
-												.getParameters().get(k),
-												api.getInputSymbol()));
-							}
+				for (ParameterizedInput queryPI : query.sequence) {
+					ParameterizedInput api = queryPI.clone();
+					for (int k = 0; k < api.getParameters().size(); k++) {
+						if (api.isNdv(k)) {
+							System.out.println("Requesting NDV for " + api.getInputSymbol());
+							String pKey = UNIQUE_NDV ? api.getInputSymbol() : api.getParameterValue(0);
+							api.setParameterValue(
+									k,
+									findNdvInPos(
+											dTable.getNdv(api.getNdvIndexForVar(k)),
+											pos,
+											api.getParameters().get(k),
+											pKey));
 						}
-						pis.addParameterizedInput(api);
-						ParameterizedOutput po = driver.execute(api);
-						pos.addParameterizedOuput(po);
-						api = querie.sequence.get(j).clone();
 					}
+					pis.addParameterizedInput(api);
+					ParameterizedOutput po = driver.execute(api);
+					pos.addParameterizedOuput(po);
+				}
 					
-				} else {
-					for (int j = 0; j < querie.sequence.size(); j++) {
-						ParameterizedInput api = querie.sequence.get(j).clone();
-						for (int k = 0; k < api.getParameters().size(); k++) {
-							if (api.isNdv(k)) {
-								api.setParameterValue(
-										k,
-										findNdvInPos(dTable.getNdv(api
-												.getNdvIndexForVar(k)), pos, api
-												.getParameters().get(k),
-												api.getParameterValue(0)));
-							}
-						}
-						pis.addParameterizedInput(api);
-						ParameterizedOutput po = driver.execute(api);
-						pos.addParameterizedOuput(po);
-					}
-				}  
-
+				//Completes the control table with the new item
 				LiControlTableItem ctiNBP = new LiControlTableItem(
 						pis.getLastParameters(), pos.getLastSymbol());
 				for (int j = 0; j < nbp.params.size(); j++) {
 					ctiNBP.setNdv(j, nbp.params.get(j).getNdv());
 				}
 				ctr.addAtColumn(nbp.iInputSymbol, ctiNBP);
-
+				
+				//Completes the data table
 				TreeMap<String, List<Parameter>> automataState = driver
 						.getInitState();
 				ParameterizedInputSequence currentPis = new ParameterizedInputSequence();
@@ -450,12 +434,11 @@ public class LiLearner extends Learner {
 				for (int j = 0; j < pis.sequence.size(); j++) {
 					ParameterizedInput tmpNdv = pis.sequence.get(j).clone();
 					currentPis.addParameterizedInput(tmpNdv);
-					currentPos.addParameterizedOuput(pos.sequence.get(j)
-							.clone());
+					currentPos.addParameterizedOuput(pos.sequence.get(j).clone());
 					LiDataTableItem dti = new LiDataTableItem(
 							currentPis.getLastParameters(),
-							(TreeMap<String, List<Parameter>>) automataState
-									.clone(), currentPos.getLastParameters(),
+							(TreeMap<String, List<Parameter>>) automataState.clone(),
+							currentPos.getLastParameters(),
 							currentPos.getLastSymbol());
 					dTable.addAtCorrespondingPlace(dti, currentPis);
 
@@ -490,9 +473,9 @@ public class LiLearner extends Learner {
 							driver.reset();
 							ParameterizedInputSequence pis = ndv.getPIS();
 							ParameterizedOutputSequence pos = new ParameterizedOutputSequence();
-							for (int m = 0; m < pis.sequence.size(); m++)
-								pos.sequence.add(driver.execute(pis.sequence
-										.get(m)));
+							for (ParameterizedInput pi : pis.sequence) {
+								pos.sequence.add(driver.execute(pi));
+							}
 							String ndvVal = "0";
 							try{
 								ndvVal = pos.getLastParameters().get(
@@ -571,6 +554,7 @@ public class LiLearner extends Learner {
 	}
 
 
+	@Override
 	public void learn() {
 		LogManager.logConsole("Inferring the system");
 		boolean finished = false;

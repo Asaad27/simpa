@@ -15,7 +15,7 @@ public class NDV implements Cloneable {
 	 * 
 	 * @param pis 			Parameterized Input Sequence containing a parameter that is NDV
 	 * @param type 			Type of the NDV 
-	 * @param paramIndex	Index of the input parameter that is NDV value
+	 * @param paramIndex	Index of the input parameter, in the last parametrized input of pis, that is NDV value
 	 * @param iNdv			Index of this NDV in NDV list
 	 */
 	public NDV(ParameterizedInputSequence pis, Types type, int paramIndex,
@@ -31,6 +31,7 @@ public class NDV implements Cloneable {
 		return new NDV(pis.clone(), type, paramIndex, indexNdv);
 	}
 
+	@Override
 	public boolean equals(Object to) {
 		if (this == to)
 			return true;
@@ -40,6 +41,7 @@ public class NDV implements Cloneable {
 		return (pis.isSame(comp.pis) && (paramIndex == comp.paramIndex));
 	}
 
+	@Override
 	public int hashCode() {
 		return 7 * pis.toString().hashCode() + 31 * paramIndex;
 	}

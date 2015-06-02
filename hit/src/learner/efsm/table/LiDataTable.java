@@ -9,6 +9,7 @@ import java.util.Set;
 import automata.efsm.Parameter;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedInputSequence;
+import java.util.LinkedList;
 
 public class LiDataTable {
 	
@@ -87,9 +88,9 @@ public class LiDataTable {
 		for (LiDataTableRow dtr : allRows) {
 			/* Iteration on table columns */
 			for (int j = 0; j < dtr.getColumCount(); j++) {
-				/* if the row is not empty */
+				/* if the cell is not empty */
 				if (!dtr.getColum(j).isEmpty()) {
-					List<Parameter> params = new ArrayList<Parameter>();
+					LinkedList<Parameter> params = new LinkedList<>();
 					/* Look for NDV index in box (i, j) of table */
 					int ndvIndex = newNDVForItem(dtr.getColum(j), params,
 							ndvList.size());
@@ -98,7 +99,7 @@ public class LiDataTable {
 						/* Get input sequence */
 						ParameterizedInputSequence pi = dtr.getPIS();
 						/* Pop output parameter that is NDV */
-						Parameter last = params.remove(params.size() - 1);
+						Parameter last = params.removeLast();
 						/* Add column parameter in input sequence */
 						pi.addParameterizedInput(inputSymbols.get(j), params);
 						/* Creation of a new NDV */
@@ -171,7 +172,7 @@ public class LiDataTable {
 
 	
 	/**
-	 *  Find new a NDV in a given box of data table 
+	 *  Find a new NDV in a given box of data table 
 	 * 
 	 * @param item		Content of a cell of the data table (consist of a list of (PIS, POS))
 	 * @param params	List of parameters where to write the sequence where a NDV was found
@@ -181,7 +182,7 @@ public class LiDataTable {
 	 */
 	public int newNDVForItem(List<LiDataTableItem> item,
 			List<Parameter> params, int index) {
-		List<ArrayList<Parameter>> oldParams = new ArrayList<ArrayList<Parameter>>();
+		List<List<Parameter>> oldParams = new ArrayList<>();
 		int currentIndex = 0;
 		for (int i = 0; i < item.size(); i++) {
 			for (int j = i + 1; j < item.size(); j++) {
@@ -195,7 +196,7 @@ public class LiDataTable {
 					for (int k = 0; k < item.get(i).getOutputParameters()
 							.size(); k++) {
 						/* If k in bounds */
-						if (item.get(j).getOutputParameters().size() > k
+						if (k < item.get(j).getOutputParameters().size()
 								/* and if the values of this output for i and j
 								 * are different
 								 */
@@ -205,7 +206,7 @@ public class LiDataTable {
 							boolean exists = false;
 							/* Iteration on parameters to see if already exists in
 							 * the list */
-							for (ArrayList<Parameter> old : oldParams) {
+							for (List<Parameter> old : oldParams) {
 								if (old.equals(item.get(i).getInputParameters())) {
 									exists = true;
 									break;
@@ -225,8 +226,7 @@ public class LiDataTable {
 											.getOutputParameters().get(k));
 									return k;
 								} else {
-									oldParams.add((ArrayList<Parameter>) item
-											.get(i).getInputParameters());
+									oldParams.add(item.get(i).getInputParameters());
 									currentIndex++;
 								}
 							}
@@ -235,7 +235,7 @@ public class LiDataTable {
 				}
 			}
 		}
-		/* No NDV found, return 0 */
+		/* No NDV found, return -1 */
 		return -1;
 	}
 

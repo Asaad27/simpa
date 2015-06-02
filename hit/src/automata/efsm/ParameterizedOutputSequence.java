@@ -30,7 +30,7 @@ public class ParameterizedOutputSequence implements Serializable {
 	}
 
 	public List<Parameter> getLastParameters() {
-		List<Parameter> lp = new ArrayList<Parameter>();
+		List<Parameter> lp = new ArrayList<>();
 		if (!sequence.get(sequence.size() - 1).getParameters().isEmpty())
 			lp.addAll(sequence.get(sequence.size() - 1).getParameters());
 		return lp;
