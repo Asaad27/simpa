@@ -50,11 +50,26 @@ public class Parameter implements Cloneable, Serializable {
 		return new Parameter(value, type, ndv);
 	}
 
-	public boolean equals(Parameter a) {
-		if (a.isNDV() || isNDV())
-			return a.ndv == ndv;
+	
+	@Override
+	public boolean equals(Object o) {
+		if(o == null || !(o instanceof Parameter)){
+			return false;
+		}
+		Parameter other = (Parameter)o;
+		if (other.isNDV() || isNDV())
+			return other.ndv == ndv;
 		else
-			return a.value.equals(value);
+			return other.value.equals(value);
+	}
+
+	@Override
+	public int hashCode() {
+		if(isNDV()){
+			return ndv;
+		} else {
+			return value.hashCode();
+		}
 	}
 
 	public String toString() {
