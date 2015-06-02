@@ -49,14 +49,14 @@ public class LiDataTable {
 				int index = inputSymbols.indexOf(lastSymbol);
 				String dtiStr = dti.toString();
 				boolean exist = false;
-				for (LiDataTableItem existingDti : dtr.getColum(index)) {
+				for (LiDataTableItem existingDti : dtr.getColumn(index)) {
 					if (existingDti.toString().equals(dtiStr)) {
 						exist = true;
 						break;
 					}
 				}
 				if (!exist) {
-					dtr.getColum(index).add(dti);
+					dtr.getColumn(index).add(dti);
 				}
 				break;
 			}
@@ -87,12 +87,12 @@ public class LiDataTable {
 		/* Iteration on table rows */
 		for (LiDataTableRow dtr : allRows) {
 			/* Iteration on table columns */
-			for (int j = 0; j < dtr.getColumCount(); j++) {
+			for (int j = 0; j < dtr.getColumnCount(); j++) {
 				/* if the cell is not empty */
-				if (!dtr.getColum(j).isEmpty()) {
+				if (!dtr.getColumn(j).isEmpty()) {
 					LinkedList<Parameter> params = new LinkedList<>();
 					/* Look for NDV index in box (i, j) of table */
-					int ndvIndex = newNDVForItem(dtr.getColum(j), params,
+					int ndvIndex = newNDVForItem(dtr.getColumn(j), params,
 							ndvList.size());
 					/* If a NDV was found */
 					if (ndvIndex != -1) {
@@ -260,7 +260,7 @@ public class LiDataTable {
 		}
 		pis.addParameterizedInput(pi);
 		pis.removeEmptyInput();
-		for (LiDataTableItem dti : dtr.getColum(inputSymbols.indexOf(pi
+		for (LiDataTableItem dti : dtr.getColumn(inputSymbols.indexOf(pi
 				.getInputSymbol()))) {
 			boolean isEqual = true;
 			for (int i = 0; i < dti.getInputParameters().size(); i++) {

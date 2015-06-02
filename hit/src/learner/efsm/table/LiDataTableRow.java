@@ -18,7 +18,7 @@ public class LiDataTableRow {
 		}
 	}
 
-	public ArrayList<LiDataTableItem> getColum(int index) {
+	public ArrayList<LiDataTableItem> getColumn(int index) {
 		return cols.get(index);
 	}
 
@@ -26,7 +26,7 @@ public class LiDataTableRow {
 		cols.add(new ArrayList<LiDataTableItem>());
 	}
 	
-	public int getColumCount() {
+	public int getColumnCount() {
 		return cols.size();
 	}
 

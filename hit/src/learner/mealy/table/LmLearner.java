@@ -32,7 +32,7 @@ public class LmLearner extends Learner {
 
 	private void fillTablesForRow(LmControlTableRow ctr) {
 		InputSequence querie = null;
-		for (int i = 0; i < ctr.getColumCount(); i++) {
+		for (int i = 0; i < ctr.getColumnCount(); i++) {
 			if (ctr.getColumn(i).getOutputSymbol() == null) {
 				driver.reset();
 				querie = ctr.getIS();

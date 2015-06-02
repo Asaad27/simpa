@@ -59,7 +59,7 @@ public class LiLearner extends Learner {
 		
 		for (int i = 0; i < ctr.getColumnCount(); i++) {	
 			if (ctr.getColumn(i).isEmpty()) {	
-				ArrayList<ParameterizedInputSequence> qlist = Utils.generatePermutations(ctr.getColumPIS(i), 0, defaultParamValues);
+				ArrayList<ParameterizedInputSequence> qlist = Utils.generatePermutations(ctr.getColumnPIS(i), 0, defaultParamValues);
 				for (int l = 0; l < qlist.size(); l++) {
 					driver.reset();
 					for (int m = 0; m < qlist.get(l).getLength(); m++) {
@@ -131,7 +131,7 @@ public class LiLearner extends Learner {
 									.getOutputSymbol(), pos.sequence.get(j)
 									.getParameters());
 					}
-					dtr.getColum(i).add(
+					dtr.getColumn(i).add(
 							new LiDataTableItem(pis.getLastParameters(),
 									automataState, pos.getLastParameters(), pos
 											.getLastSymbol()));
@@ -233,12 +233,12 @@ public class LiLearner extends Learner {
 					.getRowInS(iFrom).getColumn(
 							cTable.getInputSymbols().indexOf(inputSymbol));
 			ArrayList<LiDataTableItem> allDataItems = dTable.getRowInS(
-					iFrom).getColum(
+					iFrom).getColumn(
 					cTable.getInputSymbols().indexOf(inputSymbol));
 			for (int i = 0; i < cTable.R.size(); i++) {
 				if (cTable.getRowInS(iFrom).isEquivalentTo(
 						cTable.getRowInR(i))) {
-					allDataItems.addAll(dTable.getRowInR(i).getColum(
+					allDataItems.addAll(dTable.getRowInR(i).getColumn(
 							cTable.getInputSymbols().indexOf(inputSymbol)));
 				}
 			}
@@ -388,7 +388,7 @@ public class LiLearner extends Learner {
 				ParameterizedInputSequence query = ctr.getPIS();
 				query.addParameterizedInput(
 						new ParameterizedInput(
-								ctr.getColumPIS(nbp.iInputSymbol).getLastSymbol(),//TODO:it assumes that E will never contains sequences (is that true ?) (*)
+								ctr.getColumnPIS(nbp.iInputSymbol).getLastSymbol(),//TODO:it assumes that E will never contains sequences (is that true ?) (*)
 								nbp.params)
 				);
 				query.removeEmptyInput();

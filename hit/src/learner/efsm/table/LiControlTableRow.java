@@ -67,7 +67,7 @@ public class LiControlTableRow {
 		return pis.sequence.get(pis.sequence.size() - 1);
 	}
 
-	public ParameterizedInputSequence getColumPIS(int i) {
+	public ParameterizedInputSequence getColumnPIS(int i) {
 		return E.get(i);
 	}
 

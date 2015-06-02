@@ -43,7 +43,7 @@ public class LmControlTableRow {
 		return null;
 	}
 
-	public int getColumCount() {
+	public int getColumnCount() {
 		return cols.size();
 	}
 
@@ -64,7 +64,7 @@ public class LmControlTableRow {
 	}
 
 	public boolean isEquivalentTo(LmControlTableRow aRow) {
-		for (int i = 0; i < getColumCount(); i++) {
+		for (int i = 0; i < getColumnCount(); i++) {
 			if (!getColumn(i).getOutputSymbol().equals(
 					aRow.getColumn(i).getOutputSymbol()))
 				return false;
