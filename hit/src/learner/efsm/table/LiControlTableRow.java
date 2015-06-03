@@ -26,7 +26,7 @@ public class LiControlTableRow {
 		}
 	}
 
-	public void addColumn(ParameterizedInputSequence col) {
+	public void addColumn() {
 		cols.add(new ArrayList<LiControlTableItem>());
 	}
 

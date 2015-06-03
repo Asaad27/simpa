@@ -34,6 +34,10 @@ public class LiControlTableItem implements Serializable {
 		return parameters;
 	}
 
+	/**
+	 * @deprecated Please use parameters.equals() to compare them
+	 * @return 
+	 */
 	public String getParamHash() {
 		StringBuffer s = new StringBuffer();
 		for (int i = 0; i < parameters.size(); i++) {

@@ -3,6 +3,7 @@ package automata.efsm;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import main.simpa.Options;
 
@@ -12,7 +13,7 @@ public class ParameterizedInputSequence implements Cloneable, Serializable {
 	public List<ParameterizedInput> sequence;
 
 	public ParameterizedInputSequence() {
-		sequence = new ArrayList<ParameterizedInput>();
+		sequence = new ArrayList<>();
 	}
 
 	public void addEmptyParameterizedInput() {
@@ -40,17 +41,25 @@ public class ParameterizedInputSequence implements Cloneable, Serializable {
 		return newpis;
 	}
 
-	public boolean equals(ParameterizedInputSequence o) {
-		if (sequence.size() != o.sequence.size())
+	public boolean hasSameSymbolSequence(ParameterizedInputSequence i){
+		return this.getSymbolSequence().equals(i.getSymbolSequence());
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o == null || !(o instanceof ParameterizedInputSequence)) {
 			return false;
-		else {
-			for (int i = 0; i < sequence.size(); i++) {
-				if (!sequence.get(i).getInputSymbol()
-						.equals(o.sequence.get(i).getInputSymbol()))
-					return false;
-			}
 		}
-		return true;
+		ParameterizedInputSequence other = (ParameterizedInputSequence) o;
+		
+		return this.sequence.equals(other.sequence);
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 3;
+		hash = 29 * hash + Objects.hashCode(this.sequence);
+		return hash;
 	}
 
 	public List<Parameter> getLastParameters() {
@@ -85,19 +94,18 @@ public class ParameterizedInputSequence implements Cloneable, Serializable {
 	 * 				this, return false)
 	 */
 	public boolean startsWith(ParameterizedInputSequence pis) {
-		if (pis.sequence.isEmpty() || sequence.isEmpty())
+		if (pis.sequence.isEmpty() || sequence.isEmpty()) {
 			return false;
-		if (pis.sequence.size() <= sequence.size()) {
-			for (int i = 0; i < pis.sequence.size(); i++) {
-				if ((!pis.sequence.get(i).getInputSymbol()
-						.equals(sequence.get(i).getInputSymbol()))
-						|| (!pis.sequence.get(i).getParamHash()
-								.equals(sequence.get(i).getParamHash())))
-					return false;
+		}
+		if (sequence.size() < pis.sequence.size()) {
+			return false;
+		}
+		for (int i = 0; i < pis.sequence.size(); i++) {
+			if (!pis.sequence.get(i).equals(sequence.get(i))) {
+				return false;
 			}
-			return true;
-		} else
-			return false;
+		}
+		return true;
 	}
 
 	@Override
@@ -120,17 +128,33 @@ public class ParameterizedInputSequence implements Cloneable, Serializable {
 		return newis;
 	}
 
+	/**
+	 * @deprecated please use equals instead, String operations are really slow
+	 * @return 
+	 */
 	public String getHash() {
 		String hash = "";
-		for (int i = 0; i < sequence.size(); i++) {
-			hash += sequence.get(i).getInputSymbol()
-					+ sequence.get(i).getParamHash();
+		for (ParameterizedInput pi : sequence) {
+			hash += pi.getInputSymbol() + pi.getParamHash();
 		}
 		return hash;
 	}
 
 	public String getSymbol(int k) {
 		return sequence.get(k).getInputSymbol();
+	}
+	
+	/**
+	 * Return the list of symbols contained by the ParameterizedInputSequence.
+	 * Warning, does not make copies, for read purpose only.
+	 * @return 
+	 */
+	public List<String> getSymbolSequence(){
+		List list = new ArrayList();
+		for (ParameterizedInput pi : sequence) {
+			list.add(pi.getInputSymbol());
+		}
+		return list;
 	}
 
 	public List<Parameter> getParameter(int k) {

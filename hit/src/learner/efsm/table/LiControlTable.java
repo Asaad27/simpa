@@ -35,15 +35,15 @@ public class LiControlTable {
 	public void addColumnInE(ParameterizedInputSequence col) {
 		boolean exists = false;
 		for (ParameterizedInputSequence is : E) {
-			if (is.equals(col))
+			if (is.hasSameSymbolSequence(col))
 				exists = true;
 		}
 		if (!exists) {
 			E.add(col);
 			for (LiControlTableRow row : S)
-				row.addColumn(col);
+				row.addColumn();
 			for (LiControlTableRow row : R)
-				row.addColumn(col);
+				row.addColumn();
 		}
 	}
 
@@ -215,7 +215,7 @@ public class LiControlTable {
 	public List<LiControlTableRow> getRowStartsWith(
 			ParameterizedInputSequence pis) {
 		final List<LiControlTableRow> allRows = getAllRows();
-		List<LiControlTableRow> ctrs = new ArrayList<LiControlTableRow>();
+		List<LiControlTableRow> ctrs = new ArrayList<>();
 		for (LiControlTableRow ctr : allRows) {
 			if (ctr.getPIS().startsWith(pis))
 				ctrs.add(ctr);

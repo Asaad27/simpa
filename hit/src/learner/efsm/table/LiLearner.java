@@ -244,37 +244,41 @@ public class LiLearner extends Learner {
 			}
 
 			for (LiControlTableItem cti : allControlItems) {
-				if (!cti.isOmegaSymbol()) {
-					if (ctr.getLastPI().getParamHash()
-							.equals(cti.getParamHash())) {
-						ArrayList<LiDataTableItem> correspondingDataTableItems = new ArrayList<LiDataTableItem>();
-						for (LiDataTableItem dti : allDataItems) {
-							if (cti.getOutputSymbol().equals(
-									dti.getOutputSymbol())
-									&& !correspondingDataTableItems
-											.contains(dti))
-								correspondingDataTableItems.add(dti);
-						}
-						for (NDV n : dTable.ndvList) {
-							ParameterizedInputSequence tmpis = n.getPIS();
-							if (ctr.getPIS()
-									.toString()
-									.equals(tmpis.removeEmptyInput()
-											.toString())) {
-								for (LiDataTableItem tmp : correspondingDataTableItems) {
-									tmp.getOutputParameters().set(
-											n.paramIndex,
-											new Parameter("Ndv"
-													+ n.indexNdv,
-													Types.STRING));
-								}
-							}
-						}
-						if (!correspondingDataTableItems.isEmpty())
-							c.addTransition(new EFSMTransition(c, from, to,
-									inputSymbol, cti.getOutputSymbol(),
-									correspondingDataTableItems));
+				if (cti.isOmegaSymbol()) {
+					continue;
+				}
+				if (!ctr.getLastPI().getParameters()
+						.equals(cti.getParameters())) {
+					continue;
+				}
+				ArrayList<LiDataTableItem> correspondingDataTableItems = new ArrayList<>();
+				for (LiDataTableItem dti : allDataItems) {
+					if (cti.getOutputSymbol().equals(
+							dti.getOutputSymbol())
+							&& !correspondingDataTableItems
+							.contains(dti)) {
+						correspondingDataTableItems.add(dti);
 					}
+				}
+				for (NDV n : dTable.ndvList) {
+					ParameterizedInputSequence tmpis = n.getPIS();
+					if (ctr.getPIS()
+							.toString()
+							.equals(tmpis.removeEmptyInput()
+									.toString())) {
+						for (LiDataTableItem tmp : correspondingDataTableItems) {
+							tmp.getOutputParameters().set(
+									n.paramIndex,
+									new Parameter("Ndv"
+											+ n.indexNdv,
+											Types.STRING));
+						}
+					}
+				}
+				if (!correspondingDataTableItems.isEmpty()) {
+					c.addTransition(new EFSMTransition(c, from, to,
+							inputSymbol, cti.getOutputSymbol(),
+							correspondingDataTableItems));
 				}
 			}
 		}
@@ -374,9 +378,8 @@ public class LiLearner extends Learner {
 			//those concerned by the NBP
 			boolean paramExists = false;
 			for (int j = 0; j < ctr.getSizeOfColumn(nbp.iInputSymbol); j++) {
-				if (nbp.getParamHash()
-						.equals(ctr.getItemInColumn(nbp.iInputSymbol, j)
-								.getParamHash())) {
+				if (nbp.params.equals(
+						ctr.getItemInColumn(nbp.iInputSymbol, j).getParameters())) {
 					paramExists = true;
 					break;
 				}

@@ -3,6 +3,7 @@ package automata.efsm;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import main.simpa.Options;
 
@@ -29,12 +30,39 @@ public class ParameterizedInput implements Cloneable, Serializable {
 
 	@Override
 	public ParameterizedInput clone() {
-		ArrayList<Parameter> params = new ArrayList<Parameter>();
+		ArrayList<Parameter> params = new ArrayList<>();
 		for (Parameter p : parameters)
 			params.add(p.clone());
 		return new ParameterizedInput(inputSymbol, params);
 	}
 
+	@Override
+	public int hashCode() {
+		int hash = 5;
+		hash = 47 * hash + Objects.hashCode(this.inputSymbol);
+		hash = 47 * hash + Objects.hashCode(this.parameters);
+		return hash;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final ParameterizedInput other = (ParameterizedInput) obj;
+		if (!Objects.equals(this.inputSymbol, other.inputSymbol)) {
+			return false;
+		}
+		if (!Objects.equals(this.parameters, other.parameters)) {
+			return false;
+		}
+		return true;
+	}
+
+	
 	public String getInputSymbol() {
 		return inputSymbol;
 	}
@@ -51,6 +79,10 @@ public class ParameterizedInput implements Cloneable, Serializable {
 		return parameters.get(paramIndex).value;
 	}
 
+	/**
+	 * @deprecated please use parameters.equals() instead
+	 * @return 
+	 */
 	public String getParamHash() {
 		StringBuffer s = new StringBuffer();
 		for (int i = 0; i < parameters.size(); i++) {

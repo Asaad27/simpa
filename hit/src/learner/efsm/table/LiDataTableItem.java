@@ -77,6 +77,7 @@ public class LiDataTableItem implements Serializable {
 		outputParameters.get(i).setNdv(iNdv);
 	}
 
+	@Override
 	public boolean equals(Object to) {
 		if (this == to)
 			return true;

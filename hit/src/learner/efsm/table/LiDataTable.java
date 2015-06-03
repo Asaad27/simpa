@@ -45,7 +45,7 @@ public class LiDataTable {
 			prefix.addEmptyParameterizedInput();
 		final List<LiDataTableRow> allRows = getAllRows();
 		for (LiDataTableRow dtr : allRows) {
-			if (dtr.getPIS().getHash().equals(prefix.getHash())) {
+			if (dtr.getPIS().equals(prefix)) {
 				int index = inputSymbols.indexOf(lastSymbol);
 				String dtiStr = dti.toString();
 				boolean exist = false;
@@ -152,7 +152,7 @@ public class LiDataTable {
 		return S.get(iRow);
 	}
 
-	public void initialize() {
+	private void initialize() {
 		S = new ArrayList<LiDataTableRow>();
 		R = new ArrayList<LiDataTableRow>();
 		ParameterizedInputSequence empty = new ParameterizedInputSequence();
@@ -292,13 +292,12 @@ public class LiDataTable {
 
 	
 	public void addColumnInAllRows() {
-		for (int i = 0; i < R.size(); i++) {
-			R.get(i).addColumn();
+		for (LiDataTableRow row : R) {
+			row.addColumn();
 		}
-		for (int i = 0; i < S.size(); i++) {
-			S.get(i).addColumn();
+		for (LiDataTableRow row : S) {
+			row.addColumn();
 		}
-		return;	
 	}
 	
 }

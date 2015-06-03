@@ -13,6 +13,10 @@ public class NBP {
 		this.params = params;
 	}
 
+	/**
+	 * @deprecated You should call params.equals() to compare two lists of Parameters 
+	 * @return 
+	 */
 	public String getParamHash() {
 		StringBuffer s = new StringBuffer();
 		for (int i = 0; i < params.size(); i++) {
