@@ -124,10 +124,15 @@ public class ParameterizedInputSequence implements Cloneable, Serializable {
 		return s.toString();
 	}
 
-	public ParameterizedInputSequence getIthSuffix(int start) {
+	/**
+	 * Returns a copy the the i last items of the ParameterizedInputSequence
+	 * @param i the number of elements to extract
+	 * @return the suffix of length "i"
+	 */
+	public ParameterizedInputSequence getIthSuffix(int i) {
 		ParameterizedInputSequence newis = new ParameterizedInputSequence();
-		for (int i = sequence.size() - start; i < sequence.size(); i++) {
-			newis.addParameterizedInput(sequence.get(i));
+		for (int n = sequence.size() - i; n < sequence.size(); n++) {
+			newis.addParameterizedInput(sequence.get(n));
 		}
 		return newis;
 	}

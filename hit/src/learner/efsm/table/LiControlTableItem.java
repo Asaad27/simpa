@@ -10,12 +10,12 @@ import automata.efsm.Parameter;
 public class LiControlTableItem implements Serializable {
 
 	private static final long serialVersionUID = -8484677909227738772L;
-	private List<Parameter> parameters;
+	private List<Parameter> inputParameters;
 	private String outputSymbol;
 
 	public LiControlTableItem(List<Parameter> list, String outputSymbol) {
 		this.outputSymbol = outputSymbol;
-		this.parameters = list;
+		this.inputParameters = list;
 	}
 
 	public String getOutputSymbol() {
@@ -23,15 +23,15 @@ public class LiControlTableItem implements Serializable {
 	}
 
 	public Parameter getParameter(int index) {
-		return parameters.get(index);
+		return inputParameters.get(index);
 	}
 
 	public Integer getParameterNDVIndex(int iParameter) {
-		return parameters.get(iParameter).getNdv();
+		return inputParameters.get(iParameter).getNdv();
 	}
 
 	public List<Parameter> getParameters() {
-		return parameters;
+		return inputParameters;
 	}
 
 	/**
@@ -40,13 +40,13 @@ public class LiControlTableItem implements Serializable {
 	 */
 	public String getParamHash() {
 		StringBuffer s = new StringBuffer();
-		for (int i = 0; i < parameters.size(); i++) {
+		for (int i = 0; i < inputParameters.size(); i++) {
 			if (i > 0)
 				s.append('|');
-			if (parameters.get(i).isNDV())
-				s.append("Ndv" + parameters.get(i).getNdv());
+			if (inputParameters.get(i).isNDV())
+				s.append("Ndv" + inputParameters.get(i).getNdv());
 			else
-				s.append(parameters.get(i).value);
+				s.append(inputParameters.get(i).value);
 		}
 		return s.toString();
 	}
@@ -56,19 +56,19 @@ public class LiControlTableItem implements Serializable {
 	}
 
 	public void setNdv(int indexParam, int indexNdv) {
-		parameters.get(indexParam).setNdv(indexNdv);
+		inputParameters.get(indexParam).setNdv(indexNdv);
 	}
 
 	@Override
 	public String toString() {
 		StringBuffer res = new StringBuffer("((");
-		for (int i = 0; i < parameters.size(); i++) {
+		for (int i = 0; i < inputParameters.size(); i++) {
 			if (i > 0)
 				res.append(", ");
-			if (!parameters.get(i).isNDV())
-				res.append(parameters.get(i).value);
+			if (!inputParameters.get(i).isNDV())
+				res.append(inputParameters.get(i).value);
 			else
-				res.append("Ndv" + parameters.get(i).getNdv());
+				res.append("Ndv" + inputParameters.get(i).getNdv());
 		}
 		return res
 				.append("), "

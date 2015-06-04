@@ -18,6 +18,7 @@ import drivers.efsm.real.ScanDriver;
 public class SIMPA {
 	public final static String name = SIMPA.class.getSimpleName();
 	private static Driver driver;
+	public static final boolean DEFENSIVE_CODE = true;
 
 	private static void init(String[] args) {
 		LogManager.logConsole("Checking environment and options");
@@ -157,15 +158,10 @@ public class SIMPA {
 		LogManager.end();
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		welcome();
 		init(args);
-		try {
-			launch();
-		} catch (Exception e) {
-			System.err.println("Unexpected error");
-			e.printStackTrace(System.err);
-		}
+		launch();
 	}
 
 	private static void welcome() {

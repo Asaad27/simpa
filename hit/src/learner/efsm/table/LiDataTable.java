@@ -10,6 +10,7 @@ import automata.efsm.Parameter;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedInputSequence;
 import drivers.efsm.EFSMDriver;
+import java.util.TreeMap;
 
 public class LiDataTable {
 	
@@ -36,31 +37,27 @@ public class LiDataTable {
 	}
 
 	/* TODO: considère qu'il n'y a qu'un seul input dans la colonne => à changer */
-	public void addAtCorrespondingPlace(LiDataTableItem dti,
-			ParameterizedInputSequence currentPis) {
-		String lastSymbol = currentPis.getLastSymbol();
-		ParameterizedInputSequence prefix = currentPis.clone();
+	void addAtCorrespondingPlace(LiDataTableItem dti, ParameterizedInputSequence pis) {
+		
+		String lastSymbol = pis.getLastSymbol();
+		int columnIndex = inputSymbols.indexOf(lastSymbol);
+		
+		
+		ParameterizedInputSequence prefix = pis.clone();
 		prefix.removeLastParameterizedInput();
 		if (prefix.sequence.isEmpty())
 			prefix.addEmptyParameterizedInput();
-		final List<LiDataTableRow> allRows = getAllRows();
-		for (LiDataTableRow dtr : allRows) {
-			if (dtr.getPIS().equals(prefix)) {
-				int index = inputSymbols.indexOf(lastSymbol);
-				String dtiStr = dti.toString();
-				boolean exist = false;
-				for (LiDataTableItem existingDti : dtr.getColumn(index)) {
-					if (existingDti.toString().equals(dtiStr)) {
-						exist = true;
-						break;
-					}
-				}
-				if (!exist) {
-					dtr.getColumn(index).add(dti);
-				}
-				break;
+		
+		
+		LiDataTableRow dtr = getRow(prefix);
+		
+		String dtiStr = dti.toString();
+		for (LiDataTableItem existingDti : dtr.getColumn(columnIndex)) {
+			if (existingDti.toString().equals(dtiStr)) {
+				return;
 			}
 		}
+		dtr.getColumn(columnIndex).add(dti);	
 	}
 
 	
@@ -139,6 +136,20 @@ public class LiDataTable {
 		return S.get(iRow);
 	}
 
+	/**
+	 * @see LiControlTable.#getRow(automata.efsm.ParameterizedInputSequence)  
+	 * @param prefix
+	 * @return 
+	 */
+	public LiDataTableRow getRow(ParameterizedInputSequence prefix){
+			final List<LiDataTableRow> allRows = getAllRows();
+		for (LiDataTableRow ctr : allRows) {
+			if (ctr.getPIS().equals(prefix))
+				return ctr;
+		}
+		throw new AssertionError("No corresponding row was found.");
+	}
+	
 	private void initialize() {
 		S = new ArrayList<LiDataTableRow>();
 		R = new ArrayList<LiDataTableRow>();
@@ -222,6 +233,50 @@ public class LiDataTable {
 		
 	public LiDataTableRow removeRowInR(int iRow) {
 		return R.remove(iRow);
+	}
+
+	public List<Parameter> getOutputParametersFor(ParameterizedInputSequence pis, TreeMap<String, List<Parameter>> automataState) {
+		ParameterizedInputSequence prefix = pis.clone();
+		ParameterizedInput lastPI = prefix.removeLastParameterizedInput();
+		if (prefix.sequence.isEmpty()) {
+			prefix.addEmptyParameterizedInput();
+		}
+		String lastSymbol = lastPI.getInputSymbol();
+
+		/* Computes the column number of the cell we have to look into*/
+		int j = inputSymbols.indexOf(lastSymbol);
+		if (j == -1) {
+			throw new AssertionError("This should be impossible, since E contains at least all the alphabet");
+		}
+
+		/* Look for the right row in the table */
+		List<LiDataTableRow> allRows = getAllRows();
+		for (LiDataTableRow dtr : allRows) {
+			if (dtr.getPIS().equals(prefix)) {
+				ArrayList<LiDataTableItem> cellContent = dtr.getColumn(j);
+				for (LiDataTableItem dti : cellContent) {
+					boolean paramsHaveSameValues = true;
+					for (int i = 0; i < dti.getInputParameters().size(); i++) {
+						if (!dti.getInputParameters().get(i).value.equals(lastPI.getParameterValue(i))) {
+							paramsHaveSameValues = false;
+							break;
+						}
+						for (Map.Entry<String, List<Parameter>> entrySet : automataState.entrySet()) {
+							String key = entrySet.getKey();
+							if (!dti.getAutomataState().get(key).equals(automataState.get(key))) {
+								paramsHaveSameValues = false;
+								break;
+							}
+						}
+
+					}
+					if (paramsHaveSameValues) {
+						return dti.getOutputParameters();
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	public Set<Parameter> getFixedOutputParametersFor(

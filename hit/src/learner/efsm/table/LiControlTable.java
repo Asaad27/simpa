@@ -7,6 +7,7 @@ import java.util.Map;
 import automata.efsm.Parameter;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedInputSequence;
+import main.simpa.SIMPA;
 
 public class LiControlTable {
 	public List<String> inputSymbols;
@@ -47,11 +48,21 @@ public class LiControlTable {
 		}
 	}
 
+	private void checkForDuplicatedRow(LiControlTableRow row){
+		for (LiControlTableRow rowCurrent : getAllRows()) {
+			if (row.getPIS().equals(rowCurrent.getPIS())){
+				throw new AssertionError("Duplicate row in R");
+			}
+		}	
+	}
+	
 	public void addRowInR(LiControlTableRow row) {
+		if(SIMPA.DEFENSIVE_CODE) checkForDuplicatedRow(row);
 		R.add(row);
 	}
 
 	public void addRowInS(LiControlTableRow row) {
+		if(SIMPA.DEFENSIVE_CODE) checkForDuplicatedRow(row);
 		S.add(row);
 	}
 
@@ -70,22 +81,46 @@ public class LiControlTable {
 		return S.size();
 	}
 
+	/**
+	 * Returns a disputed row if any.
+	 * Disputed row :
+	 * A row s \in S is disputed if there exists an x in E such that more than one output symbol
+	 * are included in the cell indexed by s & x   -- i.e. C(s,x).
+	 * 
+	 * Resolved row : A disputed row s is resolved if for each output symbol y involved in C(s,x), there 
+	 * is a row in R __union S__(this part has been forgotten in Karim's thesis)
+	 * indexed by s.x(x.paramValues), and (x.paramValues, y) is in C(s,x).
+	 * 
+	 * @return A NDF object if the disputed row has not been discovered before
+	 */
 	public NDF getDisputedItem() {
+		//Iterates over rows of S
 		for (LiControlTableRow ctr : S) {
+			
+			//Iterates over cell of the row
 			for (int i = 0; i < ctr.getColumnCount(); i++) {
-				for (int j = 0; j < ctr.getSizeOfColumn(i); j++) {
-					for (int k = j + 1; k < ctr.getSizeOfColumn(i); k++) {
-						if (!ctr.getItemInColumn(i, j)
-								.getOutputSymbol()
-								.equals(ctr.getItemInColumn(i, k)
-										.getOutputSymbol())) {
-							List<ArrayList<Parameter>> parameters = new ArrayList<ArrayList<Parameter>>();
-							for (int l = 0; l < ctr.getSizeOfColumn(i); l++) {
+				int sizeOfColumnI = ctr.getSizeOfColumn(i);
+				
+				//Iterates over every couple of item of the cell
+				for (int j = 0; j < sizeOfColumnI; j++) {
+					String symbolJ = ctr.getItemInColumn(i, j).getOutputSymbol();
+					for (int k = j + 1; k < sizeOfColumnI; k++) {
+						String symbolK = ctr.getItemInColumn(i, k).getOutputSymbol();
+						
+						//if they have different output symbols
+						if (!symbolJ.equals(symbolK)) {
+							
+							//We store the different parameters combinations found in the cell 
+							List<ArrayList<Parameter>> parameters = new ArrayList<>();
+							for (int l = 0; l < sizeOfColumnI; l++) {
 								parameters.add((ArrayList<Parameter>) ctr
 										.getItemInColumn(i, l).getParameters());
 							}
+							//and create a NDF object with it
 							NDF ndf = new NDF(ctr.getPIS().removeEmptyInput(),
 									inputSymbols.get(i), parameters);
+				
+							//and return it, if it has not been discovered before
 							if (!NdfList.contains(ndf)) {
 								NdfList.add(ndf);
 								return ndf.clone();
@@ -162,7 +197,7 @@ public class LiControlTable {
 							}
 						}
 						if (!found) {
-							NBP nbp = new NBP(parametersA, i);
+							NBP nbp = new NBP(parametersA, i, getInputSymbol(i));
 							for (int k = 0; k < allRows.get(z).getSizeOfColumn(
 									i); k++) {
 								boolean foundReal = true;
@@ -205,24 +240,59 @@ public class LiControlTable {
 
 	
 	/**
-	 * Look for rows in data table that start with the pis
+	 * Look for rows in control table that start with the pis
 	 * input sequence
 	 * 
-	 * @param 	pis prefix to look for
+	 * @param 	prefix prefix to look for
 	 * @return	A list of rows of Data table that start
 	 * 			with pis
 	 */
-	public List<LiControlTableRow> getRowStartsWith(
-			ParameterizedInputSequence pis) {
+	public List<LiControlTableRow> getRowsStartsWith(
+			ParameterizedInputSequence prefix) {
 		final List<LiControlTableRow> allRows = getAllRows();
 		List<LiControlTableRow> ctrs = new ArrayList<>();
 		for (LiControlTableRow ctr : allRows) {
-			if (ctr.getPIS().startsWith(pis))
+			if (ctr.getPIS().startsWith(prefix))
 				ctrs.add(ctr);
 		}
 		return ctrs;
 	}
 
+	/**
+	 * Return the row matching a given prefix
+	 * @param prefix The prefix to look for
+	 * @param matchExpected Indicates if we expect to find a matching row
+	 * @return The corresponding row
+	 */
+	public LiControlTableRow getRow(ParameterizedInputSequence prefix, boolean matchExpected){
+		final List<LiControlTableRow> allRows = getAllRows();
+		for (LiControlTableRow ctr : allRows) {
+			if (ctr.getPIS().equals(prefix))
+				return ctr;
+		}
+		if(matchExpected){
+			throw new AssertionError("No corresponding row was found.");
+		} else {
+			return null;
+		}
+	}
+	
+	/**
+	 * @see LiControlTable#getRow(automata.efsm.ParameterizedInputSequence, boolean)
+	 */
+	public LiControlTableRow getRow(ParameterizedInputSequence prefix){
+		return getRow(prefix,true);
+	}
+	
+	/**
+	 * Check the existence of a row indexed by the given prefix
+	 * @param prefix The prefix to look for in the table
+	 * @return true if a row was found, false otherwise
+	 */
+	public boolean rowExists(ParameterizedInputSequence prefix) {
+		return getRow(prefix, false) != null;
+	}
+	
 	public int getFromState(LiControlTableRow ctr) {
 		final List<LiControlTableRow> allRows = getAllRows();
 		ParameterizedInputSequence pis = ctr.getPIS();
@@ -293,5 +363,73 @@ public class LiControlTable {
 
 	public LiControlTableRow removeRowInR(int iRow) {
 		return R.remove(iRow);
+	}
+
+	/**
+	 * Returns the item corresponding to the PIS given in argument.
+	 * TODO : Verify is it is possible that E can contain sequences of size > 1
+	 * @param pis
+	 * @return 
+	 */
+	public LiControlTableItem getItem(ParameterizedInputSequence pis) {
+		ParameterizedInputSequence prefix = pis.clone();
+		ParameterizedInput lastPI = prefix.removeLastParameterizedInput();
+		if(prefix.sequence.isEmpty()){
+			prefix.addEmptyParameterizedInput();
+		}
+		String lastSymbol = lastPI.getInputSymbol();
+		
+		/* Computes the column number of the cell we have to look into*/
+		int j = inputSymbols.indexOf(lastSymbol);
+		if (j == -1) {
+			throw new AssertionError("This should be impossible, since E contains at least all the alphabet");
+		}
+		
+		/* Look for the right row in the table */
+		LiControlTableRow ctr = getRow(prefix);
+		ArrayList<LiControlTableItem> cellContent = ctr.getColumn(j);
+		for (LiControlTableItem cti : cellContent) {
+			boolean paramsHaveSameValues = true;
+			for (int i = 0; i < cti.getParameters().size(); i++) {
+				if (!cti.getParameter(i).value.equals(lastPI.getParameterValue(i))) {
+					paramsHaveSameValues = false;
+					break;
+				}
+			}
+			if (paramsHaveSameValues) {
+				return cti;
+			}
+		}
+
+		return null;
+	}
+	
+	void addAtCorrespondingPlace(LiControlTableItem cti, ParameterizedInputSequence pis) {
+		//Compute the column index from the last symbol
+		String lastSymbol = pis.getLastSymbol();
+		int columnIndex = inputSymbols.indexOf(lastSymbol);
+		
+		//Compute the PIS that indexes the row
+		ParameterizedInputSequence prefix = pis.clone();
+		prefix.removeLastParameterizedInput();
+		if (prefix.sequence.isEmpty())
+			prefix.addEmptyParameterizedInput();
+
+		//Look for the matching row
+		LiControlTableRow ctr = getRow(prefix);
+
+		//check if the item already exists
+		ArrayList<LiControlTableItem> cellContent = ctr.getColumn(columnIndex);
+		for (LiControlTableItem existingCti : cellContent) {
+			if (existingCti.getParameters().equals(cti.getParameters())) {
+				if (!existingCti.getOutputSymbol().equals(cti.getOutputSymbol())){
+					throw new AssertionError("The system seems undeterministic, or the driver the inference cannot work");
+				}
+				return;
+			}
+		}
+
+		//if not found, we add it
+		cellContent.add(cti);
 	}
 }
