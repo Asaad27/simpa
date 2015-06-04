@@ -60,16 +60,18 @@ public class TextLogger implements ILogger {
 		}
 	}
 	
+	@Override
 	public void logFatalError(String s) {
 		System.err.flush();
 		System.err.println("[!] "+ s);
 		System.exit(1);
 	}
 
+	@Override
 	public void logControlTable(LiControlTable l) {
 		try {
 			int nbSymbols = l.inputSymbols.size();
-			ArrayList<Integer> width = new ArrayList<Integer>();
+			ArrayList<Integer> width = new ArrayList<>();
 			for (int i = 0; i < nbSymbols + 1; i++)
 				width.add(0);
 			final List<LiControlTableRow> allRows = l.getAllRows();
@@ -85,12 +87,12 @@ public class TextLogger implements ILogger {
 						width.set(i + 1, maxwidth);
 				}
 			}
-			StringBuffer s = new StringBuffer(ret
+			StringBuilder s = new StringBuilder(ret
 					+ printLine(width, l.inputSymbols.size()));
-			s.append(tfm.format(new Date()) + "|" + pad("", width.get(0)) + "|");
+			s.append(tfm.format(new Date())).append("|").append(pad("", width.get(0))).append("|");
 			for (int i = 0; i < nbSymbols; i++)
-				s.append(pad(l.inputSymbols.get(i), width.get(i + 1)) + "|");
-			s.append(ret + printLine(width, nbSymbols));
+				s.append(pad(l.inputSymbols.get(i), width.get(i + 1))).append("|");
+			s.append(ret).append(printLine(width, nbSymbols));
 			for (LiControlTableRow ctr : l.S)
 				s.append(printRows(ctr, width));
 			s.append(printLine(width, nbSymbols));
@@ -104,10 +106,11 @@ public class TextLogger implements ILogger {
 		}
 	}
 
+	@Override
 	public void logControlTable(LmControlTable l) {
 		try {
 			int nbCols = l.getColsCount();
-			ArrayList<Integer> width = new ArrayList<Integer>();
+			ArrayList<Integer> width = new ArrayList<>();
 			for (int i = 0; i < nbCols + 1; i++)
 				width.add(0);
 			final List<LmControlTableRow> allRows = l.getAllRows();
@@ -125,12 +128,11 @@ public class TextLogger implements ILogger {
 						width.set(i + 1, maxwidth);
 				}
 			}
-			StringBuffer s = new StringBuffer(ret + printLine(width, nbCols));
-			s.append(tfm.format(new Date()) + "|" + pad("", width.get(0)) + "|");
+			StringBuilder s = new StringBuilder(ret + printLine(width, nbCols));
+			s.append(tfm.format(new Date())).append("|").append(pad("", width.get(0))).append("|");
 			for (int i = 0; i < nbCols; i++)
-				s.append(pad(l.getColSuffix(i).toString(), width.get(i + 1))
-						+ "|");
-			s.append(ret + printLine(width, nbCols));
+				s.append(pad(l.getColSuffix(i).toString(), width.get(i + 1))).append("|");
+			s.append(ret).append(printLine(width, nbCols));
 			for (LmControlTableRow ctr : l.S)
 				s.append(printRows(ctr, width));
 			s.append(printLine(width, nbCols));
@@ -148,7 +150,7 @@ public class TextLogger implements ILogger {
 	public void logDataTable(LiDataTable l) {
 		try {
 			int nbSymbols = l.inputSymbols.size();
-			ArrayList<Integer> width = new ArrayList<Integer>();
+			ArrayList<Integer> width = new ArrayList<>();
 			for (int i = 0; i < nbSymbols + 1; i++)
 				width.add(0);
 			final List<LiDataTableRow> allRows = l.getAllRows();
@@ -164,11 +166,10 @@ public class TextLogger implements ILogger {
 						width.set(i + 1, maxwidth);
 				}
 			}
-			StringBuffer s = new StringBuffer(printLine(width, nbSymbols));
-			s.append(tfm.format(new Date()) + "|" + pad(" ", width.get(0))
-					+ "|");
+			StringBuilder s = new StringBuilder(printLine(width, nbSymbols));
+			s.append(tfm.format(new Date())).append("|").append(pad(" ", width.get(0))).append("|");
 			for (int i = 0; i < nbSymbols; i++)
-				s.append(pad(l.inputSymbols.get(i), width.get(i + 1)) + "|");
+				s.append(pad(l.inputSymbols.get(i), width.get(i + 1))).append("|");
 			s.append(ret);
 			s.append(printLine(width, nbSymbols));
 			for (LiDataTableRow dtr : l.S)
@@ -244,21 +245,21 @@ public class TextLogger implements ILogger {
 		}
 	}
 
-	private StringBuffer pad(String s, int size) {
-		StringBuffer res = new StringBuffer();
+	private StringBuilder pad(String s, int size) {
+		StringBuilder res = new StringBuilder();
 		int before = size - s.length() + 1;
 		for (int i = 0; i < before; i++)
 			res.append(' ');
-		return res.append(s + ' ');
+		return res.append(s).append(' ');
 	}
 
-	private StringBuffer printLine(ArrayList<Integer> width, int NbSymbols) {
-		StringBuffer s = new StringBuffer(tfm.format(new Date()) + '|');
+	private StringBuilder printLine(ArrayList<Integer> width, int NbSymbols) {
+		StringBuilder s = new StringBuilder(tfm.format(new Date()) + '|');
 		for (int i = 0; i < NbSymbols + 1; i++) {
 			for (int j = 0; j < width.get(i) + 2; j++)
 				s.append('-');
 		}
-		return s.append("--|" + ret);
+		return s.append("--|").append(ret);
 	}
 
 	private StringBuffer printRows(LmControlTableRow ctr,
@@ -268,14 +269,14 @@ public class TextLogger implements ILogger {
 				+ pad(ctr.getIS().toString(), width.get(0)) + "|");
 		for (int i = 0; i < ctr.getColumnCount(); i++) {
 			LmControlTableItem acti = ctr.getColumn(i);
-			s.append(pad(acti.toString(), width.get(i + 1)) + "|");
+			s.append(pad(acti.toString(), width.get(i + 1))).append("|");
 			height = 1;
 		}
 		s.append(ret);
 		for (int i = 1; i < height; i++) {
-			s.append(tfm.format(new Date()) + "|" + pad("", width.get(0)) + "|");
+			s.append(tfm.format(new Date())).append("|").append(pad("", width.get(0))).append("|");
 			for (int j = 0; j < ctr.getColumnCount(); j++) {
-				s.append(pad("", width.get(j + 1)) + "|");
+				s.append(pad("", width.get(j + 1))).append("|");
 			}
 			s.append(ret);
 		}
@@ -290,21 +291,20 @@ public class TextLogger implements ILogger {
 		for (int i = 0; i < ctr.getColumnCount(); i++) {
 			ArrayList<LiControlTableItem> acti = ctr.getColumn(i);
 			if (acti.size() > 0)
-				s.append(pad(acti.get(0).toString(), width.get(i + 1)) + "|");
+				s.append(pad(acti.get(0).toString(), width.get(i + 1))).append("|");
 			else
-				s.append(pad("", width.get(i + 1)) + "|");
+				s.append(pad("", width.get(i + 1))).append("|");
 			height = Math.max(height, acti.size());
 		}
 		s.append(ret);
 		for (int i = 1; i < height; i++) {
-			s.append(tfm.format(new Date()) + "|" + pad("", width.get(0)) + "|");
+			s.append(tfm.format(new Date())).append("|").append(pad("", width.get(0))).append("|");
 			for (int j = 0; j < ctr.getColumnCount(); j++) {
 				ArrayList<LiControlTableItem> acti = ctr.getColumn(j);
 				if (acti.size() > i)
-					s.append(pad(acti.get(i).toString(), width.get(j + 1))
-							+ "|");
+					s.append(pad(acti.get(i).toString(), width.get(j + 1))).append("|");
 				else
-					s.append(pad("", width.get(j + 1)) + "|");
+					s.append(pad("", width.get(j + 1))).append("|");
 			}
 			s.append(ret);
 		}
@@ -313,26 +313,25 @@ public class TextLogger implements ILogger {
 
 	private StringBuffer printRows(LiDataTableRow dtr, ArrayList<Integer> width) {
 		int height = 0;
-		StringBuffer s = new StringBuffer(tfm.format(new Date()) + "|"
-				+ pad(dtr.getPIS().toString(), width.get(0)) + "|");
+		StringBuffer s = new StringBuffer();
+		s.append(tfm.format(new Date())).append("|").append(pad(dtr.getPIS().toString(), width.get(0))).append("|");
 		for (int i = 0; i < dtr.getColumnCount(); i++) {
 			ArrayList<LiDataTableItem> adti = dtr.getColumn(i);
 			if (adti.size() > 0)
-				s.append(pad(adti.get(0).toString(), width.get(i + 1)) + "|");
+				s.append(pad(adti.get(0).toString(), width.get(i + 1))).append("|");
 			else
-				s.append(pad("", width.get(i + 1)) + "|");
+				s.append(pad("", width.get(i + 1))).append("|");
 			height = Math.max(height, adti.size());
 		}
 		s.append(ret);
 		for (int i = 1; i < height; i++) {
-			s.append(tfm.format(new Date()) + "|" + pad("", width.get(0)) + "|");
+			s.append(tfm.format(new Date())).append("|").append(pad("", width.get(0))).append("|");
 			for (int j = 0; j < dtr.getColumnCount(); j++) {
 				ArrayList<LiDataTableItem> adti = dtr.getColumn(j);
 				if (adti.size() > i)
-					s.append(pad(adti.get(i).toString(), width.get(j + 1))
-							+ "|");
+					s.append(pad(adti.get(i).toString(), width.get(j + 1))).append("|");
 				else
-					s.append(pad("", width.get(j + 1)) + "|");
+					s.append(pad("", width.get(j + 1))).append("|");
 			}
 			s.append(ret);
 		}
@@ -451,7 +450,7 @@ public class TextLogger implements ILogger {
 		try {
 			writer.write(tfm.format(new Date()) + "Symbols and parameters :"
 					+ ret + ret);
-			ArrayList<String> keys = new ArrayList<String>(params.keySet());
+			ArrayList<String> keys = new ArrayList<>(params.keySet());
 			Collections.sort(keys);
 			for (String k : keys) {
 				writer.write(tfm.format(new Date()) + "Symbol " + k + "has "

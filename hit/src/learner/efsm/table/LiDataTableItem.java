@@ -105,7 +105,7 @@ public class LiDataTableItem implements Serializable {
 
 	@Override
 	public String toString() {
-		StringBuffer res = new StringBuffer("((");
+		StringBuilder res = new StringBuilder("((");
 		for (int i = 0; i < inputParameters.size(); i++) {
 			if (i > 0)
 				res.append(", ");
@@ -118,9 +118,8 @@ public class LiDataTableItem implements Serializable {
 				res.append(s.get(0).isNDV() ? "Ndv" + s.get(0).getNdv()
 						: s.get(0).value);
 			for (int i = 1; i < s.size(); i++)
-				res.append(", "
-						+ (s.get(i).isNDV() ? "Ndv" + s.get(i).getNdv()
-								: s.get(i).value));
+				res.append(", ").append(s.get(i).isNDV() ? "Ndv" + s.get(i).getNdv()
+						: s.get(i).value);
 			res.append(')');
 		}
 		res.append("] -> ");
@@ -132,7 +131,7 @@ public class LiDataTableItem implements Serializable {
 				if (i > 0)
 					res.append(", ");
 				if (outputParameters.get(i).isNDV())
-					res.append("Ndv" + outputParameters.get(i).getNdv());
+					res.append("Ndv").append(outputParameters.get(i).getNdv());
 				else
 					res.append(outputParameters.get(i).value);
 			}
