@@ -165,7 +165,7 @@ public class LiLearner extends Learner {
 			pis.removeEmptyInput();
 			if (pis.sequence.size() <= pos.sequence.size()) {
 				if (ndv.paramIndex < pos.getLastParameters().size()) {
-					pNdv = pos.getLastParameters().get(ndv.paramIndex);
+					pNdv = pos.getLastParameters().get(ndv.paramIndex).clone();
 					pNdv.setNdv(ndv.indexNdv);
 					return pNdv;
 				}
@@ -178,7 +178,7 @@ public class LiLearner extends Learner {
 			if (ndv.paramIndex < outputParameters.size()) {
 				pNdv_val = outputParameters.get(ndv.paramIndex).value;
 				if (!this.ndvUsed.get(pKey).contains(pNdv_val)) {
-					pNdv = outputParameters.get(ndv.paramIndex);
+					pNdv = outputParameters.get(ndv.paramIndex).clone();
 					pNdv.setNdv(ndv.indexNdv);
 					if (MARK_USED_NDV)
 						this.ndvUsed.get(pKey).add(pNdv.value);
@@ -191,7 +191,7 @@ public class LiLearner extends Learner {
 			if (ndv.paramIndex < pos.sequence.get(i).getParameters().size()) {
 				pNdv_val = pos.sequence.get(i).getParameters().get(ndv.paramIndex).value;
 				if (!this.ndvUsed.get(pKey).contains(pNdv_val)) {
-					pNdv = pos.sequence.get(i).getParameters().get(ndv.paramIndex);
+					pNdv = pos.sequence.get(i).getParameters().get(ndv.paramIndex).clone();
 					pNdv.setNdv(ndv.indexNdv);
 					if (MARK_USED_NDV)
 						this.ndvUsed.get(pKey).add(pNdv.value);
