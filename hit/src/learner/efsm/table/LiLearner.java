@@ -29,7 +29,7 @@ public class LiLearner extends Learner {
 	private LiControlTable cTable;
 	private LiDataTable dTable;
 	private Map<String, List<ArrayList<Parameter>>> defaultParamValues;
-	private HashMap<String, ArrayList<String>> ndvUsed = new HashMap<String, ArrayList<String>>();
+	private HashMap<String, ArrayList<String>> ndvUsed = new HashMap<>();
 	private static boolean UNIQUE_NDV = true;
 	private static boolean MARK_USED_NDV = true;
 	

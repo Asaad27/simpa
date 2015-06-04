@@ -80,8 +80,7 @@ public class LiControlTableRow {
 	}
 
 	public boolean isEpsilon() {
-		return ((pis.sequence.size() == 1) && (pis.getLastSymbol()
-				.equals(EFSM.EPSILON)));
+		return pis.isEpsilon();
 	}
 	
 	public boolean isEquivalentTo(LiControlTableRow aRow) {

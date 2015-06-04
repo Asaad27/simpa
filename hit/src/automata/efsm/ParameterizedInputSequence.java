@@ -17,15 +17,18 @@ public class ParameterizedInputSequence implements Cloneable, Serializable {
 	}
 
 	public void addEmptyParameterizedInput() {
-		sequence.add(new ParameterizedInput());
+		addParameterizedInput(new ParameterizedInput());
 	}
 
 	public void addParameterizedInput(ParameterizedInput pi) {
 		sequence.add(pi);
+		if(sequence.get(0).isEpsilonSymbol() && sequence.size()>1){
+			sequence.remove(0);
+		}
 	}
 
 	public void addParameterizedInput(String input, List<Parameter> parameters) {
-		sequence.add(new ParameterizedInput(input, parameters));
+		addParameterizedInput(new ParameterizedInput(input, parameters));
 	}
 
 	public int getLength() {
@@ -75,8 +78,9 @@ public class ParameterizedInputSequence implements Cloneable, Serializable {
 	}
 
 	public ParameterizedInputSequence removeEmptyInput() {
-		if (sequence.get(0).isEpsilonSymbol())
-			sequence.remove(0);
+		if (sequence.get(0).isEpsilonSymbol()){
+			ParameterizedInput remove = sequence.remove(0);
+		}
 		return this;
 	}
 
@@ -159,5 +163,9 @@ public class ParameterizedInputSequence implements Cloneable, Serializable {
 
 	public List<Parameter> getParameter(int k) {
 		return sequence.get(k).getParameters();
+	}
+
+	public boolean isEpsilon() {
+		return sequence.size() == 1 && sequence.get(0).isEpsilonSymbol();
 	}
 }
