@@ -92,15 +92,12 @@ public class XMLModel {
 										+ value[0] + " := random();</label>\n");
 					else {
 						try {
-							Float.parseFloat(value[1].substring(1,
-									value[1].length() - 1));
+							Float.parseFloat(value[1]);
 							transitions
 									.append("            <label kind=\"assignment\">"
 											+ value[0]
 											+ " := "
-											+ value[1].substring(1,
-													value[1].length() - 1)
-													.trim() + "</label>\n");
+											+ value[1].trim() + "</label>\n");
 						} catch (NumberFormatException e) {
 							transitions
 									.append("            <label kind=\"assignment\">"
