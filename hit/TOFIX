@@ -2,3 +2,6 @@
  public, which makes it difficult to trace back modifications of these
  values when debugging.
 
+* The LiLearner,  LiControlTable, LiDataTable  etc ...  otfen consider
+  that E  contains only sequences  of length  1, which is  false after
+  counter-example is provided.

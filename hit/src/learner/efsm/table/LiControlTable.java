@@ -367,7 +367,6 @@ public class LiControlTable {
 
 	/**
 	 * Returns the item corresponding to the PIS given in argument.
-	 * TODO : Verify is it is possible that E can contain sequences of size > 1
 	 * @param pis
 	 * @return 
 	 */

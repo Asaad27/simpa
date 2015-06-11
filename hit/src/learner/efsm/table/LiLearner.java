@@ -443,7 +443,6 @@ public class LiLearner extends Learner {
 			/* Iteration on input parameters */
 			for (int i = 0; i < driver.getInputSymbols().size(); i++) {
 				/* Iteration on default values for the current parameter */
-				if(!driver.getInputSymbols().equals(cTable.getInputSymbols())){throw new AssertionError("Why ?");}//TODO: if always false, clean the code below
 				for (int l = 0; l < defaultParamValues.get(
 						cTable.getInputSymbol(i)).size(); l++) {
 					for (int k = 0; k < defaultParamValues
@@ -459,14 +458,11 @@ public class LiLearner extends Learner {
 								pos.sequence.add(driver.execute(pi));
 							}
 							String ndvVal = "0";
-							try{
-								ndvVal = pos.getLastParameters().get(
-									ndv.paramIndex).value;
-								LogManager.logInfo("Ndv value is : " + ndvVal);
-							}catch(Exception e){															}
+							ndvVal = pos.getLastParameters().get(ndv.paramIndex).value;
+							LogManager.logInfo("Ndv value is : " + ndvVal);
 							ndvParam.get(k).value = ndvVal;
 							ParameterizedInput ndvpi = new ParameterizedInput(
-									driver.getInputSymbols().get(i), ndvParam);
+									cTable.getInputSymbols().get(i), ndvParam);
 							ndvpi.setNdvIndexForVar(k, ndv.indexNdv);
 							ParameterizedOutput po = driver.execute(ndvpi);
 
