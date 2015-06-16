@@ -22,7 +22,6 @@
 	<classpathentry kind="lib" path="lib/sipunit/stun4j-1.0.MOBICENTS.jar"/>
 	<classpathentry kind="lib" path="lib/sipunit/xsdlib-20060615.jar"/>
 	<classpathentry kind="lib" path="lib/htmlunit/htmlunit-2.11.jar"/>
-	<classpathentry kind="lib" path="lib/jsoup-1.7.2.jar"/>
 	<classpathentry kind="lib" path="lib/htmlunit/httpclient-4.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/htmlunit/commons-codec-1.7.jar"/>
 	<classpathentry kind="lib" path="lib/htmlunit/commons-collections-3.2.1.jar"/>
@@ -41,5 +40,6 @@
 	<classpathentry kind="lib" path="lib/htmlunit/xml-apis-1.4.01.jar"/>
 	<classpathentry kind="lib" path="lib/json/jackson-core-asl-1.9.11.jar"/>
 	<classpathentry kind="lib" path="lib/json/jackson-mapper-asl-1.9.11.jar"/>
+	<classpathentry kind="lib" path="lib/jsoup-1.8.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
