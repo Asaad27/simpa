@@ -3,9 +3,11 @@ package learner;
 import learner.efsm.table.LiLearner;
 import learner.mealy.table.LmLearner;
 import learner.mealy.tree.ZLearner;
+import learner.mealy.noReset.NoResetLearner;
 import main.simpa.Options;
 import automata.Automata;
 import drivers.Driver;
+import drivers.mealy.MealyDriver;
 
 public abstract class Learner {
 	protected boolean addtolog = true;
@@ -31,6 +33,8 @@ public abstract class Learner {
 		case MEALY:
 			if (Options.TREEINFERENCE)
 				return new ZLearner(driver);
+			else if (Options.NORESETINFERENCE)
+				return new NoResetLearner((MealyDriver)driver);
 			return new LmLearner(driver);
 		default:
 			return null;

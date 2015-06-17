@@ -56,6 +56,8 @@ public class SIMPA {
 					Options.XSS_DETECTION = true;
 				else if (args[i].equals("--tree"))
 					Options.TREEINFERENCE = true;
+				else if (args[i].equals("--noReset"))
+					Options.NORESETINFERENCE = true;
 				else if (args[i].equals("--weka"))
 					Options.WEKA = true;
 				else if (args[i].equals("--help") || args[i].equals("-h"))
@@ -188,7 +190,10 @@ public class SIMPA {
 		System.out
 				.println("    --weka            : Force the use of Weka");
 		System.out
-				.println("    --supportmin (20) : Minimal support for relation (1-100)");
+		.println("    --supportmin (20) : Minimal support for relation (1-100)");
+		System.out.println("> Algorithm NoReset");
+		System.out
+		.println("    --noReset					: Use noReset Algorithm");
 		System.out.println("> Algorithm ZQ");
 		System.out
 				.println("    --tree            : Use tree inference (if available) instead of table");

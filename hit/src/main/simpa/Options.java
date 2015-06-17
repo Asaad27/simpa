@@ -34,6 +34,7 @@ public class Options {
 
 	public static boolean SCAN = false;
 	public static boolean TREEINFERENCE = false;
+	public static boolean NORESETINFERENCE = false;
 	public static boolean GENERICDRIVER = false;
 	public static String INITIAL_INPUT_SYMBOLS = "";
 	public static String INITIAL_INPUT_SEQUENCES = "";
@@ -60,11 +61,11 @@ public class Options {
 	public static int RETEST = -1;
 
 	public static int NBTEST = 1;
-	public static int MINSTATES = 10000;
-	public static int MAXSTATES = 10000;
+	public static int MINSTATES = 10;
+	public static int MAXSTATES = 10;
 	public static int TRANSITIONPERCENT = 20;
-	public static int MININPUTSYM = 50;
-	public static int MAXINPUTSYM = 50;
+	public static int MININPUTSYM = 3;
+	public static int MAXINPUTSYM = 3;
 	public static int MINOUTPUTSYM = 50;
 	public static int MAXOUTPUTSYM = 50;
 	
