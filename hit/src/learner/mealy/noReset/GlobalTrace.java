@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import learner.mealy.LmTrace;
 import learner.mealy.noReset.dataManager.FullyQualifiedState;
 
+import tools.loggers.LogManager;
+
 public class GlobalTrace extends LmTrace {
 	private MealyDriver driver;
 	private ArrayList<FullyQualifiedState> C;
@@ -25,6 +27,7 @@ public class GlobalTrace extends LmTrace {
 	 * @return the output of the automata
 	 */
 	public String apply(String input){
+		LogManager.logInfo("transition n°"+size());
 		String output = driver.execute(input);
 		append(input,output);
 		C.add(null);

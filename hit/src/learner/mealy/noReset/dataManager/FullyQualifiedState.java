@@ -43,7 +43,8 @@ public class FullyQualifiedState{
 		if (t.getTrace().size() == 1){
 			T.add(t);
 			R_.remove(t.getTrace().getInput(0));//the transition with this symbol is known
-			if (R_.isEmpty()){
+			if (R_.isEmpty()){		
+				DataManager.instance.logRecursivity("All transitions from state " + this + " are known.");
 				DataManager.instance.startRecursivity();
 				DataManager.instance.setKnownState(this);
 				DataManager.instance.endRecursivity();

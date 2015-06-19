@@ -54,32 +54,51 @@ public class DataManager {
 	}
 
 	public void addFullyKnownTrace(FullyKnownTrace t){
+		logRecursivity("New transition found : " + t);
+		startRecursivity();
 		V.add(t);
+		logRecursivity("V is now :" + V);
 		t.getStart().addFullyKnownTrace(t);
 		if (t.getTrace().size() == 1){
 			T.add(t);
 			conjecture.addTransition(new MealyTransition(conjecture, t.getStart().getState(), t.getEnd().getState(), t.getTrace().getInput(0), t.getTrace().getOutput(0)));
-			logRecursivity("New transition found :" + t);
 		}
-		//update C ? //already done in FullyQualifiedState
+		updateC(t);
+		endRecursivity();
 		//clean K ?
 	}
 	
 	// It may be a good thing to implement others methods based on more precise data.
 	public void updateC(){
+		for (FullyKnownTrace t : V)
+			updateC(t);
+	}
+	
+	public void updateC(FullyKnownTrace t){
 		for (int i =0 ; i < trace.size(); i++){
-			for (FullyKnownTrace t : V){
-				if (t.getStart() == trace.getC(i) && trace.hasSuffix(i, t.getTrace())){
-					assert trace.getC(i+t.getTrace().size()) == null || trace.getC(i+t.getTrace().size()) == t.getEnd() : "labelling error : " + trace.getC(i+t.getTrace().size()) + " is remplaced by " + t.getEnd() + " at pos " + (i+t.getTrace().size());
-					if (trace.getC(i+t.getTrace().size()) == null){
-						trace.setC(i+t.getTrace().size(), t.getEnd());
+			if (t.getStart() == trace.getC(i) && trace.hasSuffix(i, t.getTrace())){
+				int newStatePos = i+t.getTrace().size();
+				assert trace.getC(newStatePos) == null || trace.getC(newStatePos) == t.getEnd() : "labelling error : " + trace.getC(i+t.getTrace().size()) + " is remplaced by " + t.getEnd() + " at pos " + (i+t.getTrace().size());
+				if (trace.getC(newStatePos) == null){
+					logRecursivity("Labelling trace at position " + newStatePos + " become " + t.getEnd());
+					startRecursivity();
+					trace.setC(newStatePos, t.getEnd());
+					for (LmTrace print : getMatchingWInTrace(newStatePos+1)){
+						addPartiallyKnownTrace(t.getEnd(), trace.subtrace(newStatePos, newStatePos+1), print);
 					}
-					//TODO update K
-				}else{
+					endRecursivity();
 				}
-				
 			}
 		}
+	}
+
+	private Collection<LmTrace> getMatchingWInTrace(int j) {
+		Collection<LmTrace> r = new ArrayList<LmTrace>();
+		for (ArrayList<String> w : W){//TODO we can make an optimized version of that
+			if (trace.subtrace(j, j+w.size()).getInputsProjection().equals(w))
+				r.add(trace.subtrace(j, j+w.size()));
+		}
+		return r;
 	}
 
 	/**
@@ -135,7 +154,6 @@ public class DataManager {
 	}
 
 	protected void setKnownState(FullyQualifiedState s) {
-		logRecursivity("All transitions from state " + s + " are known.");
 		notFullyKnownStates.remove(s);
 	}
 
@@ -192,7 +210,6 @@ public class DataManager {
 	}
 	
 	protected void startRecursivity(){
-		logRecursivity("that let us find :");
 		recursivity++;
 	}
 	protected void endRecursivity(){
@@ -200,8 +217,10 @@ public class DataManager {
 	}
 	protected void logRecursivity(String l){
 		StringBuilder s = new StringBuilder();
-		for (int i = 0; i < recursivity; i++)
-			s.append("\t");
+		for (int i = 1; i < recursivity; i++)
+			s.append("  \t|");
+		if (recursivity > 0)
+			s.append("  \t⊢");
 		s.append(l);
 		LogManager.logInfo(s.toString());
 	}

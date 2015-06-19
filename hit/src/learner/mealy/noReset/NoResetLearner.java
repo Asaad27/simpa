@@ -15,7 +15,7 @@ public class NoResetLearner extends Learner {
 	private MealyDriver driver;
 	private DataManager dataManager;
 
-	public NoResetLearner (MealyDriver d){
+	public NoResetLearner(MealyDriver d){
 		driver = d;
 	}
 	
@@ -83,7 +83,7 @@ public class NoResetLearner extends Learner {
 			LogManager.logInfo("We found that " + q + " followed by " + sigma + "give " +trace.subtrace(newStatePos, trace.size()));
 			dataManager.addPartiallyKnownTrace(q, sigma, trace.subtrace(newStatePos, trace.size()));
 			dataManager.updateC();
-			if (trace.getC(trace.size()-1) == null){
+			if (trace.getC(trace.size()) == null){
 				localize(trace, W);
 				dataManager.updateC();
 			}

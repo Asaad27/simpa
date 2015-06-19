@@ -61,8 +61,16 @@ public class LmTrace {
 		return true;
 	}
 	
+	/**
+	 * get a subtrace of current trace
+	 * @param start the position of the first element to keep
+	 * @param end the position of the first element to not take
+	 * @return an empty Trace if the asked subtrace is not in the current trace
+	 */
 	public LmTrace subtrace(int start, int end){
 		LmTrace newTrace = new LmTrace();
+		if (end > size())
+			return newTrace;
 		newTrace.inputs = new ArrayList<String>(inputs.subList(start, end));
 		newTrace.outputs = new ArrayList<String>(outputs.subList(start, end));
 		return newTrace;
