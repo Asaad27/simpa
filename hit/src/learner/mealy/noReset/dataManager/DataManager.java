@@ -97,6 +97,10 @@ public class DataManager {
 						addPartiallyKnownTrace(t.getEnd(), trace.subtrace(newStatePos, newStatePos+1), print);
 					}
 					endRecursivity();
+				}else{//To ensure C is fully updated, to be removed
+					for (LmTrace print : getMatchingWInTrace(newStatePos+1)){
+						addPartiallyKnownTrace(t.getEnd(), trace.subtrace(newStatePos, newStatePos+1), print);
+					}
 				}
 			}
 		}
