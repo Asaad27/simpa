@@ -89,6 +89,7 @@ public class NoResetLearner extends Learner {
 			}
 		}
 		LogManager.logConsole(dataManager.readableTrace());
+		dataManager.getConjecture().exportToDot();
 	}
 	
 	public LmConjecture createConjecture() {
