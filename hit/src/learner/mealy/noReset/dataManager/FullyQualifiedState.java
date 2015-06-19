@@ -3,6 +3,7 @@ package learner.mealy.noReset.dataManager;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Collection;
 
 import tools.loggers.LogManager;
 import learner.mealy.LmTrace;
@@ -99,5 +100,9 @@ public class FullyQualifiedState{
 
 	public State getState() {
 		return state;
+	}
+	
+	protected Collection<PartiallyKnownTrace> getK(){
+		return K.values();
 	}
 }
