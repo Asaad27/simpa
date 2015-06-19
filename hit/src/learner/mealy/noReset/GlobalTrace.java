@@ -15,6 +15,7 @@ public class GlobalTrace extends LmTrace {
 		driver = d;
 		driver.reset();//should be removed ?
 		C = new ArrayList<FullyQualifiedState>();
+		C.add(null);
 	}
 	
 	/**

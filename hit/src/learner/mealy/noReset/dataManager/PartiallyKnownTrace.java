@@ -14,17 +14,17 @@ public class PartiallyKnownTrace {
 	private ArrayList<ArrayList<String>> unknownPrints;
 	private final ArrayList<ArrayList<String>> W; //use at end to keep the order of W elements
 	
-	public PartiallyKnownTrace(FullyQualifiedState start, LmTrace transition, ArrayList<ArrayList<String>> W, ArrayList<String> inputSymbols){
+	public PartiallyKnownTrace(FullyQualifiedState start, LmTrace transition, ArrayList<ArrayList<String>> W){
 		this.W = W;
 		this.start = start;
 		this.transition = transition;
-		unknownPrints = (ArrayList<ArrayList<String>>) inputSymbols.clone();
+		unknownPrints = new ArrayList<ArrayList<String>>(W);
 		WResponses = new ArrayList<ArrayList<String>>();
 		for (int i =0; i < W.size(); i++)//allocate all the array
 			WResponses.add(null);
 	}
 	
-	public ArrayList<ArrayList<String>> getUnknownPrints(){
+	protected ArrayList<ArrayList<String>> getUnknownPrints(){
 		return unknownPrints;
 	}
 	
@@ -33,15 +33,20 @@ public class PartiallyKnownTrace {
 	 * @param print must be in W to bring information, So supposed to be in W
 	 */
 	public void addPrint(LmTrace print){
-		if (!unknownPrints.remove(print.getInputsProjection())) //the print wasn't in W or has been already removed
-		return;
+		assert W.contains(print.getInputsProjection());
+		if (!unknownPrints.remove(print.getInputsProjection())){ //the print wasn't in W or has been already removed
+			return;
+		}
+
 		WResponses.set(W.indexOf(print.getInputsProjection()), print.getOutputsProjection());
 		
 		if (unknownPrints.isEmpty()){
 			//we have totally found a transition
 			FullyQualifiedState state = DataManager.instance.getFullyQualifiedState(WResponses);//TODO avoid having a loop in this function
 			FullyKnownTrace t = new FullyKnownTrace(start, transition, state);
+			DataManager.instance.startRecursivity();
 			DataManager.instance.addFullyKnownTrace(t);//TODO avoid loop in this call
+			DataManager.instance.endRecursivity();
 		}
 	}
 	
@@ -51,5 +56,14 @@ public class PartiallyKnownTrace {
 
 	public FullyQualifiedState getStart() {
 		return start;
+	}
+	
+	public String toString(){
+		StringBuilder s = new StringBuilder();
+		s.append("from " + start + " followed by " + transition + " : [");
+		for (int i = 0 ; i < W.size(); i++)
+			s.append(W.get(i) + " → " + WResponses.get(i) + ", ");
+		s.append("]");
+		return s.toString();
 	}
 }

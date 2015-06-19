@@ -24,4 +24,8 @@ public class FullyKnownTrace {
 	public LmTrace getTrace(){
 		return trace;//a secure way is to return trace.clone(). Should we use it ?
 	}
+	
+	public String toString(){
+		return start.toString() + " followed by " + trace.toString() + " → " + end.toString();
+	}
 }
