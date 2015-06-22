@@ -75,10 +75,10 @@ public class FullyQualifiedState{
 		return k;
 	}
 
-	protected void addPartiallyKnownTrace(LmTrace transition, LmTrace print) {
+	protected boolean addPartiallyKnownTrace(LmTrace transition, LmTrace print) {
 		//TODO check if the transition is not even known
 		PartiallyKnownTrace k = getKEntry(transition);
-		k.addPrint(print);
+		return k.addPrint(print);
 	}
 	
 	/**

@@ -49,16 +49,19 @@ public class DataManager {
 	public void addPartiallyKnownTrace(FullyQualifiedState start, LmTrace transition, LmTrace print){
 		assert transition.size() > 0;
 		assert W.contains(print.getInputsProjection());
-		logRecursivity("New print(=a response to W input) found : " + start + " followed by " + transition + " → " + print);
 		startRecursivity();
-		start.addPartiallyKnownTrace(transition,print);
-		
+		boolean is_new = start.addPartiallyKnownTrace(transition,print);
+		if (is_new){
+			logRecursivity("because New print(=a response to W input) found : " + start + " followed by " + transition + " → " + print);
 		//compute K
-		StringBuilder s = new StringBuilder();
+		StringBuilder s = new StringBuilder("{");
 		for (FullyQualifiedState q : Q.values()){
-			s.append(q.getK()+ "      ");//TODO try to increase readability
+			for (PartiallyKnownTrace k : q.getK())
+				s.append(k);
 		}
+		s.append("}");
 		logRecursivity("K is now : " + s);
+		}
 		endRecursivity();
 
 	}

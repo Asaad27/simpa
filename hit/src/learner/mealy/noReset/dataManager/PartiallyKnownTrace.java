@@ -31,11 +31,12 @@ public class PartiallyKnownTrace {
 	/**
 	 * 
 	 * @param print must be in W to bring information, So supposed to be in W
+	 * @return false if the print was already known
 	 */
-	public void addPrint(LmTrace print){
+	public boolean addPrint(LmTrace print){
 		assert W.contains(print.getInputsProjection());
 		if (!unknownPrints.remove(print.getInputsProjection())){ //the print wasn't in W or has been already removed
-			return;
+			return false;
 		}
 
 		WResponses.set(W.indexOf(print.getInputsProjection()), print.getOutputsProjection());
@@ -48,6 +49,7 @@ public class PartiallyKnownTrace {
 			DataManager.instance.addFullyKnownTrace(t);//TODO avoid loop in this call
 			DataManager.instance.endRecursivity();
 		}
+		return true;
 	}
 	
 	public LmTrace getTransition(){
@@ -60,10 +62,8 @@ public class PartiallyKnownTrace {
 	
 	public String toString(){
 		StringBuilder s = new StringBuilder();
-		s.append("from " + start + " followed by " + transition + " : [");
 		for (int i = 0 ; i < W.size(); i++)
-			s.append(W.get(i) + " → " + WResponses.get(i) + ", ");
-		s.append("]");
+			s.append("(" + start + ", " + transition + ", " + W.get(i) + "),");
 		return s.toString();
 	}
 }
