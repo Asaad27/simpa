@@ -80,6 +80,8 @@ public class LmTrace {
 		LmTrace newTrace = new LmTrace();
 		if (end > size())
 			return newTrace;
+		if (start < 0)
+			return newTrace;
 		newTrace.inputs = new ArrayList<String>(inputs.subList(start, end));
 		newTrace.outputs = new ArrayList<String>(outputs.subList(start, end));
 		return newTrace;

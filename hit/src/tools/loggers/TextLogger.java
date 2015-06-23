@@ -472,6 +472,16 @@ public class TextLogger implements ILogger {
 	}
 
 	@Override
+	public void logRequest(String input, String ouput, int n) {
+		try {
+			writer.write(tfm.format(new Date()) + "transition n°" + n  + " : " + input + " -> " + ouput + ret);
+			writer.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
 	public void logObservationTree(ZObservationNode root) {
 		// TODO Auto-generated method stub
 

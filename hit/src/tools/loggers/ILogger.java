@@ -33,6 +33,8 @@ public interface ILogger {
 
 	public void logRequest(String input, String ouput);
 
+	public void logRequest(String input, String ouput, int n);
+
 	public void logStart();
 
 	public void logStat(String s);
@@ -54,4 +56,5 @@ public interface ILogger {
 	public void logObservationTree(ZObservationNode root);
 
 	public void logXObservationTree(ZXObservationNode root);
+
 }

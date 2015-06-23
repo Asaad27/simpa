@@ -97,6 +97,11 @@ public class LogManager {
 			l.logRequest(input, output);
 	}
 
+	public static void logRequest(String input, String output, int n) {
+		for (ILogger l : loggers)
+			l.logRequest(input, output, n);
+	}
+
 	public static void start() {
 		for (ILogger l : loggers)
 			l.logStart();

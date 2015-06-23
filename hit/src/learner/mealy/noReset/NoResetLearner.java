@@ -115,17 +115,18 @@ public class NoResetLearner extends Learner {
 	}
 	
 	private ArrayList<ArrayList<String>> localize_intern(DataManager dataManager, ArrayList<ArrayList<String>> inputSequences){
-		LogManager.logInfo("Localize with " + inputSequences);
 		if (inputSequences.size() == 1){
 			ArrayList<ArrayList<String>> WResponses = new ArrayList<ArrayList<String>>();
 			WResponses.add(dataManager.apply(inputSequences.get(0)));
 			return WResponses;
 		}
+		LogManager.logInfo("Localizer : Localize with " + inputSequences);
 		int n = 3;//TODO find how this parameter is obtained
 		
 		ArrayList<ArrayList<String>> Z1 = new ArrayList<ArrayList<String>>(inputSequences);
 		Z1.remove(Z1.size()-1);
 		ArrayList<ArrayList<ArrayList<String>>> localizerResponses = new ArrayList<ArrayList<ArrayList<String>>>();
+		LogManager.logInfo("Localizer : Applying " + (2*n-1) + " times localize(" + Z1 + ")");
 		for (int i = 0; i < 2*n - 1; i++){
 			localizerResponses.add(localize_intern(dataManager, Z1));
 		}
@@ -134,7 +135,6 @@ public class NoResetLearner extends Learner {
 		boolean isLoop = false;
 		while (!isLoop){
 			j--;
-			LogManager.logInfo("trying to find a loop of size " + (n-j));
 			assert (j>=0) : "no loop was found";
 			isLoop = true;
 			for (int m = 0; m < n-1; m++){
@@ -146,7 +146,8 @@ public class NoResetLearner extends Learner {
 				}
 			}
 		}
-		LogManager.logInfo("found a loop of size " + (n-j));
+		LogManager.logInfo("Localizer : Found a loop of size " + (n-j));
+		LogManager.logInfo("Localizer : We know that applying " + Z1 + " will produce " + localizerResponses.get(j+n-1));
 		
 		ArrayList<ArrayList<String>> WResponses = localizerResponses.get(j+n-1);
 		WResponses.add(dataManager.apply(inputSequences.get(inputSequences.size()-1)));

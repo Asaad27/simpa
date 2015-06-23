@@ -52,7 +52,6 @@ public class DataManager {
 	}
 	
 	public String apply(String input){
-		LogManager.logInfo("transition n°"+trace.size());
 		startRecursivity();
 		String output = driver.execute(input);
 		trace.append(input,output);
@@ -317,7 +316,11 @@ public class DataManager {
 			return Q.get(WResponses);
 		FullyQualifiedState newState = new FullyQualifiedState(WResponses, I, conjecture.addState());
 		notFullyKnownStates.add(newState);
-		logRecursivity("New state discovered : " + newState);
+		StringBuilder s = new StringBuilder();
+		for (int i = 0; i < W.size(); i++){
+			s.append(new LmTrace(W.get(i),WResponses.get(i)) + ", ");
+		}
+		logRecursivity("New state discovered : " + newState + " (" + s + ")");
 		Q.put(WResponses,newState);
 		return newState;
 	}

@@ -21,6 +21,7 @@ public class MealyDriver extends Driver {
 	protected State currentState;
 	protected List<InputSequence> forcedCE;
 	private int nbStates = 0;
+	private int transitionCount = 0;
 	private String name = null;
 
 	public MealyDriver(Mealy automata) {
@@ -64,7 +65,8 @@ public class MealyDriver extends Driver {
 				output = new String();
 			}
 			if (addtolog)
-				LogManager.logRequest(input, output);
+				LogManager.logRequest(input, output, transitionCount);
+			transitionCount++;
 		}
 		return output;
 	}
