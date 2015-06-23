@@ -33,22 +33,22 @@ public class PartiallyKnownTrace {
 	 * @param print must be in W to bring information, So supposed to be in W
 	 * @return false if the print was already known
 	 */
-	public boolean addPrint(LmTrace print){
+	protected boolean addPrint(LmTrace print){
 		assert W.contains(print.getInputsProjection());
 		if (!unknownPrints.remove(print.getInputsProjection())){ //the print wasn't in W or has been already removed
 			return false;
 		}
-
 		WResponses.set(W.indexOf(print.getInputsProjection()), print.getOutputsProjection());
-		
-		if (unknownPrints.isEmpty()){
+		DataManager.instance.logRecursivity("New print(=a response to W input) found : " + start + " followed by " + transition + " → " + print);
+		DataManager.instance.startRecursivity();
+		DataManager.instance.logRecursivity("K is now : " + DataManager.instance.getK());
+		if (unknownPrints.isEmpty()){// rule 4 in algorithm
 			//we have totally found a transition
 			FullyQualifiedState state = DataManager.instance.getFullyQualifiedState(WResponses);//TODO avoid having a loop in this function
 			FullyKnownTrace t = new FullyKnownTrace(start, transition, state);
-			DataManager.instance.startRecursivity();
 			DataManager.instance.addFullyKnownTrace(t);//TODO avoid loop in this call
-			DataManager.instance.endRecursivity();
 		}
+		DataManager.instance.endRecursivity();
 		return true;
 	}
 	
@@ -62,8 +62,12 @@ public class PartiallyKnownTrace {
 	
 	public String toString(){
 		StringBuilder s = new StringBuilder();
-		for (int i = 0 ; i < W.size(); i++)
-			s.append("(" + start + ", " + transition + ", " + W.get(i) + "),");
+		for (int i = 0 ; i < W.size(); i++){
+			if (WResponses.get(i) != null){
+				LmTrace t = new LmTrace(W.get(i),WResponses.get(i));
+				s.append("(" + start + ", " + transition + ", " + t + "),");
+			}
+		}
 		return s.toString();
 	}
 }

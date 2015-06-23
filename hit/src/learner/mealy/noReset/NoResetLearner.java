@@ -8,6 +8,7 @@ import learner.mealy.noReset.dataManager.FullyQualifiedState;
 import drivers.mealy.MealyDriver;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import tools.loggers.LogManager;
 
@@ -38,54 +39,53 @@ public class NoResetLearner extends Learner {
 		logW.append("]");
 		LogManager.logInfo(logW.toString());
 		
-		GlobalTrace trace = new GlobalTrace(driver);
-		dataManager = new DataManager(driver, W, trace);
+		//GlobalTrace trace = new GlobalTrace(driver);
+		dataManager = new DataManager(driver, W);
 		
 		//start of the algorithm
-		localize(trace, W);
+		localize(dataManager, W);
 		
 		while (!dataManager.isFullyKnown()){
 			LogManager.logLine();
 			int qualifiedStatePos;
 			LmTrace sigma;
-			if (trace.getC(trace.size()) != null){
-				FullyQualifiedState q = trace.getC(trace.size());
+			if (dataManager.getC(dataManager.traceSize()) != null){
+				FullyQualifiedState q = dataManager.getC(dataManager.traceSize());
 				LogManager.logInfo("We already know the curent state (q = " + q + ")");	
 				ArrayList<String> alpha = dataManager.getShortestAlpha(q);
-				trace.apply(alpha);
-				dataManager.updateC();//to get the new state, should be automated in trace
-				assert trace.getC(trace.size()) != null;
-				qualifiedStatePos = trace.size();
-				FullyQualifiedState quallifiedState = trace.getC(qualifiedStatePos);
-				ArrayList<String> X = dataManager.getxNotInR(quallifiedState);
-				String x=X.get(0); //here we CHOOSE to take the first
+				dataManager.apply(alpha);
+				dataManager.updateCKVT();//to get the new state, should be automated in 
+				assert dataManager.getC(dataManager.traceSize()) != null;
+				qualifiedStatePos = dataManager.traceSize();
+				FullyQualifiedState quallifiedState = dataManager.getC(qualifiedStatePos);
+				Set<String> X = dataManager.getxNotInR(quallifiedState);
+				String x=X.iterator().next(); //here we CHOOSE to take the first
 				LogManager.logInfo("We choose x = " + x + " in " + X);		
-				String o = trace.apply(x);
+				String o = dataManager.apply(x);
 				sigma = new LmTrace(x,o);
 				LogManager.logInfo("So sigma = " + sigma);	
-				assert trace.getC(trace.size()) == null : "we are trying to quallify this state, that should not be already done.";
+				assert dataManager.getC(dataManager.traceSize()) == null : "we are trying to quallify this state, that should not be already done.";
 			}else{
 				LogManager.logInfo("We don't know the curent state");	
-				qualifiedStatePos = trace.size()-1;
-				while (trace.getC(qualifiedStatePos) == null)
+				qualifiedStatePos = dataManager.traceSize()-1;
+				while (dataManager.getC(qualifiedStatePos) == null)
 					qualifiedStatePos --;
-				LogManager.logInfo("last quallified state is " + trace.getC(qualifiedStatePos));
-				sigma = trace.subtrace(qualifiedStatePos,trace.size());
+				LogManager.logInfo("last quallified state is " + dataManager.getC(qualifiedStatePos));
+				sigma = dataManager.getSubtrace(qualifiedStatePos,dataManager.traceSize());
 				LogManager.logInfo("We got sigma = "+ sigma);
 			}
-			FullyQualifiedState q = trace.getC(qualifiedStatePos);
+			FullyQualifiedState q = dataManager.getC(qualifiedStatePos);
 			ArrayList<ArrayList<String>> allowed_W = dataManager.getwNotInK(q, sigma);
 			ArrayList<String> w = allowed_W.get(0); //here we CHOOSE to take the first.
 			LogManager.logInfo("We choose w = " + w + " in " + allowed_W);		
-			int newStatePos = trace.size();
-			trace.apply(w);
-			//trace.apply("b");
-			LogManager.logInfo("We found that " + q + " followed by " + sigma + "give " +trace.subtrace(newStatePos, trace.size()));
-			dataManager.addPartiallyKnownTrace(q, sigma, trace.subtrace(newStatePos, trace.size()));
-			dataManager.updateC();
-			if (trace.getC(trace.size()) == null){
-				localize(trace, W);
-				dataManager.updateC();
+			int newStatePos = dataManager.traceSize();
+			dataManager.apply(w);
+			LogManager.logInfo("We found that " + q + " followed by " + sigma + "give " +dataManager.getSubtrace(newStatePos, dataManager.traceSize()));
+			dataManager.addPartiallyKnownTrace(q, sigma, dataManager.getSubtrace(newStatePos, dataManager.traceSize()));
+			dataManager.updateCKVT();
+			if (dataManager.getC(dataManager.traceSize()) == null){
+				localize(dataManager, W);
+				dataManager.updateCKVT();
 			}
 		}
 		LogManager.logConsole(dataManager.readableTrace());
@@ -105,23 +105,23 @@ public class NoResetLearner extends Learner {
 	 * @param inputSequences a subset of the characterization state \subset W \subset I*
 	 * @return the position of the fully identified state in the GlobalTrace
 	 */
-	private int localize(GlobalTrace trace, ArrayList<ArrayList<String>> inputSequences){
+	private int localize(DataManager dataManager, ArrayList<ArrayList<String>> inputSequences){
 		LogManager.logInfo("Localizing...");
 		//TODO
-		trace.apply("a");
-		trace.apply("a");
-		trace.apply("a");
-		trace.apply("a");
-		trace.apply("a");
-		trace.apply("b");
+		dataManager.apply("a");
+		dataManager.apply("a");
+		dataManager.apply("a");
+		dataManager.apply("a");
+		dataManager.apply("a");
+		dataManager.apply("b");
 		ArrayList<ArrayList<String>> WResponses = new ArrayList<ArrayList<String>>();
 		WResponses.add(new ArrayList<String>());
 		WResponses.add(new ArrayList<String>());
 		WResponses.get(0).add("0");
 		WResponses.get(1).add("0");
-		FullyQualifiedState s = DataManager.instance.getFullyQualifiedState(WResponses);
-		trace.setC(trace.size()-1, s);
+		FullyQualifiedState s = dataManager.getFullyQualifiedState(WResponses);
+		dataManager.setC(dataManager.traceSize()-1, s);
 		LogManager.logInfo("Localized ! We are b/0 after " + s);
-		return trace.size()-1;
+		return dataManager.traceSize()-1;
 	}
 }

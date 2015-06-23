@@ -11,6 +11,11 @@ public class LmTrace {
 		this();
 		append(x,o);
 	}
+	
+	public LmTrace(ArrayList<String> x, ArrayList<String> o) {
+		this();
+		append(x,o);
+	}
 
 	public LmTrace() {
 		inputs = new ArrayList<String>();
@@ -33,14 +38,18 @@ public class LmTrace {
 		return inputs;
 	}
 	
+	public void append(ArrayList<String> inputs, ArrayList<String> outputs){
+		this.inputs.addAll(inputs);
+		this.outputs.addAll(outputs);
+	}
+	
 	public void append(String input, String output){
 		inputs.add(input);
 		outputs.add(output);
 	}
 	
 	public void append(LmTrace other){
-		inputs.addAll(other.inputs);
-		outputs.addAll(other.outputs);
+		append(other.inputs, other.outputs);
 	}
 	
 	public int size(){
