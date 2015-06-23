@@ -1,6 +1,7 @@
 package learner.mealy.noReset.dataManager;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
@@ -8,6 +9,7 @@ import java.util.HashMap;
 import java.util.Collection;
 
 import org.apache.bcel.generic.DADD;
+import org.jsoup.select.Evaluator.IsEmpty;
 
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
@@ -27,8 +29,8 @@ public class FullyQualifiedState{
 		this.state = state;
 		R_ = new HashSet<String>(inputSymbols);
 		K = new HashMap<LmTrace, PartiallyKnownTrace>();
-		V = new HashMap<LmTrace, FullyKnownTrace>();//TODO is arrayList the better type ?
-		T = new HashMap<LmTrace, FullyKnownTrace>();//TODO is arrayList the better type ?
+		V = new HashMap<LmTrace, FullyKnownTrace>();
+		T = new HashMap<LmTrace, FullyKnownTrace>();
 	}
 	
 	public Boolean equals(FullyQualifiedState other){
@@ -48,11 +50,31 @@ public class FullyQualifiedState{
 		if (V.containsKey(v.getTrace())){
 			return false;
 		}
-		//TODO Check if t is a suffix of a V transition
-		K.remove(v.getTrace());
-		V.put(v.getTrace(), v);
 		DataManager.instance.logRecursivity("New transition found : " + v);
 		DataManager.instance.startRecursivity();
+
+		LinkedList<FullyKnownTrace> toAdd = new LinkedList<FullyKnownTrace>();
+		LinkedList<LmTrace> toRemove = new LinkedList<LmTrace>();
+		for (FullyKnownTrace knownV : V.values()){
+			if (v.getTrace().equals(knownV.getTrace().subtrace(0, v.getTrace().size()))){
+				toAdd.add(new FullyKnownTrace(v.getEnd(), knownV.getTrace().subtrace(v.getTrace().size(), knownV.getTrace().size()), knownV.getEnd()));
+				toRemove.add(knownV.getTrace());
+			}
+		}
+		while (!toRemove.isEmpty()){
+			LmTrace vtoRemove = toRemove.poll();
+			V.remove(vtoRemove);
+		}
+		while (!toAdd.isEmpty()){
+			FullyKnownTrace vToAdd = toAdd.poll();
+			DataManager.instance.logRecursivity("Split transition : " + v + " + " + vToAdd);
+			DataManager.instance.startRecursivity();
+			vToAdd.getStart().addFullyKnownTrace(vToAdd);
+			DataManager.instance.endRecursivity();
+		}
+		
+		K.remove(v.getTrace());
+		V.put(v.getTrace(), v);
 		DataManager.instance.logRecursivity("V is now : " + DataManager.instance.getV());
 		if (v.getTrace().size() == 1){
 			LmConjecture conjecture = DataManager.instance.getConjecture();
@@ -98,7 +120,13 @@ public class FullyQualifiedState{
 	protected boolean addPartiallyKnownTrace(LmTrace transition, LmTrace print) {
 		if (V.containsKey(transition))
 			return false;
-		//TODO check if a suffix of this transition is not even known
+		//try to reduce transition
+		for (FullyKnownTrace v : V.values()){
+			if (v.equals(transition.subtrace(0, v.getTrace().size())) && v.getTrace().size() < transition.size()){
+				DataManager.instance.logRecursivity("Trace reduced using " + v + " : " + v.getEnd() +" followed by "+ transition + " → " +print);
+				return v.getEnd().addPartiallyKnownTrace(transition.subtrace(v.getTrace().size(), transition.size()), print);
+			}
+		}
 		PartiallyKnownTrace k = getKEntry(transition);
 		return k.addPrint(print);
 	}

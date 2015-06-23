@@ -44,7 +44,7 @@ public class PartiallyKnownTrace {
 		DataManager.instance.logRecursivity("K is now : " + DataManager.instance.getK());
 		if (unknownPrints.isEmpty()){// rule 4 in algorithm
 			//we have totally found a transition
-			FullyQualifiedState state = DataManager.instance.getFullyQualifiedState(WResponses);//TODO avoid having a loop in this function
+			FullyQualifiedState state = DataManager.instance.getFullyQualifiedState(WResponses);
 			FullyKnownTrace t = new FullyKnownTrace(start, transition, state);
 			DataManager.instance.addFullyKnownTrace(t);//TODO avoid loop in this call
 		}

@@ -307,16 +307,6 @@ public class DataManager {
 		}
 	}
 
-	private Collection<LmTrace> getMatchingWInTrace(int j) {
-		Collection<LmTrace> r = new ArrayList<LmTrace>();
-		
-		for (ArrayList<String> w : W){//TODO we can make an optimized version of that
-			if (trace.subtrace(j, j+w.size()).getInputsProjection().equals(w))
-				r.add(trace.subtrace(j, j+w.size()));
-		}
-		return r;
-	}
-
 	/**
 	 * get an existing or create a new FullyQualifiedState
 	 * @param wResponses
