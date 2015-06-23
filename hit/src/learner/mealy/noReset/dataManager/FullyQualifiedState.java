@@ -96,7 +96,9 @@ public class FullyQualifiedState{
 	}
 
 	protected boolean addPartiallyKnownTrace(LmTrace transition, LmTrace print) {
-		//TODO check if the transition is not even known or if a suffix of this transition is not even known
+		if (V.containsKey(transition))
+			return false;
+		//TODO check if a suffix of this transition is not even known
 		PartiallyKnownTrace k = getKEntry(transition);
 		return k.addPrint(print);
 	}
