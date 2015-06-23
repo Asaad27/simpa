@@ -5,19 +5,18 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.HashSet;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
-import org.apache.log4j.lf5.StartLogFactor5;
-
 import learner.mealy.LmConjecture;
-import automata.mealy.MealyTransition;
 import learner.mealy.LmTrace;
 import tools.loggers.LogManager;
 import drivers.mealy.MealyDriver;
 
 public class DataManager {
+	class WaitingState {public FullyQualifiedState state; public int pos;}
 	protected static DataManager instance;//TODO either make a proper singleton either do something else
 	private MealyDriver driver;
 	private LmTrace trace;
@@ -30,6 +29,7 @@ public class DataManager {
 	private Set<FullyQualifiedState> notFullyKnownStates;//Fully qualified states with undefined transitions
 	private LmConjecture conjecture;
 	private int recursivity; //for log
+
 
 	
 	public DataManager(MealyDriver driver, ArrayList<ArrayList<String>> W){
@@ -114,7 +114,7 @@ public class DataManager {
 	}
 
 	protected void addFullyKnownTrace(FullyKnownTrace v){
-		v.getStart().addFullyKnownTrace(v);
+			v.getStart().addFullyKnownTrace(v);
 	}
 	
 	public FullyQualifiedState getC(int pos){
@@ -131,10 +131,19 @@ public class DataManager {
 		logRecursivity("Labelling trace : position " + pos + " is now " + s);
 		startRecursivity();
 		for (FullyQualifiedState q : Q.values()){
+			LinkedList<WaitingState> waitingStates = new LinkedList<WaitingState>();
 			for (FullyKnownTrace v : q.getVerifiedTrace())
-				if (s == v.getStart() && getSubtrace(pos, pos+v.getTrace().size()).equals(v.getTrace()))
-					setC(pos + v.getTrace().size(), v.getEnd());
-			
+				if (s == v.getStart() && getSubtrace(pos, pos+v.getTrace().size()).equals(v.getTrace())){
+//					setC(pos + v.getTrace().size(), v.getEnd());
+					WaitingState ws = new WaitingState();
+					ws.pos = pos + v.getTrace().size();
+					ws.state = v.getEnd();
+					waitingStates.add(ws);
+				}
+			while(!waitingStates.isEmpty()){
+				WaitingState wc = waitingStates.poll();
+				setC(wc.pos,wc.state);
+			}
 		}
 		updateK(pos);
 		updateV(pos);
@@ -201,17 +210,19 @@ public class DataManager {
 					for(ArrayList<String> w : W){
 						//first check for input symbols
 						if (getSubtrace(i+1, i+1+w.size()).getInputsProjection().equals(w) &&
+								getC(i+1) ==null &&
 								addPartiallyKnownTrace(getC(i), getSubtrace(i, i+1), getSubtrace(i+1, i+1+w.size()))){
 							isUpToDate = false;
-							LogManager.logError("rule 3 : K not up to date");
+							LogManager.logError("rule 3 : K not up to date near transition n°" +i);
 						}
 						//then check for W elements
 						for(ArrayList<String> w1 : W)
 							if (getSubtrace(i, i+w1.size()).getInputsProjection().equals(w1) && 
+									getC(i+w1.size()) == null &&
 									getSubtrace(i+w1.size(), i+w1.size()+w.size()).getInputsProjection().equals(w) &&
 									addPartiallyKnownTrace(getC(i), getSubtrace(i, i+w1.size()), getSubtrace(i+w1.size(), i+w1.size()+w.size()))){
 								isUpToDate = false;
-								LogManager.logError("rule 3 : K not up to date");
+								LogManager.logError("rule 3 : K not up to date near transition n°" +i);
 							}
 					}
 				
@@ -459,8 +470,4 @@ public class DataManager {
 		globalResult.append(IOString + "\n" + CString +"\n");
 		return globalResult.toString();
 	}
-	
-
-	
-	
 }
