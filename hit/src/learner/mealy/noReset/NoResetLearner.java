@@ -107,21 +107,50 @@ public class NoResetLearner extends Learner {
 	 */
 	private int localize(DataManager dataManager, ArrayList<ArrayList<String>> inputSequences){
 		LogManager.logInfo("Localizing...");
-		//TODO
-		dataManager.apply("a");
-		dataManager.apply("a");
-		dataManager.apply("a");
-		dataManager.apply("a");
-		dataManager.apply("a");
-		dataManager.apply("b");
-		ArrayList<ArrayList<String>> WResponses = new ArrayList<ArrayList<String>>();
-		WResponses.add(new ArrayList<String>());
-		WResponses.add(new ArrayList<String>());
-		WResponses.get(0).add("0");
-		WResponses.get(1).add("0");
+		ArrayList<ArrayList<String>> WResponses = localize_intern(dataManager, inputSequences);
 		FullyQualifiedState s = dataManager.getFullyQualifiedState(WResponses);
 		dataManager.setC(dataManager.traceSize()-1, s);
-		LogManager.logInfo("Localized ! We are b/0 after " + s);
-		return dataManager.traceSize()-1;
+		return dataManager.traceSize() - WResponses.get(inputSequences.size()-1).size();
+
+	}
+	
+	private ArrayList<ArrayList<String>> localize_intern(DataManager dataManager, ArrayList<ArrayList<String>> inputSequences){
+		LogManager.logInfo("Localize with " + inputSequences);
+		if (inputSequences.size() == 1){
+			ArrayList<ArrayList<String>> WResponses = new ArrayList<ArrayList<String>>();
+			WResponses.add(dataManager.apply(inputSequences.get(0)));
+			return WResponses;
+		}
+		int n = 3;//TODO find how this parameter is obtained
+		
+		ArrayList<ArrayList<String>> Z1 = new ArrayList<ArrayList<String>>(inputSequences);
+		Z1.remove(Z1.size()-1);
+		ArrayList<ArrayList<ArrayList<String>>> localizerResponses = new ArrayList<ArrayList<ArrayList<String>>>();
+		for (int i = 0; i < 2*n - 1; i++){
+			localizerResponses.add(localize_intern(dataManager, Z1));
+		}
+		
+		int j = n;
+		boolean isLoop = false;
+		while (!isLoop){
+			j--;
+			LogManager.logInfo("trying to find a loop of size " + (n-j));
+			assert (j>=0) : "no loop was found";
+			isLoop = true;
+			for (int m = 0; m < n-1; m++){
+				if (!localizerResponses.get(j+m).equals(localizerResponses.get(n+m))){
+					isLoop = false;
+					LogManager.logInfo("it's not a loop : ["+(j+m)+"] = " + localizerResponses.get(j+m) +
+							" ≠ [" + (n+m) + "=" + localizerResponses.get(n+m));
+					break;
+				}
+			}
+		}
+		LogManager.logInfo("found a loop of size " + (n-j));
+		
+		ArrayList<ArrayList<String>> WResponses = localizerResponses.get(j+n-1);
+		WResponses.add(dataManager.apply(inputSequences.get(inputSequences.size()-1)));
+		assert WResponses.size() == inputSequences.size();
+		return WResponses;
 	}
 }
