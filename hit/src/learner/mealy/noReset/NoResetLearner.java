@@ -147,10 +147,19 @@ public class NoResetLearner extends Learner {
 			}
 		}
 		LogManager.logInfo("Localizer : Found a loop of size " + (n-j));
-		LogManager.logInfo("Localizer : We know that applying " + Z1 + " will produce " + localizerResponses.get(j+n-1));
+		LogManager.logInfo("Localizer : We know that applying localize_intern(" + Z1 + ") will produce " + localizerResponses.get(j+n-1));
 		
 		ArrayList<ArrayList<String>> WResponses = localizerResponses.get(j+n-1);
-		WResponses.add(dataManager.apply(inputSequences.get(inputSequences.size()-1)));
+		ArrayList<ArrayList<String>> Z2 = new ArrayList<ArrayList<String>>(Z1);
+		Z2.remove(Z2.size()-1);
+		Z2.add(inputSequences.get(inputSequences.size()-1));
+		ArrayList<ArrayList<String>> Z2Responses = localize_intern(dataManager, Z2);
+		WResponses.add(Z2Responses.get(Z2Responses.size()-1));
+		StringBuilder s = new StringBuilder();
+		for (int i = 0; i < inputSequences.size(); i++){
+			s.append(new LmTrace(inputSequences.get(i),WResponses.get(i)) + ", ");
+		}
+		LogManager.logInfo("Localizer : Before " + inputSequences.get(inputSequences.size()-1) + " we were in " + s);
 		assert WResponses.size() == inputSequences.size();
 		return WResponses;
 	}
