@@ -109,7 +109,7 @@ public class NoResetLearner extends Learner {
 		LogManager.logInfo("Localizing...");
 		ArrayList<ArrayList<String>> WResponses = localize_intern(dataManager, inputSequences);
 		FullyQualifiedState s = dataManager.getFullyQualifiedState(WResponses);
-		dataManager.setC(dataManager.traceSize()-1, s);
+		dataManager.setC(dataManager.traceSize()-WResponses.get(WResponses.size()-1).size(), s);
 		return dataManager.traceSize() - WResponses.get(inputSequences.size()-1).size();
 
 	}
