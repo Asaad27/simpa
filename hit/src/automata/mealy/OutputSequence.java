@@ -3,6 +3,7 @@ package automata.mealy;
 import java.util.ArrayList;
 import java.util.List;
 
+import tools.loggers.LogManager;
 import main.simpa.Options;
 
 public class OutputSequence implements Cloneable {
@@ -45,16 +46,21 @@ public class OutputSequence implements Cloneable {
 		return newis;
 	}
 
-	public boolean equals(OutputSequence o) {
-		if (sequence.size() != o.sequence.size())
+	public boolean equals(OutputSequence o){
+		if (!sequence.equals(o.sequence))
 			return false;
-		else {
-			for (int i = 0; i < sequence.size(); i++) {
-				if (!sequence.get(i).equals(o.sequence.get(i)))
-					return false;
-			}
-		}
 		return true;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		return equals((OutputSequence) obj);
 	}
 
 	public String getLastSymbol() {
@@ -94,5 +100,10 @@ public class OutputSequence implements Cloneable {
 				s.append(Options.SYMBOL_OMEGA_LOW);
 		}
 		return s.toString();
+	}
+	
+	@Override
+	public int hashCode(){
+		return 23 + sequence.hashCode();
 	}
 }
