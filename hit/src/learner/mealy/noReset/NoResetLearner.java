@@ -6,9 +6,13 @@ import learner.mealy.LmTrace;
 import learner.mealy.noReset.dataManager.DataManager;
 import learner.mealy.noReset.dataManager.FullyKnownTrace;
 import learner.mealy.noReset.dataManager.FullyQualifiedState;
+import automata.mealy.InputSequence;
+import automata.mealy.OutputSequence;
+import main.simpa.Options;
 import drivers.mealy.MealyDriver;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import tools.Utils;
@@ -17,7 +21,7 @@ import tools.loggers.LogManager;
 public class NoResetLearner extends Learner {
 	private MealyDriver driver;
 	private DataManager dataManager;
-	protected ArrayList<ArrayList<String>> W;
+	protected ArrayList<InputSequence> W;
 	private int n;//the maximum number of states
 
 	public NoResetLearner(MealyDriver d){
@@ -28,18 +32,16 @@ public class NoResetLearner extends Learner {
 		LogManager.logInfo("Inferring the system");
 		LogManager.logConsole("Inferring the system");
 
-		n = 3;//TODO find how this parameter is obtained
+		n = Options.MAXSTATES;//TODO find how this parameter is obtained
 		//TODO getW;
-		W = new ArrayList<ArrayList<String>>();//Characterization set
-		W.add(new ArrayList<String>());
-		W.add(new ArrayList<String>());
-		W.get(0).add("a");
-		W.get(1).add("b");
+		W = new ArrayList<InputSequence>();//Characterization set
+		W.add(new InputSequence());
+		W.add(new InputSequence());
+		W.get(0).addInput("a");
+		W.get(1).addInput("b");
 		StringBuilder logW = new StringBuilder("Used characterization set : [");
-		for (ArrayList<String> w : W){
-			for (String wi : w)
-				logW.append(" " + wi);
-			logW.append(",");
+		for (InputSequence w : W){
+			logW.append(w + ", ");
 		}
 		logW.append("]");
 		LogManager.logInfo(logW.toString());
@@ -57,7 +59,7 @@ public class NoResetLearner extends Learner {
 			if (dataManager.getC(dataManager.traceSize()) != null){
 				FullyQualifiedState q = dataManager.getC(dataManager.traceSize());
 				LogManager.logInfo("We already know the curent state (q = " + q + ")");	
-				ArrayList<String> alpha = dataManager.getShortestAlpha(q);
+				InputSequence alpha = dataManager.getShortestAlpha(q);
 				dataManager.apply(alpha);
 				dataManager.updateCKVT();//to get the new state, should be automated in 
 				assert dataManager.getC(dataManager.traceSize()) != null;
@@ -80,8 +82,8 @@ public class NoResetLearner extends Learner {
 				LogManager.logInfo("We got sigma = "+ sigma);
 			}
 			FullyQualifiedState q = dataManager.getC(qualifiedStatePos);
-			ArrayList<ArrayList<String>> allowed_W = dataManager.getwNotInK(q, sigma);
-			ArrayList<String> w = allowed_W.get(0); //here we CHOOSE to take the first.
+			List<InputSequence> allowed_W = dataManager.getwNotInK(q, sigma);
+			InputSequence w = allowed_W.get(0); //here we CHOOSE to take the first.
 			LogManager.logInfo("We choose w = " + w + " in " + allowed_W);		
 			int newStatePos = dataManager.traceSize();
 			dataManager.apply(w);
@@ -114,26 +116,26 @@ public class NoResetLearner extends Learner {
 	 * @param inputSequences a subset of the characterization state \subset W \subset I*
 	 * @return the position of the fully identified state in the GlobalTrace
 	 */
-	private int localize(DataManager dataManager, ArrayList<ArrayList<String>> inputSequences){
+	private int localize(DataManager dataManager, List<InputSequence> inputSequences){
 		LogManager.logInfo("Localizing...");
-		ArrayList<ArrayList<String>> WResponses = localize_intern(dataManager, inputSequences);
+		List<OutputSequence> WResponses = localize_intern(dataManager, inputSequences);
 		FullyQualifiedState s = dataManager.getFullyQualifiedState(WResponses);
-		dataManager.setC(dataManager.traceSize()-WResponses.get(WResponses.size()-1).size(), s);
-		return dataManager.traceSize() - WResponses.get(inputSequences.size()-1).size();
+		dataManager.setC(dataManager.traceSize()-WResponses.get(WResponses.size()-1).getLength(), s);
+		return dataManager.traceSize() - WResponses.get(inputSequences.size()-1).getLength();
 
 	}
 	
-	private ArrayList<ArrayList<String>> localize_intern(DataManager dataManager, ArrayList<ArrayList<String>> inputSequences){
+	private List<OutputSequence> localize_intern(DataManager dataManager, List<InputSequence> inputSequences){
 		if (inputSequences.size() == 1){
-			ArrayList<ArrayList<String>> WResponses = new ArrayList<ArrayList<String>>();
+			List<OutputSequence> WResponses = new ArrayList<OutputSequence>();
 			WResponses.add(dataManager.apply(inputSequences.get(0)));
 			return WResponses;
 		}
 		LogManager.logInfo("Localizer : Localize with " + inputSequences);
 		
-		ArrayList<ArrayList<String>> Z1 = new ArrayList<ArrayList<String>>(inputSequences);
+		ArrayList<InputSequence> Z1 = new ArrayList<InputSequence>(inputSequences);
 		Z1.remove(Z1.size()-1);
-		ArrayList<ArrayList<ArrayList<String>>> localizerResponses = new ArrayList<ArrayList<ArrayList<String>>>();
+		ArrayList<List<OutputSequence>> localizerResponses = new ArrayList<List<OutputSequence>>();
 		LogManager.logInfo("Localizer : Applying " + (2*n-1) + " times localize(" + Z1 + ")");
 		for (int i = 0; i < 2*n - 1; i++){
 			localizerResponses.add(localize_intern(dataManager, Z1));
@@ -149,7 +151,7 @@ public class NoResetLearner extends Learner {
 				if (!localizerResponses.get(j+m).equals(localizerResponses.get(n+m))){
 					isLoop = false;
 					LogManager.logInfo("it's not a loop : ["+(j+m)+"] = " + localizerResponses.get(j+m) +
-							" ≠ [" + (n+m) + "=" + localizerResponses.get(n+m));
+							" ≠ [" + (n+m) + "]=" + localizerResponses.get(n+m));
 					break;
 				}
 			}
@@ -157,11 +159,11 @@ public class NoResetLearner extends Learner {
 		LogManager.logInfo("Localizer : Found a loop of size " + (n-j));
 		LogManager.logInfo("Localizer : We know that applying localize_intern(" + Z1 + ") will produce " + localizerResponses.get(j+n-1));
 		
-		ArrayList<ArrayList<String>> WResponses = localizerResponses.get(j+n-1);
-		ArrayList<ArrayList<String>> Z2 = new ArrayList<ArrayList<String>>(Z1);
+		List<OutputSequence> WResponses = localizerResponses.get(j+n-1);
+		List<InputSequence> Z2 = new ArrayList<InputSequence>(Z1);
 		Z2.remove(Z2.size()-1);
 		Z2.add(inputSequences.get(inputSequences.size()-1));
-		ArrayList<ArrayList<String>> Z2Responses = localize_intern(dataManager, Z2);
+		List<OutputSequence> Z2Responses = localize_intern(dataManager, Z2);
 		WResponses.add(Z2Responses.get(Z2Responses.size()-1));
 		StringBuilder s = new StringBuilder();
 		for (int i = 0; i < inputSequences.size(); i++){

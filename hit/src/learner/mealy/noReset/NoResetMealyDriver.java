@@ -3,7 +3,6 @@ package learner.mealy.noReset;
 import tools.loggers.LogManager;
 import automata.mealy.Mealy;
 import drivers.mealy.MealyDriver;
-import examples.mealy.TestMealy;
 
 public class NoResetMealyDriver extends MealyDriver {
 

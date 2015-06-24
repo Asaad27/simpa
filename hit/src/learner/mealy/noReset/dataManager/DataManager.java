@@ -3,6 +3,7 @@ package learner.mealy.noReset.dataManager;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -10,6 +11,8 @@ import java.util.HashSet;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
+import automata.mealy.InputSequence;
+import automata.mealy.OutputSequence;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import tools.loggers.LogManager;
@@ -21,29 +24,29 @@ public class DataManager {
 	private MealyDriver driver;
 	private LmTrace trace;
 	private ArrayList<FullyQualifiedState> C;//Identified states in trace
-	private ArrayList<ArrayList<String>> WInTrace;//Identified w-sequences in trace //TODO check that a W cannot be a prefix of another W
-	private ArrayList<ArrayList<ArrayList<String>>> WInTraceReversed;//Identified w-sequences in trace but indexed by their last position
-	private final ArrayList<ArrayList<String>> W; //Characterization set
+	private ArrayList<InputSequence> WInTrace;//Identified w-sequences in trace //TODO check that a W cannot be a prefix of another W
+	private ArrayList<Collection<InputSequence>> WInTraceReversed;//Identified w-sequences in trace but indexed by their last position
+	private final List<InputSequence> W; //Characterization set
 	private final ArrayList<String> I;//Input Symbols
-	private Map<ArrayList<ArrayList<String>>, FullyQualifiedState> Q;//known states
+	private Map<List<OutputSequence>, FullyQualifiedState> Q;//known states
 	private Set<FullyQualifiedState> notFullyKnownStates;//Fully qualified states with undefined transitions
 	private LmConjecture conjecture;
 	private int recursivity; //for log
 
 
 	
-	public DataManager(MealyDriver driver, ArrayList<ArrayList<String>> W){
+	public DataManager(MealyDriver driver, ArrayList<InputSequence> W){
 		this.trace = new LmTrace();
 		this.W = W;
 		this.I = new ArrayList<String>(driver.getInputSymbols());
 		this.driver = driver;
 		C = new ArrayList<FullyQualifiedState>();
 		C.add(null);
-		WInTrace = new ArrayList<ArrayList<String>>();
+		WInTrace = new ArrayList<InputSequence>();
 		WInTrace.add(null);
-		WInTraceReversed = new ArrayList<ArrayList<ArrayList<String>>>();
-		WInTraceReversed.add(new ArrayList<ArrayList<String>>());
-		Q = new HashMap<ArrayList<ArrayList<String>>, FullyQualifiedState>();
+		WInTraceReversed = new ArrayList<Collection<InputSequence>>();
+		WInTraceReversed.add(new ArrayList<InputSequence>());
+		Q = new HashMap<List<OutputSequence>, FullyQualifiedState>();
 		notFullyKnownStates = new HashSet<FullyQualifiedState>();
 		conjecture = new LmConjecture(driver);
 		recursivity = 0;
@@ -57,16 +60,16 @@ public class DataManager {
 		trace.append(input,output);
 		C.add(null);
 		WInTrace.add(null);
-		WInTraceReversed.add(new ArrayList<ArrayList<String>>());
-		for (ArrayList<String> w : W){//TODO we can make an optimized version of that
-			if (trace.subtrace(traceSize()-w.size(), traceSize()).getInputsProjection().equals(w)){
-				WInTrace.set(traceSize()-w.size(),w);
+		WInTraceReversed.add(new ArrayList<InputSequence>());
+		for (InputSequence w : W){//TODO we can make an optimized version of that
+			if (trace.subtrace(traceSize()-w.getLength(), traceSize()).getInputsProjection().equals(w)){
+				WInTrace.set(traceSize()-w.getLength(),w);
 				WInTraceReversed.get(traceSize()).add(w);
-				if (traceSize()-w.size()-1 >=0 && getC(traceSize()-w.size()-1) != null)
-					updateK(traceSize()-w.size()-1);
-				for (ArrayList<String> w2 : WInTraceReversed.get(traceSize()-w.size()))
-					if (traceSize() - w.size() - w2 .size() >= 0 && getC(traceSize()-w.size()-w2.size()) != null)
-						updateK(traceSize()-w.size()-w2.size());
+				if (traceSize()-w.getLength()-1 >=0 && getC(traceSize()-w.getLength()-1) != null)
+					updateK(traceSize()-w.getLength()-1);
+				for (InputSequence w2 : WInTraceReversed.get(traceSize()-w.getLength()))
+					if (traceSize() - w.getLength() - w2 .getLength() >= 0 && getC(traceSize()-w.getLength()-w2.getLength()) != null)
+						updateK(traceSize()-w.getLength()-w2.getLength());
 			}
 		}
 		for (FullyQualifiedState q : Q.values()){
@@ -81,10 +84,10 @@ public class DataManager {
 		return output;
 	}
 	
-	public ArrayList<String> apply(ArrayList<String> inputs){
-		ArrayList<String> outputs = new ArrayList<String>();
-		for (String input : inputs)
-			outputs.add(apply(input));
+	public OutputSequence apply(InputSequence inputs){
+		OutputSequence outputs = new OutputSequence();
+		for (String input : inputs.sequence)
+			outputs.addOutput(apply(input));
 		return outputs;
 	}
 	
@@ -207,20 +210,20 @@ public class DataManager {
 			//rule 3
 			for (int i = 0; i< traceSize(); i++)
 				if (getC(i) != null)
-					for(ArrayList<String> w : W){
+					for(InputSequence w : W){
 						//first check for input symbols
-						if (getSubtrace(i+1, i+1+w.size()).getInputsProjection().equals(w) &&
+						if (getSubtrace(i+1, i+1+w.getLength()).getInputsProjection().equals(w) &&
 								getC(i+1) ==null &&
-								addPartiallyKnownTrace(getC(i), getSubtrace(i, i+1), getSubtrace(i+1, i+1+w.size()))){
+								addPartiallyKnownTrace(getC(i), getSubtrace(i, i+1), getSubtrace(i+1, i+1+w.getLength()))){
 							isUpToDate = false;
 							LogManager.logError("rule 3 : K not up to date near transition n°" +i);
 						}
 						//then check for W elements
-						for(ArrayList<String> w1 : W)
-							if (getSubtrace(i, i+w1.size()).getInputsProjection().equals(w1) && 
-									getC(i+w1.size()) == null &&
-									getSubtrace(i+w1.size(), i+w1.size()+w.size()).getInputsProjection().equals(w) &&
-									addPartiallyKnownTrace(getC(i), getSubtrace(i, i+w1.size()), getSubtrace(i+w1.size(), i+w1.size()+w.size()))){
+						for(InputSequence w1 : W)
+							if (getSubtrace(i, i+w1.getLength()).getInputsProjection().equals(w1) && 
+									getC(i+w1.getLength()) == null &&
+									getSubtrace(i+w1.getLength(), i+w1.getLength()+w.getLength()).getInputsProjection().equals(w) &&
+									addPartiallyKnownTrace(getC(i), getSubtrace(i, i+w1.getLength()), getSubtrace(i+w1.getLength(), i+w1.getLength()+w.getLength()))){
 								isUpToDate = false;
 								LogManager.logError("rule 3 : K not up to date near transition n°" +i);
 							}
@@ -282,12 +285,12 @@ public class DataManager {
 		FullyQualifiedState s = C.get(pos);
 		//try to find an element of I
 		if (pos+1 <= traceSize() && WInTrace.get(pos+1) != null && C.get(pos+1) == null){
-			addPartiallyKnownTrace(s, getSubtrace(pos, pos+1), getSubtrace(pos+1, pos+1+WInTrace.get(pos+1).size()));
+			addPartiallyKnownTrace(s, getSubtrace(pos, pos+1), getSubtrace(pos+1, pos+1+WInTrace.get(pos+1).getLength()));
 		}
 		//try to find an element of W //TODO check if this do not increase complexity
-		ArrayList<String> transition = WInTrace.get(pos);
-		if (transition != null && C.get(pos+transition.size()) == null && WInTrace.get(pos+transition.size()) != null){
-			addPartiallyKnownTrace(s, getSubtrace(pos, pos+transition.size()), getSubtrace(pos+transition.size(), pos+transition.size()+WInTrace.get(pos+transition.size()).size()));
+		InputSequence transition = WInTrace.get(pos);
+		if (transition != null && C.get(pos+transition.getLength()) == null && WInTrace.get(pos+transition.getLength()) != null){
+			addPartiallyKnownTrace(s, getSubtrace(pos, pos+transition.getLength()), getSubtrace(pos+transition.getLength(), pos+transition.getLength()+WInTrace.get(pos+transition.getLength()).getLength()));
 		}
 	}
 	
@@ -312,7 +315,7 @@ public class DataManager {
 	 * @param wResponses
 	 * @return
 	 */
-	public FullyQualifiedState getFullyQualifiedState(ArrayList<ArrayList<String>> WResponses) {
+	public FullyQualifiedState getFullyQualifiedState(List<OutputSequence> WResponses) {
 		if (Q.containsKey(WResponses))
 			return Q.get(WResponses);
 		FullyQualifiedState newState = new FullyQualifiedState(WResponses, I, conjecture.addState());
@@ -326,7 +329,7 @@ public class DataManager {
 		return newState;
 	}
 	
-	protected ArrayList<ArrayList<String>> getW(){
+	protected List<InputSequence> getW(){
 		return W;
 	}
 
@@ -336,7 +339,7 @@ public class DataManager {
 	 * @param t a transition(of length 1 or more) typically an input symbol or an element of W
 	 * @return a set Z s.t. \forall w \in Z, (s, t, w) \notin W
 	 */
-	public ArrayList<ArrayList<String>> getwNotInK(FullyQualifiedState s, LmTrace t){
+	public List<InputSequence> getwNotInK(FullyQualifiedState s, LmTrace t){
 		assert s != null;
 		assert t != null;
 		return s.getwNotInK(t);
@@ -368,10 +371,10 @@ public class DataManager {
 	 * @param s the start state
 	 * @return an empty list if the state himself has unknown outputs
 	 */
-	public ArrayList<String> getShortestAlpha(FullyQualifiedState s) {
+	public InputSequence getShortestAlpha(FullyQualifiedState s) {
  		assert s != null;
 		class Node{
-			public ArrayList<String> path;
+			public InputSequence path;
 			public FullyQualifiedState end;
 			public boolean equals(Object o){ if (o instanceof Node) return equals((Node) o); return false;}
 			public boolean equals(Node o){return path.equals(o.path) && end.equals(o.end);}
@@ -380,14 +383,14 @@ public class DataManager {
 		class PathComparator implements Comparator<Node>{
 			@Override
 			public int compare(Node o1, Node o2) {
-				int diff = o1.path.size() - o2.path.size();
+				int diff = o1.path.getLength() - o2.path.getLength();
 				return diff;
 			}
 		}
 		PriorityQueue<Node> paths=new PriorityQueue<Node>(10, new PathComparator());
 		Node firstNode = new Node();
 		firstNode.end = s;
-		firstNode.path = new ArrayList<String>();
+		firstNode.path = new InputSequence();
 		paths.add(firstNode);
 		while(true){
 			firstNode = paths.poll();
@@ -398,8 +401,9 @@ public class DataManager {
 			for (FullyKnownTrace t : firstNode.end.getVerifiedTrace()){
 				Node childNode = new Node();
 				childNode.end = t.getEnd();
-				childNode.path = new ArrayList<String>(firstNode.path);
-				childNode.path.addAll(t.getTrace().getInputsProjection());
+				childNode.path = new InputSequence();
+				childNode.path.addInputSequence(firstNode.path);
+				childNode.path.addInputSequence(t.getTrace().getInputsProjection());
 				paths.add(childNode);
 			}
 			

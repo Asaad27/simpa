@@ -1,6 +1,7 @@
 package learner.mealy.noReset.dataManager;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
@@ -8,23 +9,22 @@ import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Collection;
 
-import org.apache.bcel.generic.DADD;
-import org.jsoup.select.Evaluator.IsEmpty;
-
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import automata.State;
+import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
+import automata.mealy.OutputSequence;
 
 public class FullyQualifiedState{
-	private final ArrayList<ArrayList<String>> WResponses;//used to identify the State
+	private final List<OutputSequence> WResponses;//used to identify the State
 	private Map<LmTrace, FullyKnownTrace> V;//FullyKnownTrace starting from this node
 	private Map<LmTrace, PartiallyKnownTrace> K;//PartialyllyKnownTrace starting from this node
 	private Map<LmTrace, FullyKnownTrace> T;//Fully known transitions starting from this node
 	private Set<String> R_;//Complementary set of R : unknown transition
 	private final State state;
 	
-	protected FullyQualifiedState(ArrayList<ArrayList<String>> WResponses, ArrayList<String> inputSymbols, State state){
+	protected FullyQualifiedState(List<OutputSequence> WResponses, Collection<String> inputSymbols, State state){
 		this.WResponses = WResponses;
 		this.state = state;
 		R_ = new HashSet<String>(inputSymbols);
@@ -134,7 +134,7 @@ public class FullyQualifiedState{
 	/**
 	 * @see learn.mealy.noReset.dataManager.DataManager.getwNotInK
 	 */
-	protected ArrayList<ArrayList<String>> getwNotInK(LmTrace transition){
+	protected List<InputSequence> getwNotInK(LmTrace transition){
 		assert !V.containsKey(transition);
 		PartiallyKnownTrace k = getKEntry(transition);
 		return k.getUnknownPrints();
@@ -156,7 +156,7 @@ public class FullyQualifiedState{
 		return K.values();
 	}
 
-	public ArrayList<ArrayList<String>> getWResponses() {
+	public List<OutputSequence> getWResponses() {
 		return WResponses;
 	}
 }

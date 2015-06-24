@@ -18,6 +18,10 @@ public class OutputSequence implements Cloneable {
 
 	public void addOutput(String output) {
 		sequence.add(output);
+	}	
+	
+	public void addOutputSequence(OutputSequence outputSeq) {
+		sequence.addAll(outputSeq.sequence);
 	}
 
 	public int getLength() {

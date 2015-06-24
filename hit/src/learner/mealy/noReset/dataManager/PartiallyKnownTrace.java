@@ -3,6 +3,10 @@ package learner.mealy.noReset.dataManager;
 import learner.mealy.LmTrace;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import automata.mealy.InputSequence;
+import automata.mealy.OutputSequence;
 
 /**
  * This class aim to replace the K set.
@@ -10,21 +14,19 @@ import java.util.ArrayList;
 public class PartiallyKnownTrace {
 	private final FullyQualifiedState start;
 	private final LmTrace transition; //this is probably in I \cup W. Read algorithm carefully to be sure 
-	private ArrayList<ArrayList<String>> WResponses; //a partial footprint of the state  \in WxO
-	private ArrayList<ArrayList<String>> unknownPrints;
-	private final ArrayList<ArrayList<String>> W; //use at end to keep the order of W elements
+	private List<OutputSequence> WResponses; //a partial footprint of the state  \in WxO
+	private List<InputSequence> unknownPrints;
 	
-	public PartiallyKnownTrace(FullyQualifiedState start, LmTrace transition, ArrayList<ArrayList<String>> W){
-		this.W = W;
+	public PartiallyKnownTrace(FullyQualifiedState start, LmTrace transition, List<InputSequence> W){
 		this.start = start;
 		this.transition = transition;
-		unknownPrints = new ArrayList<ArrayList<String>>(W);
-		WResponses = new ArrayList<ArrayList<String>>();
+		unknownPrints = new ArrayList<InputSequence>(W);
+		WResponses = new ArrayList<OutputSequence>();
 		for (int i =0; i < W.size(); i++)//allocate all the array
 			WResponses.add(null);
 	}
 	
-	protected ArrayList<ArrayList<String>> getUnknownPrints(){
+	protected List<InputSequence> getUnknownPrints(){
 		return unknownPrints;
 	}
 	
@@ -34,11 +36,11 @@ public class PartiallyKnownTrace {
 	 * @return false if the print was already known
 	 */
 	protected boolean addPrint(LmTrace print){
-		assert W.contains(print.getInputsProjection());
+		assert DataManager.instance.getW().contains(print.getInputsProjection());
 		if (!unknownPrints.remove(print.getInputsProjection())){ //the print wasn't in W or has been already removed
 			return false;
 		}
-		WResponses.set(W.indexOf(print.getInputsProjection()), print.getOutputsProjection());
+		WResponses.set(DataManager.instance.getW().indexOf(print.getInputsProjection()), print.getOutputsProjection());
 		DataManager.instance.logRecursivity("New print(=a response to W input) found : " + start + " followed by " + transition + " → " + print);
 		DataManager.instance.startRecursivity();
 		DataManager.instance.logRecursivity("K is now : " + DataManager.instance.getK());
@@ -62,9 +64,9 @@ public class PartiallyKnownTrace {
 	
 	public String toString(){
 		StringBuilder s = new StringBuilder();
-		for (int i = 0 ; i < W.size(); i++){
+		for (int i = 0 ; i < DataManager.instance.getW().size(); i++){
 			if (WResponses.get(i) != null){
-				LmTrace t = new LmTrace(W.get(i),WResponses.get(i));
+				LmTrace t = new LmTrace(DataManager.instance.getW().get(i),WResponses.get(i));
 				s.append("(" + start + ", " + transition + ", " + t + "),");
 			}
 		}
