@@ -15,11 +15,11 @@ public class TestMealy {
 		test.addTransition(new MealyTransition(test, s1, s2, "a", "1"));
 		test.addTransition(new MealyTransition(test, s1, s3, "b", "1"));
 
-		test.addTransition(new MealyTransition(test, s2, s2, "a", "0"));
+		test.addTransition(new MealyTransition(test, s2, s1, "a", "0"));
 		test.addTransition(new MealyTransition(test, s2, s1, "b", "0"));
 
 		test.addTransition(new MealyTransition(test, s3, s2, "a", "0"));
-		test.addTransition(new MealyTransition(test, s3, s3, "b", "1"));
+		test.addTransition(new MealyTransition(test, s3, s1, "b", "1"));
 
 		return test;
 	}

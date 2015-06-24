@@ -4,17 +4,21 @@ import learner.Learner;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import learner.mealy.noReset.dataManager.DataManager;
+import learner.mealy.noReset.dataManager.FullyKnownTrace;
 import learner.mealy.noReset.dataManager.FullyQualifiedState;
 import drivers.mealy.MealyDriver;
 
 import java.util.ArrayList;
 import java.util.Set;
 
+import tools.Utils;
 import tools.loggers.LogManager;
 
 public class NoResetLearner extends Learner {
 	private MealyDriver driver;
 	private DataManager dataManager;
+	protected ArrayList<ArrayList<String>> W;
+	private int n;//the maximum number of states
 
 	public NoResetLearner(MealyDriver d){
 		driver = d;
@@ -23,9 +27,10 @@ public class NoResetLearner extends Learner {
 	public void learn(){
 		LogManager.logInfo("Inferring the system");
 		LogManager.logConsole("Inferring the system");
-		
+
+		n = 3;//TODO find how this parameter is obtained
 		//TODO getW;
-		ArrayList<ArrayList<String>> W = new ArrayList<ArrayList<String>>();//Characterization set
+		W = new ArrayList<ArrayList<String>>();//Characterization set
 		W.add(new ArrayList<String>());
 		W.add(new ArrayList<String>());
 		W.get(0).add("a");
@@ -90,6 +95,10 @@ public class NoResetLearner extends Learner {
 		}
 		LogManager.logConsole(dataManager.readableTrace());
 		dataManager.getConjecture().exportToDot();
+		if (check())
+			LogManager.logInfo("The computed conjecture seems to be coherent with the driver");
+		else
+			LogManager.logInfo("The computed conjecture is not correct");
 	}
 	
 	public LmConjecture createConjecture() {
@@ -121,7 +130,6 @@ public class NoResetLearner extends Learner {
 			return WResponses;
 		}
 		LogManager.logInfo("Localizer : Localize with " + inputSequences);
-		int n = 3;//TODO find how this parameter is obtained
 		
 		ArrayList<ArrayList<String>> Z1 = new ArrayList<ArrayList<String>>(inputSequences);
 		Z1.remove(Z1.size()-1);
@@ -162,5 +170,49 @@ public class NoResetLearner extends Learner {
 		LogManager.logInfo("Localizer : Before " + inputSequences.get(inputSequences.size()-1) + " we were in " + s);
 		assert WResponses.size() == inputSequences.size();
 		return WResponses;
+	}
+	
+	private boolean check(){
+		LogManager.logStep(LogManager.STEPOTHER, "checking the computed conjecture");
+		NoResetMealyDriver generatedDriver = new NoResetMealyDriver(dataManager.getConjecture());
+		generatedDriver.stopLog();
+		DataManager generated = new DataManager(generatedDriver, W);
+		int knownPos = localize(generated, W);
+		FullyQualifiedState knownState = dataManager.getFullyQualifiedState(generated.getC(knownPos).getWResponses());
+		while(knownPos != generated.traceSize()){
+			boolean updated = false;
+			for (FullyKnownTrace v : knownState.getVerifiedTrace())
+			if (generated.getSubtrace(knownPos, knownPos + v.getTrace().size()).equals(v.getTrace())){
+				knownState = v.getEnd();
+				knownPos += v.getTrace().size();
+				updated = true;
+				break;
+			}
+			assert updated : "V is not well defined" ;
+		}
+		FullyQualifiedState currentState = knownState;
+		int i = 0;
+		while (currentState != dataManager.getC(dataManager.traceSize())){
+			if (dataManager.getC(i) == currentState){
+				generated.apply(dataManager.getSubtrace(i, i+1).getInputsProjection());
+				currentState = dataManager.getC(i+1);
+			}
+			assert currentState != null;
+			i++;
+		}
+		//Now the two automata are in same state.
+		//We can do a random walk
+		
+		int max_try = driver.getInputSymbols().size() * n * 10;
+		dataManager = null;//we use directly the driver for the walk so dataManager is not up to date;
+		driver.stopLog();
+		for (int j = 0; j < max_try; j++){
+			int rand = Utils.randInt(driver.getInputSymbols().size());
+			String input = driver.getInputSymbols().get(rand);
+			if (!driver.execute(input).equals(generated.apply(input)))
+				return false;
+		}
+		
+		return true;
 	}
 }

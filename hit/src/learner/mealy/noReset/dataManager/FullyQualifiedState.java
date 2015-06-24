@@ -155,4 +155,8 @@ public class FullyQualifiedState{
 	protected Collection<PartiallyKnownTrace> getK(){
 		return K.values();
 	}
+
+	public ArrayList<ArrayList<String>> getWResponses() {
+		return WResponses;
+	}
 }
