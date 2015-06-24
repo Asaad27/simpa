@@ -2,6 +2,7 @@ package learner.mealy.noReset;
 
 import tools.loggers.LogManager;
 import automata.mealy.Mealy;
+import automata.State;
 import drivers.mealy.MealyDriver;
 
 public class NoResetMealyDriver extends MealyDriver {
@@ -12,13 +13,12 @@ public class NoResetMealyDriver extends MealyDriver {
 
 	@Override
 	public void reset(){
-		super.reset();
-		if (currentState == null){
-			currentState = automata.getStates().get(0);
-			if (addtolog){
-				LogManager.logInfo("No initial state found, using " + currentState + " instead");
-			}
-		}
+		LogManager.logError("Tried to reset the driver");
+	}
+	
+	public void setCurrentState(State s){
+		assert automata.getStates().contains(s);
+		currentState = s;
 	}
 
 }

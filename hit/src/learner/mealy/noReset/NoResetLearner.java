@@ -32,7 +32,7 @@ public class NoResetLearner extends Learner {
 		LogManager.logInfo("Inferring the system");
 		LogManager.logConsole("Inferring the system");
 
-		n = Options.MAXSTATES;//TODO find how this parameter is obtained
+		n = 3;//Options.MAXSTATES;//TODO find how this parameter is obtained
 		//TODO getW;
 		W = new ArrayList<InputSequence>();//Characterization set
 		W.add(new InputSequence());
@@ -97,10 +97,13 @@ public class NoResetLearner extends Learner {
 		}
 		LogManager.logConsole(dataManager.readableTrace());
 		dataManager.getConjecture().exportToDot();
-		if (check())
+		if (checkRandomWalk()){
+			LogManager.logConsole("The computed conjecture seems to be coherent with the driver");
 			LogManager.logInfo("The computed conjecture seems to be coherent with the driver");
-		else
+		}else{
+			LogManager.logConsole("The computed conjecture is not correct");
 			LogManager.logInfo("The computed conjecture is not correct");
+		}
 	}
 	
 	public LmConjecture createConjecture() {
@@ -150,8 +153,8 @@ public class NoResetLearner extends Learner {
 			for (int m = 0; m < n-1; m++){
 				if (!localizerResponses.get(j+m).equals(localizerResponses.get(n+m))){
 					isLoop = false;
-					LogManager.logInfo("it's not a loop : ["+(j+m)+"] = " + localizerResponses.get(j+m) +
-							" ≠ [" + (n+m) + "]=" + localizerResponses.get(n+m));
+					LogManager.logInfo("Tried size " + (n-j) +" : it's not a loop : ["+(j+m)+"] = (" + Z1 + " → " + localizerResponses.get(j+m) +
+							") ≠ [" + (n+m) + "] = (" + Z1 + " → " + localizerResponses.get(n+m) + ")");
 					break;
 				}
 			}
@@ -174,34 +177,12 @@ public class NoResetLearner extends Learner {
 		return WResponses;
 	}
 	
-	private boolean check(){
+	private boolean checkRandomWalk(){
 		LogManager.logStep(LogManager.STEPOTHER, "checking the computed conjecture");
 		NoResetMealyDriver generatedDriver = new NoResetMealyDriver(dataManager.getConjecture());
 		generatedDriver.stopLog();
-		DataManager generated = new DataManager(generatedDriver, W);
-		int knownPos = localize(generated, W);
-		FullyQualifiedState knownState = dataManager.getFullyQualifiedState(generated.getC(knownPos).getWResponses());
-		while(knownPos != generated.traceSize()){
-			boolean updated = false;
-			for (FullyKnownTrace v : knownState.getVerifiedTrace())
-			if (generated.getSubtrace(knownPos, knownPos + v.getTrace().size()).equals(v.getTrace())){
-				knownState = v.getEnd();
-				knownPos += v.getTrace().size();
-				updated = true;
-				break;
-			}
-			assert updated : "V is not well defined" ;
-		}
-		FullyQualifiedState currentState = knownState;
-		int i = 0;
-		while (currentState != dataManager.getC(dataManager.traceSize())){
-			if (dataManager.getC(i) == currentState){
-				generated.apply(dataManager.getSubtrace(i, i+1).getInputsProjection());
-				currentState = dataManager.getC(i+1);
-			}
-			assert currentState != null;
-			i++;
-		}
+		generatedDriver.setCurrentState(dataManager.getC(dataManager.traceSize()).getState());
+		
 		//Now the two automata are in same state.
 		//We can do a random walk
 		
@@ -211,7 +192,7 @@ public class NoResetLearner extends Learner {
 		for (int j = 0; j < max_try; j++){
 			int rand = Utils.randInt(driver.getInputSymbols().size());
 			String input = driver.getInputSymbols().get(rand);
-			if (!driver.execute(input).equals(generated.apply(input)))
+			if (!driver.execute(input).equals(generatedDriver.execute(input)))
 				return false;
 		}
 		
