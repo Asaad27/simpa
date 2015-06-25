@@ -32,13 +32,14 @@ public class NoResetLearner extends Learner {
 		LogManager.logInfo("Inferring the system");
 		LogManager.logConsole("Inferring the system");
 
-		n = 3;//Options.MAXSTATES;//TODO find how this parameter is obtained
+		n = 4;//Options.MAXSTATES;//TODO find how this parameter is obtained
 		//TODO getW;
 		W = new ArrayList<InputSequence>();//Characterization set
 		W.add(new InputSequence());
 		W.add(new InputSequence());
-		W.get(0).addInput("a");
-		W.get(1).addInput("b");
+		W.get(0).addInput("INVITE");
+		W.get(1).addInput("BYE");
+		W.get(1).addInput("INVITE");
 		StringBuilder logW = new StringBuilder("Used characterization set : [");
 		for (InputSequence w : W){
 			logW.append(w + ", ");
