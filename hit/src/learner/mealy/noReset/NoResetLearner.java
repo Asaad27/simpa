@@ -4,16 +4,23 @@ import learner.Learner;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import learner.mealy.noReset.dataManager.DataManager;
-import learner.mealy.noReset.dataManager.FullyKnownTrace;
 import learner.mealy.noReset.dataManager.FullyQualifiedState;
+import automata.State;
+import automata.mealy.Mealy;
 import automata.mealy.InputSequence;
+import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
 import main.simpa.Options;
 import drivers.mealy.MealyDriver;
+import drivers.mealy.transparent.TransparentMealyDriver;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.Collection;
+import java.util.Map;
+import java.util.HashMap;
 
 import tools.Utils;
 import tools.loggers.LogManager;
@@ -32,7 +39,8 @@ public class NoResetLearner extends Learner {
 		LogManager.logInfo("Inferring the system");
 		LogManager.logConsole("Inferring the system");
 
-		n = 4;//Options.MAXSTATES;//TODO find how this parameter is obtained
+		n = Options.MAXSTATES;//TODO find how this parameter is obtained
+		n = 4;//TODO find how this parameter is obtained
 		//TODO getW;
 		W = new ArrayList<InputSequence>();//Characterization set
 		W.add(new InputSequence());
@@ -98,12 +106,23 @@ public class NoResetLearner extends Learner {
 		}
 		LogManager.logConsole(dataManager.readableTrace());
 		dataManager.getConjecture().exportToDot();
-		if (checkRandomWalk()){
-			LogManager.logConsole("The computed conjecture seems to be coherent with the driver");
-			LogManager.logInfo("The computed conjecture seems to be coherent with the driver");
+		if (driver instanceof TransparentMealyDriver){
+			TransparentMealyDriver d = (TransparentMealyDriver) driver;
+			if (checkExact(d.getAutomata(), d.getCurrentState())){
+				LogManager.logConsole("The computed conjecture is exact");
+				LogManager.logInfo("The computed conjecture is exact");
+			}else{
+				LogManager.logConsole("The computed conjecture is not correct");
+				LogManager.logInfo("The computed conjecture is not correct");
+			}	
 		}else{
-			LogManager.logConsole("The computed conjecture is not correct");
-			LogManager.logInfo("The computed conjecture is not correct");
+			if (checkRandomWalk()){
+				LogManager.logConsole("The computed conjecture seems to be coherent with the driver");
+				LogManager.logInfo("The computed conjecture seems to be coherent with the driver");
+			}else{
+				LogManager.logConsole("The computed conjecture is not correct");
+				LogManager.logInfo("The computed conjecture is not correct");
+			}
 		}
 	}
 	
@@ -179,7 +198,7 @@ public class NoResetLearner extends Learner {
 	}
 	
 	private boolean checkRandomWalk(){
-		LogManager.logStep(LogManager.STEPOTHER, "checking the computed conjecture");
+		LogManager.logStep(LogManager.STEPOTHER, "checking the computed conjecture with Random Walk");
 		NoResetMealyDriver generatedDriver = new NoResetMealyDriver(dataManager.getConjecture());
 		generatedDriver.stopLog();
 		generatedDriver.setCurrentState(dataManager.getC(dataManager.traceSize()).getState());
@@ -199,4 +218,82 @@ public class NoResetLearner extends Learner {
 		
 		return true;
 	}
+	
+	public boolean checkExact(Mealy automata, State currentState){
+		LogManager.logStep(LogManager.STEPOTHER, "checking the computed conjecture is exactly equivalent");
+		automata.exportToDot();
+		class FoundState {
+			public State computedState;
+			public List<String> uncheckedTransitions;
+			public FoundState(State s, List<String> I){
+				computedState = s;
+				uncheckedTransitions = new ArrayList<String>(I);
+			}
+			public String toString(){return computedState + " but transitions " + uncheckedTransitions + "have not been checked";}
+		}
+		FoundState currentFoundState = new FoundState(dataManager.getC(dataManager.traceSize()).getState(),driver.getInputSymbols());
+		Map<State,FoundState> assigned = new HashMap<State,FoundState>();
+		assigned.put(currentState, currentFoundState);
+		State unckeckedState = currentState;
+		List<String> path = new ArrayList<String>();
+		while (unckeckedState != null) {		
+			//LogManager.logInfo("assigned " + assigned);
+			FoundState uncheckedFoundState = assigned.get(unckeckedState);
+			LogManager.logInfo("Applying " + path + "in order to go in state " + unckeckedState + " and then try " + uncheckedFoundState.uncheckedTransitions.get(0));
+			path.add(uncheckedFoundState.uncheckedTransitions.get(0));
+
+			for (String i : path){
+				currentFoundState.uncheckedTransitions.remove(i);
+				MealyTransition t = automata.getTransitionFromWithInput(currentState, i);
+				currentState = t.getTo();
+				String o = dataManager.apply(i);
+				if (! o.equals(t.getOutput())){
+					LogManager.logInfo("expected output was " + t.getOutput());
+					return false;
+				}
+				currentFoundState = assigned.get(currentState);
+				if (currentFoundState == null){
+					currentFoundState = new FoundState(dataManager.getC(dataManager.traceSize()).getState(), driver.getInputSymbols());
+					assigned.put(currentState, currentFoundState);
+				} else if (currentFoundState.computedState != dataManager.getC(dataManager.traceSize()).getState()){
+					LogManager.logInfo("it was expected to arrive in " + t.getTo());
+					return false;
+				}
+
+			}
+			class Node {public List<String> path; public State state;}
+			LinkedList<Node> nodes = new LinkedList<Node>();
+			Node node = new Node();
+			node.path = new ArrayList<String>();
+			node.state = currentState;
+			nodes.add(node);
+
+			Map<State, Boolean> crossed = new HashMap<State, Boolean>();
+			for (State s : automata.getStates())
+				crossed.put(s,false);
+			unckeckedState = null;
+			path = null;
+			while (!nodes.isEmpty()){
+				node = nodes.pollFirst();
+				if (!assigned.get(node.state).uncheckedTransitions.isEmpty()){
+					unckeckedState = node.state;
+					path = node.path;
+					break;
+				}
+				if (crossed.get(node.state))
+					continue;
+				for (String i : driver.getInputSymbols()){
+					Node newNode = new Node();
+					newNode.path = new ArrayList<String>(node.path);
+					newNode.path.add(i);
+					newNode.state = automata.getTransitionFromWithInput(node.state, i).getTo();
+					nodes.add(newNode);
+					crossed.put(node.state, true);
+				}
+			}
+		}
+
+		return true;
+	}
+
 }

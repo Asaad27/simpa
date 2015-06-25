@@ -8,10 +8,14 @@ public class SIP2Mealy {
 
 	public static Mealy getAutomata() {
 		Mealy test = new Mealy("Test");
-		State s0 = test.addState(true);
-		State s1 = test.addState();
-		State s2 = test.addState();
-		State s3 = test.addState();
+		State s0 = new State("knownS0",true);
+		State s1 = new State("knownS1",false);
+		State s2 = new State("knownS2",false);
+		State s3 = new State("knownS3",false);
+		test.addState(s0);
+		test.addState(s1);
+		test.addState(s2);
+		test.addState(s3);
 
 		test.addTransition(new MealyTransition(test, s0, s0, "REGISTER", "200"));
 		test.addTransition(new MealyTransition(test, s0, s0, "ACK", "TIMEOUT"));
