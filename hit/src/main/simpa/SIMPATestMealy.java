@@ -29,6 +29,8 @@ public class SIMPATestMealy {
 					Options.NBTEST = Integer.parseInt(args[++i]);
 				else if (args[i].equals("--tree"))
 					Options.TREEINFERENCE = true;
+				else if (args[i].equals("--noReset"))
+					Options.NORESETINFERENCE = true;
 				else if (args[i].equals("--minstates"))
 					Options.MINSTATES = Integer.parseInt(args[++i]);
 				else if (args[i].equals("--maxstates"))
