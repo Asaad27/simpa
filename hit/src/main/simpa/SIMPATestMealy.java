@@ -95,6 +95,7 @@ public class SIMPATestMealy {
 				for (i = 1; i <= Options.NBTEST; i++) {
 					Options.OUTDIR = Utils.makePath(dir + i);
 					Utils.createDir(new File(Options.OUTDIR));
+					System.out.println("outputdir is " + Options.OUTDIR);
 					Options.SYSTEM = "Random " + i;
 					if (!Options.STAT)
 						System.out.println("    " + i + "/" + Options.NBTEST);

@@ -258,7 +258,7 @@ public class DataManager {
 		int otherPos = pos-1;
 		while (otherPos>0 && C.get(otherPos) == null)
 			otherPos--;
-		FullyQualifiedState other = C.get(otherPos);
+		FullyQualifiedState other = (otherPos > 0) ? C.get(otherPos) : null;;
 		if (other != null){
 			FullyKnownTrace t = new FullyKnownTrace(other, getSubtrace(otherPos, pos), C.get(pos));
 			addFullyKnownTrace(t);
