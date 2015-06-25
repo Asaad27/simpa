@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.Collection;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -36,27 +35,25 @@ public class NoResetLearner extends Learner {
 	}
 	
 	public void learn(){
+		learn(computeCharacterizationSet(driver));
+	}
+
+	public void learn(List<InputSequence> W){
 		LogManager.logInfo("Inferring the system");
 		LogManager.logConsole("Inferring the system");
 
 		n = Options.MAXSTATES;//TODO find how this parameter is obtained
-		n = 4;//TODO find how this parameter is obtained
-		//TODO getW;
-		W = new ArrayList<InputSequence>();//Characterization set
-		W.add(new InputSequence());
-		W.add(new InputSequence());
-		W.get(0).addInput("INVITE");
-		W.get(1).addInput("BYE");
-		W.get(1).addInput("INVITE");
+
+		this.W = new ArrayList<InputSequence>(W);
 		StringBuilder logW = new StringBuilder("Used characterization set : [");
-		for (InputSequence w : W){
+		for (InputSequence w : this.W){
 			logW.append(w + ", ");
 		}
 		logW.append("]");
 		LogManager.logInfo(logW.toString());
 		
 		//GlobalTrace trace = new GlobalTrace(driver);
-		dataManager = new DataManager(driver, W);
+		dataManager = new DataManager(driver, this.W);
 		
 		//start of the algorithm
 		localize(dataManager, W);
@@ -294,6 +291,57 @@ public class NoResetLearner extends Learner {
 		}
 
 		return true;
+	}
+	
+	private static List<InputSequence> computeCharacterizationSet(
+			MealyDriver driver) {
+		if (driver instanceof TransparentMealyDriver){
+			return computeCharacterizationSet((TransparentMealyDriver) driver);
+		} else {
+			throw new RuntimeException("unable to compute W");
+		}
+	}
+	
+	private static List<InputSequence> computeCharacterizationSet(TransparentMealyDriver driver){
+		LogManager.logStep(LogManager.STEPOTHER, "computing characterization set");
+		Mealy automata = driver.getAutomata();
+		List<InputSequence> W = new ArrayList<InputSequence>();
+		W.add(new InputSequence(driver.getInputSymbols().get(0)));
+		for (State s1 : automata.getStates()){
+			for (State s2 : automata.getStates()){
+				List<InputSequence> haveSameOutput = new ArrayList<InputSequence>();//the W elements for which s1 and s2 have the same output
+				for (InputSequence w : W){
+					if (!apply(w,automata,s1).equals(apply(w,automata,s2))){
+						haveSameOutput.add(w);
+					}
+				}
+				if (haveSameOutput.size() == W.size()){
+					InputSequence toSplit = haveSameOutput.get(0);//here we choose to take the first element so it may be interesting to randomize that
+					for (String i : driver.getInputSymbols()){
+						InputSequence newW = new InputSequence();
+						newW.addInputSequence(toSplit);
+						newW.addInput(i);
+						W.remove(toSplit);
+						W.add(newW);
+						if (!apply(newW,automata,s1).equals(apply(newW,automata,s2))){
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		return W;
+	}
+	
+	private static OutputSequence apply(InputSequence I, Mealy m, State s){
+		OutputSequence O = new OutputSequence();
+		for (String i : I.sequence){
+			MealyTransition t = m.getTransitionFromWithInput(s, i);
+			s = t.getTo();
+			O.addOutput(t.getOutput());
+		}
+		return O;
 	}
 
 }

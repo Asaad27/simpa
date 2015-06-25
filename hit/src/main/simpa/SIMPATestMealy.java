@@ -12,7 +12,7 @@ import tools.loggers.HTMLLogger;
 import tools.loggers.LogManager;
 import tools.loggers.TextLogger;
 import drivers.Driver;
-import drivers.mealy.RandomMealyDriver;
+import drivers.mealy.transparent.RandomMealyDriver;
 import examples.mealy.RandomMealy;
 
 public class SIMPATestMealy {
