@@ -312,12 +312,12 @@ public class NoResetLearner extends Learner {
 		}
 		boolean isCaracterizationSet = false;
 		while (!isCaracterizationSet){
-			LogManager.logInfo("W is now " + W);
+			LogManager.logInfo("computing caracterization set : W is now " + W);
 			isCaracterizationSet = true;
 			for (State s1 : automata.getStates()){
 				for (State s2 : automata.getStates()){
 					if (s1.equals(s2))
-						break;//we do not not to test s1 -> s2 AND s2 -> s1
+						break;//we do not need to test s1 -> s2 AND s2 -> s1
 					List<InputSequence> haveSameOutput = new ArrayList<InputSequence>();//the W elements for which s1 and s2 have the same output
 					for (InputSequence w : W){
 						if (apply(w,automata,s1).equals(apply(w,automata,s2))){
@@ -327,15 +327,21 @@ public class NoResetLearner extends Learner {
 					if (haveSameOutput.size() == W.size()){
 						isCaracterizationSet = false;
 						InputSequence toSplit = haveSameOutput.get(0);//here we choose to take the first element so it may be interesting to randomize that
+						W.remove(toSplit);
 						for (String i : driver.getInputSymbols()){
 							InputSequence newW = new InputSequence();
 							newW.addInputSequence(toSplit);
 							newW.addInput(i);
-							W.remove(toSplit);
-							W.add(newW);
 							if (!apply(newW,automata,s1).equals(apply(newW,automata,s2))){
+								W.add(newW);
 								break;
 							}
+						}
+						for (String i : driver.getInputSymbols()){
+							InputSequence newW = new InputSequence();
+							newW.addInputSequence(toSplit);
+							newW.addInput(i);
+							W.add(newW);
 						}
 					}
 				}
