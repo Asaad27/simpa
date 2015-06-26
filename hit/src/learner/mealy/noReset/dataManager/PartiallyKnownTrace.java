@@ -1,6 +1,7 @@
 package learner.mealy.noReset.dataManager;
 
 import learner.mealy.LmTrace;
+import main.simpa.Options;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,9 +42,11 @@ public class PartiallyKnownTrace {
 			return false;
 		}
 		WResponses.set(DataManager.instance.getW().indexOf(print.getInputsProjection()), print.getOutputsProjection());
-		DataManager.instance.logRecursivity("New print(=a response to W input) found : " + start + " followed by " + transition + " → " + print);
+		if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+			DataManager.instance.logRecursivity("New print(=a response to W input) found : " + start + " followed by " + transition + " → " + print);
 		DataManager.instance.startRecursivity();
-		DataManager.instance.logRecursivity("K is now : " + DataManager.instance.getK());
+		if (Options.LOG_LEVEL == Options.LogLevel.ALL)
+			DataManager.instance.logRecursivity("K is now : " + DataManager.instance.getK());
 		if (unknownPrints.isEmpty()){// rule 4 in algorithm
 			//we have totally found a transition
 			FullyQualifiedState state = DataManager.instance.getFullyQualifiedState(WResponses);

@@ -15,6 +15,7 @@ import automata.mealy.InputSequence;
 import automata.mealy.OutputSequence;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
+import main.simpa.Options;
 import tools.loggers.LogManager;
 import drivers.mealy.MealyDriver;
 
@@ -131,7 +132,8 @@ public class DataManager {
 			return;
 		}
 		C.set(pos, s);
-		logRecursivity("Labelling trace : position " + pos + " is now " + s);
+		if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+			logRecursivity("Labelling trace : position " + pos + " is now " + s);
 		startRecursivity();
 		for (FullyQualifiedState q : Q.values()){
 			LinkedList<WaitingState> waitingStates = new LinkedList<WaitingState>();

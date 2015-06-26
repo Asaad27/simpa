@@ -11,6 +11,7 @@ import java.util.Collection;
 
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
+import main.simpa.Options;
 import automata.State;
 import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
@@ -50,7 +51,8 @@ public class FullyQualifiedState{
 		if (V.containsKey(v.getTrace())){
 			return false;
 		}
-		DataManager.instance.logRecursivity("New transition found : " + v);
+		if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+			DataManager.instance.logRecursivity("New transition found : " + v);
 		DataManager.instance.startRecursivity();
 
 		LinkedList<FullyKnownTrace> toAdd = new LinkedList<FullyKnownTrace>();
@@ -67,7 +69,8 @@ public class FullyQualifiedState{
 		}
 		while (!toAdd.isEmpty()){
 			FullyKnownTrace vToAdd = toAdd.poll();
-			DataManager.instance.logRecursivity("Split transition : " + v + " + " + vToAdd);
+			if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+				DataManager.instance.logRecursivity("Split transition : " + v + " + " + vToAdd);
 			DataManager.instance.startRecursivity();
 			vToAdd.getStart().addFullyKnownTrace(vToAdd);
 			DataManager.instance.endRecursivity();
@@ -75,15 +78,18 @@ public class FullyQualifiedState{
 		
 		K.remove(v.getTrace());
 		V.put(v.getTrace(), v);
-		DataManager.instance.logRecursivity("V is now : " + DataManager.instance.getV());
+		if (Options.LOG_LEVEL == Options.LogLevel.ALL)
+			DataManager.instance.logRecursivity("V is now : " + DataManager.instance.getV());
 		if (v.getTrace().size() == 1){
 			LmConjecture conjecture = DataManager.instance.getConjecture();
 			conjecture.addTransition(new MealyTransition(conjecture, v.getStart().getState(), v.getEnd().getState(), v.getTrace().getInput(0), v.getTrace().getOutput(0)));
-			conjecture.exportToDot();
+			if (Options.LOG_LEVEL == Options.LogLevel.ALL)
+				conjecture.exportToDot();
 			T.put(v.getTrace(),v);
 			R_.remove(v.getTrace().getInput(0));//the transition with this symbol is known
-			if (R_.isEmpty()){		
-				DataManager.instance.logRecursivity("All transitions from state " + this + " are known.");
+			if (R_.isEmpty()){
+				if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+					DataManager.instance.logRecursivity("All transitions from state " + this + " are known.");
 				DataManager.instance.startRecursivity();
 				DataManager.instance.setKnownState(this);
 				DataManager.instance.endRecursivity();
@@ -123,7 +129,8 @@ public class FullyQualifiedState{
 		//try to reduce transition
 		for (FullyKnownTrace v : V.values()){
 			if (v.equals(transition.subtrace(0, v.getTrace().size())) && v.getTrace().size() < transition.size()){
-				DataManager.instance.logRecursivity("Trace reduced using " + v + " : " + v.getEnd() +" followed by "+ transition + " → " +print);
+				if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+					DataManager.instance.logRecursivity("Trace reduced using " + v + " : " + v.getEnd() +" followed by "+ transition + " → " +print);
 				return v.getEnd().addPartiallyKnownTrace(transition.subtrace(v.getTrace().size(), transition.size()), print);
 			}
 		}

@@ -49,6 +49,7 @@ public class Options {
 
 	// Output's options
 
+	public static LogLevel LOG_LEVEL = LogLevel.LOW;
 	public static boolean LOG_TEXT = false;
 	public static boolean LOG_HTML = false;
 	public static boolean AUTO_OPEN_HTML = false;
@@ -77,4 +78,10 @@ public class Options {
 	public static int NDVGUARDPERCENT = 25;
 	public static int NDVMINTRANSTOCHECK = 1;
 	public static int NDVMAXTRANSTOCHECK = 1;
+	
+	public enum LogLevel{
+		ALL,
+		DO_NOT_COMPLEXIFY,//don't log things that will take a non constant-time
+		LOW;
+	}
 }
