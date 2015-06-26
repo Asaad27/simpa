@@ -411,7 +411,7 @@ public class DataManager {
 				paths.add(childNode);
 			}
 		}
-		throw new RuntimeException("The infered automata seems to be not totaly connex");
+		throw new RuntimeException("The infered automata seems to be not totaly connex : we reached " + reachedStates + " but not " + notFullyKnownStates);
 	}
 
 	public Collection<FullyQualifiedState> getStates() {

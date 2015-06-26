@@ -117,4 +117,13 @@ public class RandomMealy extends Mealy implements Serializable {
 		LogManager.logInfo("Number of states : " + nbStates);
 	}
 
+	public static RandomMealy getConnexRandomMealy(){
+		int max_try = 50;
+		for (int i = 0 ; i < max_try; i++){
+			RandomMealy automata = new RandomMealy();
+			if (automata.isConnex())
+				return automata;
+		}
+		throw new RuntimeException("Tried " + max_try + " times to create a randomMealy but it never was connex. You're unluky or try other options (more inputs symbols)");
+	}
 }

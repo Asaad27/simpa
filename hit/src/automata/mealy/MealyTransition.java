@@ -44,4 +44,9 @@ public class MealyTransition extends Transition {
 	public int hashCode(){
 		return (from + input).hashCode();
 	}
+
+	public boolean equals(MealyTransition t){
+		return output.equals(t.output) && input.equals(t.input) &&
+				from.equals(t.from) && to.equals(t.to);
+	}
 }

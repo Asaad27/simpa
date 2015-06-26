@@ -9,6 +9,8 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -33,9 +35,11 @@ public class Mealy extends Automata implements Serializable {
 
 	public Boolean addTransition(MealyTransition t) {
 		if (!transitions.containsKey(t.hashCode())){
-		   transitions.put(t.hashCode(), t);
-		   return true;
+			super.transitions.add(t);
+			transitions.put(t.hashCode(), t);
+			return true;
 		}
+		assert transitions.get(t.hashCode()).equals(t) : "stored " + transitions.get(t.hashCode()) + " and new " + t + " have same hash " + t.hashCode();
 		return false;
 	}
 	
@@ -66,6 +70,7 @@ public class Mealy extends Automata implements Serializable {
 	}
 
 	public MealyTransition getTransitionFromWithInput(State s, String input) {
+		assert states.contains(s);
 		return transitions.get((s + input).hashCode());
 	}
 
@@ -104,4 +109,14 @@ public class Mealy extends Automata implements Serializable {
 		}
 	}
 
+	public OutputSequence apply(InputSequence I, State s){
+		OutputSequence O = new OutputSequence();
+		for (String i : I.sequence){
+			MealyTransition t = getTransitionFromWithInput(s, i);
+			assert t != null;
+			s = t.getTo();
+			O.addOutput(t.getOutput());
+		}
+		return O;
+	}
 }

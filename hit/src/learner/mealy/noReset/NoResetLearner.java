@@ -50,7 +50,7 @@ public class NoResetLearner extends Learner {
 	}
 
 	public void learn(List<InputSequence> W){
-		LogManager.logInfo("Inferring the system");
+		LogManager.logStep(LogManager.STEPOTHER,"Inferring the system");
 		LogManager.logConsole("Inferring the system");
 
 		n = Options.MAXSTATES;//TODO find how this parameter is obtained

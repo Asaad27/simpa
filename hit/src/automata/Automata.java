@@ -2,7 +2,12 @@ package automata;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+
+import tools.loggers.LogManager;
+import automata.mealy.MealyTransition;
 
 public class Automata implements Serializable {
 	private static final long serialVersionUID = -8767507358858312705L;
@@ -65,5 +70,31 @@ public class Automata implements Serializable {
 	}
 
 	public void reset(){
+	}
+
+	public boolean isConnex(){
+		if (transitions.size() == 0)
+			return states.size() == 0;
+		for (State s : states){
+			LinkedList<Transition> toCheck = new LinkedList<Transition>();
+			HashSet<State> crossed = new HashSet<State>();
+			for (Transition initialTransition : transitions)
+				if (initialTransition.getFrom() == s)
+					toCheck.add(initialTransition);
+			while (!toCheck.isEmpty()){
+				Transition t = toCheck.poll();
+				if (!crossed.contains(t.getTo())){
+					crossed.add(t.getTo());
+					for (Transition t2 : transitions)
+						if (t2.getFrom() == t.getTo())
+							toCheck.add(t2);
+				}
+			}
+			for (State s2 : states){
+				if (!crossed.contains(s2))
+					return false;
+			}
+		}
+		return true;
 	}
 }

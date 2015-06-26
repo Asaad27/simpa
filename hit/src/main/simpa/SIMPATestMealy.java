@@ -171,12 +171,12 @@ public class SIMPATestMealy {
 		if (major < 1 || minor < 5)
 			throw new Exception("Java >=1.5 needed");
 
+		Options.GRAPHVIZ = true;
 		if (GraphViz.check() != 0 && !Options.TEST) {
 			Options.GRAPHVIZ = false;
 			LogManager
 					.logError("Warning: Unable to find GraphViz and converting dot to image files");
 		}
-		Options.GRAPHVIZ = false;
 
 		File f = new File(Options.OUTDIR + File.separator + Options.DIRTEST);
 		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())

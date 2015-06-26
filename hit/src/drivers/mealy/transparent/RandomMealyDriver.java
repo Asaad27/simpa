@@ -9,7 +9,7 @@ import examples.mealy.RandomMealy;
 public class RandomMealyDriver extends TransparentMealyDriver {
 
 	public RandomMealyDriver() {
-		super(new RandomMealy());
+		super(RandomMealy.getConnexRandomMealy());
 		Utils.setSeed(((RandomMealy) automata).getSeed());
 	}
 
