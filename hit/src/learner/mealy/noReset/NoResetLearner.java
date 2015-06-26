@@ -15,9 +15,11 @@ import drivers.mealy.MealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -35,7 +37,21 @@ public class NoResetLearner extends Learner {
 	}
 	
 	public void learn(){
-		learn(computeCharacterizationSet(driver));
+		List<InputSequence> W = computeCharacterizationSet(driver);
+		class InputSequenceComparator implements Comparator<InputSequence>{
+			@Override
+			public int compare(InputSequence o1, InputSequence o2) {
+				int diff = o1.getLength() - o2.getLength();
+				if (diff == 0)
+					diff = 1;//else TreeSet will remove antries of same size
+				return diff;
+			}
+		}
+		TreeSet<InputSequence> sortedW = new TreeSet<>(new InputSequenceComparator());
+		LogManager.logInfo("W : " + W);		
+		sortedW.addAll(W);
+		LogManager.logInfo("sorted W : " + sortedW);
+		learn(new ArrayList<InputSequence>(sortedW));
 	}
 
 	public void learn(List<InputSequence> W){
@@ -303,6 +319,81 @@ public class NoResetLearner extends Learner {
 	}
 	
 	private static List<InputSequence> computeCharacterizationSet(TransparentMealyDriver driver){
+		LogManager.logStep(LogManager.STEPOTHER, "computing characterization set");
+		Mealy automata = driver.getAutomata();
+		automata.exportToDot();
+		List<InputSequence> W = new ArrayList<InputSequence>();
+		List<State> distinguishedStates = new ArrayList<State>();
+		for (State s1 : automata.getStates()){
+			LogManager.logInfo("adding state " + s1);
+			for (State s2 : distinguishedStates){
+				boolean haveSameOutputs = true;
+				for (InputSequence w : W){
+					if (!apply(w,automata,s1).equals(apply(w,automata,s2))){
+						haveSameOutputs = false;
+					}
+				}
+				if (haveSameOutputs){
+					LogManager.logInfo(s1 + " and " + s2 + " have the same outputs for W=" + W);
+					addDistinctionSequence(automata, driver.getInputSymbols(), s1, s2, W);
+					LogManager.logInfo("W is now " + W);
+				}
+			}
+			distinguishedStates.add(s1);
+		}
+		return W;
+	}
+	
+	/**
+	 * compute a distinction sequence for the two states
+	 * it may be a new distinction sequence or an append of an existing distinction sequence 
+	 * @param automata
+	 * @param inputSymbols
+	 * @param s1
+	 * @param s2
+	 * @param w2
+	 */
+	private static void addDistinctionSequence(Mealy automata,
+			List<String> inputSymbols, State s1, State s2,
+			List<InputSequence> W) {
+		//first we try to add an input symbol to the existing W
+		for (InputSequence w : W){
+			for (String i : inputSymbols){
+				InputSequence testw = new InputSequence();
+				testw.addInputSequence(w);
+				testw.addInput(i);
+				if (!apply(testw, automata, s1).equals(apply(testw,automata,s2))){
+					w.addInput(i);
+					return;
+				}
+			}
+		}
+		//then we try to compute a w from scratch
+		LinkedList<InputSequence> testW = new LinkedList<InputSequence>();
+		for (String i : inputSymbols)
+			testW.add(new InputSequence(i));
+		while (true){
+			InputSequence testw = testW.pollFirst();
+			if (apply(testw, automata, s1).equals(apply(testw,automata,s2))){
+				for (String i : inputSymbols){
+					InputSequence newTestw = new InputSequence();
+					newTestw.addInputSequence(testw);
+					newTestw.addInput(i);
+					testW.add(newTestw);
+				}
+			}else{
+				for (InputSequence w : W){
+					if (testw.startsWith(w)){
+						W.remove(w);
+					}
+				}
+				W.add(testw);
+				return;
+			}
+		}
+	}
+
+	private static List<InputSequence> computeCharacterizationSetNaiv(TransparentMealyDriver driver){
 		LogManager.logStep(LogManager.STEPOTHER, "computing characterization set");
 		Mealy automata = driver.getAutomata();
 		automata.exportToDot();

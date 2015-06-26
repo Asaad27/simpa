@@ -40,7 +40,7 @@ public class RandomMealy extends Mealy implements Serializable {
 		}
 		int o = 0;
 		outputSymbols = new ArrayList<String>();
-		nbSym = Utils.randIntBetween(Options.MININPUTSYM, Options.MAXINPUTSYM);
+		nbSym = Utils.randIntBetween(Options.MINOUTPUTSYM, Options.MAXOUTPUTSYM);
 		for (int i = 0; i < nbSym; i++) {
 			outputSymbols.add(String.valueOf(o++));
 		}
