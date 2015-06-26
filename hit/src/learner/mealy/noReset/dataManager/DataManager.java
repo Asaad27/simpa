@@ -392,8 +392,12 @@ public class DataManager {
 		firstNode.end = s;
 		firstNode.path = new InputSequence();
 		paths.add(firstNode);
-		while(true){
+		List<FullyQualifiedState> reachedStates = new ArrayList<FullyQualifiedState>();
+		while(!paths.isEmpty()){
 			firstNode = paths.poll();
+			if (reachedStates.contains(firstNode.end))
+				continue;
+			reachedStates.add(firstNode.end);
 			if (!firstNode.end.getUnknowTransitions().isEmpty()){
 				LogManager.logInfo("chosen alpha is " + firstNode.path + " that lead in " + firstNode.end);
 				return firstNode.path;
@@ -406,9 +410,8 @@ public class DataManager {
 				childNode.path.addInputSequence(t.getTrace().getInputsProjection());
 				paths.add(childNode);
 			}
-			
-
 		}
+		throw new RuntimeException("The infered automata seems to be not totaly connex");
 	}
 
 	public Collection<FullyQualifiedState> getStates() {
