@@ -42,16 +42,11 @@ public class NoResetLearner extends Learner {
 			@Override
 			public int compare(InputSequence o1, InputSequence o2) {
 				int diff = o1.getLength() - o2.getLength();
-				if (diff == 0)
-					diff = 1;//else TreeSet will remove antries of same size
 				return diff;
 			}
 		}
-		TreeSet<InputSequence> sortedW = new TreeSet<>(new InputSequenceComparator());
-		LogManager.logInfo("W : " + W);		
-		sortedW.addAll(W);
-		LogManager.logInfo("sorted W : " + sortedW);
-		learn(new ArrayList<InputSequence>(sortedW));
+		W.sort(new InputSequenceComparator());
+		learn(W);
 	}
 
 	public void learn(List<InputSequence> W){
