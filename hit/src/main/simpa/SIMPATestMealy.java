@@ -77,7 +77,7 @@ public class SIMPATestMealy {
 		Driver driver = null;
 		if (!Options.STAT)
 			welcome();
-		Options.TEST = true;
+		Options.TEST = false;
 		init(args);
 		try {
 			check();

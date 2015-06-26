@@ -116,7 +116,8 @@ public class NoResetLearner extends Learner {
 					dataManager.updateCKVT();
 			}
 		}
-		LogManager.logConsole(dataManager.readableTrace());
+		if (Options.LOG_LEVEL == Options.LogLevel.ALL || Options.TEST)
+			LogManager.logConsole(dataManager.readableTrace());
 		dataManager.getConjecture().exportToDot();
 		if (driver instanceof TransparentMealyDriver){
 			TransparentMealyDriver d = (TransparentMealyDriver) driver;

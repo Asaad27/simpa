@@ -51,10 +51,21 @@ public class RandomMealy extends Mealy implements Serializable {
 		LogManager.logStep(LogManager.STEPOTHER, "Generating random Mealy");
 		seed = Utils.randLong();
 		generateSymbols();
-		createStates();
+		createStates(true);
 		createTransitions();
 		if (!Options.TEST) exportToDot();
 		//RandomMealy.serialize(this);
+	}
+	
+	public RandomMealy(boolean verbose) {
+		super("Random");
+		if (verbose)
+			LogManager.logStep(LogManager.STEPOTHER, "Generating random Mealy");
+		seed = Utils.randLong();
+		generateSymbols();
+		createStates(verbose);
+		createTransitions();
+		if (verbose) exportToDot();
 	}
 	
 	public long getSeed(){
@@ -109,20 +120,24 @@ public class RandomMealy extends Mealy implements Serializable {
 		}
 	}
 
-	private void createStates() {
+	private void createStates(boolean verbose) {
 		int nbStates = Utils.randIntBetween(Options.MINSTATES,
 				Options.MAXSTATES);
 		for (int i = 0; i < nbStates; i++)
 			addState(i == 0);
-		LogManager.logInfo("Number of states : " + nbStates);
+		if (verbose) LogManager.logInfo("Number of states : " + nbStates);
 	}
 
 	public static RandomMealy getConnexRandomMealy(){
-		int max_try = 50;
+		int max_try = 500;
+		LogManager.logStep(LogManager.STEPOTHER, "Generating random Mealy (500 try)");
 		for (int i = 0 ; i < max_try; i++){
-			RandomMealy automata = new RandomMealy();
-			if (automata.isConnex())
+			RandomMealy automata = new RandomMealy(false);
+			if (automata.isConnex()){
+				LogManager.logInfo("found a connex automata after trying " + (i+1) + " times");
+				automata.exportToDot();
 				return automata;
+			}
 		}
 		throw new RuntimeException("Tried " + max_try + " times to create a randomMealy but it never was connex. You're unluky or try other options (more inputs symbols)");
 	}
