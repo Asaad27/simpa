@@ -28,6 +28,7 @@ import tools.loggers.LogManager;
 public class NoResetLearner extends Learner {
 	private MealyDriver driver;
 	private DataManager dataManager;
+	private NoResetStats stats;
 	protected ArrayList<InputSequence> W;
 	private int n;//the maximum number of states
 
@@ -49,6 +50,7 @@ public class NoResetLearner extends Learner {
 	}
 
 	public void learn(List<InputSequence> W){
+		stats = new NoResetStats(W, driver.getInputSymbols().size(), driver.getOutputSymbols().size());
 		LogManager.logStep(LogManager.STEPOTHER,"Inferring the system");
 		LogManager.logConsole("Inferring the system");
 
@@ -116,6 +118,8 @@ public class NoResetLearner extends Learner {
 					dataManager.updateCKVT();
 			}
 		}
+		stats.setTraceLength(dataManager.traceSize());
+		stats.setStatesNumber(dataManager.getConjecture().getStateCount());
 		if (Options.LOG_LEVEL == Options.LogLevel.ALL || Options.TEST)
 			LogManager.logConsole(dataManager.readableTrace());
 		dataManager.getConjecture().exportToDot();
@@ -146,6 +150,10 @@ public class NoResetLearner extends Learner {
 		return c;
 	}
 	
+	public NoResetStats getStats(){
+		return stats;
+	}
+	
 	/**
 	 * 
 	 * @param trace omega the global trace of the automata, will be completed \in (IO)*
@@ -153,10 +161,13 @@ public class NoResetLearner extends Learner {
 	 * @return the position of the fully identified state in the GlobalTrace
 	 */
 	private int localize(DataManager dataManager, List<InputSequence> inputSequences){
+		int startTracePos = dataManager.traceSize();
 		LogManager.logInfo("Localizing...");
 		List<OutputSequence> WResponses = localize_intern(dataManager, inputSequences);
 		FullyQualifiedState s = dataManager.getFullyQualifiedState(WResponses);
 		dataManager.setC(dataManager.traceSize()-WResponses.get(WResponses.size()-1).getLength(), s);
+		stats.setLocalizeSequenceLength(dataManager.traceSize() - startTracePos);
+		stats.increaseLocalizeCallNb();
 		return dataManager.traceSize() - WResponses.get(inputSequences.size()-1).getLength();
 
 	}
