@@ -32,6 +32,15 @@ public class NoResetStats {
 			return name;
 		}
 	}
+	enum PlotStyle {
+		POINTS("with points"),
+		AVERAGE("with linespoints"),
+		AVERAGE_WITH_EXTREMA("with yerrorbars");
+		public String plotLine;
+		private PlotStyle(String plotLine) {
+			this.plotLine = plotLine;
+		}
+	}
 	private int WSize;
 	private int localizeCallNb = 0;
 	private int localizeSequenceLength;
@@ -101,9 +110,23 @@ public class NoResetStats {
 			sum += s.getAtribute(a);
 		return (float) sum / allStats.size();
 	}
-	
 
-	
+	private static Integer AtributeMin(List<NoResetStats> allStats, Atribute a) {
+		int min = allStats.get(0).getAtribute(a);
+		for (NoResetStats s : allStats)
+			if (min > s.getAtribute(a))
+				min = s.getAtribute(a);
+		return min;
+	}
+
+	private static Integer AtributeMax(List<NoResetStats> allStats, Atribute a) {
+		int max = allStats.get(0).getAtribute(a);
+		for (NoResetStats s : allStats)
+			if (max < s.getAtribute(a))
+				max = s.getAtribute(a);
+		return max;
+	}
+
 	public static String makeTextStats(List<NoResetStats> statsCol) {
 		Map<Integer, List<NoResetStats>> sorted = sortByAtribute(statsCol, Atribute.W_SIZE);
 
@@ -143,26 +166,55 @@ public class NoResetStats {
 		}
 	}
 	
-	public static void makeGraph(List<NoResetStats> allStats, Atribute ord, Atribute abs, Atribute sort){
+	private static File makeDataFile(List<NoResetStats> allStats, Atribute ord, Atribute abs, PlotStyle style){
+		File tempPlot;
+		PrintWriter tempWriter;
+		try {
+			tempPlot = File.createTempFile("simpa_"+ord+"_"+abs+"_", ".dat");
+			tempWriter = new PrintWriter(tempPlot,"UTF-8");
+		}catch (IOException ioe){
+			LogManager.logException("unable to create temporary file for gnuplot", ioe);
+			return null;
+		}
+		switch (style) {
+		case POINTS:
+			for (NoResetStats s : allStats){
+				tempWriter.write(s.getAtribute(abs) + " " + s.getAtribute(ord) + "\n");	
+			}
+			break;
+		case AVERAGE:{
+			Map<Integer,List<NoResetStats>> sorted = sortByAtribute(allStats, abs);
+			for (Integer key : sorted.keySet()){
+				tempWriter.write(key + " " + AtributeAvg(sorted.get(key), ord) + "\n");
+			}
+		}
+		break;
+		case AVERAGE_WITH_EXTREMA:{
+			Map<Integer,List<NoResetStats>> sorted = sortByAtribute(allStats, abs);
+			for (Integer key : sorted.keySet()){
+				List<NoResetStats> entrie = sorted.get(key);
+				tempWriter.write(key + " " + AtributeAvg(entrie, ord) + 
+						" " + AtributeMin(entrie, ord) + " " + AtributeMax(entrie, ord) + "\n");
+			}
+		}
+		break;
+		default:
+			break;
+		}
+
+		tempWriter.close();
+		tempPlot.deleteOnExit();
+		return tempPlot;
+	}
+	
+	public static void makeGraph(List<NoResetStats> allStats, Atribute ord, Atribute abs, Atribute sort, PlotStyle style){
 		StringBuilder plotLines = new StringBuilder("plot ");
 		Map<Integer, List<NoResetStats>> sorted = sortByAtribute(allStats, sort);
 		for (Integer Size : sorted.keySet()){
-			List<NoResetStats> entry = sorted.get(Size);
-			File tempPlot;
-			PrintWriter tempWriter;
-			try {
-				tempPlot = File.createTempFile(sort.name + "_" + Size + "_", ".dat");
-				tempWriter = new PrintWriter(tempPlot,"UTF-8");
-			}catch (IOException ioe){
-				LogManager.logException("unable to create temporary file for gnuplot", ioe);
-				return;
-			}
-			for (NoResetStats s : entry){
-				tempWriter.write(s.getAtribute(abs) + " " + s.getAtribute(ord) + "\n");
-			}
-			tempWriter.close();
-			tempPlot.deleteOnExit();
-			plotLines.append("\"" + tempPlot.getAbsolutePath() + "\" with points title \"" + sort.name + " " + Size + " " + sort.units +"\", ");
+			File tempPlot = makeDataFile(sorted.get(Size), ord, abs,style);
+			plotLines.append("\"" + tempPlot.getAbsolutePath() + "\" " +
+					style.plotLine +
+					" title \"" + sort.name + " " + Size + " " + sort.units +"\", ");
 		}
 		String filename = new String(Options.OUTDIR + File.pathSeparator + "relationship between "+ord+" and  "+abs+" sorted by " + sort + ".png");
 		GNUPlot.makeGraph(
@@ -172,14 +224,32 @@ public class NoResetStats {
 				"set ylabel \"" + ord.name + " (" + ord.units + ")\"\n" +
 				plotLines+"\n");
 	}
+	
+	public static void makeGraph(List<NoResetStats> allStats, Atribute ord, Atribute abs, PlotStyle style){
+		StringBuilder plotLines = new StringBuilder("plot ");
+			File tempPlot = makeDataFile(allStats, ord, abs,style);
+			plotLines.append("\"" + tempPlot.getAbsolutePath() + "\" " +
+					style.plotLine);
+		String filename = new String(Options.OUTDIR + File.pathSeparator + "relationship between "+ord+" and  "+abs+".png");
+		GNUPlot.makeGraph(
+				"set terminal png enhanced font \"Sans,10\"\n"+
+				"set output \"" + filename + "\"\n"+
+				"set xlabel \"" + abs.name + " (" + abs.units + ")\"\n" +
+				"set ylabel \"" + ord.name + " (" + ord.units + ")\"\n" +
+				plotLines+"\n");
+	}
 
 	public static void makeGraph(List<NoResetStats> allStats){
-		makeGraph(allStats,Atribute.TRACE_LENGTH,Atribute.LOCALIZER_CALL_NB,Atribute.W_SIZE);
-		makeGraph(allStats,Atribute.TRACE_LENGTH,Atribute.INPUT_SYMBOLS,Atribute.W_SIZE);
-		makeGraph(allStats,Atribute.TRACE_LENGTH,Atribute.OUTPUT_SYMBOLS,Atribute.W_SIZE);
-		makeGraph(allStats,Atribute.TRACE_LENGTH,Atribute.STATE_NUMBER,Atribute.W_SIZE);
-		makeGraph(allStats,Atribute.LOCALIZER_SEQUENCE_LENGTH,Atribute.INPUT_SYMBOLS,Atribute.W_SIZE);
-		makeGraph(allStats,Atribute.LOCALIZER_SEQUENCE_LENGTH,Atribute.OUTPUT_SYMBOLS,Atribute.W_SIZE);
-		makeGraph(allStats,Atribute.LOCALIZER_SEQUENCE_LENGTH,Atribute.STATE_NUMBER,Atribute.W_SIZE);
+		makeGraph(allStats,Atribute.TRACE_LENGTH,Atribute.LOCALIZER_CALL_NB,Atribute.W_SIZE,PlotStyle.POINTS);
+		makeGraph(allStats,Atribute.TRACE_LENGTH,Atribute.INPUT_SYMBOLS,Atribute.W_SIZE,PlotStyle.POINTS);
+		makeGraph(allStats,Atribute.TRACE_LENGTH,Atribute.OUTPUT_SYMBOLS,Atribute.W_SIZE,PlotStyle.POINTS);
+		makeGraph(allStats,Atribute.TRACE_LENGTH,Atribute.STATE_NUMBER,Atribute.W_SIZE,PlotStyle.POINTS);
+		makeGraph(allStats,Atribute.LOCALIZER_SEQUENCE_LENGTH,Atribute.INPUT_SYMBOLS,Atribute.W_SIZE,PlotStyle.POINTS);
+		makeGraph(allStats,Atribute.LOCALIZER_SEQUENCE_LENGTH,Atribute.OUTPUT_SYMBOLS,Atribute.W_SIZE,PlotStyle.POINTS);
+		makeGraph(allStats,Atribute.LOCALIZER_SEQUENCE_LENGTH,Atribute.STATE_NUMBER,Atribute.W_SIZE,PlotStyle.POINTS);
+		makeGraph(allStats,Atribute.LOCALIZER_CALL_NB,Atribute.STATE_NUMBER,Atribute.W_SIZE,PlotStyle.AVERAGE_WITH_EXTREMA);
+		makeGraph(allStats,Atribute.LOCALIZER_CALL_NB,Atribute.INPUT_SYMBOLS,Atribute.W_SIZE,PlotStyle.AVERAGE_WITH_EXTREMA);
+		makeGraph(allStats,Atribute.LOCALIZER_CALL_NB,Atribute.OUTPUT_SYMBOLS,Atribute.W_SIZE,PlotStyle.AVERAGE_WITH_EXTREMA);
+		makeGraph(allStats, Atribute.W_SIZE, Atribute.OUTPUT_SYMBOLS, PlotStyle.AVERAGE);
 	}
 }
