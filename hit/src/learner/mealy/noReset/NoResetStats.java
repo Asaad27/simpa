@@ -1,12 +1,15 @@
 package learner.mealy.noReset;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import main.simpa.Options;
 import tools.GNUPlot;
@@ -53,6 +56,9 @@ public class NoResetStats {
 		WSize = W.size();
 		this.inputSymbols = inputSymbols;
 		this.outputSymbols= outputSymbols;
+	}
+	
+	private NoResetStats(){
 	}
 
 	protected void setLocalizeSequenceLength(int length){
@@ -104,6 +110,57 @@ public class NoResetStats {
 		return sorted;
 	}
 	
+	public String toCSV(){
+		StringBuilder r = new StringBuilder();
+		r.append(WSize + ",");
+		r.append(localizeCallNb + ",");
+		r.append(localizeSequenceLength + ",");
+		r.append(traceLength + ",");
+		r.append(inputSymbols + ",");
+		r.append(outputSymbols + ",");
+		r.append(statesNumber + ",");
+		return r.toString();
+	}
+
+	public static String CSVHeader(){
+		return Atribute.W_SIZE.name + "," +
+				Atribute.LOCALIZER_CALL_NB.name + "," +
+				Atribute.LOCALIZER_SEQUENCE_LENGTH.name + "," +
+				Atribute.TRACE_LENGTH.name + "," +
+				Atribute.INPUT_SYMBOLS.name + "," +
+				Atribute.OUTPUT_SYMBOLS.name + "," +
+				Atribute.STATE_NUMBER.name + ",";
+	}
+	
+	public static NoResetStats entrieFromCSV(String line){
+		NoResetStats stats = new NoResetStats();
+		StringTokenizer st = new StringTokenizer(line, ",");
+		stats.WSize = Integer.parseInt(st.nextToken());
+		stats.localizeCallNb = Integer.parseInt(st.nextToken());
+		stats.localizeSequenceLength = Integer.parseInt(st.nextToken());
+		stats.traceLength = Integer.parseInt(st.nextToken());
+		stats.inputSymbols = Integer.parseInt(st.nextToken());
+		stats.outputSymbols = Integer.parseInt(st.nextToken());
+		stats.statesNumber = Integer.parseInt(st.nextToken());
+		return stats;
+	}
+
+	public static List<NoResetStats> setFromCSV(String filename){
+		List<NoResetStats> r = new ArrayList<NoResetStats>();
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(filename));
+			String strLine;
+			br.readLine();
+			while ((strLine = br.readLine()) != null) {
+				r.add(entrieFromCSV(strLine));
+			}
+			br.close();
+			return r;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
 	private static float AtributeAvg(List<NoResetStats> allStats, Atribute a){
 		int sum = 0;
 		for (NoResetStats s : allStats)

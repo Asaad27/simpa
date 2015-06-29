@@ -1,6 +1,9 @@
 package main.simpa;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -86,11 +89,19 @@ public class SIMPATestNoResetMealy {
 		try {
 			check();
 			String dir = Options.OUTDIR;
-			if (Options.RETEST == -1) {
 				Utils.cleanDir(new File(Options.OUTDIR));
 				
 				List<NoResetStats> noResetStats = new ArrayList<NoResetStats>();
-
+				File globalStats = new File(Options.OUTDIR +"../globalstats.csv");
+				
+				Writer globalStatsWriter;
+				if (!globalStats.exists()){
+					globalStats.createNewFile();
+					globalStatsWriter = new BufferedWriter(new FileWriter(globalStats));
+					globalStatsWriter.append(NoResetStats.CSVHeader());
+				}else{
+					globalStatsWriter = new BufferedWriter(new FileWriter(globalStats,true));
+				}
 				Stats stats = new Stats(Options.OUTDIR + "stats.csv");
 				stats.setHeaders(RandomMealyDriver.getStatHeaders());
 
@@ -120,12 +131,14 @@ public class SIMPATestNoResetMealy {
 
 						stats.addRecord(((RandomMealyDriver) driver).getStats());
 						noResetStats.add(l.getStats());
+						globalStatsWriter.append(l.getStats().toCSV() + "\n");
 					} catch (Exception e){
 						e.printStackTrace();
 					} finally {
 						LogManager.end();
 					}
 				}
+				globalStatsWriter.close();
 				stats.close();
 				System.out.println("[+] Stats");
 				System.out.println("    Avg. requests length : " + Utils.meanOfCSVField(stats.getFilename(), 4));
@@ -135,31 +148,8 @@ public class SIMPATestNoResetMealy {
 				System.out.print(NoResetStats.makeTextStats(noResetStats));
 				Options.OUTDIR = dir;
 				NoResetStats.makeGraph(noResetStats);
-				
-			} else {
-				System.out.println("[+] Retesting automaton " + Options.RETEST);
-				Options.OUTDIR = Utils.makePath(dir + Options.RETEST);
-				Options.SYSTEM = "Random " + Options.RETEST;
-				Utils.deleteDir(new File(Options.OUTDIR + Options.DIRGRAPH));
-				Utils.deleteDir(new File(Options.OUTDIR + Options.DIRARFF));
-				Utils.deleteDir(new File(Options.OUTDIR + Options.DIRLOG));
-				try {
-					if (Options.LOG_HTML)
-						LogManager.addLogger(new HTMLLogger());
-					if (Options.LOG_TEXT)
-						LogManager.addLogger(new TextLogger());
-					LogManager.start();
-					RandomMealy randMealy = RandomMealy
-							.deserialize(Options.OUTDIR + "Random.serialized");
-					randMealy.exportToDot();
-					driver = new RandomMealyDriver(randMealy);
-					Learner l = Learner.getLearnerFor(driver);
-					l.learn();
-					driver.logStats();
-				} finally {
-					LogManager.end();
-				}
-			}
+				Options.OUTDIR = dir + "../out/global_stats/";
+				NoResetStats.makeGraph(NoResetStats.setFromCSV(globalStats.getAbsolutePath()));
 			if (!Options.STAT)
 				System.out.println("[+] End");
 		} catch (Exception e) {
