@@ -325,7 +325,6 @@ public class NoResetLearner extends Learner {
 	private static List<InputSequence> computeCharacterizationSet(TransparentMealyDriver driver){
 		LogManager.logStep(LogManager.STEPOTHER, "computing characterization set");
 		Mealy automata = driver.getAutomata();
-		automata.exportToDot();
 		List<InputSequence> W = new ArrayList<InputSequence>();
 		List<State> distinguishedStates = new ArrayList<State>();
 		for (State s1 : automata.getStates()){

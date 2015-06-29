@@ -33,7 +33,8 @@ public class DataManager {
 	private Set<FullyQualifiedState> notFullyKnownStates;//Fully qualified states with undefined transitions
 	private LmConjecture conjecture;
 	private int recursivity; //for log
-
+	private boolean lockedSetC;//setC do not call back other setC if this is locked
+	private LinkedList<WaitingState> waitingStates;//the call to setCwhich must be done by the root setC
 
 	
 	public DataManager(MealyDriver driver, ArrayList<InputSequence> W){
@@ -51,6 +52,8 @@ public class DataManager {
 		notFullyKnownStates = new HashSet<FullyQualifiedState>();
 		conjecture = new LmConjecture(driver);
 		recursivity = 0;
+		waitingStates = new LinkedList<WaitingState>();
+		lockedSetC = false;
 		instance = this;
 		driver.reset();
 	}
@@ -136,7 +139,6 @@ public class DataManager {
 			logRecursivity("Labelling trace : position " + pos + " is now " + s);
 		startRecursivity();
 		for (FullyQualifiedState q : Q.values()){
-			LinkedList<WaitingState> waitingStates = new LinkedList<WaitingState>();
 			for (FullyKnownTrace v : q.getVerifiedTrace())
 				if (s == v.getStart() && getSubtrace(pos, pos+v.getTrace().size()).equals(v.getTrace())){
 //					setC(pos + v.getTrace().size(), v.getEnd());
@@ -145,10 +147,15 @@ public class DataManager {
 					ws.state = v.getEnd();
 					waitingStates.add(ws);
 				}
-			while(!waitingStates.isEmpty()){
-				WaitingState wc = waitingStates.poll();
-				setC(wc.pos,wc.state);
+			if (!lockedSetC){
+				lockedSetC = true;
+				while(!waitingStates.isEmpty()){
+					WaitingState ws = waitingStates.poll();
+					setC(ws.pos,ws.state);
+				}
+				lockedSetC = false;
 			}
+			
 		}
 		updateK(pos);
 		updateV(pos);
