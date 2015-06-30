@@ -98,7 +98,7 @@ public class SIMPATestNoResetMealy {
 				if (!globalStats.exists()){
 					globalStats.createNewFile();
 					globalStatsWriter = new BufferedWriter(new FileWriter(globalStats));
-					globalStatsWriter.append(NoResetStats.CSVHeader());
+					globalStatsWriter.append(NoResetStats.CSVHeader() + "\n");
 				}else{
 					globalStatsWriter = new BufferedWriter(new FileWriter(globalStats,true));
 				}

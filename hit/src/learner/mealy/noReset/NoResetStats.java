@@ -19,12 +19,16 @@ import automata.mealy.InputSequence;
 public class NoResetStats {
 	enum Atribute {
 		W_SIZE("Size of W","sequence"),
+		W1_LENGTH("Length of first W element","symbols"),
 		LOCALIZER_CALL_NB("Number of call to localizer",""),
 		LOCALIZER_SEQUENCE_LENGTH("Length of localizer sequence","symbols"),
 		TRACE_LENGTH("length of trace","symbols"),
 		INPUT_SYMBOLS("number of input symbols",""),
 		OUTPUT_SYMBOLS("number of output symbols",""),
-		STATE_NUMBER("number of states","");
+		STATE_NUMBER("number of states",""),
+		STATE_NUMBER_BOUND("bound of state number","states"),
+		;
+		
 		public final String units;
 		public final String name;
 		private Atribute(String name, String units) {
@@ -38,24 +42,31 @@ public class NoResetStats {
 	enum PlotStyle {
 		POINTS("with points"),
 		AVERAGE("with linespoints"),
-		AVERAGE_WITH_EXTREMA("with yerrorbars");
+		AVERAGE_WITH_EXTREMA("with yerrorbars"),
+		MEDIAN("with linespoint"),
+		;
 		public String plotLine;
 		private PlotStyle(String plotLine) {
 			this.plotLine = plotLine;
 		}
 	}
 	private int WSize;
+	private int w1Length;
 	private int localizeCallNb = 0;
 	private int localizeSequenceLength;
 	private int traceLength = 0;
 	private int inputSymbols;
 	private int outputSymbols;
 	private int statesNumber;
+	private int n;
 	
-	public NoResetStats(List<InputSequence> W, int inputSymbols, int outputSymbols){
+	
+	public NoResetStats(List<InputSequence> W, int inputSymbols, int outputSymbols, int n){
 		WSize = W.size();
+		w1Length = W.get(0).getLength();
 		this.inputSymbols = inputSymbols;
 		this.outputSymbols= outputSymbols;
+		this.n = n;
 	}
 	
 	private NoResetStats(){
@@ -97,6 +108,69 @@ public class NoResetStats {
 		this.statesNumber = statesNumber;
 	}
 	
+	public String toCSV(){
+		StringBuilder r = new StringBuilder();
+		r.append(WSize + ",");
+		r.append(w1Length + ",");
+		r.append(localizeCallNb + ",");
+		r.append(localizeSequenceLength + ",");
+		r.append(traceLength + ",");
+		r.append(inputSymbols + ",");
+		r.append(outputSymbols + ",");
+		r.append(statesNumber + ",");
+		r.append(n);
+		return r.toString();
+	}
+
+	public static String CSVHeader(){
+		return Atribute.W_SIZE.name + ","
+				+ Atribute.W1_LENGTH.name + ","
+				+ Atribute.LOCALIZER_CALL_NB.name + ","
+				+ Atribute.LOCALIZER_SEQUENCE_LENGTH.name + ","
+				+ Atribute.TRACE_LENGTH.name + ","
+				+ Atribute.INPUT_SYMBOLS.name + ","
+				+ Atribute.OUTPUT_SYMBOLS.name + ","
+				+ Atribute.STATE_NUMBER.name + ","
+				+ Atribute.STATE_NUMBER_BOUND.name + ","
+				;
+	}
+	
+	public static NoResetStats entrieFromCSV(String line){
+		NoResetStats stats = new NoResetStats();
+		StringTokenizer st = new StringTokenizer(line, ",");
+		stats.WSize = Integer.parseInt(st.nextToken());
+		stats.w1Length = Integer.parseInt(st.nextToken());
+		stats.localizeCallNb = Integer.parseInt(st.nextToken());
+		stats.localizeSequenceLength = Integer.parseInt(st.nextToken());
+		stats.traceLength = Integer.parseInt(st.nextToken());
+		stats.inputSymbols = Integer.parseInt(st.nextToken());
+		stats.outputSymbols = Integer.parseInt(st.nextToken());
+		stats.statesNumber = Integer.parseInt(st.nextToken());
+		stats.n = Integer.parseInt(st.nextToken());
+		return stats;
+	}
+
+	public static List<NoResetStats> setFromCSV(String filename){
+		List<NoResetStats> r = new ArrayList<NoResetStats>();
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(filename));
+			String strLine;
+			if (!(strLine = br.readLine()).equals(CSVHeader())){
+				br.close();
+				System.out.println(CSVHeader());
+				System.out.println(strLine);
+				throw new RuntimeException("the csv file do not have the good headings");
+			}
+			while ((strLine = br.readLine()) != null) {
+				r.add(entrieFromCSV(strLine));
+			}
+			br.close();
+			return r;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
 	private static Map<Integer,List<NoResetStats>> sortByAtribute(List<NoResetStats> allStats, Atribute a){
 		Map<Integer,List<NoResetStats>> sorted = new HashMap<Integer,List<NoResetStats>>();
 		for (NoResetStats s : allStats){
@@ -110,57 +184,6 @@ public class NoResetStats {
 		return sorted;
 	}
 	
-	public String toCSV(){
-		StringBuilder r = new StringBuilder();
-		r.append(WSize + ",");
-		r.append(localizeCallNb + ",");
-		r.append(localizeSequenceLength + ",");
-		r.append(traceLength + ",");
-		r.append(inputSymbols + ",");
-		r.append(outputSymbols + ",");
-		r.append(statesNumber + ",");
-		return r.toString();
-	}
-
-	public static String CSVHeader(){
-		return Atribute.W_SIZE.name + "," +
-				Atribute.LOCALIZER_CALL_NB.name + "," +
-				Atribute.LOCALIZER_SEQUENCE_LENGTH.name + "," +
-				Atribute.TRACE_LENGTH.name + "," +
-				Atribute.INPUT_SYMBOLS.name + "," +
-				Atribute.OUTPUT_SYMBOLS.name + "," +
-				Atribute.STATE_NUMBER.name + ",";
-	}
-	
-	public static NoResetStats entrieFromCSV(String line){
-		NoResetStats stats = new NoResetStats();
-		StringTokenizer st = new StringTokenizer(line, ",");
-		stats.WSize = Integer.parseInt(st.nextToken());
-		stats.localizeCallNb = Integer.parseInt(st.nextToken());
-		stats.localizeSequenceLength = Integer.parseInt(st.nextToken());
-		stats.traceLength = Integer.parseInt(st.nextToken());
-		stats.inputSymbols = Integer.parseInt(st.nextToken());
-		stats.outputSymbols = Integer.parseInt(st.nextToken());
-		stats.statesNumber = Integer.parseInt(st.nextToken());
-		return stats;
-	}
-
-	public static List<NoResetStats> setFromCSV(String filename){
-		List<NoResetStats> r = new ArrayList<NoResetStats>();
-		try {
-			BufferedReader br = new BufferedReader(new FileReader(filename));
-			String strLine;
-			br.readLine();
-			while ((strLine = br.readLine()) != null) {
-				r.add(entrieFromCSV(strLine));
-			}
-			br.close();
-			return r;
-		} catch (Exception e) {
-			return null;
-		}
-	}
-
 	private static float AtributeAvg(List<NoResetStats> allStats, Atribute a){
 		int sum = 0;
 		for (NoResetStats s : allStats)
@@ -206,6 +229,8 @@ public class NoResetStats {
 		switch (a) {
 		case W_SIZE:
 			return WSize;
+		case W1_LENGTH:
+			return w1Length;
 		case LOCALIZER_CALL_NB:
 			return localizeCallNb;
 		case LOCALIZER_SEQUENCE_LENGTH:
@@ -218,6 +243,8 @@ public class NoResetStats {
 			return outputSymbols;
 		case STATE_NUMBER:
 			return statesNumber;
+		case STATE_NUMBER_BOUND:
+			return n;
 		default :
 			throw new RuntimeException();
 		}

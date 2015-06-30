@@ -50,11 +50,11 @@ public class NoResetLearner extends Learner {
 	}
 
 	public void learn(List<InputSequence> W){
-		stats = new NoResetStats(W, driver.getInputSymbols().size(), driver.getOutputSymbols().size());
 		LogManager.logStep(LogManager.STEPOTHER,"Inferring the system");
 		LogManager.logConsole("Inferring the system");
 
 		n = Options.MAXSTATES;//TODO find how this parameter is obtained
+		stats = new NoResetStats(W, driver.getInputSymbols().size(), driver.getOutputSymbols().size(),n);
 
 		this.W = new ArrayList<InputSequence>(W);
 		StringBuilder logW = new StringBuilder("Used characterization set : [");
