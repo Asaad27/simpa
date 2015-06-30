@@ -119,6 +119,9 @@ public class NoResetStats {
 		this.statesNumber = statesNumber;
 	}
 	
+	/**
+	 * export stat in CSV format
+	 */
 	public String toCSV(){
 		StringBuilder r = new StringBuilder();
 		r.append(WSize + ",");
@@ -133,6 +136,9 @@ public class NoResetStats {
 		return r.toString();
 	}
 
+	/**
+	 * get the Header for CSV data
+	 */
 	public static String CSVHeader(){
 		return Atribute.W_SIZE.name + ","
 				+ Atribute.W1_LENGTH.name + ","
@@ -146,6 +152,10 @@ public class NoResetStats {
 				;
 	}
 	
+	/**
+	 * rebuild a NoResetStats object from a CSV line
+	 * @param line the line to parse
+	 */
 	public static NoResetStats entrieFromCSV(String line){
 		NoResetStats stats = new NoResetStats();
 		StringTokenizer st = new StringTokenizer(line, ",");
@@ -161,6 +171,10 @@ public class NoResetStats {
 		return stats;
 	}
 
+	/**
+	 * build a list of NoResetStats from a CSV file
+	 * @param filename the name of the file to parse
+	 */
 	public static List<NoResetStats> setFromCSV(String filename){
 		List<NoResetStats> r = new ArrayList<NoResetStats>();
 		try {
@@ -312,14 +326,18 @@ public class NoResetStats {
 			break;
 		case AVERAGE:{
 			Map<Integer,List<NoResetStats>> sorted = sortByAtribute(allStats, abs);
-			for (Integer key : sorted.keySet()){
+			List<Integer> keys = new ArrayList<Integer>(sorted.keySet());
+			Collections.sort(keys);
+			for (Integer key : keys){
 				tempWriter.write(key + " " + AtributeAvg(sorted.get(key), ord) + "\n");
 			}
 		}
 		break;
 		case AVERAGE_WITH_EXTREMA:{
 			Map<Integer,List<NoResetStats>> sorted = sortByAtribute(allStats, abs);
-			for (Integer key : sorted.keySet()){
+			List<Integer> keys = new ArrayList<Integer>(sorted.keySet());
+			Collections.sort(keys);
+			for (Integer key : keys){
 				List<NoResetStats> entrie = sorted.get(key);
 				tempWriter.write(key + " " + AtributeAvg(entrie, ord) + 
 						" " + AtributeMin(entrie, ord) + " " + AtributeMax(entrie, ord) + "\n");
@@ -328,7 +346,9 @@ public class NoResetStats {
 		break;
 		case MEDIAN:{
 			Map<Integer,List<NoResetStats>> sorted = sortByAtribute(allStats, abs);
-			for (Integer key : sorted.keySet()){
+			List<Integer> keys = new ArrayList<Integer>(sorted.keySet());
+			Collections.sort(keys);
+			for (Integer key : keys){
 				tempWriter.write(key + " " + AtributeMedian(sorted.get(key), ord) + "\n");
 			}
 		}
@@ -391,6 +411,46 @@ public class NoResetStats {
 	private static String makeDataDescritption(List<NoResetStats> allStats, Atribute[] ignorefields){
 		return makeDataDescritption(allStats, Arrays.asList(ignorefields));
 	}
+	
+	/**
+	 * 
+	 * @param allStats
+	 * @param ord
+	 * @param abs
+	 * @param group may be null if data are not grouped
+	 * @param style
+	 * @param plotLines
+	 * @return
+	 */
+	private static String makeGnuPlotInstructions(List<NoResetStats> allStats, Atribute ord, Atribute abs, Atribute group, PlotStyle style, String plotLines){
+		StringBuilder r = new StringBuilder();
+
+		r.append("set terminal png enhanced font \"Sans,10\"\n");
+		
+		String name = new String("relationship between "+ord+" and  "+abs+(group == null ? "" : " grouped by " + group));
+		r.append("set title \"" + name + "\"\n");
+		
+		String filename = new String(Options.OUTDIR + File.separator + name + makeDataId(allStats) + ".png");
+		r.append("set output \"" + filename + "\"\n");
+		
+		r.append("set xlabel \"" + abs.name + " (" + abs.units + ")\"\n");
+		
+		r.append("set ylabel \"" + ord.name + " (" + ord.units + ")\"\n");
+		
+		r.append("set label \"");
+		if (group == null)
+			r.append(makeDataDescritption(allStats, new Atribute[]{ord,abs}));
+		else
+			r.append(makeDataDescritption(allStats, new Atribute[]{ord,group,abs}));
+		r.append("\" at graph 1,0.25 right\n");
+
+	
+		r.append((ord.logScale ? "set logscale y" : "unset logscale y") + "\n");
+	
+		r.append(plotLines+"\n");
+		
+		return r.toString();
+	}
 
 	public static void makeGraph(List<NoResetStats> allStats, Atribute ord, Atribute abs, Atribute sort, PlotStyle style){
 		if (allStats.size() == 0)
@@ -405,43 +465,31 @@ public class NoResetStats {
 					style.plotLine +
 					" title \"" + makeTitle(sorted.get(Size), ord, sort, Size, style) + "\", ");
 		}
-		String filename = new String(Options.OUTDIR + File.pathSeparator + "relationship between "+ord+" and  "+abs+" sorted by " + sort + makeDataId(allStats) + ".png");
-		GNUPlot.makeGraph(
-				"set terminal png enhanced font \"Sans,10\"\n"+
-				"set output \"" + filename + "\"\n"+
-				"set xlabel \"" + abs.name + " (" + abs.units + ")\"\n" +
-				"set ylabel \"" + ord.name + " (" + ord.units + ")\"\n" +
-				"set label \"" + makeDataDescritption(allStats, new Atribute[]{ord,sort,abs}) + "\" at graph 1,0.5 right\n" +
-				(ord.logScale ? "set logscale y" : "unset logscale y") + "\n" +
-				plotLines+"\n");
+		GNUPlot.makeGraph(makeGnuPlotInstructions(allStats, ord, abs, sort, style, plotLines.toString()));
 	}
 	
 	public static void makeGraph(List<NoResetStats> allStats, Atribute ord, Atribute abs, PlotStyle style){
 		StringBuilder plotLines = new StringBuilder("plot ");
-			File tempPlot = makeDataFile(allStats, ord, abs,style);
-			plotLines.append("\"" + tempPlot.getAbsolutePath() + "\" " +
-					style.plotLine +
-					" title \"" + makeTitle(allStats, ord, style) + "\", ");
-		String filename = new String(Options.OUTDIR + "relationship between "+ord+" and  "+abs+makeDataId(allStats)+".png");
-		GNUPlot.makeGraph(
-				"set terminal png enhanced font \"Sans,10\"\n"+
-				"set output \"" + filename + "\"\n"+
-				"set xlabel \"" + abs.name + " (" + abs.units + ")\"\n" +
-				"set ylabel \"" + ord.name + " (" + ord.units + ")\"\n" +
-				(ord.logScale ? "set logscale y" : "unset logscale y") + "\n" +
-				plotLines+"\n");
+		File tempPlot = makeDataFile(allStats, ord, abs,style);
+		plotLines.append("\"" + tempPlot.getAbsolutePath() + "\" " +
+				style.plotLine +
+				" title \"" + makeTitle(allStats, ord, style) + "\", ");
+		GNUPlot.makeGraph(makeGnuPlotInstructions(allStats, ord, abs, null, style, plotLines.toString()));
 	}
 
 	public static void makeGraph(List<NoResetStats> allStats){
 		makeGraph(selectFromValues(selectFromRange(allStats, Atribute.W_SIZE, 2, 2),
 				Atribute.STATE_NUMBER,new Integer[]{5,10,15,20,30,50}),
-				Atribute.TRACE_LENGTH, Atribute.STATE_NUMBER_BOUND, Atribute.STATE_NUMBER, PlotStyle.POINTS);
-		makeGraph(selectFromValues(selectFromRange(allStats, Atribute.W_SIZE, 1, 1),
+				Atribute.TRACE_LENGTH, Atribute.STATE_NUMBER_BOUND, Atribute.STATE_NUMBER, PlotStyle.MEDIAN);
+		makeGraph(selectFromValues(selectFromRange(allStats, Atribute.W_SIZE, 2, 2),
 				Atribute.STATE_NUMBER,new Integer[]{5,10,15,20,30,50}),
-				Atribute.TRACE_LENGTH, Atribute.STATE_BOUND_OFFSET, Atribute.STATE_NUMBER, PlotStyle.POINTS);
+				Atribute.TRACE_LENGTH, Atribute.STATE_BOUND_OFFSET, Atribute.STATE_NUMBER, PlotStyle.MEDIAN);
 		makeGraph(selectFromValues(allStats,
 				Atribute.STATE_NUMBER,new Integer[]{5,10,15,20,30,50}),
 				Atribute.TRACE_LENGTH, Atribute.STATE_NUMBER_BOUND, Atribute.STATE_NUMBER, PlotStyle.POINTS);
+		makeGraph(selectFromValues(allStats,
+				Atribute.STATE_NUMBER_BOUND,new Integer[]{5,10,15,20,30,50}),
+				Atribute.TRACE_LENGTH, Atribute.STATE_NUMBER, Atribute.STATE_NUMBER_BOUND, PlotStyle.POINTS);
 		makeGraph(allStats, Atribute.TRACE_LENGTH, Atribute.W_SIZE, PlotStyle.MEDIAN);
 		makeGraph(allStats, Atribute.TRACE_LENGTH, Atribute.W1_LENGTH, Atribute.W_SIZE, PlotStyle.MEDIAN);
 		makeGraph(allStats, Atribute.TRACE_LENGTH, Atribute.INPUT_SYMBOLS, Atribute.W_SIZE, PlotStyle.MEDIAN);
