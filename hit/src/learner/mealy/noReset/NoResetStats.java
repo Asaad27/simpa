@@ -20,16 +20,16 @@ import automata.mealy.InputSequence;
 
 public class NoResetStats {
 	enum Atribute {
-		W_SIZE("Size of W",							"sequence",	false,	true,	"W"),
-		W1_LENGTH("Length of first W element",		"symbols",	false,	true,	"w1"),
-		LOCALIZER_CALL_NB("Number of call to localizer","",		false,	false,	"lc"),
-		LOCALIZER_SEQUENCE_LENGTH("Length of localizer sequence","symbols",false,false,"lsl"),
-		TRACE_LENGTH("length of trace",				"symbols",	true,	false,	"tl"),
-		INPUT_SYMBOLS("number of input symbols",	"",			false,	true,	"f"),
-		OUTPUT_SYMBOLS("number of output symbols",	"",			false,	true,	"o"),
-		STATE_NUMBER("number of states",			"",			false,	true,	"s"),
-		STATE_NUMBER_BOUND("bound of state number",	"states",	false,	true,	"n"),
-		//STATE_BOUND_OFFSET("difference between bound and real state number","states",false,true,"dfn"),
+		W_SIZE("Size of W",							"sequence",	false,	true,	"W",	false),
+		W1_LENGTH("Length of first W element",		"symbols",	false,	true,	"w1",	false),
+		LOCALIZER_CALL_NB("Number of call to localizer","",		false,	false,	"lc",	false),
+		LOCALIZER_SEQUENCE_LENGTH("Length of localizer sequence","symbols",false,false,"lsl",false),
+		TRACE_LENGTH("length of trace",				"symbols",	true,	false,	"tl",	false),
+		INPUT_SYMBOLS("number of input symbols",	"",			false,	true,	"f",	false),
+		OUTPUT_SYMBOLS("number of output symbols",	"",			false,	true,	"o",	false),
+		STATE_NUMBER("number of states",			"",			false,	true,	"s",	false),
+		STATE_NUMBER_BOUND("bound of state number",	"states",	false,	true,	"n",	false),
+		STATE_BOUND_OFFSET("difference between bound and real state number","states",false,true,"dns",false),
 		;
 		
 		public final String units;
@@ -37,12 +37,14 @@ public class NoResetStats {
 		public final boolean logScale;
 		public final boolean isParameter;
 		public final String id;
-		private Atribute(String name, String units, boolean logScale,boolean isParameter,String id) {
+		public final boolean isVirtual;
+		private Atribute(String name, String units, boolean logScale,boolean isParameter,String id,boolean isVirtual) {
 			this.units = units;
 			this.name = name;
 			this.logScale = logScale;
 			this.isParameter = isParameter;
 			this.id = id;
+			this.isVirtual = isVirtual;
 		}
 		public String ToString(){
 			return name;
@@ -285,6 +287,8 @@ public class NoResetStats {
 			return statesNumber;
 		case STATE_NUMBER_BOUND:
 			return n;
+		case STATE_BOUND_OFFSET:
+			return n-statesNumber;
 		default :
 			throw new RuntimeException();
 		}
@@ -371,7 +375,7 @@ public class NoResetStats {
 		for (Atribute a : Atribute.class.getEnumConstants()){
 			if (ignorefields.contains(a))
 				continue;
-			if (!a.isParameter)
+			if (!a.isParameter || a.isVirtual)
 				continue;
 			int min = AtributeMin(allStats, a);
 			int max = AtributeMax(allStats, a);
@@ -433,6 +437,9 @@ public class NoResetStats {
 				Atribute.STATE_NUMBER,new Integer[]{5,10,15,20,30,50}),
 				Atribute.TRACE_LENGTH, Atribute.STATE_NUMBER_BOUND, Atribute.STATE_NUMBER, PlotStyle.POINTS);
 		makeGraph(selectFromValues(selectFromRange(allStats, Atribute.W_SIZE, 1, 1),
+				Atribute.STATE_NUMBER,new Integer[]{5,10,15,20,30,50}),
+				Atribute.TRACE_LENGTH, Atribute.STATE_BOUND_OFFSET, Atribute.STATE_NUMBER, PlotStyle.POINTS);
+		makeGraph(selectFromValues(allStats,
 				Atribute.STATE_NUMBER,new Integer[]{5,10,15,20,30,50}),
 				Atribute.TRACE_LENGTH, Atribute.STATE_NUMBER_BOUND, Atribute.STATE_NUMBER, PlotStyle.POINTS);
 		makeGraph(allStats, Atribute.TRACE_LENGTH, Atribute.W_SIZE, PlotStyle.MEDIAN);
