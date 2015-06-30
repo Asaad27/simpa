@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,22 +20,29 @@ import automata.mealy.InputSequence;
 
 public class NoResetStats {
 	enum Atribute {
-		W_SIZE("Size of W","sequence"),
-		W1_LENGTH("Length of first W element","symbols"),
-		LOCALIZER_CALL_NB("Number of call to localizer",""),
-		LOCALIZER_SEQUENCE_LENGTH("Length of localizer sequence","symbols"),
-		TRACE_LENGTH("length of trace","symbols"),
-		INPUT_SYMBOLS("number of input symbols",""),
-		OUTPUT_SYMBOLS("number of output symbols",""),
-		STATE_NUMBER("number of states",""),
-		STATE_NUMBER_BOUND("bound of state number","states"),
+		W_SIZE("Size of W",							"sequence",	false,	true,	"W"),
+		W1_LENGTH("Length of first W element",		"symbols",	false,	true,	"w1"),
+		LOCALIZER_CALL_NB("Number of call to localizer","",		false,	false,	"lc"),
+		LOCALIZER_SEQUENCE_LENGTH("Length of localizer sequence","symbols",false,false,"lsl"),
+		TRACE_LENGTH("length of trace",				"symbols",	true,	false,	"tl"),
+		INPUT_SYMBOLS("number of input symbols",	"",			false,	true,	"f"),
+		OUTPUT_SYMBOLS("number of output symbols",	"",			false,	true,	"o"),
+		STATE_NUMBER("number of states",			"",			false,	true,	"s"),
+		STATE_NUMBER_BOUND("bound of state number",	"states",	false,	true,	"n"),
+		//STATE_BOUND_OFFSET("difference between bound and real state number","states",false,true,"dfn"),
 		;
 		
 		public final String units;
 		public final String name;
-		private Atribute(String name, String units) {
+		public final boolean logScale;
+		public final boolean isParameter;
+		public final String id;
+		private Atribute(String name, String units, boolean logScale,boolean isParameter,String id) {
 			this.units = units;
 			this.name = name;
+			this.logScale = logScale;
+			this.isParameter = isParameter;
+			this.id = id;
 		}
 		public String ToString(){
 			return name;
@@ -184,6 +193,28 @@ public class NoResetStats {
 		return sorted;
 	}
 	
+	private static List<NoResetStats> selectFromRange(List<NoResetStats> allStats, Atribute a, int min, int max){
+		List<NoResetStats> kept = new ArrayList<NoResetStats>();
+		for (NoResetStats s : allStats){
+			if (s.getAtribute(a) <= max && s.getAtribute(a) >= min)
+				kept.add(s);
+		}
+		return kept;
+	}
+
+	private static List<NoResetStats> selectFromValues(List<NoResetStats> allStats, Atribute a, List<Integer> values){
+		List<NoResetStats> kept = new ArrayList<NoResetStats>();
+		for (NoResetStats s : allStats){
+			if (values.contains(s.getAtribute(a)))
+				kept.add(s);
+		}
+		return kept;
+	}
+	
+	private static List<NoResetStats> selectFromValues(List<NoResetStats> allStats, Atribute a, Integer[] values){
+		return selectFromValues(allStats, a, Arrays.asList(values));
+	}
+
 	private static float AtributeAvg(List<NoResetStats> allStats, Atribute a){
 		int sum = 0;
 		for (NoResetStats s : allStats)
@@ -205,6 +236,15 @@ public class NoResetStats {
 			if (max < s.getAtribute(a))
 				max = s.getAtribute(a);
 		return max;
+	}
+	
+	private static Integer AtributeMedian(List<NoResetStats> allStats, Atribute a){
+		Integer[] values = new Integer[allStats.size()];
+		for (int i = 0; i < allStats.size(); i++){
+			values[i] = allStats.get(i).getAtribute(a);
+		}
+		Arrays.sort(values);
+		return values[allStats.size()/2];
 	}
 
 	public static String makeTextStats(List<NoResetStats> statsCol) {
@@ -282,6 +322,13 @@ public class NoResetStats {
 			}
 		}
 		break;
+		case MEDIAN:{
+			Map<Integer,List<NoResetStats>> sorted = sortByAtribute(allStats, abs);
+			for (Integer key : sorted.keySet()){
+				tempWriter.write(key + " " + AtributeMedian(sorted.get(key), ord) + "\n");
+			}
+		}
+		break;
 		default:
 			break;
 		}
@@ -290,22 +337,78 @@ public class NoResetStats {
 		tempPlot.deleteOnExit();
 		return tempPlot;
 	}
+
+	private static String makeTitle(List<NoResetStats> allStats, Atribute ord, PlotStyle style){
+		StringBuilder r = new StringBuilder();
+		r.append(style + " of " + allStats.size() + " inferences ");
+		return r.toString();
+	}
 	
+	private static String makeTitle(List<NoResetStats> allStats, Atribute ord, Atribute group, Integer key, PlotStyle style){
+		StringBuilder r = new StringBuilder();
+		r.append(makeTitle(allStats, ord, style));
+		r.append("(" + group.name + " : " + key + " " + group.units + ")");
+		return r.toString();
+	}
+	
+	private static String makeDataId(List<NoResetStats> allStats){
+		StringBuilder r = new StringBuilder();
+		for (Atribute a : Atribute.class.getEnumConstants()){
+			int min = AtributeMin(allStats, a);
+			int max = AtributeMax(allStats, a);
+			if (min == max){
+				r.append("_" + a.id + min);
+			} else {
+				r.append("_" + a.id + min + "-" + max);
+			}
+		}
+		return r.toString();
+	}
+	
+	private static String makeDataDescritption(List<NoResetStats> allStats, List<Atribute> ignorefields){
+		StringBuilder r = new StringBuilder();
+		String separator = "\\n";
+		for (Atribute a : Atribute.class.getEnumConstants()){
+			if (ignorefields.contains(a))
+				continue;
+			if (!a.isParameter)
+				continue;
+			int min = AtributeMin(allStats, a);
+			int max = AtributeMax(allStats, a);
+			if (min == max){
+				r.append(a.name + " : " + min + " " + a.units + separator);
+			} else {
+				r.append(min + " ≤ " + a.name + " ≤ " + max + " " + a.units + separator);
+			}
+		}
+		return r.toString();
+	}
+	
+	private static String makeDataDescritption(List<NoResetStats> allStats, Atribute[] ignorefields){
+		return makeDataDescritption(allStats, Arrays.asList(ignorefields));
+	}
+
 	public static void makeGraph(List<NoResetStats> allStats, Atribute ord, Atribute abs, Atribute sort, PlotStyle style){
+		if (allStats.size() == 0)
+			return;
 		StringBuilder plotLines = new StringBuilder("plot ");
 		Map<Integer, List<NoResetStats>> sorted = sortByAtribute(allStats, sort);
-		for (Integer Size : sorted.keySet()){
+		List<Integer> keyValues = new ArrayList<Integer>(sorted.keySet());
+		Collections.sort(keyValues);
+		for (Integer Size : keyValues){
 			File tempPlot = makeDataFile(sorted.get(Size), ord, abs,style);
 			plotLines.append("\"" + tempPlot.getAbsolutePath() + "\" " +
 					style.plotLine +
-					" title \"" + sort.name + " " + Size + " " + sort.units +"\", ");
+					" title \"" + makeTitle(sorted.get(Size), ord, sort, Size, style) + "\", ");
 		}
-		String filename = new String(Options.OUTDIR + File.pathSeparator + "relationship between "+ord+" and  "+abs+" sorted by " + sort + ".png");
+		String filename = new String(Options.OUTDIR + File.pathSeparator + "relationship between "+ord+" and  "+abs+" sorted by " + sort + makeDataId(allStats) + ".png");
 		GNUPlot.makeGraph(
 				"set terminal png enhanced font \"Sans,10\"\n"+
 				"set output \"" + filename + "\"\n"+
 				"set xlabel \"" + abs.name + " (" + abs.units + ")\"\n" +
 				"set ylabel \"" + ord.name + " (" + ord.units + ")\"\n" +
+				"set label \"" + makeDataDescritption(allStats, new Atribute[]{ord,sort,abs}) + "\" at graph 1,0.5 right\n" +
+				(ord.logScale ? "set logscale y" : "unset logscale y") + "\n" +
 				plotLines+"\n");
 	}
 	
@@ -313,27 +416,27 @@ public class NoResetStats {
 		StringBuilder plotLines = new StringBuilder("plot ");
 			File tempPlot = makeDataFile(allStats, ord, abs,style);
 			plotLines.append("\"" + tempPlot.getAbsolutePath() + "\" " +
-					style.plotLine);
-		String filename = new String(Options.OUTDIR + File.pathSeparator + "relationship between "+ord+" and  "+abs+".png");
+					style.plotLine +
+					" title \"" + makeTitle(allStats, ord, style) + "\", ");
+		String filename = new String(Options.OUTDIR + "relationship between "+ord+" and  "+abs+makeDataId(allStats)+".png");
 		GNUPlot.makeGraph(
 				"set terminal png enhanced font \"Sans,10\"\n"+
 				"set output \"" + filename + "\"\n"+
 				"set xlabel \"" + abs.name + " (" + abs.units + ")\"\n" +
 				"set ylabel \"" + ord.name + " (" + ord.units + ")\"\n" +
+				(ord.logScale ? "set logscale y" : "unset logscale y") + "\n" +
 				plotLines+"\n");
 	}
 
 	public static void makeGraph(List<NoResetStats> allStats){
-		makeGraph(allStats,Atribute.TRACE_LENGTH,Atribute.LOCALIZER_CALL_NB,Atribute.W_SIZE,PlotStyle.POINTS);
-		makeGraph(allStats,Atribute.TRACE_LENGTH,Atribute.INPUT_SYMBOLS,Atribute.W_SIZE,PlotStyle.POINTS);
-		makeGraph(allStats,Atribute.TRACE_LENGTH,Atribute.OUTPUT_SYMBOLS,Atribute.W_SIZE,PlotStyle.POINTS);
-		makeGraph(allStats,Atribute.TRACE_LENGTH,Atribute.STATE_NUMBER,Atribute.W_SIZE,PlotStyle.POINTS);
-		makeGraph(allStats,Atribute.LOCALIZER_SEQUENCE_LENGTH,Atribute.INPUT_SYMBOLS,Atribute.W_SIZE,PlotStyle.POINTS);
-		makeGraph(allStats,Atribute.LOCALIZER_SEQUENCE_LENGTH,Atribute.OUTPUT_SYMBOLS,Atribute.W_SIZE,PlotStyle.POINTS);
-		makeGraph(allStats,Atribute.LOCALIZER_SEQUENCE_LENGTH,Atribute.STATE_NUMBER,Atribute.W_SIZE,PlotStyle.POINTS);
-		makeGraph(allStats,Atribute.LOCALIZER_CALL_NB,Atribute.STATE_NUMBER,Atribute.W_SIZE,PlotStyle.AVERAGE_WITH_EXTREMA);
-		makeGraph(allStats,Atribute.LOCALIZER_CALL_NB,Atribute.INPUT_SYMBOLS,Atribute.W_SIZE,PlotStyle.AVERAGE_WITH_EXTREMA);
-		makeGraph(allStats,Atribute.LOCALIZER_CALL_NB,Atribute.OUTPUT_SYMBOLS,Atribute.W_SIZE,PlotStyle.AVERAGE_WITH_EXTREMA);
-		makeGraph(allStats, Atribute.W_SIZE, Atribute.OUTPUT_SYMBOLS, PlotStyle.AVERAGE);
+		makeGraph(selectFromValues(selectFromRange(allStats, Atribute.W_SIZE, 2, 2),
+				Atribute.STATE_NUMBER,new Integer[]{5,10,15,20,30,50}),
+				Atribute.TRACE_LENGTH, Atribute.STATE_NUMBER_BOUND, Atribute.STATE_NUMBER, PlotStyle.POINTS);
+		makeGraph(selectFromValues(selectFromRange(allStats, Atribute.W_SIZE, 1, 1),
+				Atribute.STATE_NUMBER,new Integer[]{5,10,15,20,30,50}),
+				Atribute.TRACE_LENGTH, Atribute.STATE_NUMBER_BOUND, Atribute.STATE_NUMBER, PlotStyle.POINTS);
+		makeGraph(allStats, Atribute.TRACE_LENGTH, Atribute.W_SIZE, PlotStyle.MEDIAN);
+		makeGraph(allStats, Atribute.TRACE_LENGTH, Atribute.W1_LENGTH, Atribute.W_SIZE, PlotStyle.MEDIAN);
+		makeGraph(allStats, Atribute.TRACE_LENGTH, Atribute.INPUT_SYMBOLS, Atribute.W_SIZE, PlotStyle.MEDIAN);
 	}
 }

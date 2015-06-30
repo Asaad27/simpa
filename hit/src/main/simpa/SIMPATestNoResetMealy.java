@@ -149,6 +149,7 @@ public class SIMPATestNoResetMealy {
 				Options.OUTDIR = dir;
 				NoResetStats.makeGraph(noResetStats);
 				Options.OUTDIR = dir + "../out/global_stats/";
+				Utils.cleanDir(new File(Options.OUTDIR));
 				NoResetStats.makeGraph(NoResetStats.setFromCSV(globalStats.getAbsolutePath()));
 			if (!Options.STAT)
 				System.out.println("[+] End");
