@@ -258,26 +258,35 @@ public abstract class DriverGenerator {
 
 		for (WebInput i : inputs) {
 			TreeMap<String, List<String>> iParams = i.getParams();
-			//do not add if another input with the same address has at least one
-			//different numeric parameter value (to avoid "gallery" pages)
+			//do not add if another input with the same address has exactly one
+			//different parameter value, and this value is numeric (to avoid "gallery" pages)
 			//TODO : modify this to match the specs in Karim's paper page 82
-			if (i.getAddress().equals(in.getAddress())) {
-				int diff = 0;
-				for (String paramName : iParams.keySet()) {
-					if (inParams.get(paramName) != null && iParams.get(paramName) != null) {
-						if (inParams.get(paramName).size() == 1 && iParams.get(paramName).size() == 1) {
+			if (!iParams.keySet().equals(inParams.keySet())) {
+				continue;
+			}
+			if (!i.getAddress().equals(in.getAddress()) || !i.getMethod().equals(in.getMethod())) {
+				continue;
+			}
+			
+			int diff = 0;
+			for (String paramName : iParams.keySet()) {
+				if (inParams.get(paramName) != null && iParams.get(paramName) != null) {
+					if (inParams.get(paramName).size() == 1 && iParams.get(paramName).size() == 1) {
+						//a different parameter value is found
+						if (!inParams.get(paramName).get(0).equals(iParams.get(paramName).get(0))) {
 							if (Utils.isNumeric(inParams.get(paramName).get(0)) && Utils.isNumeric(iParams.get(paramName).get(0))) {
-								if (!inParams.get(paramName).get(0).equals(iParams.get(paramName).get(0))) {
-									diff++;
-								}
+								diff++;
+							} else {
+								break;
 							}
 						}
 					}
 				}
-				if (diff >= 1) {
-					return false;
-				}
 			}
+			if (diff == 1) {
+				return false;
+			}
+
 		}
 
 		return true;

@@ -81,7 +81,9 @@ public class DriverGeneratorBFS extends DriverGenerator {
 		for (WebInput currentInput : inputChain) {
 			checkInputParameters(currentInput);
 			resultString = sendInput(currentInput);
-
+			if (resultString == null || resultString.equals("")) {
+				return null;
+			}
 			/* If it is possible to reset the application, then sending the same 
 			sequence of input should result in the same page with the same output parameters.
 			Therefore, if any parameter is different than the last time the same 
@@ -105,8 +107,7 @@ public class DriverGeneratorBFS extends DriverGenerator {
 				}
 			}
 		}
-
-		if (resultString == null || resultString.equals("")) {
+		if(withoutLast) {
 			return null;
 		} else {
 			return new WebOutput(resultString, input, config.getLimitSelector());
@@ -180,7 +181,7 @@ public class DriverGeneratorBFS extends DriverGenerator {
 
 		inputsToCrawlAfter.add(start);
 
-		while (!inputsToCrawlAfter.isEmpty() && depth <= MAX_DEPTH) {
+		while (!inputsToCrawlAfter.isEmpty() && depth < MAX_DEPTH) {
 			depth++;
 			inputsToCrawl.addAll(inputsToCrawlAfter);
 			inputsToCrawlAfter = new LinkedList<>();
@@ -264,16 +265,19 @@ public class DriverGeneratorBFS extends DriverGenerator {
 	protected void updateOutput(WebOutput out, WebInput from) {
 		WebOutput equivalent = findEquivalentOutput(out);
 		if (equivalent != null) {
+			Map<String, String> differences = findDifferences(equivalent, out);
+			equivalent.addAllParams(differences);
+			
 			if (equivalent.isNewFrom(from)) {
 				findParameters(equivalent, from);
 			}
 			out.setState(equivalent.getState());
-			return;
+		} else {
+			outputs.add(out);
+			out.setState(outputs.size() - 1);
+			System.out.println("        New page !");
+			findParameters(out, from);
 		}
-		outputs.add(out);
-		out.setState(outputs.size() - 1);
-		System.out.println("        New page !");
-		findParameters(out, from);
 	}
 
 	/**
@@ -284,6 +288,9 @@ public class DriverGeneratorBFS extends DriverGenerator {
 	 * @param inputToFuzz the input whose parameters's values are to be fuzzed
 	 */
 	private void findParameters(WebOutput referenceOutput, WebInput inputToFuzz) {
+		if (inputToFuzz.getParams().isEmpty()) {
+			return;
+		}
 		Map<String, String> diff = new HashMap<>();
 		for (int i = 0; i < 5; i++) {
 			try {
