@@ -43,6 +43,9 @@ public class Options {
 	public static boolean FORCE_J48 = false;
 	public static boolean STOP_ON_CE_SEARCH = false;
 
+	//Web application analysis
+	public static boolean XSS_DETECTION = false;
+
 	// Output's options
 
 	public static boolean LOG_TEXT = false;

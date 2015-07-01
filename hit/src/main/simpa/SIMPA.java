@@ -52,6 +52,8 @@ public class SIMPA {
 				}
 				else if (args[i].equals("--generic"))
 					Options.GENERICDRIVER = true;
+				else if (args[i].equals("--xss"))
+					Options.XSS_DETECTION = true;
 				else if (args[i].equals("--tree"))
 					Options.TREEINFERENCE = true;
 				else if (args[i].equals("--weka"))
