@@ -4,3 +4,5 @@
 /model
 /bin
 /abs/
+.jacocoverage/
+jacoco.exec-*
