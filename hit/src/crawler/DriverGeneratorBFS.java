@@ -63,7 +63,7 @@ public class DriverGeneratorBFS extends DriverGenerator {
 	 * @return the last obtained output
 	 * @throws MalformedURLException 
 	 */
-	protected WebOutput sendInputChain(WebInput input, boolean withoutLast) throws MalformedURLException {
+	protected WebOutput sendInputChain(WebInput input, boolean withoutLast) throws IOException {
 		reset();
 		
 		//prepares the chain of input to send
@@ -114,7 +114,7 @@ public class DriverGeneratorBFS extends DriverGenerator {
 
 	}
 
-	protected String sendInput(WebInput input) throws MalformedURLException {
+	protected String sendInput(WebInput input) throws IOException {
 		return sendInput(input, false);
 	}
 
@@ -125,7 +125,7 @@ public class DriverGeneratorBFS extends DriverGenerator {
 	 * @return the content of the output (most likely HTML)
 	 * @throws MalformedURLException 
 	 */
-	protected String sendInput(WebInput input, boolean randomized) throws MalformedURLException {
+	protected String sendInput(WebInput input, boolean randomized) throws IOException {
 		Page page;
 		HttpMethod method = input.getMethod();
 
@@ -144,20 +144,18 @@ public class DriverGeneratorBFS extends DriverGenerator {
 		}
 		try {
 			page = client.getPage(request);
-			requests++;
+		} catch (RuntimeException e) {
+			//htmlunit throws a RuntimeException whenever it catches a MalformedURLException
+			//cf com.gargoylesoftware.htmlunit.util.UrlUtils.toUrlSafe()
+			throw new MalformedURLException(e.getLocalizedMessage());
+		}
+		requests++;
 			/* TODO : Task 32
 			if (page.getWebResponse().getStatusCode() != 200) {
 				return null;
 			}
 			*/
-		} catch (HttpHostConnectException e) {
-			LogManager.logFatalError("Unable to connect to host");
-			return null;
-		} catch (Exception e) {
-			LogManager.logException(null, e);
-			return null;
-		}
-
+		
 		if (page instanceof TextPage) {
 			return ((TextPage) page).getContent();
 		} else if (page instanceof HtmlPage) {
@@ -202,41 +200,43 @@ public class DriverGeneratorBFS extends DriverGenerator {
 				//	use the input, store the output
 				//	checks if the output is different from the previously encountered one (map<WebOutput, counter>)
 				//  if one output has been discovered more that 3 times, keep only one input
+				WebInput currentInput = inputsToCrawl.removeFirst();
+
+				System.out.println("Current : " + currentInput);
+				System.out.println("\tDepth " + depth);
+				//actually crawl the input and stores the output
+				WebOutput currentOutput;
 				try {
-					WebInput currentInput = inputsToCrawl.removeFirst();
-
-					System.out.println("Current : " + currentInput);
-					System.out.println("\tDepth " + depth);
-					//actually crawl the input and stores the output
-					WebOutput currentOutput = sendInputChain(currentInput, false);
-					if(currentOutput == null){
-						comments.add("The input " +  currentInput + " has been filtered out. "
-								+ "If it's a link to a non-html page (e.g. a *.jpg), "
-								+ "please consider adding a \"noFollow\" pattern "
-								+ "to the JSON config file to improve crawling speed");
-						inputs.remove(currentInput);
-						continue;
-					}
-					currentInput.setOutput(currentOutput);
-
-					//check if output is new ?
-					updateOutput(currentOutput, currentInput);
-					int fromState;
-					fromState = first ? -1 : currentInput.getPrev().getOutput().getState();
-					first = false;
-					int toState = currentOutput.getState();
-					transitions.add(new WebTransition(fromState, toState, currentInput));
-
-					//find new inputs to crawl
-					List<WebInput> extractedInputs = extractInputs(currentOutput);
-					for (WebInput wi : extractedInputs) {
-						wi.setPrev(currentInput);
-					}
-					inputsToCrawlAfter.addAll(extractedInputs);
-					
-				} catch (MalformedURLException ex) {
-					Logger.getLogger(DriverGeneratorBFS.class.getName()).log(Level.SEVERE, null, ex);
+					currentOutput = sendInputChain(currentInput, false);
+				} catch (IOException ex) {
+					inputs.remove(currentInput);
+					continue;
 				}
+				if (currentOutput == null) {
+					comments.add("The input " + currentInput + " has been filtered out. "
+							+ "If it's a link to a non-html page (e.g. a *.jpg), "
+							+ "please consider adding a \"noFollow\" pattern "
+							+ "to the JSON config file to improve crawling speed");
+					inputs.remove(currentInput);
+					continue;
+				}
+				currentInput.setOutput(currentOutput);
+
+				//check if output is new ?
+				updateOutput(currentOutput, currentInput);
+				int fromState;
+				fromState = first ? -1 : currentInput.getPrev().getOutput().getState();
+				first = false;
+				int toState = currentOutput.getState();
+				transitions.add(new WebTransition(fromState, toState, currentInput));
+
+				//find new inputs to crawl
+				List<WebInput> extractedInputs = extractInputs(currentOutput);
+				for (WebInput wi : extractedInputs) {
+					wi.setPrev(currentInput);
+				}
+				inputsToCrawlAfter.addAll(extractedInputs);
+
 			}
 		}
 		if (depth > MAX_DEPTH) {
@@ -294,8 +294,8 @@ public class DriverGeneratorBFS extends DriverGenerator {
 				if (referenceOutput.isEquivalentTo(variant)) {
 					diff.putAll(findDifferences(referenceOutput, variant));
 				}
-			} catch (MalformedURLException e) {
-				e.printStackTrace();
+			} catch (IOException e) {
+				LogManager.logException("Should not get IOException", e);
 			}
 
 		}
