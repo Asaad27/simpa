@@ -19,6 +19,7 @@ public class Configuration {
 	private String limitSelector = null;
 	private HashMap<String, ArrayList<String>> paramValues = null;
 	private ArrayList<String> noFollow = null;
+	private ArrayList<String> uselessParameters = null;
 	private ArrayList<String> urls = null;
 	private String actionByParameter = null;
 	private String cookies = null;
@@ -41,6 +42,7 @@ public class Configuration {
 	public Configuration() {
 		paramValues = new HashMap<String, ArrayList<String>>();
 		noFollow = new ArrayList<String>();
+		uselessParameters = new ArrayList<String>();
 		urls = new ArrayList<String>();
 	}
 
@@ -94,6 +96,10 @@ public class Configuration {
 
 	public List<String> getNoFollow() {		
 		return noFollow;
+	}
+
+	public ArrayList<String> getUselessParameters() {
+		return uselessParameters;
 	}
 
 	public String getName() {
@@ -158,6 +164,7 @@ public class Configuration {
 		if (cookies != null && cookies.isEmpty()) cookies = null;
 		if (reset != null && reset.isEmpty()) reset = null;
 		if (noFollow == null) noFollow = new ArrayList<String>();
+		if (uselessParameters == null) uselessParameters = new ArrayList<String>();
 		Utils.generateCombinationOfSet(paramValues);
 	}
 

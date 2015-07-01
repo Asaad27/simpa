@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -378,6 +379,9 @@ public class DriverGeneratorBFS extends DriverGenerator {
 		if (!forms.isEmpty()) {
 			inputsList.addAll(extractInputsFromForms(forms));
 		}
+		
+		//Filter out useless parameters
+		removeUselessParameters(inputsList);
 		return inputsList;
 	}
 
@@ -584,6 +588,19 @@ public class DriverGeneratorBFS extends DriverGenerator {
 				comments.add("checkInputParameters() : No values for " + key + ", "
 						+ "random string used. You may need to provide useful value.");
 
+			}
+		}
+	}
+
+	private void removeUselessParameters(List<WebInput> inputsList) {
+		for (WebInput wi : inputsList) {
+			TreeMap<String, List<String>> params = wi.getParams();
+			Set<String> keySet = params.keySet();
+			for (Iterator<String> iter = keySet.iterator(); iter.hasNext();) {
+				String param = iter.next();
+				if (config.getUselessParameters().contains(param)) {
+					iter.remove();
+				}
 			}
 		}
 	}
