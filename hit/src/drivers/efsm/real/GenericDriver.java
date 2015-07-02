@@ -113,7 +113,6 @@ public class GenericDriver extends LowWebDriver {
 	@Override
 	public ParameterizedOutput execute(ParameterizedInput pi) {
 		numberOfAtomicRequest++;
-		WebInput in = inputsFromSymbols.get(pi.getInputSymbol());
 
 		//Sends the output and store the source output
 		String source = submit(pi);
@@ -160,7 +159,7 @@ public class GenericDriver extends LowWebDriver {
 		return po;
 	}
 
-	private HTTPData getValuesForInput(WebInput in, ParameterizedInput pi) {
+	private HTTPData getRequestData(WebInput in, ParameterizedInput pi) {
 		HTTPData data = new HTTPData();
 		TreeMap<String, List<String>> params = in.getParams();
 		int i = 0;
@@ -168,6 +167,22 @@ public class GenericDriver extends LowWebDriver {
 			data.add(key, pi.getParameterValue(i++));
 		}
 		return data;
+	}
+
+	public String getAddressWithParameters(WebInput in, ParameterizedInput pi) {
+		if (in.getMethod() != HttpMethod.GET) {
+			throw new IllegalArgumentException("Internal error : this method should "
+					+ "not be called for an input with a method other than GET");
+		}
+		String addr = in.getAddress() + "?";
+		TreeMap<String, List<String>> params = in.getParams();
+		int i = 0;
+		for (String key : params.keySet()) {
+			addr += key + "=" + pi.getParameterValue(i++) + "&";
+		}
+
+		addr = addr.substring(0, addr.length() - 1);
+		return addr;
 	}
 
 	private String submit(ParameterizedInput pi) {
@@ -192,12 +207,12 @@ public class GenericDriver extends LowWebDriver {
 
 			switch (method) {
 				case POST:
-					HTTPData values = getValuesForInput(in, pi);
+					HTTPData values = getRequestData(in, pi);
 					request.setRequestParameters(values.getNameValueData());
 					request.setAdditionalHeader("Connection", "Close");
 					break;
 				case GET:
-					request.setUrl(new URL(in.getAddressWithParameters()));
+					request.setUrl(new URL(getAddressWithParameters(in, pi)));
 					break;
 				default:
 					throw new UnsupportedOperationException(method + " method not supported yet.");
