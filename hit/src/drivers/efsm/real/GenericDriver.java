@@ -30,6 +30,7 @@ import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedOutput;
 
 import com.gargoylesoftware.htmlunit.CookieManager;
+import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
@@ -42,8 +43,10 @@ import crawler.WebInput.Type;
 import crawler.WebOutput;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Logger;
 import org.apache.http.conn.HttpHostConnectException;
 import org.w3c.dom.Node;
+import tools.HTTPRequest;
 
 public class GenericDriver extends LowWebDriver {
 
@@ -113,12 +116,7 @@ public class GenericDriver extends LowWebDriver {
 		WebInput in = inputsFromSymbols.get(pi.getInputSymbol());
 
 		//Sends the output and store the source output
-		String source = null;
-		try {
-			source = submit(in, pi);
-		} catch (MalformedURLException e1) {
-			e1.printStackTrace();
-		}
+		String source = submit(pi);
 
 		ParameterizedOutput po = null;
 		//Creates the WebOutput object from html source
@@ -164,52 +162,54 @@ public class GenericDriver extends LowWebDriver {
 
 	private HTTPData getValuesForInput(WebInput in, ParameterizedInput pi) {
 		HTTPData data = new HTTPData();
-		if (in.getType() == Type.FORM) {
-			TreeMap<String, List<String>> params = in.getParams();
-			int i = 0;
-			for (String key : params.keySet()) {
-				data.add(key, pi.getParameterValue(i++));
-			}
+		TreeMap<String, List<String>> params = in.getParams();
+		int i = 0;
+		for (String key : params.keySet()) {
+			data.add(key, pi.getParameterValue(i++));
 		}
 		return data;
 	}
 
-	private String submit(WebInput in, ParameterizedInput pi)
-			throws MalformedURLException {
-		WebRequest request = null;
-		HTTPData values = getValuesForInput(in, pi);
-		if (in.getType() == Type.FORM) {
-			request = new WebRequest(new URL(in.getAddress()), in.getMethod());
-			request.setRequestParameters(values.getNameValueData());
-
+	private String submit(ParameterizedInput pi) {
+		try {
+			WebRequest request = parameterizedInputToRequest(pi);
 			HtmlPage page;
-			try {
-				page = client.getPage(request);
-			} catch (Exception e) {
-				e.printStackTrace();
-				return null;
-			}
+			page = client.getPage(request);
 			return page.asXml();
-		} else if (in.getType() == Type.LINK) {
-			String link = in.getAddress() + "?";
-			if (!in.getParams().isEmpty()) {
-				for (String name : in.getParams().keySet()) {
-					for (String value : in.getParams().get(name)) {
-						link += name + "=" + value + "&";
-					}
-				}
-			}
-			HtmlPage page;
-			try {
-				page = client.getPage(link.substring(0, link.length() - 1));
-			} catch (Exception e) {
-				e.printStackTrace();
-				return null;
-			}
-			return page.asXml();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
 		}
-		return null;
 	}
+
+
+	public WebRequest parameterizedInputToRequest(ParameterizedInput pi) {
+		try {
+			WebInput in = inputsFromSymbols.get(pi.getInputSymbol());
+			HttpMethod method = in.getMethod();
+			WebRequest request = null;
+			request = new WebRequest(new URL(in.getAddress()), in.getMethod());
+
+			switch (method) {
+				case POST:
+					HTTPData values = getValuesForInput(in, pi);
+					request.setRequestParameters(values.getNameValueData());
+					request.setAdditionalHeader("Connection", "Close");
+					break;
+				case GET:
+					request.setUrl(new URL(in.getAddressWithParameters()));
+					break;
+				default:
+					throw new UnsupportedOperationException(method + " method not supported yet.");
+			}
+
+			return request;
+		} catch (MalformedURLException ex) {
+			LogManager.logException("Internal error : this should not happen", ex);
+			throw new AssertionError("Internal error : this should not happen");
+		}
+	}
+	
 
 	@Override
 	public void reset(){

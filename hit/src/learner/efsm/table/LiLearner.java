@@ -19,10 +19,11 @@ import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedInputSequence;
 import automata.efsm.ParameterizedOutput;
 import automata.efsm.ParameterizedOutputSequence;
+import detection.XSSDetector;
 import drivers.Driver;
 import drivers.efsm.EFSMDriver;
 import drivers.efsm.EFSMDriver.Types;
-import java.util.LinkedList;
+import drivers.efsm.real.GenericDriver;
 import tools.Utils;
 
 public class LiLearner extends Learner {
@@ -30,14 +31,12 @@ public class LiLearner extends Learner {
 	private LiControlTable cTable;
 	private LiDataTable dTable;
 	private Map<String, List<ArrayList<Parameter>>> defaultParamValues;
-	private HashMap<String, ArrayList<String>> ndvUsed = new HashMap<>();
+	private HashMap<String, ArrayList<String>> ndvUsed = new HashMap<String, ArrayList<String>>();
 	private static boolean UNIQUE_NDV = true;
 	private static boolean MARK_USED_NDV = true;
-	/**
-	 * Allow the learner not to send requests for already tested sequences
-	 */
-	private static final boolean LESS_REQUESTS = false;
 	
+	/* XSS detector */
+	private XSSDetector xssDetector = null;
 	
 	public LiLearner(Driver driver) {
 		this.driver = (EFSMDriver) driver;
@@ -47,6 +46,13 @@ public class LiLearner extends Learner {
 				defaultParamValues);
 		this.dTable = new LiDataTable(driver.getInputSymbols(),
 				defaultParamValues);
+		if (Options.XSS_DETECTION) {
+			ArrayList<String> ignoredValues = new ArrayList<>();
+			ignoredValues.add(Parameter.PARAMETER_INIT_VALUE);
+			ignoredValues.add(Parameter.PARAMETER_NO_VALUE);
+			ignoredValues.add("");
+			this.xssDetector = new XSSDetector(ignoredValues, (GenericDriver) driver);
+		}
 	}
 
 	private void completeTable() {
@@ -59,21 +65,88 @@ public class LiLearner extends Learner {
 	/* TODO séparer inputs de colonne et inputs de ligne */
 	@SuppressWarnings("unchecked")
 	private void fillTablesForRow(LiControlTableRow ctr, LiDataTableRow dtr) {
-		ParameterizedInputSequence query = ctr.getPIS();
-		query.removeEmptyInput();
+		ParameterizedInputSequence querie = ctr.getPIS();
+		querie.removeEmptyInput();
 		
 		for (int i = 0; i < ctr.getColumnCount(); i++) {	
 			if (ctr.getColumn(i).isEmpty()) {	
 				ArrayList<ParameterizedInputSequence> qlist = Utils.generatePermutations(ctr.getColumnPIS(i), 0, defaultParamValues);
-				for (ParameterizedInputSequence qlistElement : qlist) {
-					for (int m = 0; m < qlistElement.getLength(); m++) {
-						query.addParameterizedInput(qlistElement.getSymbol(m), qlistElement.getParameter(m));
+				for (int l = 0; l < qlist.size(); l++) {
+					driver.reset();
+					for (int m = 0; m < qlist.get(l).getLength(); m++) {
+						querie.addParameterizedInput(qlist.get(l).getSymbol(m), qlist.get(l).getParameter(m));
 					}
+					ParameterizedInputSequence pis = new ParameterizedInputSequence();
+					ParameterizedOutputSequence pos = new ParameterizedOutputSequence();
 					
-					processQuery(query);
-					
-					for (int m = 0; m < qlistElement.getLength(); m++) {
-						query.removeLastParameterizedInput();
+					for (int j = 0; j < querie.sequence.size(); j++) {
+						if (UNIQUE_NDV) {
+							ParameterizedInput pi = querie.sequence.get(j).clone();
+							for (int k = 0; k < pi.getParameters().size(); k++) {
+								if (pi.isNdv(k)) {
+										System.out.println("Requesting NDV for " + pi.getInputSymbol());
+										pi.setParameterValue(k,
+															findNdvInPos(dTable.getNdv(pi
+																		.getNdvIndexForVar(k)), pos, pi
+																		.getParameters().get(k),
+																		pi.getInputSymbol()
+																	)
+															);
+								}
+							}
+							pis.addParameterizedInput(pi);
+							ParameterizedOutput po = driver.execute(pi);
+							pos.addParameterizedOuput(po);
+						} else {
+							ParameterizedInput pi = querie.sequence.get(j).clone();
+							for (int k = 0; k < pi.getParameters().size(); k++) {
+								if (pi.isNdv(k)) {
+									pi.setParameterValue(
+											k,
+											findNdvInPos(dTable.getNdv(pi
+													.getNdvIndexForVar(k)), pos, pi
+													.getParameters().get(k), pi.getInputSymbol()));
+								}
+							}
+							pis.addParameterizedInput(pi);
+							ParameterizedOutput po = driver.execute(pi);
+							pos.addParameterizedOuput(po);
+						}
+					}
+
+					LiControlTableItem cti = new LiControlTableItem(
+							querie.getLastParameters(), pos.getLastSymbol());
+					ctr.addAtColumn(i, cti);
+
+					TreeMap<String, List<Parameter>> automataState = driver
+							.getInitState();
+					ParameterizedInputSequence currentPis = new ParameterizedInputSequence();
+					ParameterizedOutputSequence currentPos = new ParameterizedOutputSequence();
+					for (int j = 0; j < pis.sequence.size() - 1; j++) {
+						currentPis.addParameterizedInput(pis.sequence.get(j)
+								.clone());
+						currentPos.addParameterizedOuput(pos.sequence.get(j)
+								.clone());
+						LiDataTableItem dti = new LiDataTableItem(
+								currentPis.getLastParameters(),
+								(TreeMap<String, List<Parameter>>) automataState
+										.clone(), currentPos
+										.getLastParameters(), currentPos
+										.getLastSymbol());
+						updateDataTable(dti, currentPis);
+						automataState.put(pis.sequence.get(j).getInputSymbol(),
+								pis.sequence.get(j).getParameters());
+						if (!pos.sequence.get(j).isOmegaSymbol())
+							automataState.put(pos.sequence.get(j)
+									.getOutputSymbol(), pos.sequence.get(j)
+									.getParameters());
+					}
+					dtr.getColumn(i).add(
+							new LiDataTableItem(pis.getLastParameters(),
+									automataState, pos.getLastParameters(), pos
+											.getLastSymbol()));
+					for (int m = 0; m < qlist.get(l).getLength(); m++) {
+						querie.removeLastParameterizedInput();
 					}
 				}
 			}
@@ -285,38 +358,30 @@ public class LiLearner extends Learner {
 		}
 	}
 
-	/**
-	 * Resolve a disputed row.
-	 * @see LiControlTable#getDisputedItem() 
-	 * @param disputed The object describing the disputed item
-	 * @return true if the tables have been modified
-	 */
-	private boolean handleDisputedRow(NDF disputed) {
-		boolean modifiedTables = false;
-		//Iterate over the input parameters combinations stored in the NDF
-		for (ArrayList<Parameter> parameters : disputed.parameters) {
-			/*	construct a sequence from the prefix sequence, these parameters 
-				and the input symbol contained in the NDF */
+	private void handleDisputedRow(NDF disputed) {
+		for (int i = 0; i < disputed.parameters.size(); i++) {
 			ParameterizedInputSequence pis = disputed.getPIS();
 			pis.addParameterizedInput(new ParameterizedInput(disputed
-					.getInputSymbol(), parameters));
-
-			//Check if this sequence is a prefix in a row of R __or S__(this part has been forgotten in Karim's thesis)
-			if(cTable.rowExists(pis)){
-				continue;
+					.getInputSymbol(), disputed.parameters.get(i)));
+			boolean alreadyExists = false;
+			for (int j = 0; j < cTable.getCountOfRowsInR(); j++) {
+				if (pis.isSame(cTable.getRowInR(j).getPIS())) {
+					alreadyExists = true;
+					break;
+				}
 			}
-			//else, add the necessary rows to resolve the disputed row, and fill them
-			cTable.addRowInR(new LiControlTableRow(pis, cTable.E));
-			dTable.addRowInR(new LiDataTableRow(pis, cTable.getInputSymbols()));
-			completeTable();
-			modifiedTables = true;
+			if (!alreadyExists) {
+				cTable.addRowInR(new LiControlTableRow(pis, cTable.E));
+				dTable.addRowInR(new LiDataTableRow(pis, cTable
+						.getInputSymbols()));
+				completeTable();
+			}
 		}
-		return modifiedTables;
 	}
 
 	@SuppressWarnings("unchecked")
 	private void handleNBP(NBP nbp) {
-		//Iterates over every line of the table
+		//Iterates on every line of the table
 		final List<LiControlTableRow> allRows = cTable.getAllRows();
 		for (LiControlTableRow ctr : allRows) {
 			//Looks for a cell in which the input parameters are different from 
@@ -329,115 +394,81 @@ public class LiLearner extends Learner {
 					break;
 				}
 			}
-			if (paramExists) {
-				continue;
-			}
+			if (!paramExists) {
+				driver.reset();
+				
+				//constructs the PIS that will be used to balance the cell
+				ParameterizedInputSequence query = ctr.getPIS();
+				query.addParameterizedInput(
+						new ParameterizedInput(
+								ctr.getColumnPIS(nbp.iInputSymbol).getLastSymbol(),//TODO:it assumes that E will never contains sequences (is that true ?) (*)
+								nbp.params)
+				);
+				query.removeEmptyInput();
 
-			//constructs the PIS that will be used to balance the cell
-			ParameterizedInputSequence query = ctr.getPIS();
-			query.addParameterizedInput(
-					new ParameterizedInput(
-							ctr.getColumnPIS(nbp.iInputSymbol).getLastSymbol(),//TODO:it assumes that E will never contains sequences (is that true ?) (*)
-							nbp.params)
-			);
-			query.removeEmptyInput();
-
-			processQuery(query);
-		}
-	}
-
-
-	/**
-	 * Executes a ParameterizedInputSequence, set NDV values if necessary,
-	 * and records the observation in both control & data tables.
-	 * The affected value of an NDV is the value of the corresponding internal variable.
-	 * If this variable is equals to init (i.e. never set), a default value is
-	 * chosen instead.
-	 * If the sequence has been already sent to the system, it is not sent again 
-	 * in order to decrease the number of requests.
-	 * @param query The sequence to send to the system.
-	 */
-	private void processQuery(ParameterizedInputSequence query) {
-		TreeMap<String, List<Parameter>> automataState = driver.getInitState();
-		//Sends the sequence and store the results in a POS
-		//Before sending, search a velue to give to each NDV
-		boolean needToReset = true;
-		ParameterizedInputSequence pis = new ParameterizedInputSequence();
-		ParameterizedOutputSequence pos = new ParameterizedOutputSequence();
-		List<ParameterizedInput> notSent = new LinkedList<>();
-		for (ParameterizedInput queryPI : query.sequence) {
-			ParameterizedInput api = queryPI.clone();
-			for (int k = 0; k < api.getParameters().size(); k++) {
-				if (api.isNdv(k)) {
-					System.out.println("Requesting NDV for " + api.getInputSymbol());
-					NDV correspondingNDV = dTable.ndvList.get(api.getNdvIndexForVar(k));
-					/* Looks in the current automata state the last value
-					 of the parameter returned by the output symbol in which the NDV
-					 was found */
-					Parameter ndvValue = automataState.get(correspondingNDV.getOutputSymbol()).get(correspondingNDV.paramIndex);
-					/* If this symbol was not encountered before, "init" is present in the
-					 automata, and there is no need to send this dummy value
-					 to the real system. So we replace it by a default value.*/
-					if (ndvValue.isInit()) {
-						ndvValue = defaultParamValues.get(api.getInputSymbol()).get(0).get(k).clone();
+				//Sends the sequence and store the results in a POS
+				//Before sending, search a velue to give to each NDV
+				ParameterizedInputSequence pis = new ParameterizedInputSequence();
+				ParameterizedOutputSequence pos = new ParameterizedOutputSequence();
+				for (ParameterizedInput queryPI : query.sequence) {
+					ParameterizedInput api = queryPI.clone();
+					for (int k = 0; k < api.getParameters().size(); k++) {
+						if (api.isNdv(k)) {
+							System.out.println("Requesting NDV for " + api.getInputSymbol());
+							String pKey = UNIQUE_NDV ? api.getInputSymbol() : api.getParameterValue(0);
+							api.setParameterValue(
+									k,
+									findNdvInPos(
+											dTable.getNdv(api.getNdvIndexForVar(k)),
+											pos,
+											api.getParameters().get(k),
+											pKey));
+						}
 					}
-					ndvValue.setNdv(correspondingNDV.indexNdv);
-					api.setParameterValue(k, ndvValue);
+					pis.addParameterizedInput(api);
+					ParameterizedOutput po = driver.execute(api);
+					pos.addParameterizedOuput(po);
 				}
-			}
-			pis.addParameterizedInput(api);
-
-			/* Checks if the formed input sequence has already been sent */
-			LiControlTableItem cti;
-			ParameterizedOutput po;
-			if (LESS_REQUESTS && (cti = cTable.getItem(pis)) != null) {
-				String outputSymbol = cti.getOutputSymbol();
-				List<Parameter> outputParams = dTable.getOutputParametersFor(pis, automataState);
-				if (outputParams == null) {
-					LogManager.logFatalError("output params not found for "+pis+" "+automataState);
-					throw new AssertionError("output params not found for "+pis+" "+automataState);
+					
+				//Completes the control table with the new item
+				LiControlTableItem ctiNBP = new LiControlTableItem(
+						pis.getLastParameters(), pos.getLastSymbol());
+				for (int j = 0; j < nbp.params.size(); j++) {
+					ctiNBP.setNdv(j, nbp.params.get(j).getNdv());
 				}
-				po = new ParameterizedOutput(outputSymbol, outputParams);
-				notSent.add(api);
-			} else {
-				if (needToReset) {
-					driver.reset();
-					needToReset = false;
+				ctr.addAtColumn(nbp.iInputSymbol, ctiNBP);
+				
+				//Completes the data table
+				TreeMap<String, List<Parameter>> automataState = driver
+						.getInitState();
+				ParameterizedInputSequence currentPis = new ParameterizedInputSequence();
+				ParameterizedOutputSequence currentPos = new ParameterizedOutputSequence();
+				pis.removeEmptyInput();
+				for (int j = 0; j < pis.sequence.size(); j++) {
+					ParameterizedInput tmpNdv = pis.sequence.get(j).clone();
+					currentPis.addParameterizedInput(tmpNdv);
+					currentPos.addParameterizedOuput(pos.sequence.get(j).clone());
+					LiDataTableItem dti = new LiDataTableItem(
+							currentPis.getLastParameters(),
+							(TreeMap<String, List<Parameter>>) automataState.clone(),
+							currentPos.getLastParameters(),
+							currentPos.getLastSymbol());
+					updateDataTable(dti, currentPis);
+					automataState.put(pis.sequence.get(j).getInputSymbol(),
+							pis.sequence.get(j).getParameters());
+					if (!pos.sequence.get(j).isOmegaSymbol())
+						automataState.put(
+								pos.sequence.get(j).getOutputSymbol(),
+								pos.sequence.get(j).getParameters());
 				}
-				for (ParameterizedInput pi : notSent) {
-					driver.execute(pi);
-					//TODO : complete the data table with real values
-				}
-
-				po = driver.execute(api);
-			}
-			pos.addParameterizedOuput(po);
-
-			//Store the state in which the automata was before executing the PI
-			LiDataTableItem dti = new LiDataTableItem(
-					pis.getLastParameters(),
-					(TreeMap<String, List<Parameter>>) automataState.clone(),
-					pos.getLastParameters(),
-					pos.getLastSymbol());
-			dTable.addAtCorrespondingPlace(dti, pis);
-
-			//Update the automata
-			automataState.put(pis.getLastSymbol(), pis.getLastParameters());
-			if (!pos.sequence.get(pos.sequence.size() - 1).isOmegaSymbol()) {
-				automataState.put(pos.getLastSymbol(), pos.getLastParameters());
 			}
 		}
-
-		//Completes the control table with the new item
-		LiControlTableItem cti = new LiControlTableItem(
-				pis.getLastParameters(), pos.getLastSymbol());//cf TODO(*)
-		cTable.addAtCorrespondingPlace(cti, pis);
 	}
 
 	@SuppressWarnings("unchecked")
 	private void handleNDV(NDV ndv) {
 		/* Let us find all rows starting with the NDV given as parameter */
-		List<LiControlTableRow> ctrs = cTable.getRowsStartsWith(ndv.pis);
+		List<LiControlTableRow> ctrs = cTable.getRowStartsWith(ndv.pis);
 		/* Iteration on rows containing NDV */
 		for (LiControlTableRow ctr : ctrs) {
 			/* Iteration on input parameters */
@@ -458,11 +489,14 @@ public class LiLearner extends Learner {
 								pos.sequence.add(driver.execute(pi));
 							}
 							String ndvVal = "0";
-							ndvVal = pos.getLastParameters().get(ndv.paramIndex).value;
-							LogManager.logInfo("Ndv value is : " + ndvVal);
+							try{
+								ndvVal = pos.getLastParameters().get(
+									ndv.paramIndex).value;
+								LogManager.logInfo("Ndv value is : " + ndvVal);
+							}catch(Exception e){															}
 							ndvParam.get(k).value = ndvVal;
 							ParameterizedInput ndvpi = new ParameterizedInput(
-									cTable.getInputSymbols().get(i), ndvParam);
+									driver.getInputSymbols().get(i), ndvParam);
 							ndvpi.setNdvIndexForVar(k, ndv.indexNdv);
 							ParameterizedOutput po = driver.execute(ndvpi);
 
@@ -570,7 +604,6 @@ public class LiLearner extends Learner {
 					int nonClosedRowRealIndex = nonClosedRow - alreadyNonClosed;
 					finished = false;
 					int seems = -1;
-					boolean tablesHaveChanged = true;
 					if (Options.REUSE_OP_IFNEEDED
 							&& ((seems = seemsEquivalent(nonClosedRowRealIndex)) != -1)
 							&& !cTable.getRowInR(nonClosedRowRealIndex)
@@ -589,24 +622,20 @@ public class LiLearner extends Learner {
 								cTable.R.get(nonClosedRowRealIndex).getPIS());
 						handleNonClosed(nonClosedRowRealIndex);
 						alreadyNonClosed++;
-					} else {
-						tablesHaveChanged = false;
 					}
-					if (tablesHaveChanged) {
-						LogManager.logControlTable(cTable);
-						LogManager.logDataTable(dTable);
-					}
+					LogManager.logControlTable(cTable);
+					LogManager.logDataTable(dTable);
 				}
 				while ((ndf = cTable.getDisputedItem()) != null) {
 					finished = false;
 					LogManager.logStep(LogManager.STEPNDF, ndf);
-					boolean tablesHaveChanged = handleDisputedRow(ndf);
-					if (tablesHaveChanged){
-						LogManager.logControlTable(cTable);
-						LogManager.logDataTable(dTable);
-					}else{
-						LogManager.logInfo("The tables have not been modified\n");
-					}
+					handleDisputedRow(ndf);
+					LogManager.logControlTable(cTable);
+					LogManager.logDataTable(dTable);
+				}
+				if(xssDetector.detectReflections()){
+					LogManager.logInfo("Confirmation des reflections");
+					xssDetector.confirmReflections();
 				}
 			}
 			LiConjecture conjecture = createConjecture();
@@ -708,9 +737,7 @@ public class LiLearner extends Learner {
 													.clone(), currentPos
 													.getLastParameters(),
 											currentPos.getLastSymbol());
-									dTable.addAtCorrespondingPlace(dti,
-											currentPis);
-
+									updateDataTable(dti, currentPis);
 									automataState.put(pis.sequence.get(j)
 											.getInputSymbol(), pis.sequence
 											.get(j).getParameters());
@@ -777,5 +804,13 @@ public class LiLearner extends Learner {
 		}
 		
 		return (stats.get(indexMin) <= 1 / max ? indexMin : -1);
+	}
+
+	
+	private void updateDataTable(LiDataTableItem dti, ParameterizedInputSequence pis) {
+		dTable.addAtCorrespondingPlace(dti, pis);
+		if (Options.XSS_DETECTION) {
+			xssDetector.recordItem(dti, pis);
+		}
 	}
 }

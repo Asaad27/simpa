@@ -26,8 +26,7 @@ public class LiDataTable {
 	/* List of parameters declared non deterministic */
 	public List<NDV> ndvList;
 
-	/* XSS detector (may be moved to another place) */
-	private XSSDetector xssDetector = null;
+	
 	
 	/**
 	 * Constructor for data table from input symbols, default values
@@ -37,23 +36,12 @@ public class LiDataTable {
 		this.inputSymbols = inputSymbols;
 		this.defaultParamValues = defaultParamValues;
 		this.ndvList = new ArrayList<NDV>();
-		if(Options.XSS_DETECTION){
-			ArrayList<String> ignoredValues = new ArrayList<>();
-			ignoredValues.add(Parameter.PARAMETER_INIT_VALUE);
-			ignoredValues.add(Parameter.PARAMETER_NO_VALUE);
-			ignoredValues.add("");
-			this.xssDetector = new XSSDetector(ignoredValues);
-		}
 		initialize();
 	}
 
 	/* TODO: considère qu'il n'y a qu'un seul input dans la colonne => à changer */
 	public void addAtCorrespondingPlace(LiDataTableItem dti,
 			ParameterizedInputSequence currentPis) {
-		//May be moved to another place
-		if(Options.XSS_DETECTION){
-			xssDetector.recordItem(dti, pis);
-		}
 		String lastSymbol = currentPis.getLastSymbol();
 		ParameterizedInputSequence prefix = currentPis.clone();
 		prefix.removeLastParameterizedInput();
