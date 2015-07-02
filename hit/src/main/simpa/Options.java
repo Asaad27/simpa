@@ -49,7 +49,7 @@ public class Options {
 
 	// Output's options
 
-	public static LogLevel LOG_LEVEL = LogLevel.LOW;
+	public static LogLevel LOG_LEVEL = LogLevel.DO_NOT_COMPLEXIFY;
 	public static boolean LOG_TEXT = false;
 	public static boolean LOG_HTML = false;
 	public static boolean AUTO_OPEN_HTML = false;

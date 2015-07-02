@@ -9,8 +9,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import main.simpa.Options;
@@ -20,7 +22,7 @@ import automata.mealy.InputSequence;
 
 public class NoResetStats {
 	enum Atribute {
-		W_SIZE("Size of W",							"sequence",	false,	true,	"W",	false),
+		W_SIZE("Size of W",							"sequences",false,	true,	"W",	false),
 		W1_LENGTH("Length of first W element",		"symbols",	false,	true,	"w1",	false),
 		LOCALIZER_CALL_NB("Number of call to localizer","",		false,	false,	"lc",	false),
 		LOCALIZER_SEQUENCE_LENGTH("Length of localizer sequence","symbols",false,false,"lsl",false),
@@ -70,6 +72,7 @@ public class NoResetStats {
 	private int outputSymbols;
 	private int statesNumber;
 	private int n;
+	private int loopTransitionPercentage;
 	
 	
 	public NoResetStats(List<InputSequence> W, int inputSymbols, int outputSymbols, int n){
@@ -117,6 +120,10 @@ public class NoResetStats {
 
 	protected void setStatesNumber(int statesNumber) {
 		this.statesNumber = statesNumber;
+	}
+	
+	protected void setLoopTransitionPercentage(int percentage){
+		loopTransitionPercentage = percentage;
 	}
 	
 	/**
@@ -313,6 +320,7 @@ public class NoResetStats {
 		PrintWriter tempWriter;
 		try {
 			tempPlot = File.createTempFile("simpa_"+ord+"_"+abs+"_", ".dat");
+			tempPlot.deleteOnExit();
 			tempWriter = new PrintWriter(tempPlot,"UTF-8");
 		}catch (IOException ioe){
 			LogManager.logException("unable to create temporary file for gnuplot", ioe);
@@ -358,7 +366,6 @@ public class NoResetStats {
 		}
 
 		tempWriter.close();
-		tempPlot.deleteOnExit();
 		return tempPlot;
 	}
 
@@ -376,6 +383,8 @@ public class NoResetStats {
 	}
 	
 	private static String makeDataId(List<NoResetStats> allStats){
+		if (allStats.size() == 0)
+			return "_empty_";
 		StringBuilder r = new StringBuilder();
 		for (Atribute a : Atribute.class.getEnumConstants()){
 			int min = AtributeMin(allStats, a);
@@ -430,7 +439,7 @@ public class NoResetStats {
 		String name = new String("relationship between "+ord+" and  "+abs+(group == null ? "" : " grouped by " + group));
 		r.append("set title \"" + name + "\"\n");
 		
-		String filename = new String(Options.OUTDIR + File.separator + name + makeDataId(allStats) + ".png");
+		String filename = new String(Options.OUTDIR + File.separator + name + "(" + makeDataId(allStats) + ").png");
 		r.append("set output \"" + filename + "\"\n");
 		
 		r.append("set xlabel \"" + abs.name + " (" + abs.units + ")\"\n");
@@ -452,8 +461,88 @@ public class NoResetStats {
 		return r.toString();
 	}
 
+	public static void makeMap(List<NoResetStats> allStats, Atribute ord, Atribute abs, Atribute watch,int watchMin ,int watchMax){
+		if (allStats.isEmpty())
+			return;
+		int maxSize = 0;
+		Set<Integer> absKeys = new HashSet<Integer>();
+		Map<Integer, List<NoResetStats>> groupORD = sortByAtribute(allStats, ord);
+		Map<Integer,Map<Integer, List<NoResetStats>>> groupMAP = new HashMap<Integer,Map<Integer,List<NoResetStats>>>();
+		for (Integer key : groupORD.keySet()){
+			Map<Integer, List<NoResetStats>> groupABS = sortByAtribute(groupORD.get(key), abs);
+			for (Integer keyAbs : groupABS.keySet()){
+				List<NoResetStats> values = groupABS.get(keyAbs);
+				if (values.size() > maxSize)
+					maxSize = values.size();
+			}
+			groupMAP.put(key, groupABS);
+			absKeys.addAll(groupABS.keySet());
+		}
+		maxSize++;
+		
+		File tempPlot;
+		PrintWriter tempWriter;
+		try {
+			tempPlot = File.createTempFile("simpa_"+ord+"_"+abs+"_", ".dat");
+			//tempPlot.deleteOnExit();
+			tempWriter = new PrintWriter(tempPlot,"UTF-8");
+		}catch (IOException ioe){
+			LogManager.logException("unable to create temporary file for gnuplot", ioe);
+			return;
+		}
+		List<Integer> keyValuesOrd = new ArrayList<Integer>(groupORD.keySet());
+		Collections.sort(keyValuesOrd);
+		List<Integer> keyValuesAbs = new ArrayList<Integer>(absKeys);
+		Collections.sort(keyValuesAbs);
+		for (Integer keyOrd : keyValuesOrd){
+			Map<Integer, List<NoResetStats>> groupABS = groupMAP.get(keyOrd);
+			for (Integer keyAbs : keyValuesAbs){
+				float RatioSize = 0;
+				float RatioWatch = 0;
+				List<NoResetStats> pointValues = groupABS.get(keyAbs);
+				if (pointValues != null){
+					RatioSize = ((float)pointValues.size())/maxSize;
+					//to increase visibility 
+//					RatioSize *= 3./4.;
+//					RatioSize += .25;
+					List<NoResetStats> watchValues = selectFromRange(pointValues, watch, watchMin, watchMax);
+					RatioWatch = ((float)watchValues.size())/pointValues.size();
+				}
+				tempWriter.append(keyOrd + " " + keyAbs + " " + RatioSize + " " + RatioWatch + "\n");
+			}
+			tempWriter.append("\n");
+		}
+		tempWriter.close();
+		
+		StringBuilder r = new StringBuilder();
+
+		r.append("set terminal png enhanced font \"Sans,10\"\n");
+		
+		String name = new String("Map of value in "+ord+" and  "+abs+" observing " + watch);
+		r.append("set title \"" + name + "\"\n");
+		
+		String filename = new String(Options.OUTDIR + File.separator + name + "(" + makeDataId(allStats) + ").png");
+		r.append("set output \"" + filename + "\"\n");
+		
+		r.append("set xlabel \"" + abs.name + " (" + abs.units + ")\"\n");
+		
+		r.append("set ylabel \"" + ord.name + " (" + ord.units + ")\"\n");
+		
+		r.append("set label \"");
+			r.append(makeDataDescritption(allStats, new Atribute[]{ord,abs}));
+		r.append("\" at graph 1,0.25 right front\n");
+
+		r.append("RGB(R,G,B) =  int(255.*R) * 2**16 + int(255.*G) * 2**8  + int(255.*B)\n");
+		r.append("myColor(s,w) =  RGB((1-s)+s*w,1-s,(1-s)+s*(1-w))\n");
+		//r.append("plot \""+tempPlot.getAbsolutePath()+"\" using 2:1:(myColor($3,$4)) with image lc rgb variable\n");
+		r.append("plot \""+tempPlot.getAbsolutePath()+"\" using 2:1:(myColor($3,$4)) with points pt 7 ps 2 lc rgb variable\n");
+		
+		GNUPlot.makeGraph(r.toString());
+		
+	}
+	
 	public static void makeGraph(List<NoResetStats> allStats, Atribute ord, Atribute abs, Atribute sort, PlotStyle style){
-		if (allStats.size() == 0)
+		if (allStats.isEmpty())
 			return;
 		StringBuilder plotLines = new StringBuilder("plot ");
 		Map<Integer, List<NoResetStats>> sorted = sortByAtribute(allStats, sort);
@@ -469,6 +558,8 @@ public class NoResetStats {
 	}
 	
 	public static void makeGraph(List<NoResetStats> allStats, Atribute ord, Atribute abs, PlotStyle style){
+		if (allStats.isEmpty())
+			return;
 		StringBuilder plotLines = new StringBuilder("plot ");
 		File tempPlot = makeDataFile(allStats, ord, abs,style);
 		plotLines.append("\"" + tempPlot.getAbsolutePath() + "\" " +
@@ -478,20 +569,102 @@ public class NoResetStats {
 	}
 
 	public static void makeGraph(List<NoResetStats> allStats){
-		makeGraph(selectFromValues(selectFromRange(allStats, Atribute.W_SIZE, 2, 2),
-				Atribute.STATE_NUMBER,new Integer[]{5,10,15,20,30,50}),
-				Atribute.TRACE_LENGTH, Atribute.STATE_NUMBER_BOUND, Atribute.STATE_NUMBER, PlotStyle.MEDIAN);
-		makeGraph(selectFromValues(selectFromRange(allStats, Atribute.W_SIZE, 2, 2),
-				Atribute.STATE_NUMBER,new Integer[]{5,10,15,20,30,50}),
-				Atribute.TRACE_LENGTH, Atribute.STATE_BOUND_OFFSET, Atribute.STATE_NUMBER, PlotStyle.MEDIAN);
-		makeGraph(selectFromValues(allStats,
-				Atribute.STATE_NUMBER,new Integer[]{5,10,15,20,30,50}),
-				Atribute.TRACE_LENGTH, Atribute.STATE_NUMBER_BOUND, Atribute.STATE_NUMBER, PlotStyle.POINTS);
-		makeGraph(selectFromValues(allStats,
-				Atribute.STATE_NUMBER_BOUND,new Integer[]{5,10,15,20,30,50}),
-				Atribute.TRACE_LENGTH, Atribute.STATE_NUMBER, Atribute.STATE_NUMBER_BOUND, PlotStyle.POINTS);
-		makeGraph(allStats, Atribute.TRACE_LENGTH, Atribute.W_SIZE, PlotStyle.MEDIAN);
-		makeGraph(allStats, Atribute.TRACE_LENGTH, Atribute.W1_LENGTH, Atribute.W_SIZE, PlotStyle.MEDIAN);
-		makeGraph(allStats, Atribute.TRACE_LENGTH, Atribute.INPUT_SYMBOLS, Atribute.W_SIZE, PlotStyle.MEDIAN);
+		//utils : points repartition
+//		makeGraph(selectFromRange(selectFromRange(selectFromRange(selectFromRange(allStats, 
+//				Atribute.INPUT_SYMBOLS, 0, 500),
+//				Atribute.W_SIZE, 1, 3),
+//				Atribute.STATE_NUMBER, 0, 500),
+//				Atribute.OUTPUT_SYMBOLS, 0, 500),
+//				Atribute.INPUT_SYMBOLS, Atribute.STATE_NUMBER, Atribute.OUTPUT_SYMBOLS,PlotStyle.POINTS);
+		
+		//not enough data
+		List<NoResetStats> chosenStats;
+//		chosenStats = allStats;
+//		chosenStats = selectFromRange(chosenStats, Atribute.INPUT_SYMBOLS,15,15);
+//		chosenStats = selectFromRange(chosenStats, Atribute.OUTPUT_SYMBOLS,10,10);
+//		chosenStats = selectFromRange(chosenStats, Atribute.W_SIZE,2,2);
+//		chosenStats = selectFromValues(chosenStats, Atribute.STATE_NUMBER_BOUND,new Integer[]{5,10,15,20,30,50});
+//		makeGraph(chosenStats,
+//				Atribute.TRACE_LENGTH, Atribute.STATE_NUMBER, Atribute.STATE_NUMBER_BOUND, PlotStyle.POINTS);
+		
+		//seems ok but not enough data for STATE_NUMBER != 10
+//		chosenStats = allStats;
+//		chosenStats = selectFromRange(chosenStats, Atribute.W_SIZE,2,2);
+//		chosenStats = selectFromRange(chosenStats, Atribute.W1_LENGTH, 1, 1);
+//		chosenStats = selectFromRange(chosenStats, Atribute.INPUT_SYMBOLS,15,15);
+//		chosenStats = selectFromRange(chosenStats, Atribute.OUTPUT_SYMBOLS,10,10);
+//		chosenStats = selectFromValues(chosenStats, Atribute.STATE_NUMBER,new Integer[]{10});
+//		makeGraph(chosenStats,
+//				Atribute.TRACE_LENGTH, Atribute.STATE_NUMBER_BOUND, Atribute.STATE_NUMBER, PlotStyle.MEDIAN);
+	
+		//not enough data...
+//		chosenStats = allStats;
+//		chosenStats = selectFromValues(chosenStats, Atribute.STATE_NUMBER,new Integer[]{5,10,15,20,30,50});
+//		//chosenStats = selectFromRange(chosenStats, Atribute.W_SIZE, 2, 2);
+//		//chosenStats = selectFromValues(chosenStats, Atribute.STATE_NUMBER,new Integer[]{5,10,15,20,30,50});
+//		chosenStats = selectFromRange(chosenStats, Atribute.OUTPUT_SYMBOLS, 5, 5);
+//		chosenStats = selectFromRange(chosenStats, Atribute.STATE_NUMBER, 10, 10);
+//		chosenStats = selectFromRange(chosenStats, Atribute.INPUT_SYMBOLS, 5, 5);
+//		makeGraph(chosenStats,
+//				Atribute.TRACE_LENGTH, Atribute.STATE_NUMBER_BOUND, Atribute.W_SIZE, PlotStyle.POINTS);
+		
+		
+		//not enough data...
+//		chosenStats = allStats;
+//		chosenStats = selectFromRange(chosenStats, Atribute.W_SIZE, 2, 2);
+//		chosenStats = selectFromValues(chosenStats, Atribute.STATE_NUMBER,new Integer[]{5,10,15,20,30,50});
+//		chosenStats = selectFromRange(chosenStats, Atribute.OUTPUT_SYMBOLS, 5, 5);
+//		chosenStats = selectFromRange(chosenStats, Atribute.INPUT_SYMBOLS, 5, 5);
+//		makeGraph(chosenStats,
+//				Atribute.TRACE_LENGTH, Atribute.STATE_BOUND_OFFSET, Atribute.STATE_NUMBER, PlotStyle.POINTS);
+	
+	
+		//group by output symbols gave a curious result
+//		chosenStats = allStats;
+//		chosenStats = selectFromRange(chosenStats, Atribute.STATE_BOUND_OFFSET, 0, 0);
+//		chosenStats = selectFromRange(chosenStats, Atribute.STATE_NUMBER, 5, 5);
+//		chosenStats = selectFromRange(chosenStats, Atribute.OUTPUT_SYMBOLS, 3, 3);
+//		chosenStats = selectFromRange(chosenStats, Atribute.INPUT_SYMBOLS, 5, 5);
+//		makeGraph(chosenStats,
+//				Atribute.TRACE_LENGTH, Atribute.W_SIZE, PlotStyle.POINTS);
+		
+//		makeGraph(selectFromRange(selectFromRange(selectFromRange(allStats, 
+//		Atribute.INPUT_SYMBOLS, 5, 5),
+//		Atribute.OUTPUT_SYMBOLS, 5, 5),
+//		Atribute.STATE_NUMBER, 0, 500),
+//		Atribute.TRACE_LENGTH, Atribute.STATE_NUMBER, Atribute.W_SIZE,PlotStyle.POINTS);
+
+		
+
+		// not good
+//		chosenStats = allStats;
+//		//chosenStats = selectFromRange(chosenStats, Atribute.STATE_BOUND_OFFSET, 0, 0);
+//		chosenStats = selectFromRange(chosenStats, Atribute.STATE_NUMBER, 11, 11);
+//		chosenStats = selectFromRange(chosenStats, Atribute.OUTPUT_SYMBOLS, 5, 5);
+//		chosenStats = selectFromRange(chosenStats, Atribute.INPUT_SYMBOLS, 5, 5);
+//		makeGraph(chosenStats, 
+//				Atribute.TRACE_LENGTH, Atribute.W1_LENGTH, Atribute.W_SIZE, PlotStyle.POINTS);
+		// help to choose the right number of states		
+//		makeGraph(selectFromRange(selectFromRange(selectFromRange(allStats, 
+//				Atribute.INPUT_SYMBOLS, 5, 5),
+//				Atribute.OUTPUT_SYMBOLS, 5, 5),
+//				Atribute.STATE_NUMBER, 0, 500),
+//				Atribute.W1_LENGTH, Atribute.STATE_NUMBER, Atribute.W_SIZE,PlotStyle.POINTS);
+	
+		//OK		
+//		chosenStats = allStats;
+//		chosenStats = selectFromRange(chosenStats, Atribute.STATE_BOUND_OFFSET, 0, 0);
+//		chosenStats = selectFromRange(chosenStats, Atribute.STATE_NUMBER, 5, 5);
+//		chosenStats = selectFromRange(chosenStats, Atribute.OUTPUT_SYMBOLS, 5, 5);
+//		makeGraph(chosenStats,
+//				Atribute.TRACE_LENGTH, Atribute.INPUT_SYMBOLS, Atribute.W_SIZE, PlotStyle.MEDIAN);
+		
+		chosenStats = allStats;
+		chosenStats = selectFromRange(chosenStats, Atribute.STATE_BOUND_OFFSET, 0, 0);
+		chosenStats = selectFromRange(chosenStats, Atribute.STATE_NUMBER, 0, 500);
+		chosenStats = selectFromRange(chosenStats, Atribute.INPUT_SYMBOLS, 0, 500);
+		chosenStats = selectFromRange(chosenStats, Atribute.OUTPUT_SYMBOLS, 2, 2);
+		makeMap(chosenStats, Atribute.INPUT_SYMBOLS, Atribute.STATE_NUMBER, Atribute.W_SIZE, 3, 3);
+		
 	}
 }

@@ -68,6 +68,8 @@ public class SIMPATestNoResetMealy {
 					Options.LOG_HTML = true;
 				else if (args[i].equals("--openhtml"))
 					Options.AUTO_OPEN_HTML = true;
+				else if (args[i].startsWith("--outdir"))
+					Options.OUTDIR = args[++i];
 
 				else if (args[i].equals("--help") || args[i].equals("-h"))
 					usage();
@@ -112,7 +114,7 @@ public class SIMPATestNoResetMealy {
 				for (i = 1; i <= Options.NBTEST; i++) {
 					Options.OUTDIR = Utils.makePath(dir + i);
 					Utils.createDir(new File(Options.OUTDIR));
-					Options.SYSTEM = "Random " + i;
+					Options.SYSTEM = "Random_" + i;
 					if (!Options.STAT)
 						System.out.println("    " + i + "/" + Options.NBTEST);
 					try {

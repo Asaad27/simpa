@@ -51,9 +51,16 @@ public class NoResetLearner extends Learner {
 
 	public void learn(List<InputSequence> W){
 		LogManager.logStep(LogManager.STEPOTHER,"Inferring the system");
-		LogManager.logConsole("Inferring the system");
-
+		LogManager.logConsole("Inferring the system with W="+W);
+		
 		n = Options.MAXSTATES;//TODO find how this parameter is obtained
+		if (driver instanceof TransparentMealyDriver){
+			n = ((TransparentMealyDriver) driver).getAutomata().getStateCount();
+		}
+		//n += Utils.randInt(5)*5;
+		//n = Utils.randIntBetween(n, 50);
+
+		
 		stats = new NoResetStats(W, driver.getInputSymbols().size(), driver.getOutputSymbols().size(),n);
 
 		this.W = new ArrayList<InputSequence>(W);
@@ -392,6 +399,14 @@ public class NoResetLearner extends Learner {
 		while (true){
 			InputSequence testw = testW.pollFirst();
 			if (apply(testw, automata, s1).equals(apply(testw,automata,s2))){
+				if (testw.getLength() > automata.getStateCount()){
+					//TODO find a better way to log and save the automata
+					String dir = Options.OUTDIR;
+					Options.OUTDIR = "/tmp/";
+					automata.exportToDot();
+					Options.OUTDIR = dir;
+					throw new RuntimeException("it looks like if we will not find a w to distinguish "+s1 +" and " +s2+".Those state may are equivalents, please look in /tmp");
+				}
 				for (String i : inputSymbols){
 					InputSequence newTestw = new InputSequence();
 					newTestw.addInputSequence(testw);
@@ -399,7 +414,8 @@ public class NoResetLearner extends Learner {
 					testW.add(newTestw);
 				}
 			}else{
-				for (InputSequence w : W){
+				for (int i = 0; i < W.size(); i++){
+					InputSequence w = W.get(i);
 					if (testw.startsWith(w)){
 						W.remove(w);
 					}
@@ -407,6 +423,7 @@ public class NoResetLearner extends Learner {
 				W.add(testw);
 				return;
 			}
+			
 		}
 	}
 
