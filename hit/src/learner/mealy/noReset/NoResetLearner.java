@@ -126,7 +126,7 @@ public class NoResetLearner extends Learner {
 			}
 		}
 		stats.setTraceLength(dataManager.traceSize());
-		stats.setStatesNumber(dataManager.getConjecture().getStateCount());
+		stats.updateWithConjecture(dataManager.getConjecture());
 		if (Options.LOG_LEVEL == Options.LogLevel.ALL || Options.TEST)
 			LogManager.logConsole(dataManager.readableTrace());
 		dataManager.getConjecture().exportToDot();

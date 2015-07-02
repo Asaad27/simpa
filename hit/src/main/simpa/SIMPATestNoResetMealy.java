@@ -24,6 +24,7 @@ import examples.mealy.RandomMealy;
 
 public class SIMPATestNoResetMealy {
 	public final static String name = "SIMPA Test Mealy";
+	public static boolean onlyGraphGeneration = false;
 
 	private static void init(String[] args) {
 		if (!Options.STAT)
@@ -71,6 +72,9 @@ public class SIMPATestNoResetMealy {
 				else if (args[i].startsWith("--outdir"))
 					Options.OUTDIR = args[++i];
 
+				else if (args[i].startsWith("--onlyGraph"))
+					onlyGraphGeneration = true;
+
 				else if (args[i].equals("--help") || args[i].equals("-h"))
 					usage();
 			}
@@ -91,19 +95,20 @@ public class SIMPATestNoResetMealy {
 		try {
 			check();
 			String dir = Options.OUTDIR;
+			List<NoResetStats> noResetStats = new ArrayList<NoResetStats>();
+			File globalStats = new File(Options.OUTDIR +"../globalstats.csv");
+
+			Writer globalStatsWriter;
+			if (!globalStats.exists()){
+				globalStats.createNewFile();
+				globalStatsWriter = new BufferedWriter(new FileWriter(globalStats));
+				globalStatsWriter.append(NoResetStats.CSVHeader() + "\n");
+			}else{
+				globalStatsWriter = new BufferedWriter(new FileWriter(globalStats,true));
+			}
+			if (!onlyGraphGeneration){
 				Utils.cleanDir(new File(Options.OUTDIR));
-				
-				List<NoResetStats> noResetStats = new ArrayList<NoResetStats>();
-				File globalStats = new File(Options.OUTDIR +"../globalstats.csv");
-				
-				Writer globalStatsWriter;
-				if (!globalStats.exists()){
-					globalStats.createNewFile();
-					globalStatsWriter = new BufferedWriter(new FileWriter(globalStats));
-					globalStatsWriter.append(NoResetStats.CSVHeader() + "\n");
-				}else{
-					globalStatsWriter = new BufferedWriter(new FileWriter(globalStats,true));
-				}
+
 				Stats stats = new Stats(Options.OUTDIR + "stats.csv");
 				stats.setHeaders(RandomMealyDriver.getStatHeaders());
 
@@ -146,13 +151,14 @@ public class SIMPATestNoResetMealy {
 				System.out.println("    Avg. requests length : " + Utils.meanOfCSVField(stats.getFilename(), 4));
 				System.out.println("    Avg. requests : " + Utils.meanOfCSVField(stats.getFilename(), 5));
 				System.out.println("    Avg. duration : " + Utils.meanOfCSVField(stats.getFilename(), 6));
-				
+
 				System.out.print(NoResetStats.makeTextStats(noResetStats));
 				Options.OUTDIR = dir;
 				NoResetStats.makeGraph(noResetStats);
-				Options.OUTDIR = dir + "../out/global_stats/";
-				Utils.cleanDir(new File(Options.OUTDIR));
-				NoResetStats.makeGraph(NoResetStats.setFromCSV(globalStats.getAbsolutePath()));
+			}
+			Options.OUTDIR = dir + "../out/global_stats/";
+			Utils.cleanDir(new File(Options.OUTDIR));
+			NoResetStats.makeGraph(NoResetStats.setFromCSV(globalStats.getAbsolutePath()));
 			if (!Options.STAT)
 				System.out.println("[+] End");
 		} catch (Exception e) {
@@ -181,7 +187,7 @@ public class SIMPATestNoResetMealy {
 		if (GraphViz.check() != 0 && !Options.TEST) {
 			Options.GRAPHVIZ = false;
 			LogManager
-					.logError("Warning: Unable to find GraphViz and converting dot to image files");
+			.logError("Warning: Unable to find GraphViz and converting dot to image files");
 		}
 
 		File f = new File(Options.OUTDIR + File.separator + Options.DIRTEST);
@@ -219,10 +225,10 @@ public class SIMPATestNoResetMealy {
 		System.out.println("> General");
 		System.out.println("    --help | -h            : Show help");
 		System.out
-				.println("    --retest X             : Load and test the random EFSM numner X");
+		.println("    --retest X             : Load and test the random EFSM numner X");
 		System.out.println("> Algorithm");
 		System.out
-				.println("    --tree                 : Use tree inference instead of table");
+		.println("    --tree                 : Use tree inference instead of table");
 		System.out.println("    -I                "
 				+ String.format("%4s", "(" + Options.SYMBOL_EPSILON + ")")
 				+ " : Initial inputs symbols");
@@ -230,7 +236,7 @@ public class SIMPATestNoResetMealy {
 				+ String.format("%4s", "(" + Options.SYMBOL_EPSILON + ")")
 				+ " : Initial Z");
 		System.out
-				.println("    --I=X                  : Initial input symbols set to X");
+		.println("    --I=X                  : Initial input symbols set to X");
 		System.out.println("> Test");
 		System.out.println("    --nbtest          "
 				+ String.format("%4s", "(" + Options.NBTEST + ")")

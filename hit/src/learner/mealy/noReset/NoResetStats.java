@@ -15,9 +15,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import learner.mealy.LmConjecture;
 import main.simpa.Options;
 import tools.GNUPlot;
 import tools.loggers.LogManager;
+import automata.Transition;
 import automata.mealy.InputSequence;
 
 public class NoResetStats {
@@ -31,7 +33,8 @@ public class NoResetStats {
 		OUTPUT_SYMBOLS("number of output symbols",	"",			false,	true,	"o",	false),
 		STATE_NUMBER("number of states",			"",			false,	true,	"s",	false),
 		STATE_NUMBER_BOUND("bound of state number",	"states",	false,	true,	"n",	false),
-		STATE_BOUND_OFFSET("difference between bound and real state number","states",false,true,"dns",false),
+		STATE_BOUND_OFFSET("difference between bound and real state number","states",false,true,"dns",true),
+		LOOP_RATIO("percentage of loop transitions","%",		false,	true,	"lr",	false),
 		;
 		
 		public final String units;
@@ -121,9 +124,15 @@ public class NoResetStats {
 	protected void setStatesNumber(int statesNumber) {
 		this.statesNumber = statesNumber;
 	}
-	
-	protected void setLoopTransitionPercentage(int percentage){
-		loopTransitionPercentage = percentage;
+
+	public void updateWithConjecture(LmConjecture conjecture) {
+		statesNumber = conjecture.getStateCount();
+		int loopTransitions=0;
+		for (Transition t : conjecture.getTransitions()){
+			if (t.getTo() == t.getFrom())
+				loopTransitions++;
+		}
+		loopTransitionPercentage = ((100*loopTransitions)/conjecture.getTransitionCount());
 	}
 	
 	/**
@@ -139,6 +148,8 @@ public class NoResetStats {
 		r.append(inputSymbols + ",");
 		r.append(outputSymbols + ",");
 		r.append(statesNumber + ",");
+		r.append(statesNumber + ",");
+		r.append(loopTransitionPercentage + ",");
 		r.append(n);
 		return r.toString();
 	}
@@ -156,6 +167,7 @@ public class NoResetStats {
 				+ Atribute.OUTPUT_SYMBOLS.name + ","
 				+ Atribute.STATE_NUMBER.name + ","
 				+ Atribute.STATE_NUMBER_BOUND.name + ","
+				+ Atribute.LOOP_RATIO.name + ","
 				;
 	}
 	
@@ -175,6 +187,7 @@ public class NoResetStats {
 		stats.outputSymbols = Integer.parseInt(st.nextToken());
 		stats.statesNumber = Integer.parseInt(st.nextToken());
 		stats.n = Integer.parseInt(st.nextToken());
+		stats.loopTransitionPercentage = Integer.parseInt(st.nextToken());
 		return stats;
 	}
 
@@ -310,6 +323,8 @@ public class NoResetStats {
 			return n;
 		case STATE_BOUND_OFFSET:
 			return n-statesNumber;
+		case LOOP_RATIO:
+			return loopTransitionPercentage;
 		default :
 			throw new RuntimeException();
 		}
@@ -660,10 +675,10 @@ public class NoResetStats {
 //				Atribute.TRACE_LENGTH, Atribute.INPUT_SYMBOLS, Atribute.W_SIZE, PlotStyle.MEDIAN);
 		
 		chosenStats = allStats;
-		chosenStats = selectFromRange(chosenStats, Atribute.STATE_BOUND_OFFSET, 0, 0);
+		chosenStats = selectFromRange(chosenStats, Atribute.STATE_BOUND_OFFSET, 0, 500);
 		chosenStats = selectFromRange(chosenStats, Atribute.STATE_NUMBER, 0, 500);
 		chosenStats = selectFromRange(chosenStats, Atribute.INPUT_SYMBOLS, 0, 500);
-		chosenStats = selectFromRange(chosenStats, Atribute.OUTPUT_SYMBOLS, 2, 2);
+		chosenStats = selectFromRange(chosenStats, Atribute.OUTPUT_SYMBOLS, 0, 500);
 		makeMap(chosenStats, Atribute.INPUT_SYMBOLS, Atribute.STATE_NUMBER, Atribute.W_SIZE, 3, 3);
 		
 	}
