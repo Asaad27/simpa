@@ -86,13 +86,19 @@ public class XSSDetector {
 			for (ParameterizedInput pi : sequence) {
 				result = driver.execute(pi);
 			}
-			String parameterValue = result
-					.getParameterValue(potentialReflection.outputElementParamIndex);
-			if (parameterValue.equals(randomString.toString())) {
-				reflectionsFound.add(potentialReflection);
-				LogManager.logInfo("Reflection confirmée");
+
+			if (result != null
+					&& result.getOutputSymbol().equals(potentialReflection.expectedOutputSymbol)) {
+				String parameterValue = result
+						.getParameterValue(potentialReflection.outputElementParamIndex);
+				if (parameterValue.equals(randomString.toString())) {
+					reflectionsFound.add(potentialReflection);
+					LogManager.logInfo("Reflection confirmed");
+				} else {
+					LogManager.logInfo("Reflection disconfirmed");
+				}
 			} else {
-				LogManager.logInfo("Reflection non confirmée");
+				LogManager.logInfo("Reflection disconfirmed");
 			}
 		}
 
@@ -134,12 +140,17 @@ public class XSSDetector {
 		 * The index of the output parameter concerned by the reflection
 		 */
 		private final int outputElementParamIndex;
+		/**
+		 * The output symbol where we expect to find thr reflected value
+		 */
+		private final String expectedOutputSymbol;
 
-		public Reflection(List<ParameterizedInput> path, int inputElementIndex, int inputElementParamIndex, int outputElementParamIndex) {
+		public Reflection(List<ParameterizedInput> path, int inputElementIndex, int inputElementParamIndex, int outputElementParamIndex, String outputSymbol) {
 			this.path = path;
 			this.inputElementIndex = inputElementIndex;
 			this.inputElementParamIndex = inputElementParamIndex;
 			this.outputElementParamIndex = outputElementParamIndex;
+			this.expectedOutputSymbol = outputSymbol;
 		}
 
 		@Override
@@ -186,34 +197,35 @@ public class XSSDetector {
 		this.driver = driver;
 	}
 
+	/**
+	 * Record an observation made for the data table, and store a succinct copy of it.
+	 * Make a clone of the data in order not to alter the inference
+	 * @param dti The observation to save
+	 * @param pis The sequence that has been sent to the system to obtain the observation
+	 */
 	public void recordItem(LiDataTableItem dti, ParameterizedInputSequence pis) {
-		SimplifiedDataItem simplifiedDataItem = new SimplifiedDataItem(pis, new ParameterizedOutput(dti.getOutputSymbol(), dti.getOutputParameters()));
+		ParameterizedInputSequence pisClone = pis.clone();
+		LiDataTableItem dtiClone = (LiDataTableItem) dti.clone();
+		SimplifiedDataItem simplifiedDataItem = new SimplifiedDataItem(pisClone, new ParameterizedOutput(dtiClone.getOutputSymbol(), dtiClone.getOutputParameters()));
 		itemsToCheck.add(simplifiedDataItem);
-
-/*		if (itemsToCheck.size() > 0) {
-			detectReflections();
-		}
-		if (potentialReflectionsFound.size() > 0) {
-			confirmReflections();
-		}*/
 	}
 
 	/**
 	 * Use the recorded data to search potential reflections.
-	 * 
+	 *
 	 * @return True if at least one reflection was found, false otherwise
 	 */
 	public boolean detectReflections() {
 		//System.out.println("Detection started");
 		long startTime = System.currentTimeMillis();
-		boolean reflectionsFound = false;
+		boolean reflectionsHaveBeenFound = false;
 		/* Iterate on the new items */
 		while (!itemsToCheck.isEmpty()) {
 			SimplifiedDataItem currentItem = itemsToCheck.pop();
 			List<Parameter> outputParameters = currentItem.result.getParameters();
 			for (Parameter outputParameter : outputParameters) {
 				String outputValue = outputParameter.value;
-				if (outputValue.length() < MINIMAL_SIZE && ignoredValues.contains(outputValue)) {
+				if (ignoredValues.contains(outputValue)) {
 					continue;
 				}
 
@@ -226,7 +238,7 @@ public class XSSDetector {
 					for (Parameter param : piParameters) {
 						String inputValue = param.value;
 
-						if (outputValue.length() < MINIMAL_SIZE && ignoredValues.contains(inputValue)) {
+						if (inputValue.length() < MINIMAL_SIZE && ignoredValues.contains(inputValue)) {
 							continue;
 						}
 
@@ -235,7 +247,8 @@ public class XSSDetector {
 									= new Reflection(currentItem.path.sequence,
 											path.indexOf(pi),
 											piParameters.indexOf(param),
-											outputParameters.indexOf(outputParameter));
+											outputParameters.indexOf(outputParameter),
+											currentItem.result.getOutputSymbol());
 
 							boolean foundSimilar = false;
 							for (Reflection reflection : potentialReflectionsFound) {
@@ -247,15 +260,16 @@ public class XSSDetector {
 
 							if (!foundSimilar && !potentialReflectionsFound.contains(newReflection)) {
 								LogManager.logInfo("Potential reflection found : ");
-								LogManager.logInfo("\t" + (newReflection.inputElementParamIndex+1) + "th parameter of input symbol " 
+								LogManager.logInfo("\t" + (newReflection.inputElementParamIndex + 1) + "th parameter of input symbol "
 										+ currentItem.path.sequence.get(newReflection.inputElementIndex).getInputSymbol());
-								LogManager.logInfo("\treflected in the " + (newReflection.outputElementParamIndex+1) + "th parameter of the output symbol "
+								LogManager.logInfo("Soit : " + currentItem.path.sequence.get(newReflection.inputElementIndex));
+								LogManager.logInfo("\treflected in the " + (newReflection.outputElementParamIndex + 1) + "th parameter of the output symbol "
 										+ currentItem.result.getOutputSymbol());
 								LogManager.logInfo("\t" + "in the sequence :");
 								LogManager.logInfo(currentItem.path.toString());
-								
+
 								potentialReflectionsFound.add(newReflection);
-								reflectionsFound = true;
+								reflectionsHaveBeenFound = true;
 							} else {
 								filtered++;
 							}
@@ -266,6 +280,6 @@ public class XSSDetector {
 		}
 		//System.out.println("Detection finished in " + (System.currentTimeMillis() - startTime));
 		//System.out.println(filtered);
-		return reflectionsFound;
+		return reflectionsHaveBeenFound;
 	}
 }

@@ -9,8 +9,9 @@ import java.util.TreeMap;
 
 import main.simpa.Options;
 import automata.efsm.Parameter;
+import java.util.LinkedList;
 
-public class LiDataTableItem implements Serializable {
+public class LiDataTableItem implements Cloneable, Serializable {
 
 	private static final long serialVersionUID = 7893795283839427233L;
 	private List<Parameter> inputParameters;
@@ -138,5 +139,20 @@ public class LiDataTableItem implements Serializable {
 			res.append(')');
 		}
 		return res.append(')').toString();
+	}
+	
+	@Override
+	public Object clone(){
+		TreeMap<String, List<Parameter>> automataStateClone = (TreeMap<String, List<Parameter>>) automataState.clone();
+		List<Parameter> inputParametersClone = new LinkedList<>();
+		for (Parameter inputParameter : inputParameters) {
+			inputParametersClone.add(inputParameter.clone());
+		}
+		List<Parameter> outputParametersClone = new LinkedList<>();
+		for (Parameter outputParameter : outputParameters) {
+			outputParametersClone.add(outputParameter.clone());
+		}
+		
+		return new LiDataTableItem(inputParametersClone, automataStateClone, outputParametersClone, outputSymbol);
 	}
 }
