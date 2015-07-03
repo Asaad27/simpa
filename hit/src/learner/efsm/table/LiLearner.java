@@ -620,8 +620,10 @@ public class LiLearner extends Learner {
 					}
 				}
 				if(xssDetector.detectReflections()){
-					LogManager.logInfo("Confirmation des reflections");
+					LogManager.logInfo("[XSS] Trying to confirm reflections");
 					xssDetector.confirmReflections();
+					LogManager.logInfo("[XSS] Trying to exploit reflections");
+					xssDetector.testReflections();
 				}
 			}
 			LiConjecture conjecture = createConjecture();

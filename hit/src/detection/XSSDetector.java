@@ -9,6 +9,7 @@ import automata.efsm.Parameter;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedInputSequence;
 import automata.efsm.ParameterizedOutput;
+import com.gargoylesoftware.htmlunit.WebRequest;
 import drivers.efsm.real.GenericDriver;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -16,6 +17,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import learner.efsm.table.LiDataTableItem;
+import org.apache.commons.lang3.StringUtils;
+import tools.Utils;
 import tools.loggers.LogManager;
 
 public class XSSDetector {
@@ -40,12 +43,11 @@ public class XSSDetector {
 	 * Confirmed reflections
 	 */
 	private final List<Reflection> reflectionsFound;
-
 	/**
 	 * Driver used to test input in the system
 	 */
 	private final GenericDriver driver;
-
+	
 	private int filtered = 0;
 
 	/**
@@ -60,63 +62,19 @@ public class XSSDetector {
 		return outputValue.contains(inputValue);
 	}
 
-	public void confirmReflections() {
-		String charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-		Random random = new Random();
-
-		for (Reflection potentialReflection : potentialReflectionsFound) {
-			//Generate a random alpha numeric string to test the reflection again
-			StringBuilder randomString = new StringBuilder();
-			for (int i = 0; i < 10; i++) {
-				int index = random.nextInt(charset.length());
-				randomString.append(charset.charAt(index));
-			}
-
-			//retrieve the input parameter that is to be reflected
-			List<ParameterizedInput> sequence = potentialReflection.path;
-			Parameter inputParameter = sequence.get(potentialReflection.inputElementIndex)
-					.getParameters().get(potentialReflection.inputElementParamIndex);
-
-			//replace its value by the randomly generated one
-			inputParameter.value = randomString.toString();
-
-			//test if this value is still reflected
-			driver.reset();
-			ParameterizedOutput result = null;
-			for (ParameterizedInput pi : sequence) {
-				result = driver.execute(pi);
-			}
-
-			if (result != null
-					&& result.getOutputSymbol().equals(potentialReflection.expectedOutputSymbol)) {
-				String parameterValue = result
-						.getParameterValue(potentialReflection.outputElementParamIndex);
-				if (parameterValue.equals(randomString.toString())) {
-					reflectionsFound.add(potentialReflection);
-					LogManager.logInfo("Reflection confirmed");
-				} else {
-					LogManager.logInfo("Reflection disconfirmed");
-				}
-			} else {
-				LogManager.logInfo("Reflection disconfirmed");
-			}
-		}
-
-	}
-
 	/**
 	 * Class that represents a couple 'input/output'
 	 */
 	private class SimplifiedDataItem {
-
+		
 		private final ParameterizedInputSequence path;
 		private final ParameterizedOutput result;
-
+		
 		private SimplifiedDataItem(ParameterizedInputSequence path, ParameterizedOutput result) {
 			this.path = path;
 			this.result = result;
 		}
-
+		
 	}
 
 	/**
@@ -144,7 +102,11 @@ public class XSSDetector {
 		 * The output symbol where we expect to find thr reflected value
 		 */
 		private final String expectedOutputSymbol;
-
+		/**
+		 * True if the reflection has been confirmed, or tested for XSS
+		 */
+		private boolean hasBeenTested = false;
+		
 		public Reflection(List<ParameterizedInput> path, int inputElementIndex, int inputElementParamIndex, int outputElementParamIndex, String outputSymbol) {
 			this.path = path;
 			this.inputElementIndex = inputElementIndex;
@@ -152,7 +114,7 @@ public class XSSDetector {
 			this.outputElementParamIndex = outputElementParamIndex;
 			this.expectedOutputSymbol = outputSymbol;
 		}
-
+		
 		@Override
 		public int hashCode() {
 			int hash = 7;
@@ -162,7 +124,7 @@ public class XSSDetector {
 			hash = 31 * hash + this.outputElementParamIndex;
 			return hash;
 		}
-
+		
 		@Override
 		public boolean equals(Object obj) {
 			if (obj == null) {
@@ -186,9 +148,17 @@ public class XSSDetector {
 			}
 			return true;
 		}
-
+		
+		@Override
+		public Reflection clone() {
+			List<ParameterizedInput> pathClone = new LinkedList<>();
+			for (ParameterizedInput pi : path) {
+				pathClone.add(pi.clone());
+			}
+			return new Reflection(pathClone, inputElementIndex, inputElementParamIndex, outputElementParamIndex, expectedOutputSymbol);
+		}
 	}
-
+	
 	public XSSDetector(ArrayList<String> ignoredValues, GenericDriver driver) {
 		this.ignoredValues = ignoredValues;
 		this.itemsToCheck = new LinkedList<>();
@@ -198,10 +168,12 @@ public class XSSDetector {
 	}
 
 	/**
-	 * Record an observation made for the data table, and store a succinct copy of it.
-	 * Make a clone of the data in order not to alter the inference
+	 * Record an observation made for the data table, and store a succinct copy
+	 * of it. Make a clone of the data in order not to alter the inference
+	 *
 	 * @param dti The observation to save
-	 * @param pis The sequence that has been sent to the system to obtain the observation
+	 * @param pis The sequence that has been sent to the system to obtain the
+	 * observation
 	 */
 	public void recordItem(LiDataTableItem dti, ParameterizedInputSequence pis) {
 		ParameterizedInputSequence pisClone = pis.clone();
@@ -216,8 +188,6 @@ public class XSSDetector {
 	 * @return True if at least one reflection was found, false otherwise
 	 */
 	public boolean detectReflections() {
-		//System.out.println("Detection started");
-		long startTime = System.currentTimeMillis();
 		boolean reflectionsHaveBeenFound = false;
 		/* Iterate on the new items */
 		while (!itemsToCheck.isEmpty()) {
@@ -237,11 +207,11 @@ public class XSSDetector {
 					/* Iterate on the different parameter of the input */
 					for (Parameter param : piParameters) {
 						String inputValue = param.value;
-
+						
 						if (inputValue.length() < MINIMAL_SIZE && ignoredValues.contains(inputValue)) {
 							continue;
 						}
-
+						
 						if (isReflected(inputValue, outputValue)) {
 							Reflection newReflection
 									= new Reflection(currentItem.path.sequence,
@@ -249,7 +219,7 @@ public class XSSDetector {
 											piParameters.indexOf(param),
 											outputParameters.indexOf(outputParameter),
 											currentItem.result.getOutputSymbol());
-
+							
 							boolean foundSimilar = false;
 							for (Reflection reflection : potentialReflectionsFound) {
 								if (newReflection.path.containsAll(reflection.path)) {
@@ -257,17 +227,16 @@ public class XSSDetector {
 									break;
 								}
 							}
-
+							
 							if (!foundSimilar && !potentialReflectionsFound.contains(newReflection)) {
-								LogManager.logInfo("Potential reflection found : ");
-								LogManager.logInfo("\t" + (newReflection.inputElementParamIndex + 1) + "th parameter of input symbol "
-										+ currentItem.path.sequence.get(newReflection.inputElementIndex).getInputSymbol());
-								LogManager.logInfo("Soit : " + currentItem.path.sequence.get(newReflection.inputElementIndex));
-								LogManager.logInfo("\treflected in the " + (newReflection.outputElementParamIndex + 1) + "th parameter of the output symbol "
-										+ currentItem.result.getOutputSymbol());
-								LogManager.logInfo("\t" + "in the sequence :");
+								LogManager.logInfo("[XSS] Potential reflection found : ");
+								LogManager.logInfo("[XSS]\t" + (newReflection.inputElementParamIndex + 1) + "th parameter of input "
+										+ currentItem.path.sequence.get(newReflection.inputElementIndex));
+								LogManager.logInfo("[XSS]\tis reflected in the " + (newReflection.outputElementParamIndex + 1) + "th parameter of the output "
+										+ currentItem.result);
+								LogManager.logInfo("[XSS]\t" + "in the sequence :");
 								LogManager.logInfo(currentItem.path.toString());
-
+								
 								potentialReflectionsFound.add(newReflection);
 								reflectionsHaveBeenFound = true;
 							} else {
@@ -278,8 +247,106 @@ public class XSSDetector {
 				}
 			}
 		}
-		//System.out.println("Detection finished in " + (System.currentTimeMillis() - startTime));
-		//System.out.println(filtered);
 		return reflectionsHaveBeenFound;
 	}
+	
+	public void confirmReflections() {
+		for (Reflection potentialReflection : potentialReflectionsFound) {
+			if (potentialReflection.hasBeenTested) {
+				continue;
+			} else {
+				potentialReflection.hasBeenTested = true;
+			}
+			//Generate a random alpha numeric string to test the reflection again
+			String randomString = Utils.randAlphaNumString(10);
+
+			//retrieve the input parameter that is to be reflected
+			List<ParameterizedInput> sequence = potentialReflection.path;
+			Parameter inputParameter = sequence.get(potentialReflection.inputElementIndex)
+					.getParameters().get(potentialReflection.inputElementParamIndex);
+
+			//replace its value by the randomly generated one
+			inputParameter.value = randomString;
+
+			//test if this value is still reflected
+			driver.reset();
+			ParameterizedOutput result = null;
+			for (ParameterizedInput pi : sequence) {
+				result = driver.execute(pi);
+			}
+			
+			if (result != null
+					&& result.getOutputSymbol().equals(potentialReflection.expectedOutputSymbol)) {
+				String parameterValue = result
+						.getParameterValue(potentialReflection.outputElementParamIndex);
+				if (parameterValue.equals(randomString.toString())) {
+					Reflection reflectionClone = potentialReflection.clone();
+					reflectionClone.hasBeenTested = false;
+					reflectionsFound.add(reflectionClone);
+					LogManager.logInfo("Reflection confirmed");
+				} else {
+					LogManager.logInfo("Reflection disconfirmed");
+				}
+			} else {
+				LogManager.logInfo("Reflection disconfirmed");
+			}
+		}
+		
+	}
+	
+	private static String[] payloads = {"'';!--\"<XSS>=&{()}"};
+	private static String[] payloadsExpectedResults = {"<XSS"};
+	
+	
+	public void testReflections() {
+		for (Reflection r : reflectionsFound) {
+			if (r.hasBeenTested) {
+				continue;
+			} else {
+				r.hasBeenTested = true;
+			}
+			Reflection reflection = r.clone();
+			
+			String startPattern = Utils.randAlphaNumString(4);
+			String endPattern = Utils.randAlphaNumString(4);
+			
+			int indexPayload = 0;
+			for (String xssPayload : payloads) {
+				StringBuilder completePayload = new StringBuilder(startPattern);
+				completePayload.append(xssPayload);
+				completePayload.append(endPattern);
+				
+				for (int i = 0; i < reflection.path.size(); i++) {
+					ParameterizedInput pi = reflection.path.get(i);
+					if (i == reflection.inputElementIndex) {
+						pi.getParameters().get(reflection.inputElementParamIndex).value = completePayload.toString();
+					}
+					String response = driver.submit(pi);
+					
+					if (response.toLowerCase().contains(payloadsExpectedResults[indexPayload].toLowerCase())){
+						LogManager.logInfo("[XSS] Payload \'" + xssPayload + "\' reflected as \'" + payloadsExpectedResults[indexPayload] + "\', as exepected");
+					}
+					if (response.contains(startPattern) && response.contains(endPattern)) {
+						int indexStartFilteredPayload = response.indexOf(startPattern) + startPattern.length();
+						int indexEndFilteredPayload = response.indexOf(endPattern);
+						String filteredPayload = response.substring(indexStartFilteredPayload, indexEndFilteredPayload); //TODO : handle multiple reflexions
+						LogManager.logInfo("[XSS] Payload \'" + xssPayload + "\' reflected as \'" + filteredPayload + "\'");
+						LogManager.logInfo("[XSS] Score :" + StringUtils.getLevenshteinDistance(filteredPayload, xssPayload));
+					} else {
+						LogManager.logInfo("[XSS] Payload \'" + xssPayload + "\' was not found");
+						//TODO : find behaviour
+					}
+					
+					ParameterizedOutput responsePO = driver.htmlToParameterizedOutput(response);
+					if (!responsePO.getOutputSymbol().equals(reflection.expectedOutputSymbol)) {
+						LogManager.logInfo("[XSS] Payload \'" + xssPayload + "\' do not produce the expected page");
+						//TODO : find behaviour
+					}
+				}
+				
+				indexPayload++;
+			}
+		}
+	}
+	
 }

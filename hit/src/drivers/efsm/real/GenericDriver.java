@@ -30,7 +30,6 @@ import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedOutput;
 
 import com.gargoylesoftware.htmlunit.CookieManager;
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
@@ -43,10 +42,8 @@ import crawler.WebInput.Type;
 import crawler.WebOutput;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.logging.Logger;
 import org.apache.http.conn.HttpHostConnectException;
 import org.w3c.dom.Node;
-import tools.HTTPRequest;
 
 public class GenericDriver extends LowWebDriver {
 
@@ -114,12 +111,20 @@ public class GenericDriver extends LowWebDriver {
 	public ParameterizedOutput execute(ParameterizedInput pi) {
 		numberOfAtomicRequest++;
 
-		//Sends the output and store the source output
+		/* Sends the parameterized input to the server and retrieve the HTML source code of the response */
 		String source = submit(pi);
 
+		/* Translate the response in an parameterized output symbol */ 
+		ParameterizedOutput po = htmlToParameterizedOutput(source);
+		
+		LogManager.logRequest(pi, po);
+		return po;
+	}
+
+	public ParameterizedOutput htmlToParameterizedOutput(String htmlPage){
 		ParameterizedOutput po = null;
 		//Creates the WebOutput object from html source
-		WebOutput out = new WebOutput(source, config.getLimitSelector()); //TODO add 'from' ?
+		WebOutput out = new WebOutput(htmlPage, config.getLimitSelector()); //TODO add 'from' ?
 		//Looks for a equivalent output from the already visited ones
 		boolean equivalentOutputFound = false;
 		for (int i = 0; i < outputs.size(); i++) {
@@ -148,14 +153,9 @@ public class GenericDriver extends LowWebDriver {
 
 		//If a new page is discovered during the inference
 		if (po == null) {
-			// System.out.println(pi);
-			// System.out.println(source);
-			// System.out.println(out.getPageTree());
-			System.err.println("Different page found");
+			//System.err.println("Different page found");
 			po = new ParameterizedOutput();
 		}
-
-		LogManager.logRequest(pi, po);
 		return po;
 	}
 
@@ -185,7 +185,12 @@ public class GenericDriver extends LowWebDriver {
 		return addr;
 	}
 
-	private String submit(ParameterizedInput pi) {
+	/**
+	 * Convert a parameterized input into a concrete request and send it to the server
+	 * @param pi the abstract input
+	 * @return The HTML source code of the response
+	 */
+	public String submit(ParameterizedInput pi) {
 		try {
 			WebRequest request = parameterizedInputToRequest(pi);
 			HtmlPage page;
@@ -198,6 +203,11 @@ public class GenericDriver extends LowWebDriver {
 	}
 
 
+	/**
+	 * Convert a parameterized input into a concrete request
+	 * @param pi
+	 * @return 
+	 */
 	public WebRequest parameterizedInputToRequest(ParameterizedInput pi) {
 		try {
 			WebInput in = inputsFromSymbols.get(pi.getInputSymbol());

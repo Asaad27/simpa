@@ -420,6 +420,17 @@ public class Utils {
 	public static String randString() {
 		return "random" + Utils.randInt(1000);
 	}
+	
+	public static String randAlphaNumString(int size) {
+		String charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+		StringBuilder randomString = new StringBuilder();
+		for (int i = 0; i < size; i++) {
+			int index = rand.nextInt(charset.length());
+			randomString.append(charset.charAt(index));
+		};
+		return randomString.toString();
+	}
+	
 
 	public static int minimum(int a, int b, int c) {
 		return Math.min(Math.min(a, b), c);
