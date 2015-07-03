@@ -145,6 +145,9 @@ public class DriverGeneratorBFS extends DriverGenerator {
 		}
 		try {
 			page = client.getPage(request);
+		} catch (HttpHostConnectException e){
+			LogManager.logError("Connection problem using input " + input);
+			throw e;
 		} catch (RuntimeException e) {
 			//htmlunit throws a RuntimeException whenever it catches a MalformedURLException
 			//cf com.gargoylesoftware.htmlunit.util.UrlUtils.toUrlSafe()
