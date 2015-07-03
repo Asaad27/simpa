@@ -15,6 +15,14 @@ import automata.State;
 import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
 
+/**
+ * Create a product of two automata.
+ * 
+ * If the automata have the same set of input symbols, this will be a synchronous product.
+ * If they have distinct set of input symbols, it will be an asynchronous product.
+ * @author nbremond
+ *
+ */
 public class CombinedMealy extends Mealy implements Serializable {
 	private static final long serialVersionUID = 4685322377371L;
 
@@ -26,6 +34,12 @@ public class CombinedMealy extends Mealy implements Serializable {
 		this.m1 = m1;
 		this.m2 = m2;
 		LogManager.logStep(LogManager.STEPOTHER, "Generate product of "+m1.getName() +" and "+m2.getName());
+		Map<State,Map<State,State>> combinedStates = createStates();
+		createTransitions(combinedStates);
+		if (!Options.TEST) exportToDot();
+	}
+	
+	private Map<State, Map<State, State>> createStates(){
 		Map<State,Map<State,State>> combinedStates = new HashMap<State,Map<State,State>>();
 		for (State s1 : m1.getStates()){
 			Map<State,State> s1States = new HashMap<State,State>();
@@ -37,23 +51,46 @@ public class CombinedMealy extends Mealy implements Serializable {
 			}
 			combinedStates.put(s1, s1States);
 		}
-		for (MealyTransition t1 : m1.getTransitions()){
-			for (State s2 : m2.getStates()){
-				State from = combinedStates.get(t1.getFrom()).get(s2);
-				State to = combinedStates.get(t1.getTo()).get(s2);
-				MealyTransition t = new MealyTransition(this, from, to, t1.getInput(), t1.getOutput());
-				addTransition(t);
+		return combinedStates;
+	}
+	
+	private void createTransitions(Map<State,Map<State,State>> combinedStates){
+		for (int i = 0; i < 2; i++){
+			Mealy m_a, m_b;
+			if (i == 0){
+				m_a = m1;
+				m_b = m2;
+			}else{
+				m_a = m2;
+				m_b = m1;
+			}
+			for (MealyTransition t_a : m_a.getTransitions()){
+				for (State s_b : m_b.getStates()){
+					State from;
+					if (i == 0)
+						from = combinedStates.get(t_a.getFrom()).get(s_b);
+					else
+						from = combinedStates.get(s_b).get(t_a.getFrom());
+					State to_b;
+					String output = t_a.getOutput();
+					MealyTransition t_b = m_b.getTransitionFromWithInput(s_b, t_a.getInput());
+					if (t_b == null){ // we are making an asynchronous product
+						to_b = s_b;
+					}else{
+						to_b = t_b.getTo();
+						output += "_x_" + t_b.getOutput();
+					}
+					State to;
+					if (i == 0)
+						to = combinedStates.get(t_a.getTo()).get(to_b);
+					else
+						to = combinedStates.get(to_b).get(t_a.getTo());
+					MealyTransition t = new MealyTransition(this, from, to, t_a.getInput(),output);
+					if (getTransitionFromWithInput(from, t_a.getInput()) == null)//because in case of synchronous product we will add to times the transition with reversed output
+						addTransition(t);
+				}
 			}
 		}
-		for (MealyTransition t2 : m2.getTransitions()){
-			for (State s1 : m1.getStates()){
-				State from = combinedStates.get(s1).get(t2.getFrom());
-				State to = combinedStates.get(s1).get(t2.getTo());
-				MealyTransition t = new MealyTransition(this, from, to, t2.getInput(), t2.getOutput());
-				addTransition(t);
-			}
-		}
-		if (!Options.TEST) exportToDot();
 	}
 	
 	public static void serialize(CombinedMealy o) {
@@ -88,6 +125,4 @@ public class CombinedMealy extends Mealy implements Serializable {
 		}
 		return (CombinedMealy) o;
 	}
-
-
 }
