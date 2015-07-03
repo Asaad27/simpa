@@ -21,6 +21,10 @@ public class TestMealy {
 		test.addTransition(new MealyTransition(test, s3, s2, "a", "0"));
 		test.addTransition(new MealyTransition(test, s3, s1, "b", "1"));
 
+		test.exportToDot();
+
+		test = CounterMealy.addCounter(test, s1, s2, "i", 2);
+		test = CounterMealy.addCounter(test, s3, s2, "j", 3);
 		return test;
 	}
 }
