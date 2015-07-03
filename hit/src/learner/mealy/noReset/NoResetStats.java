@@ -591,9 +591,10 @@ public class NoResetStats {
 //				Atribute.STATE_NUMBER, 0, 500),
 //				Atribute.OUTPUT_SYMBOLS, 0, 500),
 //				Atribute.INPUT_SYMBOLS, Atribute.STATE_NUMBER, Atribute.OUTPUT_SYMBOLS,PlotStyle.POINTS);
+
+		List<NoResetStats> chosenStats;
 		
 		//not enough data
-		List<NoResetStats> chosenStats;
 //		chosenStats = allStats;
 //		chosenStats = selectFromRange(chosenStats, Atribute.INPUT_SYMBOLS,15,15);
 //		chosenStats = selectFromRange(chosenStats, Atribute.OUTPUT_SYMBOLS,10,10);
@@ -667,12 +668,12 @@ public class NoResetStats {
 //				Atribute.W1_LENGTH, Atribute.STATE_NUMBER, Atribute.W_SIZE,PlotStyle.POINTS);
 	
 		//OK		
-//		chosenStats = allStats;
-//		chosenStats = selectFromRange(chosenStats, Atribute.STATE_BOUND_OFFSET, 0, 0);
-//		chosenStats = selectFromRange(chosenStats, Atribute.STATE_NUMBER, 5, 5);
-//		chosenStats = selectFromRange(chosenStats, Atribute.OUTPUT_SYMBOLS, 5, 5);
-//		makeGraph(chosenStats,
-//				Atribute.TRACE_LENGTH, Atribute.INPUT_SYMBOLS, Atribute.W_SIZE, PlotStyle.MEDIAN);
+		chosenStats = allStats;
+		chosenStats = selectFromRange(chosenStats, Atribute.STATE_BOUND_OFFSET, 0, 0);
+		chosenStats = selectFromRange(chosenStats, Atribute.STATE_NUMBER, 6, 6);
+		chosenStats = selectFromRange(chosenStats, Atribute.OUTPUT_SYMBOLS, 5, 5);
+		makeGraph(chosenStats,
+				Atribute.TRACE_LENGTH, Atribute.INPUT_SYMBOLS, Atribute.W_SIZE, PlotStyle.MEDIAN);
 		
 		chosenStats = allStats;
 		chosenStats = selectFromRange(chosenStats, Atribute.STATE_BOUND_OFFSET, 0, 500);

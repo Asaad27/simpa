@@ -12,6 +12,7 @@ import java.util.List;
 import learner.Learner;
 import learner.mealy.noReset.NoResetLearner;
 import learner.mealy.noReset.NoResetStats;
+import main.simpa.Options.LogLevel;
 import tools.GraphViz;
 import tools.Stats;
 import tools.Utils;
@@ -19,6 +20,7 @@ import tools.loggers.HTMLLogger;
 import tools.loggers.LogManager;
 import tools.loggers.TextLogger;
 import drivers.Driver;
+import drivers.mealy.transparent.RandomAndCounterMealyDriver;
 import drivers.mealy.transparent.RandomMealyDriver;
 import examples.mealy.RandomMealy;
 
@@ -109,13 +111,10 @@ public class SIMPATestNoResetMealy {
 			if (!onlyGraphGeneration){
 				Utils.cleanDir(new File(Options.OUTDIR));
 
-				Stats stats = new Stats(Options.OUTDIR + "stats.csv");
-				stats.setHeaders(RandomMealyDriver.getStatHeaders());
-
 				if (!Options.STAT)
 					System.out.println("[+] Testing " + Options.NBTEST
 							+ " automaton");
-
+				Options.LOG_LEVEL = LogLevel.LOW;
 				for (i = 1; i <= Options.NBTEST; i++) {
 					Options.OUTDIR = Utils.makePath(dir + i);
 					Utils.createDir(new File(Options.OUTDIR));
@@ -129,14 +128,13 @@ public class SIMPATestNoResetMealy {
 							LogManager.addLogger(new TextLogger());
 						LogManager.start();
 
-						driver = new RandomMealyDriver();
+						driver = new RandomAndCounterMealyDriver();
 						Learner gl = Learner.getLearnerFor(driver);
 						assert gl instanceof NoResetLearner;
 						NoResetLearner l = (NoResetLearner) gl;
 						l.learn();
 						driver.logStats();
 
-						stats.addRecord(((RandomMealyDriver) driver).getStats());
 						noResetStats.add(l.getStats());
 						globalStatsWriter.append(l.getStats().toCSV() + "\n");
 					} catch (Exception e){
@@ -146,12 +144,6 @@ public class SIMPATestNoResetMealy {
 					}
 				}
 				globalStatsWriter.close();
-				stats.close();
-				System.out.println("[+] Stats");
-				System.out.println("    Avg. requests length : " + Utils.meanOfCSVField(stats.getFilename(), 4));
-				System.out.println("    Avg. requests : " + Utils.meanOfCSVField(stats.getFilename(), 5));
-				System.out.println("    Avg. duration : " + Utils.meanOfCSVField(stats.getFilename(), 6));
-
 				System.out.print(NoResetStats.makeTextStats(noResetStats));
 				Options.OUTDIR = dir;
 				NoResetStats.makeGraph(noResetStats);

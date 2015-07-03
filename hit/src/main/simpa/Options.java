@@ -62,13 +62,13 @@ public class Options {
 	public static int RETEST = -1;
 
 	public static int NBTEST = 1;
-	public static int MINSTATES = 10;
-	public static int MAXSTATES = 10;
-	public static int TRANSITIONPERCENT = 20;
-	public static int MININPUTSYM = 3;
-	public static int MAXINPUTSYM = 3;
-	public static int MINOUTPUTSYM = 50;
-	public static int MAXOUTPUTSYM = 50;
+	public static int MINSTATES = 5;
+	public static int MAXSTATES = 5;
+	public static int TRANSITIONPERCENT = 90;
+	public static int MININPUTSYM = 5;
+	public static int MAXINPUTSYM = 5;
+	public static int MINOUTPUTSYM = 5;
+	public static int MAXOUTPUTSYM = 5;
 	
 	// EFSM
 	public static int MINPARAMETER = 1;

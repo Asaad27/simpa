@@ -108,7 +108,7 @@ public class RandomMealy extends Mealy implements Serializable {
 	private void createTransitions() {
 		for (State s1 : states) {
 			for (String is : inputSymbols) {
-				if (Utils.randBoolWithPercent(90)) {
+				if (Utils.randBoolWithPercent(Options.TRANSITIONPERCENT)) {
 					addTransition(new MealyTransition(this, s1,
 							Utils.randIn(states), is,
 							Utils.randIn(outputSymbols)));
@@ -130,7 +130,7 @@ public class RandomMealy extends Mealy implements Serializable {
 
 	public static RandomMealy getConnexRandomMealy(){
 		int max_try = 500;
-		LogManager.logStep(LogManager.STEPOTHER, "Generating random Mealy (500 try)");
+		LogManager.logStep(LogManager.STEPOTHER, "Generating random Mealy ("+max_try+" try)");
 		for (int i = 0 ; i < max_try; i++){
 			RandomMealy automata = new RandomMealy(false);
 			if (automata.isConnex()){
