@@ -619,11 +619,13 @@ public class LiLearner extends Learner {
 						LogManager.logInfo("The tables have not been modified\n");
 					}
 				}
-				if(xssDetector.detectReflections()){
-					LogManager.logInfo("[XSS] Trying to confirm reflections");
-					xssDetector.confirmReflections();
-					LogManager.logInfo("[XSS] Trying to exploit reflections");
-					xssDetector.testReflections();
+				if (Options.XSS_DETECTION) {
+					if (xssDetector.detectReflections()) {
+						LogManager.logInfo("[XSS] Trying to confirm reflections");
+						xssDetector.confirmReflections();
+						LogManager.logInfo("[XSS] Trying to exploit reflections");
+						xssDetector.testReflections();
+					}
 				}
 			}
 			LiConjecture conjecture = createConjecture();

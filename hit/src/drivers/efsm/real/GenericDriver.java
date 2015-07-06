@@ -186,23 +186,35 @@ public class GenericDriver extends LowWebDriver {
 	}
 
 	/**
-	 * Convert a parameterized input into a concrete request and send it to the server
-	 * @param pi the abstract input
-	 * @return The HTML source code of the response
+	 * @see GenericDriver#submit(automata.efsm.ParameterizedInput, boolean) 
 	 */
 	public String submit(ParameterizedInput pi) {
+		return submit(pi, false);
+	}
+
+
+	/**
+	 * Convert a parameterized input into a concrete request and send it to the server
+	 * @param pi the abstract input
+	 * @param rawResponse if true, returns the raw HTTP response instead of parsing it
+	 * @return The HTML source code of the response
+	 */
+	public String submit(ParameterizedInput pi, boolean rawResponse) {
 		try {
 			WebRequest request = parameterizedInputToRequest(pi);
 			HtmlPage page;
 			page = client.getPage(request);
-			return page.asXml();
+			if (rawResponse) {
+				return page.getWebResponse().getContentAsString();
+			} else {
+				return page.asXml();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
-
-
+	
 	/**
 	 * Convert a parameterized input into a concrete request
 	 * @param pi

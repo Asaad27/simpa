@@ -47,7 +47,7 @@ public class XSSDetector {
 	 * Driver used to test input in the system
 	 */
 	private final GenericDriver driver;
-	
+
 	private int filtered = 0;
 
 	/**
@@ -59,22 +59,22 @@ public class XSSDetector {
 	 * @return true if a reflection is found, false otherwise
 	 */
 	private boolean isReflected(String inputValue, String outputValue) {
-		return outputValue.contains(inputValue);
+		return outputValue.toLowerCase().contains(inputValue.toLowerCase());
 	}
 
 	/**
 	 * Class that represents a couple 'input/output'
 	 */
 	private class SimplifiedDataItem {
-		
+
 		private final ParameterizedInputSequence path;
 		private final ParameterizedOutput result;
-		
+
 		private SimplifiedDataItem(ParameterizedInputSequence path, ParameterizedOutput result) {
 			this.path = path;
 			this.result = result;
 		}
-		
+
 	}
 
 	/**
@@ -106,7 +106,7 @@ public class XSSDetector {
 		 * True if the reflection has been confirmed, or tested for XSS
 		 */
 		private boolean hasBeenTested = false;
-		
+
 		public Reflection(List<ParameterizedInput> path, int inputElementIndex, int inputElementParamIndex, int outputElementParamIndex, String outputSymbol) {
 			this.path = path;
 			this.inputElementIndex = inputElementIndex;
@@ -114,7 +114,7 @@ public class XSSDetector {
 			this.outputElementParamIndex = outputElementParamIndex;
 			this.expectedOutputSymbol = outputSymbol;
 		}
-		
+
 		@Override
 		public int hashCode() {
 			int hash = 7;
@@ -124,7 +124,7 @@ public class XSSDetector {
 			hash = 31 * hash + this.outputElementParamIndex;
 			return hash;
 		}
-		
+
 		@Override
 		public boolean equals(Object obj) {
 			if (obj == null) {
@@ -148,7 +148,7 @@ public class XSSDetector {
 			}
 			return true;
 		}
-		
+
 		@Override
 		public Reflection clone() {
 			List<ParameterizedInput> pathClone = new LinkedList<>();
@@ -158,7 +158,7 @@ public class XSSDetector {
 			return new Reflection(pathClone, inputElementIndex, inputElementParamIndex, outputElementParamIndex, expectedOutputSymbol);
 		}
 	}
-	
+
 	public XSSDetector(ArrayList<String> ignoredValues, GenericDriver driver) {
 		this.ignoredValues = ignoredValues;
 		this.itemsToCheck = new LinkedList<>();
@@ -207,11 +207,11 @@ public class XSSDetector {
 					/* Iterate on the different parameter of the input */
 					for (Parameter param : piParameters) {
 						String inputValue = param.value;
-						
+
 						if (inputValue.length() < MINIMAL_SIZE && ignoredValues.contains(inputValue)) {
 							continue;
 						}
-						
+
 						if (isReflected(inputValue, outputValue)) {
 							Reflection newReflection
 									= new Reflection(currentItem.path.sequence,
@@ -219,7 +219,7 @@ public class XSSDetector {
 											piParameters.indexOf(param),
 											outputParameters.indexOf(outputParameter),
 											currentItem.result.getOutputSymbol());
-							
+
 							boolean foundSimilar = false;
 							for (Reflection reflection : potentialReflectionsFound) {
 								if (newReflection.path.containsAll(reflection.path)) {
@@ -227,7 +227,7 @@ public class XSSDetector {
 									break;
 								}
 							}
-							
+
 							if (!foundSimilar && !potentialReflectionsFound.contains(newReflection)) {
 								LogManager.logInfo("[XSS] Potential reflection found : ");
 								LogManager.logInfo("[XSS]\t" + (newReflection.inputElementParamIndex + 1) + "th parameter of input "
@@ -236,7 +236,7 @@ public class XSSDetector {
 										+ currentItem.result);
 								LogManager.logInfo("[XSS]\t" + "in the sequence :");
 								LogManager.logInfo(currentItem.path.toString());
-								
+
 								potentialReflectionsFound.add(newReflection);
 								reflectionsHaveBeenFound = true;
 							} else {
@@ -249,7 +249,7 @@ public class XSSDetector {
 		}
 		return reflectionsHaveBeenFound;
 	}
-	
+
 	public void confirmReflections() {
 		for (Reflection potentialReflection : potentialReflectionsFound) {
 			if (potentialReflection.hasBeenTested) {
@@ -274,12 +274,12 @@ public class XSSDetector {
 			for (ParameterizedInput pi : sequence) {
 				result = driver.execute(pi);
 			}
-			
+
 			if (result != null
 					&& result.getOutputSymbol().equals(potentialReflection.expectedOutputSymbol)) {
-				String parameterValue = result
+				String outoutParameterValue = result
 						.getParameterValue(potentialReflection.outputElementParamIndex);
-				if (parameterValue.equals(randomString.toString())) {
+				if (isReflected(inputParameter.value, outoutParameterValue)) {
 					Reflection reflectionClone = potentialReflection.clone();
 					reflectionClone.hasBeenTested = false;
 					reflectionsFound.add(reflectionClone);
@@ -291,13 +291,20 @@ public class XSSDetector {
 				LogManager.logInfo("Reflection disconfirmed");
 			}
 		}
-		
+
 	}
-	
-	private static String[] payloads = {"'';!--\"<XSS>=&{()}"};
-	private static String[] payloadsExpectedResults = {"<XSS"};
-	
-	
+
+	private static final String[] payloads = {
+		"'';!--\"<XSS>=&{()}",
+		"<script>alert(\"XSS\");</script>",
+		"<script>alert(\'XSS\');</script>"
+	};
+	private static final String[] payloadsExpectedResults = {
+		"<XSS",
+		"<script>alert(\"XSS\");</script>",
+		"<script>alert(\'XSS\');</script>"
+	};
+
 	public void testReflections() {
 		for (Reflection r : reflectionsFound) {
 			if (r.hasBeenTested) {
@@ -306,47 +313,66 @@ public class XSSDetector {
 				r.hasBeenTested = true;
 			}
 			Reflection reflection = r.clone();
-			
+
 			String startPattern = Utils.randAlphaNumString(4);
 			String endPattern = Utils.randAlphaNumString(4);
-			
-			int indexPayload = 0;
-			for (String xssPayload : payloads) {
+
+			for (int indexPayload = 0; indexPayload < payloads.length; indexPayload++) {
+				String xssPayload = payloads[indexPayload];
+				String expectedReflection = payloadsExpectedResults[indexPayload];
 				StringBuilder completePayload = new StringBuilder(startPattern);
 				completePayload.append(xssPayload);
 				completePayload.append(endPattern);
-				
+
 				for (int i = 0; i < reflection.path.size(); i++) {
 					ParameterizedInput pi = reflection.path.get(i);
 					if (i == reflection.inputElementIndex) {
 						pi.getParameters().get(reflection.inputElementParamIndex).value = completePayload.toString();
 					}
-					String response = driver.submit(pi);
-					
-					if (response.toLowerCase().contains(payloadsExpectedResults[indexPayload].toLowerCase())){
-						LogManager.logInfo("[XSS] Payload \'" + xssPayload + "\' reflected as \'" + payloadsExpectedResults[indexPayload] + "\', as exepected");
+					String response = driver.submit(pi, true);
+
+					if (response.toLowerCase().contains(expectedReflection.toLowerCase())) {
+						LogManager.logInfo("[XSS] Payload \'" + xssPayload + "\' reflected as \'" + expectedReflection + "\', as exepected");
 					}
+
+					/* Both patterns were found : the data in between should contain our payload */
 					if (response.contains(startPattern) && response.contains(endPattern)) {
 						int indexStartFilteredPayload = response.indexOf(startPattern) + startPattern.length();
 						int indexEndFilteredPayload = response.indexOf(endPattern);
 						String filteredPayload = response.substring(indexStartFilteredPayload, indexEndFilteredPayload); //TODO : handle multiple reflexions
 						LogManager.logInfo("[XSS] Payload \'" + xssPayload + "\' reflected as \'" + filteredPayload + "\'");
 						LogManager.logInfo("[XSS] Score :" + StringUtils.getLevenshteinDistance(filteredPayload, xssPayload));
+
+						/* Only one pattern was found, our payload should be located before or after */
+					} else if (response.contains(startPattern) ^ response.contains(endPattern)) {
+						String stringAroundPattern = null;
+						if (response.contains(startPattern)) {
+							int indexStartFilteredPayload = response.indexOf(startPattern) + startPattern.length();
+							stringAroundPattern = response.substring(
+									indexStartFilteredPayload,
+									indexStartFilteredPayload + xssPayload.length() + 10)
+									+ "...";
+						} else {
+							//TODO
+						}
+						LogManager.logInfo("[XSS] Payload \'" + xssPayload + "\' was probably found in \'" + stringAroundPattern);
+						//TODO : find behaviour
+					/* None of the patterns were found : the payload has probably been filtered entirely */
 					} else {
 						LogManager.logInfo("[XSS] Payload \'" + xssPayload + "\' was not found");
 						//TODO : find behaviour
 					}
-					
+
 					ParameterizedOutput responsePO = driver.htmlToParameterizedOutput(response);
 					if (!responsePO.getOutputSymbol().equals(reflection.expectedOutputSymbol)) {
 						LogManager.logInfo("[XSS] Payload \'" + xssPayload + "\' do not produce the expected page");
 						//TODO : find behaviour
 					}
 				}
-				
+
 				indexPayload++;
 			}
 		}
 	}
-	
+
 }
