@@ -28,6 +28,7 @@ public class DriverGen {
 				else if (args[i].equals("--css")) main.drivergen.Options.CSS = true;
 				else if (args[i].equals("--js")) main.drivergen.Options.JS = true;
 				else if (args[i].equals("--timeout")) main.drivergen.Options.TIMEOUT = Integer.parseInt(args[++i]);
+				else if (args[i].equals("--limit")) main.drivergen.Options.LIMIT_TIME = Integer.parseInt(args[++i])*1000;
 				else main.drivergen.Options.INPUT = args[i];
 			}			
 			if (main.drivergen.Options.INPUT.isEmpty()) usage();			
@@ -72,7 +73,8 @@ public class DriverGen {
 		System.out.println("");
 		System.out.println("Options");
 		System.out.println("> Crawling");
-		System.out.println("    --timeout 10000   : Timeout in milliseconds");
+		System.out.println("    --timeout 10000   : Request timeout in milliseconds");
+		System.out.println("    --limit			  : Crawling limit time in seconds");
 		System.out.println("    --css             : Enable CSS rendering (May slow down the crawler)");
 		System.out.println("    --js              : Enable JS execution (May slow down the crawler)");
 		System.out.println("> General");

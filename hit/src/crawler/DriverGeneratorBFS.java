@@ -184,7 +184,10 @@ public class DriverGeneratorBFS extends DriverGenerator {
 
 		inputsToCrawlAfter.add(start);
 
-		while (!inputsToCrawlAfter.isEmpty() && depth < MAX_DEPTH) {
+		long startingTime = System.currentTimeMillis();
+		while (!inputsToCrawlAfter.isEmpty()
+				&& depth < MAX_DEPTH
+				&& System.currentTimeMillis() - startingTime < main.drivergen.Options.LIMIT_TIME) {
 			depth++;
 			inputsToCrawl.addAll(inputsToCrawlAfter);
 			inputsToCrawlAfter = new LinkedList<>();
@@ -197,7 +200,8 @@ public class DriverGeneratorBFS extends DriverGenerator {
 				}
 			}
 
-			while (!inputsToCrawl.isEmpty()) {
+			while (!inputsToCrawl.isEmpty()
+					&& System.currentTimeMillis() - startingTime < main.drivergen.Options.LIMIT_TIME) {
 				//TODO :
 				//extract group of similar inputs (store similar inputs in a collection, returns the parameter that makes them similar)
 				//for each input of the group
@@ -245,6 +249,9 @@ public class DriverGeneratorBFS extends DriverGenerator {
 		}
 		if (depth > MAX_DEPTH) {
 			System.err.println("Maximum depth reached, stopping crawling");
+		}
+		if (System.currentTimeMillis() - startingTime > main.drivergen.Options.LIMIT_TIME){
+			System.err.println("Maximum time alocated for the crawling elapsed");
 		}
 		return 0;
 	}

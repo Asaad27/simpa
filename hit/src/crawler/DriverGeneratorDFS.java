@@ -32,6 +32,10 @@ import crawler.WebInput.Type;
 import java.util.LinkedList;
 import java.util.logging.Logger;
 
+/**
+ * @deprecated
+ * @see DriverGeneratorBFS
+ */
 public class DriverGeneratorDFS extends DriverGenerator {
 
 	/**

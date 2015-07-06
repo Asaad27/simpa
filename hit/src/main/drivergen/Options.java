@@ -8,6 +8,7 @@ public class Options {
 	public static boolean CSS = false;
 	public static boolean JS = false;
 	public static int TIMEOUT = 10000;
+	public static long LIMIT_TIME = Long.MAX_VALUE;
 	
 	public static boolean GRAPHVIZ = GraphViz.check() == 0;
 	public static String OUTDIR = System.getProperty("user.dir");
