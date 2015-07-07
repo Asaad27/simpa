@@ -45,7 +45,21 @@ public class SIMPA {
 				else if (args[i].equals("--forcej48"))
 					Options.FORCE_J48 = true;
 				else if (args[i].equals("--scan"))
-					Options.SCAN = true;	
+					Options.SCAN = true;
+				else if (args[i].equals("--minstates"))
+					Options.MINSTATES = Integer.parseInt(args[++i]);
+				else if (args[i].equals("--maxstates"))
+					Options.MAXSTATES = Integer.parseInt(args[++i]);
+				else if (args[i].equals("--transitions"))
+					Options.TRANSITIONPERCENT = Integer.parseInt(args[++i]);
+				else if (args[i].equals("--mininputsym"))
+					Options.MININPUTSYM = Integer.parseInt(args[++i]);
+				else if (args[i].equals("--maxinputsym"))
+					Options.MAXINPUTSYM = Integer.parseInt(args[++i]);
+				else if (args[i].equals("--minoutputsym"))
+					Options.MINOUTPUTSYM = Integer.parseInt(args[++i]);
+				else if (args[i].equals("--maxoutputsym"))
+					Options.MAXOUTPUTSYM = Integer.parseInt(args[++i]);
 				else if (args[i].equals("--urls")){
 					Options.URLS = new ArrayList<String>();
 					for(String url : args[++i].split(";")) Options.URLS.add(url);
@@ -58,6 +72,8 @@ public class SIMPA {
 					Options.TREEINFERENCE = true;
 				else if (args[i].equals("--noReset"))
 					Options.NORESETINFERENCE = true;
+				else if (args[i].equals("--combinatorial"))
+						Options.COMBINATORIALINFERENCE = true;
 				else if (args[i].equals("--weka"))
 					Options.WEKA = true;
 				else if (args[i].equals("--help") || args[i].equals("-h"))
