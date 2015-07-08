@@ -2,6 +2,7 @@ package learner.mealy;
 
 import java.util.List;
 
+import automata.State;
 import drivers.Driver;
 
 public class LmConjecture extends automata.mealy.Mealy {
@@ -16,5 +17,17 @@ public class LmConjecture extends automata.mealy.Mealy {
 	public List<String> getInputSymbols() {
 		return inputSymbols;
 	}
-
+	
+	/**
+	 * check if a conjecture have all transitions
+	 * @param c the conjecture to check
+	 * @return true if there is a transition from any state with any input symbol
+	 */
+	public boolean isFullyKnown(LmConjecture c){
+		for (State s : c.getStates())
+			for (String i : inputSymbols)
+				if (c.getTransitionFromWithInput(s, i) == null)
+					return false;
+		return true;
+	}
 }

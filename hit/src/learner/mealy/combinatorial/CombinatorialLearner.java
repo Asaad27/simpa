@@ -1,10 +1,7 @@
 package learner.mealy.combinatorial;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-
 import tools.loggers.LogManager;
 import automata.Automata;
 import automata.State;
@@ -51,10 +48,15 @@ public class CombinatorialLearner extends Learner {
 		conjecture = result.conjecture;
 	}
 
+	/**
+	 * this method travel along the tree and complete Nodes when they are not complete.
+	 * @param n the root of the tree
+	 * @return a Node with a correct conjecture (according to the teacher @see #getShortestUnknowntransition(State, Conjecture)) or null
+	 */
 	private TreeNode compute(TreeNode n){
+		//TODO make a non-recursive version of that ?
 		LogManager.logInfo("currently in " + n.getStatesTrace(trace));
-		//n.conjecture.exportToDot();
-		if (n.isCutted)
+		if (n.isCut)
 			return null;
 		if (n.haveForcedChild)
 			return compute(n.getOnlyChild());
@@ -63,8 +65,6 @@ public class CombinatorialLearner extends Learner {
 			if (i == null){
 				LogManager.logInfo("no reachable unknown transition found");
 				//all transitions are known in conjecture.
-				LogManager.logInfo("check connexity on ");
-				n.conjecture.exportToDot();
 				if (!n.conjecture.isConnex()){
 					LogManager.logInfo("conjecture is not connex, cutting");
 					n.cut();
@@ -90,7 +90,7 @@ public class CombinatorialLearner extends Learner {
 			return compute(child);
 		}
 		for (State q : n.conjecture.getStates()){
-			TreeNode child = n.childs.get(q);
+			TreeNode child = n.children.get(q);
 			if (child == null)
 				child = n.addChild(i,o,q);
 			TreeNode returnedNode = compute(child);
@@ -101,19 +101,12 @@ public class CombinatorialLearner extends Learner {
 	}
 
 	/**
-	 * check if a conjecture have all transitions
-	 * @param c the conjecture to check
-	 * @param inputSymbols the inputSymbols
-	 * @return true if there are a transition from any state with any input symbol
+	 * get an inputSequence which lead after an unknown transition
+	 * @param start the state from which the sequence is computed
+	 * @param c the conjecture to check (and which contains the inputs symbols)
+	 * @return an input sequence s.t. the last transition obtained after applying the sequence to start is unknown or null if a such transition is not REACHABLE.
+	 * You can get a null return if the automata has an unknown transition but is not connex.
 	 */
-	private boolean isFullyKnown(LmConjecture c, List<String> inputSymbols){
-		for (State s : c.getStates())
-			for (String i : inputSymbols)
-				if (c.getTransitionFromWithInput(s, i) == null)
-					return false;
-		return true;
-	}
-
 	private InputSequence getShortestUnknowntransition(State start, Conjecture c){
 		LogManager.logInfo("searching an unknown transition from " + start);
 		c.exportToDot();
@@ -141,10 +134,20 @@ public class CombinatorialLearner extends Learner {
 				toCompute.add(newNode);
 			}
 		}
-		//TODO check if the automata is connex
 		return null;
 	}
 
+	/**
+	 * search a sequence which distinguish the conjecture and the blackbox and apply it.
+	 * 
+	 * If the driver is an instance of {@link TransparentMealyDriver}, the real automata is used to find the shortest counter example
+	 * 
+	 * If the automata are not equivalents, the distinguish sequence is applied. If they seems to be equivalent, a sequence may are may not be applied
+	 * @see #getShortestCounterExemple(Mealy, State, Conjecture, State)
+	 * @param c the conjecture
+	 * @param currentState the current position in conjecture
+	 * @return true if a counterExemple was found, false if the conjecture seems to be equivalent to the automata.
+	 */
 	private boolean applyCounterExample(Conjecture c, State currentState){
 		LogManager.logInfo("searching counter Example on ");
 		c.exportToDot();
@@ -161,25 +164,33 @@ public class CombinatorialLearner extends Learner {
 		//TODO random walk (already exist in MealyDriver but not withoutReset)
 	}
 
-	private InputSequence getShortestCounterExemple(Mealy original,
-			State originalState, Conjecture c, State currentState) {
-		//		Map<State,State> assignedStates;//<origninalState,ConjectureState>
-		//		assignedStates = new HashMap<State,State>();
-		//		assignedStates.put(originalState,currentState);
+/**
+ * get a shortest distinguish sequence for two automata
+ * The two automata ares supposed to be connex.
+ * @param a1 the first automata
+ * @param s1 the current position in a1
+ * @param a2 the second automata (a conjecture, in order to get the input symbols)
+ * @param s2 the current position in a2
+ * @return a distinguish sequence for the two automata starting from their current states.
+ */
+	private InputSequence getShortestCounterExemple(Mealy a1,
+			State s1, Conjecture a2, State s2) {
+		assert a1.isConnex() && a2.isConnex();
+		int maxLength = (a1.getStateCount() > a2.getStateCount() ? a1.getStateCount() : a2.getStateCount());
 		class Node{public InputSequence i; public State originalEnd; public State conjectureEnd;}
 		LinkedList<Node> toCompute = new LinkedList<Node>();
 		Node n = new Node();
 		n.i = new InputSequence();
-		n.originalEnd = originalState;
-		n.conjectureEnd = currentState;
+		n.originalEnd = s1;
+		n.conjectureEnd = s2;
 		toCompute.add(n);
 		while (!toCompute.isEmpty()){
 			Node current = toCompute.pollFirst();
-			if (current.i.getLength() > original.getStateCount())
+			if (current.i.getLength() > maxLength)
 				continue;
-			for (String i : c.getInputSymbols()){
-				MealyTransition originalT = original.getTransitionFromWithInput(current.originalEnd, i);
-				MealyTransition conjectureT = c.getTransitionFromWithInput(current.conjectureEnd, i);
+			for (String i : a2.getInputSymbols()){
+				MealyTransition originalT = a1.getTransitionFromWithInput(current.originalEnd, i);
+				MealyTransition conjectureT = a2.getTransitionFromWithInput(current.conjectureEnd, i);
 				if (!originalT.getOutput().equals(conjectureT.getOutput())){
 					current.i.addInput(i);
 					return current.i;
@@ -196,6 +207,11 @@ public class CombinatorialLearner extends Learner {
 		return null;
 	}
 
+	/**
+	 * @see #apply(String)
+	 * @param is
+	 * @return
+	 */
 	private OutputSequence apply(InputSequence is){
 		OutputSequence os = new OutputSequence();
 		for (String i : is.sequence){
@@ -205,6 +221,11 @@ public class CombinatorialLearner extends Learner {
 		return os;
 	}
 
+	/**
+	 * execute a symbol on the driver and complete the trace.
+	 * @param i the input symbol
+	 * @return the returned output symbol.
+	 */
 	private String apply(String i) {
 		String o = driver.execute(i);
 		trace.append(i, o);

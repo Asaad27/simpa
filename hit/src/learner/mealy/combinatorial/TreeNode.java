@@ -10,58 +10,81 @@ import automata.State;
 import automata.mealy.MealyTransition;
 
 class TreeNode {
-	protected Conjecture conjecture;
-	private boolean copyConjectureOnWrite;
-	protected Map<State,TreeNode> childs;
-	protected boolean haveForcedChild;
-	protected boolean isCutted;
-	protected final int depth;
+	protected Conjecture conjecture;//by defaults the conjecture is shared with the father's conjecture. Note that the father is not suppose to update the conjecture.
+	private boolean copyConjectureOnWrite;//indicate if the conjecture is shared with the father's.
+	protected Map<State,TreeNode> children;
+	protected boolean haveForcedChild;//indicate that there is only one child which is imposed due to a previous transition
+	protected boolean isCut;//indicate that this node is incoherent with trace so it must be ignored and do not have children.
+	protected final int depth;//the depth of the node in the tree.
 	protected final TreeNode father;
 	protected final State state;
 
+	/**
+	 * Create the root of the tree.
+	 * @param d the driver used to create conjecture
+	 */
 	public TreeNode(MealyDriver d){
 		conjecture = new Conjecture(d);
 		copyConjectureOnWrite = false;
-		childs = new HashMap<State, TreeNode>();
+		children = new HashMap<State, TreeNode>();
 		haveForcedChild = false;
-		isCutted = false;
+		isCut = false;
 		depth = 0;
 		father = null;
 		state = addState();
 	}
 
-	public TreeNode(TreeNode parent, State s) {
+	/**
+	 * create a child node in the tree.
+	 * @param parent the father of the created node
+	 * @param s the state of the node
+	 */
+	private TreeNode(TreeNode parent, State s) {
 		this.conjecture = parent.conjecture;
 		copyConjectureOnWrite = true;
-		childs = new HashMap<State, TreeNode>();
+		children = new HashMap<State, TreeNode>();
 		haveForcedChild = false;
-		isCutted = false;
+		isCut = false;
 		father = parent;
 		depth = parent.depth +1;
 		state = s;
 	}
 
+/**
+ * add a state to the conjecture.
+ * Note that as all Node's conjectures are partially shared, adding a state to one will add a state to all.
+ * It may be better to call this method on the root.
+ * @see learner.mealy.combinatorial.Conjecture
+ * @return the created state.
+ */
 	public State addState(){
-		assert depth == 0;//this method is supposed to be uniquely applied on the root
 		State s = conjecture.addState();
 		return s;
 	}
 
+	/**
+	 * get the only child of the node.
+	 * This method must only be called on Node which have forced child.
+	 * @return
+	 */
 	public TreeNode getOnlyChild() {
 		assert haveForcedChild;
-		Iterator<TreeNode> it = childs.values().iterator();
+		Iterator<TreeNode> it = children.values().iterator();
 		return it.next();
 	}
 
+	/**
+	 * mark the Node as cut.
+	 */
 	protected void cut() {
-		assert childs.isEmpty();
-		isCutted = true;
+		assert children.isEmpty();
+		isCut = true;
 	}
 
 	protected TreeNode addForcedChild(State to) {
-		assert childs.isEmpty();
+		assert children.isEmpty();
 		TreeNode child = new TreeNode(this, to);
-		childs.put(to, child);
+		children.put(to, child);
 		haveForcedChild = true;
 		return child;
 	}
@@ -69,7 +92,7 @@ class TreeNode {
 	protected TreeNode addChild(String i, String o, State q) {
 		TreeNode child = new TreeNode(this, q);
 		child.addTransition(state, q, i, o);
-		childs.put(q, child);
+		children.put(q, child);
 		return child;
 	}
 
@@ -78,6 +101,10 @@ class TreeNode {
 		conjecture.addTransition(new MealyTransition(conjecture, from, to, i, o));
 	}
 
+	/**
+	 * as we share Conjecture between Nodes, we need to clone them when we want to add states.
+	 * This method do this for you.
+	 */
 	private void makeConjectureLocal() {
 		if (copyConjectureOnWrite){
 			conjecture = new Conjecture(conjecture);
@@ -85,6 +112,7 @@ class TreeNode {
 		}
 	}
 
+	
 	public String getStatesTrace(){
 		if (father == null)
 			return state.toString();
@@ -92,6 +120,7 @@ class TreeNode {
 	}
 
 	public StringBuilder getStatesTrace(LmTrace t){
+		//TODO make a non-recursive version of this method ?
 		StringBuilder s;
 		if (father == null)
 			s = new StringBuilder();
@@ -103,7 +132,7 @@ class TreeNode {
 			s.append(haveForcedChild ? "⇒" : "→");
 			s.append("("+t.getInput(depth)+"/"+t.getOutput(depth)+")");
 		}
-		if (isCutted)
+		if (isCut)
 			s.append("X");
 		s.append(haveForcedChild ? "⇒ " : "→ ");
 		return s;
