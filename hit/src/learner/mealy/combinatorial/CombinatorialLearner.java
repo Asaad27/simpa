@@ -1,7 +1,6 @@
 package learner.mealy.combinatorial;
 
 import java.util.LinkedList;
-import java.util.List;
 import tools.loggers.LogManager;
 import automata.Automata;
 import automata.State;
@@ -10,8 +9,9 @@ import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
 import learner.Learner;
-import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
+import main.simpa.Options;
+import main.simpa.Options.LogLevel;
 import drivers.mealy.MealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 
@@ -45,7 +45,10 @@ public class CombinatorialLearner extends Learner {
 			LogManager.logInfo("added a state. States are now " + root.conjecture.getStates());
 			LogManager.logConsole("added a state. States are now " + root.conjecture.getStates());
 		}
+		LogManager.logStep(LogManager.STEPOTHER,"Found an automata which seems to have no counter example");
+		LogManager.logConsole("Found an automata which seems to have no counter example");
 		conjecture = result.conjecture;
+		conjecture.exportToDot();
 	}
 
 	/**
@@ -55,7 +58,8 @@ public class CombinatorialLearner extends Learner {
 	 */
 	private TreeNode compute(TreeNode n){
 		//TODO make a non-recursive version of that ?
-		LogManager.logInfo("currently in " + n.getStatesTrace(trace));
+		if (Options.LOG_LEVEL  != LogLevel.LOW)
+			LogManager.logInfo("currently in " + n.getStatesTrace(trace));
 		if (n.isCut)
 			return null;
 		if (n.haveForcedChild)
@@ -82,7 +86,8 @@ public class CombinatorialLearner extends Learner {
 		MealyTransition t = n.conjecture.getTransitionFromWithInput(n.state, i);
 		if (t != null){
 			if (!t.getOutput().equals(o)){
-				LogManager.logInfo("we supposed to have transition '" + t + "' but applying '" + i +"' produced '" + o + "'. cutting.");
+				if (Options.LOG_LEVEL  != LogLevel.LOW)
+					LogManager.logInfo("we supposed to have transition '" + t + "' but applying '" + i +"' produced '" + o + "'. cutting.");
 				n.cut();
 				return null;
 			}
@@ -109,7 +114,8 @@ public class CombinatorialLearner extends Learner {
 	 */
 	private InputSequence getShortestUnknowntransition(State start, Conjecture c){
 		LogManager.logInfo("searching an unknown transition from " + start);
-		c.exportToDot();
+		if (Options.LOG_LEVEL == LogLevel.ALL)
+			c.exportToDot();
 		class Node{public InputSequence i; public State end;}
 		LinkedList<Node> toCompute = new LinkedList<Node>();
 		Node n = new Node();
@@ -149,8 +155,7 @@ public class CombinatorialLearner extends Learner {
 	 * @return true if a counterExemple was found, false if the conjecture seems to be equivalent to the automata.
 	 */
 	private boolean applyCounterExample(Conjecture c, State currentState){
-		LogManager.logInfo("searching counter Example on ");
-		c.exportToDot();
+		LogManager.logInfo("searching counter Example");
 		if (driver instanceof TransparentMealyDriver){
 			Mealy original = ((TransparentMealyDriver) driver).getAutomata();
 			State originalState = ((TransparentMealyDriver) driver).getCurrentState();
@@ -164,15 +169,15 @@ public class CombinatorialLearner extends Learner {
 		//TODO random walk (already exist in MealyDriver but not withoutReset)
 	}
 
-/**
- * get a shortest distinguish sequence for two automata
- * The two automata ares supposed to be connex.
- * @param a1 the first automata
- * @param s1 the current position in a1
- * @param a2 the second automata (a conjecture, in order to get the input symbols)
- * @param s2 the current position in a2
- * @return a distinguish sequence for the two automata starting from their current states.
- */
+	/**
+	 * get a shortest distinguish sequence for two automata
+	 * The two automata ares supposed to be connex.
+	 * @param a1 the first automata
+	 * @param s1 the current position in a1
+	 * @param a2 the second automata (a conjecture, in order to get the input symbols)
+	 * @param s2 the current position in a2
+	 * @return a distinguish sequence for the two automata starting from their current states.
+	 */
 	private InputSequence getShortestCounterExemple(Mealy a1,
 			State s1, Conjecture a2, State s2) {
 		assert a1.isConnex() && a2.isConnex();
