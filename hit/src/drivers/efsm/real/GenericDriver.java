@@ -226,7 +226,13 @@ public class GenericDriver extends LowWebDriver {
 			HttpMethod method = in.getMethod();
 			WebRequest request = null;
 			request = new WebRequest(new URL(in.getAddress()), in.getMethod());
-
+			
+			if (in.getParams().containsKey(NO_PARAM_NAME)){
+				pi = pi.clone();
+				pi.getParameters().remove(0);
+				in = (WebInput) in.clone();
+				in.getParams().remove(NO_PARAM_NAME);
+			}
 			switch (method) {
 				case POST:
 					HTTPData values = getRequestData(in, pi);
@@ -241,7 +247,7 @@ public class GenericDriver extends LowWebDriver {
 			}
 
 			return request;
-		} catch (MalformedURLException ex) {
+		} catch (MalformedURLException | CloneNotSupportedException ex) {
 			LogManager.logException("Internal error : this should not happen", ex);
 			throw new AssertionError("Internal error : this should not happen");
 		}

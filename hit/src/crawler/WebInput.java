@@ -377,7 +377,7 @@ public class WebInput implements Cloneable {
 	}
 
 	@Override
-	protected Object clone() throws CloneNotSupportedException {
+	public Object clone() throws CloneNotSupportedException {
 		WebInput wi = (WebInput) super.clone();
 		wi.params = new TreeMap<>();
 
