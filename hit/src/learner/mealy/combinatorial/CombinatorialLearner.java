@@ -1,6 +1,8 @@
 package learner.mealy.combinatorial;
 
 import java.util.LinkedList;
+
+import tools.Utils;
 import tools.loggers.LogManager;
 import automata.Automata;
 import automata.State;
@@ -165,8 +167,20 @@ public class CombinatorialLearner extends Learner {
 			apply(r);
 			return true;
 		}
-		throw new RuntimeException("not implemented");
-		//TODO random walk (already exist in MealyDriver but not withoutReset)
+		int maxTry = driver.getInputSymbols().size() * c.getStateCount() * 20;//TODO find a better way to choose this number ?
+		for (int i = 0; i < maxTry; i++){
+			String input = Utils.randIn(driver.getInputSymbols());
+			String driverOutput = apply(input,false);
+			MealyTransition t = c.getTransitionFromWithInput(currentState, input);
+			String conjectureOutput = t.getOutput();
+			currentState = t.getTo();
+			if (! driverOutput.equals(conjectureOutput)){
+				LogManager.logInfo("trace is now " + trace);
+				return true;
+			}
+		}
+		LogManager.logInfo("no CounterExample found after " + maxTry + " try");
+		return false;
 	}
 
 	/**
@@ -220,9 +234,10 @@ public class CombinatorialLearner extends Learner {
 	private OutputSequence apply(InputSequence is){
 		OutputSequence os = new OutputSequence();
 		for (String i : is.sequence){
-			String o = apply(i);
+			String o = apply(i,false);
 			os.addOutput(o);
 		}
+		LogManager.logInfo("trace is now " + trace);
 		return os;
 	}
 
@@ -230,11 +245,23 @@ public class CombinatorialLearner extends Learner {
 	 * execute a symbol on the driver and complete the trace.
 	 * @param i the input symbol
 	 * @return the returned output symbol.
+	 * @see #apply(String, boolean)
 	 */
 	private String apply(String i) {
+		return apply(i, true);
+	}
+	
+	/**
+	 * execute a symbol on the driver and complete the trace.
+	 * @param verbose indicate if trace must be displayed or not
+	 * @param i the input symbol
+	 * @return the returned output symbol.
+	 */
+	private String apply(String i, boolean verbose) {
 		String o = driver.execute(i);
 		trace.append(i, o);
-		LogManager.logInfo("now, trace is " + trace);
+		if (verbose)
+			LogManager.logInfo("now, trace is " + trace);
 		return o;
 	}
 
