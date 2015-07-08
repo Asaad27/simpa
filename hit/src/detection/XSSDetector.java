@@ -353,9 +353,13 @@ public class XSSDetector {
 									indexStartFilteredPayload + xssPayload.length() + 10)
 									+ "...";
 						} else {
-							//TODO
+							int indexEndFilteredPayload = response.indexOf(endPattern) - 1;
+							stringAroundPattern = "..."
+									+ response.substring(
+											indexEndFilteredPayload - xssPayload.length() - 10,
+											indexEndFilteredPayload);
 						}
-						LogManager.logInfo("[XSS] Payload \'" + xssPayload + "\' was probably found in \'" + stringAroundPattern);
+						LogManager.logInfo("[XSS] Payload \'" + xssPayload + "\' was probably found in \'" + stringAroundPattern + "\'");
 						//TODO : find behaviour
 					/* None of the patterns were found : the payload has probably been filtered entirely */
 					} else {
