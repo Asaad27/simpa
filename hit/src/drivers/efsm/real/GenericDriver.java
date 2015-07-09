@@ -214,9 +214,11 @@ public class GenericDriver extends LowWebDriver {
 	@Override
 	public void reset(){
 		super.reset();
+		if (config.getCookies() == null) {
+			client.getCookieManager().clearCookies();
+		}
 		if (config.getReset() != null && !config.getReset().isEmpty()) {
 			try {
-				client.getCookieManager().clearCookies();
 				client.getPage(config.getReset());
 			} catch (HttpHostConnectException e) {
 				LogManager.logFatalError("Unable to connect to host");

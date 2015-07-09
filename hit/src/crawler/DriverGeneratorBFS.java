@@ -50,7 +50,7 @@ public class DriverGeneratorBFS extends DriverGenerator {
 	/**
 	 * Defines the maximum depth of the exploration
 	 */
-	private static final int MAX_DEPTH = 10;
+	private static final int MAX_DEPTH = 5;
 
 	public DriverGeneratorBFS(String configFileName) throws JsonParseException, JsonMappingException, IOException {
 		super(configFileName);

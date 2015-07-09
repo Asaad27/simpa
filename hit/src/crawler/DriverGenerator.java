@@ -681,7 +681,10 @@ public abstract class DriverGenerator {
 	 * Reset the application using the provided url (if any).
 	 */
 	protected void reset() {
-		if (config.getReset() != null) {
+		if (config.getCookies() == null) {
+			client.getCookieManager().clearCookies();
+		}
+		if (config.getReset() != null && !config.getReset().isEmpty()) {
 			try {
 				client.getPage(config.getReset());
 			} catch (HttpHostConnectException e) {
