@@ -40,6 +40,20 @@ public class WebOutput {
 		return doc;
 	}
 
+	/**
+	 * Return the Elements of the html document without the "excluded" nodes.
+	 * It removes the excluded nodes from the DOM, but keep their children nodes.
+	 * @see PageTreeNode#excludedNode
+	 */
+	public Elements getDocWithoutExcludedNodes() {
+		Elements document = this.doc.clone();
+		for (String excludedNode : PageTreeNode.excludedNode) {
+			Elements excludedNodes = document.select(excludedNode);
+			excludedNodes.unwrap();
+		}
+		return document;
+	}
+
 	public PageTreeNode getPageTree() {
 		return pt;
 	}
@@ -119,9 +133,17 @@ public class WebOutput {
 	 * Methods related to parameters access
 	 */
 	
+	/**
+	 * Retrieve the value of an output parameter.
+	 * /!\ Warning : the given path is valid in the FILTERED version of the document, 
+	 * i.e without the excluded nodes
+	 * 
+	 * @param paramPath The path in the DOM where the parameter is located
+	 * @return The parameter's value
+	 */
 	public String extractParam(String paramPath) {
 		String path[] = paramPath.split("/");
-		Element e = doc.get(Integer.parseInt(path[0]));
+		Element e = this.getDocWithoutExcludedNodes().get(Integer.parseInt(path[0]));
 		for (int i = 1; i < path.length; i++) {
 			try {
 				e = e.child(Integer.parseInt(path[i]));

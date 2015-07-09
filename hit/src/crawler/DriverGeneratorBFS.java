@@ -192,7 +192,7 @@ public class DriverGeneratorBFS extends DriverGenerator {
 			inputsToCrawl.addAll(inputsToCrawlAfter);
 			inputsToCrawlAfter = new LinkedList<>();
 
-			//filter out not worthKeeping inputs
+			//store new inputs or filter out not worthKeeping inputs
 			for (Iterator<WebInput> iter = inputsToCrawl.iterator(); iter.hasNext();) {
 				WebInput current = iter.next();
 				if (!addInput(current)) {
@@ -330,8 +330,8 @@ public class DriverGeneratorBFS extends DriverGenerator {
 	protected Map<String, String> findDifferences(WebOutput first, WebOutput second) {
 		Map<String, String> differences = new HashMap<>();
 		LinkedList<String> pos = new LinkedList<>();
-		Elements firstE = first.getDoc();
-		Elements secondE = second.getDoc();
+		Elements firstE = first.getDocWithoutExcludedNodes();
+		Elements secondE = second.getDocWithoutExcludedNodes();
 		if (firstE.size() == secondE.size()) {
 			for (int i = 0; i < firstE.size(); i++) {
 				pos.addLast(String.valueOf(i));
@@ -343,7 +343,10 @@ public class DriverGeneratorBFS extends DriverGenerator {
 	}
 
 	/**
-	 * Recursive version of findDifferences
+	 * Recursive version of findDifferences.
+	 * /!\ Very important : the "children()" method returns every child Element 
+	 * (i.e. every child which is a tag in the document), whereas the "childNodes()"
+	 * method returns every child node (including TextNodes)
 	 * @see findDifferences(WebOutput first, WebOutput second)
 	 */
 	private void findDifferencesRec(Element first, Element second, Map<String, String> diff, LinkedList<String> pos) {

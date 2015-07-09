@@ -10,9 +10,13 @@ import org.jsoup.nodes.Node;
 
 public class PageTreeNode extends GenericTreeNode<String> {
 
+	/**
+	 * TODO : maintain a whitelist instead of a blacklist (with div, h1, h2, h3, h4, form, input, ...
+	 */
 	public static Set<String> excludedNode = new HashSet<String>(Arrays.asList(new String[] {
 			"#document", "#text", "span", "font", "a", "center", "bold", "italic", "style", "base", "param", "script", "noscript",
 			"b", "i", "tt", "sub", "meta", "title", "head", "tbody", "sup", "big", "small", "img", "br", "tr", "td", "option", "#comment", "#data", "strong"
+			,"p", "ul", "li", "link"
 			}));
 
 	public PageTreeNode(String nodeName){
