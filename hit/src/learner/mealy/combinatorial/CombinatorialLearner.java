@@ -270,4 +270,9 @@ public class CombinatorialLearner extends Learner {
 		return o;
 	}
 
+	public StatsEntry getStats() {
+		CombinatorialStatsEntry s = new CombinatorialStatsEntry(trace.size(),driver,conjecture);
+		return s;
+	}
+
 }
