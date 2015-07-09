@@ -12,7 +12,7 @@ import automata.mealy.MealyTransition;
 class TreeNode {
 	protected Conjecture conjecture;//by defaults the conjecture is shared with the father's conjecture. Note that the father is not suppose to update the conjecture.
 	private boolean copyConjectureOnWrite;//indicate if the conjecture is shared with the father's.
-	protected Map<State,TreeNode> children;
+	private Map<State,TreeNode> children;
 	protected boolean haveForcedChild;//indicate that there is only one child which is imposed due to a previous transition
 	protected boolean isCut;//indicate that this node is incoherent with trace so it must be ignored and do not have children.
 	protected final int depth;//the depth of the node in the tree.
@@ -71,6 +71,10 @@ class TreeNode {
 		assert haveForcedChild;
 		Iterator<TreeNode> it = children.values().iterator();
 		return it.next();
+	}
+	
+	public TreeNode getChild(State s){
+		return children.get(s);
 	}
 
 	/**

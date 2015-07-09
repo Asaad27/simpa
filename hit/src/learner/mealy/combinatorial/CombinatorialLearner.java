@@ -2,6 +2,11 @@ package learner.mealy.combinatorial;
 
 import java.util.LinkedList;
 
+import stats.Graph;
+import stats.Graph.PlotStyle;
+import stats.StatsEntry;
+import stats.StatsSet;
+import stats.attribute.Attribute;
 import tools.Utils;
 import tools.loggers.LogManager;
 import automata.Automata;
@@ -97,7 +102,7 @@ public class CombinatorialLearner extends Learner {
 			return compute(child);
 		}
 		for (State q : n.conjecture.getStates()){
-			TreeNode child = n.children.get(q);
+			TreeNode child = n.getChild(q);
 			if (child == null)
 				child = n.addChild(i,o,q);
 			TreeNode returnedNode = compute(child);

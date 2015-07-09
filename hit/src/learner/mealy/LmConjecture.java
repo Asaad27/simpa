@@ -20,13 +20,12 @@ public class LmConjecture extends automata.mealy.Mealy {
 	
 	/**
 	 * check if a conjecture have all transitions
-	 * @param c the conjecture to check
 	 * @return true if there is a transition from any state with any input symbol
 	 */
-	public boolean isFullyKnown(LmConjecture c){
-		for (State s : c.getStates())
+	public boolean isFullyKnown(){
+		for (State s : getStates())
 			for (String i : inputSymbols)
-				if (c.getTransitionFromWithInput(s, i) == null)
+				if (getTransitionFromWithInput(s, i) == null)
 					return false;
 		return true;
 	}
