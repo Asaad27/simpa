@@ -556,20 +556,29 @@ public class LiLearner extends Learner {
 		LogManager.logControlTable(cTable);
 		LogManager.logDataTable(dTable);
 		
+		/** Disable NDV analysis for web application inference without a proper reset */
+		boolean doNDVanalysis = true;
+		if (driver instanceof GenericDriver) {
+			String reset = GenericDriver.config.getReset();
+			doNDVanalysis = (reset != null && !reset.isEmpty());
+		}
+		
 		while (contrex) {
 			contrex = false;
 			finished = false;
 			while (!finished) {
 				finished = true;
-	/*
-				while ((ndv = dTable.findNDV()) != null) {
-					finished = false;
-					LogManager.logStep(LogManager.STEPNDV, ndv);
-					handleNDV(ndv);
-					LogManager.logControlTable(cTable);
-					LogManager.logDataTable(dTable);
+	
+				if (doNDVanalysis) {
+					while ((ndv = dTable.findNDV()) != null) {
+						finished = false;
+						LogManager.logStep(LogManager.STEPNDV, ndv);
+						handleNDV(ndv);
+						LogManager.logControlTable(cTable);
+						LogManager.logDataTable(dTable);
+					}
 				}
-	*/			while ((nbp = cTable.getNotBalancedParameter()) != null) {
+				while ((nbp = cTable.getNotBalancedParameter()) != null) {
 					finished = false;
 					LogManager.logStep(LogManager.STEPNBP, nbp);
 					handleNBP(nbp);
