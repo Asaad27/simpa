@@ -1,0 +1,54 @@
+package learner.mealy.combinatorial.node;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import learner.mealy.combinatorial.Conjecture;
+import automata.State;
+import automata.mealy.MealyTransition;
+import drivers.mealy.MealyDriver;
+
+public abstract class TreeNodeWithoutConjecture extends TreeNode {
+	private MealyTransition transition;
+	private List<State> states;
+	private MealyDriver driver;
+
+	public TreeNodeWithoutConjecture(MealyDriver d){
+		super(d);
+		driver = d;
+		//states is initialized when super(d) call addState
+	}
+
+	protected TreeNodeWithoutConjecture(TreeNodeWithoutConjecture parent, State s) {
+		super(parent,s);
+		states = parent.states;
+		driver = parent.driver;
+	}
+
+	public State addState(){
+		if (states == null)
+			states = new ArrayList<State>();
+		State s = new State("S"+states.size(), false);
+		states.add(s);
+		return s;
+	}
+
+	protected void addTransition(State from, State to, String i, String o) {
+		assert transition == null;
+		transition = new MealyTransition(null, from, to, i, o);
+	}
+
+	public Conjecture getConjecture(){
+		Conjecture c = new Conjecture(driver);
+		for (State s : states)
+			c.addState(s);
+		TreeNodeWithoutConjecture n = this;
+		while (n != null){
+			MealyTransition t = n.transition;
+			if (t != null)
+				c.addTransition(new MealyTransition(c, t.getFrom(), t.getTo(), t.getInput(), t.getOutput()));
+			n = (TreeNodeWithoutConjecture) n.father;
+		}
+		return c;
+	}
+}

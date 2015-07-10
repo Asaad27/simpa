@@ -4,10 +4,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import learner.mealy.LmTrace;
-import drivers.mealy.MealyDriver;
 import automata.State;
-import automata.mealy.MealyTransition;
+import drivers.mealy.MealyDriver;
 
 class HashMapTreeNodeWithConjecture extends TreeNodeWithConjecture{
 	private Map<State,HashMapTreeNodeWithConjecture> children;
@@ -23,7 +21,7 @@ class HashMapTreeNodeWithConjecture extends TreeNodeWithConjecture{
 	}
 
 	public HashMapTreeNodeWithConjecture getOnlyChild() {
-		assert haveForcedChild;
+		assert haveForcedChild();
 		Iterator<HashMapTreeNodeWithConjecture> it = children.values().iterator();
 		return it.next();
 	}
@@ -41,7 +39,7 @@ class HashMapTreeNodeWithConjecture extends TreeNodeWithConjecture{
 		assert children.isEmpty();
 		HashMapTreeNodeWithConjecture child = new HashMapTreeNodeWithConjecture(this, to);
 		children.put(to, child);
-		haveForcedChild = true;
+		setForcedChild();
 		return child;
 	}
 

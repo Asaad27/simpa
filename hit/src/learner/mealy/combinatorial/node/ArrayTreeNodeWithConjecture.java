@@ -1,15 +1,10 @@
 package learner.mealy.combinatorial.node;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
-import learner.mealy.LmTrace;
-import drivers.mealy.MealyDriver;
 import automata.State;
-import automata.mealy.MealyTransition;
+import drivers.mealy.MealyDriver;
 
 public class ArrayTreeNodeWithConjecture extends TreeNodeWithConjecture{
 	private List<ArrayTreeNodeWithConjecture> children;
@@ -25,7 +20,7 @@ public class ArrayTreeNodeWithConjecture extends TreeNodeWithConjecture{
 	}
 
 	public ArrayTreeNodeWithConjecture getOnlyChild() {
-		assert haveForcedChild;
+		assert haveForcedChild();
 		return children.get(0);
 	}
 	
@@ -45,7 +40,7 @@ public class ArrayTreeNodeWithConjecture extends TreeNodeWithConjecture{
 		assert children.isEmpty();
 		ArrayTreeNodeWithConjecture child = new ArrayTreeNodeWithConjecture(this, to);
 		children.add(child);
-		haveForcedChild = true;
+		setForcedChild();
 		return child;
 	}
 

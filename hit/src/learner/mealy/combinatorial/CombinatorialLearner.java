@@ -2,11 +2,13 @@ package learner.mealy.combinatorial;
 
 import java.util.LinkedList;
 
-import stats.Graph;
-import stats.Graph.PlotStyle;
+import learner.Learner;
+import learner.mealy.LmTrace;
+import learner.mealy.combinatorial.node.ArrayTreeNodeWithoutConjecture;
+import learner.mealy.combinatorial.node.TreeNode;
+import main.simpa.Options;
+import main.simpa.Options.LogLevel;
 import stats.StatsEntry;
-import stats.StatsSet;
-import stats.attribute.Attribute;
 import tools.Utils;
 import tools.loggers.LogManager;
 import automata.Automata;
@@ -15,12 +17,6 @@ import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
-import learner.Learner;
-import learner.mealy.LmTrace;
-import learner.mealy.combinatorial.node.ArrayTreeNodeWithConjecture;
-import learner.mealy.combinatorial.node.TreeNodeWithConjecture;
-import main.simpa.Options;
-import main.simpa.Options.LogLevel;
 import drivers.mealy.MealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 
@@ -28,7 +24,7 @@ import drivers.mealy.transparent.TransparentMealyDriver;
 public class CombinatorialLearner extends Learner {
 	private MealyDriver driver;
 	private LmTrace trace;
-	private TreeNodeWithConjecture root;
+	private TreeNode root;
 	private Conjecture conjecture;
 
 	public CombinatorialLearner(MealyDriver driver) {
@@ -46,8 +42,8 @@ public class CombinatorialLearner extends Learner {
 		LogManager.logConsole("Inferring the system");
 		driver.reset();
 		trace = new LmTrace();
-		root = new ArrayTreeNodeWithConjecture(driver);
-		TreeNodeWithConjecture result;
+		root = new ArrayTreeNodeWithoutConjecture(driver);
+		TreeNode result;
 		while ((result = compute(root)) == null){
 			root.addState();
 			LogManager.logLine();
@@ -65,7 +61,7 @@ public class CombinatorialLearner extends Learner {
 	 * @param n the root of the tree
 	 * @return a Node with a correct conjecture (according to the teacher @see #getShortestUnknowntransition(State, Conjecture)) or null
 	 */
-	private TreeNodeWithConjecture compute(TreeNodeWithConjecture n){
+	private TreeNode compute(TreeNode n){
 		//TODO make a non-recursive version of that ?
 		if (Options.LOG_LEVEL  != LogLevel.LOW)
 			LogManager.logInfo("currently in " + n.getStatesTrace(trace));
@@ -100,14 +96,14 @@ public class CombinatorialLearner extends Learner {
 				n.cut();
 				return null;
 			}
-			TreeNodeWithConjecture child  = n.addForcedChild(t.getTo());
+			TreeNode child  = n.addForcedChild(t.getTo());
 			return compute(child);
 		}
 		for (State q : n.getConjecture().getStates()){
-			TreeNodeWithConjecture child = n.getChild(q);
+			TreeNode child = n.getChild(q);
 			if (child == null)
 				child = n.addChild(i,o,q);
-			TreeNodeWithConjecture returnedNode = compute(child);
+			TreeNode returnedNode = compute(child);
 			if (returnedNode != null)
 				return returnedNode;
 		}
