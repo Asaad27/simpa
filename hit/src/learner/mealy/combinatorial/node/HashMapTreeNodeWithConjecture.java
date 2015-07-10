@@ -49,4 +49,8 @@ class HashMapTreeNodeWithConjecture extends TreeNodeWithConjecture{
 		children.put(q, child);
 		return child;
 	}
+	
+	public TreeNode removeChild(State q){
+		return children.remove(q);
+	}
 }

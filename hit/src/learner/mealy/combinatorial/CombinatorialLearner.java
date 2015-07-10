@@ -113,6 +113,7 @@ public class CombinatorialLearner extends Learner {
 			if (returnedNode != null)
 				return returnedNode;
 			checkedChildren ++;
+			n.removeChild(q);
 		}
 		return null;
 	}

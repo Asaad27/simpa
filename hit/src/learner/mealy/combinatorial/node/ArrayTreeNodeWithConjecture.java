@@ -50,4 +50,13 @@ public class ArrayTreeNodeWithConjecture extends TreeNodeWithConjecture{
 		children.add(child);
 		return child;
 	}
+	
+	public TreeNode removeChild(State q){
+		for (ArrayTreeNodeWithConjecture n : children){
+			if (n.getState().equals(q))
+				children.remove(n);
+			return n;
+		}
+		return null;
+	}
 }

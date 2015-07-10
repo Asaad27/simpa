@@ -83,6 +83,8 @@ public abstract class TreeNode {
 	}
 
 	public abstract TreeNode addChild(String i, String o, State q);
+	
+	public abstract TreeNode removeChild(State q);
 
 	abstract protected void addTransition(State from, State to, String i, String o); 
 
