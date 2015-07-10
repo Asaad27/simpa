@@ -17,6 +17,8 @@ import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
 import learner.Learner;
 import learner.mealy.LmTrace;
+import learner.mealy.combinatorial.node.ArrayTreeNodeWithConjecture;
+import learner.mealy.combinatorial.node.TreeNodeWithConjecture;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
 import drivers.mealy.MealyDriver;
@@ -26,7 +28,7 @@ import drivers.mealy.transparent.TransparentMealyDriver;
 public class CombinatorialLearner extends Learner {
 	private MealyDriver driver;
 	private LmTrace trace;
-	private TreeNode root;
+	private TreeNodeWithConjecture root;
 	private Conjecture conjecture;
 
 	public CombinatorialLearner(MealyDriver driver) {
@@ -44,17 +46,17 @@ public class CombinatorialLearner extends Learner {
 		LogManager.logConsole("Inferring the system");
 		driver.reset();
 		trace = new LmTrace();
-		root = new TreeNode(driver);
-		TreeNode result;
+		root = new ArrayTreeNodeWithConjecture(driver);
+		TreeNodeWithConjecture result;
 		while ((result = compute(root)) == null){
 			root.addState();
 			LogManager.logLine();
-			LogManager.logInfo("added a state. States are now " + root.conjecture.getStates());
-			LogManager.logConsole("added a state. States are now " + root.conjecture.getStates());
+			LogManager.logInfo("added a state. States are now " + root.getConjecture().getStates());
+			LogManager.logConsole("added a state. States are now " + root.getConjecture().getStates());
 		}
 		LogManager.logStep(LogManager.STEPOTHER,"Found an automata which seems to have no counter example");
 		LogManager.logConsole("Found an automata which seems to have no counter example");
-		conjecture = result.conjecture;
+		conjecture = result.getConjecture();
 		conjecture.exportToDot();
 	}
 
@@ -63,34 +65,34 @@ public class CombinatorialLearner extends Learner {
 	 * @param n the root of the tree
 	 * @return a Node with a correct conjecture (according to the teacher @see #getShortestUnknowntransition(State, Conjecture)) or null
 	 */
-	private TreeNode compute(TreeNode n){
+	private TreeNodeWithConjecture compute(TreeNodeWithConjecture n){
 		//TODO make a non-recursive version of that ?
 		if (Options.LOG_LEVEL  != LogLevel.LOW)
 			LogManager.logInfo("currently in " + n.getStatesTrace(trace));
-		if (n.isCut)
+		if (n.isCut())
 			return null;
-		if (n.haveForcedChild)
+		if (n.haveForcedChild())
 			return compute(n.getOnlyChild());
-		if (trace.size() <= n.depth){
-			InputSequence i = getShortestUnknowntransition(n.state, n.conjecture);
+		if (trace.size() <= n.getDepth()){
+			InputSequence i = getShortestUnknowntransition(n.getState(), n.getConjecture());
 			if (i == null){
 				LogManager.logInfo("no reachable unknown transition found");
 				//all transitions are known in conjecture.
-				if (!n.conjecture.isConnex()){
+				if (!n.getConjecture().isConnex()){
 					LogManager.logInfo("conjecture is not connex, cutting");
 					n.cut();
 					return null;
 				}
-				if (!applyCounterExample(n.conjecture, n.state))
+				if (!applyCounterExample(n.getConjecture(), n.getState()))
 					return n;
 			}else{
 				LogManager.logInfo("going to an unknown transition by applying " + i);
 				apply(i);
 			}
 		}
-		String i = trace.getInput(n.depth);
-		String o = trace.getOutput(n.depth);
-		MealyTransition t = n.conjecture.getTransitionFromWithInput(n.state, i);
+		String i = trace.getInput(n.getDepth());
+		String o = trace.getOutput(n.getDepth());
+		MealyTransition t = n.getConjecture().getTransitionFromWithInput(n.getState(), i);
 		if (t != null){
 			if (!t.getOutput().equals(o)){
 				if (Options.LOG_LEVEL  != LogLevel.LOW)
@@ -98,14 +100,14 @@ public class CombinatorialLearner extends Learner {
 				n.cut();
 				return null;
 			}
-			TreeNode child  = n.addForcedChild(t.getTo());
+			TreeNodeWithConjecture child  = n.addForcedChild(t.getTo());
 			return compute(child);
 		}
-		for (State q : n.conjecture.getStates()){
-			TreeNode child = n.getChild(q);
+		for (State q : n.getConjecture().getStates()){
+			TreeNodeWithConjecture child = n.getChild(q);
 			if (child == null)
 				child = n.addChild(i,o,q);
-			TreeNode returnedNode = compute(child);
+			TreeNodeWithConjecture returnedNode = compute(child);
 			if (returnedNode != null)
 				return returnedNode;
 		}

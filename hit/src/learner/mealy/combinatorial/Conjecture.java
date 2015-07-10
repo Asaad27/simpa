@@ -6,7 +6,7 @@ import automata.mealy.MealyTransition;
 import drivers.Driver;
 import learner.mealy.LmConjecture;
 
-class Conjecture extends LmConjecture{
+public class Conjecture extends LmConjecture{
 	private static final long serialVersionUID = 4982526952134622520L;
 
 	Driver driver;
