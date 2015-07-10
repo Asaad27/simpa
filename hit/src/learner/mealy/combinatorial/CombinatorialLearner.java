@@ -47,8 +47,8 @@ public class CombinatorialLearner extends Learner {
 		while ((result = compute(root)) == null){
 			root.addState();
 			LogManager.logLine();
-			LogManager.logInfo("added a state. States are now " + root.getConjecture().getStates());
-			LogManager.logConsole("added a state. States are now " + root.getConjecture().getStates());
+			LogManager.logInfo("added a state. States are now " + root.getStates());
+			LogManager.logConsole("added a state. States are now " + root.getStates());
 		}
 		LogManager.logStep(LogManager.STEPOTHER,"Found an automata which seems to have no counter example");
 		LogManager.logConsole("Found an automata which seems to have no counter example");
@@ -70,16 +70,17 @@ public class CombinatorialLearner extends Learner {
 		if (n.haveForcedChild())
 			return compute(n.getOnlyChild());
 		if (trace.size() <= n.getDepth()){
-			InputSequence i = getShortestUnknowntransition(n.getState(), n.getConjecture());
+			Conjecture c = n.getConjecture();
+			InputSequence i = getShortestUnknowntransition(n.getState(), c);
 			if (i == null){
 				LogManager.logInfo("no reachable unknown transition found");
 				//all transitions are known in conjecture.
-				if (!n.getConjecture().isConnex()){
+				if (!c.isConnex()){
 					LogManager.logInfo("conjecture is not connex, cutting");
 					n.cut();
 					return null;
 				}
-				if (!applyCounterExample(n.getConjecture(), n.getState()))
+				if (!applyCounterExample(c, n.getState()))
 					return n;
 			}else{
 				LogManager.logInfo("going to an unknown transition by applying " + i);
@@ -88,7 +89,7 @@ public class CombinatorialLearner extends Learner {
 		}
 		String i = trace.getInput(n.getDepth());
 		String o = trace.getOutput(n.getDepth());
-		MealyTransition t = n.getConjecture().getTransitionFromWithInput(n.getState(), i);
+		MealyTransition t = n.getTransitionFromWithInput(n.getState(), i);
 		if (t != null){
 			if (!t.getOutput().equals(o)){
 				if (Options.LOG_LEVEL  != LogLevel.LOW)
@@ -99,7 +100,7 @@ public class CombinatorialLearner extends Learner {
 			TreeNode child  = n.addForcedChild(t.getTo());
 			return compute(child);
 		}
-		for (State q : n.getConjecture().getStates()){
+		for (State q : n.getStates()){
 			TreeNode child = n.getChild(q);
 			if (child == null)
 				child = n.addChild(i,o,q);

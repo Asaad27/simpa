@@ -51,4 +51,19 @@ public abstract class TreeNodeWithoutConjecture extends TreeNode {
 		}
 		return c;
 	}
+	
+	public List<State> getStates(){
+		return states;
+	}
+	
+	public MealyTransition getTransitionFromWithInput(State s, String i){
+		TreeNodeWithoutConjecture n = this;
+		while (n != null){
+			MealyTransition t = n.transition;
+			if (t != null && t.getFrom() == s && t.getInput().equals(i))
+				return t;
+			n = (TreeNodeWithoutConjecture) n.father;
+		}
+		return null;
+	}
 }

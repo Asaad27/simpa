@@ -1,5 +1,7 @@
 package learner.mealy.combinatorial.node;
 
+import java.util.List;
+
 import learner.mealy.combinatorial.Conjecture;
 import automata.State;
 import automata.mealy.MealyTransition;
@@ -44,5 +46,13 @@ public abstract class TreeNodeWithConjecture extends TreeNode{
 	
 	public Conjecture getConjecture(){
 		return conjecture;
+	}
+	
+	public List<State> getStates(){
+		return conjecture.getStates();
+	}
+	
+	public MealyTransition getTransitionFromWithInput(State s, String i){
+		return conjecture.getTransitionFromWithInput(s, i);
 	}
 }

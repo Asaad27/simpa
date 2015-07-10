@@ -1,8 +1,11 @@
 package learner.mealy.combinatorial.node;
 
+import java.util.List;
+
 import learner.mealy.LmTrace;
 import learner.mealy.combinatorial.Conjecture;
 import automata.State;
+import automata.mealy.MealyTransition;
 import drivers.mealy.MealyDriver;
 
 public abstract class TreeNode {
@@ -114,4 +117,7 @@ public abstract class TreeNode {
 	public boolean haveForcedChild(){
 		return haveForcedChild;
 	}
+	
+	public abstract List<State> getStates();
+	public abstract MealyTransition getTransitionFromWithInput(State s, String i);
 }
