@@ -100,13 +100,19 @@ public class CombinatorialLearner extends Learner {
 			TreeNode child  = n.addForcedChild(t.getTo());
 			return compute(child);
 		}
+		int checkedChildren = 1;
 		for (State q : n.getStates()){
+			if (checkedChildren > n.getDiscoveredStatesNb()+1){
+				LogManager.logInfo("currently in " + n.getStatesTrace(trace) + " : going to a child with state "+q+" is useless (that's relabelling)");
+				break;
+			}
 			TreeNode child = n.getChild(q);
 			if (child == null)
 				child = n.addChild(i,o,q);
 			TreeNode returnedNode = compute(child);
 			if (returnedNode != null)
 				return returnedNode;
+			checkedChildren ++;
 		}
 		return null;
 	}

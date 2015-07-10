@@ -14,6 +14,7 @@ public abstract class TreeNode {
 	private final int depth;//the depth of the node in the tree.
 	protected final TreeNode father;
 	private final State state;
+	private int discoveredStatesNb;
 
 	/**
 	 * Create the root of the tree.
@@ -25,6 +26,7 @@ public abstract class TreeNode {
 		depth = 0;
 		father = null;
 		state = addState();
+		discoveredStatesNb = 1;
 	}
 
 	/**
@@ -38,6 +40,15 @@ public abstract class TreeNode {
 		father = parent;
 		depth = parent.depth +1;
 		state = s;
+		discoveredStatesNb = parent.discoveredStatesNb +1;
+		TreeNode n = parent;
+		while (n != null){
+			if (n.state == state){
+				discoveredStatesNb = parent.discoveredStatesNb;
+				break;
+			}
+			n=n.father;
+		}
 	}
 
 	/**
@@ -116,6 +127,14 @@ public abstract class TreeNode {
 	
 	public boolean haveForcedChild(){
 		return haveForcedChild;
+	}
+	
+	/**
+	 * get the number of crossed stated from root to this node (included)
+	 * @return
+	 */
+	public int getDiscoveredStatesNb(){
+		return discoveredStatesNb;
 	}
 	
 	public abstract List<State> getStates();
