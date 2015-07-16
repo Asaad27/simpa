@@ -42,16 +42,35 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		toDelete = new ArrayList<File>();
 	}
 	
-	public void plot(StatsSet stats, PlotStyle style){
+	protected void plot(StatsSet stats, PlotStyle style, String titleSuffix){
 		if (stats.size() == 0)
 			return;
 		this.stats.getStats().addAll(stats.getStats());
 		File tempPlot = makeDataFile(stats, style);
 		StringBuilder plotTitle = new StringBuilder();
 		plotTitle.append(style + " of " + stats.size() + " inferences ");
+		plotTitle.append(titleSuffix);
 		plotLines.append("\"" + tempPlot.getAbsolutePath() + "\" " +
 				style.plotLine +
 				" title \"" + plotTitle + "\", ");
+	}
+	
+	public void plot(StatsSet stats, PlotStyle style){
+		plot(stats,style,"");
+	}
+	
+	public <T extends Comparable<T>> void plotGroup(StatsSet stats, Attribute<T> groupBy, PlotStyle style){
+		Map <T,StatsSet> grouped = stats.sortByAtribute(groupBy);
+		List<T>  keys = new ArrayList<T>(grouped.keySet());
+		Collections.sort(keys);
+		for (T key : keys){
+			StringBuilder title = new StringBuilder();
+			title.append(" ");
+			title.append(groupBy.getName());
+			title.append(" = ");
+			title.append(key);
+			plot(grouped.get(key),style,title.toString());
+		}
 	}
 	
 	public void setTitle(String title){

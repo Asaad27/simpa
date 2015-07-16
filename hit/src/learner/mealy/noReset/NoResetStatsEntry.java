@@ -85,7 +85,6 @@ public class NoResetStatsEntry extends StatsEntry {
 		n = Integer.parseInt(st.nextToken());
 		loopTransitionPercentage = Integer.parseInt(st.nextToken());
 		automata = st.nextToken();
-		System.out.println(automata);
 	}
 
 	public NoResetStatsEntry(List<InputSequence> W, MealyDriver d, int n){

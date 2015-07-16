@@ -18,7 +18,7 @@ public class NoResetGraphGenerator extends GraphGenerator {
 		s1.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.STATE_BOUND_OFFSET, 0));
 		s1.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.STATE_NUMBER, 12));
 		s1.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.INPUT_SYMBOLS, 5));
-		g1.plot(s1,Graph.PlotStyle.POINTS);
+		g1.plotGroup(s1,NoResetStatsEntry.W_SIZE, Graph.PlotStyle.POINTS);
 		g1.export();
 	}
 

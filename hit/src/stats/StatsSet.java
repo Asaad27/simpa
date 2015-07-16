@@ -19,6 +19,7 @@ public class StatsSet {
 	private List<Restriction> restrictions;
 
 	private StatsSet(List<Restriction> r){
+		restrictedStats = new ArrayList<StatsEntry>();
 		restrictions = new ArrayList<Restriction>(r);
 	}
 

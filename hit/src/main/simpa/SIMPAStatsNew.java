@@ -170,11 +170,6 @@ public class SIMPAStatsNew {
 				gen.generate(stats);
 			}
 		}
-		//NoResetStats.makeGraph(NoResetStats.setFromCSV(globalStats.getAbsolutePath()));
-		//Graph<Integer, Float> g = new Graph<>(Attribute.INPUT_SYMBOLS, Attribute.DURATION);
-		//g.plot(stats, Graph.PlotStyle.POINTS);
-		//g.export();
-		//System.out.println("HEADER : " + CombinatorialStatsEntry.getCSVHeader());
 		System.out.println("[+] End");
 	}
 
@@ -201,8 +196,8 @@ public class SIMPAStatsNew {
 			.logError("Warning: Unable to find GraphViz and converting dot to image files");
 		}
 
-		if (Options.NBTEST < 1)
-			throw new Exception("Number of test >= 1 needed");
+		if (Options.NBTEST < 0)
+			throw new Exception("Number of test >= 0 needed");
 		if (Options.MINSTATES < 1)
 			throw new Exception("Minimal number of states >= 1 needed");
 		if (Options.MAXSTATES < Options.MINSTATES)
