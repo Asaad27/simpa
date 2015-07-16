@@ -38,11 +38,13 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		this.abs = abs;
 		this.ord = ord;
 		this.stats = new StatsSet();
-		plotLines = new StringBuilder("plot ");
+		plotLines = new StringBuilder();
 		toDelete = new ArrayList<File>();
 	}
 	
 	public void plot(StatsSet stats, PlotStyle style){
+		if (stats.size() == 0)
+			return;
 		this.stats.getStats().addAll(stats.getStats());
 		File tempPlot = makeDataFile(stats, style);
 		StringBuilder plotTitle = new StringBuilder();
@@ -57,9 +59,11 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 	}
 	
 	public void export(){
+		if (plotLines.length() == 0){
+			LogManager.logError("no data to plot");
+			return;
+		}
 		StringBuilder r = new StringBuilder();
-		r.append(makeDataDescritption(stats, new Attribute[]{ord,abs}));
-
 
 		r.append("set terminal png enhanced font \"Sans,10\"\n");
 		
@@ -75,13 +79,13 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		r.append("set ylabel \"" + ord.getName() + " (" + ord.getUnits().getSymbol() + ")\"\n");
 		
 		r.append("set label \"");
-		r.append(makeDataDescritption(stats, new Attribute[]{ord,abs}));
-		r.append("\" at graph 1,0.25 right\n");
+		r.append(makeDataDescritption(stats, new Attribute[]{ord,abs}).toString().replace("\"", "\\\""));
+		r.append("\" at graph 1,0.5 right\n");
 	
 		boolean ordLogScale = ord.useLogScale();
 		r.append((ordLogScale? "set logscale y" : "unset logscale y") + "\n");
 	
-		r.append(plotLines+"\n");
+		r.append("plot "+plotLines+"\n");
 		
 		GNUPlot.makeGraph(r.toString());
 	}
@@ -101,12 +105,12 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 				continue;
 			if (!a.isParameter() || a.isVirtualParameter())
 				continue;
-			Float min = ((Integer)s.attributeMin(a)).floatValue();//TODO add a method getFloatValue in the Stats Class in order to make a cast properly and throw an exception.
-			Float max = ((Integer)s.attributeMax(a)).floatValue();
-			if (min == max){
+			Comparable<?> min = s.attributeMin(a);
+			Comparable<?> max = s.attributeMax(a);
+			if (min.equals(max)){
 				r.append(a.getName() + " : " + min + " " + a.getUnits().getSymbol() + separator);
 			} else {
-				r.append(min + " ≤ " + a.getName() + " ≤ " + max + " " + a.getUnits().getSymbol() + separator);
+				r.append(min.toString() + " ≤ " + a.getName() + " ≤ " + max.toString() + " " + a.getUnits().getSymbol() + separator);
 			}
 		}
 		return r;

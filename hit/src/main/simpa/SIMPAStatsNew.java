@@ -5,31 +5,25 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import learner.Learner;
-import learner.mealy.combinatorial.CombinatorialLearner;
-import learner.mealy.combinatorial.CombinatorialStatsEntry;
 import learner.mealy.noReset.NoResetLearner;
-import learner.mealy.noReset.NoResetStats;
 import main.simpa.Options.LogLevel;
-import stats.Graph;
+import stats.GraphGenerator;
+import stats.StatsEntry;
 import stats.StatsSet;
-import stats.attribute.Attribute;
 import tools.GraphViz;
 import tools.Utils;
 import tools.loggers.HTMLLogger;
 import tools.loggers.LogManager;
 import tools.loggers.TextLogger;
 import drivers.Driver;
-import drivers.mealy.transparent.RandomAndCounterMealyDriver;
-import drivers.mealy.transparent.RandomMealyDriver;
 
 public class SIMPAStatsNew {
 	public final static String name = "SIMPA Test Mealy";
-	public static boolean onlyGraphGeneration = false;
+
+	private static boolean graphGeneration = false;
 
 	private static void init(String[] args) {
 		if (!Options.STAT)
@@ -79,11 +73,13 @@ public class SIMPAStatsNew {
 				else if (args[i].startsWith("--outdir"))
 					Options.OUTDIR = args[++i];
 
-				else if (args[i].startsWith("--onlyGraph"))
-					onlyGraphGeneration = true;
+				else if (args[i].startsWith("--makeGraph"))
+					graphGeneration = true;
 
 				else if (args[i].equals("--help") || args[i].equals("-h"))
 					usage();
+				else
+					Options.SYSTEM = args[i];
 			}
 
 		} catch (NumberFormatException e) {
@@ -95,76 +91,91 @@ public class SIMPAStatsNew {
 	public static void main(String[] args) {
 		int i = 0;
 		Driver driver = null;
-		if (!Options.STAT)
-			welcome();
+		welcome();
 		Options.TEST = false;
 		init(args);
 		try {
 			check();
-			String dir = Options.OUTDIR;
-			StatsSet stats = new StatsSet();
-			File globalStats = new File(Options.OUTDIR +"../globalstats.csv");
-
-			Writer globalStatsWriter;
-			if (!globalStats.exists()){
-				globalStats.createNewFile();
-				globalStatsWriter = new BufferedWriter(new FileWriter(globalStats));
-				globalStatsWriter.append(NoResetStats.CSVHeader() + "\n");
-			}else{
-				globalStatsWriter = new BufferedWriter(new FileWriter(globalStats,true));
-			}
-			if (!onlyGraphGeneration){
-				Utils.cleanDir(new File(Options.OUTDIR));
-
-				if (!Options.STAT)
-					System.out.println("[+] Testing " + Options.NBTEST
-							+ " automaton");
-				Options.LOG_LEVEL = LogLevel.LOW;
-				for (i = 1; i <= Options.NBTEST; i++) {
-					Options.OUTDIR = Utils.makePath(dir + i);
-					Utils.createDir(new File(Options.OUTDIR));
-					Options.SYSTEM = "Random_" + i;
-					if (!Options.STAT)
-						System.out.println("    " + i + "/" + Options.NBTEST);
-					try {
-						if (Options.LOG_HTML)
-							LogManager.addLogger(new HTMLLogger());
-						if (Options.LOG_TEXT)
-							LogManager.addLogger(new TextLogger());
-						LogManager.start();
-
-						driver = new RandomMealyDriver();
-						Learner gl = Learner.getLearnerFor(driver);
-						assert gl instanceof NoResetLearner;
-						CombinatorialLearner l = (CombinatorialLearner) gl;
-						l.learn();
-						driver.logStats();
-
-						stats.add(l.getStats());
-						//globalStatsWriter.append(l.getStats().toCSV() + "\n");
-					} catch (Exception e){
-						e.printStackTrace();
-					} finally {
-						LogManager.end();
-					}
-				}
-				globalStatsWriter.close();
-				//System.out.print(NoResetStats.makeTextStats(noResetStats));
-				Options.OUTDIR = dir;
-				//NoResetStats.makeGraph(noResetStats);
-			}
-			Options.OUTDIR = dir + "../out/global_stats/";
-			Utils.cleanDir(new File(Options.OUTDIR));
-			//NoResetStats.makeGraph(NoResetStats.setFromCSV(globalStats.getAbsolutePath()));
-			Graph<Integer, Integer> g = new Graph<>(Attribute.INPUT_SYMBOLS, Attribute.TRACE_LENGTH);
-			g.plot(stats, Graph.PlotStyle.POINTS);
-			g.export();
-			if (!Options.STAT)
-				System.out.println("[+] End");
-		} catch (Exception e) {
-			LogManager.logException("Unexpected error at test "
-					+ (i == 0 ? Options.RETEST : i), e);
+		}catch (Exception e) {
+			throw new RuntimeException(e);
 		}
+		String baseDir = Options.OUTDIR;
+		File f = new File(baseDir + File.separator + Options.DIRSTATS);
+		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
+			throw new RuntimeException("Unable to create/write " + f.getName());
+		String statsDir = Utils.makePath(f.getAbsolutePath());
+
+		f = new File(baseDir + File.separator + Options.DIRTEST);
+		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
+			throw new RuntimeException("Unable to create/write " + f.getName());
+		String logDir = Utils.makePath(f.getAbsolutePath());
+
+		if (Options.NBTEST > 0)
+			Utils.cleanDir(new File(logDir));
+
+		Options.OUTDIR = logDir;
+		System.out.println("[+] Testing " + Options.NBTEST
+				+ " automaton");
+		StatsSet stats = new StatsSet();
+		Options.LOG_LEVEL = LogLevel.LOW;
+		
+		for (i = 1; i <= Options.NBTEST; i++) {
+			Utils.createDir(new File(Options.OUTDIR));
+			System.out.println("\t" + i + "/" + Options.NBTEST);
+			try {
+				if (Options.LOG_HTML)
+					LogManager.addLogger(new HTMLLogger());
+				if (Options.LOG_TEXT)
+					LogManager.addLogger(new TextLogger());
+				LogManager.start();
+				driver = SIMPA.loadDriver(Options.SYSTEM);
+				Learner gl = Learner.getLearnerFor(driver);
+				assert gl instanceof NoResetLearner;
+				NoResetLearner l = (NoResetLearner) gl;
+				l.learn();
+				driver.logStats();
+
+				StatsEntry learnerStats = l.getStats();
+				stats.add(learnerStats);
+
+				File globalStats = new File(statsDir+File.separator+learnerStats.getClass().getName()+".csv");
+				Writer globalStatsWriter;
+				if (!globalStats.exists()){
+					globalStats.createNewFile();
+					globalStatsWriter = new BufferedWriter(new FileWriter(globalStats));
+					globalStatsWriter.append(learnerStats.getCSVHeader() + "\n");
+				}else{
+					globalStatsWriter = new BufferedWriter(new FileWriter(globalStats,true));
+				}
+
+
+				globalStatsWriter.append(learnerStats.toCSV() + "\n");
+				globalStatsWriter.close();
+			} catch (Exception e){
+				e.printStackTrace();
+			} finally {
+				LogManager.end();
+			}
+			
+		}
+
+		if (graphGeneration){
+			System.out.println("[+] Make Graph");
+			for (File statFile : new File(statsDir).listFiles()){
+				System.out.println("\tmaking graph for "+statFile.getName());
+				Options.OUTDIR = baseDir + File.separator + "out" + File.separator + statFile.getName();
+				Utils.cleanDir(new File(Options.OUTDIR));
+				stats = new StatsSet(statFile);
+				GraphGenerator gen = stats.get(0).getDefaultsGraphGenerator();
+				gen.generate(stats);
+			}
+		}
+		//NoResetStats.makeGraph(NoResetStats.setFromCSV(globalStats.getAbsolutePath()));
+		//Graph<Integer, Float> g = new Graph<>(Attribute.INPUT_SYMBOLS, Attribute.DURATION);
+		//g.plot(stats, Graph.PlotStyle.POINTS);
+		//g.export();
+		//System.out.println("HEADER : " + CombinatorialStatsEntry.getCSVHeader());
+		System.out.println("[+] End");
 	}
 
 	private static void welcome() {
@@ -189,11 +200,6 @@ public class SIMPAStatsNew {
 			LogManager
 			.logError("Warning: Unable to find GraphViz and converting dot to image files");
 		}
-
-		File f = new File(Options.OUTDIR + File.separator + Options.DIRTEST);
-		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
-			throw new Exception("Unable to create/write " + f.getName());
-		Options.OUTDIR = Utils.makePath(f.getAbsolutePath());
 
 		if (Options.NBTEST < 1)
 			throw new Exception("Number of test >= 1 needed");

@@ -3,25 +3,27 @@ package stats.attribute;
 import stats.Units;
 
 public class Attribute <T extends Comparable<T>> {
-	public final static Attribute<Integer> W_SIZE = 				new Attribute<Integer>("Size of W",							Units.SEQUENCES,false,	true,	false);
-	public final static Attribute<Integer> W1_LENGTH = 			new Attribute<Integer>("Length of first W element",			Units.SYMBOLS,	false,	true,	false);
-	public final static Attribute<Integer> LOCALIZER_CALL_NB = 	new Attribute<Integer>("Number of call to localizer",		Units.FUNCTION_CALL,false,false,false);
+	public final static Attribute<Integer> W_SIZE = 				new Attribute<Integer>(	"Size of W",						Units.SEQUENCES,false,	true,	false);
+	public final static Attribute<Integer> W1_LENGTH = 				new Attribute<Integer>(	"Length of first W element",		Units.SYMBOLS,	false,	true,	false);
+	public final static Attribute<Integer> LOCALIZER_CALL_NB = 		new Attribute<Integer>(	"Number of call to localizer",		Units.FUNCTION_CALL,false,false,false);
 	public final static Attribute<Integer> LOCALIZER_SEQUENCE_LENGTH = new Attribute<Integer>("Length of localizer sequence",	Units.SYMBOLS,	false,	false,	false);
-	public final static Attribute<Integer> TRACE_LENGTH = 			new Attribute<Integer>("length of trace",					Units.SYMBOLS,	true,	false,	false);
-	public final static Attribute<Integer> INPUT_SYMBOLS = 		new Attribute<Integer>("number of input symbols",			Units.SYMBOLS,	false,	true,	false);
-	public final static Attribute<Integer> OUTPUT_SYMBOLS = 		new Attribute<Integer>("number of output symbols",			Units.SYMBOLS,	false,	true,	false);
-	public final static Attribute<Integer> STATE_NUMBER = 			new Attribute<Integer>("number of states",					Units.STATES,	false,	true,	false);
-	public final static Attribute<Integer> STATE_NUMBER_BOUND = 	new Attribute<Integer>("bound of state number",				Units.STATES,	false,	true,	false);
-	public final static Attribute<Integer> STATE_BOUND_OFFSET = 	new Attribute<Integer>("difference between bound and real state number",Units.STATES,false,true,true);
-	public final static Attribute<Integer> LOOP_RATIO = 			new Attribute<Integer>("percentage of loop transitions",	Units.PERCENT,	false,	true,	false);
-
+	public final static Attribute<Integer> TRACE_LENGTH = 			new Attribute<Integer>(	"length of trace",					Units.SYMBOLS,	true,	false,	false);
+	public final static Attribute<Integer> INPUT_SYMBOLS = 			new Attribute<Integer>(	"number of input symbols",			Units.SYMBOLS,	false,	true,	false);
+	public final static Attribute<Integer> OUTPUT_SYMBOLS = 		new Attribute<Integer>(	"number of output symbols",			Units.SYMBOLS,	false,	true,	false);
+	public final static Attribute<Integer> STATE_NUMBER = 			new Attribute<Integer>(	"number of states",					Units.STATES,	false,	true,	false);
+	public final static Attribute<Integer> STATE_NUMBER_BOUND = 	new Attribute<Integer>(	"bound of state number",			Units.STATES,	false,	true,	false);
+	public final static Attribute<Integer> STATE_BOUND_OFFSET = 	new Attribute<Integer>(	"difference between bound and real state number",Units.STATES,false,true,true);
+	public final static Attribute<Integer> LOOP_RATIO = 			new Attribute<Integer>(	"percentage of loop transitions",	Units.PERCENT,	false,	true,	false);
+	public final static Attribute<Float> DURATION = 				new Attribute<Float>(	"duration of learning",				Units.SECONDS,	false,	false,	false);
+	public final static Attribute<String> AUTOMATA =				new Attribute<String>(	"infered automata",					Units.NO_UNITS,	false, 	true, 	false);
+	
 	private String name;
 	private Units units;
 	private boolean isParameter;
 	private boolean isVirtual;
 	private boolean useLogScale;
 
-	private Attribute(String name, Units units, boolean useLogScale,boolean isParameter,boolean isVirtual) {
+	public Attribute(String name, Units units, boolean useLogScale,boolean isParameter,boolean isVirtual) {
 		this.units = units;
 		this.name = name;
 		this.useLogScale = useLogScale;

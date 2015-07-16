@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import learner.Learner;
+import main.simpa.Options.LogLevel;
 import tools.GraphViz;
 import tools.Utils;
 import tools.loggers.HTMLLogger;
@@ -25,6 +26,7 @@ public class SIMPA {
 
 		int i = 0;
 		try {
+			Options.LOG_LEVEL = LogLevel.LOW;
 			for (i = 0; i < args.length; i++) {
 				if (args[i].equals("--reuseop"))
 					Options.REUSE_OP_IFNEEDED = true;
@@ -145,7 +147,7 @@ public class SIMPA {
 			LogManager.addLogger(new HTMLLogger());
 	}
 
-	private static Driver loadDriver(String system) throws Exception {
+	public static Driver loadDriver(String system) throws Exception {
 		Driver driver;
 		try {
 			if (Options.GENERICDRIVER) {

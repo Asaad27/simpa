@@ -6,3 +6,4 @@
 /abs/
 .jacocoverage/
 jacoco.exec-*
+/stats

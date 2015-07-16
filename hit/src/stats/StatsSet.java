@@ -1,7 +1,10 @@
 package stats;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -23,12 +26,53 @@ public class StatsSet {
 		restrictedStats = new ArrayList<StatsEntry>();
 		restrictions = new ArrayList<Restriction>();
 	}
-	
+
 	public StatsSet(StatsSet o){
 		restrictedStats = o.restrictedStats;
 		restrictions = new ArrayList<Restriction>(o.restrictions);
 	}
-	
+
+	public StatsSet(File f){
+		this();
+		if (! f.getName().endsWith(".csv"))
+			throw new RuntimeException("Files names must be ClassName.csv in order to load CSV");
+		String className = f.getName().substring(0, f.getName().length()-4);
+		Constructor<?> constructor;
+		Class<?> statEntryClass;
+		try {
+			statEntryClass = Class.forName(className);
+			constructor = statEntryClass.getConstructor(String.class);
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException("Files names must be ClassName.csv in order to load CSV. No class " + className + " found.");
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException(className + " cannot be instanciate with a String so CSV will not be loaded.");
+		}
+		String CSVHeader;
+		try {
+			CSVHeader = (String) statEntryClass.getMethod("getCSVHeader_s").invoke(null);
+		} catch (Exception e) {
+			throw new RuntimeException("unable to get the CSV header of class " + className + ". (" + e.getMessage() + ")");
+		}
+
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(f));
+			String strLine;
+			if (!(strLine = br.readLine()).equals(CSVHeader)){
+				br.close();
+				throw new RuntimeException("the csv file do not have the good header :\n'"+strLine+"'\ninstead of \n'"+CSVHeader+"'");
+			}
+			while ((strLine = br.readLine()) != null) {
+				restrictedStats.add((StatsEntry) constructor.newInstance(strLine));
+			}
+			br.close();
+
+		} catch (RuntimeException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	public void add(StatsEntry s){
 		for (Restriction r : restrictions)
 			if (!r.contains(s))
@@ -43,6 +87,10 @@ public class StatsSet {
 
 	protected List<StatsEntry> getStats() {
 		return restrictedStats;
+	}
+	
+	public StatsEntry get(int n){
+		return restrictedStats.get(0);
 	}
 
 	public <T extends Comparable<T>> Map<T,StatsSet> sortByAtribute(Attribute<T> a){
@@ -59,7 +107,7 @@ public class StatsSet {
 		}
 		return sorted;
 	}
-	
+
 	public <T extends Comparable<T>> float attributeAVG(Attribute<T> a){
 		Float sum = new Float(0);
 		for (StatsEntry s : restrictedStats){
@@ -67,7 +115,7 @@ public class StatsSet {
 		}
 		return sum/restrictedStats.size();
 	}
-	
+
 	public <T extends Comparable<T>> T attributeMin(Attribute<T> a){
 		assert restrictedStats.size() > 0;
 		T min = restrictedStats.get(0).get(a);
@@ -78,7 +126,7 @@ public class StatsSet {
 		}
 		return min;
 	}
-	
+
 	public <T extends Comparable<T>> T attributeMax(Attribute<T> a){
 		assert restrictedStats.size() > 0;
 		T max = restrictedStats.get(0).get(a);
@@ -89,7 +137,7 @@ public class StatsSet {
 		}
 		return max;
 	}
-	
+
 	public <T extends Comparable<T>> T attributeMedian(Attribute<T> a){
 		assert restrictedStats.size() > 0;
 		ArrayList<T> values = new ArrayList<T>(restrictedStats.size());
@@ -99,7 +147,7 @@ public class StatsSet {
 		Collections.sort(values);
 		return values.get(restrictedStats.size()/2);
 	}
-	
+
 	public int size(){
 		return restrictedStats.size();
 	}

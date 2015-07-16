@@ -26,6 +26,7 @@ public class CombinatorialLearner extends Learner {
 	private LmTrace trace;
 	private TreeNode root;
 	private Conjecture conjecture;
+	private CombinatorialStatsEntry stats;
 
 	public CombinatorialLearner(MealyDriver driver) {
 		this.driver = driver;
@@ -40,6 +41,7 @@ public class CombinatorialLearner extends Learner {
 	public void learn() {
 		LogManager.logStep(LogManager.STEPOTHER,"Inferring the system");
 		LogManager.logConsole("Inferring the system");
+		long start = System.nanoTime();
 		driver.reset();
 		trace = new LmTrace();
 		root = new ArrayTreeNodeWithoutConjecture(driver);
@@ -50,10 +52,13 @@ public class CombinatorialLearner extends Learner {
 			LogManager.logInfo("added a state. States are now " + root.getStates());
 			LogManager.logConsole("added a state. States are now " + root.getStates());
 		}
-		LogManager.logStep(LogManager.STEPOTHER,"Found an automata which seems to have no counter example");
-		LogManager.logConsole("Found an automata which seems to have no counter example");
 		conjecture = result.getConjecture();
+		float duration = (float)(System.nanoTime() - start)/ 1000000000;
+		LogManager.logStep(LogManager.STEPOTHER,"Found an automata which seems to have no counter example in "+duration+"s");
+		LogManager.logConsole("Found an automata which seems to have no counter example in "+duration+"s");
 		conjecture.exportToDot();
+		stats = new CombinatorialStatsEntry(trace.size(),driver,conjecture);
+		stats.setDuration(duration);
 	}
 
 	/**
@@ -277,8 +282,7 @@ public class CombinatorialLearner extends Learner {
 	}
 
 	public StatsEntry getStats() {
-		CombinatorialStatsEntry s = new CombinatorialStatsEntry(trace.size(),driver,conjecture);
-		return s;
+		return stats;
 	}
 
 }

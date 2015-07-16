@@ -28,7 +28,7 @@ import tools.loggers.LogManager;
 public class NoResetLearner extends Learner {
 	private MealyDriver driver;
 	private DataManager dataManager;
-	private NoResetStats stats;
+	private NoResetStatsEntry stats;
 	protected ArrayList<InputSequence> W;
 	private int n;//the maximum number of states
 
@@ -61,7 +61,7 @@ public class NoResetLearner extends Learner {
 		//n = Utils.randIntBetween(n, 50);
 
 		
-		stats = new NoResetStats(W, driver.getInputSymbols().size(), driver.getOutputSymbols().size(),n);
+		stats = new NoResetStatsEntry(W, driver, n);
 
 		this.W = new ArrayList<InputSequence>(W);
 		StringBuilder logW = new StringBuilder("Used characterization set : [");
@@ -157,7 +157,7 @@ public class NoResetLearner extends Learner {
 		return c;
 	}
 	
-	public NoResetStats getStats(){
+	public NoResetStatsEntry getStats(){
 		return stats;
 	}
 	

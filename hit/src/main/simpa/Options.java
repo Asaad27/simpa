@@ -22,6 +22,7 @@ public class Options {
 	public static String DIRGRAPH = "out";
 	public static String DIRARFF = "arff";
 	public static String DIRTEST = "test";
+	public static String DIRSTATS = "stats";
 	public static String DIRLOG = "log";
 	public static String DIRASLAN = "model";
 

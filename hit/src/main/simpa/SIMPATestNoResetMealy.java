@@ -135,7 +135,7 @@ public class SIMPATestNoResetMealy {
 						l.learn();
 						driver.logStats();
 
-						noResetStats.add(l.getStats());
+						//noResetStats.add(l.getStats());
 						globalStatsWriter.append(l.getStats().toCSV() + "\n");
 					} catch (Exception e){
 						e.printStackTrace();
