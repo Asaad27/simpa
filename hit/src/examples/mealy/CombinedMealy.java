@@ -30,7 +30,7 @@ public class CombinedMealy extends Mealy implements Serializable {
 	private Mealy m2;
 	
 	public CombinedMealy(Mealy m1, Mealy m2){
-		super("Combined("+m1.getName()+","+m2.getName()+")");
+		super("Combined("+m1.getName()+";"+m2.getName()+")");
 		this.m1 = m1;
 		this.m2 = m2;
 		LogManager.logStep(LogManager.STEPOTHER, "Generate product of "+m1.getName() +" and "+m2.getName());

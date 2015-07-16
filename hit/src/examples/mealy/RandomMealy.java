@@ -58,7 +58,7 @@ public class RandomMealy extends Mealy implements Serializable {
 	}
 	
 	public RandomMealy(boolean verbose) {
-		super("Random");
+		super("Random("+Options.TRANSITIONPERCENT+")");
 		if (verbose)
 			LogManager.logStep(LogManager.STEPOTHER, "Generating random Mealy");
 		seed = Utils.randLong();
@@ -136,6 +136,7 @@ public class RandomMealy extends Mealy implements Serializable {
 			if (automata.isConnex()){
 				LogManager.logInfo("found a connex automata after trying " + (i+1) + " times");
 				automata.exportToDot();
+				automata.name = "Connex(" + automata.name + ")";
 				return automata;
 			}
 		}

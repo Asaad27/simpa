@@ -24,7 +24,7 @@ public class CounterMealy extends Mealy implements Serializable {
 	private String ResetSymbol;
 	
 	public CounterMealy(int nbStates, String inputSymbol){
-		super("Counter_"+inputSymbol+"_"+nbStates);
+		super("Counter("+nbStates+")");
 		LogManager.logStep(LogManager.STEPOTHER, "Generate Counter Mealy");
 		noResetSymbol = noResetSuffix;
 		ResetSymbol = resetSuffix;
