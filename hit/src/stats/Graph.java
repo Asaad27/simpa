@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import main.simpa.Options;
 import stats.attribute.Attribute;
 import tools.GNUPlot;
 import tools.loggers.LogManager;
@@ -25,15 +26,17 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 			this.plotLine = plotLine;
 		}
 	}
-	
+
 	private Attribute<T_ABS> abs;
 	private Attribute<T_ORD> ord;
 	private StatsSet stats;
-	StringBuilder plotLines;
-	String title;
-	
+	private StringBuilder plotLines;
+	private String title;
+	private String fileName;
+	private Boolean forceOrdLogScale;
+
 	private List<File> toDelete;
-	
+
 	public Graph(Attribute<T_ABS> abs, Attribute<T_ORD> ord){
 		this.abs = abs;
 		this.ord = ord;
@@ -41,7 +44,7 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		plotLines = new StringBuilder();
 		toDelete = new ArrayList<File>();
 	}
-	
+
 	protected void plot(StatsSet stats, PlotStyle style, String titleSuffix){
 		if (stats.size() == 0)
 			return;
@@ -54,11 +57,11 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 				style.plotLine +
 				" title \"" + plotTitle + "\", ");
 	}
-	
+
 	public void plot(StatsSet stats, PlotStyle style){
 		plot(stats,style,"");
 	}
-	
+
 	public <T extends Comparable<T>> void plotGroup(StatsSet stats, Attribute<T> groupBy, PlotStyle style){
 		Map <T,StatsSet> grouped = stats.sortByAtribute(groupBy);
 		List<T>  keys = new ArrayList<T>(grouped.keySet());
@@ -72,11 +75,23 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 			plot(grouped.get(key),style,title.toString());
 		}
 	}
-	
+
 	public void setTitle(String title){
 		this.title = title;
 	}
-	
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+
+	/**
+	 * 
+	 * @param forceOrdLogScale true to force logarithmic scale, false to force linear scale and null to use default scale
+	 */
+	public void setForceOrdLogScale(Boolean forceOrdLogScale) {
+		this.forceOrdLogScale = forceOrdLogScale;
+	}
+
 	public void export(){
 		if (plotLines.length() == 0){
 			LogManager.logError("no data to plot");
@@ -85,34 +100,43 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		StringBuilder r = new StringBuilder();
 
 		r.append("set terminal png enhanced font \"Sans,10\"\n");
-		
+
 		String name = new String("relationship between "+ord+" and  "+abs);
 		r.append("set title \"" + (title == null ? name : title) + "\"\n");
-		
-	//	String filename = new String(Options.OUTDIR + File.separator + name + "(" + makeDataId(stats) + ").png");
-		String filename = "test.png";
-		r.append("set output \"" + filename + "\"\n");
-		
+
+		StringBuilder totalFileName = new StringBuilder(Options.OUTDIR + File.separator);
+		if (fileName == null)
+			totalFileName.append(name + "(" + stats.hashCode() + ")");
+		else
+			totalFileName.append(fileName);
+		totalFileName.append(".png");
+
+		r.append("set output \"" + totalFileName + "\"\n");
+
 		r.append("set xlabel \"" + abs.getName() + " (" + abs.getUnits().getSymbol() + ")\"\n");
-		
+
 		r.append("set ylabel \"" + ord.getName() + " (" + ord.getUnits().getSymbol() + ")\"\n");
-		
+
 		r.append("set label \"");
-		r.append(makeDataDescritption(stats, new Attribute[]{ord,abs}).toString().replace("\"", "\\\""));
+		r.append(makeDataDescritption(stats, new Attribute[]{ord,abs}).toString()
+				.replace("\"", "\\\"")
+				);
 		r.append("\" at graph 1,0.5 right\n");
-	
+
 		boolean ordLogScale = ord.useLogScale();
+		if (forceOrdLogScale != null)
+			ordLogScale = forceOrdLogScale;
 		r.append((ordLogScale? "set logscale y" : "unset logscale y") + "\n");
-	
+
 		r.append("plot "+plotLines+"\n");
-		
+
 		GNUPlot.makeGraph(r.toString());
 	}
-	
+
 	private StringBuilder makeDataDescritption(StatsSet s, Attribute<?>[] ignoreFields) {
 		return makeDataDescritption(s, Arrays.asList(ignoreFields));
 	}
-	
+
 	private StringBuilder makeDataDescritption(StatsSet s, List<Attribute<?>> ignoreFields) {
 		if (s.size() == 0){
 			return new StringBuilder("No Data");
@@ -160,7 +184,7 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 			for (T_ABS key : keys){
 				tempWriter.write(key + " " + sorted.get(key).attributeAVG(ord) + "\n");
 			}
-	
+
 		}
 		break;
 		case AVERAGE_WITH_EXTREMA:{
@@ -191,5 +215,4 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		return tempPlot;
 	}
 
-	
 }

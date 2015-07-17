@@ -155,6 +155,7 @@ public class SIMPAStatsNew {
 				e.printStackTrace();
 			} finally {
 				LogManager.end();
+				LogManager.clearsLoggers();
 			}
 			
 		}
@@ -164,6 +165,7 @@ public class SIMPAStatsNew {
 			for (File statFile : new File(statsDir).listFiles()){
 				System.out.println("\tmaking graph for "+statFile.getName());
 				Options.OUTDIR = baseDir + File.separator + "out" + File.separator + statFile.getName();
+				new File(Options.OUTDIR).mkdir();
 				Utils.cleanDir(new File(Options.OUTDIR));
 				stats = new StatsSet(statFile);
 				GraphGenerator gen = stats.get(0).getDefaultsGraphGenerator();

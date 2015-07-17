@@ -32,6 +32,14 @@ public class LogManager {
 	public static void addLogger(ILogger logger) {
 		loggers.add(logger);
 	}
+	
+	public static void delLogger(ILogger logger){
+		loggers.remove(logger);
+	}
+	
+	public static void clearsLoggers(){
+		loggers.clear();
+	}
 
 	public static void end() {
 		logConsole("End");

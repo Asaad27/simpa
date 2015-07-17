@@ -57,8 +57,14 @@ public class NoResetLearner extends Learner {
 		if (driver instanceof TransparentMealyDriver){
 			n = ((TransparentMealyDriver) driver).getAutomata().getStateCount();
 		}
-		//n += Utils.randInt(5)*5;
-		//n = Utils.randIntBetween(n, 50);
+
+		//that's for stats : we may need to have a bound greeter than real state number 
+		if (Utils.randBoolWithPercent(50)){
+			if (Utils.randBoolWithPercent(50))
+				n += Utils.randInt(5)*3;
+			else
+				n = Utils.randIntBetween(n, 30);
+		}
 
 		
 		stats = new NoResetStatsEntry(W, driver, n);

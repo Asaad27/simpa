@@ -71,4 +71,8 @@ public class Attribute <T extends Comparable<T>> {
 	public boolean useLogScale(){
 		return useLogScale;
 	}
+	
+	public String toString(){
+		return getName();
+	}
 }
