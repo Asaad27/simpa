@@ -61,7 +61,7 @@ public class NoResetLearner extends Learner {
 		//that's for stats : we may need to have a bound greeter than real state number 
 		if (Utils.randBoolWithPercent(50)){
 			if (Utils.randBoolWithPercent(50))
-				n += Utils.randInt(5)*3;
+				n += Utils.randInt(3)*5;
 			else
 				n = Utils.randIntBetween(n, 30);
 		}

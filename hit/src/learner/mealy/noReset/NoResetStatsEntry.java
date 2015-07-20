@@ -153,6 +153,22 @@ public class NoResetStatsEntry extends StatsEntry {
 
 	}
 
+	public <T extends Comparable<T>> Float getFloatValue(Attribute<T> a) {
+		if (a == W_SIZE || 
+				a == W1_LENGTH ||
+				a == LOCALIZER_CALL_NB ||
+				a == LOCALIZER_SEQUENCE_LENGTH ||
+				a == TRACE_LENGTH ||
+				a == INPUT_SYMBOLS ||
+				a == OUTPUT_SYMBOLS ||
+				a == STATE_NUMBER ||
+				a == STATE_NUMBER_BOUND ||
+				a == STATE_BOUND_OFFSET ||
+				a == LOOP_RATIO)
+			return ((Integer) get(a)).floatValue();
+		throw new RuntimeException(a.getName() + " is not available or cannot be cast to float");
+
+	}
 	@Override
 	public GraphGenerator getDefaultsGraphGenerator() {
 		return new NoResetGraphGenerator();

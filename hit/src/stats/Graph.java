@@ -61,6 +61,15 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 	public void plot(StatsSet stats, PlotStyle style){
 		plot(stats,style,"");
 	}
+	
+	/**
+	 * plot a theorical function
+	 * @param f the function expression (must depends of x)
+	 * @param title the title of the function
+	 */
+	public void plotFunc(String f, String title){
+		plotLines.append(f + " with lines title \"" + title + "\", ");
+	}
 
 	public <T extends Comparable<T>> void plotGroup(StatsSet stats, Attribute<T> groupBy, PlotStyle style){
 		Map <T,StatsSet> grouped = stats.sortByAtribute(groupBy);
@@ -127,9 +136,7 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		if (forceOrdLogScale != null)
 			ordLogScale = forceOrdLogScale;
 		r.append((ordLogScale? "set logscale y" : "unset logscale y") + "\n");
-
 		r.append("plot "+plotLines+"\n");
-
 		GNUPlot.makeGraph(r.toString());
 	}
 

@@ -20,7 +20,11 @@ public abstract class StatsEntry {
 	 * @return the value of the Attribute a.
 	 */
 	public abstract <T extends Comparable<T>> T get(Attribute<T> a);
-
+	
+	public <T extends Comparable<T>> Float getFloatValue(Attribute<T> a){
+		throw new RuntimeException();
+	}
+	
 	public String toCSV() {
 		StringBuilder r = new StringBuilder();
 		for (Attribute<?> a : getAttributesIntern()){
