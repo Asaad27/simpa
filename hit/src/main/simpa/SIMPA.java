@@ -75,7 +75,9 @@ public class SIMPA {
 				else if (args[i].equals("--noReset"))
 					Options.NORESETINFERENCE = true;
 				else if (args[i].equals("--combinatorial"))
-						Options.COMBINATORIALINFERENCE = true;
+					Options.COMBINATORIALINFERENCE = true;
+				else if (args[i].equals("--rivestShapire"))
+					Options.RIVESTSHAPIREINFERENCE = true;
 				else if (args[i].equals("--weka"))
 					Options.WEKA = true;
 				else if (args[i].equals("--help") || args[i].equals("-h"))

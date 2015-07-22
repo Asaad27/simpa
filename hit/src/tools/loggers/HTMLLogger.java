@@ -452,7 +452,8 @@ public class HTMLLogger implements ILogger {
 			writer.flush();
 			writer.write("<li class=\"request\">\n");
 			writer.write("<span class=\"date\">" + tfm.format(new Date())
-					+ "</span><span class=\"content\"><span class=\"pi\">"
+					+ "</span><span class=\"content\">" + LogManager.getPrefix()
+					+ "<span class=\"pi\">"
 					+ input + "</span> -> <span class=\"po\">"
 					+ (output.length() > 0 ? output : Options.SYMBOL_OMEGA_LOW)
 					+ "</span></span>\n</li>\n");
@@ -467,7 +468,7 @@ public class HTMLLogger implements ILogger {
 			writer.flush();
 			writer.write("<li class=\"request\">\n");
 			writer.write("<span class=\"date\">" + tfm.format(new Date())
-					+ "</span><span class=\"content\">"
+					+ "</span><span class=\"content\">" + LogManager.getPrefix()
 					+ "transition n°" + n + " : "
 					+ "<span class=\"pi\">"
 					+ input + "</span> -> <span class=\"po\">"

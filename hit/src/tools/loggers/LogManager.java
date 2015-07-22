@@ -29,6 +29,8 @@ public class LogManager {
 	static ArrayList<ILogger> loggers = new ArrayList<ILogger>();
 	static XSSLogger xssLogger;
 	
+	private static String prefix = "";
+
 	public static void addLogger(ILogger logger) {
 		loggers.add(logger);
 	}
@@ -53,7 +55,7 @@ public class LogManager {
 	
 	public static void logFatalError(String s) {
 		for (ILogger l : loggers)
-			l.logFatalError(s);
+			l.logFatalError(prefix+s);
 	}
 
 	public static void logControlTable(LmControlTable ct) {
@@ -75,24 +77,24 @@ public class LogManager {
 		if (!Options.TEST) {
 			System.out.flush();
 			//System.out.println(tfm.format(new Date()) + s);
-			System.out.println(s);
+			System.out.println(prefix + s);
 		}
 	}
 
 	public static void logError(String s) {
 		System.err.flush();
-		System.err.println(tfm.format(new Date()) + s);
+		System.err.println(tfm.format(new Date()) + prefix + s);
 	}
 
 	public static void logException(String s, Exception e) {
 		System.err.flush();
-		System.err.println(tfm.format(new Date()) + s);
+		System.err.println(tfm.format(new Date()) + prefix + s);
 		e.printStackTrace(System.err);
 	}
 
 	public static void logInfo(String s) {
 		for (ILogger l : loggers)
-			l.logInfo(s);
+			l.logInfo(prefix + s);
 	}
 
 	public static void logRequest(ParameterizedInput pi, ParameterizedOutput po) {
@@ -126,7 +128,7 @@ public class LogManager {
 
 	public static void logStat(String s) {
 		for (ILogger l : loggers)
-			l.logStat(s);
+			l.logStat(prefix + s);
 	}
 
 	public static void logLine() {
@@ -141,12 +143,12 @@ public class LogManager {
 
 	public static void logTransition(String trans) {
 		for (ILogger l : loggers)
-			l.logTransition(trans);
+			l.logTransition(prefix + trans);
 	}
 
 	public static void logData(String data) {
 		for (ILogger l : loggers)
-			l.logData(data);
+			l.logData(prefix + data);
 	}
 
 	public static void logImage(String path) {
@@ -156,7 +158,7 @@ public class LogManager {
 
 	public static void logConcrete(String data) {
 		for (ILogger l : loggers)
-			l.logConcrete(data);
+			l.logConcrete(prefix + data);
 	}
 
 	public static void logSymbolsParameters(Map<String, Integer> params) {
@@ -198,4 +200,11 @@ public class LogManager {
 		xssLogger.logFoundXSS(r, driver);
 	}
 
+	public static void setPrefix(String s){
+		prefix = s;
+	}
+	
+	public static String getPrefix(){
+		return prefix;
+	}
 }
