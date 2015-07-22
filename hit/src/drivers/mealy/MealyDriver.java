@@ -6,6 +6,7 @@ import java.util.List;
 
 import learner.mealy.LmConjecture;
 import main.simpa.Options;
+import main.simpa.Options.LogLevel;
 import tools.Utils;
 import tools.loggers.LogManager;
 import automata.Automata;
@@ -179,5 +180,43 @@ public class MealyDriver extends Driver {
 		startLog();
 		conjDriver.startLog();
 		return isCe;
+	}
+
+	/**
+	 * compute an input sequence s.t. the output sequence entirely define the final state
+	 * @return null if a such sequence cannot be computed
+	 */
+	public InputSequence getHomingSequence(){
+		LogManager.logInfo("Computing homing sequence");
+		if (automata == null){
+			LogManager.logInfo("Unable to compute homing sequence");
+			return null;
+		}
+		InputSequence r = new InputSequence();
+		boolean found = false;
+		while (!found){
+			found = true;
+			for (int i = 0; i < automata.getStateCount(); i++){
+				State s1 = automata.getState(i);
+				for (int j = i+1; j < automata.getStateCount(); j++){
+					State s2 = automata.getState(j);
+					OutputSequence o1 = automata.apply(r, s1);
+					State os1 = automata.applyGetState(r, s1);
+					OutputSequence o2 = automata.apply(r, s2);
+					State os2 = automata.applyGetState(r, s2);
+					if (o1.equals(o2) && os1 != os2){
+						found = false;
+						List<InputSequence> W = new ArrayList<InputSequence>();
+						automata.addDistinctionSequence(getInputSymbols(), s1, s2, W);
+						r.addInputSequence(W.get(0));
+						if (Options.LOG_LEVEL != LogLevel.LOW)
+							LogManager.logInfo("appending " + W.get(0) + " to homing sequence in order to distinguish " + os1 + " and " + os2 
+									+ " respectively reached from " + s1 + " and "+ s2 + " with output " + o1);
+					}
+				}
+			}
+		}
+		LogManager.logInfo("Found homing sequence " + r);
+		return r;
 	}
 }

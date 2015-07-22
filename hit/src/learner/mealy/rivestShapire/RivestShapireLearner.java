@@ -19,16 +19,7 @@ public class RivestShapireLearner extends Learner {
 
 	public RivestShapireLearner(MealyDriver driver) {
 		this.driver = driver;
-		driver.reset();
-		homingSequence = new InputSequence();
-		homingSequence.addInput("a");
-		homingSequence.addInput("a");
-		homingSequence.addInput("b");
-		homingSequence.addInput("counter");
-		homingSequence.addInput("counter");
-
 		drivers = new HashMap<OutputSequence,StateDriver>();
-		
 	}
 
 	@Override
@@ -38,7 +29,10 @@ public class RivestShapireLearner extends Learner {
 
 	@Override
 	public void learn() {
-		LogManager.logStep(LogManager.STEPOTHER,"Inferring the system (global)");
+		driver.reset();
+		LogManager.logStep(LogManager.STEPOTHER, "Computing homing sequence");
+		homingSequence = driver.getHomingSequence();
+		LogManager.logStep(LogManager.STEPOTHER,"Inferring the system");
 		LogManager.logConsole("Inferring the system (global)");
 		//StateDriver first = home();
 		//first.unpause();

@@ -119,4 +119,72 @@ public class Mealy extends Automata implements Serializable {
 		}
 		return O;
 	}
+	
+	public State applyGetState(InputSequence I, State s){
+		for (String i : I.sequence){
+			MealyTransition t = getTransitionFromWithInput(s, i);
+			assert t != null;
+			s = t.getTo();
+		}
+		return s;
+	}
+	
+	/**
+	 * compute a distinction sequence for the two states
+	 * it may be a new distinction sequence or an append of an existing distinction sequence 
+	 * @param automata
+	 * @param inputSymbols
+	 * @param s1
+	 * @param s2
+	 * @param W
+	 */
+	public void addDistinctionSequence(
+			List<String> inputSymbols, State s1, State s2,
+			List<InputSequence> W) {
+		//first we try to add an input symbol to the existing W
+		for (InputSequence w : W){
+			for (String i : inputSymbols){
+				InputSequence testw = new InputSequence();
+				testw.addInputSequence(w);
+				testw.addInput(i);
+				if (!apply(testw, s1).equals(apply(testw, s2))){
+					w.addInput(i);
+					return;
+				}
+			}
+		}
+		//then we try to compute a w from scratch
+		LinkedList<InputSequence> testW = new LinkedList<InputSequence>();
+		for (String i : inputSymbols)
+			testW.add(new InputSequence(i));
+		while (true){
+			InputSequence testw = testW.pollFirst();
+			if (apply(testw, s1).equals(apply(testw, s2))){
+				if (testw.getLength() > getStateCount()){
+					//TODO find a better way to log and save the automata
+					String dir = Options.OUTDIR;
+					Options.OUTDIR = "/tmp/";
+					exportToDot();
+					Options.OUTDIR = dir;
+					throw new RuntimeException("it looks like if we will not find a w to distinguish "+s1 +" and " +s2+".Those state may are equivalents, please look in /tmp");
+				}
+				for (String i : inputSymbols){
+					InputSequence newTestw = new InputSequence();
+					newTestw.addInputSequence(testw);
+					newTestw.addInput(i);
+					testW.add(newTestw);
+				}
+			}else{
+				for (int i = 0; i < W.size(); i++){
+					InputSequence w = W.get(i);
+					if (testw.startsWith(w)){
+						W.remove(w);
+					}
+				}
+				W.add(testw);
+				return;
+			}
+			
+		}
+	}
 }
