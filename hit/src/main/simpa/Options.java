@@ -1,6 +1,7 @@
 package main.simpa;
 
 import java.util.List;
+import tools.loggers.LogManager;
 
 public class Options {
 
@@ -45,11 +46,17 @@ public class Options {
 	public static int SUPPORT_MIN = 20;
 	public static boolean REUSE_OP_IFNEEDED = false;
 	public static boolean FORCE_J48 = false;
+	
+	// Counterexample options
+	
 	public static boolean STOP_ON_CE_SEARCH = false;
 
 	//Web application analysis
 	public static boolean XSS_DETECTION = false;
 
+	public static int MAX_CE_LENGTH = 20;
+	public static int MAX_CE_RESETS = 10;
+	
 	// Output's options
 
 	public static LogLevel LOG_LEVEL = LogLevel.ALL;
@@ -87,4 +94,28 @@ public class Options {
 		DO_NOT_COMPLEXIFY,//don't log things that will take a non constant-time
 		LOW;
 	}
-}
+	public static void LogOptions (){
+		LogManager.logInfo("Applicable options:");
+		
+		LogManager.logInfo("STOP_ON_CE_SEARCH = " + STOP_ON_CE_SEARCH);
+		if (!STOP_ON_CE_SEARCH) {
+			LogManager.logInfo("MAX_CE_LENGTH = " + MAX_CE_LENGTH);
+			LogManager.logInfo("MAX_CE_RESETS = " + MAX_CE_RESETS);
+		}
+		if(TEST) {
+			LogManager.logInfo("NBTEST = " + NBTEST);
+			LogManager.logInfo("MINSTATES = " + MINSTATES);
+			LogManager.logInfo("MAXSTATES = " + MAXSTATES);
+			LogManager.logInfo("TRANSITIONPERCENT = " + TRANSITIONPERCENT);
+			LogManager.logInfo("MININPUTSYM = " + MININPUTSYM);
+			LogManager.logInfo("MAXINPUTSYM = " + MAXINPUTSYM);
+			LogManager.logInfo("MINOUTPUTSYM = " + MINOUTPUTSYM);
+			LogManager.logInfo("MAXOUTPUTSYM = " + MAXOUTPUTSYM);
+			LogManager.logInfo("TEST = " + TEST);
+			LogManager.logInfo("TEST = " + TEST);
+		}
+		// To be completed with options on choice of algo and EFSM
+		LogManager.logLine();
+		}
+	}
+

@@ -40,6 +40,10 @@ public class SIMPA {
 					Options.INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = true;
 				else if (args[i].equals("--stopatce"))
 					Options.STOP_ON_CE_SEARCH = true;
+				else if (args[i].equals("--maxcelength"))
+					Options.MAX_CE_LENGTH = Integer.parseInt(args[++i]);
+				else if (args[i].equals("--maxceresets"))
+					Options.MAX_CE_RESETS = Integer.parseInt(args[++i]);
 				else if (args[i].equals("--html"))
 					Options.LOG_HTML = true;
 				else if (args[i].equals("--openhtml"))
@@ -175,6 +179,7 @@ public class SIMPA {
 	public static void launch() throws Exception {
 		check();
 		LogManager.start();
+		Options.LogOptions();
 		driver = loadDriver(Options.SYSTEM);
 		Learner learner = Learner.getLearnerFor(driver);
 		learner.learn();
@@ -225,6 +230,12 @@ public class SIMPA {
 				.println("    --I=X             : Initial input symbols set to X");
 		System.out
 				.println("    --stopatce        : Stop at counter example search");
+		System.out.println("    --maxcelength"
+				+ String.format("%5s", "(" + Options.MAX_CE_LENGTH + ")")
+				+ ": Maximal length of random walk for counter example search");
+		System.out.println("    --maxceresets"
+				+ String.format("%5s", "(" + Options.MAX_CE_RESETS + ")")
+				+ ": Maximal number of random walks for counter example search");
 		System.out.println("> Output");
 		System.out
 				.println("    --outdir (.)      : Where to save arff and graph files");

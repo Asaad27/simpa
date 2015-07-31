@@ -107,14 +107,14 @@ public class MealyDriver extends Driver {
 			LogManager.logInfo("Counter example found (forced) : " + ce);
 		} else if (!Options.STOP_ON_CE_SEARCH) {
 			LmConjecture conj = (LmConjecture) c;
-			int maxTries = 10000;
+			int maxTries = Options.MAX_CE_RESETS;
 			List<String> is = getInputSymbols();
 			MealyDriver conjDriver = new MealyDriver(conj);
 			stopLog();
 			conjDriver.stopLog();
 			int i = 0;
 			while (i < maxTries && !found) {
-				ce = InputSequence.generate(is, Utils.randIntBetween(1, 12));
+				ce = InputSequence.generate(is, Options.MAX_CE_LENGTH);
 				OutputSequence osSystem = new OutputSequence();
 				OutputSequence osConj = new OutputSequence();
 				reset();
