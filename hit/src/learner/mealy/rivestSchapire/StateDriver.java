@@ -1,4 +1,4 @@
-package learner.mealy.rivestShapire;
+package learner.mealy.rivestSchapire;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ class StateDriver extends MealyDriver {
 	private MealyDriver realDriver;
 	protected OutputSequence homingSequenceResponse;
 	private Learner stateLearner;
-	private RivestShapireLearner learner;
+	private RivestSchapireLearner learner;
 	protected Thread thread;
 	private boolean resetDone;
 	protected boolean paused;
@@ -25,7 +25,7 @@ class StateDriver extends MealyDriver {
 	/**
 	 * should be invoke only if we are in  the initial state of this driver (i.e reset() has no effect)
 	 */
-	StateDriver(MealyDriver realDriver, OutputSequence response, RivestShapireLearner learner){
+	StateDriver(MealyDriver realDriver, OutputSequence response, RivestSchapireLearner learner){
 		super(realDriver.getSystemName() + " for state " + response);
 		homingSequenceResponse = response;
 		StringBuilder prefixBuilder = new StringBuilder();
@@ -115,7 +115,7 @@ class StateDriver extends MealyDriver {
 //		}
 	}
 
-	public RivestShapireLearner getLearner() {
+	public RivestSchapireLearner getLearner() {
 		return learner;
 	}
 

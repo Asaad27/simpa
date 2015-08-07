@@ -80,8 +80,8 @@ public class SIMPA {
 					Options.NORESETINFERENCE = true;
 				else if (args[i].equals("--combinatorial"))
 					Options.COMBINATORIALINFERENCE = true;
-				else if (args[i].equals("--rivestShapire"))
-					Options.RIVESTSHAPIREINFERENCE = true;
+				else if (args[i].equals("--rivestSchapire"))
+					Options.RIVESTSCHAPIREINFERENCE = true;
 				else if (args[i].equals("--weka"))
 					Options.WEKA = true;
 				else if (args[i].startsWith("--supportmin"))

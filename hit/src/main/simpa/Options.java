@@ -42,7 +42,7 @@ public class Options {
 	public static boolean TREEINFERENCE = false;
 	public static boolean NORESETINFERENCE = false;
 	public static boolean COMBINATORIALINFERENCE = false;
-	public static boolean RIVESTSHAPIREINFERENCE = false;
+	public static boolean RIVESTSCHAPIREINFERENCE = false;
 	public static boolean GENERICDRIVER = false;
 	public static String INITIAL_INPUT_SYMBOLS = "";
 	public static String INITIAL_INPUT_SEQUENCES = "";

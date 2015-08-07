@@ -1,4 +1,4 @@
-package learner.mealy.rivestShapire;
+package learner.mealy.rivestSchapire;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,13 +11,13 @@ import automata.mealy.Mealy;
 import automata.mealy.OutputSequence;
 import drivers.mealy.MealyDriver;
 
-public class RivestShapireLearner extends Learner {
+public class RivestSchapireLearner extends Learner {
 	private InputSequence homingSequence;
 	private MealyDriver driver;
 	private Map<OutputSequence,StateDriver> drivers;
 	protected StateDriver finishedLearner;
 
-	public RivestShapireLearner(MealyDriver driver) {
+	public RivestSchapireLearner(MealyDriver driver) {
 		this.driver = driver;
 		drivers = new HashMap<OutputSequence,StateDriver>();
 	}
