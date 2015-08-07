@@ -26,7 +26,10 @@ import main.simpa.Options;
 import tools.loggers.LogManager;
 
 public class Utils {
-	private static Random rand = new SecureRandom();
+	// Use Random instead of SecureRandom,
+	// because for simulation needs, we do not need a crypto-strong generator.
+	// Instead, we need good control of the seed.
+	private static Random rand = new Random();
 	
 	public static void setSeed(long seed){
 		rand.setSeed(seed);

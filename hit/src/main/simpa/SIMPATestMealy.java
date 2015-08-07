@@ -61,10 +61,13 @@ public class SIMPATestMealy {
 					Options.LOG_HTML = true;
 				else if (args[i].equals("--openhtml"))
 					Options.AUTO_OPEN_HTML = true;
+				else if (args[i].equals("--seed"))
+					Options.SEED = Long.parseLong(args[++i]);
 
 				else if (args[i].equals("--help") || args[i].equals("-h"))
 					usage();
 			}
+			Utils.setSeed(Options.SEED);
 
 		} catch (NumberFormatException e) {
 			LogManager.logError("Error parsing argument (number) : " + args[i]);
@@ -104,6 +107,7 @@ public class SIMPATestMealy {
 						if (Options.LOG_TEXT)
 							LogManager.addLogger(new TextLogger());
 						LogManager.start();
+						Options.LogOptions();
 
 						driver = new RandomMealyDriver();
 						Learner l = Learner.getLearnerFor(driver);
@@ -213,7 +217,8 @@ public class SIMPATestMealy {
 		System.out.println("> General");
 		System.out.println("    --help | -h            : Show help");
 		System.out
-				.println("    --retest X             : Load and test the random EFSM numner X");
+				.println("    --retest X             : Load and test the random EFSM number X");
+		System.out.println("    --seed NN       : Use NN as seed for random generator");
 		System.out.println("> Algorithm");
 		System.out
 				.println("    --tree                 : Use tree inference instead of table");

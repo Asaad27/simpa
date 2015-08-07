@@ -1,9 +1,13 @@
 package main.simpa;
 
 import java.util.List;
+import tools.Utils;
 import tools.loggers.LogManager;
 
 public class Options {
+
+	// General seed for SIMPA (generation of automata and algo)
+	public static long SEED = Utils.randLong();
 
 	// Test or not
 
@@ -95,6 +99,7 @@ public class Options {
 		LOW;
 	}
 	public static void LogOptions (){
+		LogManager.logInfo("Seed used: " + SEED);
 		LogManager.logInfo("Applicable options:");
 		
 		LogManager.logInfo("STOP_ON_CE_SEARCH = " + STOP_ON_CE_SEARCH);
@@ -114,7 +119,7 @@ public class Options {
 			LogManager.logInfo("TEST = " + TEST);
 			LogManager.logInfo("TEST = " + TEST);
 		}
-		// To be completed with options on choice of algo and EFSM
+		// TODO: To be completed with options on choice of algo and EFSM
 		LogManager.logLine();
 		}
 	}

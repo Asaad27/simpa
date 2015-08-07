@@ -84,16 +84,20 @@ public class SIMPA {
 					Options.RIVESTSHAPIREINFERENCE = true;
 				else if (args[i].equals("--weka"))
 					Options.WEKA = true;
-				else if (args[i].equals("--help") || args[i].equals("-h"))
-					usage();
 				else if (args[i].startsWith("--supportmin"))
 					Options.SUPPORT_MIN = Integer.parseInt(args[++i]);
 				else if (args[i].startsWith("--outdir"))
 					Options.OUTDIR = args[++i];
+				else if (args[i].equals("--seed"))
+					Options.SEED = Long.parseLong(args[++i]);
+
+				else if (args[i].equals("--help") || args[i].equals("-h"))
+					usage();
 				else
 					Options.SYSTEM = args[i];
 			}
 
+			Utils.setSeed(Options.SEED);
 			if (Options.SYSTEM.isEmpty())
 				usage();
 
@@ -205,6 +209,7 @@ public class SIMPA {
 		System.out.println("Options");
 		System.out.println("> General");
 		System.out.println("    --help | -h       : Show help");
+		System.out.println("    --seed NN       : Use NN as seed for random generator");
 		System.out.println("> Algorithm EFSM");
 		System.out
 				.println("    --generic         : Use generic driver");

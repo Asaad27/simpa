@@ -75,12 +75,15 @@ public class SIMPAStatsNew {
 
 				else if (args[i].startsWith("--makeGraph"))
 					graphGeneration = true;
+				else if (args[i].equals("--seed"))
+					Options.SEED = Long.parseLong(args[++i]);
 
 				else if (args[i].equals("--help") || args[i].equals("-h"))
 					usage();
 				else
 					Options.SYSTEM = args[i];
 			}
+			Utils.setSeed(Options.SEED);
 
 		} catch (NumberFormatException e) {
 			LogManager.logError("Error parsing argument (number) : " + args[i]);
@@ -128,6 +131,8 @@ public class SIMPAStatsNew {
 				if (Options.LOG_TEXT)
 					LogManager.addLogger(new TextLogger());
 				LogManager.start();
+				Options.LogOptions();
+
 				driver = SIMPA.loadDriver(Options.SYSTEM);
 				Learner gl = Learner.getLearnerFor(driver);
 				assert gl instanceof NoResetLearner;
@@ -228,7 +233,8 @@ public class SIMPAStatsNew {
 		System.out.println("> General");
 		System.out.println("    --help | -h            : Show help");
 		System.out
-		.println("    --retest X             : Load and test the random EFSM numner X");
+		.println("    --retest X             : Load and test the random EFSM number X");
+		System.out.println("    --seed NN       : Use NN as seed for random generator");
 		System.out.println("> Algorithm");
 		System.out
 		.println("    --tree                 : Use tree inference instead of table");
