@@ -97,7 +97,7 @@ public class LmLearner extends Learner {
 			}
 		}*/
 
-		LogManager.logInfo("Conjecture have " + c.getStateCount()
+		LogManager.logInfo("Conjecture has " + c.getStateCount()
 				+ " states and " + c.getTransitionCount() + " transitions : ");
 		for (MealyTransition t : c.getTransitions()) {
 			LogManager.logTransition(t.toString());
@@ -126,20 +126,21 @@ public class LmLearner extends Learner {
 
 	public void learn() {
 		LogManager.logConsole("Inferring the system");
-		boolean finished = false;
+// RG: changed Karim's use of finished that repeated CE search after final conjecture.
+//		boolean finished = false;
 		boolean potentialNewNonClosedRows = true;
 		InputSequence ce = null;
 		completeTable();
 		LogManager.logControlTable(cTable);
-		while (!finished) {
+		while (true /*!finished*/) {
 			potentialNewNonClosedRows = true;
-			finished = true;
+//			finished = true;
 			while (potentialNewNonClosedRows) {
 				potentialNewNonClosedRows = false;
 				int alreadyNonClosed = 0;
 				for (int nonClosedRow : cTable.getNonClosedRows()) {
 					potentialNewNonClosedRows=true;
-					finished = false;
+//					finished = false;
 					LogManager.logStep(LogManager.STEPNCR,
 							cTable.R.get(nonClosedRow).getIS());
 					handleNonClosed(nonClosedRow - (alreadyNonClosed++));
@@ -155,7 +156,7 @@ public class LmLearner extends Learner {
 				LogManager.logInfo("Previous counter example : " + ce
 						+ " is still a counter example for the new conjecture");
 			if (ce != null) {
-				finished = false;
+//				finished = false;
 				int suffixLength = 1;
 				do {
 					cTable.addColumnInE(ce.getIthSuffix(suffixLength));
@@ -164,8 +165,14 @@ public class LmLearner extends Learner {
 						break;
 					suffixLength++;
 				} while (suffixLength <= ce.getLength());
+				if (cTable.getNonClosedRows().isEmpty())
+// RG: this should not happen with Lm. Test could be converted to assert once we are sure.
+					LogManager.logInfo("Counter example failed to exhibit new state");
 				LogManager.logControlTable(cTable);
 			}
+			else
+//				finished = true;
+				break;
 		}
 	}
 }
