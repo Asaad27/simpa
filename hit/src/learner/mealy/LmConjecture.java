@@ -19,7 +19,7 @@ public class LmConjecture extends automata.mealy.Mealy {
 	}
 	
 	/**
-	 * check if a conjecture have all transitions
+	 * check if a conjecture has all transitions
 	 * @return true if there is a transition from any state with any input symbol
 	 */
 	public boolean isFullyKnown(){

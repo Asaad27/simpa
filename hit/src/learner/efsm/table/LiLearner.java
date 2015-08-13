@@ -246,7 +246,7 @@ public class LiLearner extends Learner {
 
 		expandInitParams(c.getTransitions());
 
-		LogManager.logInfo("Raw conjecture have " + c.getStateCount()
+		LogManager.logInfo("Raw conjecture has " + c.getStateCount()
 				+ " states and " + c.getTransitionCount() + " transitions : ");
 		for (EFSMTransition t : c.getTransitions()) {
 			LogManager.logTransition(t.toString());

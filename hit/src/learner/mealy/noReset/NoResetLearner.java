@@ -158,7 +158,7 @@ public class NoResetLearner extends Learner {
 	
 	public LmConjecture createConjecture() {
 		LmConjecture c = dataManager.getConjecture();
-		LogManager.logInfo("Conjecture have " + c.getStateCount()
+		LogManager.logInfo("Conjecture has " + c.getStateCount()
 				+ " states and " + c.getTransitionCount() + " transitions : ");
 		return c;
 	}

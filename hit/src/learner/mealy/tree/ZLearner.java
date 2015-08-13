@@ -385,7 +385,7 @@ public class ZLearner extends Learner {
 		LogManager.logInfo("Z : " + z);
 		LogManager.logInfo("I : " + i);
 
-		LogManager.logInfo("Conjecture have " + c.getStateCount()
+		LogManager.logInfo("Conjecture has " + c.getStateCount()
 				+ " states and " + c.getTransitionCount() + " transitions : ");
 		for (MealyTransition t : c.getTransitions())
 			LogManager.logTransition(t.toString());

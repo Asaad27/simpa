@@ -80,7 +80,7 @@ public class LiConjecture extends automata.efsm.EFSM {
 			}
 			writer.write("}\n");
 			writer.close();
-			LogManager.logInfo("Raw conjecture have been exported to "
+			LogManager.logInfo("Raw conjecture has been exported to "
 					+ file.getName());
 			File imagePath = GraphViz.dotToFile(file.getPath());
 			if (imagePath != null)
@@ -174,7 +174,7 @@ public class LiConjecture extends automata.efsm.EFSM {
 					}
 					writer.write("}\n");
 					if (writer != null) writer.close();
-					LogManager.logInfo("Conjecture have been exported to "
+					LogManager.logInfo("Conjecture has been exported to "
 							+ file.getName());
 					File imagePath = GraphViz.dotToFile(file.getPath());
 					if (imagePath != null)
@@ -239,7 +239,7 @@ public class LiConjecture extends automata.efsm.EFSM {
 				writer.write(entity.toString());
 				if (writer != null)
 					writer.close();
-				LogManager.logInfo("Conjecture have been exported to "
+				LogManager.logInfo("Conjecture has been exported to "
 						+ file.getName());
 			} else
 				LogManager.logError("unable to create " + dir.getName()
@@ -266,7 +266,7 @@ public class LiConjecture extends automata.efsm.EFSM {
 				writer.write(m.toString());
 				if (writer != null)
 					writer.close();
-				LogManager.logInfo("Conjecture have been exported to "
+				LogManager.logInfo("Conjecture has been exported to "
 						+ file.getName());
 			} else
 				LogManager.logError("unable to create " + dir.getName()

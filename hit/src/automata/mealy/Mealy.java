@@ -99,7 +99,7 @@ public class Mealy extends Automata implements Serializable {
 			}
 			writer.write("}\n");
 			writer.close();
-			LogManager.logInfo("Conjecture have been exported to "
+			LogManager.logInfo("Conjecture has been exported to "
 					+ file.getName());
 			File imagePath = GraphViz.dotToFile(file.getPath());
 			if (imagePath != null)
