@@ -2,6 +2,7 @@ package drivers.mealy;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import learner.mealy.LmConjecture;
@@ -98,57 +99,138 @@ public class MealyDriver extends Driver {
 	}
 
 	public InputSequence getCounterExample(Automata c) {
+		Mealy m = (Mealy) c;
 		LogManager.logInfo("Searching counter example");
-		boolean found = false;
 		InputSequence ce = null;
 		if (forcedCE != null && !forcedCE.isEmpty()) {
-			found = true;
 			ce = forcedCE.remove(0);
 			LogManager.logInfo("Counter example found (forced) : " + ce);
-		} else if (!Options.STOP_ON_CE_SEARCH) {
-			LmConjecture conj = (LmConjecture) c;
-			int maxTries = Options.MAX_CE_RESETS;
-			List<String> is = getInputSymbols();
-			MealyDriver conjDriver = new MealyDriver(conj);
-			stopLog();
-			conjDriver.stopLog();
-			int i = 0;
-			while (i < maxTries && !found) {
-				ce = InputSequence.generate(is, Options.MAX_CE_LENGTH);
-				OutputSequence osSystem = new OutputSequence();
-				OutputSequence osConj = new OutputSequence();
-				reset();
-				conjDriver.reset();
-				if (ce.getLength() > 0) {
-					for (String input : ce.sequence) {
-						String _sys = execute(input);
-						String _conj = conjDriver.execute(input);
-						if (_sys.length() > 0) {
-							osSystem.addOutput(_sys);
-							osConj.addOutput(_conj);
-						}
-						if (!_sys.equals(_conj)
-								&& (osSystem.getLength() > 0 && !osSystem
-										.getLastSymbol().isEmpty())) {
-							found = true;
-							ce = ce.getIthPreffix(osSystem.getLength());
-							LogManager.logInfo("Counter example found : " + ce);
-							LogManager.logInfo("On system : " + osSystem);
-							LogManager.logInfo("On conjecture : " + osConj);
-							break;
-						}
-					}
-					i++;
-				}
-			}
-			startLog();
-			conjDriver.startLog();
+		}
+		if (Options.STOP_ON_CE_SEARCH){
+			LogManager.logInfo("CE search aborted (see Options.STOP_ON_CE_SEARCH");
+			return null;
 		}
 
-		if (!found)
-			LogManager.logInfo("No counter example found");
+		if (ce == null){
+			LogManager.logInfo("search theorical CE");
+			if (m.isConnex())
+				ce = getShortestCounterExemple(m);
+			if (ce != null){
+				reset();
+				for (String i : ce.sequence)
+					execute(i);
+			}
+		}
+		//TODO we don't know if ce is null because the two automata are identical or because we cannot compute a shortest CE (due to unknown driver for example). todo : add an exception
 
+		if (ce == null){
+			LogManager.logInfo("search random CE");
+			ce = getRandomCounterExemple(m);
+		}
+
+		if (ce == null)
+			LogManager.logInfo("No counter example found");
+		LogManager.logInfo("found ce : "+ce);
+		return ce;
+	}
+
+	public InputSequence getRandomCounterExemple(Mealy c){
+		boolean found = false;
+		InputSequence ce = null;
+
+		int maxTries = Options.MAX_CE_RESETS;
+		List<String> is = getInputSymbols();
+		MealyDriver conjDriver = new MealyDriver(c);
+		stopLog();
+		conjDriver.stopLog();
+		int i = 0;
+		while (i < maxTries && !found) {
+			ce = InputSequence.generate(is, Options.MAX_CE_LENGTH);
+			OutputSequence osSystem = new OutputSequence();
+			OutputSequence osConj = new OutputSequence();
+			reset();
+			conjDriver.reset();
+			if (ce.getLength() > 0) {
+				for (String input : ce.sequence) {
+					String _sys = execute(input);
+					String _conj = conjDriver.execute(input);
+					if (_sys.length() > 0) {
+						osSystem.addOutput(_sys);
+						osConj.addOutput(_conj);
+					}
+					if (!_sys.equals(_conj)
+							&& (osSystem.getLength() > 0 && !osSystem
+									.getLastSymbol().isEmpty())) {
+						found = true;
+						ce = ce.getIthPreffix(osSystem.getLength());
+						LogManager.logInfo("Counter example found : " + ce);
+						LogManager.logInfo("On system : " + osSystem);
+						LogManager.logInfo("On conjecture : " + osConj);
+						break;
+					}
+				}
+				i++;
+			}
+		}
+		startLog();
+		conjDriver.startLog();
 		return (found ? ce : null);
+	}
+
+	/**
+	 * get a shortest distinguish sequence for an automata
+	 * the computed sequence is not applied to the driver
+	 * The two automata are supposed to be connex.
+	 * @param s1 the position in the driver equivalent to s2. If null, the current position is chosen
+	 * @param a2 the second automata
+	 * @param s2 the current position in a2
+	 * @return a distinguish sequence for the two automata starting from their current states.
+	 */
+	public InputSequence getShortestCounterExemple(
+			State s1, Mealy a2, State s2) {
+		if (s1 == null)
+			s1 = currentState;
+		assert automata.isConnex() && a2.isConnex();
+		int maxLength = (automata.getStateCount() > a2.getStateCount() ? automata.getStateCount() : a2.getStateCount());
+		class Node{public InputSequence i; public State originalEnd; public State conjectureEnd;public String toString(){return "for input '" + i + "' this driver go to '" + originalEnd + "' and the other go to '"+conjectureEnd+"'\n";}}
+		LinkedList<Node> toCompute = new LinkedList<Node>();
+		Node n = new Node();
+		n.i = new InputSequence();
+		n.originalEnd = s1;
+		n.conjectureEnd = s2;
+		toCompute.add(n);
+		while (!toCompute.isEmpty()){
+			Node current = toCompute.pollFirst();
+			if (current.i.getLength() > maxLength)
+				continue;
+			for (String i : getInputSymbols()){
+				MealyTransition originalT = automata.getTransitionFromWithInput(current.originalEnd, i);
+				MealyTransition conjectureT = a2.getTransitionFromWithInput(current.conjectureEnd, i);
+				if (!originalT.getOutput().equals(conjectureT.getOutput())){
+					current.i.addInput(i);
+					return current.i;
+				}
+				Node newNode = new Node();
+				newNode.i = new InputSequence();
+				newNode.i.addInputSequence(current.i);
+				newNode.i.addInput(i);
+				newNode.originalEnd = originalT.getTo();
+				newNode.conjectureEnd = conjectureT.getTo();
+				toCompute.add(newNode);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * get a shortest distinguish sequence for an automata
+	 * the computed sequence is not applied to the driver
+	 * The two automata ares supposed to be connex.
+	 * @param a2 the second automata
+	 * @return a distinguish sequence for the two automata starting from their initial states.
+	 */
+	public InputSequence getShortestCounterExemple(Mealy m) {
+		return getShortestCounterExemple(automata.getInitialState(), m, m.getInitialState());
 	}
 
 	@Override

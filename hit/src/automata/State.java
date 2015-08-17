@@ -56,4 +56,8 @@ public class State implements Serializable {
 	public String toString() {
 		return name;
 	}
+	
+	protected void setInitial(boolean isInitial){
+		initial = isInitial;
+	}
 }

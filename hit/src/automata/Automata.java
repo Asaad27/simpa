@@ -6,9 +6,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-import tools.loggers.LogManager;
-import automata.mealy.MealyTransition;
-
 public class Automata implements Serializable {
 	private static final long serialVersionUID = -8767507358858312705L;
 
@@ -96,5 +93,10 @@ public class Automata implements Serializable {
 			}
 		}
 		return true;
+	}
+
+	public void invalideateInitialsStates() {
+		for (State s : states)
+			s.setInitial(false);
 	}
 }

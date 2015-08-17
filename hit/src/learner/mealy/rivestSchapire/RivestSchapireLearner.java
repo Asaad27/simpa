@@ -3,19 +3,21 @@ package learner.mealy.rivestSchapire;
 import java.util.HashMap;
 import java.util.Map;
 
-import learner.Learner;
-import learner.mealy.LmTrace;
-import tools.loggers.LogManager;
+import automata.Automata;
 import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.OutputSequence;
 import drivers.mealy.MealyDriver;
+import learner.Learner;
+import learner.mealy.LmTrace;
+import tools.loggers.LogManager;
 
 public class RivestSchapireLearner extends Learner {
 	private InputSequence homingSequence;
 	private MealyDriver driver;
 	private Map<OutputSequence,StateDriver> drivers;
 	protected StateDriver finishedLearner;
+	private Automata conjecture = null;
 
 	public RivestSchapireLearner(MealyDriver driver) {
 		this.driver = driver;
@@ -24,7 +26,11 @@ public class RivestSchapireLearner extends Learner {
 
 	@Override
 	public Mealy createConjecture() {
-		return (Mealy) finishedLearner.getStateLearner().createConjecture();
+		if (conjecture == null){
+			conjecture = finishedLearner.getStateLearner().createConjecture();
+			conjecture.invalideateInitialsStates();
+		}
+		return (Mealy) conjecture;
 	}
 
 	@Override
@@ -40,6 +46,7 @@ public class RivestSchapireLearner extends Learner {
 		while (finishedLearner == null)
 			Thread.yield();
 		LogManager.setPrefix("");
+		LogManager.logStep(LogManager.STEPOTHER,"killing threads");
 		for (StateDriver s : drivers.values())
 			s.killThread();
 		createConjecture().exportToDot();

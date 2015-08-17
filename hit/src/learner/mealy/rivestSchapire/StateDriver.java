@@ -5,6 +5,8 @@ import java.util.List;
 import tools.loggers.LogManager;
 import learner.Learner;
 import learner.mealy.table.LmLearner;
+import automata.mealy.InputSequence;
+import automata.mealy.Mealy;
 import automata.mealy.OutputSequence;
 import drivers.mealy.MealyDriver;
 
@@ -73,6 +75,12 @@ class StateDriver extends MealyDriver {
 
 	public List<String> getInputSymbols(){
 		return realDriver.getInputSymbols();
+	}
+	
+	public InputSequence getShortestCounterExemple(Mealy m){
+		LogManager.logInfo("reset the driver in order to get the initial state");
+		reset();
+		return realDriver.getShortestCounterExemple(null,m,m.getInitialState());
 	}
 
 	public void reset(){
