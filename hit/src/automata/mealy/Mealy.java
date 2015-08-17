@@ -97,6 +97,11 @@ public class Mealy extends Automata implements Serializable {
 			for (MealyTransition t : getTransitions()) {
 				writer.write("\t" + t.toDot() + "\n");
 			}
+			for (State s : states){
+				if (s.isInitial()){
+					writer.write("\t" + s.getName() + " [shape=doubleoctagon]\n");
+				}
+			}
 			writer.write("}\n");
 			writer.close();
 			LogManager.logInfo("Conjecture has been exported to "
