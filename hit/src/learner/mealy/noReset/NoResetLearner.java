@@ -261,11 +261,18 @@ public class NoResetLearner extends Learner {
 		return true;
 	}
 	
+	/**
+	 * check if the computed conjecture is equivalent to the given automata
+	 * the control is made by walking in the given automata in order to follow each transitions and comparing the two outputs and checking that only one state of th conjecture  can be associated to a state of the given automata.
+	 * @param automata a connex automata
+	 * @param currentState the state in the automata which is supposed to be equivalent to the current state of the driver
+	 * @return true if the two automata are equivalent
+	 */
 	public boolean checkExact(Mealy automata, State currentState){
 		LogManager.logStep(LogManager.STEPOTHER, "checking the computed conjecture is exactly equivalent");
 		automata.exportToDot();
 		class FoundState {
-			public State computedState;
+			public State computedState; //a state in the conjecture
 			public List<String> uncheckedTransitions;
 			public FoundState(State s, List<String> I){
 				computedState = s;
@@ -273,16 +280,21 @@ public class NoResetLearner extends Learner {
 			}
 			public String toString(){return computedState + " but transitions " + uncheckedTransitions + "have not been checked";}
 		}
+		//currentFoundState is maintained in order that currentFoundState.computedState is the current state in conjecture
 		FoundState currentFoundState = new FoundState(dataManager.getC(dataManager.traceSize()).getState(),driver.getInputSymbols());
+		//assigned is a table to associate a FoundState to each state in the given automata
 		Map<State,FoundState> assigned = new HashMap<State,FoundState>();
 		assigned.put(currentState, currentFoundState);
-		State unckeckedState = currentState;
-		List<String> path = new ArrayList<String>();
+		State unckeckedState = currentState; //a state with an unchecked transition
+		List<String> path = new ArrayList<String>();//the path from the current state to uncheckeState
+		
+		//now we iterate over all unchecked transitions
 		while (unckeckedState != null) {		
 			FoundState uncheckedFoundState = assigned.get(unckeckedState);
 			LogManager.logInfo("Applying " + path + "in order to go in state " + unckeckedState + " and then try " + uncheckedFoundState.uncheckedTransitions.get(0));
 			path.add(uncheckedFoundState.uncheckedTransitions.get(0));
 
+			//we follow path in driver (the conjecture) and the given automata
 			for (String i : path){
 				currentFoundState.uncheckedTransitions.remove(i);
 				MealyTransition t = automata.getTransitionFromWithInput(currentState, i);
@@ -300,8 +312,10 @@ public class NoResetLearner extends Learner {
 					LogManager.logInfo("it was expected to arrive in " + t.getTo());
 					return false;
 				}
-
 			}
+			//now we've applied an unchecked transition (which is now checked)
+
+			//and then we compute a new path to go to another state with unchecked transitions
 			class Node {public List<String> path; public State state;}
 			LinkedList<Node> nodes = new LinkedList<Node>();
 			Node node = new Node();
@@ -309,7 +323,7 @@ public class NoResetLearner extends Learner {
 			node.state = currentState;
 			nodes.add(node);
 
-			Map<State, Boolean> crossed = new HashMap<State, Boolean>();
+			Map<State, Boolean> crossed = new HashMap<State, Boolean>();//this map is used to store the node crossed during the path searching (avoid going to the same state by two different path)
 			for (State s : automata.getStates())
 				crossed.put(s,false);
 			unckeckedState = null;
