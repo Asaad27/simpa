@@ -12,7 +12,6 @@ public class Options {
 	// Test or not
 
 	public static boolean TEST = false;
-	public static boolean STAT = false;
 
 	// Unicode characters
 

@@ -19,7 +19,7 @@ public class SIMPATestMealy {
 	public final static String name = "SIMPA Test Mealy";
 
 	private static void init(String[] args) {
-		if (!Options.STAT)
+		//if (!Options.STAT)
 			System.out.println("[+] Reading arguments");
 
 		int i = 0;
@@ -78,7 +78,7 @@ public class SIMPATestMealy {
 	public static void main(String[] args) {
 		int i = 0;
 		Driver driver = null;
-		if (!Options.STAT)
+		//if (!Options.STAT)
 			welcome();
 		Options.TEST = false;
 		init(args);
@@ -91,7 +91,7 @@ public class SIMPATestMealy {
 				Stats stats = new Stats(Options.OUTDIR + "stats.csv");
 				stats.setHeaders(RandomMealyDriver.getStatHeaders());
 
-				if (!Options.STAT)
+				//if (!Options.STAT)
 					System.out.println("[+] Testing " + Options.NBTEST
 							+ " automaton");
 
@@ -99,7 +99,7 @@ public class SIMPATestMealy {
 					Options.OUTDIR = Utils.makePath(dir + i);
 					Utils.createDir(new File(Options.OUTDIR));
 					Options.SYSTEM = "Random " + i;
-					if (!Options.STAT)
+					//if (!Options.STAT)
 						System.out.println("    " + i + "/" + Options.NBTEST);
 					try {
 						if (Options.LOG_HTML)
@@ -151,7 +151,7 @@ public class SIMPATestMealy {
 					LogManager.end();
 				}
 			}
-			if (!Options.STAT)
+			//if (!Options.STAT)
 				System.out.println("[+] End");
 		} catch (Exception e) {
 			LogManager.logException("Unexpected error at test "
@@ -166,7 +166,7 @@ public class SIMPATestMealy {
 	}
 
 	private static void check() throws Exception {
-		if (!Options.STAT)
+		//if (!Options.STAT)
 			System.out.println("[+] Checking environment and options");
 
 		String v = System.getProperty("java.specification.version");

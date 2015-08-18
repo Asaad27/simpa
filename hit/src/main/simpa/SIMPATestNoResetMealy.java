@@ -29,7 +29,7 @@ public class SIMPATestNoResetMealy {
 	public static boolean onlyGraphGeneration = false;
 
 	private static void init(String[] args) {
-		if (!Options.STAT)
+		//if (!Options.STAT)
 			System.out.println("[+] Reading arguments");
 
 		int i = 0;
@@ -93,7 +93,7 @@ public class SIMPATestNoResetMealy {
 	public static void main(String[] args) {
 		int i = 0;
 		Driver driver = null;
-		if (!Options.STAT)
+		//if (!Options.STAT)
 			welcome();
 		Options.TEST = false;
 		init(args);
@@ -114,7 +114,7 @@ public class SIMPATestNoResetMealy {
 			if (!onlyGraphGeneration){
 				Utils.cleanDir(new File(Options.OUTDIR));
 
-				if (!Options.STAT)
+				//if (!Options.STAT)
 					System.out.println("[+] Testing " + Options.NBTEST
 							+ " automaton");
 				Options.LOG_LEVEL = LogLevel.LOW;
@@ -122,7 +122,7 @@ public class SIMPATestNoResetMealy {
 					Options.OUTDIR = Utils.makePath(dir + i);
 					Utils.createDir(new File(Options.OUTDIR));
 					Options.SYSTEM = "Random_" + i;
-					if (!Options.STAT)
+					//if (!Options.STAT)
 						System.out.println("    " + i + "/" + Options.NBTEST);
 					try {
 						if (Options.LOG_HTML)
@@ -155,7 +155,7 @@ public class SIMPATestNoResetMealy {
 			Options.OUTDIR = dir + "../out/global_stats/";
 			Utils.cleanDir(new File(Options.OUTDIR));
 			NoResetStats.makeGraph(NoResetStats.setFromCSV(globalStats.getAbsolutePath()));
-			if (!Options.STAT)
+			//if (!Options.STAT)
 				System.out.println("[+] End");
 		} catch (Exception e) {
 			LogManager.logException("Unexpected error at test "
@@ -170,7 +170,7 @@ public class SIMPATestNoResetMealy {
 	}
 
 	private static void check() throws Exception {
-		if (!Options.STAT)
+		//if (!Options.STAT)
 			System.out.println("[+] Checking environment and options");
 
 		String v = System.getProperty("java.specification.version");

@@ -7,6 +7,7 @@ import learner.mealy.tree.ZLearner;
 import learner.mealy.combinatorial.CombinatorialLearner;
 import learner.mealy.noReset.NoResetLearner;
 import main.simpa.Options;
+import stats.StatsEntry;
 import automata.Automata;
 import drivers.Driver;
 import drivers.mealy.MealyDriver;
@@ -25,6 +26,10 @@ public abstract class Learner {
 	public abstract Automata createConjecture();
 
 	public abstract void learn();
+	
+	public StatsEntry getStats(){
+		return null;
+	}
 
 	public static Learner getLearnerFor(Driver driver) throws Exception {
 		switch (driver.type) {

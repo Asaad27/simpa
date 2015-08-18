@@ -1,21 +1,29 @@
 package main.simpa;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Scanner;
 
+import drivers.Driver;
+import drivers.efsm.real.GenericDriver;
+import drivers.efsm.real.ScanDriver;
 import learner.Learner;
+import learner.mealy.noReset.NoResetLearner;
 import main.simpa.Options.LogLevel;
+import stats.GraphGenerator;
+import stats.StatsEntry;
+import stats.StatsSet;
 import tools.GraphViz;
 import tools.Utils;
 import tools.loggers.HTMLLogger;
 import tools.loggers.LogManager;
 import tools.loggers.TextLogger;
-import drivers.Driver;
-import drivers.efsm.real.GenericDriver;
-import drivers.efsm.real.ScanDriver;
 
 abstract class Option<T> {
 	protected String consoleName;
@@ -142,7 +150,7 @@ class StringListOption extends Option<ArrayList<String>> {
 					value.add(s);
 			}
 	}
-	
+
 	protected void postCheck(String[] args, ArrayList<Boolean> used){
 		if (needed && getValue() == null){
 			System.err.println("argument '" + consoleName + "' missing");
@@ -186,7 +194,7 @@ class HelpOption extends Option<Object>{
 			}
 		//TODO add a more detailed help for each commands.
 	}
-	
+
 	protected void postCheck(String[] args, ArrayList<Boolean> used){}
 	protected void preCheck(String[] args, ArrayList<Boolean> used){}
 }
@@ -227,11 +235,12 @@ public class SIMPA {
 
 	//EFSM options
 	private static BooleanOption GENERIC_DRIVER = new BooleanOption("--generic", "Use generic driver");
+	private static BooleanOption SCAN = new BooleanOption("--scan", "Use scan driver");
 	private static BooleanOption REUSE_OP_IFNEEDED = new BooleanOption("--reuseop", "Reuse output parameter for non closed row");
 	private static BooleanOption FORCE_J48 = new BooleanOption("--forcej48", "Force the use of J48 algorithm instead of M5P for numeric classes");
 	private static BooleanOption WEKA = new BooleanOption("--weka", "Force the use of weka");
 	private static IntegerOption SUPPORT_MIN = new IntegerOption("--supportmin", "Minimal support for relation (1-100)", Options.SUPPORT_MIN);
-	private static Option<?>[] EFSMOptions = new Option<?>[]{GENERIC_DRIVER,REUSE_OP_IFNEEDED,FORCE_J48,WEKA,SUPPORT_MIN};
+	private static Option<?>[] EFSMOptions = new Option<?>[]{GENERIC_DRIVER,SCAN,REUSE_OP_IFNEEDED,FORCE_J48,WEKA,SUPPORT_MIN};
 
 	//Random driver options
 	private static IntegerOption MIN_STATE = new IntegerOption("--minstates", "Minimal number of states for random automatas", Options.MINSTATES);
@@ -244,20 +253,25 @@ public class SIMPA {
 	private static BooleanOption XSS_DETECTION = new BooleanOption("--xss", "Detect XSS vulnerability");
 	private static Option<?>[] randomAutomataOptions = new Option<?>[]{MIN_STATE,MAX_STATE,MIN_INPUT_SYM,MAX_INPUT_SYM,MIN_OUTPUT_SYM,MAX_OUTPUT_SYM,TRANSITION_PERCENT,XSS_DETECTION};
 
-//Other options undocumented //TODO sort and explain them.
-	private static BooleanOption SCAN = new BooleanOption("--scan", "??? TODO");
-	private static StringListOption URLS = new StringListOption("--urls", "??? TODO\n  (format '--urls url1;url2' or '--urls url1 --urls url2')", Options.URLS);
-	private static Option<?>[] otherOptions = new Option<?>[]{SCAN,URLS};
+	//stats options
+	private static IntegerOption NB_TEST = new IntegerOption("--nbtest","number of execution of the algorithm",Options.NBTEST);
+	private static BooleanOption MAKE_GRAPH = new BooleanOption("--makeGraph","create graph based on csv files");
+	private static BooleanOption STATS_MODE = new BooleanOption("--stats","enable stats mode\n - save results to csv\n - disable some feature");
+	private static Option<?>[] statsOptions = new Option<?>[]{NB_TEST,MAKE_GRAPH,STATS_MODE};
 
-	
-	
+	//Other options undocumented //TODO sort and explain them.
+	private static StringListOption URLS = new StringListOption("--urls", "??? TODO\n  (format '--urls url1;url2' or '--urls url1 --urls url2')", Options.URLS);
+	private static Option<?>[] otherOptions = new Option<?>[]{URLS};
+
+
+
 	private static void parse(String[] args, ArrayList<Boolean> used, Option<?>[] options){
 		for (Option<?> o : options)
 			o.parse(args, used);
 	}
 
 
-	private static void init(String[] args) {
+	private static void parseArguments(String[] args) {
 		LogManager.logConsole("Checking environment and options");
 
 		ArrayList<Boolean> used = new ArrayList<>();
@@ -268,7 +282,7 @@ public class SIMPA {
 		Options.SEED = (SEED.getValue() != null) ? SEED.getValue() : Utils.randLong();
 		Utils.setSeed(Options.SEED);
 
-		
+
 		parse(args,used,new Option<?>[]{LOG_HTML,LOG_TEXT,AUTO_OPEN_HTML,OUTDIR,NORESET_INFERENCE,TREE_INFERENCE,COMBINATORIAL_INFERENCE,RIVETSCHAPIRE_INFERENCE});
 		if (TREE_INFERENCE.getValue() && NORESET_INFERENCE.getValue()){
 			System.out.println("You cannot choose two inference system");
@@ -281,8 +295,11 @@ public class SIMPA {
 		parse(args,used,EFSMOptions);
 		parse(args,used,randomAutomataOptions);
 
+		parse(args,used,statsOptions);
 
 
+		//TODO check those options and put them in the right place
+		parse(args,used,otherOptions);
 
 		//check for unused arguments and select the driver
 		int unusedArgs = 0;
@@ -304,8 +321,7 @@ public class SIMPA {
 		}
 
 
-		//TODO check those options and put them in the right place
-		parse(args,used,otherOptions);
+
 
 
 
@@ -342,18 +358,21 @@ public class SIMPA {
 		Options.TRANSITIONPERCENT = TRANSITION_PERCENT.getValue();
 		Options.XSS_DETECTION = XSS_DETECTION.getValue();
 
+		Options.NBTEST = NB_TEST.getValue();
+
+		Options.URLS = URLS.getValue();
 		Options.SCAN = SCAN.getValue();
 	}
 
-	private static void check() throws Exception {
+	private static void check() {
 		String v = System.getProperty("java.specification.version");
 		int major = Integer.parseInt(v.substring(0, v.indexOf(".")));
 		int minor = Integer.parseInt(v.substring(v.indexOf(".") + 1));
 		if (major < 1 || minor < 5)
-			throw new Exception("Java >=1.5 needed");
+			throw new RuntimeException("Java >=1.5 needed");
 
 		if (Options.SUPPORT_MIN < 1 || Options.SUPPORT_MIN > 100)
-			throw new Exception("Minimal between 1 and 100 include needed");
+			throw new RuntimeException("Minimal between 1 and 100 include needed");
 
 		if (Options.WEKA){
 			try {
@@ -375,23 +394,67 @@ public class SIMPA {
 
 		File f = new File(Options.OUTDIR);
 		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
-			throw new Exception("Unable to create/write " + f.getName());
+			throw new RuntimeException("Unable to create/write " + f.getName());
 		Options.OUTDIR = Utils.makePath(f.getAbsolutePath());
 		Utils.deleteDir(new File(Options.OUTDIR + Options.DIRGRAPH));
 		Utils.deleteDir(new File(Options.OUTDIR + Options.DIRARFF));
 
 		f = new File(Options.OUTDIR + Options.DIRGRAPH);
 		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
-			throw new Exception("Unable to create/write " + f.getName());
+			throw new RuntimeException("Unable to create/write " + f.getName());
 
 		f = new File(Options.OUTDIR + Options.DIRARFF);
 		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
-			throw new Exception("Unable to create/write " + f.getName());
+			throw new RuntimeException("Unable to create/write " + f.getName());
 
-		if (Options.LOG_TEXT)
-			LogManager.addLogger(new TextLogger());
-		if (Options.LOG_HTML)
-			LogManager.addLogger(new HTMLLogger());
+		if (STATS_MODE.getValue()){
+			boolean assert_test=false;
+			assert (assert_test = true);
+			if (assert_test){
+				System.out.println("you're about to make stats with active assertions."+
+						"This can make wrong results for duration stats because some assertions may have a big computation duration.\n"+
+						"Do you want to continue ? [y/n]");
+				while (true){
+					Scanner input = new Scanner(System.in);
+					String answer = input.next();
+					if (answer.equalsIgnoreCase("y") || answer.equalsIgnoreCase("yes")){
+						input.close();
+						break;
+					}
+					if (answer.equalsIgnoreCase("n") || answer.equalsIgnoreCase("no")){
+						input.close();
+						System.exit(0);
+					}
+					System.out.println("what did you say ?");
+				}
+			}
+		}
+
+		if (Options.NBTEST < 1)
+			throw new RuntimeException("Number of test >= 1 needed");
+
+
+		if (Options.MINSTATES < 1)
+			throw new RuntimeException("Minimal number of states >= 1 needed");
+		if (Options.MAXSTATES < Options.MINSTATES)
+			throw new RuntimeException(
+					"Maximal number of states > Minimal number of states needed");
+		if (Options.TRANSITIONPERCENT < 0 || Options.TRANSITIONPERCENT > 100)
+			throw new RuntimeException(
+					"Percent of transition between 0 and 100 needed");
+		if (Options.MININPUTSYM < 1)
+			throw new RuntimeException("Minimal number of input symbols >= 1 needed");
+		if (Options.MININPUTSYM > Options.MAXINPUTSYM)
+			throw new RuntimeException(
+					"Minimal number of input symbols <= Maximal number of input symbols needed");
+		if (Options.MINOUTPUTSYM < 1)
+			throw new RuntimeException("Minimal number of output symbols >= 1 needed");
+		if (Options.MINOUTPUTSYM > Options.MAXOUTPUTSYM)
+			throw new RuntimeException(
+					"Minimal number of output symbols < Maximal number of output symbols needed");
+
+
+
 	}
 
 	public static Driver loadDriver(String system) throws Exception {
@@ -428,10 +491,105 @@ public class SIMPA {
 		LogManager.end();
 	}
 
-	public static void main(String[] args) throws Exception {
+	protected static Learner learnOneTime() throws Exception{
+		if (Options.LOG_TEXT)
+			LogManager.addLogger(new TextLogger());
+		if (Options.LOG_HTML)
+			LogManager.addLogger(new HTMLLogger());
+		LogManager.start();
+		Options.LogOptions();
+		driver = loadDriver(Options.SYSTEM);
+		Learner learner = Learner.getLearnerFor(driver);
+		learner.learn();
+		learner.createConjecture();
+		driver.logStats();
+		//TODO check conjecture
+		LogManager.end();
+		LogManager.clearsLoggers();
+		return learner;
+	}
+
+	protected static void run_stats(){
+		String baseDir = Options.OUTDIR;
+		File f = new File(baseDir + File.separator + Options.DIRSTATS);
+		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
+			throw new RuntimeException("Unable to create/write " + f.getName());
+		String statsDir = Utils.makePath(f.getAbsolutePath());
+
+		f = new File(baseDir + File.separator + Options.DIRTEST);
+		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
+			throw new RuntimeException("Unable to create/write " + f.getName());
+		String logDir = Utils.makePath(f.getAbsolutePath());
+
+		if (Options.NBTEST > 0)
+			Utils.cleanDir(new File(logDir));
+		Options.OUTDIR = logDir;
+		System.out.println("[+] Testing " + Options.NBTEST
+				+ " automaton");
+		Options.LOG_LEVEL = LogLevel.LOW;
+
+		for (int i = 1; i <= Options.NBTEST; i++) {
+			Utils.createDir(new File(Options.OUTDIR));
+			System.out.println("\t" + i + "/" + Options.NBTEST);
+			try {
+				Learner l = learnOneTime();
+
+				StatsEntry learnerStats = l.getStats();
+
+				File globalStats = new File(statsDir+File.separator+learnerStats.getClass().getName()+".csv");
+				Writer globalStatsWriter;
+				if (!globalStats.exists()){
+					globalStats.createNewFile();
+					globalStatsWriter = new BufferedWriter(new FileWriter(globalStats));
+					globalStatsWriter.append(learnerStats.getCSVHeader() + "\n");
+				}else{
+					globalStatsWriter = new BufferedWriter(new FileWriter(globalStats,true));
+				}
+
+
+				globalStatsWriter.append(learnerStats.toCSV() + "\n");
+				globalStatsWriter.close();
+			} catch (Exception e){
+				//TODO close loggers, save log, stackTrace, seed, ... somewhere
+				e.printStackTrace();
+			} finally {
+				LogManager.end();
+				LogManager.clearsLoggers();
+			}
+
+		}
+
+		if (MAKE_GRAPH.getValue()){
+			System.out.println("[+] Make Graph");
+			for (File statFile : new File(statsDir).listFiles()){
+				System.out.println("\tmaking graph for "+statFile.getName());
+				Options.OUTDIR = baseDir + File.separator + "out" + File.separator + statFile.getName();
+				new File(Options.OUTDIR).mkdir();
+				Utils.cleanDir(new File(Options.OUTDIR));
+				StatsSet stats = new StatsSet(statFile);
+				GraphGenerator gen = stats.get(0).getDefaultsGraphGenerator();
+				gen.generate(stats);
+			}
+		}
+		
+	}
+
+	public static void main(String[] args) {
 		welcome();
-		init(args);
-		launch();
+		parseArguments(args);
+		check();
+
+		if (STATS_MODE.getValue()){
+			run_stats();
+		} else {
+			try {
+				learnOneTime();
+			} catch (Exception e) {
+				System.err.println("Unexpected error");
+				e.printStackTrace(System.err);
+			}
+		}
+		System.out.println("[+] End");
 	}
 
 	private static void welcome() {
@@ -444,7 +602,7 @@ public class SIMPA {
 		System.out.println("Usage : SIMPA driverClass [Options]");
 		System.out.println("");
 		System.out.println("Options");
-		
+
 		System.out.println("> General");
 		printUsage(generalOptions);
 
@@ -462,10 +620,13 @@ public class SIMPA {
 
 		System.out.println("> Output");
 		printUsage(outputOptions);
-		
+
+		System.out.println("> Stats");
+		printUsage(statsOptions);
+
 		System.out.println("> Others...");
 		printUsage(otherOptions);
-		
+
 		System.out.println();
 		System.out
 		.println("Ex: SIMPA drivers.efsm.NSPKDriver --outdir mydir --text");

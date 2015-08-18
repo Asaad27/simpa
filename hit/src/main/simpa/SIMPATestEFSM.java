@@ -19,7 +19,7 @@ public class SIMPATestEFSM {
 	public final static String name = "KITestEFSM";
 
 	private static void init(String[] args) {
-		if (!Options.STAT)
+		//if (!Options.STAT)
 			System.out.println("[+] Reading arguments");
 
 		int i = 0;
@@ -88,7 +88,7 @@ public class SIMPATestEFSM {
 	public static void main(String[] args) {
 		int i = 0;
 		Driver driver = null;
-		if (!Options.STAT)
+		//if (!Options.STAT)
 			welcome();
 		Options.TEST = true;
 		init(args);
@@ -101,7 +101,7 @@ public class SIMPATestEFSM {
 				Stats stats = new Stats(Options.OUTDIR + "stats.csv");
 				stats.setHeaders(RandomEFSMDriver.getStatHeaders());
 
-				if (!Options.STAT)
+				//if (!Options.STAT)
 					System.out.println("[+] Testing " + Options.NBTEST
 							+ " automaton");
 
@@ -109,7 +109,7 @@ public class SIMPATestEFSM {
 					Options.OUTDIR = Utils.makePath(dir + i);
 					Utils.createDir(new File(Options.OUTDIR));
 					Options.SYSTEM = "Random " + i;
-					if (!Options.STAT)
+					//if (!Options.STAT)
 						System.out.print("    " + i + "/" + Options.NBTEST);
 					try {
 						if (Options.LOG_HTML)
@@ -165,7 +165,7 @@ public class SIMPATestEFSM {
 					LogManager.end();
 				}
 			}
-			if (!Options.STAT)
+			//if (!Options.STAT)
 				System.out.println("[+] End");
 		} catch (Exception e) {
 			LogManager.logException("Unexpected error at test "
@@ -180,7 +180,7 @@ public class SIMPATestEFSM {
 	}
 
 	private static void check() throws Exception {
-		if (!Options.STAT)
+		//if (!Options.STAT)
 			System.out.println("[+] Checking environment and options");
 
 		String v = System.getProperty("java.specification.version");

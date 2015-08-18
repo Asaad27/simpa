@@ -26,7 +26,7 @@ public class SIMPAStatsNew {
 	private static boolean graphGeneration = false;
 
 	private static void init(String[] args) {
-		if (!Options.STAT)
+		//if (!Options.STAT)
 			System.out.println("[+] Reading arguments");
 
 		int i = 0;
@@ -136,7 +136,8 @@ public class SIMPAStatsNew {
 				driver = SIMPA.loadDriver(Options.SYSTEM);
 				Learner gl = Learner.getLearnerFor(driver);
 				assert gl instanceof NoResetLearner;
-				NoResetLearner l = (NoResetLearner) gl;
+				//NoResetLearner l = (NoResetLearner) gl;
+				Learner l = gl;
 				l.learn();
 				driver.logStats();
 
@@ -187,7 +188,7 @@ public class SIMPAStatsNew {
 	}
 
 	private static void check() throws Exception {
-		if (!Options.STAT)
+		//if (!Options.STAT)
 			System.out.println("[+] Checking environment and options");
 
 		String v = System.getProperty("java.specification.version");

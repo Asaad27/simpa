@@ -48,7 +48,7 @@ public abstract class Driver {
 				+ ((float) numberOfAtomicRequest / numberOfRequest) + "\n");
 		LogManager.logLine();
 	}
-
+	
 	public void reset() {
 		if (addtolog) {
 			LogManager.logReset();

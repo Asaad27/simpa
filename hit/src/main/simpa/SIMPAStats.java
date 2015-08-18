@@ -19,7 +19,7 @@ public class SIMPAStats {
 	}
 
 	public static void main(String[] args) throws IOException {
-		Options.STAT = true;
+		//Options.STAT = true;
 		welcome();
 		String dir = Options.OUTDIR;
 
