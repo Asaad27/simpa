@@ -43,17 +43,18 @@ public class NoResetGraphGenerator extends GraphGenerator {
 		s3 .restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.INPUT_SYMBOLS, 5));
 		s3.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.STATE_NUMBER, 12));
 		s3.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.STATE_BOUND_OFFSET, 0));
-		g3.plot(s3, Graph.PlotStyle.POINTS);
-		g3.setFileName("influence_of_W_size");
-		g3.plotFunc("0.006*"+makeMaxTheoricalFunction(s2, NoResetStatsEntry.W_SIZE), "shape of complexity bound");
-		g3.export();
+		if (s3.size() > 0){
+			g3.plot(s3, Graph.PlotStyle.POINTS);
+			g3.setFileName("influence_of_W_size");
+			g3.plotFunc("0.006*"+makeMaxTheoricalFunction(s2, NoResetStatsEntry.W_SIZE), "shape of complexity bound");
+			g3.export();
+		}
 		
 		Graph<Integer, Integer> g4 = new Graph<Integer,Integer>(NoResetStatsEntry.STATE_NUMBER, NoResetStatsEntry.TRACE_LENGTH);
 		StatsSet s4 = new StatsSet(s);
 		s4.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.OUTPUT_SYMBOLS, 5));
 		s4.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.INPUT_SYMBOLS, 5));
 		s4.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.W_SIZE, 2));
-		s4.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.INPUT_SYMBOLS, 5));
 		s4.restrict(new InSetRestriction<Integer>(NoResetStatsEntry.STATE_BOUND_OFFSET, new Integer[]{0,5,10,15}));
 		g4.plotGroup(s4,NoResetStatsEntry.STATE_BOUND_OFFSET, Graph.PlotStyle.MEDIAN);
 		//g4.setForceOrdLogScale(false);
@@ -66,7 +67,6 @@ public class NoResetGraphGenerator extends GraphGenerator {
 		s5.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.OUTPUT_SYMBOLS, 5));
 		s5.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.INPUT_SYMBOLS, 5));
 		s5.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.W_SIZE, 2));
-		s5.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.INPUT_SYMBOLS, 5));
 		g5.plotGroup(s5,NoResetStatsEntry.STATE_NUMBER, Graph.PlotStyle.MEDIAN);
 		g5.export();
 		
@@ -75,10 +75,26 @@ public class NoResetGraphGenerator extends GraphGenerator {
 		s6.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.OUTPUT_SYMBOLS, 5));
 		s6.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.INPUT_SYMBOLS, 5));
 		s6.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.W_SIZE, 2));
-		s6.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.INPUT_SYMBOLS, 5));
 		//s6.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.W1_LENGTH, 2));
 		g6.plotGroup(s6,NoResetStatsEntry.STATE_NUMBER, Graph.PlotStyle.AVERAGE_WITH_EXTREMA);
 		g6.export();
+		
+		Graph<Integer, Integer> g7 = new Graph<Integer,Integer>(NoResetStatsEntry.INPUT_SYMBOLS, NoResetStatsEntry.MEMORY);
+		StatsSet s7 = new StatsSet(s);
+		s7.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.OUTPUT_SYMBOLS, 5));
+		//s7.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.INPUT_SYMBOLS, 5));
+		s7.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.W_SIZE, 2));
+		s7.restrict(new InSetRestriction<Integer>(NoResetStatsEntry.STATE_BOUND_OFFSET, new Integer[]{0,5,10,15}));
+		g7.plotGroup(s7,NoResetStatsEntry.STATE_BOUND_OFFSET, Graph.PlotStyle.POINTS);
+		//g7.setForceOrdLogScale(true);
+		g7.setFileName("memory");
+		g7.export();
+		
+		Graph<Integer, Float> g7bis = new Graph<Integer,Float>(NoResetStatsEntry.INPUT_SYMBOLS, NoResetStatsEntry.DURATION);
+		g7bis.plotGroup(s7,NoResetStatsEntry.STATE_BOUND_OFFSET, Graph.PlotStyle.POINTS);
+		//g7.setForceOrdLogScale(true);
+		g7bis.setFileName("duration");
+		g7bis.export();
 	}
 
 	private String makeMaxTheoricalFunction(StatsSet s, Attribute<?> a){

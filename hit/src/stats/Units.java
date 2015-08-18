@@ -8,6 +8,7 @@ public class Units {
 	public final static Units FUNCTION_CALL = new Units("calls");
 	public final static Units SECONDS = new Units("s");
 	public final static Units NO_UNITS = new Units("");
+	public static final Units BYTE = new Units("B");
 	private String symbol;
 
 	public Units(String symbol){

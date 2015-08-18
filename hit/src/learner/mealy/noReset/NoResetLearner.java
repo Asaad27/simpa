@@ -77,6 +77,8 @@ public class NoResetLearner extends Learner {
 		logW.append("]");
 		LogManager.logInfo(logW.toString());
 		
+		long start = System.nanoTime();
+		
 		//GlobalTrace trace = new GlobalTrace(driver);
 		dataManager = new DataManager(driver, this.W);
 		
@@ -84,6 +86,10 @@ public class NoResetLearner extends Learner {
 		localize(dataManager, W);
 		
 		while (!dataManager.isFullyKnown()){
+			Runtime runtime = Runtime.getRuntime();
+		    runtime.gc();
+		    stats.updateMemory((int) (runtime.totalMemory() - runtime.freeMemory()));
+		    
 			LogManager.logLine();
 			int qualifiedStatePos;
 			LmTrace sigma;
@@ -131,6 +137,11 @@ public class NoResetLearner extends Learner {
 					dataManager.updateCKVT();
 			}
 		}
+		float duration = (float)(System.nanoTime() - start)/ 1000000000;
+		stats.setDuration(duration);
+		Runtime runtime = Runtime.getRuntime();
+	    runtime.gc();
+	    stats.updateMemory((int) (runtime.totalMemory() - runtime.freeMemory()));
 		stats.setTraceLength(dataManager.traceSize());
 		stats.updateWithConjecture(dataManager.getConjecture());
 		if (Options.LOG_LEVEL == Options.LogLevel.ALL || Options.TEST)

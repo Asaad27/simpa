@@ -24,6 +24,8 @@ public class NoResetStatsEntry extends StatsEntry {
 	public static final Attribute<Integer>STATE_BOUND_OFFSET = Attribute.STATE_BOUND_OFFSET;
 	public static final Attribute<Integer>LOOP_RATIO = Attribute.LOOP_RATIO;
 	public static final Attribute<String> AUTOMATA = Attribute.AUTOMATA;
+	public static final Attribute<Float> DURATION = Attribute.DURATION;
+	public static final Attribute<Integer>MEMORY = Attribute.MEMORY;
 	
 	private static Attribute<?>[] attributes = new Attribute<?>[]{
 			W_SIZE,
@@ -38,6 +40,8 @@ public class NoResetStatsEntry extends StatsEntry {
 			STATE_BOUND_OFFSET,
 			LOOP_RATIO,
 			AUTOMATA,
+			DURATION,
+			MEMORY,
 	};
 	
 	public static String getCSVHeader_s(){
@@ -67,6 +71,8 @@ public class NoResetStatsEntry extends StatsEntry {
 	private int n;
 	private int loopTransitionPercentage;
 	private String automata;
+	private float duration;
+	private int memory = 0;
 	
 	/**
 	 * rebuild a NoResetStats object from a CSV line
@@ -85,6 +91,8 @@ public class NoResetStatsEntry extends StatsEntry {
 		n = Integer.parseInt(st.nextToken());
 		loopTransitionPercentage = Integer.parseInt(st.nextToken());
 		automata = st.nextToken();
+		duration = Float.parseFloat(st.nextToken());
+		memory = Integer.parseUnsignedInt(st.nextToken());
 	}
 
 	public NoResetStatsEntry(List<InputSequence> W, MealyDriver d, int n){
@@ -149,6 +157,10 @@ public class NoResetStatsEntry extends StatsEntry {
 			return (T) new Integer(loopTransitionPercentage);
 		if (a == AUTOMATA)
 			return (T) automata;
+		if (a == DURATION)
+			return (T) new Float(duration);
+		if (a == MEMORY)
+			return (T) new Integer(memory);
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 
 	}
@@ -164,14 +176,26 @@ public class NoResetStatsEntry extends StatsEntry {
 				a == STATE_NUMBER ||
 				a == STATE_NUMBER_BOUND ||
 				a == STATE_BOUND_OFFSET ||
+				a == MEMORY ||
 				a == LOOP_RATIO)
 			return ((Integer) get(a)).floatValue();
+		if (a == DURATION)
+			return (Float) get(a);
 		throw new RuntimeException(a.getName() + " is not available or cannot be cast to float");
 
 	}
 	@Override
 	public GraphGenerator getDefaultsGraphGenerator() {
 		return new NoResetGraphGenerator();
+	}
+
+	public void setDuration(float duration) {
+		this.duration = duration;
+	}
+
+	public void updateMemory(int currentMemory) {
+		if (currentMemory > memory)
+			memory = currentMemory;
 	}
 
 }

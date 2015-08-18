@@ -16,6 +16,7 @@ public class Attribute <T extends Comparable<T>> {
 	public final static Attribute<Integer> LOOP_RATIO = 			new Attribute<Integer>(	"percentage of loop transitions",	Units.PERCENT,	false,	true,	false);
 	public final static Attribute<Float> DURATION = 				new Attribute<Float>(	"duration of learning",				Units.SECONDS,	false,	false,	false);
 	public final static Attribute<String> AUTOMATA =				new Attribute<String>(	"infered automata",					Units.NO_UNITS,	false, 	true, 	false);
+	public static final Attribute<Integer> MEMORY = 				new Attribute<Integer>(	"used memory", 						Units.BYTE, 	false, 	false, 	false);
 	
 	private String name;
 	private Units units;
