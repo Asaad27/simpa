@@ -41,7 +41,8 @@ public abstract class Learner {
 				return new RivestSchapireLearner((MealyDriver)driver);
 			else if (Options.NORESETINFERENCE)
 				return new NoResetLearner((MealyDriver)driver);
-			return new LmLearner(driver);
+			else if (Options.LMINFERENCE)
+				return new LmLearner(driver);
 		default:
 			return null;
 		}

@@ -40,6 +40,7 @@ public class Options {
 
 	public static boolean SCAN = false;
 	public static boolean TREEINFERENCE = false;
+	public static boolean LMINFERENCE = false;
 	public static boolean NORESETINFERENCE = false;
 	public static boolean COMBINATORIALINFERENCE = false;
 	public static boolean RIVESTSCHAPIREINFERENCE = false;
