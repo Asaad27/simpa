@@ -10,6 +10,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.channels.FileChannel;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -191,6 +196,20 @@ public class Utils {
 			fin.close();
 			fou.close();
 		}
+	}
+	
+	public static void copyDir(final Path source, final Path target) throws IOException {
+		Files.walkFileTree(source, new SimpleFileVisitor<Path>(){
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				Files.copy(file, target.resolve(source.relativize(file)));
+				return FileVisitResult.CONTINUE;
+				
+			}
+			public FileVisitResult preVisitDirectory (Path dir, BasicFileAttributes attrs) throws IOException{
+				Files.copy(dir, target.resolve(source.relativize(dir)));
+				return FileVisitResult.CONTINUE;
+			}
+		});
 	}
 
 	public static int randIntBetween(int a, int b) {
