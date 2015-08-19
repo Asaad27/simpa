@@ -3,7 +3,10 @@ package main.simpa;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Writer;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,7 +17,6 @@ import drivers.Driver;
 import drivers.efsm.real.GenericDriver;
 import drivers.efsm.real.ScanDriver;
 import learner.Learner;
-import learner.mealy.noReset.NoResetLearner;
 import main.simpa.Options.LogLevel;
 import stats.GraphGenerator;
 import stats.StatsEntry;
@@ -536,7 +538,7 @@ public class SIMPA {
 
 	protected static void run_stats(){
 		String baseDir = Options.OUTDIR;
-		File f = new File(baseDir + File.separator + Options.DIRSTATS);
+		File f = new File(baseDir + File.separator + Options.DIRSTATSCSV);
 		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
 			throw new RuntimeException("Unable to create/write " + f.getName());
 		String statsDir = Utils.makePath(f.getAbsolutePath());
@@ -554,8 +556,9 @@ public class SIMPA {
 		Options.LOG_LEVEL = LogLevel.LOW;
 
 		for (int i = 1; i <= Options.NBTEST; i++) {
-			Utils.createDir(new File(Options.OUTDIR));
 			System.out.println("\t" + i + "/" + Options.NBTEST);
+			Options.OUTDIR = logDir+File.separator+i+File.separator;
+			Utils.createDir(new File(Options.OUTDIR));
 			try {
 				Learner l = learnOneTime();
 
@@ -575,10 +578,30 @@ public class SIMPA {
 				globalStatsWriter.append(learnerStats.toCSV() + "\n");
 				globalStatsWriter.close();
 			} catch (Exception e){
-				//TODO close loggers, save log, stackTrace, seed, ... somewhere
-				e.printStackTrace();
-			} finally {
 				LogManager.end();
+				String failDir = baseDir + File.separator + 
+						Options.DIRFAIL + File.separator + 
+						new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS").format(new Date());
+				try {
+					Utils.copyDir(Paths.get(Options.OUTDIR),Paths.get(failDir));
+					File readMe = new File(failDir+File.separator+"ReadMe.txt");
+					Writer readMeWriter = new BufferedWriter(new FileWriter(readMe));
+					readMeWriter.write(name+ " " + new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date()));
+					readMeWriter.write("One learner during stats throw an exception");
+					readMeWriter.write("\n");
+					e.printStackTrace(new PrintWriter(readMeWriter));
+					readMeWriter.write("\n");
+					readMeWriter.write("\n");
+					readMeWriter.write("\nthe driver was "+Options.SYSTEM);
+					readMeWriter.write("\nthe seed was "+Options.SEED);
+					readMeWriter.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+					System.exit(1);
+				}
+				e.printStackTrace();
+				System.err.println("data saved in " + failDir);
+			} finally {
 				LogManager.clearsLoggers();
 			}
 
@@ -586,9 +609,13 @@ public class SIMPA {
 
 		if (MAKE_GRAPH.getValue()){
 			System.out.println("[+] Make Graph");
+			String baseDirGraph = baseDir + File.separator + Options.DIRGRAPHSTATS + File.separator;
+			new File(baseDirGraph).mkdir();
 			for (File statFile : new File(statsDir).listFiles()){
-				System.out.println("\tmaking graph for "+statFile.getName());
-				Options.OUTDIR = baseDir + File.separator + "out" + File.separator + statFile.getName();
+				String statName = statFile.getName().substring(0, statFile.getName().length()-4);
+				statName = statName.substring(statName.lastIndexOf(".")+1,statName.length());
+				System.out.println("\tmaking graph for "+statName);
+				Options.OUTDIR = baseDirGraph + File.separator + statName;
 				new File(Options.OUTDIR).mkdir();
 				Utils.cleanDir(new File(Options.OUTDIR));
 				StatsSet stats = new StatsSet(statFile);

@@ -103,7 +103,7 @@ public class SIMPAStatsNew {
 			throw new RuntimeException(e);
 		}
 		String baseDir = Options.OUTDIR;
-		File f = new File(baseDir + File.separator + Options.DIRSTATS);
+		File f = new File(baseDir + File.separator + Options.DIRSTATSCSV);
 		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
 			throw new RuntimeException("Unable to create/write " + f.getName());
 		String statsDir = Utils.makePath(f.getAbsolutePath());

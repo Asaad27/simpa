@@ -1,5 +1,6 @@
 package main.simpa;
 
+import java.io.File;
 import java.util.List;
 import tools.Utils;
 import tools.loggers.LogManager;
@@ -24,11 +25,13 @@ public class Options {
 	public static final String SYMBOL_NOT_EQUAL = "\u2260";
 
 	public static String DIRGRAPH = "out";
+	public static String DIRGRAPHSTATS = "stats"+File.separator+"graphs";
 	public static String DIRARFF = "arff";
 	public static String DIRTEST = "test";
-	public static String DIRSTATS = "stats";
+	public static String DIRSTATSCSV = "stats"+File.separator+"CSV";
 	public static String DIRLOG = "log";
 	public static String DIRASLAN = "model";
+	public static String DIRFAIL = "fails";//where to store logs of fails during stats computation 
 
 	// Tools available
 
