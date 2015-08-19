@@ -241,6 +241,17 @@ public class SIMPA {
 	private static BooleanOption WEKA = new BooleanOption("--weka", "Force the use of weka");
 	private static IntegerOption SUPPORT_MIN = new IntegerOption("--supportmin", "Minimal support for relation (1-100)", Options.SUPPORT_MIN);
 	private static Option<?>[] EFSMOptions = new Option<?>[]{GENERIC_DRIVER,SCAN,REUSE_OP_IFNEEDED,FORCE_J48,WEKA,SUPPORT_MIN};
+	
+	//TestEFSM options //TODO group with Random generrator ?
+	private static IntegerOption MIN_PARAMETER = new IntegerOption("--minparameter", "Minimal number of parameter by symbol", Options.MINPARAMETER);
+	private static IntegerOption MAX_PARAMETER = new IntegerOption("--maxparameter", "Maximal number of parameter by symbol", Options.MAXPARAMETER);
+	private static IntegerOption DOMAIN_SIZE = new IntegerOption("--domainsize", "Size of the parameter's domain", Options.DOMAINSIZE);
+	private static IntegerOption SIMPLE_GUARD_PERCENT = new IntegerOption("--simpleguard", "% of simple guard by transitions", Options.SIMPLEGUARDPERCENT);
+	private static IntegerOption NDV_GUARD_PERCENT = new IntegerOption("--ndvguard", "% of generating NDV by transitions", Options.NDVGUARDPERCENT);
+	private static IntegerOption NDV_MIN_TRANS = new IntegerOption("--ndvmintrans", "Minimum number of states before checking NDV value", Options.NDVMINTRANSTOCHECK);
+	private static IntegerOption NDV_MAX_TRANS = new IntegerOption("--ndvmaxtrans", "Maximum number of states before checking NDV value", Options.NDVMAXTRANSTOCHECK);
+	private static Option<?>[] testEFSMOptions = new Option<?>[]{MIN_PARAMETER,MAX_PARAMETER,DOMAIN_SIZE,SIMPLE_GUARD_PERCENT,NDV_GUARD_PERCENT,NDV_MIN_TRANS,NDV_MAX_TRANS};
+
 
 	//Random driver options
 	private static IntegerOption MIN_STATE = new IntegerOption("--minstates", "Minimal number of states for random automatas", Options.MINSTATES);
@@ -311,7 +322,7 @@ public class SIMPA {
 				unusedArgs++;
 				Options.SYSTEM = args[j];
 			}
-		if (unusedArgs < 1){
+		if (unusedArgs < 1 && NB_TEST.getValue() > 0){
 			System.err.println("please specify the driverClass");
 			usage();
 		}
@@ -348,6 +359,14 @@ public class SIMPA {
 		Options.FORCE_J48 = FORCE_J48.getValue();
 		Options.WEKA = WEKA.getValue();
 		Options.SUPPORT_MIN = SUPPORT_MIN.getValue();
+
+		Options.MINPARAMETER = MIN_PARAMETER.getValue();
+		Options.MAXPARAMETER = MAX_PARAMETER.getValue();
+		Options.DOMAINSIZE = DOMAIN_SIZE.getValue();
+		Options.SIMPLEGUARDPERCENT = SIMPLE_GUARD_PERCENT.getValue();
+		Options.NDVGUARDPERCENT = NDV_GUARD_PERCENT.getValue();
+		Options.NDVMINTRANSTOCHECK = NDV_MIN_TRANS.getValue();
+		Options.NDVMAXTRANSTOCHECK = NDV_MAX_TRANS.getValue();
 
 		Options.MINSTATES = MIN_STATE.getValue();
 		Options.MAXSTATES = MAX_STATE.getValue();
@@ -430,8 +449,8 @@ public class SIMPA {
 			}
 		}
 
-		if (Options.NBTEST < 1)
-			throw new RuntimeException("Number of test >= 1 needed");
+		if (Options.NBTEST < 0)
+			throw new RuntimeException("Number of test >= 0 needed");
 
 
 		if (Options.MINSTATES < 1)
@@ -460,23 +479,29 @@ public class SIMPA {
 	public static Driver loadDriver(String system) throws Exception {
 		Driver driver;
 		try {
-			if (Options.GENERICDRIVER) {
-				driver = new GenericDriver(system);
-			}else if (Options.SCAN){
-				driver = new ScanDriver(system); 
-			}else {
-				driver = (Driver) Class.forName(system).newInstance();
+			try {
+				if (Options.GENERICDRIVER) {
+					driver = new GenericDriver(system);
+				}else if (Options.SCAN){
+					driver = new ScanDriver(system); 
+				}else {
+					driver = (Driver) Class.forName(system).newInstance();
+				}
+				LogManager.logConsole("System : " + driver.getSystemName());
+				return driver;
+			} catch (InstantiationException e) {
+				throw new Exception("Unable to instantiate the driver : " + system);
+			} catch (IllegalAccessException e) {
+				throw new Exception("Unable to access the driver : " + system);
+			} catch (ClassNotFoundException e) {
+				throw new Exception(
+						"Unable to find the driver. Please check the system name ("
+								+ system + ")");
 			}
-			LogManager.logConsole("System : " + driver.getSystemName());
-			return driver;
-		} catch (InstantiationException e) {
-			throw new Exception("Unable to instantiate the driver : " + system);
-		} catch (IllegalAccessException e) {
-			throw new Exception("Unable to access the driver : " + system);
-		} catch (ClassNotFoundException e) {
-			throw new Exception(
-					"Unable to find the driver. Please check the system name ("
-							+ system + ")");
+		} catch (Exception e) {
+			e.printStackTrace();
+			usage();
+			throw e;
 		}
 	}
 
@@ -571,7 +596,7 @@ public class SIMPA {
 				gen.generate(stats);
 			}
 		}
-		
+
 	}
 
 	public static void main(String[] args) {
@@ -623,6 +648,9 @@ public class SIMPA {
 
 		System.out.println("> Stats");
 		printUsage(statsOptions);
+		
+		System.out.println("> Test EFSM (should be group with random Generator ?)");
+		printUsage(testEFSMOptions);
 
 		System.out.println("> Others...");
 		printUsage(otherOptions);
