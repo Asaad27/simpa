@@ -3,6 +3,9 @@ package learner.mealy.combinatorial;
 import stats.GraphGenerator;
 import stats.StatsEntry;
 import stats.attribute.Attribute;
+
+import java.util.StringTokenizer;
+
 import drivers.mealy.MealyDriver;
 
 public class CombinatorialStatsEntry extends StatsEntry {
@@ -23,10 +26,26 @@ public class CombinatorialStatsEntry extends StatsEntry {
 	private int outputSymbols;
 	private float duration;
 	
+	public static String getCSVHeader_s(){
+		return makeCSVHeader(attributes);
+	}
+	
 	protected CombinatorialStatsEntry(int traceLength, MealyDriver d, Conjecture c) {
 		this.traceLength = traceLength;
 		this.inputSymbols = d.getInputSymbols().size();
 		this.outputSymbols = d.getOutputSymbols().size();
+	}
+	
+	/**
+	 * rebuild a CombinatorialStatEntry object from a CSV line
+	 * @param line the line to parse
+	 */
+	public CombinatorialStatsEntry(String line){
+		StringTokenizer st = new StringTokenizer(line, ",");
+		traceLength = Integer.parseInt(st.nextToken());
+		inputSymbols = Integer.parseInt(st.nextToken());
+		outputSymbols = Integer.parseInt(st.nextToken());
+		duration = Float.parseFloat(st.nextToken());
 	}
 	
 	public void setDuration(float d){
@@ -58,6 +77,6 @@ public class CombinatorialStatsEntry extends StatsEntry {
 
 	@Override
 	public GraphGenerator getDefaultsGraphGenerator() {
-		return null;
+		return new CombinatorialGraphGenerator();
 	}
 }

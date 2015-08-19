@@ -34,7 +34,7 @@ public class NoResetGraphGenerator extends GraphGenerator {
 		g2.plotGroup(s2,NoResetStatsEntry.W_SIZE, Graph.PlotStyle.MEDIAN);
 		g2.setForceOrdLogScale(false);
 		g2.setFileName("influence_of_input_symbols");
-		//g2.plotFunc("0.003*"+makeMaxTheoricalFunction(s2, NoResetStatsEntry.INPUT_SYMBOLS), "shape of complexity bound");
+		g2.plotFunc("0.003*"+makeMaxTheoricalFunction(s2, NoResetStatsEntry.INPUT_SYMBOLS), "shape of complexity bound");
 		g2.export();
 		
 		Graph<Integer, Integer> g3 = new Graph<Integer,Integer>(NoResetStatsEntry.W_SIZE, NoResetStatsEntry.TRACE_LENGTH);
