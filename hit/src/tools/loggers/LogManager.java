@@ -14,6 +14,8 @@ import learner.mealy.tree.ZObservationNode;
 import main.simpa.Options;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedOutput;
+import detection.Reflection;
+import drivers.efsm.real.GenericDriver;
 
 public class LogManager {
 	private static DateFormat tfm = new SimpleDateFormat("[HH:mm:ss:SSS] ");
@@ -25,7 +27,8 @@ public class LogManager {
 	public static final int STEPNDF = 3;
 
 	static ArrayList<ILogger> loggers = new ArrayList<ILogger>();
-
+	static XSSLogger xssLogger;
+	
 	public static void addLogger(ILogger logger) {
 		loggers.add(logger);
 	}
@@ -34,6 +37,9 @@ public class LogManager {
 		logConsole("End");
 		for (ILogger l : loggers)
 			l.logEnd();
+		if(Options.XSS_DETECTION){
+			xssLogger.logEnd();
+		}
 		// System.exit(0);
 	}
 	
@@ -94,6 +100,10 @@ public class LogManager {
 	public static void start() {
 		for (ILogger l : loggers)
 			l.logStart();
+		if(Options.XSS_DETECTION){
+			xssLogger = new XSSLogger();
+			xssLogger.logStart();
+		}
 	}
 
 	public static void logReset() {
@@ -152,4 +162,27 @@ public class LogManager {
 			if (Options.GRAPHVIZ)
 				l.logXObservationTree(root);
 	}
+	
+	/**
+	 * Logs a reflection found in the web application.
+	 * Print the input sequence triggering the reflection
+	 * @param r The data representing the reflection
+	 * @param driver The GenericDriver used to translate abstract symbols into concrete requests
+	 */
+	public static void logFoundReflection(Reflection r, GenericDriver driver){
+		xssLogger.logFoundReflection(r, driver);
+	}
+
+	/**
+	 * Logs a XSS found in the web application. Print the input sequence
+	 * used to introduce the payload and observe the result
+	 *
+	 * @param r The data representing the sequence used
+	 * @param driver The GenericDriver used to translate abstract symbols into
+	 * concrete requests
+	 */
+	public static void logFoundXSS(Reflection r, GenericDriver driver) {
+		xssLogger.logFoundXSS(r, driver);
+	}
+
 }
