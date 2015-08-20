@@ -15,6 +15,11 @@ public abstract class TreeNode {
 	protected final TreeNode father;
 	private final State state;
 	private int discoveredStatesNb;
+	
+	public String desc = "";
+	public int id=max_id++;
+	private static int max_id=0;
+	
 
 	/**
 	 * Create the root of the tree.

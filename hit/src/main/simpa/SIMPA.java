@@ -223,8 +223,9 @@ public class SIMPA {
 	private static BooleanOption LM_INFERENCE = new BooleanOption("--lm", "Use lm inference");
 	private static BooleanOption NORESET_INFERENCE = new BooleanOption("--noReset", "use noReset Algorithm");
 	private static BooleanOption COMBINATORIAL_INFERENCE = new BooleanOption("--combinatorial", "use the combinatorial inference");
+	private static BooleanOption CUTTER_COMBINATORIAL_INFERENCE = new BooleanOption("--cutCombinatorial", "use the combinatorial inference with cutting");
 	private static BooleanOption RIVETSCHAPIRE_INFERENCE = new BooleanOption("--rivestSchapire", "use the RivestSchapire inference (must be used with an other learner)\nThis option let you to run an inference algorithm with resets on a driver without reset.");
-	private static Option<?>[] inferenceChoiceOptions = new Option<?>[]{TREE_INFERENCE,LM_INFERENCE,NORESET_INFERENCE,COMBINATORIAL_INFERENCE,RIVETSCHAPIRE_INFERENCE};
+	private static Option<?>[] inferenceChoiceOptions = new Option<?>[]{TREE_INFERENCE,LM_INFERENCE,NORESET_INFERENCE,CUTTER_COMBINATORIAL_INFERENCE,COMBINATORIAL_INFERENCE,RIVETSCHAPIRE_INFERENCE};
 
 	//ZQ options
 	private static BooleanOption STOP_AT_CE_SEARCH = new BooleanOption("--stopatce", "Stop inference when a counter exemple is asked");
@@ -296,7 +297,8 @@ public class SIMPA {
 		Utils.setSeed(Options.SEED);
 
 
-		parse(args,used,new Option<?>[]{LOG_HTML,LOG_TEXT,AUTO_OPEN_HTML,OUTDIR,NORESET_INFERENCE,TREE_INFERENCE,COMBINATORIAL_INFERENCE,RIVETSCHAPIRE_INFERENCE});
+		parse(args,used,outputOptions);
+		parse(args,used,inferenceChoiceOptions);
 		if (TREE_INFERENCE.getValue() && NORESET_INFERENCE.getValue()){
 			System.out.println("You cannot choose two inference system");
 			usage();
@@ -347,6 +349,7 @@ public class SIMPA {
 		Options.TREEINFERENCE = TREE_INFERENCE.getValue();
 		Options.NORESETINFERENCE = NORESET_INFERENCE.getValue();
 		Options.COMBINATORIALINFERENCE = COMBINATORIAL_INFERENCE.getValue();
+		Options.CUTTERCOMBINATORIALINFERENCE = CUTTER_COMBINATORIAL_INFERENCE.getValue();
 		Options.RIVESTSCHAPIREINFERENCE = RIVETSCHAPIRE_INFERENCE.getValue();
 
 		Options.STOP_ON_CE_SEARCH = STOP_AT_CE_SEARCH.getValue();

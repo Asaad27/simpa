@@ -5,6 +5,7 @@ import learner.mealy.rivestSchapire.RivestSchapireLearner;
 import learner.mealy.table.LmLearner;
 import learner.mealy.tree.ZLearner;
 import learner.mealy.combinatorial.CombinatorialLearner;
+import learner.mealy.combinatorial.CutterCombinatorialLearner;
 import learner.mealy.noReset.NoResetLearner;
 import main.simpa.Options;
 import stats.StatsEntry;
@@ -42,6 +43,8 @@ public abstract class Learner {
 				return new ZLearner(driver);
 			else if (Options.COMBINATORIALINFERENCE)
 				return new CombinatorialLearner((MealyDriver)driver);
+			else if (Options.CUTTERCOMBINATORIALINFERENCE)
+					return new CutterCombinatorialLearner((MealyDriver)driver);
 			else if (Options.RIVESTSCHAPIREINFERENCE)
 				return new RivestSchapireLearner((MealyDriver)driver);
 			else if (Options.NORESETINFERENCE)

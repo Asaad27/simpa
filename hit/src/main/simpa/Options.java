@@ -45,6 +45,7 @@ public class Options {
 	public static boolean LMINFERENCE = false;
 	public static boolean NORESETINFERENCE = false;
 	public static boolean COMBINATORIALINFERENCE = false;
+	public static boolean CUTTERCOMBINATORIALINFERENCE = false;
 	public static boolean RIVESTSCHAPIREINFERENCE = false;
 	public static boolean GENERICDRIVER = false;
 	public static String INITIAL_INPUT_SYMBOLS = "";
