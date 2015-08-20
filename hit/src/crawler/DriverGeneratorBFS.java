@@ -135,7 +135,7 @@ public class DriverGeneratorBFS extends DriverGenerator {
 			case POST:
 				HTTPData values = getHTTPDataFromInput(input, randomized);
 				request.setRequestParameters(values.getNameValueData());
-				request.setAdditionalHeader("Connection", "Close");
+				//request.setAdditionalHeader("Connection", "Close");
 				break;
 			case GET:
 				request.setUrl(new URL(input.getAddressWithParameters(randomized)));
@@ -469,6 +469,18 @@ public class DriverGeneratorBFS extends DriverGenerator {
 			String address = form.absUrl("action");
 			if (address.isEmpty()) {
 				address = form.baseUri();
+			} else {
+				//filter out the unwanted urls
+				boolean exclude = false;
+				for (String filter : config.getNoFollow()) {
+					if (address.matches(filter)) {
+						exclude = true;
+						break;
+					}
+				}
+				if (exclude) {
+					continue;
+				}
 			}
 
 			//The list formed by all the inputs created from the current form

@@ -561,7 +561,7 @@ public class LiLearner extends Learner {
 			finished = false;
 			while (!finished) {
 				finished = true;
-	
+	/*
 				while ((ndv = dTable.findNDV()) != null) {
 					finished = false;
 					LogManager.logStep(LogManager.STEPNDV, ndv);
@@ -569,7 +569,7 @@ public class LiLearner extends Learner {
 					LogManager.logControlTable(cTable);
 					LogManager.logDataTable(dTable);
 				}
-				while ((nbp = cTable.getNotBalancedParameter()) != null) {
+	*/			while ((nbp = cTable.getNotBalancedParameter()) != null) {
 					finished = false;
 					LogManager.logStep(LogManager.STEPNBP, nbp);
 					handleNBP(nbp);
