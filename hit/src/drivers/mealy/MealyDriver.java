@@ -2,8 +2,10 @@ package drivers.mealy;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import learner.mealy.LmConjecture;
 import main.simpa.Options;
@@ -22,6 +24,7 @@ public class MealyDriver extends Driver {
 	protected Mealy automata;
 	protected State currentState;
 	protected List<InputSequence> forcedCE;
+	protected Set<InputSequence> triedCE;
 	private int nbStates = 0;
 	private int transitionCount = 0;
 	private String name = null;
@@ -31,6 +34,7 @@ public class MealyDriver extends Driver {
 		type = DriverType.MEALY;
 		this.automata = automata;
 		this.forcedCE = getForcedCE();
+		triedCE = new HashSet<>();
 		this.nbStates = automata.getStateCount();
 		this.name = automata.getName();
 	}
@@ -146,6 +150,9 @@ public class MealyDriver extends Driver {
 		int i = 0;
 		while (i < maxTries && !found) {
 			ce = InputSequence.generate(is, Options.MAX_CE_LENGTH);
+			while (triedCE.contains(ce))
+				ce = InputSequence.generate(is, Options.MAX_CE_LENGTH);
+			triedCE.add(ce);
 			OutputSequence osSystem = new OutputSequence();
 			OutputSequence osConj = new OutputSequence();
 			reset();
