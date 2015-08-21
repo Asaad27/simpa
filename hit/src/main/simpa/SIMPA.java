@@ -16,6 +16,7 @@ import java.util.Scanner;
 import drivers.Driver;
 import drivers.efsm.real.GenericDriver;
 import drivers.efsm.real.ScanDriver;
+import drivers.mealy.FromDotMealyDriver;
 import learner.Learner;
 import main.simpa.Options.LogLevel;
 import stats.GraphGenerator;
@@ -85,6 +86,10 @@ abstract class Option<T> {
 
 	public T getDefaultValue() {
 		return defaultValue;
+	}
+
+	public void setNeeded(boolean needed) {
+		this.needed = needed;
 	}
 }
 
@@ -209,7 +214,8 @@ public class SIMPA {
 	//General Options
 	private static HelpOption help = new HelpOption();
 	private static IntegerOption SEED = new IntegerOption("--seed", "Use NN as seed for random generator", null);
-	private static Option<?>[] generalOptions = new Option<?>[]{help,SEED};
+	private static StringOption LOAD_DOT_FILE = new StringOption("--loadDotFile", "load the specified dot file\n use with drivers.mealy.FromDotMealyDriver", null);
+	private static Option<?>[] generalOptions = new Option<?>[]{help,SEED,LOAD_DOT_FILE};
 
 	//output options
 	private static BooleanOption LOG_HTML = new BooleanOption("--html", "Use HTML logger");
@@ -287,6 +293,10 @@ public class SIMPA {
 
 	private static void parseArguments(String[] args) {
 		LogManager.logConsole("Checking environment and options");
+		
+		SEED.setNeeded(false);
+		URLS.setNeeded(false);
+		LOAD_DOT_FILE.setNeeded(false);
 
 		ArrayList<Boolean> used = new ArrayList<>();
 		for (int j = 0; j < args.length; j++)
@@ -489,6 +499,8 @@ public class SIMPA {
 					driver = new GenericDriver(system);
 				}else if (Options.SCAN){
 					driver = new ScanDriver(system); 
+				}else if (LOAD_DOT_FILE.getValue() != null){
+					driver = (Driver) Class.forName(system).getConstructor(File.class).newInstance(new File(LOAD_DOT_FILE.getValue()));
 				}else {
 					driver = (Driver) Class.forName(system).newInstance();
 				}

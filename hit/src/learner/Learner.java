@@ -52,7 +52,7 @@ public abstract class Learner {
 			else if (Options.LMINFERENCE)
 				return new LmLearner(driver);
 		default:
-			return null;
+			throw new RuntimeException("there is no driver to use");
 		}
 	}
 }
