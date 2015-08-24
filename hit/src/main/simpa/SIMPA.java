@@ -116,6 +116,29 @@ class IntegerOption extends Option<Integer> {
 	}
 }
 
+class LongOption extends Option<Long> {
+	public LongOption(String consoleName, String description, Long defaultValue) {
+		super(consoleName, description, defaultValue);
+	}
+
+	@Override
+	public void parseInternal(String[] args, ArrayList<Boolean> used) {
+		for (int i = 0; i < args.length; i++)
+			if (args[i].equals(consoleName)){
+				used.set(i, true);
+				i++;
+				assert !used.get(i) : "argument already parsed";
+				used.set(i, true);
+				try{
+					value = new Long(args[i]);
+				} catch (NumberFormatException e) {
+					System.err.println("Error parsing argument '" + args[i] + "' for " + consoleName);
+					throw e;
+				}
+			}
+	}
+}
+
 class StringOption extends Option<String> {
 	public StringOption(String consoleName, String description, String defaultValue) {
 		super(consoleName, description, defaultValue);
@@ -213,7 +236,7 @@ public class SIMPA {
 	
 	//General Options
 	private static HelpOption help = new HelpOption();
-	private static IntegerOption SEED = new IntegerOption("--seed", "Use NN as seed for random generator", null);
+	private static LongOption SEED = new LongOption("--seed", "Use NN as seed for random generator", null);
 	private static StringOption LOAD_DOT_FILE = new StringOption("--loadDotFile", "load the specified dot file\n use with drivers.mealy.FromDotMealyDriver", null);
 	private static Option<?>[] generalOptions = new Option<?>[]{help,SEED,LOAD_DOT_FILE};
 
