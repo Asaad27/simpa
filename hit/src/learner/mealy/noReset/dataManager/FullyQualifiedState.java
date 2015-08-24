@@ -55,25 +55,21 @@ public class FullyQualifiedState{
 			DataManager.instance.logRecursivity("New transition found : " + v);
 		DataManager.instance.startRecursivity();
 
-		LinkedList<FullyKnownTrace> toAdd = new LinkedList<FullyKnownTrace>();
 		LinkedList<LmTrace> toRemove = new LinkedList<LmTrace>();
 		for (FullyKnownTrace knownV : V.values()){
 			if (v.getTrace().equals(knownV.getTrace().subtrace(0, v.getTrace().size()))){
-				toAdd.add(new FullyKnownTrace(v.getEnd(), knownV.getTrace().subtrace(v.getTrace().size(), knownV.getTrace().size()), knownV.getEnd()));
+				FullyKnownTrace vToAdd = new FullyKnownTrace(v.getEnd(), knownV.getTrace().subtrace(v.getTrace().size(), knownV.getTrace().size()), knownV.getEnd());
+				if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+					DataManager.instance.logRecursivity("Split transition : " + v + " + " + vToAdd);
+				DataManager.instance.startRecursivity();
+				DataManager.instance.addFullyKnownTrace(vToAdd);
+				DataManager.instance.endRecursivity();
 				toRemove.add(knownV.getTrace());
 			}
 		}
 		while (!toRemove.isEmpty()){
 			LmTrace vtoRemove = toRemove.poll();
 			V.remove(vtoRemove);
-		}
-		while (!toAdd.isEmpty()){
-			FullyKnownTrace vToAdd = toAdd.poll();
-			if (Options.LOG_LEVEL != Options.LogLevel.LOW)
-				DataManager.instance.logRecursivity("Split transition : " + v + " + " + vToAdd);
-			DataManager.instance.startRecursivity();
-			vToAdd.getStart().addFullyKnownTrace(vToAdd);
-			DataManager.instance.endRecursivity();
 		}
 		
 		K.remove(v.getTrace());

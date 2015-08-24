@@ -33,10 +33,11 @@ public class DataManager {
 	private Set<FullyQualifiedState> notFullyKnownStates;//Fully qualified states with undefined transitions
 	private LmConjecture conjecture;
 	private int recursivity; //for log
-	private boolean lockedSetC;//setC do not call back other setC if this is locked
 	private LinkedList<WaitingState> waitingStates;//the call to setCwhich must be done by the root setC
+	private LinkedList<FullyKnownTrace> waitingFullyKnownTrace;
+	private boolean lockAdd;//indicate whether an add is currently running.
 
-	
+
 	public DataManager(MealyDriver driver, ArrayList<InputSequence> W){
 		this.trace = new LmTrace();
 		this.W = W;
@@ -53,11 +54,12 @@ public class DataManager {
 		conjecture = new LmConjecture(driver);
 		recursivity = 0;
 		waitingStates = new LinkedList<WaitingState>();
-		lockedSetC = false;
+		waitingFullyKnownTrace = new LinkedList<>();
+		lockAdd = false;
 		instance = this;
 		driver.reset();
 	}
-	
+
 	public String apply(String input){
 		startRecursivity();
 		String output = driver.execute(input);
@@ -87,14 +89,14 @@ public class DataManager {
 		endRecursivity();
 		return output;
 	}
-	
+
 	public OutputSequence apply(InputSequence inputs){
 		OutputSequence outputs = new OutputSequence();
 		for (String input : inputs.sequence)
 			outputs.addOutput(apply(input));
 		return outputs;
 	}
-	
+
 	public String getK(){
 		StringBuilder s = new StringBuilder("{");
 		for (FullyQualifiedState q : Q.values()){
@@ -104,7 +106,7 @@ public class DataManager {
 		s.append("}");
 		return s.toString();
 	}
-	
+
 	public String getV(){
 		StringBuilder VString = new StringBuilder();
 		for (FullyQualifiedState q : Q.values()){
@@ -121,14 +123,31 @@ public class DataManager {
 	}
 
 	protected void addFullyKnownTrace(FullyKnownTrace v){
-			v.getStart().addFullyKnownTrace(v);
+		waitingFullyKnownTrace.add(v);
+		doWaitingAdd();
 	}
-	
+
 	public FullyQualifiedState getC(int pos){
 		return C.get(pos);
 	}
-	
+
 	public void setC(int pos,FullyQualifiedState s){
+		WaitingState ws = new WaitingState();
+		ws.pos = pos;
+		ws.state = s;
+		waitingStates.add(ws);
+		doWaitingAdd();
+	}
+
+	/**
+	 * must be call only if there is no other call.
+	 * This method is used in order to avoid highly recursive call which make concurrence exceptions in loop.
+	 * @see #doWaitingAdd()
+	 * @see #setC(int, FullyQualifiedState)
+	 * @param pos
+	 * @param s
+	 */
+	private void setCchecked(int pos,FullyQualifiedState s){
 		assert s != null;
 		assert C.get(pos) == null || C.get(pos) == s : "Relabelling " + C.get(pos) + " with " + s + " at pos " + pos;
 		if (C.get(pos) != null){
@@ -141,36 +160,48 @@ public class DataManager {
 		for (FullyQualifiedState q : Q.values()){
 			for (FullyKnownTrace v : q.getVerifiedTrace())
 				if (s == v.getStart() && getSubtrace(pos, pos+v.getTrace().size()).equals(v.getTrace())){
-//					setC(pos + v.getTrace().size(), v.getEnd());
-					WaitingState ws = new WaitingState();
-					ws.pos = pos + v.getTrace().size();
-					ws.state = v.getEnd();
-					waitingStates.add(ws);
+					setC(pos + v.getTrace().size(), v.getEnd());
 				}
-			if (!lockedSetC){
-				lockedSetC = true;
-				while(!waitingStates.isEmpty()){
-					WaitingState ws = waitingStates.poll();
-					setC(ws.pos,ws.state);
-				}
-				lockedSetC = false;
-			}
-			
 		}
 		updateK(pos);
 		updateV(pos);
 		endRecursivity();
 	}
-	
+
+	private void doWaitingAdd(){
+		if (lockAdd)
+			return;
+		lockAdd = true;
+		boolean upToDate = false;
+		while (!upToDate){
+			upToDate = true;
+			FullyKnownTrace v = waitingFullyKnownTrace.poll();
+			if (v != null){
+				upToDate = false;
+				v.getStart().addFullyKnownTrace(v);
+			}
+			WaitingState ws = waitingStates.poll();
+			if (ws  != null){
+				upToDate = false;
+				setCchecked(ws.pos,ws.state);
+			}
+		}
+		lockAdd = false;
+	}
+
 	public int traceSize(){
 		return trace.size();
 	}
-	
+
 	public LmTrace getSubtrace(int start, int end){
 		return trace.subtrace(start, end);
 	}
-	
-	public void updateCKVT(){
+
+	/**
+	 * update C,K,V and T.
+	 * @return true if C,K,V,T were already up to date.
+	 */
+	public boolean updateCKVT(){
 		logRecursivity("full C,K,V,T update, should do nothing (and then this func call should be removed)");
 		startRecursivity();
 		for (FullyQualifiedState q : Q.values()){
@@ -183,9 +214,9 @@ public class DataManager {
 				updateV(i);
 			}
 		}
-		
-		
-		
+
+
+		boolean wasUpToDate = true;
 		boolean isUpToDate;
 		do{
 			isUpToDate = true;
@@ -213,9 +244,9 @@ public class DataManager {
 						}
 					}
 				}
-			
+
 			//rule 2
-			
+
 			//rule 3
 			for (int i = 0; i< traceSize(); i++)
 				if (getC(i) != null)
@@ -237,9 +268,9 @@ public class DataManager {
 								LogManager.logError("rule 3 : K not up to date near transition n°" +i);
 							}
 					}
-				
+
 			//rule 4
-			
+
 			//rule 5
 			for (FullyQualifiedState q : Q.values())
 				for (FullyKnownTrace v : q.getVerifiedTrace())
@@ -251,13 +282,18 @@ public class DataManager {
 							LogManager.logError("rule 5 : C not up to date");
 							setC(i+v.getTrace().size(),v.getEnd());
 						}
-					
-			
-			
+
+			if (!isUpToDate){
+				throw new RuntimeException("C,K,V,T were not up to date");
+			}
+
+			if (!isUpToDate)
+				wasUpToDate = false;
 		}while(!isUpToDate);
 		endRecursivity();
+		return wasUpToDate;
 	}
-	
+
 	/**
 	 * rule 1 in the algorithm
 	 * @param pos the position of a discovered state.
@@ -267,12 +303,12 @@ public class DataManager {
 		int otherPos = pos-1;
 		while (otherPos>0 && C.get(otherPos) == null)
 			otherPos--;
-		FullyQualifiedState other = (otherPos > 0) ? C.get(otherPos) : null;;
+		FullyQualifiedState other = (otherPos > 0) ? C.get(otherPos) : null;
 		if (other != null){
 			FullyKnownTrace t = new FullyKnownTrace(other, getSubtrace(otherPos, pos), C.get(pos));
 			addFullyKnownTrace(t);
 		}
-		
+
 		if (pos == traceSize())
 			return;
 		otherPos = pos+1; 
@@ -284,7 +320,7 @@ public class DataManager {
 			addFullyKnownTrace(t);
 		}
 	}
-	
+
 	/**
 	 * rule 3 in algorithm
 	 * @param pos the position of a discovered state
@@ -302,7 +338,7 @@ public class DataManager {
 			addPartiallyKnownTrace(s, getSubtrace(pos, pos+transition.getLength()), getSubtrace(pos+transition.getLength(), pos+transition.getLength()+WInTrace.get(pos+transition.getLength()).getLength()));
 		}
 	}
-	
+
 	/**
 	 * rule 5 in algorithm
 	 * @param t
@@ -338,7 +374,7 @@ public class DataManager {
 		Q.put(WResponses,newState);
 		return newState;
 	}
-	
+
 	protected List<InputSequence> getW(){
 		return W;
 	}
@@ -354,7 +390,7 @@ public class DataManager {
 		assert t != null;
 		return s.getwNotInK(t);
 	}
-	
+
 	/**
 	 * get transitions for which we do not know the output (ie we don't know the result of tr_s(x)
 	 * @param s
@@ -363,7 +399,7 @@ public class DataManager {
 	public Set<String> getxNotInR(FullyQualifiedState s){
 		return s.getUnknowTransitions();
 	}
-	
+
 	/**
 	 * check if the automata is fully known.
 	 * @return true if all states are fully known.
@@ -382,7 +418,7 @@ public class DataManager {
 	 * @return an empty list if the state himself has unknown outputs
 	 */
 	public InputSequence getShortestAlpha(FullyQualifiedState s) {
- 		assert s != null;
+		assert s != null;
 		class Node{
 			public InputSequence path;
 			public FullyQualifiedState end;
@@ -431,7 +467,7 @@ public class DataManager {
 	public LmConjecture getConjecture() {
 		return conjecture;
 	}
-	
+
 	protected void startRecursivity(){
 		recursivity++;
 	}
@@ -447,7 +483,7 @@ public class DataManager {
 		s.append(l);
 		LogManager.logInfo(s.toString());
 	}
-	
+
 	public String readableTrace(){
 		int maxLength=80;
 		StringBuilder globalResult = new StringBuilder();

@@ -32,7 +32,7 @@ public class NoResetGraphGenerator extends GraphGenerator {
 		s2.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.STATE_NUMBER, 12));
 		s2.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.STATE_BOUND_OFFSET, 0));
 		g2.plotGroup(s2,NoResetStatsEntry.W_SIZE, Graph.PlotStyle.MEDIAN);
-		g2.setForceOrdLogScale(false);
+		//g2.setForceOrdLogScale(false);
 		g2.setFileName("influence_of_input_symbols");
 		g2.plotFunc("0.003*"+makeMaxTheoricalFunction(s2, NoResetStatsEntry.INPUT_SYMBOLS), "shape of complexity bound");
 		g2.export();
@@ -85,7 +85,7 @@ public class NoResetGraphGenerator extends GraphGenerator {
 		//s7.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.INPUT_SYMBOLS, 5));
 		s7.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.W_SIZE, 2));
 		s7.restrict(new InSetRestriction<Integer>(NoResetStatsEntry.STATE_BOUND_OFFSET, new Integer[]{0,5,10,15}));
-		g7.plotGroup(s7,NoResetStatsEntry.STATE_BOUND_OFFSET, Graph.PlotStyle.POINTS);
+		g7.plotGroup(s7,NoResetStatsEntry.STATE_BOUND_OFFSET, Graph.PlotStyle.MEDIAN);
 		//g7.setForceOrdLogScale(true);
 		g7.setFileName("memory");
 		g7.export();

@@ -65,7 +65,6 @@ public class NoResetLearner extends Learner {
 			else
 				n = Utils.randIntBetween(n, 30);
 		}
-
 		
 		stats = new NoResetStatsEntry(W, driver, n);
 
@@ -136,6 +135,7 @@ public class NoResetLearner extends Learner {
 				if (Options.TEST)
 					dataManager.updateCKVT();
 			}
+			assert dataManager.updateCKVT();
 		}
 		float duration = (float)(System.nanoTime() - start)/ 1000000000;
 		stats.setDuration(duration);
