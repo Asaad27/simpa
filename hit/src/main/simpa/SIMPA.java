@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -523,7 +524,11 @@ public class SIMPA {
 				}else if (Options.SCAN){
 					driver = new ScanDriver(system); 
 				}else if (LOAD_DOT_FILE.getValue() != null){
+					try {
 					driver = (Driver) Class.forName(system).getConstructor(File.class).newInstance(new File(LOAD_DOT_FILE.getValue()));
+					} catch (InvocationTargetException e){
+						throw new Exception(e.getTargetException());
+					}
 				}else {
 					driver = (Driver) Class.forName(system).newInstance();
 				}
