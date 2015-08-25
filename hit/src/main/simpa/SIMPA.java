@@ -623,7 +623,9 @@ public class SIMPA {
 			} catch (Exception e){
 				LogManager.end();
 				String failDir = baseDir + File.separator + 
-						Options.DIRFAIL + File.separator + 
+						Options.DIRFAIL;
+				Utils.createDir(new File(failDir));
+				failDir = failDir + File.separator + 
 						new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS").format(new Date());
 				try {
 					Utils.copyDir(Paths.get(Options.OUTDIR),Paths.get(failDir));
