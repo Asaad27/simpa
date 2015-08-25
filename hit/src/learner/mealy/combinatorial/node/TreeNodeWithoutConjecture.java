@@ -16,7 +16,10 @@ public abstract class TreeNodeWithoutConjecture extends TreeNode {
 	public TreeNodeWithoutConjecture(MealyDriver d){
 		super(d);
 		driver = d;
-		//states is initialized when super(d) call addState
+	}
+	
+	protected void initStates(MealyDriver d){
+		states = new ArrayList<State>();
 	}
 
 	protected TreeNodeWithoutConjecture(TreeNodeWithoutConjecture parent, State s) {
@@ -26,8 +29,6 @@ public abstract class TreeNodeWithoutConjecture extends TreeNode {
 	}
 
 	public State addState(){
-		if (states == null)
-			states = new ArrayList<State>();
 		State s = new State("S"+states.size(), false);
 		states.add(s);
 		return s;

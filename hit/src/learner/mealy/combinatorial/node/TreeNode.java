@@ -30,9 +30,15 @@ public abstract class TreeNode {
 		isCut = false;
 		depth = 0;
 		father = null;
+		initStates(d);
 		state = addState();
 		discoveredStatesNb = 1;
 	}
+
+	/**
+	 * init the node in order to call addState
+	 */
+	protected abstract void initStates(MealyDriver d);
 
 	/**
 	 * create a child node in the tree.
