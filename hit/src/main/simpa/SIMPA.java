@@ -239,7 +239,8 @@ public class SIMPA {
 	private static HelpOption help = new HelpOption();
 	private static LongOption SEED = new LongOption("--seed", "Use NN as seed for random generator", null);
 	private static StringOption LOAD_DOT_FILE = new StringOption("--loadDotFile", "load the specified dot file\n use with drivers.mealy.FromDotMealyDriver", null);
-	private static Option<?>[] generalOptions = new Option<?>[]{help,SEED,LOAD_DOT_FILE};
+	private static BooleanOption INTERACTIVE = new BooleanOption("--interactive", "algorithms may ask user to choose a sequence, a counter example or something else");
+	private static Option<?>[] generalOptions = new Option<?>[]{help,SEED,LOAD_DOT_FILE,INTERACTIVE};
 
 	//output options
 	private static BooleanOption LOG_HTML = new BooleanOption("--html", "Use HTML logger");
@@ -372,7 +373,7 @@ public class SIMPA {
 
 
 
-
+		Options.INTERACTIVE = INTERACTIVE.getValue();
 
 		Options.LOG_HTML = LOG_HTML.getValue();
 		Options.LOG_TEXT = LOG_TEXT.getValue();
@@ -485,6 +486,10 @@ public class SIMPA {
 					}
 					System.out.println("what did you say ?");
 				}
+			}
+			if (INTERACTIVE.getValue()){
+				System.err.println("you cannot use interactive mode for stats (that may induce wrong values for duration when user wait)");
+				System.exit(1);
 			}
 		}
 
@@ -599,6 +604,7 @@ public class SIMPA {
 		Options.LOG_LEVEL = LogLevel.LOW;
 
 		for (int i = 1; i <= Options.NBTEST; i++) {
+			Runtime.getRuntime().gc();
 			System.out.println("\t" + i + "/" + Options.NBTEST);
 			Options.OUTDIR = logDir+File.separator+i+File.separator;
 			Utils.createDir(new File(Options.OUTDIR));

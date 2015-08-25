@@ -54,6 +54,7 @@ public class Options {
 	public static int SUPPORT_MIN = 20;
 	public static boolean REUSE_OP_IFNEEDED = false;
 	public static boolean FORCE_J48 = false;
+	public static boolean INTERACTIVE = false; //For algorithms which can prompt user for counter example or choosen sequences
 	
 	// Counterexample options
 	

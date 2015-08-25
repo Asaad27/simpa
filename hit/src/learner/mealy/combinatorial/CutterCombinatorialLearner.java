@@ -210,7 +210,7 @@ public class CutterCombinatorialLearner extends Learner {
 		LogManager.logLine();
 		LogManager.logInfo("searching cutting sequence");
 		LogManager.logInfo("current level has "+currentLevel.size()+" nodes");
-		System.out.println("\nsearching cutting sequence");
+		System.out.println("searching cutting sequence (hope to reduce actual "+currentLevel.size()+" nodes)");
 
 		InputSequence cuttingSequence = new InputSequence();
 
@@ -242,10 +242,12 @@ public class CutterCombinatorialLearner extends Learner {
 					maxNodes = nodes;
 				if (responses.get(output) == currentLevel.size())
 					maxNodes = -1;
-				System.out.println(i+"/"+output+" : "+ nodes + " nodes");
+				if (Options.INTERACTIVE)
+					System.out.println(i+"/"+output+" : "+ nodes + " nodes");
 				LogManager.logInfo("if we apply '" +i+ "' and if we get '" + output +"', next level will have "+nodes+" nodes");
 			}
-			System.out.println(i+"/? : "+(currentLevel.size()-knownResponses)*root.getStates().size()+" nodes");
+			if (Options.INTERACTIVE)
+				System.out.println(i+"/? : "+(currentLevel.size()-knownResponses)*root.getStates().size()+" nodes");
 			LogManager.logInfo("if we apply '" +i+ "' and if we get an other output, next level will have "+(currentLevel.size()-knownResponses)*root.getStates().size()+" nodes");
 			maxLength.put(new InputSequence(i), new Integer(maxNodes));
 		}
@@ -272,21 +274,21 @@ public class CutterCombinatorialLearner extends Learner {
 		}	
 		cut ++;
 
+		if (Options.INTERACTIVE){
+			System.out.println("what do you want to apply ? \n\tenter «auto» to use default sequence '"+
+					cuttingSequence+"'\n\t'a,b,c' for the sequence a, b, c\n\t«empty» to use old algorithm (Shortest unknown transition or shortest counter exemple)");
 
-		System.out.println("what do you want to apply ? \n\tenter «auto» to use default sequence '"+
-				cuttingSequence+"'\n\t'a,b,c' for the sequence a, b, c\n\t«empty» to use old algorithm (Shortest unknown transition or shortest counter exemple)");
-
-		String answer = "auto";
-		//answer = input.next();//comment this line to not be prompted
-		System.out.println("understood «"+answer+"»");
-		if (answer.equals("empty"))
-			cuttingSequence = new InputSequence();
-		else if (!answer.equals("auto")){
-			cuttingSequence = new InputSequence();
-			for (String i : answer.split(","))
-				cuttingSequence.addInput(i);
+			String answer = input.next();
+			System.out.println("understood «"+answer+"»");
+			if (answer.equals("empty"))
+				cuttingSequence = new InputSequence();
+			else if (!answer.equals("auto")){
+				cuttingSequence = new InputSequence();
+				for (String i : answer.split(","))
+					cuttingSequence.addInput(i);
+			}
+			System.out.println("applying «"+cuttingSequence+"»\n");
 		}
-		System.out.println("applying «"+cuttingSequence+"»");
 		apply(cuttingSequence);
 
 	}
