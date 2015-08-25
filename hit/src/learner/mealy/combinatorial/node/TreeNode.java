@@ -15,11 +15,11 @@ public abstract class TreeNode {
 	protected final TreeNode father;
 	private final State state;
 	private int discoveredStatesNb;
-	
+
 	public String desc = "";
 	public int id=max_id++;
 	private static int max_id=0;
-	
+
 
 	/**
 	 * Create the root of the tree.
@@ -82,13 +82,13 @@ public abstract class TreeNode {
 	}
 
 	public abstract TreeNode addForcedChild(State to);
-	
+
 	protected void setForcedChild(){
 		haveForcedChild = true;
 	}
 
 	public abstract TreeNode addChild(String i, String o, State q);
-	
+
 	public abstract TreeNode removeChild(State q);
 
 	abstract protected void addTransition(State from, State to, String i, String o); 
@@ -121,21 +121,21 @@ public abstract class TreeNode {
 	public State getState(){
 		return state;
 	}
-	
+
 	public abstract Conjecture getConjecture();
-	
+
 	public boolean isCut(){
 		return isCut;
 	}
-	
+
 	public int getDepth(){
 		return depth;
 	}
-	
+
 	public boolean haveForcedChild(){
 		return haveForcedChild;
 	}
-	
+
 	/**
 	 * get the number of crossed stated from root to this node (included)
 	 * @return
@@ -143,7 +143,24 @@ public abstract class TreeNode {
 	public int getDiscoveredStatesNb(){
 		return discoveredStatesNb;
 	}
-	
+
 	public abstract List<State> getStates();
 	public abstract MealyTransition getTransitionFromWithInput(State s, String i);
+
+	public boolean haveUncuttedChild(){
+		if (isCut())
+			return false;
+		if (haveForcedChild())
+			return getOnlyChild().haveUncuttedChild();
+		int childcount = 0;
+		for (State s : getStates()){
+			TreeNode child = getChild(s);
+			if (child == null)
+				continue;
+			if (child.haveUncuttedChild())
+				return true;
+			childcount++;
+		}
+		return childcount == 0;
+	}
 }

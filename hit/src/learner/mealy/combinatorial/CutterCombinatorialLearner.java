@@ -11,9 +11,17 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Scanner;
 
+import automata.Automata;
+import automata.State;
+import automata.mealy.InputSequence;
+import automata.mealy.Mealy;
+import automata.mealy.MealyTransition;
+import automata.mealy.OutputSequence;
+import drivers.mealy.MealyDriver;
+import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
 import learner.mealy.LmTrace;
-import learner.mealy.combinatorial.node.ArrayTreeNodeWithoutConjecture;
+import learner.mealy.combinatorial.node.ArrayTreeNodeWithConjecture;
 import learner.mealy.combinatorial.node.TreeNode;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
@@ -21,15 +29,6 @@ import stats.StatsEntry;
 import tools.GraphViz;
 import tools.Utils;
 import tools.loggers.LogManager;
-import automata.Automata;
-import automata.State;
-import automata.Transition;
-import automata.mealy.InputSequence;
-import automata.mealy.Mealy;
-import automata.mealy.MealyTransition;
-import automata.mealy.OutputSequence;
-import drivers.mealy.MealyDriver;
-import drivers.mealy.transparent.TransparentMealyDriver;
 
 
 public class CutterCombinatorialLearner extends Learner {
@@ -37,7 +36,7 @@ public class CutterCombinatorialLearner extends Learner {
 	private LmTrace trace;
 	private TreeNode root;
 	private Conjecture conjecture;
-	private CombinatorialStatsEntry stats;
+	private CutterCombinatorialStatsEntry stats;
 	private ArrayList<TreeNode> currentLevel;
 	private ArrayList<TreeNode> nextLevel;
 
@@ -54,12 +53,11 @@ public class CutterCombinatorialLearner extends Learner {
 	public void learn() {
 		LogManager.logStep(LogManager.STEPOTHER,"Inferring the system");
 		LogManager.logConsole("Inferring the system");
+		stats = new CutterCombinatorialStatsEntry(driver);
 		long start = System.nanoTime();
 		driver.reset();
 		trace = new LmTrace();
-		root = new ArrayTreeNodeWithoutConjecture(driver);
-		//root.addState();
-		//root.addState();
+		root = new ArrayTreeNodeWithConjecture(driver);
 		TreeNode result;
 		while ((result = compute(root)) == null){
 			root.addState();
@@ -72,8 +70,9 @@ public class CutterCombinatorialLearner extends Learner {
 		LogManager.logStep(LogManager.STEPOTHER,"Found an automata which seems to have no counter example in "+duration+"s");
 		LogManager.logConsole("Found an automata which seems to have no counter example in "+duration+"s");
 		conjecture.exportToDot();
-		stats = new CombinatorialStatsEntry(trace.size(),driver,conjecture);
 		stats.setDuration(duration);
+		stats.updateWithConjecture(conjecture);
+		stats.setTraceLength(trace.size());
 	}
 
 
@@ -95,7 +94,6 @@ public class CutterCombinatorialLearner extends Learner {
 			//				(currentLevel.size()==0 &&
 			//				!(c = (result = currentLevel.get(0)).getConjecture()).isConnex()&&
 			//				!applyCounterExample(c, currentLevel.get(0).getState()))){
-			LogManager.logInfo("computing level with nodes " + currentLevel);
 			computeLevel();
 			for (TreeNode node : currentLevel)
 				node.desc = "";
@@ -136,11 +134,14 @@ public class CutterCombinatorialLearner extends Learner {
 
 		if (trace.size() <= currentDepth){
 			applyCuttingSequence();
-		}
+		}else
+			exportTreeToDot();
 
 		if (trace.size() <= currentDepth){
 			TreeNode n = currentLevel.get(0);
-			LogManager.logInfo("trace is not long enough");
+			LogManager.logLine();
+			LogManager.logLine();
+			LogManager.logInfo("trace is not long enough searching unknown transition/counter example");
 			Conjecture c = n.getConjecture();
 			InputSequence i = getShortestUnknowntransition(n.getState(), c);
 			if (i == null){
@@ -165,8 +166,6 @@ public class CutterCombinatorialLearner extends Learner {
 		String i = trace.getInput(currentDepth);
 		String o = trace.getOutput(currentDepth);
 		for (TreeNode n : currentLevel){
-			if (Options.LOG_LEVEL  != LogLevel.LOW)
-				LogManager.logInfo("currently in " + n.getStatesTrace(trace));
 			if (n.isCut())
 				continue;
 			if (n.haveForcedChild()){
@@ -184,6 +183,7 @@ public class CutterCombinatorialLearner extends Learner {
 				}
 				TreeNode child  = n.addForcedChild(t.getTo());
 				nextLevel.add(child);
+				stats.addNode();
 				continue;
 			}
 			int checkedChildren = 1;
@@ -193,8 +193,10 @@ public class CutterCombinatorialLearner extends Learner {
 					break;
 				}
 				TreeNode child = n.getChild(q);
-				if (child == null)
+				if (child == null){
 					child = n.addChild(i,o,q);
+					stats.addNode();
+				}
 				nextLevel.add(child);
 				checkedChildren ++;
 				//n.removeChild(q);
@@ -205,17 +207,19 @@ public class CutterCombinatorialLearner extends Learner {
 	private Scanner input = new Scanner(System.in);
 	private int cut = 0;
 	private void applyCuttingSequence(){
+		LogManager.logLine();
 		LogManager.logInfo("searching cutting sequence");
+		LogManager.logInfo("current level has "+currentLevel.size()+" nodes");
 		System.out.println("\nsearching cutting sequence");
-	
+
 		InputSequence cuttingSequence = new InputSequence();
-		
+
 		Map<InputSequence,Integer> maxLength = new HashMap<>();
 		for (String i : driver.getInputSymbols()){
+			LogManager.logInfo("");
 			int knownResponses=0;
 			Map<String,Integer> responses = new HashMap<>();
 			for (TreeNode n : currentLevel){
-				int localNewNode = 0;
 				MealyTransition t = n.getConjecture().getTransitionFromWithInput(n.getState(), i);
 				if (t == null){
 				} else {
@@ -239,8 +243,10 @@ public class CutterCombinatorialLearner extends Learner {
 				if (responses.get(output) == currentLevel.size())
 					maxNodes = -1;
 				System.out.println(i+"/"+output+" : "+ nodes + " nodes");
+				LogManager.logInfo("if we apply '" +i+ "' and if we get '" + output +"', next level will have "+nodes+" nodes");
 			}
 			System.out.println(i+"/? : "+(currentLevel.size()-knownResponses)*root.getStates().size()+" nodes");
+			LogManager.logInfo("if we apply '" +i+ "' and if we get an other output, next level will have "+(currentLevel.size()-knownResponses)*root.getStates().size()+" nodes");
 			maxLength.put(new InputSequence(i), new Integer(maxNodes));
 		}
 		exportTreeToDot();
@@ -253,35 +259,33 @@ public class CutterCombinatorialLearner extends Learner {
 			}
 		}
 
-		String a = driver.getInputSymbols().get(0);
-		String b = driver.getInputSymbols().get(1);
-		String c = driver.getInputSymbols().get(2);
 
 		String[] defaults = new String[]{};
-		//String[] defaults = new String[]{a,a,a,b,a,a,b,a,b,a,a,b,b,a};
+		//defaults = new String[]{"a","a","a","b","a","a","b","a","b","a","a","b","b","a"};
 
 		if (cut < defaults.length){
 			cuttingSequence = new InputSequence(defaults[cut]);
-			LogManager.logInfo("applying forced choice n° " + cut +" : " + cuttingSequence);
-			System.out.println("applying forced choice n° " + cut +" : " + cuttingSequence);
+			LogManager.logInfo("select forced choice n° " + cut +" : " + cuttingSequence);
+			System.out.println("select forced choice n° " + cut +" : " + cuttingSequence);
 		} else {
 			LogManager.logInfo("no more forced symbols");
 		}	
 		cut ++;
-		
-		
+
+
 		System.out.println("what do you want to apply ? \n\tenter «auto» to use default sequence '"+
-		cuttingSequence+"'\n\t'a,b,c' for the sequence a, b, c\n\t«empty» to use old algorithm (Shortest unknown transition or shortest counter exemple)");
+				cuttingSequence+"'\n\t'a,b,c' for the sequence a, b, c\n\t«empty» to use old algorithm (Shortest unknown transition or shortest counter exemple)");
 
 		String answer = "auto";
-		answer = input.next();//comment this line to not be prompted
+		//answer = input.next();//comment this line to not be prompted
 		System.out.println("understood «"+answer+"»");
-		if (!answer.equals("auto")){
+		if (answer.equals("empty"))
+			cuttingSequence = new InputSequence();
+		else if (!answer.equals("auto")){
 			cuttingSequence = new InputSequence();
 			for (String i : answer.split(","))
 				cuttingSequence.addInput(i);
-		}else if (answer.equals("empty"))
-			cuttingSequence = new InputSequence();
+		}
 		System.out.println("applying «"+cuttingSequence+"»");
 		apply(cuttingSequence);
 
@@ -417,7 +421,7 @@ public class CutterCombinatorialLearner extends Learner {
 			String o = apply(i,false);
 			os.addOutput(o);
 		}
-		LogManager.logInfo("trace is now " + trace);
+		//LogManager.logInfo("trace is now " + trace);
 		return os;
 	}
 
@@ -428,7 +432,7 @@ public class CutterCombinatorialLearner extends Learner {
 	 * @see #apply(String, boolean)
 	 */
 	private String apply(String i) {
-		return apply(i, true);
+		return apply(i, false);
 	}
 
 	/**
@@ -451,6 +455,8 @@ public class CutterCombinatorialLearner extends Learner {
 
 	private int n_export=0;
 	public void exportTreeToDot() {
+		if (Options.LOG_LEVEL == Options.LogLevel.LOW)
+			return;
 		n_export++;
 		Writer writer = null;
 		File file = null;
@@ -473,25 +479,36 @@ public class CutterCombinatorialLearner extends Learner {
 				LmTrace t = trace.subtrace(currentDepth, currentDepth+1);
 				String label = t.toString();
 				for (TreeNode n : currentLevel){
+					boolean haveUncuttedChild = n.haveUncuttedChild();
 					writer.write("\t"+n.id+" [label=\""+n.getState() + "\\n" + n.desc +"\"" +
 							(n.isCut() ? ",style=dotted" : "") + "]\n");
-					if (n.haveForcedChild()){
-						TreeNode n1 = n.getOnlyChild();
-						writer.write("\t"+n.id+" -> "+ n1.id + "[style=bold,color=red,label=\""+label+"\"]\n");
-						nextLevel.add(n1);
-					}else if (n.isCut()){
+					if (n.isCut()){
 						String cutId = "cut_"+n.id;
 						String cutOutput = n.getConjecture().getTransitionFromWithInput(n.getState(), t.getInput(0)).getOutput();
 						writer.write("\t"+cutId+" [label=\"\",shape=none]\n");
 						writer.write("\t" + n.id + " -> " + cutId +
 								"[style=dotted,color=red,label=\"("+ new LmTrace(t.getInput(0), cutOutput) +")\"]\n");
-
+					}else if (!haveUncuttedChild){
+						String cutId = "cut_"+n.id;
+						String cutOutput = n.getConjecture().getTransitionFromWithInput(n.getState(), t.getInput(0)).getOutput();
+						writer.write("\t"+cutId+" [label=\"\",shape=none]\n");
+						writer.write("\t" + n.id + " -> " + cutId +
+								"[style=dashed,color=blue,label=\""+ new LmTrace(t.getInput(0), cutOutput) +"\"]\n");
+					}else if (n.haveForcedChild()){
+						TreeNode n1 = n.getOnlyChild();
+						writer.write("\t"+n.id+" -> "+ n1.id + "[style=bold,color=red,label=\""+label+"\"]\n");
+						nextLevel.add(n1);
 					}else {
 						for (State s : n.getStates()){
 							TreeNode n1 = n.getChild(s);
 							if (n1 != null){
-								writer.write("\t"+n.id+" -> "+ n1.id + "[label=\""+label+"\"]\n");
-								nextLevel.add(n1);
+								if (!n1.isCut() && !n1.haveUncuttedChild()){
+									writer.write("\t"+n.id+" -> "+ n1.id + "[label=\""+label+"\",color=blue,style=dashed]\n");
+									writer.write("\t"+n1.id+" [label=\""+n1.getState() + "\",style=dotted,color=blue]\n");
+								}else{
+									writer.write("\t"+n.id+" -> "+ n1.id + "[label=\""+label+"\"]\n");
+									nextLevel.add(n1);
+								}
 							}
 						}
 					}
@@ -500,14 +517,6 @@ public class CutterCombinatorialLearner extends Learner {
 				nextLevel = new ArrayList<>();
 			}
 
-			//			for (MealyTransition t : getTransitions()) {
-			//				writer.write("\t" + t.toDot() + "\n");
-			//			}
-			//			for (State s : states){
-			//				if (s.isInitial()){
-			//					writer.write("\t" + s.getName() + " [shape=doubleoctagon]\n");
-			//				}
-			//			}
 			writer.write("}\n");
 			writer.close();
 			LogManager.logInfo("Tree has been exported to "
