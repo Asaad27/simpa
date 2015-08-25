@@ -41,6 +41,7 @@ public class CombinatorialLearner extends Learner {
 	public void learn() {
 		LogManager.logStep(LogManager.STEPOTHER,"Inferring the system");
 		LogManager.logConsole("Inferring the system");
+		stats = new CombinatorialStatsEntry(driver);
 		long start = System.nanoTime();
 		driver.reset();
 		trace = new LmTrace();
@@ -57,8 +58,9 @@ public class CombinatorialLearner extends Learner {
 		LogManager.logStep(LogManager.STEPOTHER,"Found an automata which seems to have no counter example in "+duration+"s");
 		LogManager.logConsole("Found an automata which seems to have no counter example in "+duration+"s");
 		conjecture.exportToDot();
-		stats = new CombinatorialStatsEntry(trace.size(),driver,conjecture);
+		stats.setTraceLength(trace.size());
 		stats.setDuration(duration);
+		stats.updateWithConjecture(conjecture);
 	}
 
 	/**
@@ -103,6 +105,7 @@ public class CombinatorialLearner extends Learner {
 				return null;
 			}
 			TreeNode child  = n.addForcedChild(t.getTo());
+			stats.addNode();
 			return compute(child);
 		}
 		int checkedChildren = 1;
@@ -112,8 +115,10 @@ public class CombinatorialLearner extends Learner {
 				break;
 			}
 			TreeNode child = n.getChild(q);
-			if (child == null)
+			if (child == null){
 				child = n.addChild(i,o,q);
+				stats.addNode();
+			}
 			TreeNode returnedNode = compute(child);
 			if (returnedNode != null)
 				return returnedNode;
