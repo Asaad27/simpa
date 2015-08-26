@@ -296,7 +296,7 @@ public class MealyDriver extends Driver {
 					if (o1.equals(o2) && os1 != os2){
 						found = false;
 						List<InputSequence> W = new ArrayList<InputSequence>();
-						automata.addDistinctionSequence(getInputSymbols(), s1, s2, W);
+						automata.addDistinctionSequence(getInputSymbols(), os1, os2, W);
 						r.addInputSequence(W.get(0));
 						if (Options.LOG_LEVEL != LogLevel.LOW)
 							LogManager.logInfo("appending " + W.get(0) + " to homing sequence in order to distinguish " + os1 + " and " + os2 
