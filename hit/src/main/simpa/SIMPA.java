@@ -17,7 +17,6 @@ import java.util.Scanner;
 import drivers.Driver;
 import drivers.efsm.real.GenericDriver;
 import drivers.efsm.real.ScanDriver;
-import drivers.mealy.FromDotMealyDriver;
 import learner.Learner;
 import main.simpa.Options.LogLevel;
 import stats.GraphGenerator;
@@ -275,7 +274,7 @@ public class SIMPA {
 	private static BooleanOption WEKA = new BooleanOption("--weka", "Force the use of weka");
 	private static IntegerOption SUPPORT_MIN = new IntegerOption("--supportmin", "Minimal support for relation (1-100)", Options.SUPPORT_MIN);
 	private static Option<?>[] EFSMOptions = new Option<?>[]{GENERIC_DRIVER,SCAN,REUSE_OP_IFNEEDED,FORCE_J48,WEKA,SUPPORT_MIN};
-	
+
 	//TestEFSM options //TODO group with Random generrator ?
 	private static IntegerOption MIN_PARAMETER = new IntegerOption("--minparameter", "Minimal number of parameter by symbol", Options.MINPARAMETER);
 	private static IntegerOption MAX_PARAMETER = new IntegerOption("--maxparameter", "Maximal number of parameter by symbol", Options.MAXPARAMETER);
@@ -318,7 +317,7 @@ public class SIMPA {
 
 	private static void parseArguments(String[] args) {
 		LogManager.logConsole("Checking environment and options");
-		
+
 		SEED.setNeeded(false);
 		URLS.setNeeded(false);
 		LOAD_DOT_FILE.setNeeded(false);
@@ -491,6 +490,10 @@ public class SIMPA {
 				System.err.println("you cannot use interactive mode for stats (that may induce wrong values for duration when user wait)");
 				System.exit(1);
 			}
+			if (SEED.getValue() != null){
+				System.err.println("you cannot impose seed for stats (that may duplicate results and make wrong average)");
+				System.exit(1);
+			}
 		}
 
 		if (Options.NBTEST < 0)
@@ -530,7 +533,7 @@ public class SIMPA {
 					driver = new ScanDriver(system); 
 				}else if (LOAD_DOT_FILE.getValue() != null){
 					try {
-					driver = (Driver) Class.forName(system).getConstructor(File.class).newInstance(new File(LOAD_DOT_FILE.getValue()));
+						driver = (Driver) Class.forName(system).getConstructor(File.class).newInstance(new File(LOAD_DOT_FILE.getValue()));
 					} catch (InvocationTargetException e){
 						throw new Exception(e.getTargetException());
 					}
@@ -606,6 +609,8 @@ public class SIMPA {
 		for (int i = 1; i <= Options.NBTEST; i++) {
 			Runtime.getRuntime().gc();
 			System.out.println("\t" + i + "/" + Options.NBTEST);
+			Options.SEED =  Utils.randLong();
+			Utils.setSeed(Options.SEED);
 			Options.OUTDIR = logDir+File.separator+i+File.separator;
 			Utils.createDir(new File(Options.OUTDIR));
 			try {
@@ -726,7 +731,7 @@ public class SIMPA {
 
 		System.out.println("> Stats");
 		printUsage(statsOptions);
-		
+
 		System.out.println("> Test EFSM (should be group with random Generator ?)");
 		printUsage(testEFSMOptions);
 
