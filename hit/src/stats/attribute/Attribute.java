@@ -18,6 +18,11 @@ public class Attribute <T extends Comparable<T>> {
 	public final static Attribute<String> AUTOMATA =				new Attribute<String>(	"infered automata",					Units.NO_UNITS,	false, 	true, 	false);
 	public static final Attribute<Integer> MEMORY = 				new Attribute<Integer>(	"used memory", 						Units.BYTE, 	false, 	false, 	false);
 	public final static Attribute<Integer> NODES_NB =				new Attribute<Integer>(	"number of nodes",					Units.NODES,	true,	false,	false);
+	public final static Attribute<Integer> RESET_CALL_NB =			new Attribute<Integer>(	"number of call to reset",			Units.FUNCTION_CALL,false,false,false);
+	public final static Attribute<Integer>HOMING_SEQUENCE_LENGTH =	new Attribute<Integer>(	"length of homing sequence",		Units.SYMBOLS,	false,	true,	false);
+	public final static Attribute<Integer>LEARNER_NUMBER =			new Attribute<Integer>(	"number of sub-learner",			Units.LEARNER,	false,	true,	false);
+	
+	
 	
 	private String name;
 	private Units units;

@@ -57,7 +57,7 @@ public class NoResetGraphGenerator extends GraphGenerator {
 		s4.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.W_SIZE, 2));
 		s4.restrict(new InSetRestriction<Integer>(NoResetStatsEntry.STATE_BOUND_OFFSET, new Integer[]{0,5,10,15}));
 		g4.plotGroup(s4,NoResetStatsEntry.STATE_BOUND_OFFSET, Graph.PlotStyle.MEDIAN);
-		//g4.setForceOrdLogScale(false);
+		g4.setForceOrdLogScale(false);
 		g4.setFileName("influence_of_state_number");
 		g4.export();
 		
@@ -95,6 +95,15 @@ public class NoResetGraphGenerator extends GraphGenerator {
 		//g7.setForceOrdLogScale(true);
 		g7bis.setFileName("duration");
 		g7bis.export();
+		
+		Graph<Integer, Float> g8 = new Graph<Integer,Float>(NoResetStatsEntry.TRACE_LENGTH, NoResetStatsEntry.DURATION);
+		StatsSet s8 = new StatsSet(s);
+		//s8.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.W_SIZE, 3));
+		//s8.restrict(new RangeRestriction<Float>(NoResetStatsEntry.DURATION, new Float(0), new Float(300)));
+		g8.plotGroup(s8,NoResetStatsEntry.W_SIZE, Graph.PlotStyle.SMOOTH);
+		g8.setFileName("similarity_between_duration_and_trace_length");
+		g8.export();
+		
 	}
 
 	private String makeMaxTheoricalFunction(StatsSet s, Attribute<?> a){

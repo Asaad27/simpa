@@ -10,6 +10,7 @@ import automata.mealy.OutputSequence;
 import drivers.mealy.MealyDriver;
 import learner.Learner;
 import learner.mealy.LmTrace;
+import stats.StatsEntry;
 import tools.loggers.LogManager;
 
 public class RivestSchapireLearner extends Learner {
@@ -18,6 +19,7 @@ public class RivestSchapireLearner extends Learner {
 	private Map<OutputSequence,StateDriver> drivers;
 	protected StateDriver finishedLearner;
 	private Automata conjecture = null;
+	private RivestSchapireStatsEntry stats;
 
 	public RivestSchapireLearner(MealyDriver driver) {
 		this.driver = driver;
@@ -40,8 +42,10 @@ public class RivestSchapireLearner extends Learner {
 		homingSequence = driver.getHomingSequence();
 		LogManager.logStep(LogManager.STEPOTHER,"Inferring the system");
 		LogManager.logConsole("Inferring the system (global)");
+		stats = new RivestSchapireStatsEntry(driver, homingSequence);
 		//StateDriver first = home();
 		//first.unpause();
+		long start = System.nanoTime();
 		resetCall();
 		while (finishedLearner == null)
 			Thread.yield();
@@ -49,6 +53,9 @@ public class RivestSchapireLearner extends Learner {
 		LogManager.logStep(LogManager.STEPOTHER,"killing threads");
 		for (StateDriver s : drivers.values())
 			s.killThread();
+		stats.setDuration(((float)(System.nanoTime() - start))/ 1000000000);
+		stats.setTraceLength(driver.numberOfAtomicRequest);
+		stats.setLearnerNumber(drivers.size());
 		createConjecture().exportToDot();
 	}
 	
@@ -70,11 +77,18 @@ public class RivestSchapireLearner extends Learner {
 	}
 
 	public void resetCall() {
-		LogManager.setPrefix("");
+		stats.increaseresetCallNb();
+		Runtime runtime = Runtime.getRuntime();
+	    runtime.gc();
+	    stats.updateMemory((int) (runtime.totalMemory() - runtime.freeMemory()));
+	    LogManager.setPrefix("");
 		StateDriver next = home();
 		LogManager.logInfo("giving hand to " + next.homingSequenceResponse);
 		LogManager.setPrefix(next.getPrefix());
 		next.unpause();
 	}
 
+	public StatsEntry getStats(){
+		return stats;
+	}
 }

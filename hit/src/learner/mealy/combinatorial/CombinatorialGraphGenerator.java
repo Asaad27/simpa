@@ -1,6 +1,5 @@
 package learner.mealy.combinatorial;
 
-import learner.mealy.noReset.NoResetStatsEntry;
 import stats.Graph;
 import stats.GraphGenerator;
 import stats.StatsSet;
@@ -49,6 +48,16 @@ public class CombinatorialGraphGenerator extends GraphGenerator {
 		g4.plot(s4, Graph.PlotStyle.AVERAGE_WITH_EXTREMA);
 		g4.plotFunc(makeMaxTheoricalFunction(s4, CombinatorialStatsEntry.STATE_NUMBER), "n^{nf}");
 		g4.export();
+		
+		Graph<Integer, Float> g5 = new Graph<Integer,Float>(CombinatorialStatsEntry.NODES_NB, CombinatorialStatsEntry.DURATION);
+		StatsSet s5 = new StatsSet(s);
+		//s5.restrict(new EqualsRestriction<Integer>(CombinatorialStatsEntry.STATE_NUMBER, 5));
+		//s5.restrict(new RangeRestriction<Float>(CombinatorialStatsEntry.DURATION, new Float(0), new Float(100)));
+		//s5.restrict(new RangeRestriction<Integer>(CombinatorialStatsEntry.TRACE_LENGTH, 0, 25));
+		//s5.restrict(new InSetRestriction<>(CombinatorialStatsEntry.TRACE_LENGTH, new Integer[]{2, 9, 13, 28, 32}));
+		g5.plotGroup(s5,CombinatorialStatsEntry.STATE_NUMBER, Graph.PlotStyle.POINTS);
+		g5.setFileName("relation_between_nodes_number_and_duration");
+		g5.export();
 	}
 	private String makeMaxTheoricalFunction(StatsSet s, Attribute<?> a){
 		String n = (a == CombinatorialStatsEntry.STATE_NUMBER) ? "x" : s.attributeMax(CombinatorialStatsEntry.STATE_NUMBER).toString();

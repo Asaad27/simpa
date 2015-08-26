@@ -86,7 +86,7 @@ class StateDriver extends MealyDriver {
 	
 //	//this let us to have a global dictionary for used CE.
 //	public InputSequence getRandomCounterExemple(Mealy c){
-//		return realDriver.getRandomCounterExemple(c); // this don not work because returned CE start from initial state of realDriver
+//		return realDriver.getRandomCounterExemple(c); // this do not work because returned CE start from initial state of realDriver
 //	}
 
 

@@ -20,6 +20,7 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		AVERAGE("with linespoints"),
 		AVERAGE_WITH_EXTREMA("with yerrorbars"),
 		MEDIAN("with linespoint"),
+		SMOOTH("with linespoints"),
 		;
 		public String plotLine;
 		private PlotStyle(String plotLine) {
@@ -211,6 +212,32 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 			Collections.sort(keys);
 			for (T_ABS key : keys){
 				tempWriter.write(key + " " + sorted.get(key).attributeMedian(ord) + "\n");
+			}
+		}
+		break;
+		case SMOOTH:{
+			Map<T_ABS, StatsSet> sorted = stats.sortByAtribute(abs);
+			List<T_ABS> keys = new ArrayList<T_ABS>(sorted.keySet());
+			Collections.sort(keys);
+			int n = 0;
+			String min = "";
+			StatsSet tmpSet = new StatsSet();
+			for (T_ABS key : keys){
+				for (StatsEntry s : sorted.get(key).getStats()){
+					if (n==0){
+						min = s.get(abs).toString();
+						tmpSet = new StatsSet();
+					}
+					tmpSet.add(s);
+					n++;
+					if (n == 5){
+						float avg = tmpSet.attributeAVG(ord);
+						String max = s.get(abs).toString();
+						tempWriter.write(min + " " + avg + "\n");
+						tempWriter.write(max + " " + avg + "\n");
+						n = 0;
+					}
+				}
 			}
 		}
 		break;
