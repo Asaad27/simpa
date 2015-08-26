@@ -13,7 +13,7 @@ import drivers.mealy.MealyDriver;
 class StateDriver extends MealyDriver {
 	class ThreadEndException extends RuntimeException{
 		private static final long serialVersionUID = -2529130613268413483L;
-		
+
 	}
 	private MealyDriver realDriver;
 	protected OutputSequence homingSequenceResponse;
@@ -51,12 +51,16 @@ class StateDriver extends MealyDriver {
 			}
 			public void run(){
 				try{
-				LogManager.logInfo("thread started");
-				learner.learn();
-				d.getLearner().finishedLearner = d;
-				LogManager.logInfo(d.homingSequenceResponse + " learner has finish");
+					LogManager.logInfo("thread started");
+					learner.learn();
+					d.getLearner().finishedLearner = d;
+					LogManager.logInfo(d.homingSequenceResponse + " learner has finish");
 				}catch(ThreadEndException e){
 					LogManager.logInfo(d.homingSequenceResponse + " interrupted");
+				}catch(Throwable e){
+					LogManager.logInfo("Exception caught in thread " + homingSequenceResponse);
+					LogManager.logException("in thread "+homingSequenceResponse, new Exception(e));
+					d.learner.threadThrown = e;
 				}
 			}
 		}
@@ -76,18 +80,18 @@ class StateDriver extends MealyDriver {
 	public List<String> getInputSymbols(){
 		return realDriver.getInputSymbols();
 	}
-	
+
 	public InputSequence getShortestCounterExemple(Mealy m){
 		LogManager.logInfo("reset the driver in order to get the initial state");
 		reset();
 		return realDriver.getShortestCounterExemple(null,m,m.getInitialState());
 	}
-	
-	
-//	//this let us to have a global dictionary for used CE.
-//	public InputSequence getRandomCounterExemple(Mealy c){
-//		return realDriver.getRandomCounterExemple(c); // this do not work because returned CE start from initial state of realDriver
-//	}
+
+
+	//	//this let us to have a global dictionary for used CE.
+	//	public InputSequence getRandomCounterExemple(Mealy c){
+	//		return realDriver.getRandomCounterExemple(c); // this do not work because returned CE start from initial state of realDriver
+	//	}
 
 
 	public void reset(){
@@ -98,36 +102,12 @@ class StateDriver extends MealyDriver {
 		}
 		paused = true;
 		learner.resetCall();
-		while (paused && learner.finishedLearner == null){
+		while (paused && learner.finishedLearner == null && learner.threadThrown == null){
 			Thread.yield();
 		}
-		if (learner.finishedLearner != null)
+		if (learner.finishedLearner != null || learner.threadThrown != null)
 			throw new ThreadEndException();
 		return;
-//		StateDriver next = learner.home();
-//		if (next == this){
-//			LogManager.logInfo("    staying in same state (" + homingSequenceResponse + ") keep hand");
-//			return;
-//		}
-//		LogManager.logInfo("    moved in an other state (" + next.homingSequenceResponse + ") give hand");
-//		synchronized(next.thread){
-//			LogManager.logInfo("    " + homingSequenceResponse + " notify " +  next.homingSequenceResponse);
-//			next.thread.notify();
-//			next.thread.interrupt();
-//		}
-//		try {
-//			synchronized(thread){
-//				LogManager.logInfo("    " + homingSequenceResponse + " will now wait");
-//				thread.wait();
-//				LogManager.logInfo("    " + homingSequenceResponse + " is no longer waiting");
-//
-//			}
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			//e.printStackTrace();
-//			//throw new RuntimeException(e);
-//			LogManager.logInfo(homingSequenceResponse+" interrupted while waiting");
-//		}
 	}
 
 	public RivestSchapireLearner getLearner() {
@@ -137,20 +117,16 @@ class StateDriver extends MealyDriver {
 	public Learner getStateLearner() {
 		return stateLearner;
 	}
-	
+
 	protected void unpause(){
 		paused = false;
 	}
-	
+
 	public void killThread(){
-		thread.interrupt();
 		try {
 			thread.join();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-		//thread.stop();
 	}
 
 	public String getPrefix() {

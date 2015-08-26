@@ -18,6 +18,7 @@ public class RivestSchapireLearner extends Learner {
 	private MealyDriver driver;
 	private Map<OutputSequence,StateDriver> drivers;
 	protected StateDriver finishedLearner;
+	protected Throwable threadThrown = null;
 	private Automata conjecture = null;
 	private RivestSchapireStatsEntry stats;
 
@@ -47,8 +48,15 @@ public class RivestSchapireLearner extends Learner {
 		//first.unpause();
 		long start = System.nanoTime();
 		resetCall();
-		while (finishedLearner == null)
+		while (finishedLearner == null){
+			if (threadThrown != null){
+				LogManager.setPrefix("");
+				for (StateDriver s : drivers.values())
+					s.killThread();
+				throw new RuntimeException(threadThrown);
+			}
 			Thread.yield();
+		}
 		LogManager.setPrefix("");
 		LogManager.logStep(LogManager.STEPOTHER,"killing threads");
 		for (StateDriver s : drivers.values())
@@ -57,6 +65,7 @@ public class RivestSchapireLearner extends Learner {
 		stats.setTraceLength(driver.numberOfAtomicRequest);
 		stats.setLearnerNumber(drivers.size());
 		createConjecture().exportToDot();
+		stats.updateWithConjecture(createConjecture());
 	}
 	
 	protected StateDriver home(){
