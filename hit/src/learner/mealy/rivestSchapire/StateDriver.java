@@ -83,10 +83,11 @@ class StateDriver extends MealyDriver {
 		return realDriver.getShortestCounterExemple(null,m,m.getInitialState());
 	}
 	
-	//this let us to have a global dictionary for used CE.
-	public InputSequence getRandomCounterExemple(Mealy c){
-		return realDriver.getRandomCounterExemple(c);
-	}
+	
+//	//this let us to have a global dictionary for used CE.
+//	public InputSequence getRandomCounterExemple(Mealy c){
+//		return realDriver.getRandomCounterExemple(c); // this don not work because returned CE start from initial state of realDriver
+//	}
 
 
 	public void reset(){

@@ -21,6 +21,10 @@ import automata.mealy.OutputSequence;
 import drivers.Driver;
 
 public class MealyDriver extends Driver {
+	class UnableToComputeException extends Exception {
+		private static final long serialVersionUID = -6169240870495799817L;
+		}
+	
 	protected Mealy automata;
 	protected State currentState;
 	protected List<InputSequence> forcedCE;
@@ -42,6 +46,7 @@ public class MealyDriver extends Driver {
 	public MealyDriver(String name) {
 		this.name = name;
 		this.automata = null;
+		triedCE = new HashSet<>();
 	}
 
 	public List<String> getStats() {
@@ -115,19 +120,23 @@ public class MealyDriver extends Driver {
 			return null;
 		}
 
+		boolean shortestCEFailed = false;
 		if (ce == null){
 			LogManager.logInfo("search theorical CE");
 			if (m.isConnex())
-				ce = getShortestCounterExemple(m);
+				try {
+					ce = getShortestCounterExemple(m);
+				} catch (UnableToComputeException e) {
+					shortestCEFailed = true;
+				}
 			if (ce != null){
 				reset();
 				for (String i : ce.sequence)
 					execute(i);
 			}
 		}
-		//TODO we don't know if ce is null because the two automata are identical or because we cannot compute a shortest CE (due to unknown driver for example). todo : add an exception
 
-		if (ce == null){
+		if (shortestCEFailed && ce == null){
 			LogManager.logInfo("search random CE");
 			ce = getRandomCounterExemple(m);
 		}
@@ -234,9 +243,12 @@ public class MealyDriver extends Driver {
 	 * the computed sequence is not applied to the driver
 	 * The two automata ares supposed to be connex.
 	 * @param a2 the second automata
-	 * @return a distinguish sequence for the two automata starting from their initial states.
+	 * @return a distinguish sequence for the two automata starting from their initial states or null if the two automata are equivalents.
+	 * @throws UnableToComputeException if there is not enough data to compute a CE.
 	 */
-	public InputSequence getShortestCounterExemple(Mealy m) {
+	public InputSequence getShortestCounterExemple(Mealy m) throws UnableToComputeException {
+		if (automata == null)
+			throw new UnableToComputeException();
 		return getShortestCounterExemple(automata.getInitialState(), m, m.getInitialState());
 	}
 
