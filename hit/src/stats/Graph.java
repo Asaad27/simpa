@@ -137,7 +137,7 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		if (forceOrdLogScale != null)
 			ordLogScale = forceOrdLogScale;
 		r.append((ordLogScale? "set logscale y" : "unset logscale y") + "\n");
-		r.append("plot "+plotLines+"\n");
+		r.append("plot "+plotLines.substring(0, plotLines.length()-2)+"\n");
 		GNUPlot.makeGraph(r.toString());
 	}
 

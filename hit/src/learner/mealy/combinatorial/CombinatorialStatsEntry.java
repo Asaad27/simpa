@@ -14,6 +14,7 @@ public class CombinatorialStatsEntry extends StatsEntry {
 	public final static Attribute<Integer> STATE_NUMBER = Attribute.STATE_NUMBER;
 	public final static Attribute<Float> DURATION = Attribute.DURATION;
 	public final static Attribute<Integer> NODES_NB = Attribute.NODES_NB;
+	public final static Attribute<String>  AUTOMATA = Attribute.AUTOMATA;
 
 	private static final Attribute<?>[] attributes = new Attribute<?>[]{
 		TRACE_LENGTH,
@@ -22,6 +23,7 @@ public class CombinatorialStatsEntry extends StatsEntry {
 		STATE_NUMBER,
 		DURATION,
 		NODES_NB,
+		AUTOMATA,
 	};
 
 	private	int traceLength;
@@ -30,6 +32,7 @@ public class CombinatorialStatsEntry extends StatsEntry {
 	private int state_number;
 	private float duration;
 	private int nodesNB;
+	private String automata;
 
 	public static String getCSVHeader_s(){
 		return makeCSVHeader(attributes);
@@ -38,6 +41,7 @@ public class CombinatorialStatsEntry extends StatsEntry {
 	protected CombinatorialStatsEntry(MealyDriver d) {
 		this.inputSymbols = d.getInputSymbols().size();
 		this.outputSymbols = d.getOutputSymbols().size();
+		automata = d.getSystemName();
 		nodesNB = 0;
 	}
 
@@ -53,6 +57,7 @@ public class CombinatorialStatsEntry extends StatsEntry {
 		state_number = Integer.parseInt(st.nextToken());
 		duration = Float.parseFloat(st.nextToken());
 		nodesNB = Integer.parseInt(st.nextToken());
+		automata = st.nextToken();
 	}
 
 	public void setDuration(float d){
@@ -86,6 +91,8 @@ public class CombinatorialStatsEntry extends StatsEntry {
 			return (T) new Float(duration);
 		if (a == NODES_NB)
 			return (T) new Integer(nodesNB);
+		if (a == AUTOMATA)
+			return (T) automata;
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 	}
 
