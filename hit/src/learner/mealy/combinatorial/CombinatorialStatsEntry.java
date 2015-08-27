@@ -1,12 +1,11 @@
 package learner.mealy.combinatorial;
 
-import stats.GraphGenerator;
-import stats.StatsEntry;
-import stats.attribute.Attribute;
-
 import java.util.StringTokenizer;
 
 import drivers.mealy.MealyDriver;
+import stats.GraphGenerator;
+import stats.StatsEntry;
+import stats.attribute.Attribute;
 
 public class CombinatorialStatsEntry extends StatsEntry {
 	public final static Attribute<Integer> TRACE_LENGTH = Attribute.TRACE_LENGTH;

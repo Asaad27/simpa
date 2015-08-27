@@ -3,7 +3,6 @@ package automata.mealy;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,16 +11,15 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import automata.Automata;
+import automata.State;
 import main.simpa.Options;
 import tools.GraphViz;
 import tools.loggers.LogManager;
-import automata.Automata;
-import automata.State;
 
 public class Mealy extends Automata implements Serializable {
 	private static final long serialVersionUID = 3590635279837551088L;
@@ -172,6 +170,7 @@ public class Mealy extends Automata implements Serializable {
 					//TODO find a better way to log and save the automata
 					String dir = Options.OUTDIR;
 					Options.OUTDIR = "/tmp/";
+					LogManager.logInfo("unable to compute distinguish sequence for " + s1 + " and " + s2);
 					exportToDot();
 					Options.OUTDIR = dir;
 					throw new RuntimeException("it looks like if we will not find a w to distinguish "+s1 +" and " +s2+".Those state may are equivalents, please look in /tmp");
@@ -233,6 +232,7 @@ public class Mealy extends Automata implements Serializable {
 				states.put(stateName, new State(stateName,true));
 			}
 		}
+		reader.close();
 		
 		for (State s : states.values())
 			result.addState(s);

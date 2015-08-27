@@ -7,6 +7,7 @@ import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import drivers.Driver;
 import learner.Learner;
 import learner.mealy.noReset.NoResetLearner;
 import main.simpa.Options.LogLevel;
@@ -18,7 +19,6 @@ import tools.Utils;
 import tools.loggers.HTMLLogger;
 import tools.loggers.LogManager;
 import tools.loggers.TextLogger;
-import drivers.Driver;
 
 public class SIMPAStatsNew {
 	public final static String name = "SIMPA Test Mealy";

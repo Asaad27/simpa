@@ -3,10 +3,10 @@ package learner.mealy.noReset;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import drivers.mealy.MealyDriver;
-import learner.mealy.LmConjecture;
 import automata.Transition;
 import automata.mealy.InputSequence;
+import drivers.mealy.MealyDriver;
+import learner.mealy.LmConjecture;
 import stats.GraphGenerator;
 import stats.StatsEntry;
 import stats.attribute.Attribute;

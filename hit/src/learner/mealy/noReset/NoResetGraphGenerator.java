@@ -112,7 +112,7 @@ public class NoResetGraphGenerator extends GraphGenerator {
 		String p = (a == NoResetStatsEntry.W_SIZE) ? "x" : s.attributeMax(NoResetStatsEntry.W_SIZE).toString();
 		String w1 = (a == NoResetStatsEntry.W1_LENGTH) ? "x" : s.attributeMax(NoResetStatsEntry.W1_LENGTH).toString();
 		String L = "("+w1+"*(2*"+n+"-1)**"+p+")";
-		String coarseBound = p + "*(" + f + "+" + p + ")*(2**"+ p + ") * (" + n + "**(" + p + "+" + 2 +"))";
+		//String coarseBound = p + "*(" + f + "+" + p + ")*(2**"+ p + ") * (" + n + "**(" + p + "+" + 2 +"))";
 		return "("+n+"*("+f+"+"+p+")*"+p+"+1"+")"+
 				"*"+
 				"("+L+"+"+n+"**2+"+n+"+1)";

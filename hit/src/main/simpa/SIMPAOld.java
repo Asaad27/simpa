@@ -5,6 +5,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import drivers.Driver;
+import drivers.efsm.real.GenericDriver;
+import drivers.efsm.real.ScanDriver;
 import learner.Learner;
 import main.simpa.Options.LogLevel;
 import tools.GraphViz;
@@ -12,9 +15,6 @@ import tools.Utils;
 import tools.loggers.HTMLLogger;
 import tools.loggers.LogManager;
 import tools.loggers.TextLogger;
-import drivers.Driver;
-import drivers.efsm.real.GenericDriver;
-import drivers.efsm.real.ScanDriver;
 
 public class SIMPAOld {
 	public final static String name = SIMPAOld.class.getSimpleName();

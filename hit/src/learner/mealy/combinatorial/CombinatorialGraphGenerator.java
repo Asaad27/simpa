@@ -5,8 +5,6 @@ import stats.GraphGenerator;
 import stats.StatsSet;
 import stats.attribute.Attribute;
 import stats.attribute.restriction.EqualsRestriction;
-import stats.attribute.restriction.InSetRestriction;
-import stats.attribute.restriction.RangeRestriction;
 
 public class CombinatorialGraphGenerator extends GraphGenerator {
 

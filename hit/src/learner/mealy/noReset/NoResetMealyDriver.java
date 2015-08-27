@@ -1,9 +1,9 @@
 package learner.mealy.noReset;
 
-import tools.loggers.LogManager;
-import automata.mealy.Mealy;
 import automata.State;
+import automata.mealy.Mealy;
 import drivers.mealy.MealyDriver;
+import tools.loggers.LogManager;
 
 public class NoResetMealyDriver extends MealyDriver {
 

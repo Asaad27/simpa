@@ -4,6 +4,9 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import drivers.Driver;
+import drivers.efsm.RandomEFSMDriver;
+import examples.efsm.RandomEFSM;
 import learner.efsm.table.LiLearner;
 import tools.GraphViz;
 import tools.Stats;
@@ -11,9 +14,6 @@ import tools.Utils;
 import tools.loggers.HTMLLogger;
 import tools.loggers.LogManager;
 import tools.loggers.TextLogger;
-import drivers.Driver;
-import drivers.efsm.RandomEFSMDriver;
-import examples.efsm.RandomEFSM;
 
 public class SIMPATestEFSM {
 	public final static String name = "KITestEFSM";

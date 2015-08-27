@@ -15,7 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +25,6 @@ import java.util.StringTokenizer;
 
 import automata.efsm.Parameter;
 import automata.efsm.ParameterizedInputSequence;
-
 import main.simpa.Options;
 import tools.loggers.LogManager;
 

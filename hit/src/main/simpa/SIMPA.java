@@ -693,6 +693,7 @@ public class SIMPA {
 			try {
 				learnOneTime();
 			} catch (Exception e) {
+				LogManager.end();
 				System.err.println("Unexpected error");
 				e.printStackTrace(System.err);
 			}

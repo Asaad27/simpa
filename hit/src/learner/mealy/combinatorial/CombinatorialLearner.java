@@ -2,6 +2,14 @@ package learner.mealy.combinatorial;
 
 import java.util.LinkedList;
 
+import automata.Automata;
+import automata.State;
+import automata.mealy.InputSequence;
+import automata.mealy.Mealy;
+import automata.mealy.MealyTransition;
+import automata.mealy.OutputSequence;
+import drivers.mealy.MealyDriver;
+import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
 import learner.mealy.LmTrace;
 import learner.mealy.combinatorial.node.ArrayTreeNodeWithoutConjecture;
@@ -11,14 +19,6 @@ import main.simpa.Options.LogLevel;
 import stats.StatsEntry;
 import tools.Utils;
 import tools.loggers.LogManager;
-import automata.Automata;
-import automata.State;
-import automata.mealy.InputSequence;
-import automata.mealy.Mealy;
-import automata.mealy.MealyTransition;
-import automata.mealy.OutputSequence;
-import drivers.mealy.MealyDriver;
-import drivers.mealy.transparent.TransparentMealyDriver;
 
 
 public class CombinatorialLearner extends Learner {
@@ -268,7 +268,7 @@ public class CombinatorialLearner extends Learner {
 	 * @return the returned output symbol.
 	 * @see #apply(String, boolean)
 	 */
-	private String apply(String i) {
+	protected String apply(String i) {
 		return apply(i, true);
 	}
 	

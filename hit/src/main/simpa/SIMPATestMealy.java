@@ -4,6 +4,9 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import drivers.Driver;
+import drivers.mealy.transparent.RandomMealyDriver;
+import examples.mealy.RandomMealy;
 import learner.Learner;
 import tools.GraphViz;
 import tools.Stats;
@@ -11,9 +14,6 @@ import tools.Utils;
 import tools.loggers.HTMLLogger;
 import tools.loggers.LogManager;
 import tools.loggers.TextLogger;
-import drivers.Driver;
-import drivers.mealy.transparent.RandomMealyDriver;
-import examples.mealy.RandomMealy;
 
 public class SIMPATestMealy {
 	public final static String name = "SIMPA Test Mealy";

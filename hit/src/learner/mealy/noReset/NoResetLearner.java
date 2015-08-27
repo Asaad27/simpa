@@ -1,27 +1,26 @@
 package learner.mealy.noReset;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import automata.State;
+import automata.mealy.InputSequence;
+import automata.mealy.Mealy;
+import automata.mealy.MealyTransition;
+import automata.mealy.OutputSequence;
+import drivers.mealy.MealyDriver;
+import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import learner.mealy.noReset.dataManager.DataManager;
 import learner.mealy.noReset.dataManager.FullyQualifiedState;
-import automata.State;
-import automata.mealy.Mealy;
-import automata.mealy.InputSequence;
-import automata.mealy.MealyTransition;
-import automata.mealy.OutputSequence;
 import main.simpa.Options;
-import drivers.mealy.MealyDriver;
-import drivers.mealy.transparent.TransparentMealyDriver;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.Map;
-import java.util.HashMap;
-
 import tools.Utils;
 import tools.loggers.LogManager;
 

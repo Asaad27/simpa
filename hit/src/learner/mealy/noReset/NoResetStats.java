@@ -15,12 +15,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import automata.Transition;
+import automata.mealy.InputSequence;
 import learner.mealy.LmConjecture;
 import main.simpa.Options;
 import tools.GNUPlot;
 import tools.loggers.LogManager;
-import automata.Transition;
-import automata.mealy.InputSequence;
 
 public class NoResetStats {
 	enum Atribute {

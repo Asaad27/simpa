@@ -3,7 +3,6 @@ package automata.mealy;
 import java.util.ArrayList;
 import java.util.List;
 
-import tools.loggers.LogManager;
 import main.simpa.Options;
 
 public class OutputSequence implements Cloneable {

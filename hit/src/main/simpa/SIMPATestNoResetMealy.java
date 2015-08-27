@@ -9,20 +9,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import drivers.Driver;
+import drivers.mealy.transparent.RandomAndCounterMealyDriver;
 import learner.Learner;
 import learner.mealy.noReset.NoResetLearner;
 import learner.mealy.noReset.NoResetStats;
 import main.simpa.Options.LogLevel;
 import tools.GraphViz;
-import tools.Stats;
 import tools.Utils;
 import tools.loggers.HTMLLogger;
 import tools.loggers.LogManager;
 import tools.loggers.TextLogger;
-import drivers.Driver;
-import drivers.mealy.transparent.RandomAndCounterMealyDriver;
-import drivers.mealy.transparent.RandomMealyDriver;
-import examples.mealy.RandomMealy;
 
 public class SIMPATestNoResetMealy {
 	public final static String name = "SIMPA Test Mealy";

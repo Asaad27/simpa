@@ -4,15 +4,13 @@ import java.util.StringTokenizer;
 
 import automata.Transition;
 import automata.mealy.InputSequence;
+import automata.mealy.Mealy;
 import drivers.mealy.MealyDriver;
-import learner.mealy.LmConjecture;
-import learner.mealy.noReset.NoResetStatsEntry;
 import stats.Graph;
 import stats.GraphGenerator;
 import stats.StatsEntry;
 import stats.StatsSet;
 import stats.attribute.Attribute;
-import stats.attribute.restriction.EqualsRestriction;
 
 public class RivestSchapireStatsEntry extends StatsEntry {
 	public static final Attribute<Integer>RESET_CALL_NB = Attribute.RESET_CALL_NB;
@@ -109,7 +107,7 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 		this.learnerNb = LearnerNumber;
 	}
 
-	public void updateWithConjecture(LmConjecture conjecture) {
+	public void updateWithConjecture(Mealy conjecture) {
 		statesNumber = conjecture.getStateCount();
 		int loopTransitions=0;
 		for (Transition t : conjecture.getTransitions()){

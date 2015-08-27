@@ -1,6 +1,7 @@
 package learner.mealy.combinatorial;
 
 import java.util.HashMap;
+
 import automata.Transition;
 import automata.mealy.MealyTransition;
 import drivers.Driver;
