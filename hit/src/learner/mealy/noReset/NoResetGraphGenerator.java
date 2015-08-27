@@ -1,6 +1,8 @@
 package learner.mealy.noReset;
 
+import drivers.mealy.transparent.RandomAndCounterMealyDriver;
 import stats.Graph;
+import stats.Graph.PlotStyle;
 import stats.GraphGenerator;
 import stats.StatsSet;
 import stats.attribute.Attribute;
@@ -16,8 +18,12 @@ public class NoResetGraphGenerator extends GraphGenerator {
 	@Override
 	public void generate(StatsSet s) {
 		
+		StatsSet RandomCounter = new StatsSet(s);
+		RandomCounter.restrict(new EqualsRestriction<String>(NoResetStatsEntry.AUTOMATA, new RandomAndCounterMealyDriver().getSystemName()));
+		
 		Graph<Integer, Integer> g1 = new Graph<Integer, Integer>(NoResetStatsEntry.OUTPUT_SYMBOLS, NoResetStatsEntry.TRACE_LENGTH);
-		StatsSet s1 = new StatsSet(s);
+		StatsSet s1 = new StatsSet(RandomCounter);
+		
 		s1.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.STATE_BOUND_OFFSET, 0));
 		s1.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.STATE_NUMBER, 12));
 		s1.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.INPUT_SYMBOLS, 5));
@@ -27,7 +33,7 @@ public class NoResetGraphGenerator extends GraphGenerator {
 		g1.export();
 		
 		Graph<Integer, Integer> g2 = new Graph<Integer,Integer>(NoResetStatsEntry.INPUT_SYMBOLS, NoResetStatsEntry.TRACE_LENGTH);
-		StatsSet s2 = new StatsSet(s);
+		StatsSet s2 = new StatsSet(RandomCounter);
 		s2 .restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.OUTPUT_SYMBOLS, 5));
 		s2.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.STATE_NUMBER, 12));
 		s2.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.STATE_BOUND_OFFSET, 0));
@@ -38,7 +44,7 @@ public class NoResetGraphGenerator extends GraphGenerator {
 		g2.export();
 		
 		Graph<Integer, Integer> g3 = new Graph<Integer,Integer>(NoResetStatsEntry.W_SIZE, NoResetStatsEntry.TRACE_LENGTH);
-		StatsSet s3 = new StatsSet(s);
+		StatsSet s3 = new StatsSet(RandomCounter);
 		s3 .restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.OUTPUT_SYMBOLS, 5));
 		s3 .restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.INPUT_SYMBOLS, 5));
 		s3.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.STATE_NUMBER, 12));
@@ -51,7 +57,7 @@ public class NoResetGraphGenerator extends GraphGenerator {
 		}
 		
 		Graph<Integer, Integer> g4 = new Graph<Integer,Integer>(NoResetStatsEntry.STATE_NUMBER, NoResetStatsEntry.TRACE_LENGTH);
-		StatsSet s4 = new StatsSet(s);
+		StatsSet s4 = new StatsSet(RandomCounter);
 		s4.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.OUTPUT_SYMBOLS, 5));
 		s4.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.INPUT_SYMBOLS, 5));
 		s4.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.W_SIZE, 2));
@@ -62,7 +68,7 @@ public class NoResetGraphGenerator extends GraphGenerator {
 		g4.export();
 		
 		Graph<Integer, Integer> g5 = new Graph<Integer,Integer>(NoResetStatsEntry.STATE_BOUND_OFFSET, NoResetStatsEntry.LOCALIZER_CALL_NB);
-		StatsSet s5 = new StatsSet(s);
+		StatsSet s5 = new StatsSet(RandomCounter);
 		s5.restrict(new RangeRestriction<Integer>(NoResetStatsEntry.STATE_BOUND_OFFSET, 0, 30));
 		s5.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.OUTPUT_SYMBOLS, 5));
 		s5.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.INPUT_SYMBOLS, 5));
@@ -71,7 +77,7 @@ public class NoResetGraphGenerator extends GraphGenerator {
 		g5.export();
 		
 		Graph<Integer, Integer> g6 = new Graph<Integer,Integer>(NoResetStatsEntry.STATE_NUMBER_BOUND, NoResetStatsEntry.TRACE_LENGTH);
-		StatsSet s6 = new StatsSet(s);
+		StatsSet s6 = new StatsSet(RandomCounter);
 		s6.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.OUTPUT_SYMBOLS, 5));
 		s6.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.INPUT_SYMBOLS, 5));
 		s6.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.W_SIZE, 2));
@@ -80,7 +86,7 @@ public class NoResetGraphGenerator extends GraphGenerator {
 		g6.export();
 		
 		Graph<Integer, Integer> g7 = new Graph<Integer,Integer>(NoResetStatsEntry.INPUT_SYMBOLS, NoResetStatsEntry.MEMORY);
-		StatsSet s7 = new StatsSet(s);
+		StatsSet s7 = new StatsSet(RandomCounter);
 		s7.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.OUTPUT_SYMBOLS, 5));
 		//s7.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.INPUT_SYMBOLS, 5));
 		s7.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.W_SIZE, 2));
@@ -97,13 +103,21 @@ public class NoResetGraphGenerator extends GraphGenerator {
 		g7bis.export();
 		
 		Graph<Integer, Float> g8 = new Graph<Integer,Float>(NoResetStatsEntry.TRACE_LENGTH, NoResetStatsEntry.DURATION);
-		StatsSet s8 = new StatsSet(s);
+		StatsSet s8 = new StatsSet(RandomCounter);
 		//s8.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.W_SIZE, 3));
 		//s8.restrict(new RangeRestriction<Float>(NoResetStatsEntry.DURATION, new Float(0), new Float(300)));
 		g8.plotGroup(s8,NoResetStatsEntry.W_SIZE, Graph.PlotStyle.SMOOTH);
 		g8.setFileName("similarity_between_duration_and_trace_length");
 		g8.export();
 		
+		Graph<Integer, Integer> g_locker = new Graph<>(NoResetStatsEntry.INPUT_SYMBOLS, NoResetStatsEntry.TRACE_LENGTH);
+		StatsSet s_locker = new StatsSet(s);
+		s_locker.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.W_SIZE, 2));
+		s_locker.restrict(new RangeRestriction<Integer>(NoResetStatsEntry.STATE_NUMBER, 0, 5));
+		s_locker.restrict(new RangeRestriction<Integer>(NoResetStatsEntry.STATE_BOUND_OFFSET, 0, 30));
+		g_locker.plotGroup(s_locker, NoResetStatsEntry.AUTOMATA, PlotStyle.POINTS);
+		g_locker.setFileName("lockers");
+		g_locker.export();
 	}
 
 	private String makeMaxTheoricalFunction(StatsSet s, Attribute<?> a){

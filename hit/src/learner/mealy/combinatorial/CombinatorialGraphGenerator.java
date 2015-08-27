@@ -14,8 +14,11 @@ public class CombinatorialGraphGenerator extends GraphGenerator {
 	@Override
 	public void generate(StatsSet s) {
 
+		StatsSet RandomCounter = new StatsSet(s);
+		//RandomCounter.restrict(new EqualsRestriction<String>(CombinatorialStatsEntry.AUTOMATA, new RandomAndCounterMealyDriver().getSystemName()));
+		
 		Graph<Integer, Integer> g1 = new Graph<Integer, Integer>(CombinatorialStatsEntry.INPUT_SYMBOLS, CombinatorialStatsEntry.TRACE_LENGTH);
-		StatsSet s1 = new StatsSet(s);
+		StatsSet s1 = new StatsSet(RandomCounter);
 		//s1.restrict(new EqualsRestriction<Integer>(CombinatorialEntry.STATE_NUMBER, 12));
 		s1.restrict(new EqualsRestriction<Integer>(CombinatorialStatsEntry.OUTPUT_SYMBOLS, 5));
 		g1.plot(s1, Graph.PlotStyle.POINTS);
@@ -24,7 +27,7 @@ public class CombinatorialGraphGenerator extends GraphGenerator {
 		g1.export();
 
 		Graph<Integer, Float> g2 = new Graph<Integer, Float>(CombinatorialStatsEntry.INPUT_SYMBOLS, CombinatorialStatsEntry.DURATION);
-		StatsSet s2 = new StatsSet(s);
+		StatsSet s2 = new StatsSet(RandomCounter);
 		//s1.restrict(new EqualsRestriction<Integer>(CombinatorialEntry.STATE_NUMBER, 12));
 		s2.restrict(new EqualsRestriction<Integer>(CombinatorialStatsEntry.OUTPUT_SYMBOLS, 5));
 		g2.plot(s2, Graph.PlotStyle.POINTS);
@@ -32,7 +35,7 @@ public class CombinatorialGraphGenerator extends GraphGenerator {
 		g2.export();
 		
 		Graph<Integer, Integer> g3 = new Graph<Integer, Integer>(CombinatorialStatsEntry.INPUT_SYMBOLS, CombinatorialStatsEntry.NODES_NB);
-		StatsSet s3 = new StatsSet(s);
+		StatsSet s3 = new StatsSet(RandomCounter);
 		s3.restrict(new EqualsRestriction<Integer>(CombinatorialStatsEntry.OUTPUT_SYMBOLS, 4));
 		s3.restrict(new EqualsRestriction<Integer>(CombinatorialStatsEntry.STATE_NUMBER, 3));
 		g3.plot(s3, Graph.PlotStyle.AVERAGE_WITH_EXTREMA);
@@ -40,7 +43,7 @@ public class CombinatorialGraphGenerator extends GraphGenerator {
 		g3.export();
 		
 		Graph<Integer, Integer> g4 = new Graph<Integer, Integer>(CombinatorialStatsEntry.STATE_NUMBER, CombinatorialStatsEntry.NODES_NB);
-		StatsSet s4 = new StatsSet(s);
+		StatsSet s4 = new StatsSet(RandomCounter);
 		s4.restrict(new EqualsRestriction<Integer>(CombinatorialStatsEntry.OUTPUT_SYMBOLS, 4));
 		s4.restrict(new EqualsRestriction<Integer>(CombinatorialStatsEntry.INPUT_SYMBOLS, 2));
 		g4.plot(s4, Graph.PlotStyle.AVERAGE_WITH_EXTREMA);
@@ -48,7 +51,7 @@ public class CombinatorialGraphGenerator extends GraphGenerator {
 		g4.export();
 		
 		Graph<Integer, Float> g5 = new Graph<Integer,Float>(CombinatorialStatsEntry.NODES_NB, CombinatorialStatsEntry.DURATION);
-		StatsSet s5 = new StatsSet(s);
+		StatsSet s5 = new StatsSet(RandomCounter);
 		//s5.restrict(new EqualsRestriction<Integer>(CombinatorialStatsEntry.STATE_NUMBER, 5));
 		//s5.restrict(new RangeRestriction<Float>(CombinatorialStatsEntry.DURATION, new Float(0), new Float(100)));
 		//s5.restrict(new RangeRestriction<Integer>(CombinatorialStatsEntry.TRACE_LENGTH, 0, 25));

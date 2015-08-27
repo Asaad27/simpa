@@ -7,10 +7,12 @@ import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import drivers.mealy.MealyDriver;
 import stats.Graph;
+import stats.Graph.PlotStyle;
 import stats.GraphGenerator;
 import stats.StatsEntry;
 import stats.StatsSet;
 import stats.attribute.Attribute;
+import stats.attribute.restriction.RangeRestriction;
 
 public class RivestSchapireStatsEntry extends StatsEntry {
 	public static final Attribute<Integer>RESET_CALL_NB = Attribute.RESET_CALL_NB;
@@ -168,6 +170,7 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 
 			@Override
 			public void generate(StatsSet s) {
+				
 				Graph<Integer, Integer> g1 = new Graph<Integer,Integer>(INPUT_SYMBOLS, TRACE_LENGTH);
 				StatsSet s1 = new StatsSet(s);
 				//s1 .restrict(new EqualsRestriction<Integer>(OUTPUT_SYMBOLS, 5));
@@ -191,6 +194,13 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 				g8.plot(s8, Graph.PlotStyle.POINTS);
 				g8.setFileName("similarity_between_duration_and_trace_length");
 				g8.export();
+				
+				Graph<Integer, Integer> g_locker = new Graph<>(INPUT_SYMBOLS, TRACE_LENGTH);
+				StatsSet s_locker = new StatsSet(s);
+				s_locker.restrict(new RangeRestriction<Integer>(STATE_NUMBER, 0, 5));
+				g_locker.plotGroup(s_locker, AUTOMATA, PlotStyle.POINTS);
+				g_locker.setFileName("lockers");
+				g_locker.export();
 			}};
 	}
 
