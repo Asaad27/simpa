@@ -492,13 +492,12 @@ public class CutterCombinatorialLearner extends Learner {
 								"[style=dotted,color=red,label=\"("+ new LmTrace(t.getInput(0), cutOutput) +")\"]\n");
 					}else if (!haveUncuttedChild){
 						String cutId = "cut_"+n.id;
-						String cutOutput = n.getConjecture().getTransitionFromWithInput(n.getState(), t.getInput(0)).getOutput();
 						writer.write("\t"+cutId+" [label=\"\",shape=none]\n");
 						writer.write("\t" + n.id + " -> " + cutId +
-								"[style=dashed,color=blue,label=\""+ new LmTrace(t.getInput(0), cutOutput) +"\"]\n");
+								"[style=dashed,color=blue,label=\""+ t +"\"]\n");
 					}else if (n.haveForcedChild()){
 						TreeNode n1 = n.getOnlyChild();
-						writer.write("\t"+n.id+" -> "+ n1.id + "[style=bold,color=red,label=\""+label+"\"]\n");
+						writer.write("\t"+n.id+" -> "+ n1.id + "[style=bold,color=green,label=\""+label+"\"]\n");
 						nextLevel.add(n1);
 					}else {
 						for (State s : n.getStates()){
