@@ -59,7 +59,7 @@ public class NoResetLearner extends Learner {
 		stats = new NoResetStatsEntry(W, driver, n);
 
 		this.W = new ArrayList<InputSequence>(W);
-		StringBuilder logW = new StringBuilder("Used characterization set : [");
+		StringBuilder logW = new StringBuilder("Using characterization set : [");
 		for (InputSequence w : this.W){
 			logW.append(w + ", ");
 		}
@@ -84,7 +84,7 @@ public class NoResetLearner extends Learner {
 			LmTrace sigma;
 			if (dataManager.getC(dataManager.traceSize()) != null){
 				FullyQualifiedState q = dataManager.getC(dataManager.traceSize());
-				LogManager.logInfo("We already know the curent state (q = " + q + ")");	
+				LogManager.logInfo("We already know the current state (q = " + q + ")");	
 				InputSequence alpha = dataManager.getShortestAlpha(q);
 				dataManager.apply(alpha);
 				assert dataManager.updateCKVT();
@@ -101,13 +101,13 @@ public class NoResetLearner extends Learner {
 				String o = dataManager.apply(x);
 				sigma = new LmTrace(x,o);
 				LogManager.logInfo("So sigma = " + sigma);	
-				assert dataManager.getC(dataManager.traceSize()) == null : "we are trying to quallify this state, that should not be already done.";
+				assert dataManager.getC(dataManager.traceSize()) == null : "we are trying to qualify this state, that should not be already done.";
 			}else{
-				LogManager.logInfo("We don't know the curent state");	
+				LogManager.logInfo("We don't know the current state");	
 				qualifiedStatePos = dataManager.traceSize()-1;
 				while (dataManager.getC(qualifiedStatePos) == null)
 					qualifiedStatePos --;
-				LogManager.logInfo("last quallified state is " + dataManager.getC(qualifiedStatePos));
+				LogManager.logInfo("last qualified state is " + dataManager.getC(qualifiedStatePos));
 				sigma = dataManager.getSubtrace(qualifiedStatePos,dataManager.traceSize());
 				LogManager.logInfo("We got sigma = "+ sigma);
 			}
@@ -119,7 +119,7 @@ public class NoResetLearner extends Learner {
 			int newStatePos = dataManager.traceSize();
 			dataManager.apply(w);
 			if (Options.LOG_LEVEL != Options.LogLevel.LOW)
-				LogManager.logInfo("We found that " + q + " followed by " + sigma + "give " +dataManager.getSubtrace(newStatePos, dataManager.traceSize()));
+				LogManager.logInfo("We found that " + q + " followed by " + sigma + "gives " +dataManager.getSubtrace(newStatePos, dataManager.traceSize()));
 			dataManager.addPartiallyKnownTrace(q, sigma, dataManager.getSubtrace(newStatePos, dataManager.traceSize()));
 			if (Options.TEST)
 				dataManager.updateCKVT();
@@ -151,8 +151,8 @@ public class NoResetLearner extends Learner {
 			}	
 		}else{
 			if (checkRandomWalk()){
-				LogManager.logConsole("The computed conjecture seems to be coherent with the driver");
-				LogManager.logInfo("The computed conjecture seems to be coherent with the driver");
+				LogManager.logConsole("The computed conjecture seems to be consistent with the driver");
+				LogManager.logInfo("The computed conjecture seems to be consistent with the driver");
 			}else{
 				LogManager.logConsole("The computed conjecture is not correct");
 				LogManager.logInfo("The computed conjecture is not correct");
@@ -274,7 +274,6 @@ public class NoResetLearner extends Learner {
 	 */
 	public boolean checkExact(Mealy automata, State currentState){
 		LogManager.logStep(LogManager.STEPOTHER, "checking the computed conjecture is exactly equivalent");
-		automata.exportToDot();
 		class FoundState {
 			public State computedState; //a state in the conjecture
 			public List<String> uncheckedTransitions;
@@ -289,13 +288,13 @@ public class NoResetLearner extends Learner {
 		//assigned is a table to associate a FoundState to each state in the given automata
 		Map<State,FoundState> assigned = new HashMap<State,FoundState>();
 		assigned.put(currentState, currentFoundState);
-		State unckeckedState = currentState; //a state with an unchecked transition
+		State uncheckedState = currentState; //a state with an unchecked transition
 		List<String> path = new ArrayList<String>();//the path from the current state to uncheckeState
 
 		//now we iterate over all unchecked transitions
-		while (unckeckedState != null) {		
-			FoundState uncheckedFoundState = assigned.get(unckeckedState);
-			LogManager.logInfo("Applying " + path + "in order to go in state " + unckeckedState + " and then try " + uncheckedFoundState.uncheckedTransitions.get(0));
+		while (uncheckedState != null) {		
+			FoundState uncheckedFoundState = assigned.get(uncheckedState);
+			LogManager.logInfo("Applying " + path + "in order to go in state " + uncheckedState + " and then try " + uncheckedFoundState.uncheckedTransitions.get(0));
 			path.add(uncheckedFoundState.uncheckedTransitions.get(0));
 
 			//we follow path in driver (the conjecture) and the given automata
@@ -330,12 +329,12 @@ public class NoResetLearner extends Learner {
 			Map<State, Boolean> crossed = new HashMap<State, Boolean>();//this map is used to store the node crossed during the path searching (avoid going to the same state by two different path)
 			for (State s : automata.getStates())
 				crossed.put(s,false);
-			unckeckedState = null;
+			uncheckedState = null;
 			path = null;
 			while (!nodes.isEmpty()){
 				node = nodes.pollFirst();
 				if (!assigned.get(node.state).uncheckedTransitions.isEmpty()){
-					unckeckedState = node.state;
+					uncheckedState = node.state;
 					path = node.path;
 					break;
 				}
@@ -431,7 +430,7 @@ public class NoResetLearner extends Learner {
 					Options.OUTDIR = "/tmp/";
 					automata.exportToDot();
 					Options.OUTDIR = dir;
-					throw new RuntimeException("it looks like if we will not find a w to distinguish "+s1 +" and " +s2+".Those state may are equivalents, please look in /tmp");
+					throw new RuntimeException("it appears that we will not find a w to distinguish "+s1 +" and " +s2+".Those state may be equivalent, please look in /tmp");
 				}
 				for (String i : inputSymbols){
 					InputSequence newTestw = new InputSequence();
@@ -453,6 +452,7 @@ public class NoResetLearner extends Learner {
 		}
 	}
 
+	// Initial attempt to compute a better W set, but currently disused because inefficient 
 	private static List<InputSequence> computeCharacterizationSetNaiv(TransparentMealyDriver driver){
 		LogManager.logStep(LogManager.STEPOTHER, "computing characterization set");
 		Mealy automata = driver.getAutomata();
