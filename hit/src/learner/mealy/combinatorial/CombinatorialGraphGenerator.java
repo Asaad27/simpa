@@ -65,7 +65,7 @@ public class CombinatorialGraphGenerator extends GraphGenerator {
 		
 		Graph<Integer, Integer> g_locker = new Graph<>(CombinatorialStatsEntry.INPUT_SYMBOLS, CombinatorialStatsEntry.TRACE_LENGTH);
 		StatsSet s_locker = new StatsSet(s);
-		s_locker.restrict(new RangeRestriction<Integer>(CombinatorialStatsEntry.STATE_NUMBER, 0, 5));
+		s_locker.restrict(new RangeRestriction<Integer>(CombinatorialStatsEntry.STATE_NUMBER, 3, 4));
 		g_locker.plotGroup(s_locker, CombinatorialStatsEntry.AUTOMATA, PlotStyle.POINTS);
 		g_locker.setFileName("lockers");
 		g_locker.export();

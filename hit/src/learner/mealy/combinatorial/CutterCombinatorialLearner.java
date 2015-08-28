@@ -103,12 +103,14 @@ public class CutterCombinatorialLearner extends Learner {
 				finished = true;
 			if (currentLevel.size() == 1){
 				result = currentLevel.get(0);
-				InputSequence i = getShortestUnknowntransition(result.getState(), result.getConjecture());
-				if (i == null){
-					Conjecture c = result.getConjecture();
-					if (c.isConnex() &&
-							!applyCounterExample(c, result.getState()))
-						return result;
+				if (result.getDepth() == trace.size()){
+					InputSequence i = getShortestUnknowntransition(result.getState(), result.getConjecture());
+					if (i == null){
+						Conjecture c = result.getConjecture();
+						if (c.isConnex() &&
+								!applyCounterExample(c, result.getState()))
+							return result;
+					}
 				}
 			}
 			if (currentLevel.size() > 0 && 
@@ -162,7 +164,7 @@ public class CutterCombinatorialLearner extends Learner {
 			}
 		}
 
-		LogManager.logInfo("computing "+ trace.subtrace(currentDepth, currentDepth)+" for each node");
+		LogManager.logInfo("computing "+ trace.subtrace(currentDepth, currentDepth+1)+" for each node");
 		String i = trace.getInput(currentDepth);
 		String o = trace.getOutput(currentDepth);
 		for (TreeNode n : currentLevel){
