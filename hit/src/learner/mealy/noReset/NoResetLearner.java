@@ -50,21 +50,9 @@ public class NoResetLearner extends Learner {
 
 	public void learn(List<InputSequence> W){
 		LogManager.logStep(LogManager.STEPOTHER,"Inferring the system");
-		LogManager.logConsole("Inferring the system with W="+W);
+		LogManager.logConsole("Inferring the system with W="+W+" and n="+Options.STATE_NUMBER_BOUND);
 		
-		n = Options.MAXSTATES;//TODO find how this parameter is obtained
-		if (driver instanceof TransparentMealyDriver){
-			n = ((TransparentMealyDriver) driver).getAutomata().getStateCount();
-		}
-
-		//that's for stats : we may need to have a bound greeter than real state number 
-		if (Utils.randBoolWithPercent(50)){
-			if (Utils.randBoolWithPercent(50))
-				n += Utils.randInt(3)*5;
-			else
-				n = Utils.randIntBetween(n, 30);
-		}
-		
+		n = Options.STATE_NUMBER_BOUND;
 		stats = new NoResetStatsEntry(W, driver, n);
 
 		this.W = new ArrayList<InputSequence>(W);

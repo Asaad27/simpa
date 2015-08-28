@@ -17,6 +17,7 @@ import java.util.Scanner;
 import drivers.Driver;
 import drivers.efsm.real.GenericDriver;
 import drivers.efsm.real.ScanDriver;
+import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
 import main.simpa.Options.LogLevel;
 import stats.GraphGenerator;
@@ -34,6 +35,7 @@ abstract class Option<T> {
 	protected T defaultValue;
 	protected T value;
 	protected boolean needed = true;
+	protected boolean haveBeenParsed = false;
 
 	public Option(String consoleName, String description, T defaultValue){
 		assert consoleName.startsWith("-");
@@ -91,6 +93,10 @@ abstract class Option<T> {
 	public void setNeeded(boolean needed) {
 		this.needed = needed;
 	}
+
+	public boolean haveBeenParsed() {
+		return haveBeenParsed;
+	}
 }
 
 class IntegerOption extends Option<Integer> {
@@ -102,6 +108,7 @@ class IntegerOption extends Option<Integer> {
 	public void parseInternal(String[] args, ArrayList<Boolean> used) {
 		for (int i = 0; i < args.length; i++)
 			if (args[i].equals(consoleName)){
+				haveBeenParsed = true;
 				used.set(i, true);
 				i++;
 				assert !used.get(i) : "argument already parsed";
@@ -125,6 +132,7 @@ class LongOption extends Option<Long> {
 	public void parseInternal(String[] args, ArrayList<Boolean> used) {
 		for (int i = 0; i < args.length; i++)
 			if (args[i].equals(consoleName)){
+				haveBeenParsed = true;
 				used.set(i, true);
 				i++;
 				assert !used.get(i) : "argument already parsed";
@@ -148,6 +156,7 @@ class StringOption extends Option<String> {
 	public void parseInternal(String[] args, ArrayList<Boolean> used) {
 		for (int i = 0; i < args.length; i++)
 			if (args[i].equals(consoleName)){
+				haveBeenParsed = true;
 				used.set(i, true);
 				i++;
 				assert !used.get(i) : "argument already parsed";
@@ -170,6 +179,7 @@ class StringListOption extends Option<ArrayList<String>> {
 	public void parseInternal(String[] args, ArrayList<Boolean> used) {
 		for (int i = 0; i < args.length; i++)
 			if (args[i].equals(consoleName)){
+				haveBeenParsed = true;
 				used.set(i, true);
 				i++;
 				assert !used.get(i) : "argument already parsed";
@@ -198,6 +208,7 @@ class BooleanOption extends Option<Boolean> {
 	public void parseInternal(String[] args, ArrayList<Boolean> used) {
 		for (int i = 0; i < args.length; i++)
 			if (args[i].equals(consoleName)){
+				haveBeenParsed = true;
 				used.set(i, true);
 				value = !defaultValue;
 			}
@@ -218,8 +229,9 @@ class HelpOption extends Option<Object>{
 	public void parseInternal(String[] args, ArrayList<Boolean> used) {
 		for (int i = 0; i < args.length; i++)
 			if (args[i].equals("-h") || args[i].equals("--help")){
+				haveBeenParsed = true;
 				used.set(i, true);
-				System.out.println("you don't know how it's work ?");
+				System.out.println("you don't know how it works ?");
 				SIMPA.usage();
 			}
 		//TODO add a more detailed help for each commands.
@@ -267,6 +279,14 @@ public class SIMPA {
 	private static BooleanOption INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = new BooleanOption("-I=X", "Initial input symbols set to X");
 	private static Option<?>[] ZQOptions = new Option<?>[]{MAX_CE_LENGTH,MAX_CE_RESETS,INITIAL_INPUT_SYMBOLS,INITIAL_INPUT_SEQUENCES,INITIAL_INPUT_SYMBOLS_EQUALS_TO_X};
 
+	//NoReset options
+	private static IntegerOption STATE_NUMBER_BOUND = new IntegerOption("--stateBound", "a bound of states number in the infered automaton\n"+
+			"\tn  → use n as bound of state number\n"+
+			"\t0  → use exact states number (need to know the automaton)\n"+
+			"\t-n → use a random bound between the number of states and the number of states plus n (need to know the automaton)"
+			, 0);
+	private static Option<?>[] noResetOptions = new Option<?>[]{STATE_NUMBER_BOUND};
+	
 	//EFSM options
 	private static BooleanOption GENERIC_DRIVER = new BooleanOption("--generic", "Use generic driver");
 	private static BooleanOption SCAN = new BooleanOption("--scan", "Use scan driver");
@@ -322,6 +342,7 @@ public class SIMPA {
 		SEED.setNeeded(false);
 		URLS.setNeeded(false);
 		LOAD_DOT_FILE.setNeeded(false);
+		STATE_NUMBER_BOUND.setNeeded(false);
 
 		ArrayList<Boolean> used = new ArrayList<>();
 		for (int j = 0; j < args.length; j++)
@@ -340,6 +361,9 @@ public class SIMPA {
 		}
 		if (TREE_INFERENCE.getValue() || LM_INFERENCE.getValue()){
 			parse(args,used,ZQOptions);
+		}
+		if (NORESET_INFERENCE.getValue()){
+			parse(args,used,noResetOptions);
 		}
 
 		parse(args,used,EFSMOptions);
@@ -614,6 +638,24 @@ public class SIMPA {
 		LogManager.logInfo("you can try to do this learning again by running something like '" + makeLaunchLine() + "'" );
 		System.out.println("you can try to do this learning again by running something like '" + makeLaunchLine() + "'" );
 		driver = loadDriver(Options.SYSTEM);
+		if (Options.NORESETINFERENCE){
+			if (STATE_NUMBER_BOUND.getValue() > 0)
+				Options.STATE_NUMBER_BOUND = STATE_NUMBER_BOUND.getValue();
+			else{
+				if (driver instanceof TransparentMealyDriver){
+					int nb_states = ((TransparentMealyDriver) driver).getAutomata().getStateCount();
+					if (STATE_NUMBER_BOUND.getValue() == 0)
+						Options.STATE_NUMBER_BOUND = nb_states;
+					else 
+						Options.STATE_NUMBER_BOUND = Utils.randIntBetween(nb_states, nb_states-STATE_NUMBER_BOUND.getValue());	
+				}else{
+					if (STATE_NUMBER_BOUND.haveBeenParsed())
+						throw new IllegalArgumentException("You must provide a positive integer for state number bound ("+STATE_NUMBER_BOUND.getConsoleName()+") because the number of states in the driver is unspecified");
+					else
+						throw new IllegalArgumentException("You must specify "+STATE_NUMBER_BOUND+" because the number of states in driver is unknown");
+				}
+			}
+		}
 		Learner learner = Learner.getLearnerFor(driver);
 		learner.learn();
 		learner.createConjecture();
@@ -764,6 +806,9 @@ public class SIMPA {
 
 		System.out.println("> Algorithm ZQ");
 		printUsage(ZQOptions);
+		
+		System.out.println("> Algorithm noReset");
+		printUsage(noResetOptions);
 
 		System.out.println("> Algorithm EFSM");
 		printUsage(EFSMOptions);
