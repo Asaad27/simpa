@@ -140,6 +140,8 @@ public class NoResetLearner extends Learner {
 		if (Options.LOG_LEVEL == Options.LogLevel.ALL || Options.TEST)
 			LogManager.logConsole(dataManager.readableTrace());
 		dataManager.getConjecture().exportToDot();
+		// The transition count should be stopped
+		driver.stopLog();
 		if (driver instanceof TransparentMealyDriver){
 			TransparentMealyDriver d = (TransparentMealyDriver) driver;
 			if (checkExact(d.getAutomata(), d.getCurrentState())){
