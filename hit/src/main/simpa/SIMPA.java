@@ -13,7 +13,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
+import java.util.StringTokenizer;
 
+import automata.mealy.InputSequence;
 import drivers.Driver;
 import drivers.efsm.real.GenericDriver;
 import drivers.efsm.real.ScanDriver;
@@ -167,12 +169,16 @@ class StringOption extends Option<String> {
 }
 
 /**
- * append strings to a list
+ * append T to a list
  */
-class StringListOption extends Option<ArrayList<String>> {
-	public StringListOption(String consoleName, String description, List<String> URLS) {
-		super(consoleName, description, (URLS == null) ? null : new ArrayList<String>(URLS));
+abstract class ListOption<T> extends Option<ArrayList<T>> {
+	protected String sampleValue1;
+	protected String sampleValue2;
+	public ListOption(String consoleName, String description, List<T> defaults, String sampleValue1, String sampleValue2) {
+		super(consoleName, description, (defaults == null) ? null : new ArrayList<T>(defaults));
 		value = null;
+		this.sampleValue1 = sampleValue1;
+		this.sampleValue2 = sampleValue2;
 	}
 
 	@Override
@@ -185,9 +191,9 @@ class StringListOption extends Option<ArrayList<String>> {
 				assert !used.get(i) : "argument already parsed";
 				used.set(i, true);
 				if (value == null)
-					value = new ArrayList<String>();
+					value = new ArrayList<T>();
 				for (String s : args[i].split(";"))
-					value.add(s);
+					value.add(valueFromString(s));
 			}
 	}
 
@@ -196,6 +202,43 @@ class StringListOption extends Option<ArrayList<String>> {
 			System.err.println("argument '" + consoleName + "' missing");
 		}
 	}
+	
+	protected abstract T valueFromString(String s);
+
+	public String getDescription(){
+		return super.getDescription() + "\n\tusage : '" +
+				getConsoleName() + " " + sampleValue1 + ";" + sampleValue2 +
+				"' or '" +
+				getConsoleName() + " " + sampleValue1 + " " + getConsoleName() + " " + sampleValue2 +
+				"'";
+	}
+}
+
+class StringListOption extends ListOption<String> {
+	public StringListOption(String consoleName, String description, String sampleValue1, String sampleValue2, List<String> defaults) {
+		super(consoleName, description, defaults, sampleValue1, sampleValue2);
+	}
+
+	@Override
+	protected String valueFromString(String s) {
+		return s;
+	}
+}
+
+class InputSequenceListOption extends ListOption<InputSequence> {
+	public InputSequenceListOption(String consoleName, String description, List<InputSequence> defaults) {
+		super(consoleName, description, defaults, "a,b,c", "b,c,d");
+	}
+
+	@Override
+	protected InputSequence valueFromString(String s) {
+		InputSequence r = new InputSequence();
+		StringTokenizer st = new StringTokenizer(s, ",");
+		while (st.hasMoreTokens())
+			r.addInput(st.nextToken());
+		return r;
+	}
+	
 }
 
 class BooleanOption extends Option<Boolean> {
@@ -285,7 +328,8 @@ public class SIMPA {
 			"\t0  → use exact states number (need to know the automaton)\n"+
 			"\t-n → use a random bound between the number of states and the number of states plus n (need to know the automaton)"
 			, 0);
-	private static Option<?>[] noResetOptions = new Option<?>[]{STATE_NUMBER_BOUND};
+	private static InputSequenceListOption CHARACTERIZATION_SET = new InputSequenceListOption("--characterizationSeq", "use the given charcacterization sequences", null);
+	private static Option<?>[] noResetOptions = new Option<?>[]{STATE_NUMBER_BOUND,CHARACTERIZATION_SET};
 	
 	//EFSM options
 	private static BooleanOption GENERIC_DRIVER = new BooleanOption("--generic", "Use generic driver");
@@ -296,7 +340,7 @@ public class SIMPA {
 	private static IntegerOption SUPPORT_MIN = new IntegerOption("--supportmin", "Minimal support for relation (1-100)", Options.SUPPORT_MIN);
 	private static Option<?>[] EFSMOptions = new Option<?>[]{GENERIC_DRIVER,SCAN,REUSE_OP_IFNEEDED,FORCE_J48,WEKA,SUPPORT_MIN};
 
-	//TestEFSM options //TODO group with Random generrator ?
+	//TestEFSM options //TODO group with Random generator ?
 	private static IntegerOption MIN_PARAMETER = new IntegerOption("--minparameter", "Minimal number of parameter by symbol", Options.MINPARAMETER);
 	private static IntegerOption MAX_PARAMETER = new IntegerOption("--maxparameter", "Maximal number of parameter by symbol", Options.MAXPARAMETER);
 	private static IntegerOption DOMAIN_SIZE = new IntegerOption("--domainsize", "Size of the parameter's domain", Options.DOMAINSIZE);
@@ -325,7 +369,7 @@ public class SIMPA {
 	private static Option<?>[] statsOptions = new Option<?>[]{NB_TEST,MAKE_GRAPH,STATS_MODE};
 
 	//Other options undocumented //TODO sort and explain them.
-	private static StringListOption URLS = new StringListOption("--urls", "??? TODO\n  (format '--urls url1;url2' or '--urls url1 --urls url2')", Options.URLS);
+	private static StringListOption URLS = new StringListOption("--urls", "??? TODO","url1","url2", Options.URLS);
 	private static Option<?>[] otherOptions = new Option<?>[]{URLS};
 
 
@@ -342,7 +386,7 @@ public class SIMPA {
 		SEED.setNeeded(false);
 		URLS.setNeeded(false);
 		LOAD_DOT_FILE.setNeeded(false);
-		STATE_NUMBER_BOUND.setNeeded(false);
+		CHARACTERIZATION_SET.setNeeded(false);
 
 		ArrayList<Boolean> used = new ArrayList<>();
 		for (int j = 0; j < args.length; j++)
@@ -418,6 +462,8 @@ public class SIMPA {
 		Options.INITIAL_INPUT_SEQUENCES = INITIAL_INPUT_SEQUENCES.getValue();
 		Options.INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = INITIAL_INPUT_SYMBOLS_EQUALS_TO_X.getValue();
 
+		Options.CHARACTERIZATION_SET = CHARACTERIZATION_SET.getValue();
+		
 		Options.GENERICDRIVER = GENERIC_DRIVER.getValue();
 		Options.REUSE_OP_IFNEEDED = REUSE_OP_IFNEEDED.getValue();
 		Options.FORCE_J48 = FORCE_J48.getValue();

@@ -3,6 +3,7 @@ package main.simpa;
 import java.io.File;
 import java.util.List;
 
+import automata.mealy.InputSequence;
 import tools.Utils;
 import tools.loggers.LogManager;
 
@@ -56,6 +57,7 @@ public class Options {
 	public static boolean REUSE_OP_IFNEEDED = false;
 	public static boolean FORCE_J48 = false;
 	public static int STATE_NUMBER_BOUND;
+	public static List<InputSequence> CHARACTERIZATION_SET;
 	public static boolean INTERACTIVE = false; //For algorithms which can prompt user for counter example or chosen sequences
 	
 	// Counterexample options
