@@ -233,7 +233,8 @@ public class SIMPA {
 	public final static String name = SIMPA.class.getSimpleName();
 	private static Driver driver;
 	public static final boolean DEFENSIVE_CODE = true;
-	
+	private static String[] launchArgs;
+
 	//General Options
 	private static HelpOption help = new HelpOption();
 	private static LongOption SEED = new LongOption("--seed", "Use NN as seed for random generator", null);
@@ -454,8 +455,6 @@ public class SIMPA {
 		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
 			throw new RuntimeException("Unable to create/write " + f.getName());
 		Options.OUTDIR = Utils.makePath(f.getAbsolutePath());
-		Utils.deleteDir(new File(Options.OUTDIR + Options.DIRGRAPH));
-		Utils.deleteDir(new File(Options.OUTDIR + Options.DIRARFF));
 
 		f = new File(Options.OUTDIR + Options.DIRGRAPH);
 		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
@@ -569,6 +568,42 @@ public class SIMPA {
 		LogManager.end();
 	}
 
+	private static String makeLaunchLine(){
+		StringBuilder r = new StringBuilder();
+		r.append("java ");
+		r.append(SIMPA.class.getName()+" ");
+		for (int i = 0 ; i < launchArgs.length; i++){
+			String arg = launchArgs[i];
+			boolean keepArg = true;
+			for (Option<?> statArg : statsOptions){
+				if (arg.equals(statArg.getConsoleName())){
+					keepArg = false;
+					if (!(statArg instanceof BooleanOption))
+						i++;
+				}
+			}
+			if (arg.equals(SEED.getConsoleName())){
+				i++;
+				keepArg = false;
+			}
+			if (arg.equals(LOG_HTML.getConsoleName()))
+				keepArg = false;
+
+			if (keepArg){
+				if (arg.contains(" "))
+					r.append("\""+arg+"\"");
+				else
+					r.append(arg);
+				r.append(" ");
+			}
+		}
+		r.append(LOG_HTML.getConsoleName()+" ");
+		r.append(LOG_TEXT.getConsoleName()+" ");
+		r.append(SEED.getConsoleName()+" ");
+		r.append(Options.SEED+" ");
+		return r.toString();
+	}
+
 	protected static Learner learnOneTime() throws Exception{
 		if (Options.LOG_TEXT)
 			LogManager.addLogger(new TextLogger());
@@ -576,6 +611,8 @@ public class SIMPA {
 			LogManager.addLogger(new HTMLLogger());
 		LogManager.start();
 		Options.LogOptions();
+		LogManager.logInfo("you can try to do this learning again by running something like '" + makeLaunchLine() + "'" );
+		System.out.println("you can try to do this learning again by running something like '" + makeLaunchLine() + "'" );
 		driver = loadDriver(Options.SYSTEM);
 		Learner learner = Learner.getLearnerFor(driver);
 		learner.learn();
@@ -636,6 +673,8 @@ public class SIMPA {
 				String failDir = baseDir + File.separator + 
 						Options.DIRFAIL;
 				Utils.createDir(new File(failDir));
+				failDir = failDir + File.separator + e.getClass().getSimpleName();
+				Utils.createDir(new File(failDir));
 				failDir = failDir + File.separator + 
 						new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS").format(new Date());
 				try {
@@ -643,13 +682,15 @@ public class SIMPA {
 					File readMe = new File(failDir+File.separator+"ReadMe.txt");
 					Writer readMeWriter = new BufferedWriter(new FileWriter(readMe));
 					readMeWriter.write(name+ " " + new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date()));
-					readMeWriter.write("One learner during stats throw an exception");
+					readMeWriter.write("\nOne learner during stats throw an exception");
 					readMeWriter.write("\n");
 					e.printStackTrace(new PrintWriter(readMeWriter));
 					readMeWriter.write("\n");
 					readMeWriter.write("\n");
 					readMeWriter.write("\nthe driver was "+Options.SYSTEM);
 					readMeWriter.write("\nthe seed was "+Options.SEED);
+					readMeWriter.write("\nyou can try to do this learning again by running something like '" + makeLaunchLine() + "'" );
+
 					readMeWriter.close();
 				} catch (IOException e1) {
 					e1.printStackTrace();
@@ -683,6 +724,7 @@ public class SIMPA {
 	}
 
 	public static void main(String[] args) {
+		launchArgs = args;
 		welcome();
 		parseArguments(args);
 		check();
@@ -691,6 +733,8 @@ public class SIMPA {
 			run_stats();
 		} else {
 			try {
+				Utils.deleteDir(new File(Options.OUTDIR + Options.DIRGRAPH));
+				Utils.deleteDir(new File(Options.OUTDIR + Options.DIRARFF));
 				learnOneTime();
 			} catch (Exception e) {
 				LogManager.end();
