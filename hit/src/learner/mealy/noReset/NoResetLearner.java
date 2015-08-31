@@ -87,12 +87,15 @@ public class NoResetLearner extends Learner {
 				LogManager.logInfo("We already know the curent state (q = " + q + ")");	
 				InputSequence alpha = dataManager.getShortestAlpha(q);
 				dataManager.apply(alpha);
-				if (Options.TEST)
-					dataManager.updateCKVT();//to get the new state, should be automated in 
+				assert dataManager.updateCKVT();
 				assert dataManager.getC(dataManager.traceSize()) != null;
 				qualifiedStatePos = dataManager.traceSize();
 				FullyQualifiedState quallifiedState = dataManager.getC(qualifiedStatePos);
 				Set<String> X = dataManager.getxNotInR(quallifiedState);
+				if (X.isEmpty()){
+					LogManager.logInfo("We discovered the missing transition when we applied alpha");
+					continue;//we already are in a known state (because we applied alpha) so we didn't need to localize
+				}
 				String x=X.iterator().next(); //here we CHOOSE to take the first
 				LogManager.logInfo("We choose x = " + x + " in " + X);		
 				String o = dataManager.apply(x);
@@ -386,6 +389,8 @@ public class NoResetLearner extends Learner {
 			}
 			distinguishedStates.add(s1);
 		}
+		if (automata.getStateCount() == 1)
+			W.add(new InputSequence(driver.getInputSymbols().get(0)));
 		return W;
 	}
 

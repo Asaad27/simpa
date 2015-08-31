@@ -658,6 +658,8 @@ public class SIMPA {
 			}
 			if (arg.equals(LOG_HTML.getConsoleName()))
 				keepArg = false;
+			if (arg.equals(LOG_TEXT.getConsoleName()))
+				keepArg = false;
 
 			if (keepArg){
 				if (arg.contains(" "))
