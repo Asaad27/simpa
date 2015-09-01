@@ -447,7 +447,9 @@ public class Utils {
 		}
 	}
 	
-
+	public static boolean isCSRFtoken(String ndv){
+		return ndv.matches("^[a-zA-Z0-9+/\\.]{16,}(={0,2})?$");
+	}
 	
 	public static ArrayList<ParameterizedInputSequence> generatePermutations(
 										ParameterizedInputSequence querie, 

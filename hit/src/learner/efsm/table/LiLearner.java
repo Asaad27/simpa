@@ -380,7 +380,7 @@ public class LiLearner extends Learner {
 			ParameterizedInput api = queryPI.clone();
 			for (int k = 0; k < api.getParameters().size(); k++) {
 				if (api.isNdv(k)) {
-					System.out.println("Requesting NDV for " + api.getInputSymbol());
+					//System.out.println("Requesting NDV for " + api.getInputSymbol());
 					NDV correspondingNDV = dTable.ndvList.get(api.getNdvIndexForVar(k));
 					/* Looks in the current automata state the last value
 					 of the parameter returned by the output symbol in which the NDV

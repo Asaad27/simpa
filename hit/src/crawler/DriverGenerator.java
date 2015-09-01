@@ -97,7 +97,7 @@ public abstract class DriverGenerator {
 		java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF);
 		java.util.logging.Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.OFF);
 		client = new WebClient();
-		client.setThrowExceptionOnFailingStatusCode(false);
+		client.getOptions().setThrowExceptionOnFailingStatusCode(false);
 		client.getOptions().setTimeout(Options.TIMEOUT);
 		client.getOptions().setCssEnabled(Options.CSS);
 		client.getOptions().setJavaScriptEnabled(Options.JS);

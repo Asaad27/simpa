@@ -14,19 +14,17 @@ import java.util.TreeMap;
 
 public class LiDataTable {
 	
-	/* List of input symbols, ie.vocabulary */
+	/** List of input symbols, ie.vocabulary */
 	public List<String> inputSymbols;
-	/* Default parameter values for input symbols */
+	/** Default parameter values for input symbols */
 	private Map<String, List<ArrayList<Parameter>>> defaultParamValues;
-	/* Firsts lines of Data table (cf Angluin algo) */
+	/** Firsts lines of Data table (cf Angluin algo) */
 	public List<LiDataTableRow> S;
-	/* Final lines of Data table (cf Angluin algo) */
+	/** Final lines of Data table (cf Angluin algo) */
 	public List<LiDataTableRow> R;
-	/* List of parameters declared non deterministic */
+	/** List of parameters declared non deterministic */
 	public List<NDV> ndvList;
 
-	
-	
 	/**
 	 * Constructor for data table from input symbols, default values
 	 */

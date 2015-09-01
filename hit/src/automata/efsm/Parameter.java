@@ -86,7 +86,7 @@ public class Parameter implements Cloneable, Serializable {
 
 	public void setNdv(int ndv) {
 		if(this.ndv == -1 && ndv != -1){
-			System.err.println("Parameter [" + this.value + "] is now considered as a NDV : " + ndv);
+			//System.err.println("Parameter [" + this.value + "] is now considered as a NDV : " + ndv);
 		}
 		this.ndv = ndv;
 	}
