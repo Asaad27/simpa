@@ -56,15 +56,20 @@ public class CutterCombinatorialLearner extends Learner {
 		stats = new CutterCombinatorialStatsEntry(driver);
 		long start = System.nanoTime();
 		driver.reset();
-		trace = new LmTrace();
-		root = new ArrayTreeNodeWithConjecture(driver);
+		int statesNumber = 0;
 		TreeNode result;
-		while ((result = compute(root)) == null){
-			root.addState();
+		do {
+			root = new ArrayTreeNodeWithConjecture(driver);
+			statesNumber++;
+			for (int i = 1; i < statesNumber; i++)
+				root.addState();
 			LogManager.logLine();
 			LogManager.logInfo("added a state. States are now " + root.getStates());
 			LogManager.logConsole("added a state. States are now " + root.getStates());
-		}
+			trace = new LmTrace();
+			result = compute(root);
+			stats.addTraceLength(trace.size());
+		} while (result == null);
 		conjecture = result.getConjecture();
 		float duration = (float)(System.nanoTime() - start)/ 1000000000;
 		LogManager.logStep(LogManager.STEPOTHER,"Found an automata which seems to have no counter example in "+duration+"s");
@@ -72,7 +77,6 @@ public class CutterCombinatorialLearner extends Learner {
 		conjecture.exportToDot();
 		stats.setDuration(duration);
 		stats.updateWithConjecture(conjecture);
-		stats.setTraceLength(trace.size());
 	}
 
 
@@ -136,8 +140,10 @@ public class CutterCombinatorialLearner extends Learner {
 
 		if (trace.size() <= currentDepth){
 			applyCuttingSequence();
-		}else
+		}else{
 			exportTreeToDot();
+			System.out.println("computing "+currentLevel.size()+" nodes");
+		}
 
 		if (trace.size() <= currentDepth){
 			TreeNode n = currentLevel.get(0);

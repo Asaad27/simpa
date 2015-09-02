@@ -26,7 +26,7 @@ public class CombinatorialStatsEntry extends StatsEntry {
 		AUTOMATA,
 	};
 
-	private	int traceLength;
+	protected int traceLength;
 	private int inputSymbols;
 	private int outputSymbols;
 	private int state_number;
