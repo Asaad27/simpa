@@ -23,8 +23,14 @@ import drivers.Driver;
 public class MealyDriver extends Driver {
 	class UnableToComputeException extends Exception {
 		private static final long serialVersionUID = -6169240870495799817L;
+		public UnableToComputeException() {
+			super();
 		}
-	
+		public UnableToComputeException(String message) {
+			super(message);
+		}
+	}
+
 	protected Mealy automata;
 	protected State currentState;
 	protected List<InputSequence> forcedCE;
@@ -123,12 +129,16 @@ public class MealyDriver extends Driver {
 		boolean shortestCEFailed = false;
 		if (ce == null){
 			LogManager.logInfo("search theorical CE");
-			if (m.isConnex())
-				try {
+			try {
+				if (m.isConnex())
 					ce = getShortestCounterExemple(m);
-				} catch (UnableToComputeException e) {
-					shortestCEFailed = true;
-				}
+				else
+					throw new UnableToComputeException("automata is not connex");
+			} catch (UnableToComputeException e) {
+				LogManager.logInfo("unable to compute theorical CE "+(e.getMessage()));
+				shortestCEFailed = true;
+			}
+
 			if (ce != null){
 				reset();
 				for (String i : ce.sequence)
