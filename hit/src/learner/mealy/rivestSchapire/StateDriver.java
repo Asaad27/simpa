@@ -2,13 +2,13 @@ package learner.mealy.rivestSchapire;
 
 import java.util.List;
 
-import tools.loggers.LogManager;
-import learner.Learner;
-import learner.mealy.table.LmLearner;
 import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.OutputSequence;
 import drivers.mealy.MealyDriver;
+import learner.Learner;
+import learner.mealy.table.LmLearner;
+import tools.loggers.LogManager;
 
 class StateDriver extends MealyDriver {
 	class ThreadEndException extends RuntimeException{
@@ -50,6 +50,7 @@ class StateDriver extends MealyDriver {
 				d = s;
 			}
 			public void run(){
+				d.learner.lock.lock();
 				try{
 					LogManager.logInfo("thread started");
 					learner.learn();
@@ -61,6 +62,8 @@ class StateDriver extends MealyDriver {
 					LogManager.logInfo("Exception caught in thread " + homingSequenceResponse);
 					LogManager.logException("in thread "+homingSequenceResponse, new Exception(e));
 					d.learner.threadThrown = e;
+				}finally {
+					d.learner.lock.unlock();
 				}
 			}
 		}
@@ -93,7 +96,6 @@ class StateDriver extends MealyDriver {
 	//		return realDriver.getRandomCounterExemple(c); // this do not work because returned CE start from initial state of realDriver
 	//	}
 
-
 	public void reset(){
 		LogManager.logInfo("reset call for state " + homingSequenceResponse);
 		if (resetDone){
@@ -102,9 +104,17 @@ class StateDriver extends MealyDriver {
 		}
 		paused = true;
 		learner.resetCall();
+		learner.lock.unlock();//We let the next thread or main thread take the hand.
 		while (paused && learner.finishedLearner == null && learner.threadThrown == null){
-			Thread.yield();
+			synchronized (this) {
+				try {
+					wait();
+				} catch (InterruptedException e) {
+					throw new RuntimeException("the thread is not supposed to be interrupted");
+				}
+			}
 		}
+		learner.lock.lock();//we take the hand so main thread will stop notifying
 		if (learner.finishedLearner != null || learner.threadThrown != null)
 			throw new ThreadEndException();
 		return;
@@ -120,10 +130,20 @@ class StateDriver extends MealyDriver {
 
 	protected void unpause(){
 		paused = false;
+		synchronized ((this)) {
+			notify();
+		}
 	}
 
+	/**
+	 * this method supposed that the inference is finished, i.e. learner.finishedLearner != null || learner.threadThrown != null
+	 * otherwise the thread may wait again and join will not work
+	 */
 	public void killThread(){
 		try {
+			synchronized (this) {
+				notify();
+			}
 			thread.join();
 		} catch (InterruptedException e) {
 		}

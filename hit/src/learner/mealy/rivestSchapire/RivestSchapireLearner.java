@@ -2,6 +2,8 @@ package learner.mealy.rivestSchapire;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import automata.Automata;
 import automata.mealy.InputSequence;
@@ -21,6 +23,7 @@ public class RivestSchapireLearner extends Learner {
 	protected Throwable threadThrown = null;
 	private Automata conjecture = null;
 	private RivestSchapireStatsEntry stats;
+	protected Lock lock = new ReentrantLock();//When a learner is computing, it take the lock. When the lock is free, the main thread try to notify a stateDriver
 
 	public RivestSchapireLearner(MealyDriver driver) {
 		this.driver = driver;
@@ -55,6 +58,13 @@ public class RivestSchapireLearner extends Learner {
 					s.killThread();
 				throw new RuntimeException(threadThrown);
 			}
+			lock.lock();//if we can lock that mean that no thread is computing. So we try to notify the one which is waiting.
+			for (StateDriver s : drivers.values())
+				if (!s.paused)
+					synchronized (s) {
+						s.notify();
+					}
+			lock.unlock();
 			Thread.yield();
 		}
 		LogManager.setPrefix("");
