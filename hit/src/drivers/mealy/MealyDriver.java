@@ -21,7 +21,7 @@ import automata.mealy.OutputSequence;
 import drivers.Driver;
 
 public class MealyDriver extends Driver {
-	class UnableToComputeException extends Exception {
+	public class UnableToComputeException extends Exception {
 		private static final long serialVersionUID = -6169240870495799817L;
 		public UnableToComputeException() {
 			super();
@@ -296,12 +296,13 @@ public class MealyDriver extends Driver {
 	/**
 	 * compute an input sequence s.t. the output sequence entirely define the final state
 	 * @return null if a such sequence cannot be computed
+	 * @throws UnableToComputeException 
 	 */
-	public InputSequence getHomingSequence(){
+	public InputSequence getHomingSequence() throws UnableToComputeException{
 		LogManager.logInfo("Computing homing sequence");
 		if (automata == null){
 			LogManager.logInfo("Unable to compute homing sequence");
-			return null;
+			throw new UnableToComputeException();
 		}
 		InputSequence r = new InputSequence();
 		boolean found = false;
@@ -317,12 +318,45 @@ public class MealyDriver extends Driver {
 					State os2 = automata.applyGetState(r, s2);
 					if (o1.equals(o2) && os1 != os2){
 						found = false;
-						List<InputSequence> W = new ArrayList<InputSequence>();
-						automata.addDistinctionSequence(getInputSymbols(), os1, os2, W);
-						r.addInputSequence(W.get(0));
-						if (Options.LOG_LEVEL != LogLevel.LOW)
-							LogManager.logInfo("appending " + W.get(0) + " to homing sequence in order to distinguish " + os1 + " and " + os2 
-									+ " respectively reached from " + s1 + " and "+ s2 + " with output " + o1);
+						LinkedList<InputSequence> l = new LinkedList<>();
+						l.add(new InputSequence());
+						boolean foundLocalSeq = false;
+						while(!foundLocalSeq){
+							InputSequence current = l.poll();
+							if (current.getLength() >= nbStates){
+								LogManager.logInfo("Unable to compute homming sequence because " + os1 + " and " + os2 + " have same outputs which leads in differents states");
+								LogManager.logInfo("Maybe thoose states are equivalent and you can use "+r+" as homming sequence (be careful, some states have not been tested). But in strict definition of homing sequence, if you got the same output, you must be in the same state");
+								automata.exportToDot();
+								throw new UnableToComputeException(os1 + " and " + os2 + " seems to be equivalents");
+							}
+							OutputSequence currentO1 = automata.apply(current, os1);
+							State currentOs1 = automata.applyGetState(current, os1);
+							OutputSequence currentO2 = automata.apply(current, os2);
+							State currentOs2 = automata.applyGetState(current, os2);
+							if (currentOs1 == currentOs2 || !currentO1.equals(currentO2)){
+								foundLocalSeq = true;
+								r.addInputSequence(current);
+								if (Options.LOG_LEVEL != LogLevel.LOW){
+									LogManager.logInfo("appending " + current + " to homing sequence in order to distinguish " + os1 + " and " + os2 
+											+ " respectively reached from " + s1 + " and "+ s2 + " with output " + o1);
+									if (currentOs1 == currentOs2)
+										LogManager.logInfo("Now, applying homing sequence from " + s1 + " and " + s2 + " lead in same state " + currentOs1);
+									else{
+										o1.addOutputSequence(currentO1);
+										o2.addOutputSequence(currentO2);
+										LogManager.logInfo("Now, applying homing sequence from " + s1 + " and " + s2 + " give outputs " + o1 + " and " + o2);
+									}
+								}
+
+							}else{
+								for (String in : getInputSymbols()){
+									InputSequence toTry = new InputSequence();
+									toTry.addInputSequence(current);
+									toTry.addInput(in);
+									l.add(toTry);
+								}
+							}
+						}
 					}
 				}
 			}

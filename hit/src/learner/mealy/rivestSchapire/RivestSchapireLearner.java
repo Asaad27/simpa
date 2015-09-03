@@ -10,6 +10,7 @@ import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.OutputSequence;
 import drivers.mealy.MealyDriver;
+import drivers.mealy.MealyDriver.UnableToComputeException;
 import learner.Learner;
 import learner.mealy.LmTrace;
 import stats.StatsEntry;
@@ -43,7 +44,11 @@ public class RivestSchapireLearner extends Learner {
 	public void learn() {
 		driver.reset();
 		LogManager.logStep(LogManager.STEPOTHER, "Computing homing sequence");
-		homingSequence = driver.getHomingSequence();
+		try {
+			homingSequence = driver.getHomingSequence();
+		} catch (UnableToComputeException e) {
+			throw new RuntimeException(e);
+		}
 		LogManager.logStep(LogManager.STEPOTHER,"Inferring the system");
 		LogManager.logConsole("Inferring the system (global)");
 		stats = new RivestSchapireStatsEntry(driver, homingSequence);
