@@ -1,0 +1,9 @@
+{
+    "data": {
+        "username": ["scanner1"],
+        "password": ["scanner1"]
+    },
+    "noFollow": ["^javascript:.*", ".*#.*", "^mailto:.*", "^http[s]?:\\/\\/(?!192\\.168\\.56\\.102).*$"],
+    "name": "wackopicko",
+    "urls": ["http://192.168.56.102/WackoPicko/"]
+}

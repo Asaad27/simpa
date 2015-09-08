@@ -1,0 +1,1 @@
+{"data": {}, "noFollow": ["^javascript:.*", ".*#.*", "^mailto:.*", "^http[s]?:\\/\\/(?!192\\.168\\.56\\.102).*$"], "name": "vicnum", "urls": ["http://192.168.56.102/vicnum/"]}

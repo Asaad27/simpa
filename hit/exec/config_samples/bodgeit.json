@@ -1,0 +1,1 @@
+{"reset": "http://localhost:8080/bodgeit/reset.jsp", "name": "bodgeit", "noFollow": ["^javascript:.*", ".*#.*", "^mailto:.*", "^http[s]?:\\/\\/(?!localhost:8080).*$"], "urls": ["http://localhost:8080/bodgeit/home.jsp"], "data": {"username": ["validLogin", "validLoginAdmin"], "q": ["testSearch", "testSearch2"], "password": ["validPassword", "validPasswordAdmin"], "null": [""]}}

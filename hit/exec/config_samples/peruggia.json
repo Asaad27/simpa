@@ -1,0 +1,1 @@
+{"data": {"username": ["admin"], "password": ["admin"]}, "noFollow": ["^javascript:.*", ".*#.*", "^mailto:.*", "^http[s]?:\\/\\/(?!192\\.168\\.56\\.102).*$", ".*updel.*"], "name": "peruggia", "urls": ["http://192.168.56.102/peruggia/"]}

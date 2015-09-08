@@ -1,0 +1,1 @@
+{"data": {}, "noFollow": ["^javascript:.*", ".*#.*", "^mailto:.*", "^http[s]?:\\/\\/(?!192\\.168\\.56\\.101).*$"], "name": "badstore", "urls": ["http://192.168.56.101/cgi-bin/badstore.cgi"], "data": {"email":["big@spender.com"],"passwd":["money"]}}
