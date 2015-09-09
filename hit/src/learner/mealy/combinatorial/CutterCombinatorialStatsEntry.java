@@ -6,11 +6,11 @@ public class CutterCombinatorialStatsEntry extends CombinatorialStatsEntry {
 
 	public CutterCombinatorialStatsEntry(String line) {
 		super(line);
-		traceLength = 0;
 	}
 
 	protected CutterCombinatorialStatsEntry(MealyDriver d) {
 		super(d);
+		traceLength = 0;
 	}
 
 	public void addTraceLength(int l){

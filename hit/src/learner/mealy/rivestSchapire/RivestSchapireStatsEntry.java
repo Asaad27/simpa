@@ -6,12 +6,14 @@ import automata.Transition;
 import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import drivers.mealy.MealyDriver;
+import drivers.mealy.transparent.RandomMealyDriver;
 import stats.Graph;
 import stats.Graph.PlotStyle;
 import stats.GraphGenerator;
 import stats.StatsEntry;
 import stats.StatsSet;
 import stats.attribute.Attribute;
+import stats.attribute.restriction.EqualsRestriction;
 import stats.attribute.restriction.RangeRestriction;
 
 public class RivestSchapireStatsEntry extends StatsEntry {
@@ -171,34 +173,108 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 			@Override
 			public void generate(StatsSet s) {
 				
+				StatsSet RandomCounter = new StatsSet(s);
+				RandomCounter.restrict(new EqualsRestriction<String>(AUTOMATA, new RandomMealyDriver().getSystemName()));
+				Graph<Integer, Integer> g2 = new Graph<Integer,Integer>(OUTPUT_SYMBOLS, TRACE_LENGTH);
+				StatsSet s2 = new StatsSet(RandomCounter);
+				s2.restrict(new EqualsRestriction<Integer>(STATE_NUMBER,5));
+				s2.restrict(new EqualsRestriction<Integer>(INPUT_SYMBOLS,5));
+				s2.restrict(new EqualsRestriction<Integer>(HOMING_SEQUENCE_LENGTH,2));
+				g2.plotGroup(s2, LEARNER_NB, Graph.PlotStyle.MEDIAN);
+				g2.setForceOrdLogScale(false);
+				g2.setFileName("influence_of_output_symbols");
+				g2.export();
+				
+				RandomCounter.restrict(new EqualsRestriction<Integer>(OUTPUT_SYMBOLS, 5));
+
 				Graph<Integer, Integer> g1 = new Graph<Integer,Integer>(INPUT_SYMBOLS, TRACE_LENGTH);
-				StatsSet s1 = new StatsSet(s);
-				//s1 .restrict(new EqualsRestriction<Integer>(OUTPUT_SYMBOLS, 5));
-				//s1.restrict(new EqualsRestriction<Integer>(STATE_NUMBER, 12));
-				g1.plot(s1, Graph.PlotStyle.POINTS);
+				StatsSet s1 = new StatsSet(RandomCounter);
+				s1.restrict(new EqualsRestriction<Integer>(STATE_NUMBER, 5));
+				s1.restrict(new EqualsRestriction<Integer>(LEARNER_NB, 5));
+				s1.restrict(new EqualsRestriction<Integer>(HOMING_SEQUENCE_LENGTH, 2));
+				g1.plot(s1, Graph.PlotStyle.MEDIAN);
+				g1.plotFunc("100*x**2", "100x^2");
+				g1.setForceAbsLogScale(true);
+				g1.forceAbsRange(null, 15);
+				g1.setFileName("influence_of_input_symbols_log");
+				g1.export();
+				
+				g1 = new Graph<Integer,Integer>(INPUT_SYMBOLS, TRACE_LENGTH);
+				g1.plot(s1, Graph.PlotStyle.MEDIAN);
+				g1.plotFunc("100*x**2", "100x^2");
 				g1.setForceOrdLogScale(false);
 				g1.setFileName("influence_of_input_symbols");
 				g1.export();
 				
-				Graph<Integer, Integer> g2 = new Graph<Integer,Integer>(OUTPUT_SYMBOLS, TRACE_LENGTH);
-				StatsSet s2 = new StatsSet(s);
-				//s2 .restrict(new EqualsRestriction<Integer>(OUTPUT_SYMBOLS, 5));
-				//s2.restrict(new EqualsRestriction<Integer>(STATE_NUMBER, 12));
-				g2.plot(s2, Graph.PlotStyle.POINTS);
-				//g2.setForceOrdLogScale(false);
-				g2.setFileName("influence_of_output_symbols");
-				g2.export();
+				Graph<Integer,Float> g1_d = new Graph<Integer,Float>(INPUT_SYMBOLS, DURATION);
+				g1_d.plot(s1, PlotStyle.MEDIAN);
+				g1_d.plotFunc("0.5*x**2", "0.5x^2");
+				g1_d.setFileName("influence_of_input_symbols_duration");
+				g1_d.export();
+				
+				Graph<Integer, Integer> g3 = new Graph<Integer,Integer>(LEARNER_NB, TRACE_LENGTH);
+				StatsSet s3 = new StatsSet(RandomCounter);
+				//s3.restrict(new EqualsRestriction<Integer>(STATE_NUMBER, 12));
+				g3.plotGroup(s3, HOMING_SEQUENCE_LENGTH, Graph.PlotStyle.POINTS);
+				g3.setForceOrdLogScale(false);
+				g3.export();
+				
+				Graph<Integer, Integer> g4 = new Graph<Integer,Integer>(STATE_NUMBER, TRACE_LENGTH);
+				StatsSet s4 = new StatsSet(RandomCounter);
+				s4.restrict(new EqualsRestriction<Integer>(INPUT_SYMBOLS, 5));
+				g4.plot(s4, Graph.PlotStyle.MEDIAN);
+				g4.setFileName("influence_of_states_number");
+				g4.plotFunc("50*x**2", "50x^2");
+				g4.setForceOrdLogScale(false);
+				g4.export();
+				g4 = new Graph<Integer,Integer>(STATE_NUMBER, TRACE_LENGTH);
+				g4.plot(s4, Graph.PlotStyle.MEDIAN);
+				g4.plotFunc("50*x**2", "50x^2");
+				g4.setFileName("influence_of_states_number_log");
+				g4.setForceAbsLogScale(true);
+				g4.export();
+				g4 = new Graph<Integer,Integer>(STATE_NUMBER, TRACE_LENGTH);
+				g4.plotGroup(s4,LEARNER_NB, Graph.PlotStyle.MEDIAN);
+				//g4.plotFunc("50*x**2", "50x^2");
+				g4.setFileName("influence_of_states_number_learner");
+				g4.setForceOrdLogScale(false);
+				//g4.setForceAbsLogScale(true);
+				g4.export();
+
+				
+				Graph<Integer,Float> g4_d = new Graph<Integer,Float>(STATE_NUMBER, DURATION);
+				g4_d.plotGroup(s4, HOMING_SEQUENCE_LENGTH, PlotStyle.MEDIAN);
+				g4_d.setFileName("influence_of_state_number_duration");
+				g4_d.export();
+				
+				Graph<Integer, Integer> g5 = new Graph<Integer,Integer>(HOMING_SEQUENCE_LENGTH, LEARNER_NB);
+				StatsSet s5 = new StatsSet(RandomCounter);
+				g5.plotGroup(s5, STATE_NUMBER, Graph.PlotStyle.POINTS);
+				g5.export();
+				
+				
 				
 				Graph<Integer, Float> g8 = new Graph<Integer,Float>(TRACE_LENGTH, DURATION);
 				StatsSet s8 = new StatsSet(s);
+				s8.restrict(new EqualsRestriction<Integer>(HOMING_SEQUENCE_LENGTH, 3));
+				s8.restrict(new EqualsRestriction<Integer>(LEARNER_NB, 5));
 				g8.plot(s8, Graph.PlotStyle.POINTS);
 				g8.setFileName("similarity_between_duration_and_trace_length");
+				g8.export();
+				
+				
+				
+				
+				g8 = new Graph<Integer,Float>(TRACE_LENGTH, DURATION);
+				//s8 = new StatsSet(s);
+				g8.plotGroup(s8, LEARNER_NB,Graph.PlotStyle.POINTS);
+				g8.setFileName("tmp");
 				g8.export();
 				
 				Graph<Integer, Integer> g_locker = new Graph<>(INPUT_SYMBOLS, TRACE_LENGTH);
 				StatsSet s_locker = new StatsSet(s);
 				s_locker.restrict(new RangeRestriction<Integer>(STATE_NUMBER, 0, 5));
-				g_locker.plotGroup(s_locker, AUTOMATA, PlotStyle.POINTS);
+				g_locker.plotGroup(s_locker, AUTOMATA, PlotStyle.MEDIAN);
 				g_locker.setFileName("lockers");
 				g_locker.export();
 			}};

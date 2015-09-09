@@ -18,7 +18,7 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 	public enum PlotStyle {
 		POINTS("with points"),
 		AVERAGE("with linespoints"),
-		AVERAGE_WITH_EXTREMA("with yerrorbars"),
+		AVERAGE_WITH_EXTREMA("with errorlines"),
 		MEDIAN("with linespoint"),
 		SMOOTH("with linespoints"),
 		;
@@ -27,6 +27,8 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 			this.plotLine = plotLine;
 		}
 	}
+	
+	private static boolean forcePoints = false; // set this to true in order to plot points for each graph
 
 	private Attribute<T_ABS> abs;
 	private Attribute<T_ORD> ord;
@@ -35,6 +37,11 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 	private String title;
 	private String fileName;
 	private Boolean forceOrdLogScale;
+	private Boolean forceAbsLogScale = false;
+	private Integer minAbs = null;
+	private Integer maxAbs = null;
+	private Integer minOrd = null;
+	private Integer maxOrd = null;
 
 	private List<File> toDelete;
 
@@ -46,7 +53,7 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		toDelete = new ArrayList<File>();
 	}
 
-	protected void plot(StatsSet stats, PlotStyle style, String titleSuffix){
+	public void plot(StatsSet stats, PlotStyle style, String titleSuffix){
 		if (stats.size() == 0)
 			return;
 		this.stats.getStats().addAll(stats.getStats());
@@ -57,6 +64,8 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		plotLines.append("\"" + tempPlot.getAbsolutePath() + "\" " +
 				style.plotLine +
 				" title \"" + plotTitle + "\", ");
+		if (forcePoints && style != PlotStyle.POINTS)
+			plot(stats,PlotStyle.POINTS,titleSuffix);
 	}
 
 	public void plot(StatsSet stats, PlotStyle style){
@@ -101,6 +110,33 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 	public void setForceOrdLogScale(Boolean forceOrdLogScale) {
 		this.forceOrdLogScale = forceOrdLogScale;
 	}
+	
+	/**
+	 * 
+	 * @param forceAbsLogScale true to force logarithmic scale, false to force linear scale and null to use default scale
+	 */
+	public void setForceAbsLogScale(Boolean forceAbsLogScale) {
+		this.forceAbsLogScale = forceAbsLogScale;
+	}
+	
+	/**
+	 * you can put null to use gnuplot default
+	 * @param min
+	 * @param max
+	 */
+	public void forceAbsRange(Integer min, Integer max){
+		minAbs = min;
+		maxAbs = max;
+	}
+	/**
+	 * you can put null to use gnuplot default
+	 * @param min
+	 * @param max
+	 */
+	public void forceOrdRange(Integer min, Integer max){
+		minOrd = min;
+		maxOrd = max;
+	}
 
 	public void export(){
 		if (plotLines.length() == 0){
@@ -133,10 +169,18 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 				);
 		r.append("\" at graph 1,0.5 right\n");
 
+		boolean absLogScale = abs.useLogScale();
+		if (forceAbsLogScale != null)
+			absLogScale = forceAbsLogScale;
+		r.append((absLogScale? "set logscale x" : "unset logscale x") + "\n");
 		boolean ordLogScale = ord.useLogScale();
 		if (forceOrdLogScale != null)
 			ordLogScale = forceOrdLogScale;
 		r.append((ordLogScale? "set logscale y" : "unset logscale y") + "\n");
+		
+		r.append("set xrange [" + ((minAbs == null) ? "" : minAbs) + ":" + ((maxAbs == null) ? "" : maxAbs) + "]\n");
+		r.append("set yrange [" + ((minOrd == null) ? "" : minOrd) + ":" + ((maxOrd == null) ? "" : maxOrd) + "]\n");
+
 		r.append("plot "+plotLines.substring(0, plotLines.length()-2)+"\n");
 		GNUPlot.makeGraph(r.toString());
 	}
