@@ -707,6 +707,7 @@ public class SIMPA {
 		Learner learner = Learner.getLearnerFor(driver);
 		learner.learn();
 		learner.createConjecture();
+		learner.logStats();
 		driver.logStats();
 		//TODO check conjecture
 		LogManager.end();

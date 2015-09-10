@@ -9,6 +9,8 @@ import learner.mealy.combinatorial.CutterCombinatorialLearner;
 import learner.mealy.noReset.NoResetLearner;
 import main.simpa.Options;
 import stats.StatsEntry;
+import stats.attribute.Attribute;
+import tools.loggers.LogManager;
 import automata.Automata;
 import drivers.Driver;
 import drivers.mealy.MealyDriver;
@@ -30,6 +32,19 @@ public abstract class Learner {
 	
 	public StatsEntry getStats(){
 		return null;
+	}
+	
+	public void logStats(){
+		StatsEntry s = getStats();
+		if (s == null){
+			LogManager.logInfo("unable to get learner stats");
+			return;
+		}
+		LogManager.logLine();
+		for (Attribute<?> a : s.getAttributes()){
+			LogManager.logStat(a.getName() + " : " + s.get(a) + " " + a.getUnits());
+		}
+		LogManager.logLine();
 	}
 
 	public static Learner getLearnerFor(Driver driver) throws Exception {
