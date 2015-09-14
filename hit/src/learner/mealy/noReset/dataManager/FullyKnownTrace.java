@@ -26,6 +26,8 @@ public class FullyKnownTrace {
 	}
 	
 	public String toString(){
-		return start.toString() + " followed by " + trace.toString() + " → " + end.toString();
+		return start.toString() + 
+				" followed by " + trace.toString() +
+				" → " + end.toString();
 	}
 }

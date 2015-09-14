@@ -1,27 +1,35 @@
 package learner.mealy.noReset.dataManager;
 
-import java.util.Map;
-import java.util.HashMap;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import java.util.Collection;
-import java.util.LinkedList;
-import java.util.HashSet;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Set;
 
 import automata.mealy.InputSequence;
 import automata.mealy.OutputSequence;
+import drivers.mealy.MealyDriver;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
+import learner.mealy.noReset.dataManager.vTree.AbstractNode;
+import learner.mealy.noReset.dataManager.vTree.StateNode;
 import main.simpa.Options;
+import tools.GraphViz;
 import tools.loggers.LogManager;
-import drivers.mealy.MealyDriver;
 
 public class DataManager {
 	class WaitingState {public FullyQualifiedState state; public int pos;}
-	protected static DataManager instance;//TODO either make a proper singleton either do something else
+	public static DataManager instance;//TODO either make a proper singleton either do something else
 	private MealyDriver driver;
 	private LmTrace trace;
 	private ArrayList<FullyQualifiedState> C;//Identified states in trace
@@ -36,9 +44,12 @@ public class DataManager {
 	private LinkedList<WaitingState> waitingStates;//the call to setCwhich must be done by the root setC
 	private LinkedList<FullyKnownTrace> waitingFullyKnownTrace;
 	private boolean lockAdd;//indicate whether an add is currently running.
+	private AbstractNode currentVNode;
+	
+	public int maxStates;
 
-
-	public DataManager(MealyDriver driver, ArrayList<InputSequence> W){
+	public DataManager(MealyDriver driver, ArrayList<InputSequence> W, int maxStates){
+		this.maxStates = maxStates;
 		this.trace = new LmTrace();
 		this.W = W;
 		this.I = new ArrayList<String>(driver.getInputSymbols());
@@ -58,9 +69,11 @@ public class DataManager {
 		lockAdd = false;
 		instance = this;
 		driver.reset();
+		currentVNode = null;
 	}
 
 	public String apply(String input){
+		exportVTreeToDot();
 		startRecursivity();
 		String output = driver.execute(input);
 		trace.append(input,output);
@@ -86,6 +99,9 @@ public class DataManager {
 					setC(traceSize(), t.getEnd());
 			}
 		}
+		if (currentVNode != null)
+			currentVNode = currentVNode.getChildOrCreate(input, output);
+		//exportVTreeToDot();
 		endRecursivity();
 		return output;
 	}
@@ -132,6 +148,14 @@ public class DataManager {
 	}
 
 	public void setC(int pos,FullyQualifiedState s){
+		if (currentVNode == null){
+			AbstractNode n = s.getVNode();
+			for (int i = pos; i < traceSize(); i++){
+				n = n.getChildOrCreate(trace.getInput(i), trace.getOutput(i));
+			}
+			currentVNode = n;
+			exportVTreeToDot();
+		}
 		WaitingState ws = new WaitingState();
 		ws.pos = pos;
 		ws.state = s;
@@ -174,6 +198,7 @@ public class DataManager {
 		lockAdd = true;
 		boolean upToDate = false;
 		while (!upToDate){
+			deduceFromVTree();
 			upToDate = true;
 			FullyKnownTrace v = waitingFullyKnownTrace.poll();
 			if (v != null){
@@ -463,7 +488,42 @@ public class DataManager {
 	public Collection<FullyQualifiedState> getStates() {
 		return Q.values();
 	}
+	
+	public AbstractNode getCurrentVNode() {
+		return currentVNode;
+	}
+	
+	public void setCurrentVNode(AbstractNode n) {
+		currentVNode = n;
+	}
 
+	public void deduceFromVTree(){
+		if (DataManager.instance.getStates().size() != DataManager.instance.maxStates){
+			LogManager.logInfo("cannot deduce while there is unknown states");
+			return;
+		}
+		for (FullyQualifiedState s : getStates()){
+			StateNode sn = s.getVNode();
+			for (String i : sn.getKnownInputs()){
+				AbstractNode child = sn.getChild(i);
+				if (child.isStateNode())
+					continue;
+				List<StateNode> incompatibleNodes = child.getIncompatibleStateNode();
+				if (incompatibleNodes.size() + 1 == DataManager.instance.maxStates){
+					LogManager.logInfo("Found a node which is almost incompatible with all others ! "+sn+" followed by "+i+"/"+sn.getOutput(i)+" give "+child+" which is incompatible with "+incompatibleNodes);
+					FullyQualifiedState end = null;
+					for (FullyQualifiedState fqs : DataManager.instance.getStates())
+						if (!incompatibleNodes.contains(fqs.getVNode()))
+							end = fqs;
+					FullyKnownTrace v = new FullyKnownTrace(s, new LmTrace(i, sn.getOutput(i)), end);
+					LogManager.logInfo("deducing from VTree ! found " + v);
+					addFullyKnownTrace(v);
+				}
+			}
+
+		}
+	}
+	
 	public LmConjecture getConjecture() {
 		return conjecture;
 	}
@@ -489,8 +549,10 @@ public class DataManager {
 		StringBuilder globalResult = new StringBuilder();
 		StringBuilder IOString = new StringBuilder();
 		StringBuilder CString = new StringBuilder();
-		CString.append("?");
-		IOString.append(" ");
+		CString.append((C.get(0) == null) ? "?" : C.get(0).toString());
+		for (int j = 0; j < CString.length(); j++){
+			IOString.append(" ");
+		}
 		for (int i =0; i < trace.size(); i++){
 			StringBuilder IOtransition = new StringBuilder(" " + trace.getInput(i) + "/" + trace.getOutput(i) + " ");
 			StringBuilder Ctransition = new StringBuilder();
@@ -513,4 +575,41 @@ public class DataManager {
 		globalResult.append(IOString + "\n" + CString +"\n");
 		return globalResult.toString();
 	}
+
+	private static int n_export = 0;
+	public void exportVTreeToDot(){
+		if (Options.LOG_LEVEL == Options.LogLevel.LOW)
+			return;
+		if (currentVNode == null){
+			LogManager.logInfo("VTree is unknown");
+			return;
+		}
+		n_export++;
+		Writer writer = null;
+		File file = null;
+		File dir = new File(Options.OUTDIR + Options.DIRGRAPH);
+		try {
+			if (!dir.isDirectory() && !dir.mkdirs())
+				throw new IOException("unable to create " + dir.getName()
+				+ " directory");
+
+			file = new File(dir.getPath() + File.separatorChar
+					+ "Vtree_"+n_export+".dot");
+			writer = new BufferedWriter(new FileWriter(file));
+			writer.write("digraph G {\n");
+
+			currentVNode.exportToDot(writer, new HashSet<AbstractNode>());
+			
+			writer.write("}\n");
+			writer.close();
+			LogManager.logInfo("VTree has been exported to "
+					+ file.getName());
+			File imagePath = GraphViz.dotToFile(file.getPath());
+			if (imagePath != null)
+				LogManager.logImage(imagePath.getPath());
+		} catch (IOException e) {
+			LogManager.logException("Error writing dot file", e);
+		}
+	}
+	
 }

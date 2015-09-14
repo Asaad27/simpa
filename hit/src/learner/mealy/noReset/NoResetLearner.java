@@ -69,7 +69,7 @@ public class NoResetLearner extends Learner {
 		long start = System.nanoTime();
 
 		//GlobalTrace trace = new GlobalTrace(driver);
-		dataManager = new DataManager(driver, this.W);
+		dataManager = new DataManager(driver, this.W, n);
 
 		//start of the algorithm
 		localize(dataManager, W);
