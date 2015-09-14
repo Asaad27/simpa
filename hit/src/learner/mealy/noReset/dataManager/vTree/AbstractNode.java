@@ -348,13 +348,18 @@ public abstract class AbstractNode {
 	 */
 	protected void changeFather(AbstractNode old, AbstractNode newFather) {
 		changeFatherLink(old, newFather);
-		if (newFather != null)
+		// compute incompatibilities for new father
+		if (newFather != null) {
+			// copying incompatibilities prevent from concurrent modifications
+			Set<AbstractNode> oldIncompatibilities = new HashSet<>(incompatibleNodes);
 			for (String i : newFather.getKnownInputs())
 				if (newFather.getChild(i) == this)
-					for (AbstractNode incomp : incompatibleNodes)
+					for (AbstractNode incomp : oldIncompatibilities)
 						for (AbstractNode incompP : incomp.getParents())
 							if (incompP.getChild(i) == incomp)
 								newFather.setIncompatible(incompP);
+
+		}
 	}
 
 	protected abstract void changeFatherLink(AbstractNode old, AbstractNode newFather);
@@ -374,8 +379,9 @@ public abstract class AbstractNode {
 		for (AbstractNode n : incompatibleNodes)
 			if (n.isStateNode())
 				r.add((StateNode) n);
-		assert mergedWith != null
-				|| r.containsAll(getIncompatibleStateNode_full()) && getIncompatibleStateNode_full().containsAll(r);
+		// assert mergedWith != null
+		// || r.containsAll(getIncompatibleStateNode_full()) &&
+		// getIncompatibleStateNode_full().containsAll(r);
 		return r;
 	}
 
@@ -453,8 +459,8 @@ public abstract class AbstractNode {
 	 *             if an error occurs with the writer
 	 */
 	public void exportToDot(Writer w, Set<AbstractNode> computed) throws IOException {
-		boolean exportIncompatibilities = true;
-		boolean exportParentReference = true;
+		boolean exportIncompatibilities = false;
+		boolean exportParentReference = false;
 		boolean exportUnreachableNodes = true;// need to keep all nodes in
 												// static attribute 'instance'
 		if (computed.contains(this))
