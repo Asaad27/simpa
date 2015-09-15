@@ -90,7 +90,8 @@ public abstract class AbstractNode {
 	protected AbstractNode() {
 		children = new HashMap<>();
 		outputs = new HashMap<>();
-		instances.add(this);
+		if (Options.LOG_LEVEL == LogLevel.ALL)
+			instances.add(this);
 	}
 
 	/**

@@ -7,6 +7,7 @@ import automata.Transition;
 import automata.mealy.InputSequence;
 import drivers.mealy.MealyDriver;
 import learner.mealy.LmConjecture;
+import main.simpa.Options;
 import stats.GraphGenerator;
 import stats.StatsEntry;
 import stats.attribute.Attribute;
@@ -26,6 +27,7 @@ public class NoResetStatsEntry extends StatsEntry {
 	public static final Attribute<String> AUTOMATA = Attribute.AUTOMATA;
 	public static final Attribute<Float> DURATION = Attribute.DURATION;
 	public static final Attribute<Integer>MEMORY = Attribute.MEMORY;
+	public static final Attribute<Boolean>WITH_SPEEDUP = Attribute.WITH_SPEEDUP;
 	
 	private static Attribute<?>[] attributes = new Attribute<?>[]{
 			W_SIZE,
@@ -42,6 +44,7 @@ public class NoResetStatsEntry extends StatsEntry {
 			AUTOMATA,
 			DURATION,
 			MEMORY,
+			WITH_SPEEDUP,
 	};
 	
 	public static String getCSVHeader_s(){
@@ -73,6 +76,7 @@ public class NoResetStatsEntry extends StatsEntry {
 	private String automata;
 	private float duration;
 	private int memory = 0;
+	private boolean with_speedup;
 	
 	/**
 	 * rebuild a NoResetStats object from a CSV line
@@ -93,6 +97,7 @@ public class NoResetStatsEntry extends StatsEntry {
 		automata = st.nextToken();
 		duration = Float.parseFloat(st.nextToken());
 		memory = Integer.parseUnsignedInt(st.nextToken());
+		with_speedup = Boolean.parseBoolean(st.nextToken());
 	}
 
 	public NoResetStatsEntry(List<InputSequence> W, MealyDriver d, int n){
@@ -102,6 +107,7 @@ public class NoResetStatsEntry extends StatsEntry {
 		this.outputSymbols = d.getOutputSymbols().size();
 		this.n = n;
 		this.automata = d.getSystemName();
+		this.with_speedup = !Options.ICTSS2015_WITHOUT_SPEEDUP;
 	}
 
 	protected void setLocalizeSequenceLength(int length){
@@ -161,6 +167,8 @@ public class NoResetStatsEntry extends StatsEntry {
 			return (T) new Float(duration);
 		if (a == MEMORY)
 			return (T) new Integer(memory);
+		if (a == WITH_SPEEDUP)
+			return (T) new Boolean(with_speedup);
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 
 	}

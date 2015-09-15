@@ -9,6 +9,7 @@ public class Units {
 	public final static Units FUNCTION_CALL = new Units("calls");
 	public final static Units SECONDS = new Units("s");
 	public final static Units NO_UNITS = new Units("");
+	public final static Units BOOLEAN = new Units("");
 	public static final Units BYTE = new Units("B");
 	public static final Units LEARNER = new Units("LEARNER");
 	private String symbol;

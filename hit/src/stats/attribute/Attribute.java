@@ -21,6 +21,7 @@ public class Attribute <T extends Comparable<T>> {
 	public final static Attribute<Integer> RESET_CALL_NB =			new Attribute<Integer>(	"number of call to reset",			Units.FUNCTION_CALL,false,false,false);
 	public final static Attribute<Integer>HOMING_SEQUENCE_LENGTH =	new Attribute<Integer>(	"length of homing sequence",		Units.SYMBOLS,	false,	true,	false);
 	public final static Attribute<Integer>LEARNER_NUMBER =			new Attribute<Integer>(	"number of sub-learner",			Units.LEARNER,	false,	true,	false);
+	public final static Attribute<Boolean>WITH_SPEEDUP =			new Attribute<Boolean>(	"inference with speed up",			Units.BOOLEAN,	false,	true,	false);
 	
 	
 	
