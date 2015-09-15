@@ -329,7 +329,8 @@ public class SIMPA {
 			"\t-n → use a random bound between the number of states and the number of states plus n (need to know the automaton)"
 			, 0);
 	private static InputSequenceListOption CHARACTERIZATION_SET = new InputSequenceListOption("--characterizationSeq", "use the given charcacterization sequences", null);
-	private static Option<?>[] noResetOptions = new Option<?>[]{STATE_NUMBER_BOUND,CHARACTERIZATION_SET};
+	private static BooleanOption WITHOUT_SPEEDUP = new BooleanOption("--noSpeedUp", "Don't use speedUp (deduction from trace based on state incompatibilities)\nthis is usefull if you don't know the real state number but only the bound.");
+	private static Option<?>[] noResetOptions = new Option<?>[]{STATE_NUMBER_BOUND,CHARACTERIZATION_SET, WITHOUT_SPEEDUP};
 	
 	//EFSM options
 	private static BooleanOption GENERIC_DRIVER = new BooleanOption("--generic", "Use generic driver");
@@ -463,6 +464,7 @@ public class SIMPA {
 		Options.INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = INITIAL_INPUT_SYMBOLS_EQUALS_TO_X.getValue();
 
 		Options.CHARACTERIZATION_SET = CHARACTERIZATION_SET.getValue();
+		Options.ICTSS2015_WITHOUT_SPEEDUP = WITHOUT_SPEEDUP.getValue();
 		
 		Options.GENERICDRIVER = GENERIC_DRIVER.getValue();
 		Options.REUSE_OP_IFNEEDED = REUSE_OP_IFNEEDED.getValue();
@@ -856,7 +858,7 @@ public class SIMPA {
 		System.out.println("> Algorithm ZQ");
 		printUsage(ZQOptions);
 		
-		System.out.println("> Algorithm noReset");
+		System.out.println("> Algorithm noReset (ICTSS2015)");
 		printUsage(noResetOptions);
 
 		System.out.println("> Algorithm EFSM");

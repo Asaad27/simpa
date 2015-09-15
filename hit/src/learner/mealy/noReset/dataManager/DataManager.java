@@ -148,13 +148,15 @@ public class DataManager {
 	}
 
 	public void setC(int pos,FullyQualifiedState s){
-		if (currentVNode == null){
-			AbstractNode n = s.getVNode();
-			for (int i = pos; i < traceSize(); i++){
-				n = n.getChildOrCreate(trace.getInput(i), trace.getOutput(i));
+		if (!Options.ICTSS2015_WITHOUT_SPEEDUP){
+			if (currentVNode == null){
+				AbstractNode n = s.getVNode();
+				for (int i = pos; i < traceSize(); i++){
+					n = n.getChildOrCreate(trace.getInput(i), trace.getOutput(i));
+				}
+				currentVNode = n;
+				exportVTreeToDot();
 			}
-			currentVNode = n;
-			exportVTreeToDot();
 		}
 		WaitingState ws = new WaitingState();
 		ws.pos = pos;
@@ -498,6 +500,8 @@ public class DataManager {
 	}
 
 	public void deduceFromVTree(){
+		if (Options.ICTSS2015_WITHOUT_SPEEDUP)
+			return;
 		if (DataManager.instance.getStates().size() != DataManager.instance.maxStates){
 			LogManager.logInfo("cannot deduce while there is unknown states");
 			return;
@@ -578,7 +582,9 @@ public class DataManager {
 
 	private static int n_export = 0;
 	public void exportVTreeToDot(){
-		if (Options.LOG_LEVEL == Options.LogLevel.LOW)
+		if (Options.ICTSS2015_WITHOUT_SPEEDUP)
+			return;
+		if (Options.LOG_LEVEL != Options.LogLevel.ALL)
 			return;
 		if (currentVNode == null){
 			LogManager.logInfo("VTree is unknown");

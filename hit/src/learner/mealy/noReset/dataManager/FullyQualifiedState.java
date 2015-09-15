@@ -34,7 +34,10 @@ public class FullyQualifiedState{
 		K = new HashMap<LmTrace, PartiallyKnownTrace>();
 		V = new HashMap<LmTrace, FullyKnownTrace>();
 		T = new HashMap<LmTrace, FullyKnownTrace>();
-		vNode = new StateNode(this);
+		if (Options.ICTSS2015_WITHOUT_SPEEDUP)
+			vNode = null;
+		else
+			vNode = new StateNode(this);
 	}
 	
 	public Boolean equals(FullyQualifiedState other){
@@ -57,8 +60,10 @@ public class FullyQualifiedState{
 		if (Options.LOG_LEVEL != Options.LogLevel.LOW)
 			DataManager.instance.logRecursivity("New transition found : " + v);
 		DataManager.instance.startRecursivity();
-		vNode.addFullyKnownTrace(v);
-		//DataManager.instance.exportVTreeToDot();
+		if (!Options.ICTSS2015_WITHOUT_SPEEDUP){
+			vNode.addFullyKnownTrace(v);
+			//DataManager.instance.exportVTreeToDot();
+		}
 		LinkedList<LmTrace> toRemove = new LinkedList<LmTrace>();
 		for (FullyKnownTrace knownV : V.values()){
 			if (v.getTrace().equals(knownV.getTrace().subtrace(0, v.getTrace().size()))){
