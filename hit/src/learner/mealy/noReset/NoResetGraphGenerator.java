@@ -61,7 +61,8 @@ public class NoResetGraphGenerator extends GraphGenerator {
 		g2w1.forceOrdRange(0, null);
 		g2w1.forceAbsRange(0, null);
 		g2w1.plotFunc("0.04*"+makeMaxTheoricalFunction(s2w1, NoResetStatsEntry.INPUT_SYMBOLS), "shape of complexity bound (1/25)");
-		g2w1.forceOrdRange(null, s2w1.attributeMax(NoResetStatsEntry.TRACE_LENGTH));
+		if (s2w1.size() != 0)
+			g2w1.forceOrdRange(null, s2w1.attributeMax(NoResetStatsEntry.TRACE_LENGTH));
 		g2w1.export();
 
 		StatsSet s2w2 = new StatsSet(s2);
@@ -85,7 +86,8 @@ public class NoResetGraphGenerator extends GraphGenerator {
 		g2w3.forceAbsRange(0, null);
 		g2w3.setFileName("influence_of_input_symbols_w3");
 		g2w3.plotFunc("0.04*"+makeMaxTheoricalFunction(s2w3, NoResetStatsEntry.INPUT_SYMBOLS), "shape of complexity bound (1/25)");
-		g2w3.forceOrdRange(null, s2w3.attributeMax(NoResetStatsEntry.TRACE_LENGTH));
+		if (s2w3.size() != 0)
+			g2w3.forceOrdRange(null, s2w3.attributeMax(NoResetStatsEntry.TRACE_LENGTH));
 		g2w3.export();
 
 
@@ -265,6 +267,32 @@ public class NoResetGraphGenerator extends GraphGenerator {
 		g_speedUp_w3.setForceOrdLogScale(false);
 		g_speedUp_w3.setFileName("influence_of_state_number_speedUp_w3");
 		g_speedUp_w3.export();}
+		
+		{StatsSet s_speedUp1 = new StatsSet(s_speedUp);
+		s_speedUp1.restrict(new RangeRestriction<Integer>(NoResetStatsEntry.MIN_TRACE_LENGTH,0,1000000000));
+		{StatsSet s_speedUp_w1 = new StatsSet(s_speedUp1);
+		Graph<Integer, Integer> g_speedUp_w1 = new Graph<Integer,Integer>(NoResetStatsEntry.STATE_NUMBER, NoResetStatsEntry.MIN_TRACE_LENGTH);
+		s_speedUp_w1.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.W_SIZE, 1));
+		g_speedUp_w1.plotGroup(s_speedUp_w1, NoResetStatsEntry.WITH_SPEEDUP, Graph.PlotStyle.MEDIAN);
+		g_speedUp_w1.setForceOrdLogScale(false);
+		g_speedUp_w1.setFileName("influence_of_state_number_speedUp_min_w1");
+		g_speedUp_w1.export();}
+		{StatsSet s_speedUp_w2 = new StatsSet(s_speedUp1);
+		Graph<Integer, Integer> g_speedUp_w2 = new Graph<Integer,Integer>(NoResetStatsEntry.STATE_NUMBER, NoResetStatsEntry.MIN_TRACE_LENGTH);
+		s_speedUp_w2.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.W_SIZE, 2));
+		g_speedUp_w2.plotGroup(s_speedUp_w2, NoResetStatsEntry.WITH_SPEEDUP, Graph.PlotStyle.MEDIAN);
+		g_speedUp_w2.setForceOrdLogScale(false);
+		g_speedUp_w2.setFileName("influence_of_state_number_speedUp_min_w2");
+		g_speedUp_w2.export();}
+		{StatsSet s_speedUp_w3 = new StatsSet(s_speedUp1);
+		Graph<Integer, Integer> g_speedUp_w3 = new Graph<Integer,Integer>(NoResetStatsEntry.STATE_NUMBER, NoResetStatsEntry.MIN_TRACE_LENGTH);
+		s_speedUp_w3.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.W_SIZE, 3));
+		g_speedUp_w3.plotGroup(s_speedUp_w3, NoResetStatsEntry.WITH_SPEEDUP, Graph.PlotStyle.MEDIAN);
+		g_speedUp_w3.setForceOrdLogScale(false);
+		g_speedUp_w3.setFileName("influence_of_state_number_speedUp_min_w3");
+		g_speedUp_w3.export();}
+		}
+
 
 		{StatsSet s_speedUp_time_w1 = new StatsSet(s_speedUp);
 		Graph<Integer, Float> g_speedUp_time_w1 = new Graph<Integer,Float>(NoResetStatsEntry.STATE_NUMBER, NoResetStatsEntry.DURATION);

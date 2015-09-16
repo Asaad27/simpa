@@ -21,6 +21,8 @@ import learner.mealy.LmTrace;
 import learner.mealy.noReset.dataManager.DataManager;
 import learner.mealy.noReset.dataManager.FullyQualifiedState;
 import main.simpa.Options;
+import main.simpa.Options.LogLevel;
+import tools.AdenilsoSimaoTool;
 import tools.Utils;
 import tools.loggers.LogManager;
 
@@ -140,6 +142,15 @@ public class NoResetLearner extends Learner {
 		if (Options.LOG_LEVEL == Options.LogLevel.ALL || Options.TEST)
 			LogManager.logConsole(dataManager.readableTrace());
 		dataManager.getConjecture().exportToDot();
+		if (driver instanceof TransparentMealyDriver) {
+			int minTraceLength = AdenilsoSimaoTool.minLengthForExhaustivAutomata(
+					((TransparentMealyDriver) driver).getAutomata(), dataManager.getTrace().getInputsProjection());
+			if (minTraceLength > dataManager.traceSize())
+				throw new RuntimeException("error in learning, there is another automata which produce the same trace");
+			stats.setMinTraceLength(minTraceLength);
+		}else{
+			stats.setMinTraceLength(-2);
+		}
 		// The transition count should be stopped
 		driver.stopLog();
 		if (driver instanceof TransparentMealyDriver){
@@ -160,6 +171,7 @@ public class NoResetLearner extends Learner {
 				LogManager.logInfo("The computed conjecture is not correct");
 			}
 		}
+		
 	}
 
 	public LmConjecture createConjecture() {

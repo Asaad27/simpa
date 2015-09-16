@@ -73,7 +73,6 @@ public class DataManager {
 	}
 
 	public String apply(String input){
-		exportVTreeToDot();
 		startRecursivity();
 		String output = driver.execute(input);
 		trace.append(input,output);
@@ -530,6 +529,10 @@ public class DataManager {
 	
 	public LmConjecture getConjecture() {
 		return conjecture;
+	}
+	
+	public LmTrace getTrace() {
+		return trace;
 	}
 
 	protected void startRecursivity(){
