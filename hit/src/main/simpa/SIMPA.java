@@ -766,7 +766,9 @@ public class SIMPA {
 				String failDir = baseDir + File.separator + 
 						Options.DIRFAIL;
 				Utils.createDir(new File(failDir));
-				failDir = failDir + File.separator + e.getClass().getSimpleName();
+				failDir = failDir + File.separator + e.getClass().getSimpleName()+"-"+e.getMessage();
+				if (!Utils.createDir(new File(failDir)))
+					failDir = failDir + File.separator + e.getClass().getSimpleName();
 				Utils.createDir(new File(failDir));
 				failDir = failDir + File.separator + 
 						new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS").format(new Date());

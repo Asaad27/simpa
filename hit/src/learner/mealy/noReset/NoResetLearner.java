@@ -21,7 +21,6 @@ import learner.mealy.LmTrace;
 import learner.mealy.noReset.dataManager.DataManager;
 import learner.mealy.noReset.dataManager.FullyQualifiedState;
 import main.simpa.Options;
-import main.simpa.Options.LogLevel;
 import tools.AdenilsoSimaoTool;
 import tools.Utils;
 import tools.loggers.LogManager;
@@ -439,12 +438,9 @@ public class NoResetLearner extends Learner {
 			InputSequence testw = testW.pollFirst();
 			if (apply(testw, automata, s1).equals(apply(testw,automata,s2))){
 				if (testw.getLength() > automata.getStateCount()){
-					//TODO find a better way to log and save the automata
-					String dir = Options.OUTDIR;
-					Options.OUTDIR = "/tmp/";
-					automata.exportToDot();
-					Options.OUTDIR = dir;
-					throw new RuntimeException("it appears that we will not find a w to distinguish "+s1 +" and " +s2+".Those state may be equivalent, please look in /tmp");
+					LogManager.logInfo("unable to get find a w to distinguish " + s1 + " and " + s2
+							+ ".Those states may be equivalent");
+					throw new RuntimeException("unable to distinguish two states for W set");
 				}
 				for (String i : inputSymbols){
 					InputSequence newTestw = new InputSequence();
