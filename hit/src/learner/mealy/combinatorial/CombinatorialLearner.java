@@ -1,5 +1,11 @@
 package learner.mealy.combinatorial;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import automata.Automata;
@@ -17,6 +23,7 @@ import learner.mealy.combinatorial.node.TreeNode;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
 import stats.StatsEntry;
+import tools.GraphViz;
 import tools.Utils;
 import tools.loggers.LogManager;
 
@@ -94,6 +101,7 @@ public class CombinatorialLearner extends Learner {
 				apply(i);
 			}
 		}
+		exportTreeToDot();
 		String i = trace.getInput(n.getDepth());
 		String o = trace.getOutput(n.getDepth());
 		MealyTransition t = n.getTransitionFromWithInput(n.getState(), i);
@@ -123,7 +131,8 @@ public class CombinatorialLearner extends Learner {
 			if (returnedNode != null)
 				return returnedNode;
 			checkedChildren ++;
-			n.removeChild(q);
+			if (Options.LOG_LEVEL != LogLevel.ALL)
+				n.removeChild(q);
 		}
 		return null;
 	}
@@ -289,5 +298,83 @@ public class CombinatorialLearner extends Learner {
 	public StatsEntry getStats() {
 		return stats;
 	}
+	
+	private int n_export = 0;
 
+	public void exportTreeToDot() {
+		boolean hideCutBranches = false;
+		if (Options.LOG_LEVEL != Options.LogLevel.ALL)
+			return;
+		n_export++;
+		Writer writer = null;
+		File file = null;
+		File dir = new File(Options.OUTDIR + Options.DIRGRAPH);
+		try {
+			if (!dir.isDirectory() && !dir.mkdirs())
+				throw new IOException("unable to create " + dir.getName() + " directory");
+
+			file = new File(dir.getPath() + File.separatorChar + "tree_" + n_export + ".dot");
+			writer = new BufferedWriter(new FileWriter(file));
+			writer.write("digraph G {\n");
+
+			ArrayList<TreeNode> currentLevel = new ArrayList<>();
+			ArrayList<TreeNode> nextLevel = new ArrayList<>();
+			currentLevel.add(root);
+			while (currentLevel.size() > 0) {
+				int currentDepth = currentLevel.get(0).getDepth();
+				LmTrace t = trace.subtrace(currentDepth, currentDepth + 1);
+				String label = t.toString();
+				for (TreeNode n : currentLevel) {
+					boolean haveUncuttedChild = n.haveUncuttedChild();
+					writer.write("\t" + n.id + " [label=\"" + n.getState() + "\\n" + n.desc + "\""
+							+ (n.isCut() ? ",style=dotted" : "") + "]\n");
+					if (n.isCut()) {
+						String cutId = "cut_" + n.id;
+						writer.write("\t" + cutId + " [label=\"\",shape=none]\n");
+						if (t.size() != 0) {
+							String cutOutput = n.getConjecture().getTransitionFromWithInput(n.getState(), t.getInput(0))
+									.getOutput();
+							writer.write("\t" + n.id + " -> " + cutId + "[style=dotted,color=red,label=\"("
+									+ new LmTrace(t.getInput(0), cutOutput) + ")\"]\n");
+						}
+					} else if (hideCutBranches && !haveUncuttedChild) {
+						String cutId = "cut_" + n.id;
+						writer.write("\t" + cutId + " [label=\"\",shape=none]\n");
+						writer.write("\t" + n.id + " -> " + cutId + "[style=dashed,color=blue,label=\"" + t + "\"]\n");
+					} else if (n.haveForcedChild()) {
+						TreeNode n1 = n.getOnlyChild();
+						writer.write(
+								"\t" + n.id + " -> " + n1.id + "[style=bold,color=green,label=\"" + label + "\"]\n");
+						nextLevel.add(n1);
+					} else {
+						for (State s : n.getStates()) {
+							TreeNode n1 = n.getChild(s);
+							if (n1 != null) {
+								if (hideCutBranches && !n1.isCut() && !n1.haveUncuttedChild()) {
+									writer.write("\t" + n.id + " -> " + n1.id + "[label=\"" + label
+											+ "\",color=blue,style=dashed]\n");
+									writer.write("\t" + n1.id + " [label=\"" + n1.getState()
+											+ "\",style=dotted,color=blue]\n");
+								} else {
+									writer.write("\t" + n.id + " -> " + n1.id + "[label=\"" + label + "\"]\n");
+									nextLevel.add(n1);
+								}
+							}
+						}
+					}
+				}
+				currentLevel = nextLevel;
+				nextLevel = new ArrayList<>();
+			}
+
+			writer.write("}\n");
+			writer.close();
+			LogManager.logInfo("Tree has been exported to " + file.getName());
+			File imagePath = GraphViz.dotToFile(file.getPath());
+			if (imagePath != null)
+				LogManager.logImage(imagePath.getPath());
+		} catch (IOException e) {
+			LogManager.logException("Error writing dot file", e);
+		}
+	}
 }
