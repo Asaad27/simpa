@@ -96,7 +96,8 @@ public class DriverGeneratorBFS extends DriverGenerator {
 					if (currentOutput.extractParam(paramPath) == null) {
 						continue;
 					}
-					if (!currentOutput.extractParam(paramPath).equals(storedOutput.getParamValue(paramPath))) {
+					if (!currentOutput.extractParam(paramPath).equals(storedOutput.getParamValue(paramPath))
+							&& !Utils.isCSRFtoken(currentOutput.extractParam(paramPath))) {
 						//System.err.println("The param \"" + storedOutput.getParamValue(paramPath) + "\" has been detected as an ndv and is now removed");
 						storedOutput.removeParam(paramPath, iter);
 					}
