@@ -1,0 +1,25 @@
+@RELATION 'fromS0'
+@ATTRIBUTE Url1 STRING
+@ATTRIBUTE savedMsg_2794385965070024175 STRING
+@ATTRIBUTE savedUrl1_568444290201070248 STRING
+@ATTRIBUTE savedUrl2_5904082503887052012 STRING
+@ATTRIBUTE savedSamlresponse_3014122842453659422 STRING
+@ATTRIBUTE savedSessionid_5442463578325701744 NUMERIC
+@ATTRIBUTE savedAction_3823639912964399410 STRING
+@ATTRIBUTE savedIdp_2183209855179034380 STRING
+@ATTRIBUTE savedSamlrequest_1904423732337325414 STRING
+@ATTRIBUTE savedGensessionid_974437505119347675 NUMERIC
+@ATTRIBUTE savedStatus_7931655223710931778 STRING
+@ATTRIBUTE savedContent_213034128169005738 STRING
+@ATTRIBUTE class NOMINAL {S0err,S1httpResp1}
+@DATA
+'shttpgood', 'sinit', 'sinit', 'sinit', 'sinit', -2147483648, 'sinit', 'sinit', 'sinit', -2147483648, 'sinit', 'sinit', S1httpResp1
+'shttpgood', 'surlinvalid', 'shttperror', 'sinit', 'sinit', -2147483648, 'sinit', 'sinit', 'sinit', -2147483648, 'sinit', 'sinit', S1httpResp1
+'shttpgood', 'sinit', 'sinit', 'shttpgood', 'sSamlResp', 666, 'sinit', 'sinit', 'sinit', -2147483648, 'sinit', 'sinit', S1httpResp1
+'shttpgood', 'sinit', 'sinit', 'shttperror', 'sSamlResp', 666, 'sinit', 'sinit', 'sinit', -2147483648, 'sinit', 'sinit', S1httpResp1
+'shttpgood', 'sinit', 'shttpgood', 'shttpgood', 'sSamlResp', 348, 'sredirect', 'sIdP', 'sSamlReq', 348, 'sok', 'sressource', S1httpResp1
+'shttperror', 'sinit', 'sinit', 'sinit', 'sinit', -2147483648, 'sinit', 'sinit', 'sinit', -2147483648, 'sinit', 'sinit', S0err
+'shttperror', 'surlinvalid', 'shttperror', 'sinit', 'sinit', -2147483648, 'sinit', 'sinit', 'sinit', -2147483648, 'sinit', 'sinit', S0err
+'shttperror', 'sinit', 'sinit', 'shttpgood', 'sSamlResp', 666, 'sinit', 'sinit', 'sinit', -2147483648, 'sinit', 'sinit', S0err
+'shttperror', 'sinit', 'sinit', 'shttperror', 'sSamlResp', 666, 'sinit', 'sinit', 'sinit', -2147483648, 'sinit', 'sinit', S0err
+'shttperror', 'sinit', 'shttpgood', 'shttpgood', 'sSamlResp', 101, 'sredirect', 'sIdP', 'sSamlReq', 101, 'sok', 'sressource', S0err
