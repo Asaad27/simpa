@@ -43,7 +43,7 @@ public class Entropy {
 	
 	public static float gain (LinkedList<String> column_class, LinkedList<String> column, Nominal enum_class, Nominal enum_col, float global_entropy) {
 		float gain = global_entropy;
-
+		
 		LinkedList<String> possible_values = enum_col.getLinkedList();
 		
 		LinkedList<String> Sv = new LinkedList<String>();
@@ -63,7 +63,6 @@ public class Entropy {
 			float card_Sv = Sv.size();
 			gain -= (card_Sv / (column_class.size())) * entropy_Sv;
 		}
-		
 		return gain / Entropy._Entropy(column, enum_col);
 	}	
 	

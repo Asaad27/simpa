@@ -27,8 +27,6 @@ public class SIMPA {
 					Options.REUSE_OP_IFNEEDED = true;
 				else if (args[i].equals("--text"))
 					Options.LOG_TEXT = true;
-				else if (args[i].equals("--weka"))
-					Options.WEKA = true;
 				else if (args[i].equals("-I"))
 					Options.INITIAL_INPUT_SYMBOLS = args[++i];
 				else if (args[i].equals("-Z"))
@@ -79,17 +77,14 @@ public class SIMPA {
 		if (Options.SUPPORT_MIN < 1 || Options.SUPPORT_MIN > 100)
 			throw new Exception("Minimal between 1 and 100 include needed");
 
-		if (Options.WEKA){
-			try {
-				Options.WEKA = weka.core.Version.MAJOR >= 3;
-				if (!Options.WEKA)
-					LogManager
-							.logError("Warning : Weka version >= 3 needed. Please update Weka.");
-			} catch (Exception e) {
+		try {
+			Options.WEKA = weka.core.Version.MAJOR >= 3;
+			if (!Options.WEKA)
 				LogManager
-						.logError("Warning : Unable to use Weka. Check the buildpath.");
-				Options.WEKA = false;
-			}
+						.logError("Warning : Weka version >= 3 needed. Please update Weka.");
+		} catch (Exception e) {
+			LogManager
+					.logError("Warning : Unable to use Weka. Check the buildpath.");
 		}
 
 		if (GraphViz.check() != 0) {

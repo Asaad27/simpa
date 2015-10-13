@@ -25,7 +25,7 @@ public class Options {
 
 	// Tools available
 
-	public static boolean WEKA = false;
+	public static boolean WEKA = true;
 	public static boolean GRAPHVIZ = true;
 
 	// Algorithm's options

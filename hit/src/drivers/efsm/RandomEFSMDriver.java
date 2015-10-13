@@ -23,14 +23,6 @@ public class RandomEFSMDriver extends EFSMDriver {
 		pn = a.getDefaultParamNames();
 		nbStates = a.getStateCount();
 	}
-	
-	public RandomEFSMDriver() {
-		super(new RandomEFSM());
-		efsm = (RandomEFSM)this.automata;
-		dpv = efsm.getDefaultParamValues();
-		pn = efsm.getDefaultParamNames();
-		nbStates = efsm.getStateCount();
-	}
 
 	public static List<String> getStatHeaders() {
 		return Utils.createArrayList("States", "Inputs", "Outputs",
