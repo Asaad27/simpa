@@ -320,7 +320,7 @@ public class SIMPA {
 	private static StringOption INITIAL_INPUT_SYMBOLS = new StringOption("-I","Initial input symbols (a,b,c)",Options.INITIAL_INPUT_SYMBOLS);
 	private static StringOption INITIAL_INPUT_SEQUENCES = new StringOption("-Z","Initial distinguishing sequences (a-b,a-c,a-c-b))",Options.INITIAL_INPUT_SEQUENCES);
 	private static BooleanOption INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = new BooleanOption("-I=X", "Initial input symbols set to X");
-	private static Option<?>[] ZQOptions = new Option<?>[]{MAX_CE_LENGTH,MAX_CE_RESETS,INITIAL_INPUT_SYMBOLS,INITIAL_INPUT_SEQUENCES,INITIAL_INPUT_SYMBOLS_EQUALS_TO_X};
+	private static Option<?>[] ZQOptions = new Option<?>[]{STOP_AT_CE_SEARCH,MAX_CE_LENGTH,MAX_CE_RESETS,INITIAL_INPUT_SYMBOLS,INITIAL_INPUT_SEQUENCES,INITIAL_INPUT_SYMBOLS_EQUALS_TO_X};
 
 	//NoReset options
 	private static IntegerOption STATE_NUMBER_BOUND = new IntegerOption("--stateBound", "a bound of states number in the infered automaton\n"+
