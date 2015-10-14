@@ -360,8 +360,7 @@ public class SIMPA {
 	private static IntegerOption MIN_OUTPUT_SYM = new IntegerOption("--minoutputsym", "Minimal number of output symbols for random automatas\nThat is the minimal number used for output symbol genration but it is possible that less symbols are used", Options.MINOUTPUTSYM);
 	private static IntegerOption MAX_OUTPUT_SYM = new IntegerOption("--maxoutputsym", "Maximal number of output symbols for random automatas", Options.MAXOUTPUTSYM);
 	private static IntegerOption TRANSITION_PERCENT = new IntegerOption("--transitions", "percentage of loop in random automatas\nSome other loop may be generated randomly so it's a minimal percentage", Options.TRANSITIONPERCENT);
-	private static BooleanOption XSS_DETECTION = new BooleanOption("--xss", "Detect XSS vulnerability");
-	private static Option<?>[] randomAutomataOptions = new Option<?>[]{MIN_STATE,MAX_STATE,MIN_INPUT_SYM,MAX_INPUT_SYM,MIN_OUTPUT_SYM,MAX_OUTPUT_SYM,TRANSITION_PERCENT,XSS_DETECTION};
+	private static Option<?>[] randomAutomataOptions = new Option<?>[]{MIN_STATE,MAX_STATE,MIN_INPUT_SYM,MAX_INPUT_SYM,MIN_OUTPUT_SYM,MAX_OUTPUT_SYM,TRANSITION_PERCENT};
 
 	//stats options
 	private static IntegerOption NB_TEST = new IntegerOption("--nbtest","number of execution of the algorithm",Options.NBTEST);
@@ -371,7 +370,8 @@ public class SIMPA {
 
 	//Other options undocumented //TODO sort and explain them.
 	private static StringListOption URLS = new StringListOption("--urls", "??? TODO","url1","url2", Options.URLS);
-	private static Option<?>[] otherOptions = new Option<?>[]{URLS};
+	private static BooleanOption XSS_DETECTION = new BooleanOption("--xss", "Detect XSS vulnerability");
+	private static Option<?>[] otherOptions = new Option<?>[]{URLS,XSS_DETECTION};
 
 
 
@@ -487,10 +487,10 @@ public class SIMPA {
 		Options.MINOUTPUTSYM = MIN_OUTPUT_SYM.getValue();
 		Options.MAXOUTPUTSYM = MAX_OUTPUT_SYM.getValue();
 		Options.TRANSITIONPERCENT = TRANSITION_PERCENT.getValue();
-		Options.XSS_DETECTION = XSS_DETECTION.getValue();
 
 		Options.NBTEST = NB_TEST.getValue();
 
+		Options.XSS_DETECTION = XSS_DETECTION.getValue();
 		Options.URLS = URLS.getValue();
 		Options.SCAN = SCAN.getValue();
 	}
