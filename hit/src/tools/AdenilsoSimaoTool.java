@@ -81,9 +81,10 @@ public class AdenilsoSimaoTool {
 			// } catch (final Exception e) {
 			// e.printStackTrace();
 			// }
-			if (!p.waitFor(60, TimeUnit.SECONDS)){
+			if (!p.waitFor(15, TimeUnit.SECONDS)){
 				p.destroy();
-				System.out.println("interrupted sub-process");
+				System.out.println("interrupted sub-process (you can try to change time in java source"
+						+ "");
 				throw new InterruptedException("time out");
 			}
 			return p.exitValue() == 0;

@@ -80,6 +80,11 @@ public class StatsSet {
 				return;
 		restrictedStats.add(s);
 	}
+	
+	public void restrict(Restriction[] rs){
+		for (Restriction r : rs)
+			restrict(r);
+	}
 
 	public void restrict(Restriction r){
 		restrictions.add(r);//TODO check if one restriction is not a subRestriction of another
@@ -91,7 +96,7 @@ public class StatsSet {
 	}
 	
 	public StatsEntry get(int n){
-		return restrictedStats.get(0);
+		return restrictedStats.get(n);
 	}
 
 	public <T extends Comparable<T>> Map<T,StatsSet> sortByAtribute(Attribute<T> a){

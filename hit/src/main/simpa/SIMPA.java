@@ -22,6 +22,7 @@ import drivers.efsm.real.ScanDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
 import main.simpa.Options.LogLevel;
+import stats.GlobalGraphGenerator;
 import stats.GraphGenerator;
 import stats.StatsEntry;
 import stats.StatsSet;
@@ -803,6 +804,7 @@ public class SIMPA {
 			System.out.println("[+] Make Graph");
 			String baseDirGraph = baseDir + File.separator + Options.DIRGRAPHSTATS + File.separator;
 			new File(baseDirGraph).mkdir();
+			GlobalGraphGenerator globalGraph = new GlobalGraphGenerator();
 			for (File statFile : new File(statsDir).listFiles()){
 				String statName = statFile.getName().substring(0, statFile.getName().length()-4);
 				statName = statName.substring(statName.lastIndexOf(".")+1,statName.length());
@@ -813,6 +815,7 @@ public class SIMPA {
 				StatsSet stats = new StatsSet(statFile);
 				GraphGenerator gen = stats.get(0).getDefaultsGraphGenerator();
 				gen.generate(stats);
+				globalGraph.generate(stats);
 			}
 		}
 
