@@ -53,6 +53,12 @@ public class NoResetLearner extends Learner {
 	}
 
 	public void learn(List<InputSequence> W){
+		// VERY QUICK&DIRTY HACK by Roland Groz for ICGI paper
+		// skip cases where card(W) greater than 2
+		if (W.size()>2) {
+			LogManager.logConsole("Skipping cases where card(W)>2: W="+W+" and n="+Options.STATE_NUMBER_BOUND);
+			throw new RuntimeException();
+		}
 		LogManager.logStep(LogManager.STEPOTHER,"Inferring the system");
 		LogManager.logConsole("Inferring the system with W="+W+" and n="+Options.STATE_NUMBER_BOUND);
 

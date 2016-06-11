@@ -564,7 +564,7 @@ public class SIMPA {
 			}
 			if (SEED.getValue() != null){
 				System.err.println("you cannot impose seed for stats (that may duplicate results and make wrong average)");
-				System.exit(1);
+//				System.exit(1);
 			}
 		}
 
@@ -759,8 +759,10 @@ public class SIMPA {
 					globalStatsWriter = new BufferedWriter(new FileWriter(globalStats,true));
 				}
 
-
-				globalStatsWriter.append(learnerStats.toCSV() + "\n");
+				// QUICK HACK by Roland Groz to record the SEED used for this instance
+				// It should be more properly added as an Attribute
+				// Or even better associated to the name of the random machine
+				globalStatsWriter.append(learnerStats.toCSV() + Options.SEED + "\n");
 				globalStatsWriter.close();
 			} catch (Exception e){
 				LogManager.end();
