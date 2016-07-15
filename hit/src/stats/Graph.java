@@ -73,12 +73,12 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 	}
 
 	/**
-	 * plot a theorical function
+	 * plot a theorical weightFunction
 	 * 
 	 * @param f
-	 *            the function expression (must depends of x)
+	 *            the weightFunction expression (must depends of x)
 	 * @param title
-	 *            the title of the function
+	 *            the title of the weightFunction
 	 */
 	public void plotFunc(String f, String title, LineStyle lineStyle) {
 		linesStyles.add(lineStyle);

@@ -18,6 +18,10 @@ public class InputSequence implements Cloneable {
 		this();
 		sequence.add(input);
 	}
+	public InputSequence(List<String> sequence){
+		this();
+		this.sequence.addAll(sequence);
+	}
 
 	public InputSequence addInput(String input) {
 		sequence.add(input);

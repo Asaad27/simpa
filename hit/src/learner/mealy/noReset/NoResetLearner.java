@@ -185,8 +185,6 @@ public class NoResetLearner extends Learner {
 	}
 
 	/**
-	 * 
-	 * @param trace omega the global trace of the automata, will be completed \in (IO)*
 	 * @param inputSequences a subset of the characterization state \subset W \subset I*
 	 * @return the position of the fully identified state in the GlobalTrace
 	 */
@@ -367,7 +365,7 @@ public class NoResetLearner extends Learner {
 		return true;
 	}
 
-	private static List<InputSequence> computeCharacterizationSet(
+	public static List<InputSequence> computeCharacterizationSet(
 			MealyDriver driver) {
 		if (driver instanceof TransparentMealyDriver){
 			return computeCharacterizationSet((TransparentMealyDriver) driver);
@@ -413,7 +411,6 @@ public class NoResetLearner extends Learner {
 	 * @param inputSymbols
 	 * @param s1
 	 * @param s2
-	 * @param w2
 	 */
 	private static void addDistinctionSequence(Mealy automata,
 			List<String> inputSymbols, State s1, State s2,

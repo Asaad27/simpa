@@ -6,8 +6,7 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import main.simpa.Options;
 import tools.Utils;
@@ -67,6 +66,101 @@ public class RandomMealy extends Mealy implements Serializable {
 		createTransitions();
 		if (verbose) exportToDot();
 	}
+
+    public RandomMealy(boolean verbose,boolean reccursive) {
+        super("Random("+Options.TRANSITIONPERCENT+")");
+        if (reccursive){
+            seed = Utils.randLong();
+            generateSymbols();
+            int nbStates = Utils.randIntBetween(Options.MINSTATES,
+                    Options.MAXSTATES);
+            recursiveMealy(nbStates);
+
+        }else{
+            if (verbose)
+                LogManager.logStep(LogManager.STEPOTHER, "Generating random Mealy");
+            seed = Utils.randLong();
+            generateSymbols();
+            createStates(verbose);
+            createTransitions();
+            if (verbose) exportToDot();
+        }
+    }
+
+
+    /**
+     * Not completly working, too slow
+     * @param n
+     */
+    private void recursiveMealy(int n){
+        if(n == 1){
+            State s0 = addState(true);
+            for (String is : inputSymbols) {
+                addTransition(new MealyTransition(this, s0, s0, is, Utils.randIn(outputSymbols)));
+            }
+        }else{
+            recursiveMealy(n - 1);
+            State s = addState(false);
+            int max_try = 100;
+            for (int i = 0; i < max_try; i++){
+                List<MealyTransition> removed = new LinkedList<>();
+				List<MealyTransition> addedTransition = new LinkedList<>();
+
+				for (int j = 0; j < inputSymbols.size() ; j++) {
+                    State s2;
+                    //counting number of transition that lands on s2, s2 is kept if it can giveaway one
+                    int count = 0;
+					s2 = Utils.randIn(states);
+					for(MealyTransition transition : transitions.values()){
+						if(transition.getTo() == s2){
+							count++;
+						}
+					}
+					if(count < 2)
+						continue;
+                    Set<Integer> keys = transitions.keySet();
+                    List<Integer> candidates = new LinkedList<>();
+                    for (Integer key : keys){
+                        if(transitions.get(key).getTo() == s2){
+                            candidates.add(key);
+                        }
+                    }
+                    MealyTransition toRemove = transitions.remove(Utils.randIn(candidates));
+                    removed.add(toRemove);
+					MealyTransition newTransition = new MealyTransition(this, toRemove.getFrom(),s, toRemove.getInput(), Utils.randIn(outputSymbols));
+                    addTransition(newTransition);
+					addedTransition.add(newTransition);
+                }
+                for (String inputSymbol : inputSymbols) {
+                    MealyTransition transition = new MealyTransition(
+                            this,s,Utils.randIn(states),inputSymbol, Utils.randIn(outputSymbols));
+                    addedTransition.add(transition);
+                    addTransition(transition);
+                }
+                if (isConnex()){
+                    System.err.println("found a connex automata after trying " + (i+1) + " times");
+                    name = "Connex(" + name + ")";
+                    return;
+                }else{
+					System.err.println("NOT CONNEX :(");
+					//cancelling, wanna try another one.
+                    Set<Integer> keys = transitions.keySet();
+					Set<Integer> copy = new HashSet<>();
+					for(Integer key : keys){
+						copy.add(key);
+					}
+                    for (Integer key : copy){
+                        if(addedTransition.contains(transitions.get(key))){
+                            transitions.remove(key);
+                        }
+                    }
+                    for(MealyTransition transition : removed)
+                        addTransition(transition);
+                }
+            }
+            throw new RuntimeException("Tried " + max_try + " times to create a randomMealy but it never was connex. You're unluky or try other options (more inputs symbols)");
+        }
+    }
 	
 	public long getSeed(){
 		return seed;
@@ -129,7 +223,7 @@ public class RandomMealy extends Mealy implements Serializable {
 	}
 
 	public static RandomMealy getConnexRandomMealy(){
-		int max_try = 500;
+		int max_try = 50000;
 		LogManager.logStep(LogManager.STEPOTHER, "Generating random Mealy ("+max_try+" try)");
 		for (int i = 0 ; i < max_try; i++){
 			RandomMealy automata = new RandomMealy(false);
@@ -142,4 +236,11 @@ public class RandomMealy extends Mealy implements Serializable {
 		}
 		throw new RuntimeException("Tried " + max_try + " times to create a randomMealy but it never was connex. You're unluky or try other options (more inputs symbols)");
 	}
+
+    public static void main(String[] args){
+        Options.MINSTATES = 20;
+        Options.MAXSTATES = 20;
+        RandomMealy mealy = new RandomMealy(false,true);
+        System.err.println("terminated");
+    }
 }

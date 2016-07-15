@@ -73,7 +73,6 @@ public class WSetCalculator {
             printWSet();
             printStates();
         }
-        int j = 57;
     }
     private void printWSet(){
         System.out.print("Wset : {");

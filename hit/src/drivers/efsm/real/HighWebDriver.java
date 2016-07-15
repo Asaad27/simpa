@@ -25,8 +25,8 @@ import drivers.efsm.EFSMDriver;
  * 
  * getOutputSymbols / getInputSymbols functions returns a list of symbols (String)
  * 
- * Each symbols have at least one parameter, the default values is specified by the getDefaultParamValues function.
- * And their name is defined in the getParameterNames function.
+ * Each symbols have at least one parameter, the default values is specified by the getDefaultParamValues weightFunction.
+ * And their name is defined in the getParameterNames weightFunction.
  * 
  * abstractToConcrete take ParameterizedInput (one symbol and its parameter) as input and return the corresponding HTTP request
  * 
