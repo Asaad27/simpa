@@ -19,7 +19,7 @@ public class AntlrListener extends DotMealyBaseListener {
 	@Override
 	public void enterGraph(DotMealyParser.GraphContext ctx) {
 		ArrayList<String> value = new ArrayList<String>();
-		System.err.println("start-------" + ctx.ID().getText());
+//		System.err.println("start-------" + ctx.ID().getText());
 		String dotName = ctx.ID().getText();
 		value.add(dotName);
 		transation.put("GNAME", value);
@@ -28,7 +28,7 @@ public class AntlrListener extends DotMealyBaseListener {
 	@Override
 	public void exitGraph(DotMealyParser.GraphContext ctx) {
 		transation.put("TRANSALTION", set);
-		System.err.println("fin-------" + ctx.ID().getText());
+//		System.err.println("fin-------" + ctx.ID().getText());
 	}
 
 	/**
