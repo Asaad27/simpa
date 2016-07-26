@@ -20,7 +20,7 @@ public class AdenilsoSimaoTool {
 		try {
 			int min = 1;
 			int max = trace.getLength();
-			System.out.println("computing min trace lehgth");
+			System.out.println("computing min trace length");
 			while (min + 1 < max) {
 				int middle = (min + max) / 2;
 				if (isLengthSufficient(automata, trace, middle))
@@ -39,7 +39,7 @@ public class AdenilsoSimaoTool {
 	private static boolean isLengthSufficient(Mealy automata, InputSequence trace, int length)
 			throws InterruptedException {
 		assert length <= trace.getLength();
-		System.out.println("checking if " + length + " symbols are sufficient to found the automata");
+		System.out.println("checking if " + length + " symbols are sufficient to find the automaton");
 		try {
 			File tempSeq = File.createTempFile("simpa_" + length + "_", ".seq");
 			// tempSeq.deleteOnExit();
