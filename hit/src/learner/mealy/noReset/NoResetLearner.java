@@ -142,11 +142,18 @@ public class NoResetLearner extends Learner {
 			LogManager.logConsole(dataManager.readableTrace());
 		dataManager.getConjecture().exportToDot();
 		if (driver instanceof TransparentMealyDriver) {
-			int minTraceLength = AdenilsoSimaoTool.minLengthForExhaustivAutomata(
-					((TransparentMealyDriver) driver).getAutomata(), dataManager.getTrace().getInputsProjection());
-			if (minTraceLength > dataManager.traceSize())
-				throw new RuntimeException("error in learning, there is another automata which produce the same trace");
-			stats.setMinTraceLength(minTraceLength);
+			if (AdenilsoSimaoTool.isToolPresent()) {
+				int minTraceLength = AdenilsoSimaoTool.minLengthForExhaustivAutomata(
+						((TransparentMealyDriver) driver).getAutomata(), dataManager.getTrace().getInputsProjection());
+				if (minTraceLength > dataManager.traceSize())
+					throw new RuntimeException("error in learning, there is another automata which produce the same trace");
+				stats.setMinTraceLength(minTraceLength);
+			}else{
+				LogManager.logConsole("info: AdenilsoSimaoTool 'n-complete-exhaustive' tool is missing, "
+						              + "the minLengthForExhaustivAutomata() will not be computed.");
+				LogManager.logInfo("info: AdenilsoSimaoTool 'n-complete-exhaustive' tool is missing, "
+						              + "the minLengthForExhaustivAutomata() will not be computed.");
+			}
 		}else{
 			stats.setMinTraceLength(-2);
 		}
