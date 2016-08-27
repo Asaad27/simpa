@@ -15,7 +15,7 @@ mealy_trans
 	:	edge ( '[' mealy_attrs ']' )+
     |	label_name '=' ( value | '"'* ) 
     |	state (  '[' mealy_attrs ']' )*
-//    |	label_name ('=' quote*)
+    |	state ('=' value*)
     ;
 
 //attr_list
@@ -40,12 +40,12 @@ label_name
 edge
  	:	//ID '->' ID
  	|	(ID '->' (ID)*)* ';'? 	
+ 	|	(NUMBER '->' (NUMBER)*)* ';'?
  //	|	(state edgeop (state)*)* ';'?
  	;
  	
 state
-	: 	ID
-	
+	: 	ID | NUMBER
 	;
  	
 edgeop

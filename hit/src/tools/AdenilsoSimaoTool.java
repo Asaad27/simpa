@@ -15,6 +15,18 @@ import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
 
 public class AdenilsoSimaoTool {
+	
+	private static String nCompleteExhaustiveToolPath = "../../n-complete-exhaustive";
+	
+	public static boolean isToolPresent() {
+		boolean isPresent = false;
+		
+		File f = new File(nCompleteExhaustiveToolPath);
+		if (f.exists() && !f.isDirectory() && f.canExecute()) { 
+			isPresent = true;
+		}
+		return isPresent;
+	}
 
 	public static int minLengthForExhaustivAutomata(Mealy automata, InputSequence trace) {
 		try {
@@ -49,7 +61,7 @@ public class AdenilsoSimaoTool {
 			writer.close();
 
 			Runtime rt = Runtime.getRuntime();
-			Process p = rt.exec("../../n-complete-exhaustive " + tempSeq.getAbsolutePath());
+			Process p = rt.exec(nCompleteExhaustiveToolPath + " " + tempSeq.getAbsolutePath());
 			State init = automata.getInitialState();
 			StringBuilder fsmAutomata = new StringBuilder();
 			int nodeId = 0;
