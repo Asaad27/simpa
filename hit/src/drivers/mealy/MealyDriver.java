@@ -364,4 +364,28 @@ public class MealyDriver extends Driver {
 		LogManager.logInfo("Found homing sequence " + r);
 		return r;
 	}
+
+	/**
+	 * @param wset
+	 * @return true if the wset distinguish every state-pair
+     */
+	public boolean isCorrectWSet(List<InputSequence> wset){
+		for(int i = 0; i < automata.getStates().size(); i++){
+			State s1 = automata.getStates().get(i);
+			for(int j = 0; j < i; j++) {
+				boolean distinguished = false;
+				State s2 = automata.getStates().get(j);
+				for(InputSequence word: wset){
+					if(!automata.apply(word,s1).isSame(automata.apply(word,s2))){
+						distinguished = true;
+						break;
+					}
+				}
+				if(!distinguished){
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 }

@@ -11,6 +11,10 @@ public class OutputSequence implements Cloneable {
 	public OutputSequence() {
 		sequence = new ArrayList<String>();
 	}
+	public OutputSequence(String st) {
+		sequence = new ArrayList<String>();
+		sequence.add(st);
+	}
 
 	public void addOmegaInput() {
 		sequence.add(new String());

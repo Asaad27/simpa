@@ -1,6 +1,13 @@
 package WSetFinder;
 
+import WSetFinder.TransparentFinder.WSetStrategies.Crawler.CrawlerWset;
+import WSetFinder.TransparentFinder.WSetStrategies.Crawler.decisionFunction.NbTwin;
+import WSetFinder.TransparentFinder.WSetStrategies.Crawler.inputStrategy.LcaStrategy;
+import WSetFinder.TransparentFinder.WSetStrategies.UnionWSet;
+import WSetFinder.TransparentFinder.WeightFunction.LocaliseWeightFunction;
 import automata.State;
+import automata.mealy.InputSequence;
+import automata.mealy.OutputSequence;
 import drivers.mealy.MealyDriver;
 import drivers.mealy.transparent.RandomMealyDriver;
 import main.simpa.Options;
@@ -18,8 +25,8 @@ import java.util.*;
 public class WSetCalculator {
     private static PrintWriter writer;
 
-    private HashMap<String,HashMap<String, Integer>> statistics;
-    private ArrayList<String> WSet = new ArrayList<>();
+    private HashMap<InputSequence,HashMap<OutputSequence, Integer>> statistics;
+    private ArrayList<InputSequence> WSet = new ArrayList<>();
     int distinguishedStates = 0;
     private List<String> inputs;
     private String currentWord = "";
@@ -59,11 +66,13 @@ public class WSetCalculator {
     }
 
     public void calculateWSet(){
+        /*
+        driver.reset();
         statistics = WSetStatCalculator.computeIOStat(driver,nbState).getResultMap();
-        inputs = driver.getInputSymbols();
-        String w = chooseWord();
+        //inputs = driver.getInputSymbols();
+        InputSequence w = chooseWord();
         WSet.add(w);
-        for(String output : statistics.get(w).keySet()){
+        for(OutputSequence output : statistics.get(w).keySet()){
             StateIO newState = new StateIO();
             newState.add(w,output);
             stateIOs.add(newState);
@@ -73,10 +82,11 @@ public class WSetCalculator {
             printWSet();
             printStates();
         }
+        */
     }
     private void printWSet(){
         System.out.print("Wset : {");
-        for(String w : WSet){
+        for(InputSequence w : WSet){
             System.out.print(w+",");
         }
         System.out.println("}");
@@ -85,17 +95,17 @@ public class WSetCalculator {
         for(int i =0; i < stateIOs.size(); i++){
             StateIO stateIO = stateIOs.get(i);
             System.out.print("state "+ i +" : ");
-            for(String input : WSet) {
-                String output = stateIO.get(input);
+            for(InputSequence input : WSet) {
+                OutputSequence output = stateIO.get(input);
                 System.out.print("{" + input + "->" + output + "}, ");
             }
             System.out.println();
         }
         System.out.println();
     }
-
+    /* A DEBUGUER
     private void strategy() {
-        String w = chooseWord();
+        InputSequence w = chooseWord();
         System.out.println("choosen word: " + w);
         WSet.add(w);
         int i = 0;
@@ -134,15 +144,16 @@ public class WSetCalculator {
             System.out.println("Only " + nbChar + "/"+stateIOs.size()+ " characterized");
         }
     }
+    */
 
     private void update(StateIO detectedState) {
-        String w = WSet.get(WSet.size() - 1);
+        InputSequence w = WSet.get(WSet.size() - 1);
         ArrayList<StateIO> candidates = new ArrayList<>(stateIOs);
-        ArrayList<String> set = new ArrayList<>(WSet);
+        ArrayList<InputSequence> set = new ArrayList<>(WSet);
         set.remove(w);
         for(StateIO  candidate : candidates){
             boolean sameQuotientState = true;
-            for(String word : set) {
+            for(InputSequence word : set) {
                 if (candidate.get(word) != null) {
                     if (!candidate.get(word).equals(detectedState.get(word))) {
                         sameQuotientState = false;
@@ -170,23 +181,27 @@ public class WSetCalculator {
         stateIOs.add(detectedState);
     }
 
-    private StateIO localizer(List<String> set){
-        if(set.size() ==1){
-            execute(set.get(0));
+    //A DEBUGUER
+    /*
+    private StateIO localizer(List<InputSequence> set){
+        if(set.size() == 1){
+            execute(set.get(0).toString());
             StateIO state = new StateIO();
             //recreating trace
-            String input = "";
-            String output = "";
-            for(int i =0; i< set.get(0).length() ; i++){
-                input = trace.get(trace.size() - 1 - i).getInput() + input;
-                output = trace.get(trace.size() - 1 - i).getOutput() + output;
+            InputSequence input = new InputSequence();
+            OutputSequence output = new OutputSequence();
+            int wordSize = set.get(0).getLength();
+            for(int i = 0; i < wordSize; i++){
+                IO io = trace.get(trace.size() - wordSize + i);
+                input.addInputSequence(io.getInput());
+                output.addOutputSequence(io.getOutput());
             }
             state.add(new IO(input,output));
             return state;
         }else{
             //what are answers to set(k -1);
             ArrayList<IO> traces = new ArrayList<>();
-            ArrayList<String> subSet1 = new ArrayList<>(set);
+            ArrayList<InputSequence> subSet1 = new ArrayList<>(set);
             subSet1.remove(set.get(set.size() -1));
             ArrayList<String> subSet2 = new ArrayList<>(set);
             subSet2.remove(set.get(set.size() - 2));
@@ -225,6 +240,7 @@ public class WSetCalculator {
             return trace2;
         }
     }
+    */
 
     private void execute(String s) {
         System.out.print("Executing {" + s + "->");
@@ -232,22 +248,22 @@ public class WSetCalculator {
             String input = "" + s.charAt(i);
             String output = driver.execute(input);
             System.out.print(output);
-            trace.add(new IO(input,output));
+            trace.add(new IO(new InputSequence(input),new OutputSequence(output)));
         }
         System.out.println();
     }
 
-    private String chooseWord(){
+    private InputSequence chooseWord(){
         int quality = 0;
-        String word = "";
-        for(String key : statistics.keySet()){
+        InputSequence word = new InputSequence();
+        for(InputSequence key : statistics.keySet()){
             if(statistics.get(key).size() > quality){
                 if(!WSet.contains(key)){
                     word = key;
                     quality = statistics.get(key).size();
                 }
             }
-            else if(statistics.get(key).size() == quality && key.length() < word.length()) {
+            else if(statistics.get(key).size() == quality && key.getLength() < word.getLength()) {
                 if (!WSet.contains(key)) {
                     word = key;
                     quality = statistics.get(key).size();
@@ -259,4 +275,5 @@ public class WSetCalculator {
         }
         return word;
     }
+
 }

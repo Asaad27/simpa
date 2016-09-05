@@ -1,23 +1,26 @@
 package WSetFinder;
 
+import automata.mealy.InputSequence;
+import automata.mealy.OutputSequence;
+
 /**
  * Created by jean on 27/04/16.
  * Store an Input sequence and its answer
  */
 public class IO {
-    private String input;
-    private String output;
+    private InputSequence input;
+    private OutputSequence output;
 
-    public IO(String input, String output) {
+    public IO(InputSequence input, OutputSequence output) {
         this.input = input;
         this.output = output;
     }
 
-    public String getInput() {
+    public InputSequence getInput() {
         return input;
     }
 
-    public String getOutput() {
+    public OutputSequence getOutput() {
         return output;
     }
 }

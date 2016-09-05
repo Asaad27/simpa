@@ -2,14 +2,15 @@ package WSetFinder;
 
 import automata.Automata;
 import automata.mealy.InputSequence;
+import automata.mealy.Mealy;
+import automata.mealy.OutputSequence;
 import drivers.mealy.MealyDriver;
 import drivers.mealy.transparent.RandomMealyDriver;
+import examples.mealy.RandomMealy;
 import learner.mealy.noReset.NoResetLearner;
 import main.simpa.Options;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +24,8 @@ public class WSetStatCalculator {
     private static PrintWriter writer;
 
     public static void main(String[] args) {
+        generation();
+        if(true) return;
         if (args.length != 1) {
             System.out.println(" usage : bin arg\n arg : dest cvs file");
             return;
@@ -150,31 +153,27 @@ public class WSetStatCalculator {
     public static IOStats computeIOStat(MealyDriver driver, int nbState) {
         List<String> inputSymbols = driver.getInputSymbols();
         //store intput/output statistics
-        HashMap<String,HashMap<String,Integer>> resultMap = new HashMap<>();
-        HashMap<String,Integer> nbTest = new HashMap<>();
+        HashMap<InputSequence,HashMap<OutputSequence,Integer>> resultMap = new HashMap<>();
+        HashMap<InputSequence,Integer> nbTest = new HashMap<>();
         Random random = new Random();
         int size = inputSymbols.size();
-        List<String> inputLog = new ArrayList<>();
-        List<String> outputLog = new ArrayList<>();
-        for(int i = 0; i < 30000; i++){
+        InputSequence inputLog = new InputSequence();
+        OutputSequence outputLog = new OutputSequence();
+        for(int i = 0; i < 3000; i++){
             //pick a random input
             String input = inputSymbols.get(random.nextInt(inputSymbols.size()));
             String output = driver.execute(input);
-            inputLog.add(input);
-            outputLog.add(output);
+            inputLog.addInput(input);
+            outputLog.addOutput(output);
             //find every input sequence statistic to update.
             for(int j = Math.max(0,i - 6 + 1); j <= i; j++){
-                String inputSequence = "";
-                String outputSequence = "";
-                for(int k = j; k <= i; k++){
-                    inputSequence += inputLog.get(k);
-                    outputSequence += outputLog.get(k);
-                }
+                InputSequence inputSequence = inputLog.getIthSuffix(j);
+                OutputSequence outputSequence = outputLog.getIthSuffix(j);
                 if(!nbTest.containsKey(inputSequence)){
                     nbTest.put(inputSequence,0);
                     resultMap.put(inputSequence, new HashMap<>());
                 }
-                HashMap<String,Integer> inputStats = resultMap.get(inputSequence);
+                HashMap<OutputSequence,Integer> inputStats = resultMap.get(inputSequence);
                 if(!inputStats.containsKey(outputSequence)){
                     inputStats.put(outputSequence,0);
                     // a single sequence destinguish all states, this is a success
@@ -246,7 +245,7 @@ public class WSetStatCalculator {
             }
             nbTest.put(nbState,nbTest.get(nbState) + 1);
             Integer max = 0;
-            for(HashMap<String,Integer> outputsResult : ioStats.getResultMap().values()){
+            for(HashMap<OutputSequence,Integer> outputsResult : ioStats.getResultMap().values()){
                 if(outputsResult.size() > max){
                     max = outputsResult.size();
                 }
@@ -287,4 +286,74 @@ public class WSetStatCalculator {
             }
         }
     }
+
+    public static void dataBaseCreate(int nbState, int nbAutomata){
+        Options.MININPUTSYM = 2;
+        Options.MAXINPUTSYM = 2;
+        Options.MINOUTPUTSYM = 2;
+        Options.MAXOUTPUTSYM = 2;
+        Options.MAXSTATES = nbState;
+        Options.MINSTATES = nbState;
+        try {
+            SerializableAutomataList list = new SerializableAutomataList();
+            int i = 0;
+            while (i < nbAutomata){
+                try{
+                    list.mealys.add(RandomMealy.getConnexRandomMealy());
+                    i++;
+                }catch (Exception e) {
+                    //doNotihng
+                }
+            }
+            File file = new File(Options.OUTDIR +"/database/size"+nbState+".auto");
+            file.createNewFile();
+            FileOutputStream fileOut =
+                    new FileOutputStream(Options.OUTDIR +"/database/size"+nbState+".auto");
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(list);
+            out.close();
+            fileOut.close();
+            System.out.printf(Options.OUTDIR +"/database/size"+nbState+".auto");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static List<Mealy> databaseImport(int nbState){
+        try
+        {
+            FileInputStream fileIn = new FileInputStream(Options.OUTDIR +"/database/size"+nbState+".auto");
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            SerializableAutomataList list = (SerializableAutomataList) in.readObject();
+            in.close();
+            fileIn.close();
+            return list.mealys;
+        }catch(IOException i)
+        {
+            i.printStackTrace();
+            return null;
+        }catch(ClassNotFoundException c)
+        {
+            System.out.println("list of automata not found");
+            c.printStackTrace();
+            return null;
+        }
+    }
+
+    public static void testImport(){
+        dataBaseCreate(10,10);
+        List<Mealy> list = databaseImport(10);
+        System.out.println(list);
+    }
+
+    public static void generation(){
+        for(int i = 5; i <= 35; i++){
+            dataBaseCreate(i,1000);
+            System.out.println("1000 automatas created for nb State = " + i);
+        }
+    }
+}
+
+class SerializableAutomataList implements Serializable {
+    List<Mealy> mealys = new ArrayList<>();
 }

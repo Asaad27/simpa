@@ -1,5 +1,8 @@
 package WSetFinder;
 
+import automata.mealy.InputSequence;
+import automata.mealy.OutputSequence;
+
 import java.util.HashMap;
 
 /**
@@ -13,12 +16,12 @@ public class IOStats {
     /**
      * number of computed tests for each observed input sequences
      */
-    private HashMap<String, Integer> nbTest;
+    private HashMap<InputSequence, Integer> nbTest;
     /**
      * link each observed input sequence the the differents observed output
      * and their frequencies
      */
-    private HashMap<String,HashMap<String, Integer>> resultMap;
+    private HashMap<InputSequence,HashMap<OutputSequence, Integer>> resultMap;
     /**
      * number of state in the automata
      */
@@ -30,17 +33,17 @@ public class IOStats {
     private boolean hasDistinguishingSequence = false;
 
 
-    public IOStats(HashMap<String, Integer> nbTest, HashMap<String, HashMap<String, Integer>> resultMap, int nbState) {
+    public IOStats(HashMap<InputSequence, Integer> nbTest, HashMap<InputSequence, HashMap<OutputSequence, Integer>> resultMap, int nbState) {
         this.nbTest = nbTest;
         this.resultMap = resultMap;
         this.nbState = nbState;
     }
 
-    public HashMap<String, Integer> getNbTest() {
+    public HashMap<InputSequence, Integer> getNbTest() {
         return nbTest;
     }
 
-    public HashMap<String, HashMap<String, Integer>> getResultMap() {
+    public HashMap<InputSequence, HashMap<OutputSequence, Integer>> getResultMap() {
         return resultMap;
     }
 

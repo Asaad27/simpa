@@ -1,6 +1,8 @@
 package WSetFinder;
 
 import automata.State;
+import automata.mealy.InputSequence;
+import automata.mealy.OutputSequence;
 
 import java.util.ArrayList;
 
@@ -12,7 +14,7 @@ import java.util.ArrayList;
 public class StateIO {
     private ArrayList<IO> ios;
 
-    public void add(String input, String output){
+    public void add(InputSequence input, OutputSequence output){
         ios.add(new IO(input,output));
     }
     public void add(IO io){
@@ -22,7 +24,7 @@ public class StateIO {
     public StateIO() {
         ios = new ArrayList<>();
     }
-    public String get(String input){
+    public OutputSequence get(InputSequence input){
         for(IO io : ios){
             if(io.getInput().equals(input)){
                 return io.getOutput();
