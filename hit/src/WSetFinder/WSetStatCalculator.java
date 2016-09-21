@@ -22,6 +22,8 @@ public class WSetStatCalculator {
     private static PrintWriter writer;
 
     public static void main(String[] args) {
+
+        /*
         if (args.length != 1) {
             System.out.println(" usage : bin arg\n arg : dest cvs file");
             return;
@@ -39,7 +41,7 @@ public class WSetStatCalculator {
         IOStats ioStats = computeIOStat(new RandomMealyDriver(),Options.MAXSTATES);
         ioStats.getResultMap();
         exportIOStats(computeIOStats(2,20,2,2,2,2,200));
-        writer.close();
+        writer.close();*/
     }
 
     /**
@@ -275,6 +277,7 @@ public class WSetStatCalculator {
         Options.MAXOUTPUTSYM = 2;
         Options.MAXSTATES = nbState;
         Options.MINSTATES = nbState;
+        System.out.println("creating database of size " + nbState);
         try {
             SerializableAutomataList list = new SerializableAutomataList();
             int i = 0;
@@ -289,10 +292,15 @@ public class WSetStatCalculator {
                 }
             }
             File file = new File(Options.OUTDIR +"/database/size"+nbState+".auto");
+            File databaseDirectory = new File(Options.OUTDIR +"/database");
+            try{
+                databaseDirectory.mkdirs();
+            }catch (Exception ignored){
+
+            }
             Boolean success = file.createNewFile();
             if(!success){
-                System.err.println("Error, directory " + Options.OUTDIR +"/database does not exist" +
-                        " or file already exist." );
+                System.err.println("error creating file, try deleting previous one");
             }
             FileOutputStream fileOut =
                     new FileOutputStream(Options.OUTDIR +"/database/size"+nbState+".auto");
@@ -317,16 +325,15 @@ public class WSetStatCalculator {
             return list.mealys;
         }catch(IOException i)
         {
-            i.printStackTrace();
-            return null;
-        }catch(ClassNotFoundException c)
-        {
             System.out.println("list of automata not found");
             System.out.println("now generating list of automata, rerun again after this end ");
             generation();
-            c.printStackTrace();
-            return null;
+            System.out.println("done!");
+        }catch(ClassNotFoundException ignored)
+        {
+
         }
+        return databaseImport(nbState);
     }
 
     public static void testImport(){

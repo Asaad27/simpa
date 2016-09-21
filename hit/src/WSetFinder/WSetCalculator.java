@@ -12,8 +12,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
- * warning: due to lacks of time, this is not wished to be read by anyone
- * allergies and loss of will to live may occurs.
+ * DEPRECATED
  * Created by jean on 24/04/16.
  */
 public class WSetCalculator {
@@ -39,6 +38,7 @@ public class WSetCalculator {
      * @param args: should be of length 1
      */
     public static void main(String[] args) {
+        System.out.println(Options.OUTDIR);
         if (args.length != 1) {
             System.out.println(" usage : bin arg\n arg : dest cvs file");
             return;
