@@ -1,4 +1,4 @@
-package WSetFinder.TransparentFinder.WeightFunction;
+package WSetFinder.WeightFunction;
 
 import automata.mealy.InputSequence;
 

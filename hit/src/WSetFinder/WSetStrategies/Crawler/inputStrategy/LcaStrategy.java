@@ -1,10 +1,8 @@
-package WSetFinder.TransparentFinder.WSetStrategies.Crawler.inputStrategy;
+package WSetFinder.WSetStrategies.Crawler.inputStrategy;
 
-import WSetFinder.TransparentFinder.Node;
-import WSetFinder.TransparentFinder.SplittingTree;
-import WSetFinder.TransparentFinder.WSetStrategies.Crawler.StatePair;
-import WSetFinder.TransparentFinder.WSetStrategies.Crawler.States;
-import automata.State;
+import WSetFinder.Node;
+import WSetFinder.SplittingTree;
+import WSetFinder.WSetStrategies.Crawler.States;
 import automata.mealy.InputSequence;
 
 import java.util.*;

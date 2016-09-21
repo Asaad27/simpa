@@ -1,15 +1,15 @@
-package WSetFinder.TransparentFinder.WSetStrategies.Crawler;
+package WSetFinder.WSetStrategies.Crawler;
 
-import WSetFinder.TransparentFinder.SplittingTree;
-import WSetFinder.TransparentFinder.WSetStrategies.Crawler.decisionFunction.NbCluster;
-import WSetFinder.TransparentFinder.WSetStrategies.Crawler.decisionFunction.NbTwin;
-import WSetFinder.TransparentFinder.WSetStrategies.Crawler.decisionFunction.ValueFunction;
-import WSetFinder.TransparentFinder.WSetStrategies.Crawler.inputStrategy.AlphabetStrategy;
-import WSetFinder.TransparentFinder.WSetStrategies.Crawler.inputStrategy.InputStrategy;
-import WSetFinder.TransparentFinder.WSetStrategies.Crawler.inputStrategy.LcaStrategy;
-import WSetFinder.TransparentFinder.WSetStrategies.WSetStrategy;
-import WSetFinder.TransparentFinder.WeightFunction.LocaliseWeightFunction;
-import WSetFinder.TransparentFinder.WeightFunction.WeightFunction;
+import WSetFinder.SplittingTree;
+import WSetFinder.WSetStrategies.Crawler.decisionFunction.NbCluster;
+import WSetFinder.WSetStrategies.Crawler.decisionFunction.NbTwin;
+import WSetFinder.WSetStrategies.Crawler.decisionFunction.ValueFunction;
+import WSetFinder.WSetStrategies.Crawler.inputStrategy.AlphabetStrategy;
+import WSetFinder.WSetStrategies.Crawler.inputStrategy.InputStrategy;
+import WSetFinder.WSetStrategies.Crawler.inputStrategy.LcaStrategy;
+import WSetFinder.WSetStrategies.WSetStrategy;
+import WSetFinder.WeightFunction.LocaliseWeightFunction;
+import WSetFinder.WeightFunction.WeightFunction;
 import automata.mealy.InputSequence;
 import automata.State;
 import drivers.mealy.transparent.RandomMealyDriver;

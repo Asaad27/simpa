@@ -1,8 +1,7 @@
-package WSetFinder.TransparentFinder.WSetStrategies;
+package WSetFinder.WSetStrategies;
 
-import WSetFinder.TransparentFinder.Node;
-import WSetFinder.TransparentFinder.WSetStrategies.WSetStrategy;
-import WSetFinder.TransparentFinder.WeightFunction.WeightFunction;
+import WSetFinder.Node;
+import WSetFinder.WeightFunction.WeightFunction;
 import automata.mealy.InputSequence;
 import drivers.mealy.transparent.TransparentMealyDriver;
 
@@ -11,6 +10,7 @@ import java.util.List;
 
 /**
  * Created by Jean Bouvattier on 04/07/16.
+ * make an union of all input-sequence from a splitting tree to make a w-set
  */
 public class UnionWSet extends WSetStrategy {
 

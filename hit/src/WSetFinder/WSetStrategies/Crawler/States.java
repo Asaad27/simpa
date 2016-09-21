@@ -1,17 +1,17 @@
-package WSetFinder.TransparentFinder.WSetStrategies.Crawler;
+package WSetFinder.WSetStrategies.Crawler;
 
-import WSetFinder.TransparentFinder.Node;
-import WSetFinder.TransparentFinder.SplittingTree;
+import WSetFinder.Node;
+import WSetFinder.SplittingTree;
 import automata.State;
 import automata.mealy.InputSequence;
 import automata.mealy.OutputSequence;
 
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
  * Created by Jean Bouvattier on 07/07/16.
+ * states evolutions and abilities to be distinguished when applying a word to machine.st
  */
 public class States {
     private List<List<StatePair>> statePairs;

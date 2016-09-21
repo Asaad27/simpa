@@ -1,19 +1,18 @@
-package WSetFinder.TransparentFinder.WSetStrategies;
+package WSetFinder.WSetStrategies;
 
-import WSetFinder.TransparentFinder.WeightFunction.LocaliseWeightFunction;
-import WSetFinder.TransparentFinder.WeightFunction.WeightFunction;
+import WSetFinder.WeightFunction.LocaliseWeightFunction;
+import WSetFinder.WeightFunction.WeightFunction;
 import WSetFinder.WSetStatCalculator;
 import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
-import drivers.Driver;
-import drivers.mealy.MealyDriver;
-import drivers.mealy.transparent.RandomMealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
-import examples.mealy.RandomMealy;
 import main.simpa.Options;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.*;
 
 /**
@@ -27,26 +26,29 @@ public class FromStats extends WSetStrategy {
     final static float[] targetValues = {1.374f,1.463f,1.587f,1.672f,1.721f,1.781f,1.81f,1.874f
             ,1.911f,1.915f,1.951f,1.956f,1.989f,2.007f,1.999f,2.001f,2.024f,2.006f,2.038f,2.029f
             ,2.022f,2.024f,2.027f,2.04f,2.038f,2.042f,2.042f,2.046f,2.035f,2.035f,2.039f};
+    private final Set<MealyTransition> uncheckedTransition;
 
     private int limitLength = 10;
-    private int nbInput;
+    protected int nbInput;
     private List<String> inputs = new ArrayList<>();
     private List<String> outputs = new ArrayList<>();
     private LinkedInputTree statRoot = new LinkedInputTree(new InputSequence());
     List<LinkedInputTree> stats;
+
     public FromStats(TransparentMealyDriver driver, boolean doRefine, WeightFunction weightFunction,
                      int nbInput, int limitLength) {
         super(driver, doRefine, weightFunction);
         s = driver.getAutomata().getInitialState();
         this.limitLength = limitLength;
         this.nbInput = nbInput;
+        this.uncheckedTransition = new HashSet<>(driver.getAutomata().getTransitions());
     }
 
     /**
      * performs statistics to determine best distinguishing sequences.
      * also privilege sequences if their sufixes are not present in the
      * on construction w-set
-     * @return
+     * @return null if a wset can't be efficiently created or the computed wset
      */
     @Override
     public List<InputSequence> calculateWSet() {
@@ -58,7 +60,7 @@ public class FromStats extends WSetStrategy {
         wSet.add(stats.get(0).input);
         int prefixLimit = 1;
         boolean goodCandidate = true;
-        while(!driver.isCorrectWSet(wSet) && wSet.size() <= 10){
+        while(!driver.isCorrectWSet(wSet) && wSet.size() <10){
             InputSequence candidate = null;
             for (LinkedInputTree node: stats) {
                 goodCandidate = true;
@@ -94,11 +96,10 @@ public class FromStats extends WSetStrategy {
                 prefixLimit++;
             }
         }
-        Iterator<LinkedInputTree> itr = stats.iterator();
-        while(!driver.isCorrectWSet(wSet) && itr.hasNext()){
-            wSet.add(itr.next().input);
-        }
-        return wSet;
+        if(wSet.size() == 10)
+            return null;
+        else
+            return wSet;
     }
 
     private automata.State s;
@@ -107,6 +108,7 @@ public class FromStats extends WSetStrategy {
         TransparentMealyDriver driver = tree.getDriver();
         MealyTransition transition = driver.getAutomata().getTransitionFromWithInput(s,input);
         String output = transition.getOutput();
+        uncheckedTransition.remove(transition);
         s = transition.getTo();
         inputs.add(input);
         outputs.add(output);
@@ -139,19 +141,31 @@ public class FromStats extends WSetStrategy {
         return statRoot.toList();
     }
 
-    public static void main(String args[]){
-        int nbState = 4;
-        Options.MAXOUTPUTSYM = 2;
-        Options.MINOUTPUTSYM = 2;
-        Options.MAXINPUTSYM = 2;
-        Options.MININPUTSYM = 2;
-        ArrayList<Integer> nbTry = new ArrayList<>();
-        for(float expectedValue : FromStats.targetValues){
-            nbState++;
-            float targetValue = expectedValue*1.1f;
-            int result = getParameters(targetValue,nbState);
-            nbTry.add(result);
-            System.out.println("nbTry = " + nbTry + " for nb State =" + nbState);
+    /**
+     * iterate overs all FSM size to run test
+     * @param args
+     */
+    public static void main(String args[]) {
+        try {
+            FileWriter writer = new FileWriter(Options.OUTDIR + "/statCrawler.csv");
+            int beginning = 0;
+            int nbState = 4 + beginning;
+            Options.MAXOUTPUTSYM = 2;
+            Options.MINOUTPUTSYM = 2;
+            Options.MAXINPUTSYM = 2;
+            Options.MININPUTSYM = 2;
+            ArrayList<Integer> nbTry = new ArrayList<>();
+            for (int i = beginning; i < FromStats.targetValues.length; i++) {
+                nbState++;
+                float expectedValue = FromStats.targetValues[i];
+                float targetValue = expectedValue * 1.05f;
+                int result = getParameters(targetValue, nbState,writer);
+                nbTry.add(result);
+                System.out.println("nbTry = " + nbTry + " for nb State =" + nbState);
+            }
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -161,18 +175,21 @@ public class FromStats extends WSetStrategy {
      * @param nbState automata size to be tested
      * @return number of input to be computed on a classic wset search
      */
-    public static int getParameters(float wantedSize, int nbState){
+    public static int getParameters(float wantedSize, int nbState,Writer writer) throws IOException {
         float averageSize;
         Options.MAXSTATES = nbState;
         Options.MINSTATES = nbState;
+        List<Float> averages = new ArrayList<>();
+
         List<Mealy> database = WSetStatCalculator.databaseImport(nbState);
         int nbSample = database.size();
-        int nbInput = 200;
+        int nbInput = 0;
         int wordLength;
-        if(nbState <= 10)
+        int nbFail;
+        if(nbState <= 8)
             wordLength = nbState;
         else{
-            wordLength = 5 + nbState/2;
+            wordLength = 8;
         }
         List<TransparentMealyDriver> drivers = new ArrayList<>();
         for (Mealy mealy : database) {
@@ -180,11 +197,20 @@ public class FromStats extends WSetStrategy {
             drivers.add(driver);
         }
         System.out.println("target average size: " + wantedSize);
+        boolean asymptoteReached;
+        HashMap<Integer, Integer> wSetSizeRepartition;
+        int nbAssymptote = 0;
+        int nbTest;
         do {
-            nbInput += 40;
+            nbFail = 0;
+             wSetSizeRepartition = new HashMap<>();
+            for (int i = 1; i < 10; i++) {
+                wSetSizeRepartition.put(i, 0);
+            }
+            nbInput += 50;
             //wordLength++;
             averageSize = 0;
-            int nbTest = 0;
+            nbTest = 0;
             long timeSpent = 0;
             for (int i = 0; i < nbSample; i++) {
                 try {
@@ -192,27 +218,48 @@ public class FromStats extends WSetStrategy {
                     long begin = System.currentTimeMillis();
                     FromStats strat = new FromStats(driver, true, new LocaliseWeightFunction(), nbInput, wordLength);//wordLength);
                     List<InputSequence> wSet = strat.calculateWSet();
+                    //Happens if statistic analysis failed to create a correct wSet
+                    if (wSet == null) {
+                        nbFail++;
+                        continue;
+                    }
+                    long end = System.currentTimeMillis();
                     int size = wSet.size();
                     averageSize += size;
                     nbTest++;
-                    long end = System.currentTimeMillis();
+                    wSetSizeRepartition.put(size, wSetSizeRepartition.get(size) + 1);
                     timeSpent += (end - begin);
                 } catch (Exception e) {
                     //e.printStackTrace();
                 }
             }
+
+            System.out.println("number of failed wset building:" + nbFail);
+
             averageSize /= nbTest;
             timeSpent /= (nbTest);
             System.out.println("avg size = " + averageSize + " with nb Input = " +
                     nbInput + " nb try = " + nbTest + " Time spent = " + timeSpent + " wordLength = " + wordLength);
-        } while (averageSize > wantedSize && nbInput < 1000);
-            return nbInput;
+            averages.add(averageSize);
+            asymptoteReached = (averages.size() >= 3 && (averages.get(averages.size() - 3) - averages.get(averages.size() - 1) < 0.05f));
+            if (asymptoteReached) {
+                nbAssymptote++;
+            }
+        } while (averageSize > wantedSize  && nbInput < 1000 && nbAssymptote < 3);
+        writer.write(nbState + "," + nbInput + "," + averageSize + ",");
+        for (int i = 1; i < 6; i++) {
+            float fraction = ((float) wSetSizeRepartition.get(i))/nbTest;
+            writer.write("\"" +(Float.toString(fraction).replace('.',','))+ "\",");
+        }
+        writer.write("\n");
+        System.out.println("result average size = " + averageSize);
+        return nbInput;
     }
 }
 
 /**
- * Link every input sequence to all its extensions.
- * also contains outpurs
+ * Link every input sequence to all its prolongations.
+ * also contains outputs.
  */
 class LinkedInputTree implements Comparable<LinkedInputTree>{
     final static boolean reccursiveAdding = true;

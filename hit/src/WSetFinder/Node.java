@@ -1,12 +1,9 @@
-package WSetFinder.TransparentFinder;
+package WSetFinder;
 
-import automata.Automata;
 import automata.State;
 import automata.mealy.InputSequence;
-import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
 import drivers.mealy.transparent.TransparentMealyDriver;
-import org.apache.regexp.RE;
 
 import java.io.PrintWriter;
 import java.util.*;

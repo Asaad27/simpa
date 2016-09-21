@@ -1,31 +1,27 @@
 package WSetFinder;
 
-import automata.Automata;
 import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.OutputSequence;
 import drivers.mealy.MealyDriver;
 import drivers.mealy.transparent.RandomMealyDriver;
-import examples.mealy.RandomMealy;
+import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.mealy.noReset.NoResetLearner;
 import main.simpa.Options;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
+ * DEPRECATED
  * Created by jean Bouvattier on 20/03/16.
+ * calculate input output states. deprecated.
  */
 public class WSetStatCalculator {
 
     private static PrintWriter writer;
 
     public static void main(String[] args) {
-        generation();
-        if(true) return;
         if (args.length != 1) {
             System.out.println(" usage : bin arg\n arg : dest cvs file");
             return;
@@ -36,18 +32,6 @@ public class WSetStatCalculator {
             e.printStackTrace();
             return;
         }
-        //Uncomment to have wSet size statistics
-
-         //List<ResultSet> resultSets = computeWSetSizeStat(2, 20, 2, 2, 2, 2, 10);
-         //exportWSetSizeStat(resultSets);
-
-        // Uncomment to have full array of state
-
-        //for (ResultSet result: resultSets) {
-        //    result.printResult(writer);
-        //}
-
-        // Uncomment to try the wSetGuesser
         Options.MININPUTSYM = 2;
         Options.MAXINPUTSYM = 2;
         Options.MINOUTPUTSYM = 2;
@@ -56,7 +40,6 @@ public class WSetStatCalculator {
         ioStats.getResultMap();
         exportIOStats(computeIOStats(2,20,2,2,2,2,200));
         writer.close();
-
     }
 
     /**
@@ -148,7 +131,6 @@ public class WSetStatCalculator {
     /**
      * send random inputs sequences and link them to differents ouputs
      * @param driver : driver to a blackbox mealy automata
-     * @return
      */
     public static IOStats computeIOStat(MealyDriver driver, int nbState) {
         List<String> inputSymbols = driver.getInputSymbols();
@@ -194,7 +176,6 @@ public class WSetStatCalculator {
 
     /**
      * compute IOStat on a large number of case
-     * @params min/max: range of tests
      * @param nbTry : for each triplet (nbStates,NbInput,nbOutput) the algorithme performs nbTry computation
      * @return List of Input/output statistics for each driver tested.
      */
@@ -299,14 +280,20 @@ public class WSetStatCalculator {
             int i = 0;
             while (i < nbAutomata){
                 try{
-                    list.mealys.add(RandomMealy.getConnexRandomMealy());
+                    TransparentMealyDriver driver = new RandomMealyDriver();
+                    SplittingTree tree = new SplittingTree(driver,true);
+                    list.mealys.add(driver.getAutomata());
                     i++;
                 }catch (Exception e) {
                     //doNotihng
                 }
             }
             File file = new File(Options.OUTDIR +"/database/size"+nbState+".auto");
-            file.createNewFile();
+            Boolean success = file.createNewFile();
+            if(!success){
+                System.err.println("Error, directory " + Options.OUTDIR +"/database does not exist" +
+                        " or file already exist." );
+            }
             FileOutputStream fileOut =
                     new FileOutputStream(Options.OUTDIR +"/database/size"+nbState+".auto");
             ObjectOutputStream out = new ObjectOutputStream(fileOut);
@@ -335,6 +322,8 @@ public class WSetStatCalculator {
         }catch(ClassNotFoundException c)
         {
             System.out.println("list of automata not found");
+            System.out.println("now generating list of automata, rerun again after this end ");
+            generation();
             c.printStackTrace();
             return null;
         }
@@ -354,6 +343,9 @@ public class WSetStatCalculator {
     }
 }
 
+/**
+ * to serialize list.
+ */
 class SerializableAutomataList implements Serializable {
     List<Mealy> mealys = new ArrayList<>();
 }

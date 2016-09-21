@@ -1,11 +1,5 @@
 package WSetFinder;
 
-import WSetFinder.TransparentFinder.WSetStrategies.Crawler.CrawlerWset;
-import WSetFinder.TransparentFinder.WSetStrategies.Crawler.decisionFunction.NbTwin;
-import WSetFinder.TransparentFinder.WSetStrategies.Crawler.inputStrategy.LcaStrategy;
-import WSetFinder.TransparentFinder.WSetStrategies.UnionWSet;
-import WSetFinder.TransparentFinder.WeightFunction.LocaliseWeightFunction;
-import automata.State;
 import automata.mealy.InputSequence;
 import automata.mealy.OutputSequence;
 import drivers.mealy.MealyDriver;
@@ -270,7 +264,7 @@ public class WSetCalculator {
                 }
             }
         }
-        if(Objects.equals(word, "")){
+        if(word.getLength() == 0){
             System.err.println("Erreur : pas de nouveau mot trouvé");
         }
         return word;

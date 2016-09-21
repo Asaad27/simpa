@@ -1,7 +1,7 @@
-package WSetFinder.TransparentFinder.WSetStrategies.Crawler.decisionFunction;
+package WSetFinder.WSetStrategies.Crawler.decisionFunction;
 
-import WSetFinder.TransparentFinder.WSetStrategies.Crawler.StatePair;
-import WSetFinder.TransparentFinder.WSetStrategies.Crawler.States;
+import WSetFinder.WSetStrategies.Crawler.StatePair;
+import WSetFinder.WSetStrategies.Crawler.States;
 import automata.State;
 
 import java.util.ArrayList;

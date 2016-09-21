@@ -1,7 +1,6 @@
-package WSetFinder.TransparentFinder.WSetStrategies;
+package WSetFinder.WSetStrategies;
 
-import WSetFinder.TransparentFinder.WSetStrategies.WSetStrategy;
-import WSetFinder.TransparentFinder.WeightFunction.LocaliseWeightFunction;
+import WSetFinder.WeightFunction.LocaliseWeightFunction;
 import automata.mealy.InputSequence;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.mealy.noReset.NoResetLearner;
@@ -10,6 +9,7 @@ import java.util.List;
 
 /**
  * Created by Jean Bouvattier on 05/07/16.
+ * old deprecated w-set calculator
  */
 public class OldWSet extends WSetStrategy {
 

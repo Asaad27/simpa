@@ -1,6 +1,6 @@
-package WSetFinder.TransparentFinder.WSetStrategies.Crawler;
+package WSetFinder.WSetStrategies.Crawler;
 
-import WSetFinder.TransparentFinder.SplittingTree;
+import WSetFinder.SplittingTree;
 import automata.State;
 import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
@@ -10,6 +10,8 @@ import java.util.List;
 
 /**
  * Created by Jean Bouvattier on 05/07/16.
+ * a state of pair: the initial one and the last one is the result from applying current word.
+ * see article for more information
  */
 public class StatePair{
     public State initial;

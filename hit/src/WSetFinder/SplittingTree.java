@@ -1,13 +1,10 @@
-package WSetFinder.TransparentFinder;
+package WSetFinder;
 
 import automata.State;
 import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
-import drivers.mealy.transparent.RandomMealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
-import learner.mealy.noReset.NoResetLearner;
-import main.simpa.Options;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -159,7 +156,6 @@ public class SplittingTree {
 
     /**
      * randomly choose what input will be selected for next splitting
-     * @return
      */
     private String chooseInput() {
         return driver.getInputSymbols().get(rand.nextInt(driver.getInputSymbols().size()));
@@ -214,7 +210,6 @@ public class SplittingTree {
     /**
      * find leaf linked to this state
      * @param state
-     * @return
      */
     Node findBlock(State state){
         List<State> list = new ArrayList<>();

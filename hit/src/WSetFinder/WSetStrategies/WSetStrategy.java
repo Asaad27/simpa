@@ -1,13 +1,13 @@
-package WSetFinder.TransparentFinder.WSetStrategies;
+package WSetFinder.WSetStrategies;
 
-import WSetFinder.TransparentFinder.WSetStrategies.Crawler.CrawlerWset;
-import WSetFinder.TransparentFinder.WSetStrategies.Crawler.decisionFunction.NbCluster;
-import WSetFinder.TransparentFinder.WSetStrategies.Crawler.decisionFunction.NbTwin;
-import WSetFinder.TransparentFinder.WSetStrategies.Crawler.inputStrategy.AlphabetStrategy;
-import WSetFinder.TransparentFinder.SplittingTree;
-import WSetFinder.TransparentFinder.WSetStrategies.Crawler.inputStrategy.LcaStrategy;
-import WSetFinder.TransparentFinder.WeightFunction.LocaliseWeightFunction;
-import WSetFinder.TransparentFinder.WeightFunction.WeightFunction;
+import WSetFinder.WSetStrategies.Crawler.CrawlerWset;
+import WSetFinder.WSetStrategies.Crawler.decisionFunction.NbCluster;
+import WSetFinder.WSetStrategies.Crawler.decisionFunction.NbTwin;
+import WSetFinder.WSetStrategies.Crawler.inputStrategy.AlphabetStrategy;
+import WSetFinder.SplittingTree;
+import WSetFinder.WSetStrategies.Crawler.inputStrategy.LcaStrategy;
+import WSetFinder.WeightFunction.LocaliseWeightFunction;
+import WSetFinder.WeightFunction.WeightFunction;
 import automata.mealy.InputSequence;
 import drivers.mealy.transparent.RandomMealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
@@ -52,14 +52,14 @@ public abstract class WSetStrategy {
             int stateMin, int stateMax, int inputMin, int inputMax, int outputMin, int outputMax, int nbTry) {
         PrintWriter tryWriter = null;
         try {
-            tryWriter = new PrintWriter("/home/jean/sandbox/result.csv","UTF-8");
+            tryWriter = new PrintWriter(Options.OUTDIR + "/wSetStats.csv","UTF-8");
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
         assert tryWriter != null;
         final PrintWriter writer = tryWriter;
         LocaliseWeightFunction weightFunction = new LocaliseWeightFunction();
-        int nbFunction = 1;
+        int nbFunction = 6;
         writer.println("state min, state max, input min, input max, output min, output max, nb Try,");
         writer.println(stateMin +"," + stateMax + "," + inputMin + "," + inputMax + "," + outputMin + "," + outputMax + "," + nbTry);
         final String tab = ",,,,";
@@ -91,20 +91,15 @@ public abstract class WSetStrategy {
                             driver.getAutomata().exportToDot();
                             List<WSetStrategy> strategies = new ArrayList<>();
                             SplittingTree tree = new SplittingTree(driver,true);
-                            /*strategies.add(new FromStats(driver,true,new LocaliseWeightFunction(),1000,20));
-                            strategies.add(new FromStats(driver,true,new LocaliseWeightFunction(),1000,10));
-                            strategies.add(new FromStats(driver,true,new LocaliseWeightFunction(),1000,5));
-                            strategies.add(new FromStats(driver,true,new LocaliseWeightFunction(),300,20));
-                            strategies.add(new FromStats(driver,true,new LocaliseWeightFunction(),300,10));
+                            /**
+                             * here, add all wSet calculator wished, be sure to change var nbFunction
+                             */
                             strategies.add(new OldWSet(driver,true,new LocaliseWeightFunction()));
                             strategies.add(new UnionWSet(driver,true,new LocaliseWeightFunction()));
                             strategies.add(new CrawlerWset(tree,weightFunction,new NbTwin(),new LcaStrategy(),1));
                             strategies.add(new CrawlerWset(tree,weightFunction,new NbCluster(),new LcaStrategy(),1));
                             strategies.add(new CrawlerWset(tree,weightFunction,new NbTwin(),new AlphabetStrategy(),10));
                             strategies.add(new CrawlerWset(tree,weightFunction,new NbCluster(),new AlphabetStrategy(),10));
-                            */
-                            strategies.add(new FromStats(driver,true,new LocaliseWeightFunction(),300,5));
-
                             assert strategies.size() == nbFunction;
                             for(int m = 0; m < nbFunction; m++ ){
                                 resultSet.get(m).add(strategies.get(m),i);
