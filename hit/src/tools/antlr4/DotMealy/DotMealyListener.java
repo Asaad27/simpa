@@ -1,4 +1,5 @@
-package tools.antlr4;// Generated from DotMealy.g4 by ANTLR 4.5.3
+// Generated from DotMealy.g4 by ANTLR 4.5.3
+package tools.antlr4.DotMealy;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
 /**
