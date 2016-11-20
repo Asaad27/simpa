@@ -8,8 +8,8 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import tools.antlr4.DotMealyBaseListener;
-import tools.antlr4.DotMealyParser;
+import tools.antlr4.DotMealy.DotMealyBaseListener;
+import tools.antlr4.DotMealy.DotMealyParser;
 
 public class AntlrListener extends DotMealyBaseListener {
 
@@ -86,9 +86,7 @@ public class AntlrListener extends DotMealyBaseListener {
 
 	}
 
-	// @Override
-	// public void exitAttr_list(DotMealyParser.Attr_listContext ctx) {
-	// }
+	
 
 	/**
 	 * {@inheritDoc}
@@ -231,5 +229,11 @@ public class AntlrListener extends DotMealyBaseListener {
 	public void allElements(ErrorNode node) {
 
 	}
+	
+	
+	
+	
+	
+	
 
 }
