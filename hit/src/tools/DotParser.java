@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import tools.antlr4.*;
 import tools.antlr4.DotMealy.DotMealyLexer;
 import tools.antlr4.DotMealy.DotMealyParser;
 
@@ -73,9 +72,9 @@ public class DotParser {
 
 	public static void main(String[] args) throws IOException {
 //
-		DotParser dotParser = new DotParser();
+		/*DotParser dotParser = new DotParser();
 		File file = new File("/Users/wang/Documents/MyWorkspace/DotParser/test2.dot");
-		dotParser.showGuiTreeView(file);
+		dotParser.showGuiTreeView(file);*/
 		
 		
 		
