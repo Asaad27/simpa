@@ -16,9 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import tools.antlr4.DotMealy.DotMealyLexer;
-import tools.antlr4.DotMealy.DotMealyParser;
-
+import tools.antlr4.DotMealy.*;
 import org.antlr.v4.gui.TreeViewer;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
