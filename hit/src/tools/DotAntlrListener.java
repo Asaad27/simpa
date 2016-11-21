@@ -11,7 +11,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import tools.antlr4.DotMealy.DotMealyBaseListener;
 import tools.antlr4.DotMealy.DotMealyParser;
 
-public class AntlrListener extends DotMealyBaseListener {
+public class DotAntlrListener extends DotMealyBaseListener {
 
 	Map<String, ArrayList> transation = new HashMap<String, ArrayList>();
 	ArrayList<ArrayList> set = new ArrayList<ArrayList>();
