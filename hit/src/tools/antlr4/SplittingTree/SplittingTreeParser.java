@@ -21,9 +21,9 @@ public class SplittingTreeParser extends Parser {
 		WS=9;
 	public static final int
 		RULE_splitting_tree = 0, RULE_branch = 1, RULE_subsplitting_tree = 2, 
-		RULE_state = 3, RULE_root = 4, RULE_input = 5, RULE_output = 6;
+		RULE_leaf = 3, RULE_root = 4, RULE_input = 5, RULE_output = 6;
 	public static final String[] ruleNames = {
-		"splitting_tree", "branch", "subsplitting_tree", "state", "root", "input", 
+		"splitting_tree", "branch", "subsplitting_tree", "leaf", "root", "input", 
 		"output"
 	};
 
@@ -93,11 +93,11 @@ public class SplittingTreeParser extends Parser {
 		public BranchContext branch(int i) {
 			return getRuleContext(BranchContext.class,i);
 		}
-		public List<StateContext> state() {
-			return getRuleContexts(StateContext.class);
+		public List<LeafContext> leaf() {
+			return getRuleContexts(LeafContext.class);
 		}
-		public StateContext state(int i) {
-			return getRuleContext(StateContext.class,i);
+		public LeafContext leaf(int i) {
+			return getRuleContext(LeafContext.class,i);
 		}
 		public Splitting_treeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -152,7 +152,7 @@ public class SplittingTreeParser extends Parser {
 					{
 					{
 					setState(23);
-					state();
+					leaf();
 					}
 					}
 					setState(28);
@@ -180,11 +180,11 @@ public class SplittingTreeParser extends Parser {
 		public OutputContext output() {
 			return getRuleContext(OutputContext.class,0);
 		}
-		public List<StateContext> state() {
-			return getRuleContexts(StateContext.class);
+		public List<LeafContext> leaf() {
+			return getRuleContexts(LeafContext.class);
 		}
-		public StateContext state(int i) {
-			return getRuleContext(StateContext.class,i);
+		public LeafContext leaf(int i) {
+			return getRuleContext(LeafContext.class,i);
 		}
 		public Subsplitting_treeContext subsplitting_tree() {
 			return getRuleContext(Subsplitting_treeContext.class,0);
@@ -225,7 +225,7 @@ public class SplittingTreeParser extends Parser {
 					{
 					{
 					setState(35);
-					state();
+					leaf();
 					}
 					}
 					setState(40);
@@ -317,26 +317,26 @@ public class SplittingTreeParser extends Parser {
 		return _localctx;
 	}
 
-	public static class StateContext extends ParserRuleContext {
+	public static class LeafContext extends ParserRuleContext {
 		public TerminalNode ID() { return getToken(SplittingTreeParser.ID, 0); }
 		public TerminalNode NUMBER() { return getToken(SplittingTreeParser.NUMBER, 0); }
-		public StateContext(ParserRuleContext parent, int invokingState) {
+		public LeafContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_state; }
+		@Override public int getRuleIndex() { return RULE_leaf; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SplittingTreeListener ) ((SplittingTreeListener)listener).enterState(this);
+			if ( listener instanceof SplittingTreeListener ) ((SplittingTreeListener)listener).enterLeaf(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SplittingTreeListener ) ((SplittingTreeListener)listener).exitState(this);
+			if ( listener instanceof SplittingTreeListener ) ((SplittingTreeListener)listener).exitLeaf(this);
 		}
 	}
 
-	public final StateContext state() throws RecognitionException {
-		StateContext _localctx = new StateContext(_ctx, getState());
-		enterRule(_localctx, 6, RULE_state);
+	public final LeafContext leaf() throws RecognitionException {
+		LeafContext _localctx = new LeafContext(_ctx, getState());
+		enterRule(_localctx, 6, RULE_leaf);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);

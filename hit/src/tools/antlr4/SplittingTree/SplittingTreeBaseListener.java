@@ -52,13 +52,13 @@ public class SplittingTreeBaseListener implements SplittingTreeListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterState(SplittingTreeParser.StateContext ctx) { }
+	@Override public void enterLeaf(SplittingTreeParser.LeafContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitState(SplittingTreeParser.StateContext ctx) { }
+	@Override public void exitLeaf(SplittingTreeParser.LeafContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -4,12 +4,12 @@ grammar SplittingTree;
 		
 splitting_tree
 	:	root '(' branch ';' branch ')' 
-	|  	root '(' state * ')'
+	|  	root '(' leaf * ')'
 	;
 	
 
 branch 
-	: output '(' state * ')'
+	: output '(' leaf * ')'
 	| output '(' subsplitting_tree ')'
 	;
 		
@@ -19,7 +19,7 @@ subsplitting_tree
 	;
 
 
-state
+leaf
 	: 	ID 	| NUMBER
 	;
 
