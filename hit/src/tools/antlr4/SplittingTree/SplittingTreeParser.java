@@ -1,4 +1,4 @@
-// Generated from SplittingTree.g4 by ANTLR 4.5.3
+// Generated from SplittingTree.g4 by ANTLR 4.4
 package tools.antlr4.SplittingTree;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -11,64 +11,30 @@ import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class SplittingTreeParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.5.3", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.4", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		T__0=1, T__1=2, T__2=3, NUMBER=4, ID=5, COMMENT=6, LINE_COMMENT=7, PREPROC=8, 
+		T__2=1, T__1=2, T__0=3, NUMBER=4, ID=5, COMMENT=6, LINE_COMMENT=7, PREPROC=8, 
 		WS=9;
+	public static final String[] tokenNames = {
+		"<INVALID>", "'('", "')'", "';'", "NUMBER", "ID", "COMMENT", "LINE_COMMENT", 
+		"PREPROC", "WS"
+	};
 	public static final int
-		RULE_splitting_tree = 0, RULE_branch = 1, RULE_subsplitting_tree = 2, 
-		RULE_leaf = 3, RULE_root = 4, RULE_input = 5, RULE_output = 6;
+		RULE_splitting_tree = 0, RULE_subtree = 1, RULE_state = 2, RULE_root = 3, 
+		RULE_input = 4, RULE_output = 5;
 	public static final String[] ruleNames = {
-		"splitting_tree", "branch", "subsplitting_tree", "leaf", "root", "input", 
-		"output"
+		"splitting_tree", "subtree", "state", "root", "input", "output"
 	};
-
-	private static final String[] _LITERAL_NAMES = {
-		null, "'('", "';'", "')'"
-	};
-	private static final String[] _SYMBOLIC_NAMES = {
-		null, null, null, null, "NUMBER", "ID", "COMMENT", "LINE_COMMENT", "PREPROC", 
-		"WS"
-	};
-	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
-
-	/**
-	 * @deprecated Use {@link #VOCABULARY} instead.
-	 */
-	@Deprecated
-	public static final String[] tokenNames;
-	static {
-		tokenNames = new String[_SYMBOLIC_NAMES.length];
-		for (int i = 0; i < tokenNames.length; i++) {
-			tokenNames[i] = VOCABULARY.getLiteralName(i);
-			if (tokenNames[i] == null) {
-				tokenNames[i] = VOCABULARY.getSymbolicName(i);
-			}
-
-			if (tokenNames[i] == null) {
-				tokenNames[i] = "<INVALID>";
-			}
-		}
-	}
-
-	@Override
-	@Deprecated
-	public String[] getTokenNames() {
-		return tokenNames;
-	}
-
-	@Override
-
-	public Vocabulary getVocabulary() {
-		return VOCABULARY;
-	}
 
 	@Override
 	public String getGrammarFileName() { return "SplittingTree.g4"; }
+
+	@Override
+	public String[] getTokenNames() { return tokenNames; }
 
 	@Override
 	public String[] getRuleNames() { return ruleNames; }
@@ -84,20 +50,20 @@ public class SplittingTreeParser extends Parser {
 		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
 	public static class Splitting_treeContext extends ParserRuleContext {
-		public RootContext root() {
-			return getRuleContext(RootContext.class,0);
+		public List<SubtreeContext> subtree() {
+			return getRuleContexts(SubtreeContext.class);
 		}
-		public List<BranchContext> branch() {
-			return getRuleContexts(BranchContext.class);
+		public StateContext state(int i) {
+			return getRuleContext(StateContext.class,i);
 		}
-		public BranchContext branch(int i) {
-			return getRuleContext(BranchContext.class,i);
+		public InputContext input() {
+			return getRuleContext(InputContext.class,0);
 		}
-		public List<LeafContext> leaf() {
-			return getRuleContexts(LeafContext.class);
+		public SubtreeContext subtree(int i) {
+			return getRuleContext(SubtreeContext.class,i);
 		}
-		public LeafContext leaf(int i) {
-			return getRuleContext(LeafContext.class,i);
+		public List<StateContext> state() {
+			return getRuleContexts(StateContext.class);
 		}
 		public Splitting_treeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -118,49 +84,50 @@ public class SplittingTreeParser extends Parser {
 		enterRule(_localctx, 0, RULE_splitting_tree);
 		int _la;
 		try {
-			setState(31);
-			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,1,_ctx) ) {
+			setState(36);
+			switch ( getInterpreter().adaptivePredict(_input,2,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(14);
-				root();
-				setState(15);
-				match(T__0);
-				setState(16);
-				branch();
-				setState(17);
-				match(T__1);
-				setState(18);
-				branch();
+				setState(12); input();
+				setState(13); match(T__2);
 				setState(19);
-				match(T__2);
-				}
-				break;
-			case 2:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(21);
-				root();
-				setState(22);
-				match(T__0);
-				setState(26);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				while (_la==NUMBER || _la==ID) {
 					{
 					{
-					setState(23);
-					leaf();
+					setState(14); subtree();
+					setState(15); match(T__0);
 					}
 					}
-					setState(28);
+					setState(21);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
-				setState(29);
-				match(T__2);
+				setState(22); match(T__1);
+				}
+				break;
+			case 2:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(24); input();
+				setState(25); match(T__2);
+				setState(31);
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+				while (_la==NUMBER || _la==ID) {
+					{
+					{
+					setState(26); state();
+					setState(27); match(T__0);
+					}
+					}
+					setState(33);
+					_errHandler.sync(this);
+					_la = _input.LA(1);
+				}
+				setState(34); match(T__1);
 				}
 				break;
 			}
@@ -176,134 +143,93 @@ public class SplittingTreeParser extends Parser {
 		return _localctx;
 	}
 
-	public static class BranchContext extends ParserRuleContext {
-		public OutputContext output() {
-			return getRuleContext(OutputContext.class,0);
+	public static class SubtreeContext extends ParserRuleContext {
+		public List<SubtreeContext> subtree() {
+			return getRuleContexts(SubtreeContext.class);
 		}
-		public List<LeafContext> leaf() {
-			return getRuleContexts(LeafContext.class);
-		}
-		public LeafContext leaf(int i) {
-			return getRuleContext(LeafContext.class,i);
-		}
-		public Subsplitting_treeContext subsplitting_tree() {
-			return getRuleContext(Subsplitting_treeContext.class,0);
-		}
-		public BranchContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_branch; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SplittingTreeListener ) ((SplittingTreeListener)listener).enterBranch(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SplittingTreeListener ) ((SplittingTreeListener)listener).exitBranch(this);
-		}
-	}
-
-	public final BranchContext branch() throws RecognitionException {
-		BranchContext _localctx = new BranchContext(_ctx, getState());
-		enterRule(_localctx, 2, RULE_branch);
-		int _la;
-		try {
-			setState(48);
-			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,3,_ctx) ) {
-			case 1:
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(33);
-				output();
-				setState(34);
-				match(T__0);
-				setState(38);
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-				while (_la==NUMBER || _la==ID) {
-					{
-					{
-					setState(35);
-					leaf();
-					}
-					}
-					setState(40);
-					_errHandler.sync(this);
-					_la = _input.LA(1);
-				}
-				setState(41);
-				match(T__2);
-				}
-				break;
-			case 2:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(43);
-				output();
-				setState(44);
-				match(T__0);
-				setState(45);
-				subsplitting_tree();
-				setState(46);
-				match(T__2);
-				}
-				break;
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Subsplitting_treeContext extends ParserRuleContext {
 		public InputContext input() {
 			return getRuleContext(InputContext.class,0);
 		}
-		public List<BranchContext> branch() {
-			return getRuleContexts(BranchContext.class);
+		public SubtreeContext subtree(int i) {
+			return getRuleContext(SubtreeContext.class,i);
 		}
-		public BranchContext branch(int i) {
-			return getRuleContext(BranchContext.class,i);
+		public OutputContext output() {
+			return getRuleContext(OutputContext.class,0);
 		}
-		public Subsplitting_treeContext(ParserRuleContext parent, int invokingState) {
+		public StateContext state() {
+			return getRuleContext(StateContext.class,0);
+		}
+		public SubtreeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_subsplitting_tree; }
+		@Override public int getRuleIndex() { return RULE_subtree; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SplittingTreeListener ) ((SplittingTreeListener)listener).enterSubsplitting_tree(this);
+			if ( listener instanceof SplittingTreeListener ) ((SplittingTreeListener)listener).enterSubtree(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SplittingTreeListener ) ((SplittingTreeListener)listener).exitSubsplitting_tree(this);
+			if ( listener instanceof SplittingTreeListener ) ((SplittingTreeListener)listener).exitSubtree(this);
 		}
 	}
 
-	public final Subsplitting_treeContext subsplitting_tree() throws RecognitionException {
-		Subsplitting_treeContext _localctx = new Subsplitting_treeContext(_ctx, getState());
-		enterRule(_localctx, 4, RULE_subsplitting_tree);
+	public final SubtreeContext subtree() throws RecognitionException {
+		SubtreeContext _localctx = new SubtreeContext(_ctx, getState());
+		enterRule(_localctx, 2, RULE_subtree);
+		int _la;
 		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(50);
-			input();
-			setState(51);
-			match(T__0);
-			setState(52);
-			branch();
-			setState(53);
-			match(T__1);
-			setState(54);
-			branch();
-			setState(55);
-			match(T__2);
+			setState(65);
+			switch ( getInterpreter().adaptivePredict(_input,5,_ctx) ) {
+			case 1:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(38); output();
+				setState(39); match(T__2);
+				setState(41);
+				_la = _input.LA(1);
+				if (_la==NUMBER || _la==ID) {
+					{
+					setState(40); state();
+					}
+				}
+
+				setState(43); match(T__1);
+				}
+				break;
+			case 2:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(45); output();
+				setState(46); match(T__2);
+				setState(47); subtree();
+				setState(48); match(T__1);
+				}
+				break;
+			case 3:
+				enterOuterAlt(_localctx, 3);
+				{
+				setState(50); output();
+				setState(51); match(T__2);
+				setState(52); input();
+				setState(53); match(T__2);
+				setState(59);
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+				while (_la==NUMBER || _la==ID) {
+					{
+					{
+					setState(54); subtree();
+					setState(55); match(T__0);
+					}
+					}
+					setState(61);
+					_errHandler.sync(this);
+					_la = _input.LA(1);
+				}
+				setState(62); match(T__1);
+				setState(63); match(T__1);
+				}
+				break;
 			}
 		}
 		catch (RecognitionException re) {
@@ -317,37 +243,36 @@ public class SplittingTreeParser extends Parser {
 		return _localctx;
 	}
 
-	public static class LeafContext extends ParserRuleContext {
+	public static class StateContext extends ParserRuleContext {
 		public TerminalNode ID() { return getToken(SplittingTreeParser.ID, 0); }
 		public TerminalNode NUMBER() { return getToken(SplittingTreeParser.NUMBER, 0); }
-		public LeafContext(ParserRuleContext parent, int invokingState) {
+		public StateContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_leaf; }
+		@Override public int getRuleIndex() { return RULE_state; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SplittingTreeListener ) ((SplittingTreeListener)listener).enterLeaf(this);
+			if ( listener instanceof SplittingTreeListener ) ((SplittingTreeListener)listener).enterState(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SplittingTreeListener ) ((SplittingTreeListener)listener).exitLeaf(this);
+			if ( listener instanceof SplittingTreeListener ) ((SplittingTreeListener)listener).exitState(this);
 		}
 	}
 
-	public final LeafContext leaf() throws RecognitionException {
-		LeafContext _localctx = new LeafContext(_ctx, getState());
-		enterRule(_localctx, 6, RULE_leaf);
+	public final StateContext state() throws RecognitionException {
+		StateContext _localctx = new StateContext(_ctx, getState());
+		enterRule(_localctx, 4, RULE_state);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(57);
+			setState(67);
 			_la = _input.LA(1);
 			if ( !(_la==NUMBER || _la==ID) ) {
 			_errHandler.recoverInline(this);
-			} else {
-				consume();
 			}
+			consume();
 			}
 		}
 		catch (RecognitionException re) {
@@ -380,18 +305,17 @@ public class SplittingTreeParser extends Parser {
 
 	public final RootContext root() throws RecognitionException {
 		RootContext _localctx = new RootContext(_ctx, getState());
-		enterRule(_localctx, 8, RULE_root);
+		enterRule(_localctx, 6, RULE_root);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(59);
+			setState(69);
 			_la = _input.LA(1);
 			if ( !(_la==NUMBER || _la==ID) ) {
 			_errHandler.recoverInline(this);
-			} else {
-				consume();
 			}
+			consume();
 			}
 		}
 		catch (RecognitionException re) {
@@ -424,18 +348,17 @@ public class SplittingTreeParser extends Parser {
 
 	public final InputContext input() throws RecognitionException {
 		InputContext _localctx = new InputContext(_ctx, getState());
-		enterRule(_localctx, 10, RULE_input);
+		enterRule(_localctx, 8, RULE_input);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(61);
+			setState(71);
 			_la = _input.LA(1);
 			if ( !(_la==NUMBER || _la==ID) ) {
 			_errHandler.recoverInline(this);
-			} else {
-				consume();
 			}
+			consume();
 			}
 		}
 		catch (RecognitionException re) {
@@ -468,18 +391,17 @@ public class SplittingTreeParser extends Parser {
 
 	public final OutputContext output() throws RecognitionException {
 		OutputContext _localctx = new OutputContext(_ctx, getState());
-		enterRule(_localctx, 12, RULE_output);
+		enterRule(_localctx, 10, RULE_output);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(63);
+			setState(73);
 			_la = _input.LA(1);
 			if ( !(_la==NUMBER || _la==ID) ) {
 			_errHandler.recoverInline(this);
-			} else {
-				consume();
 			}
+			consume();
 			}
 		}
 		catch (RecognitionException re) {
@@ -494,23 +416,25 @@ public class SplittingTreeParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3\13D\4\2\t\2\4\3\t"+
-		"\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\3\2\3\2\3\2\3\2\3\2\3\2\3\2"+
-		"\3\2\3\2\3\2\7\2\33\n\2\f\2\16\2\36\13\2\3\2\3\2\5\2\"\n\2\3\3\3\3\3\3"+
-		"\7\3\'\n\3\f\3\16\3*\13\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\5\3\63\n\3\3\4\3"+
-		"\4\3\4\3\4\3\4\3\4\3\4\3\5\3\5\3\6\3\6\3\7\3\7\3\b\3\b\3\b\2\2\t\2\4\6"+
-		"\b\n\f\16\2\3\3\2\6\7@\2!\3\2\2\2\4\62\3\2\2\2\6\64\3\2\2\2\b;\3\2\2\2"+
-		"\n=\3\2\2\2\f?\3\2\2\2\16A\3\2\2\2\20\21\5\n\6\2\21\22\7\3\2\2\22\23\5"+
-		"\4\3\2\23\24\7\4\2\2\24\25\5\4\3\2\25\26\7\5\2\2\26\"\3\2\2\2\27\30\5"+
-		"\n\6\2\30\34\7\3\2\2\31\33\5\b\5\2\32\31\3\2\2\2\33\36\3\2\2\2\34\32\3"+
-		"\2\2\2\34\35\3\2\2\2\35\37\3\2\2\2\36\34\3\2\2\2\37 \7\5\2\2 \"\3\2\2"+
-		"\2!\20\3\2\2\2!\27\3\2\2\2\"\3\3\2\2\2#$\5\16\b\2$(\7\3\2\2%\'\5\b\5\2"+
-		"&%\3\2\2\2\'*\3\2\2\2(&\3\2\2\2()\3\2\2\2)+\3\2\2\2*(\3\2\2\2+,\7\5\2"+
-		"\2,\63\3\2\2\2-.\5\16\b\2./\7\3\2\2/\60\5\6\4\2\60\61\7\5\2\2\61\63\3"+
-		"\2\2\2\62#\3\2\2\2\62-\3\2\2\2\63\5\3\2\2\2\64\65\5\f\7\2\65\66\7\3\2"+
-		"\2\66\67\5\4\3\2\678\7\4\2\289\5\4\3\29:\7\5\2\2:\7\3\2\2\2;<\t\2\2\2"+
-		"<\t\3\2\2\2=>\t\2\2\2>\13\3\2\2\2?@\t\2\2\2@\r\3\2\2\2AB\t\2\2\2B\17\3"+
-		"\2\2\2\6\34!(\62";
+		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3\13N\4\2\t\2\4\3\t"+
+		"\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\3\2\3\2\3\2\3\2\3\2\7\2\24\n\2\f\2"+
+		"\16\2\27\13\2\3\2\3\2\3\2\3\2\3\2\3\2\3\2\7\2 \n\2\f\2\16\2#\13\2\3\2"+
+		"\3\2\5\2\'\n\2\3\3\3\3\3\3\5\3,\n\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3"+
+		"\3\3\3\3\3\3\3\3\3\3\3\7\3<\n\3\f\3\16\3?\13\3\3\3\3\3\3\3\5\3D\n\3\3"+
+		"\4\3\4\3\5\3\5\3\6\3\6\3\7\3\7\3\7\2\2\b\2\4\6\b\n\f\2\3\3\2\6\7N\2&\3"+
+		"\2\2\2\4C\3\2\2\2\6E\3\2\2\2\bG\3\2\2\2\nI\3\2\2\2\fK\3\2\2\2\16\17\5"+
+		"\n\6\2\17\25\7\3\2\2\20\21\5\4\3\2\21\22\7\5\2\2\22\24\3\2\2\2\23\20\3"+
+		"\2\2\2\24\27\3\2\2\2\25\23\3\2\2\2\25\26\3\2\2\2\26\30\3\2\2\2\27\25\3"+
+		"\2\2\2\30\31\7\4\2\2\31\'\3\2\2\2\32\33\5\n\6\2\33!\7\3\2\2\34\35\5\6"+
+		"\4\2\35\36\7\5\2\2\36 \3\2\2\2\37\34\3\2\2\2 #\3\2\2\2!\37\3\2\2\2!\""+
+		"\3\2\2\2\"$\3\2\2\2#!\3\2\2\2$%\7\4\2\2%\'\3\2\2\2&\16\3\2\2\2&\32\3\2"+
+		"\2\2\'\3\3\2\2\2()\5\f\7\2)+\7\3\2\2*,\5\6\4\2+*\3\2\2\2+,\3\2\2\2,-\3"+
+		"\2\2\2-.\7\4\2\2.D\3\2\2\2/\60\5\f\7\2\60\61\7\3\2\2\61\62\5\4\3\2\62"+
+		"\63\7\4\2\2\63D\3\2\2\2\64\65\5\f\7\2\65\66\7\3\2\2\66\67\5\n\6\2\67="+
+		"\7\3\2\289\5\4\3\29:\7\5\2\2:<\3\2\2\2;8\3\2\2\2<?\3\2\2\2=;\3\2\2\2="+
+		">\3\2\2\2>@\3\2\2\2?=\3\2\2\2@A\7\4\2\2AB\7\4\2\2BD\3\2\2\2C(\3\2\2\2"+
+		"C/\3\2\2\2C\64\3\2\2\2D\5\3\2\2\2EF\t\2\2\2F\7\3\2\2\2GH\t\2\2\2H\t\3"+
+		"\2\2\2IJ\t\2\2\2J\13\3\2\2\2KL\t\2\2\2L\r\3\2\2\2\b\25!&+=C";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

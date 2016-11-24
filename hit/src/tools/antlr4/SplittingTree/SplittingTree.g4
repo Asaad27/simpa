@@ -1,9 +1,25 @@
 grammar SplittingTree;
 
+
+splitting_tree 
+	: input   '(' (subtree ';')*  ')' 
+	| input   '(' (state   ';')*  ')'
+	; 
+	
+
+subtree
+	: 	output   '(' state ? ')' 
+	| 	output	 '(' subtree ')'
+//	| 	output	 '(' (subtree ';')* ')' 
+	| 	output	 '(' input 	 '(' (subtree ';')* ')' ')' 
+//	| 	('(' state ')'  ';' )*
+//	| 	'('state')'*
+	;		
 		
+	
 		
-splitting_tree
-	:	root '(' branch ';' branch ')' 
+/*splitting_tree
+	:	root '(' branch ';' branch * ')' 
 	|  	root '(' leaf * ')'
 	;
 	
@@ -17,10 +33,11 @@ branch
 subsplitting_tree
 	: input '(' branch ';' branch ')' 
 	;
+*/
 
-
-leaf
-	: 	ID 	| NUMBER
+state
+	: 	ID 	
+	| 	NUMBER
 	;
 
 
@@ -88,7 +105,7 @@ PREPROC
 
 
 WS
-   : [ \t\n\r]+ -> skip
+   : [\t\n\r]+ -> skip 
    ;
    
  

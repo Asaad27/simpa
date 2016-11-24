@@ -1,7 +1,8 @@
-// Generated from SplittingTree.g4 by ANTLR 4.5.3
+// Generated from SplittingTree.g4 by ANTLR 4.4
 package tools.antlr4.SplittingTree;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -16,108 +17,96 @@ public class SplittingTreeBaseListener implements SplittingTreeListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSplitting_tree(SplittingTreeParser.Splitting_treeContext ctx) { }
+	@Override public void enterOutput(@NotNull SplittingTreeParser.OutputContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSplitting_tree(SplittingTreeParser.Splitting_treeContext ctx) { }
+	@Override public void exitOutput(@NotNull SplittingTreeParser.OutputContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterBranch(SplittingTreeParser.BranchContext ctx) { }
+	@Override public void enterSubtree(@NotNull SplittingTreeParser.SubtreeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitBranch(SplittingTreeParser.BranchContext ctx) { }
+	@Override public void exitSubtree(@NotNull SplittingTreeParser.SubtreeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSubsplitting_tree(SplittingTreeParser.Subsplitting_treeContext ctx) { }
+	@Override public void enterInput(@NotNull SplittingTreeParser.InputContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSubsplitting_tree(SplittingTreeParser.Subsplitting_treeContext ctx) { }
+	@Override public void exitInput(@NotNull SplittingTreeParser.InputContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLeaf(SplittingTreeParser.LeafContext ctx) { }
+	@Override public void enterRoot(@NotNull SplittingTreeParser.RootContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitLeaf(SplittingTreeParser.LeafContext ctx) { }
+	@Override public void exitRoot(@NotNull SplittingTreeParser.RootContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterRoot(SplittingTreeParser.RootContext ctx) { }
+	@Override public void enterState(@NotNull SplittingTreeParser.StateContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitRoot(SplittingTreeParser.RootContext ctx) { }
+	@Override public void exitState(@NotNull SplittingTreeParser.StateContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterInput(SplittingTreeParser.InputContext ctx) { }
+	@Override public void enterSplitting_tree(@NotNull SplittingTreeParser.Splitting_treeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitInput(SplittingTreeParser.InputContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterOutput(SplittingTreeParser.OutputContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitOutput(SplittingTreeParser.OutputContext ctx) { }
+	@Override public void exitSplitting_tree(@NotNull SplittingTreeParser.Splitting_treeContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterEveryRule(ParserRuleContext ctx) { }
+	@Override public void enterEveryRule(@NotNull ParserRuleContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitEveryRule(ParserRuleContext ctx) { }
+	@Override public void exitEveryRule(@NotNull ParserRuleContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void visitTerminal(TerminalNode node) { }
+	@Override public void visitTerminal(@NotNull TerminalNode node) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void visitErrorNode(ErrorNode node) { }
+	@Override public void visitErrorNode(@NotNull ErrorNode node) { }
 }
