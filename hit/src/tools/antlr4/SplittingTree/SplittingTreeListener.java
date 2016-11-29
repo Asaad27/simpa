@@ -19,16 +19,6 @@ public interface SplittingTreeListener extends ParseTreeListener {
 	 */
 	void exitOutput(@NotNull SplittingTreeParser.OutputContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link SplittingTreeParser#subtree}.
-	 * @param ctx the parse tree
-	 */
-	void enterSubtree(@NotNull SplittingTreeParser.SubtreeContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SplittingTreeParser#subtree}.
-	 * @param ctx the parse tree
-	 */
-	void exitSubtree(@NotNull SplittingTreeParser.SubtreeContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link SplittingTreeParser#input}.
 	 * @param ctx the parse tree
 	 */
@@ -38,16 +28,6 @@ public interface SplittingTreeListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitInput(@NotNull SplittingTreeParser.InputContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link SplittingTreeParser#root}.
-	 * @param ctx the parse tree
-	 */
-	void enterRoot(@NotNull SplittingTreeParser.RootContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SplittingTreeParser#root}.
-	 * @param ctx the parse tree
-	 */
-	void exitRoot(@NotNull SplittingTreeParser.RootContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SplittingTreeParser#state}.
 	 * @param ctx the parse tree

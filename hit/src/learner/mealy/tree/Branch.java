@@ -2,25 +2,22 @@ package learner.mealy.tree;
 
 import java.util.List;
 
+import automata.mealy.InputSequence;
 import automata.mealy.OutputSequence;
 
 public class Branch {
-	
-//	OutputSequence outputSeq;
+
+	// OutputSequence outputSeq;
 	OutputSequence outputSeq;
-	SplittingTreeReader splittingTree;
-	// Branch b;
+	SplittingTree splittingTree;
+	
 
-	public Branch(OutputSequence oSeq, SplittingTreeReader sTree) {
-		this.outputSeq = oSeq;
-		this.splittingTree = sTree;
+	public Branch(OutputSequence in, SplittingTree st) {
+		// TODO Auto-generated constructor stub
+		outputSeq = in;
+		splittingTree = st;
 	}
 
-	public void addBranche(Branch b) {
-//		if (inputSequence.size() != b.outputSeq.size()) {
-//			throw new RuntimeException("Length of input sequence is diffrent from output sequence.");
-//		}
-//		branchs.add(b);
-	}
+
 
 }

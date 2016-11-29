@@ -5,15 +5,14 @@ import java.util.List;
 import automata.mealy.InputSequence;
 import learner.mealy.noReset.dataManager.FullyQualifiedState;
 
-public class State extends SplittingTree {
-	
-	
+public class StateSplittingTree extends SplittingTree {
+
 	FullyQualifiedState state;
-	
-	
-	public State(InputSequence in, Branch b) {
-		super(in, b);
+
+	public StateSplittingTree(FullyQualifiedState state) {
+
 		// TODO Auto-generated constructor stub
+		this.state = state;
 	}
 
 	// List<String> state;

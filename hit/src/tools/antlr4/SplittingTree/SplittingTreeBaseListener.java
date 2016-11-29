@@ -29,18 +29,6 @@ public class SplittingTreeBaseListener implements SplittingTreeListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSubtree(@NotNull SplittingTreeParser.SubtreeContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSubtree(@NotNull SplittingTreeParser.SubtreeContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterInput(@NotNull SplittingTreeParser.InputContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -48,18 +36,6 @@ public class SplittingTreeBaseListener implements SplittingTreeListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitInput(@NotNull SplittingTreeParser.InputContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterRoot(@NotNull SplittingTreeParser.RootContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitRoot(@NotNull SplittingTreeParser.RootContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
