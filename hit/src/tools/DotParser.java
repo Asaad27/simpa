@@ -53,12 +53,12 @@ public class DotParser {
 		final DotMealyLexer lexer = new DotMealyLexer(stream);
 		final CommonTokenStream tokens = new CommonTokenStream(lexer);
 		final DotMealyParser parser = new DotMealyParser(tokens);
-//		parser.setBuildParseTree(true); // tell ANTLR to build a parse tree
+		// parser.setBuildParseTree(true); // tell ANTLR to build a parse tree
 
 		final ParseTree tree = parser.graph();
 		ParseTreeWalker walker = new ParseTreeWalker();
 
-		AntlrListener antlrL = new AntlrListener();
+		DotAntlrListener antlrL = new DotAntlrListener();
 
 		walker.walk(antlrL, tree);
 		// states.put("GNAME", antlrL.dotName);
@@ -69,18 +69,12 @@ public class DotParser {
 	}
 
 	public static void main(String[] args) throws IOException {
-//
-		/*DotParser dotParser = new DotParser();
-		File file = new File("/Users/wang/Documents/MyWorkspace/DotParser/test2.dot");
-		dotParser.showGuiTreeView(file);*/
-		
-		
-		
-		
-		
-		
-		
-		
+		//
+		/*
+		 * DotParser dotParser = new DotParser(); File file = new
+		 * File("/Users/wang/Documents/MyWorkspace/DotParser/test2.dot");
+		 * dotParser.showGuiTreeView(file);
+		 */
 
 	}
 }
