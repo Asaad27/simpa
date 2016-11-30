@@ -15,6 +15,9 @@ public class StateSplittingTree extends SplittingTree {
 		this.state = state;
 	}
 
+	public String toString() {
+		return "";
+	}
 	// List<String> state;
 
 }
