@@ -153,9 +153,9 @@ public class AdaptativeLocalizerLearner {
 			} else {
 				while (r < i - 1) {
 					r++;
-
+					/** Todo : 13/12/2016 lx **/
 				}
-				System.err.println("==== NO predictable ====" + ns);
+//				System.err.println("==== NO predictable ====" + ns);
 				sign = true;
 			}
 		}
