@@ -1,17 +1,16 @@
 grammar SplittingTree;
 
 
+
+
 splitting_tree 
-	: input   '(' (output '(' splitting_tree ')' ';')* ')'
-//	: input   '(' ( branch ';')* ')'   
-	| state?
-//	| input   '(' (output state ';')+  ')'
+	: input   '(' (output '(' splitting_tree ')' ';')* ')'   
+	| state* 
 	; 
 	
 	
-	
 //branch 
-//	: output '(' splitting_tree ')' 
+//	: input   '(' (output '(' state ')' ';')* ')' 
 //	;	
 	
 	
@@ -88,8 +87,8 @@ PREPROC
    ;
 
 
-//WS
-//   : [\t\n\r]+ -> skip 
-//   ;
+WS
+   : [\t\n\r]+ -> skip 
+   ;
    
  

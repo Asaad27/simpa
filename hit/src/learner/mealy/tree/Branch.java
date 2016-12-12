@@ -20,7 +20,7 @@ public class Branch {
 	public SplittingTree getSPTree() {
 		return splittingTree;
 	}
-
+	
 	public OutputSequence getOutputSequence() {
 		return outputSeq;
 	}

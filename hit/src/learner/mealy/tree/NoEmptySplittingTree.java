@@ -23,7 +23,13 @@ public class NoEmptySplittingTree extends SplittingTree {
 	public InputSequence getInputSequence() {
 		return inSeq;
 	}
-
+	
+	
+	public ArrayList<Branch> getBranch() {
+		return list;
+	}
+	
+	
 	public Branch getBranch(int i) {
 		return list.get(i);
 	}

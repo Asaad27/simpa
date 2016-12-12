@@ -16,6 +16,7 @@ public class StateSplittingTree extends SplittingTree {
 	}
 
 	public String toString() {
+		//now we give empty to state.
 		return "";
 	}
 	// List<String> state;
