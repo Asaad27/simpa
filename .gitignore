@@ -1,3 +1,4 @@
 /hit/build/
 /hit/dist/
 **/testAgent_*.txt
+hit/src/tools/antlr4/DotMealy/*

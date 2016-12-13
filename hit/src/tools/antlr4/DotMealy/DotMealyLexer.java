@@ -1,4 +1,4 @@
-// Generated from DotMealy.g4 by ANTLR 4.5.3
+// Generated from DotMealy.g4 by ANTLR 4.4
 package tools.antlr4.DotMealy;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
@@ -11,68 +11,32 @@ import org.antlr.v4.runtime.misc.*;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class DotMealyLexer extends Lexer {
-	static { RuntimeMetaData.checkVersion("4.5.3", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.4", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, T__6=7, T__7=8, T__8=9, 
-		T__9=10, STRICT=11, GRAPH=12, DIGRAPH=13, NODE=14, EDGE=15, SUBGRAPH=16, 
+		T__9=1, T__8=2, T__7=3, T__6=4, T__5=5, T__4=6, T__3=7, T__2=8, T__1=9, 
+		T__0=10, STRICT=11, GRAPH=12, DIGRAPH=13, NODE=14, EDGE=15, SUBGRAPH=16, 
 		NUMBER=17, ID=18, HTML_STRING=19, COMMENT=20, LINE_COMMENT=21, PREPROC=22, 
 		WS=23;
 	public static String[] modeNames = {
 		"DEFAULT_MODE"
 	};
 
+	public static final String[] tokenNames = {
+		"'\\u0000'", "'\\u0001'", "'\\u0002'", "'\\u0003'", "'\\u0004'", "'\\u0005'", 
+		"'\\u0006'", "'\\u0007'", "'\b'", "'\t'", "'\n'", "'\\u000B'", "'\f'", 
+		"'\r'", "'\\u000E'", "'\\u000F'", "'\\u0010'", "'\\u0011'", "'\\u0012'", 
+		"'\\u0013'", "'\\u0014'", "'\\u0015'", "'\\u0016'", "'\\u0017'"
+	};
 	public static final String[] ruleNames = {
-		"T__0", "T__1", "T__2", "T__3", "T__4", "T__5", "T__6", "T__7", "T__8", 
-		"T__9", "STRICT", "GRAPH", "DIGRAPH", "NODE", "EDGE", "SUBGRAPH", "NUMBER", 
+		"T__9", "T__8", "T__7", "T__6", "T__5", "T__4", "T__3", "T__2", "T__1", 
+		"T__0", "STRICT", "GRAPH", "DIGRAPH", "NODE", "EDGE", "SUBGRAPH", "NUMBER", 
 		"DIGIT", "ID", "HTML_STRING", "LETTER", "TAG", "COMMENT", "LINE_COMMENT", 
 		"PREPROC", "WS"
 	};
-
-	private static final String[] _LITERAL_NAMES = {
-		null, "'{'", "'}'", "';'", "'['", "']'", "'='", "'\"'", "'/'", "'->'", 
-		"'--'"
-	};
-	private static final String[] _SYMBOLIC_NAMES = {
-		null, null, null, null, null, null, null, null, null, null, null, "STRICT", 
-		"GRAPH", "DIGRAPH", "NODE", "EDGE", "SUBGRAPH", "NUMBER", "ID", "HTML_STRING", 
-		"COMMENT", "LINE_COMMENT", "PREPROC", "WS"
-	};
-	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
-
-	/**
-	 * @deprecated Use {@link #VOCABULARY} instead.
-	 */
-	@Deprecated
-	public static final String[] tokenNames;
-	static {
-		tokenNames = new String[_SYMBOLIC_NAMES.length];
-		for (int i = 0; i < tokenNames.length; i++) {
-			tokenNames[i] = VOCABULARY.getLiteralName(i);
-			if (tokenNames[i] == null) {
-				tokenNames[i] = VOCABULARY.getSymbolicName(i);
-			}
-
-			if (tokenNames[i] == null) {
-				tokenNames[i] = "<INVALID>";
-			}
-		}
-	}
-
-	@Override
-	@Deprecated
-	public String[] getTokenNames() {
-		return tokenNames;
-	}
-
-	@Override
-
-	public Vocabulary getVocabulary() {
-		return VOCABULARY;
-	}
 
 
 	public DotMealyLexer(CharStream input) {
@@ -82,6 +46,9 @@ public class DotMealyLexer extends Lexer {
 
 	@Override
 	public String getGrammarFileName() { return "DotMealy.g4"; }
+
+	@Override
+	public String[] getTokenNames() { return tokenNames; }
 
 	@Override
 	public String[] getRuleNames() { return ruleNames; }
@@ -100,14 +67,14 @@ public class DotMealyLexer extends Lexer {
 		"\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4"+
 		"\13\t\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22"+
 		"\t\22\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31"+
-		"\t\31\4\32\t\32\4\33\t\33\3\2\3\2\3\3\3\3\3\4\3\4\3\5\3\5\3\6\3\6\3\7"+
-		"\3\7\3\b\3\b\3\t\3\t\3\n\3\n\3\n\3\13\3\13\3\13\3\f\3\f\3\f\3\f\3\f\3"+
-		"\f\3\f\3\r\3\r\3\r\3\r\3\r\3\r\3\16\3\16\3\16\3\16\3\16\3\16\3\16\3\16"+
-		"\3\17\3\17\3\17\3\17\3\17\3\20\3\20\3\20\3\20\3\20\3\21\3\21\3\21\3\21"+
-		"\3\21\3\21\3\21\3\21\3\21\3\22\5\22w\n\22\3\22\3\22\6\22{\n\22\r\22\16"+
-		"\22|\3\22\6\22\u0080\n\22\r\22\16\22\u0081\3\22\3\22\7\22\u0086\n\22\f"+
-		"\22\16\22\u0089\13\22\5\22\u008b\n\22\5\22\u008d\n\22\3\23\3\23\3\24\3"+
-		"\24\3\24\7\24\u0094\n\24\f\24\16\24\u0097\13\24\3\24\3\24\3\24\7\24\u009c"+
+		"\t\31\4\32\t\32\4\33\t\33\3\2\3\2\3\3\3\3\3\3\3\4\3\4\3\5\3\5\3\6\3\6"+
+		"\3\7\3\7\3\b\3\b\3\b\3\t\3\t\3\n\3\n\3\13\3\13\3\f\3\f\3\f\3\f\3\f\3\f"+
+		"\3\f\3\r\3\r\3\r\3\r\3\r\3\r\3\16\3\16\3\16\3\16\3\16\3\16\3\16\3\16\3"+
+		"\17\3\17\3\17\3\17\3\17\3\20\3\20\3\20\3\20\3\20\3\21\3\21\3\21\3\21\3"+
+		"\21\3\21\3\21\3\21\3\21\3\22\5\22w\n\22\3\22\3\22\6\22{\n\22\r\22\16\22"+
+		"|\3\22\6\22\u0080\n\22\r\22\16\22\u0081\3\22\3\22\7\22\u0086\n\22\f\22"+
+		"\16\22\u0089\13\22\5\22\u008b\n\22\5\22\u008d\n\22\3\23\3\23\3\24\3\24"+
+		"\3\24\7\24\u0094\n\24\f\24\16\24\u0097\13\24\3\24\3\24\3\24\7\24\u009c"+
 		"\n\24\f\24\16\24\u009f\13\24\5\24\u00a1\n\24\3\25\3\25\3\25\7\25\u00a6"+
 		"\n\25\f\25\16\25\u00a9\13\25\3\25\3\25\3\26\3\26\3\27\3\27\7\27\u00b1"+
 		"\n\27\f\27\16\27\u00b4\13\27\3\27\3\27\3\30\3\30\3\30\3\30\7\30\u00bc"+
@@ -124,15 +91,15 @@ public class DotMealyLexer extends Lexer {
 		"\21\3\2\2\2\2\23\3\2\2\2\2\25\3\2\2\2\2\27\3\2\2\2\2\31\3\2\2\2\2\33\3"+
 		"\2\2\2\2\35\3\2\2\2\2\37\3\2\2\2\2!\3\2\2\2\2#\3\2\2\2\2\'\3\2\2\2\2)"+
 		"\3\2\2\2\2/\3\2\2\2\2\61\3\2\2\2\2\63\3\2\2\2\2\65\3\2\2\2\3\67\3\2\2"+
-		"\2\59\3\2\2\2\7;\3\2\2\2\t=\3\2\2\2\13?\3\2\2\2\rA\3\2\2\2\17C\3\2\2\2"+
-		"\21E\3\2\2\2\23G\3\2\2\2\25J\3\2\2\2\27M\3\2\2\2\31T\3\2\2\2\33Z\3\2\2"+
+		"\2\59\3\2\2\2\7<\3\2\2\2\t>\3\2\2\2\13@\3\2\2\2\rB\3\2\2\2\17D\3\2\2\2"+
+		"\21G\3\2\2\2\23I\3\2\2\2\25K\3\2\2\2\27M\3\2\2\2\31T\3\2\2\2\33Z\3\2\2"+
 		"\2\35b\3\2\2\2\37g\3\2\2\2!l\3\2\2\2#v\3\2\2\2%\u008e\3\2\2\2\'\u00a0"+
 		"\3\2\2\2)\u00a2\3\2\2\2+\u00ac\3\2\2\2-\u00ae\3\2\2\2/\u00b7\3\2\2\2\61"+
-		"\u00c5\3\2\2\2\63\u00d5\3\2\2\2\65\u00e1\3\2\2\2\678\7}\2\28\4\3\2\2\2"+
-		"9:\7\177\2\2:\6\3\2\2\2;<\7=\2\2<\b\3\2\2\2=>\7]\2\2>\n\3\2\2\2?@\7_\2"+
-		"\2@\f\3\2\2\2AB\7?\2\2B\16\3\2\2\2CD\7$\2\2D\20\3\2\2\2EF\7\61\2\2F\22"+
-		"\3\2\2\2GH\7/\2\2HI\7@\2\2I\24\3\2\2\2JK\7/\2\2KL\7/\2\2L\26\3\2\2\2M"+
-		"N\t\2\2\2NO\t\3\2\2OP\t\4\2\2PQ\t\5\2\2QR\t\6\2\2RS\t\3\2\2S\30\3\2\2"+
+		"\u00c5\3\2\2\2\63\u00d5\3\2\2\2\65\u00e1\3\2\2\2\678\7\61\2\28\4\3\2\2"+
+		"\29:\7/\2\2:;\7@\2\2;\6\3\2\2\2<=\7$\2\2=\b\3\2\2\2>?\7]\2\2?\n\3\2\2"+
+		"\2@A\7=\2\2A\f\3\2\2\2BC\7}\2\2C\16\3\2\2\2DE\7/\2\2EF\7/\2\2F\20\3\2"+
+		"\2\2GH\7?\2\2H\22\3\2\2\2IJ\7_\2\2J\24\3\2\2\2KL\7\177\2\2L\26\3\2\2\2"+
+		"MN\t\2\2\2NO\t\3\2\2OP\t\4\2\2PQ\t\5\2\2QR\t\6\2\2RS\t\3\2\2S\30\3\2\2"+
 		"\2TU\t\7\2\2UV\t\4\2\2VW\t\b\2\2WX\t\t\2\2XY\t\n\2\2Y\32\3\2\2\2Z[\t\13"+
 		"\2\2[\\\t\5\2\2\\]\t\7\2\2]^\t\4\2\2^_\t\b\2\2_`\t\t\2\2`a\t\n\2\2a\34"+
 		"\3\2\2\2bc\t\f\2\2cd\t\r\2\2de\t\13\2\2ef\t\16\2\2f\36\3\2\2\2gh\t\16"+

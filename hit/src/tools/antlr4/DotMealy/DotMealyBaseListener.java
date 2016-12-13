@@ -1,7 +1,8 @@
-// Generated from DotMealy.g4 by ANTLR 4.5.3
+// Generated from DotMealy.g4 by ANTLR 4.4
 package tools.antlr4.DotMealy;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -16,168 +17,168 @@ public class DotMealyBaseListener implements DotMealyListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterGraph(DotMealyParser.GraphContext ctx) { }
+	@Override public void enterOutput(@NotNull DotMealyParser.OutputContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitGraph(DotMealyParser.GraphContext ctx) { }
+	@Override public void exitOutput(@NotNull DotMealyParser.OutputContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterMealy_list(DotMealyParser.Mealy_listContext ctx) { }
+	@Override public void enterInput(@NotNull DotMealyParser.InputContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitMealy_list(DotMealyParser.Mealy_listContext ctx) { }
+	@Override public void exitInput(@NotNull DotMealyParser.InputContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterMealy_trans(DotMealyParser.Mealy_transContext ctx) { }
+	@Override public void enterMealy_trans(@NotNull DotMealyParser.Mealy_transContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitMealy_trans(DotMealyParser.Mealy_transContext ctx) { }
+	@Override public void exitMealy_trans(@NotNull DotMealyParser.Mealy_transContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterMealy_attrs(DotMealyParser.Mealy_attrsContext ctx) { }
+	@Override public void enterEdge(@NotNull DotMealyParser.EdgeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitMealy_attrs(DotMealyParser.Mealy_attrsContext ctx) { }
+	@Override public void exitEdge(@NotNull DotMealyParser.EdgeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLabel_name(DotMealyParser.Label_nameContext ctx) { }
+	@Override public void enterEdgeop(@NotNull DotMealyParser.EdgeopContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitLabel_name(DotMealyParser.Label_nameContext ctx) { }
+	@Override public void exitEdgeop(@NotNull DotMealyParser.EdgeopContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterEdge(DotMealyParser.EdgeContext ctx) { }
+	@Override public void enterMealy_list(@NotNull DotMealyParser.Mealy_listContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitEdge(DotMealyParser.EdgeContext ctx) { }
+	@Override public void exitMealy_list(@NotNull DotMealyParser.Mealy_listContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterState(DotMealyParser.StateContext ctx) { }
+	@Override public void enterMealy_attrs(@NotNull DotMealyParser.Mealy_attrsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitState(DotMealyParser.StateContext ctx) { }
+	@Override public void exitMealy_attrs(@NotNull DotMealyParser.Mealy_attrsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterEdgeop(DotMealyParser.EdgeopContext ctx) { }
+	@Override public void enterState(@NotNull DotMealyParser.StateContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitEdgeop(DotMealyParser.EdgeopContext ctx) { }
+	@Override public void exitState(@NotNull DotMealyParser.StateContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTrans(DotMealyParser.TransContext ctx) { }
+	@Override public void enterLabel_name(@NotNull DotMealyParser.Label_nameContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTrans(DotMealyParser.TransContext ctx) { }
+	@Override public void exitLabel_name(@NotNull DotMealyParser.Label_nameContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterValue(DotMealyParser.ValueContext ctx) { }
+	@Override public void enterValue(@NotNull DotMealyParser.ValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitValue(DotMealyParser.ValueContext ctx) { }
+	@Override public void exitValue(@NotNull DotMealyParser.ValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterInput(DotMealyParser.InputContext ctx) { }
+	@Override public void enterGraph(@NotNull DotMealyParser.GraphContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitInput(DotMealyParser.InputContext ctx) { }
+	@Override public void exitGraph(@NotNull DotMealyParser.GraphContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterOutput(DotMealyParser.OutputContext ctx) { }
+	@Override public void enterTrans(@NotNull DotMealyParser.TransContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitOutput(DotMealyParser.OutputContext ctx) { }
+	@Override public void exitTrans(@NotNull DotMealyParser.TransContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterEveryRule(ParserRuleContext ctx) { }
+	@Override public void enterEveryRule(@NotNull ParserRuleContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitEveryRule(ParserRuleContext ctx) { }
+	@Override public void exitEveryRule(@NotNull ParserRuleContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void visitTerminal(TerminalNode node) { }
+	@Override public void visitTerminal(@NotNull TerminalNode node) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void visitErrorNode(ErrorNode node) { }
+	@Override public void visitErrorNode(@NotNull ErrorNode node) { }
 }
