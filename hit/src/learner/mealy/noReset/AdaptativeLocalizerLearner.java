@@ -109,9 +109,6 @@ public class AdaptativeLocalizerLearner {
 							}
 							t.append(in, out);
 
-							// System.err.println("ns ------ " + t);
-
-							// }
 						}
 
 						NodeSplittingTree n1 = new NodeSplittingTree();
@@ -119,7 +116,6 @@ public class AdaptativeLocalizerLearner {
 						if (predictable(t.size() - 1, t, n1)) {
 							flag = false;
 							ns.append(n1);
-							// System.err.println("N1 ======= " + n1);
 						}
 					}
 				}
@@ -134,31 +130,30 @@ public class AdaptativeLocalizerLearner {
 		boolean sign = false;
 		/** repetition factor **/
 		int r = 0;
-
-		/** set of states in last r elements of Nt **/
-
+		
 		/** Set of all leaf node : card(Nt(i-r)) **/
 		int s = 0;
 		while (r < i || s > r) {
 			r++;
+			/** set of states in last r elements of Nt **/
 			NodeSplittingTree ns = new NodeSplittingTree();
 			int pos = i - r;
 			ns.append(nt.subtrace(0, pos));
 			s = ns.size();
 			System.out.println("pos => " + pos + " i = " + i + ", r = " + r + ", s = " + s + ",  ns = " + ns);
-
-			if (s == r) {
-				// System.err.println("==== NO predictable ====" + ns);
-				sign = false;
-			} else {
-				while (r < i - 1) {
-					r++;
-					/** Todo : 13/12/2016 lx **/
-				}
-//				System.err.println("==== NO predictable ====" + ns);
-				sign = true;
-			}
 		}
+		if (s == r) {
+			// System.err.println("==== NO predictable ====" + ns);
+			sign = false;
+		} else {
+			while (r < i - 1) {
+				r++;
+				/** Todo : 13/12/2016 lx **/
+			}
+			// System.err.println("==== NO predictable ====" + ns);
+			sign = true;
+		}
+
 		return sign;
 	}
 
