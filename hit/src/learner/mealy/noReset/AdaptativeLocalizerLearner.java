@@ -1,10 +1,15 @@
 package learner.mealy.noReset;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
 
 import automata.State;
 import automata.mealy.Mealy;
@@ -19,6 +24,10 @@ import learner.mealy.tree.NoEmptySplittingTree;
 import learner.mealy.tree.NodeSplittingTree;
 import learner.mealy.tree.SplittingTree;
 import learner.mealy.tree.StateSplittingTree;
+import tools.antlr4.SplittingTree.Run;
+import tools.antlr4.SplittingTree.SplittingTreeLexer;
+import tools.antlr4.SplittingTree.SplittingTreeParser;
+import tools.antlr4.SplittingTree.SplittingTreeVisitorImpl;
 
 public class AdaptativeLocalizerLearner {
 
@@ -90,32 +99,32 @@ public class AdaptativeLocalizerLearner {
 				if (t.equals(tmp) && b.getSPTree().toString().equals("ε()")) {
 					/** Here is a leaf, so return it **/
 					ns.append(t);
-					// return ns;
 
 				} else if (t.equals(tmp) && !b.getSPTree().toString().equals("ε()")) {
 					/** Here is not a leaf, so here is an iteration **/
-
+					NodeSplittingTree ite = new NodeSplittingTree();
+					ite.append(t);
 					boolean flag = true;
 					while (flag) {
+						for (int nb = 0; nb < 6; nb++) {
+							for (String input : spTree.getInputSequence().sequence) {
+								String in = "", out = "";
+								for (int e = 1; e <= input.length(); e++) {
+									String output = driver.execute(input.substring(e - 1, e));
+									in += input.substring(e - 1, e);
+									out += output;
+								}
 
-						NodeSplittingTree ite = new NodeSplittingTree();
-						// for (int nb = 0; nb < n; nb++) {
-						for (String input : spTree.getInputSequence().sequence) {
-							String in = "", out = "";
-							for (int e = 1; e <= input.length(); e++) {
-								String output = driver.execute(input.substring(e - 1, e));
-								in += input.substring(e - 1, e);
-								out += output;
+								ite.append(in, out);
+
 							}
-							t.append(in, out);
-
 						}
 
 						NodeSplittingTree n1 = new NodeSplittingTree();
-
-						if (predictable(t.size() - 1, t, n1)) {
-							flag = false;
+						System.err.println("nt ----- " + ite);
+						if (predictable(ite.size() - 1, ite, n1, spTree)) {
 							ns.append(n1);
+							flag = false;
 						}
 					}
 				}
@@ -126,35 +135,123 @@ public class AdaptativeLocalizerLearner {
 
 	}
 
-	public boolean predictable(int i, NodeSplittingTree nt, NodeSplittingTree n1) {
+	public boolean predictable(int i, NodeSplittingTree nt, NodeSplittingTree n1, NoEmptySplittingTree st) {
+
 		boolean sign = false;
 		/** repetition factor **/
 		int r = 0;
-		
+
 		/** Set of all leaf node : card(Nt(i-r)) **/
 		int s = 0;
-		while (r < i || s > r) {
+
+		while (r < i && s >= r) {
+
 			r++;
-			/** set of states in last r elements of Nt **/
-			NodeSplittingTree ns = new NodeSplittingTree();
 			int pos = i - r;
-			ns.append(nt.subtrace(0, pos));
+			NodeSplittingTree p = new NodeSplittingTree();
+			p.append(nt.getInput(pos), nt.getOutput(pos));
+
+			/** set of states in last r elements of Nt **/
+			ArrayList<NodeSplittingTree> ns = new ArrayList<NodeSplittingTree>();
+			for (NodeSplittingTree it : getLeaves(st)) {
+				NodeSplittingTree tmp = new NodeSplittingTree();
+				tmp.append(it.getInput(0), it.getOutput(0));
+				if (p.equals(tmp)) {
+					ns.add(it);
+				}
+			}
 			s = ns.size();
-			System.out.println("pos => " + pos + " i = " + i + ", r = " + r + ", s = " + s + ",  ns = " + ns);
+
+			System.out.println("pos => " + pos + " i = " + i + ", r = " + r + ", s = " + s + ", ns = " + ns);
 		}
+		// System.err.println("Here ns = " + ns );
 		if (s == r) {
-			// System.err.println("==== NO predictable ====" + ns);
-			sign = false;
+			System.err.println("Here s = " + s + "==== So! NO predictable, again ====");
+			sign = true;
+
 		} else {
+
+			NodeSplittingTree p = new NodeSplittingTree();
+			p.append(nt.getInput(i - r - 1), nt.getOutput(i - r - 1));
+
+			ArrayList<NodeSplittingTree> ntleaves = new ArrayList<NodeSplittingTree>();
+
+			for (NodeSplittingTree it : getLeaves(st)) {
+				NodeSplittingTree tmp = new NodeSplittingTree();
+				tmp.append(it.getInput(0), it.getOutput(0));
+
+				if (p.equals(tmp)) {
+					ntleaves.add(it);
+				}
+			}
+
+			// System.err.println(" ==== We can do something!! ====" +" i ="+ i
+			// +" s ="+ s + " r = " + r);
 			while (r < i - 1) {
 				r++;
-				/** Todo : 13/12/2016 lx **/
+				nt.subtrace(i - r + s, i + 1);
+				System.err.println("   ==== We can do something!! ====" + " i =" + i + " s =" + s + " r = " + r
+						+ " sub --" + nt.subtrace(i - r + s, i + 1));
+				for (int j = i - r; j < i - 1; j++) {
+					
+				}
+				// j<i-r+s;
+
 			}
-			// System.err.println("==== NO predictable ====" + ns);
+			// System.err.println("==== NO predictable ====");
 			sign = true;
 		}
 
+		//
 		return sign;
 	}
+
+	public ArrayList<NodeSplittingTree> getLeaves(NoEmptySplittingTree st) {
+
+		ArrayList<NodeSplittingTree> list = new ArrayList<NodeSplittingTree>();
+
+		for (Branch b : st.getBranch()) {
+
+			if (b.getSPTree().toString().equals("ε()")) {
+				NodeSplittingTree tmp = new NodeSplittingTree();
+				tmp.append(st.getInputSequence(), b.getOutputSequence());
+				list.add(tmp);
+			} else {
+
+				for (NodeSplittingTree n : getLeaves((NoEmptySplittingTree) b.getSPTree())) {
+					NodeSplittingTree tmp = new NodeSplittingTree();
+					tmp.append(st.getInputSequence(), b.getOutputSequence());
+					tmp.append(n);
+					list.add(tmp);
+				}
+
+			}
+
+		}
+		return list;
+	}
+
+	// public static void main(String[] args) throws IOException {
+	// AdaptativeLocalizerLearner all = new AdaptativeLocalizerLearner();
+	// File file = new File("/Users/wang/Desktop/sptree.txt");
+	// if (!file.exists()) {
+	// throw new IOException("'" + file.getAbsolutePath() + "' do not exists");
+	// }
+	// ANTLRInputStream stream = new ANTLRInputStream(new
+	// FileInputStream(file));
+	// SplittingTreeLexer lexer = new SplittingTreeLexer(stream);
+	// CommonTokenStream tokens = new CommonTokenStream(lexer);
+	// SplittingTreeParser parser = new SplittingTreeParser(tokens);
+	// // tell ANTLR to build a parse tree
+	// parser.setBuildParseTree(true);
+	// ParseTree tree = parser.splitting_tree();
+	// SplittingTreeVisitorImpl antlrVisitor = new SplittingTreeVisitorImpl();
+	// NoEmptySplittingTree st = (NoEmptySplittingTree)
+	// antlrVisitor.visit(tree);
+	//
+	// for (NodeSplittingTree at : all.getLeaves(st)) {
+	// System.err.println("NodeSplittingTree ---- " + at);
+	// }
+	// }
 
 }
