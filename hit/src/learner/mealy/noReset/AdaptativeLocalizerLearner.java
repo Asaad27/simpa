@@ -1,19 +1,5 @@
 package learner.mealy.noReset;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
-
-import automata.State;
-import automata.mealy.Mealy;
-import automata.mealy.MealyTransition;
 import automata.mealy.InputSequence;
 import automata.mealy.OutputSequence;
 import drivers.mealy.MealyDriver;
@@ -22,12 +8,6 @@ import learner.mealy.LmTrace;
 import learner.mealy.tree.Branch;
 import learner.mealy.tree.NoEmptySplittingTree;
 import learner.mealy.tree.NodeSplittingTree;
-import learner.mealy.tree.SplittingTree;
-import learner.mealy.tree.StateSplittingTree;
-import tools.antlr4.SplittingTree.Run;
-import tools.antlr4.SplittingTree.SplittingTreeLexer;
-import tools.antlr4.SplittingTree.SplittingTreeParser;
-import tools.antlr4.SplittingTree.SplittingTreeVisitorImpl;
 
 public class AdaptativeLocalizerLearner {
 
@@ -190,9 +170,10 @@ public class AdaptativeLocalizerLearner {
 			while (r < i - 1) {
 				r++;
 				nt.subtrace(i - r + s, i + 1);
-				System.err.println("   ==== We can do something!! ====" + " i =" + i + " s =" + s + " r = " + r
-						+ " sub --" + nt.subtrace(i - r + s, i + 1));
+				System.err.println("   ==== We can do something!! ====" + " i =" + i + " s =" + s + " r = " + r + " sub --" + nt.subtrace(i - r + s, i + 1));
 				for (int j = i - r; j < i - 1; j++) {
+					
+					
 					
 				}
 				// j<i-r+s;
