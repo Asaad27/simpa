@@ -1,4 +1,5 @@
 package learner.mealy.noReset;
+
 import java.util.ArrayList;
 import automata.mealy.InputSequence;
 import automata.mealy.OutputSequence;
@@ -170,10 +171,9 @@ public class AdaptativeLocalizerLearner {
 			while (r < i - 1) {
 				r++;
 				nt.subtrace(i - r + s, i + 1);
-				System.err.println("   ==== We can do something!! ====" + " i =" + i + " s =" + s + " r = " + r + " sub --" + nt.subtrace(i - r + s, i + 1));
+				System.err.println("   ==== We can do something!! ====" + " i =" + i + " s =" + s + " r = " + r
+						+ " sub --" + nt.subtrace(i - r + s, i + 1));
 				for (int j = i - r; j < i - 1; j++) {
-					
-					
 					
 				}
 				// j<i-r+s;
