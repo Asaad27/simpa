@@ -168,18 +168,26 @@ public class AdaptativeLocalizerLearner {
 
 			// System.err.println(" ==== We can do something!! ====" +" i ="+ i
 			// +" s ="+ s + " r = " + r);
+			/** leaves(Nt(i-r-1)) is a subset Ns **/
 			while (r < i - 1) {
 				r++;
-				nt.subtrace(i - r + s, i + 1);
-				System.err.println("   ==== We can do something!! ====" + " i =" + i + " s =" + s + " r = " + r
-						+ " sub --" + nt.subtrace(i - r + s, i + 1));
-				for (int j = i - r; j < i - 1; j++) {
-					
-				}
-				// j<i-r+s;
+
+				NodeSplittingTree q1 = new NodeSplittingTree();
+				q1.append(nt.subtrace(i - r - 1, i - r + s));
+
+				NodeSplittingTree q2 = new NodeSplittingTree();
+				q2.append(nt.subtrace(i - r + s, i + 1));
+
+				int m = findM(q1, q2);
+				// System.err.println("q1 ----------- >>" + q1);
+				// System.err.println("q2 ----------- >>" + q2);
+				// System.err.println("m ----------- >>" + m);
+				// System.err.println("i ----------- >>" + i);
+				// System.err.println("i-1-m ----------- >>" + (i - 1 - m));
+
+				NodeSplittingTree tmp = new NodeSplittingTree();
 
 			}
-			// System.err.println("==== NO predictable ====");
 			sign = true;
 		}
 
@@ -212,11 +220,49 @@ public class AdaptativeLocalizerLearner {
 		return list;
 	}
 
-	// public static void main(String[] args) throws IOException {
+	public int findM(NodeSplittingTree q1, NodeSplittingTree q2) {
+
+		int j = 0;
+
+		for (int i = 0; i < q2.size(); i++) {
+			int k = i;
+			int count = 0;
+
+			for (int it = 0; it < q1.size(); it++) {
+				if (it < q2.size() && k < q2.size() && q2.getIO(k).equals(q1.getIO(it))) {
+					k++;
+					count++;
+				}
+
+			}
+			if (count >= j) {
+				j = count;
+			}
+		}
+
+		return j;
+	}
+
+	// public static void main(String[] args) {
 	// AdaptativeLocalizerLearner all = new AdaptativeLocalizerLearner();
+	// NodeSplittingTree q1 = new NodeSplittingTree();
+	// NodeSplittingTree q2 = new NodeSplittingTree();
+	//
+	// q1.append("a", "0");
+	// q1.append("a", "1");
+	// q1.append("a", "0");
+	// q1.append("a", "1");
+	// q1.append("a", "0");
+	//
+	// q2.append("a", "0");
+	// q2.append("a", "1");
+	// q2.append("a", "0");
+	//
+	// System.err.println(all.findJ(q1, q2));
 	// File file = new File("/Users/wang/Desktop/sptree.txt");
 	// if (!file.exists()) {
-	// throw new IOException("'" + file.getAbsolutePath() + "' do not exists");
+	// throw new IOException("'" + file.getAbsolutePath() + "' do not
+	// exists");
 	// }
 	// ANTLRInputStream stream = new ANTLRInputStream(new
 	// FileInputStream(file));
@@ -226,7 +272,8 @@ public class AdaptativeLocalizerLearner {
 	// // tell ANTLR to build a parse tree
 	// parser.setBuildParseTree(true);
 	// ParseTree tree = parser.splitting_tree();
-	// SplittingTreeVisitorImpl antlrVisitor = new SplittingTreeVisitorImpl();
+	// SplittingTreeVisitorImpl antlrVisitor = new
+	// SplittingTreeVisitorImpl();
 	// NoEmptySplittingTree st = (NoEmptySplittingTree)
 	// antlrVisitor.visit(tree);
 	//
@@ -234,5 +281,5 @@ public class AdaptativeLocalizerLearner {
 	// System.err.println("NodeSplittingTree ---- " + at);
 	// }
 	// }
-
+	// }
 }
