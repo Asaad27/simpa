@@ -46,6 +46,7 @@ public class AdaptativeLocalizerLearner {
 
 			node.append(localize_intern(depth, spTree, n, driver));
 		}
+		System.err.println("N1 ------- >> " + node);
 		return node;
 
 	}
@@ -87,22 +88,22 @@ public class AdaptativeLocalizerLearner {
 					ite.append(t);
 					boolean flag = true;
 					while (flag) {
-						for (int nb = 0; nb < 6; nb++) {
-							for (String input : spTree.getInputSequence().sequence) {
-								String in = "", out = "";
-								for (int e = 1; e <= input.length(); e++) {
-									String output = driver.execute(input.substring(e - 1, e));
-									in += input.substring(e - 1, e);
-									out += output;
-								}
-
-								ite.append(in, out);
-
+						// for (int nb = 0; nb < 6; nb++) {
+						for (String input : spTree.getInputSequence().sequence) {
+							String in = "", out = "";
+							for (int e = 1; e <= input.length(); e++) {
+								String output = driver.execute(input.substring(e - 1, e));
+								in += input.substring(e - 1, e);
+								out += output;
 							}
+
+							ite.append(in, out);
+							System.err.println("add new input ----- " + ite);
+
 						}
+						// }
 
 						NodeSplittingTree n1 = new NodeSplittingTree();
-						System.err.println("nt ----- " + ite);
 						if (predictable(ite.size() - 1, ite, n1, spTree)) {
 							ns.append(n1);
 							flag = false;
@@ -112,6 +113,7 @@ public class AdaptativeLocalizerLearner {
 			}
 
 		}
+
 		return ns;
 
 	}
@@ -130,6 +132,7 @@ public class AdaptativeLocalizerLearner {
 			r++;
 			int pos = i - r;
 			NodeSplittingTree p = new NodeSplittingTree();
+			System.out.println(" i = " + i + ", r = " + r + ", s = " + s);
 			p.append(nt.getInput(pos), nt.getOutput(pos));
 
 			/** set of states in last r elements of Nt **/
@@ -143,18 +146,18 @@ public class AdaptativeLocalizerLearner {
 			}
 			s = ns.size();
 
-			System.out.println("pos => " + pos + " i = " + i + ", r = " + r + ", s = " + s + ", ns = " + ns);
-		}
-		// System.err.println("Here ns = " + ns );
-		if (s == r) {
-			System.err.println("Here s = " + s + "==== So! NO predictable, again ====");
-			sign = true;
+			// System.out.println(" i = " + i + ", r = " + r + ", s = " + s);
+			System.out.println("pos => " + pos + " i = " + i + ", r = " + r + ", s = " + s + ", nt = " + nt);
 
+		}
+
+		if (s == r) {
+			sign = false;
 		} else {
 
 			NodeSplittingTree p = new NodeSplittingTree();
-			p.append(nt.getInput(i - r - 1), nt.getOutput(i - r - 1));
-
+			// p.append(nt.getInput(i - r - 1), nt.getOutput(i - r - 1));
+			p.append(nt.getInput(i - r), nt.getOutput(i - r));
 			ArrayList<NodeSplittingTree> ntleaves = new ArrayList<NodeSplittingTree>();
 
 			for (NodeSplittingTree it : getLeaves(st)) {
@@ -166,9 +169,8 @@ public class AdaptativeLocalizerLearner {
 				}
 			}
 
-			// System.err.println(" ==== We can do something!! ====" +" i ="+ i
-			// +" s ="+ s + " r = " + r);
 			/** leaves(Nt(i-r-1)) is a subset Ns **/
+			int j = 0;
 			while (r < i - 1) {
 				r++;
 
@@ -178,20 +180,24 @@ public class AdaptativeLocalizerLearner {
 				NodeSplittingTree q2 = new NodeSplittingTree();
 				q2.append(nt.subtrace(i - r + s, i + 1));
 
-				int m = findM(q1, q2);
-				// System.err.println("q1 ----------- >>" + q1);
-				// System.err.println("q2 ----------- >>" + q2);
-				// System.err.println("m ----------- >>" + m);
-				// System.err.println("i ----------- >>" + i);
-				// System.err.println("i-1-m ----------- >>" + (i - 1 - m));
+				if (findJ(q1, q2) != 0) {
+					j = findJ(q1, q2);
+				}
 
 				NodeSplittingTree tmp = new NodeSplittingTree();
-
+				tmp.append(nt.getInput(i - 1 - r + j), nt.getOutput(i - 1 - r + j));
+				n1.append(tmp);
+				sign = true;
 			}
-			sign = true;
+			while (j > i - s) {
+
+				j = j - 1;
+				// TODO : ...
+				sign = false;
+			}
+
 		}
 
-		//
 		return sign;
 	}
 
@@ -220,7 +226,7 @@ public class AdaptativeLocalizerLearner {
 		return list;
 	}
 
-	public int findM(NodeSplittingTree q1, NodeSplittingTree q2) {
+	public int findJ(NodeSplittingTree q1, NodeSplittingTree q2) {
 
 		int j = 0;
 
@@ -237,6 +243,7 @@ public class AdaptativeLocalizerLearner {
 			}
 			if (count >= j) {
 				j = count;
+				j = i + j;
 			}
 		}
 
@@ -257,7 +264,7 @@ public class AdaptativeLocalizerLearner {
 	// q2.append("a", "0");
 	// q2.append("a", "1");
 	// q2.append("a", "0");
-	//
+
 	// System.err.println(all.findJ(q1, q2));
 	// File file = new File("/Users/wang/Desktop/sptree.txt");
 	// if (!file.exists()) {
