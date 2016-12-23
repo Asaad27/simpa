@@ -41,8 +41,9 @@ public class AdaptativeLocalizerLearner {
 		} else {
 			// time++;
 			node.append(localize_intern(depth, spTree, n, driver));
+			System.out.println("Return the resulat : " + node);
 		}
-		System.err.println("NODE ----------->>>> " + node);
+
 		return node;
 
 	}
@@ -78,7 +79,7 @@ public class AdaptativeLocalizerLearner {
 				NodeSplittingTree tmp = new NodeSplittingTree();
 				if (spTree.getInputSequence().getLength() == b.getOutputSequence().getLength()) {
 					tmp = handleIO(spTree.getInputSequence(), b.getOutputSequence());
-					System.err.println("Branch ----- " + b);
+					// System.err.println("Branch ----- " + b);
 					if (driverIO.equals(tmp)) {
 
 						/** if Nt is a leaf **/
@@ -109,35 +110,26 @@ public class AdaptativeLocalizerLearner {
 								System.out.println("Trace ----->>> " + trace);
 
 								if (predictable(driverIO.size() - 1, driverIO, n1, spTree)) {
+									System.out.println("predictable --- " + n1);
 									ns.append(n1);
-									// trace.append(n1);
-									flag = false;
-								}
-							}
+									if (spTree.getInputSequence().equals(n1.getInputsProjection())) {
 
-//							System.err.println("************************NS************************ >>>>>>>  " + ns);
-//							System.err.println("************************NS************************ >>>>>>>  " + trace);
-							if (spTree.getInputSequence().equals(n1.getInputsProjection())) {
-								// NodeSplittingTree nso = new
-								// NodeSplittingTree();
+										for (Branch sub : spTree.getBranch()) {
+											if (sub.getOutputSequence().equals(n1.getOutputsProjection())) {
+												NodeSplittingTree t = new NodeSplittingTree();
+												NoEmptySplittingTree subTree = (NoEmptySplittingTree) sub.getSPTree();
 
-								for (Branch sub : spTree.getBranch()) {
-									if (sub.getOutputSequence().equals(n1.getOutputsProjection())) {
-										NoEmptySplittingTree subTree = (NoEmptySplittingTree) sub.getSPTree();
-										// System.err.println("subTree---------
-										// " + subTree + " driver -----"
-										// +
-										// getDriverIO(subTree.getInputSequence(),
-										// driver));
+												t.append(getDriverIO(subTree.getInputSequence(), driver));
+												
+												ns.append(t.getInputsProjection().toString(), t.getOutputsProjection().toString());
+//												System.err.println(t.getInputsProjection());
+//												System.err.println(t.getOutputsProjection());
+//												System.err.println(ns);
+											}
 
-										// ns.append(localize_intern(depth,
-										// subTree, n, driver));
-										ns.append(getDriverIO(subTree.getInputSequence(), driver));
-										// n1.append(driverIO);
-										// ns.append(n1);
-
+										}
 									}
-
+									flag = false;
 								}
 							}
 
@@ -147,7 +139,7 @@ public class AdaptativeLocalizerLearner {
 			}
 
 		}
-		System.out.println("NS --------------- " + ns);
+		// System.out.println("NS --------------- " + ns);
 		return ns;
 
 	}

@@ -17,10 +17,14 @@ public class Branch {
 		splittingTree = st;
 	}
 
+	public Branch() {
+
+	}
+
 	public SplittingTree getSPTree() {
 		return splittingTree;
 	}
-	
+
 	public OutputSequence getOutputSequence() {
 		return outputSeq;
 	}

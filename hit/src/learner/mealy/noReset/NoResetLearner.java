@@ -263,6 +263,7 @@ public class NoResetLearner extends Learner {
 		long start = System.nanoTime();
 
 		driver.reset();
+		
 		alLearner.localize(depth, st, n, driver);
 
 	}
