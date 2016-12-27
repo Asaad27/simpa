@@ -60,7 +60,10 @@ public class Options {
 	public static boolean FORCE_J48 = false;
 	public static int STATE_NUMBER_BOUND;
 	public static List<InputSequence> CHARACTERIZATION_SET;
-	//add SplitingTree input sequence 11/14/2016
+	/**
+	 * 11/14/2016 add SplitingTree input sequence;
+	 * 12/27/2016 Change the type to splitting tree; 
+	 **/
 	public static NoEmptySplittingTree SPLITTING_TREE;
 
 	public static boolean ICTSS2015_WITHOUT_SPEEDUP = false;
