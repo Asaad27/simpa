@@ -15,10 +15,10 @@ import org.antlr.v4.runtime.tree.ParseTree;
 
 import automata.mealy.InputSequence;
 import automata.mealy.OutputSequence;
-import learner.mealy.tree.Branch;
-import learner.mealy.tree.NoEmptySplittingTree;
-import learner.mealy.tree.SplittingTree;
-import learner.mealy.tree.StateSplittingTree;
+import learner.mealy.noReset.*;
+//import learner.mealy.tree.NoEmptySplittingTree;
+//import learner.mealy.tree.SplittingTree;
+//import learner.mealy.tree.StateSplittingTree;
 import tools.antlr4.SplittingTree.SplittingTreeParser.Splitting_treeContext;
 
 public class SplittingTreeVisitorImpl extends SplittingTreeBaseVisitor<SplittingTree> {
