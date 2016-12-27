@@ -27,13 +27,14 @@ public class Options {
 	public static final String SYMBOL_NOT_EQUAL = "\u2260";
 
 	public static String DIRGRAPH = "out";
-	public static String DIRGRAPHSTATS = "stats"+File.separator+"graphs";
+	public static String DIRGRAPHSTATS = "stats" + File.separator + "graphs";
 	public static String DIRARFF = "arff";
 	public static String DIRTEST = "test";
-	public static String DIRSTATSCSV = "stats"+File.separator+"CSV";
+	public static String DIRSTATSCSV = "stats" + File.separator + "CSV";
 	public static String DIRLOG = "log";
 	public static String DIRASLAN = "model";
-	public static String DIRFAIL = "fails";//where to store logs of fails during stats computation 
+	public static String DIRFAIL = "fails";// where to store logs of fails
+											// during stats computation
 
 	// Tools available
 
@@ -58,19 +59,24 @@ public class Options {
 	public static boolean FORCE_J48 = false;
 	public static int STATE_NUMBER_BOUND;
 	public static List<InputSequence> CHARACTERIZATION_SET;
+	//add SplitingTree input sequence 11/14/2016
+	public static String SPLITTING_TREE;
+
 	public static boolean ICTSS2015_WITHOUT_SPEEDUP = false;
-	public static boolean INTERACTIVE = false; //For algorithms which can prompt user for counter example or chosen sequences
-	
+	public static boolean INTERACTIVE = false; // For algorithms which can
+												// prompt user for counter
+												// example or chosen sequences
+
 	// Counterexample options
-	
+
 	public static boolean STOP_ON_CE_SEARCH = false;
 
-	//Web application analysis
+	// Web application analysis
 	public static boolean XSS_DETECTION = false;
 
 	public static int MAX_CE_LENGTH = 20;
 	public static int MAX_CE_RESETS = 10;
-	
+
 	// Output's options
 
 	public static LogLevel LOG_LEVEL = LogLevel.ALL;
@@ -93,7 +99,7 @@ public class Options {
 	public static int MAXINPUTSYM = 5;
 	public static int MINOUTPUTSYM = 5;
 	public static int MAXOUTPUTSYM = 5;
-	
+
 	// EFSM
 	public static int MINPARAMETER = 1;
 	public static int MAXPARAMETER = 1;
@@ -102,22 +108,23 @@ public class Options {
 	public static int NDVGUARDPERCENT = 25;
 	public static int NDVMINTRANSTOCHECK = 1;
 	public static int NDVMAXTRANSTOCHECK = 1;
-	
-	public enum LogLevel{
-		ALL,
-		DO_NOT_COMPLEXIFY,//don't log things that will take a non constant-time
+
+	public enum LogLevel {
+		ALL, DO_NOT_COMPLEXIFY, // don't log things that will take a non
+								// constant-time
 		LOW;
 	}
-	public static void LogOptions (){
+
+	public static void LogOptions() {
 		LogManager.logInfo("Seed used: " + SEED);
 		LogManager.logInfo("Applicable options:");
-		
+
 		LogManager.logInfo("STOP_ON_CE_SEARCH = " + STOP_ON_CE_SEARCH);
 		if (!STOP_ON_CE_SEARCH) {
 			LogManager.logInfo("MAX_CE_LENGTH = " + MAX_CE_LENGTH);
 			LogManager.logInfo("MAX_CE_RESETS = " + MAX_CE_RESETS);
 		}
-		if(TEST) {
+		if (TEST) {
 			LogManager.logInfo("NBTEST = " + NBTEST);
 			LogManager.logInfo("MINSTATES = " + MINSTATES);
 			LogManager.logInfo("MAXSTATES = " + MAXSTATES);
@@ -131,6 +138,5 @@ public class Options {
 		}
 		// TODO: To be completed with options on choice of algo and EFSM
 		LogManager.logLine();
-		}
 	}
-
+}
