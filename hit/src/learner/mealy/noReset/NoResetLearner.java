@@ -28,8 +28,6 @@ import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import learner.mealy.noReset.dataManager.DataManager;
 import learner.mealy.noReset.dataManager.FullyQualifiedState;
-import learner.mealy.tree.NoEmptySplittingTree;
-import learner.mealy.tree.NodeSplittingTree;
 import main.simpa.Options;
 import tools.AdenilsoSimaoTool;
 import tools.Utils;
@@ -57,7 +55,8 @@ public class NoResetLearner extends Learner {
 	public void learn() {
 		List<InputSequence> W = Options.CHARACTERIZATION_SET;
 		// handle splitting tree option
-		String sTree = Options.SPLITTING_TREE;
+		NoEmptySplittingTree sTree = Options.SPLITTING_TREE;
+
 		if (W == null && sTree == null) {
 			W = computeCharacterizationSet(driver);
 			class InputSequenceComparator implements Comparator<InputSequence> {
@@ -71,34 +70,7 @@ public class NoResetLearner extends Learner {
 			learn(W);
 		} else if (sTree != null) {
 
-			File file = new File(sTree);
-			if (!file.exists()) {
-				try {
-					throw new IOException("'" + file.getAbsolutePath() + "' do not exists");
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			ANTLRInputStream stream = null;
-			try {
-				stream = new ANTLRInputStream(new FileInputStream(file));
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			SplittingTreeLexer lexer = new SplittingTreeLexer(stream);
-			CommonTokenStream tokens = new CommonTokenStream(lexer);
-			SplittingTreeParser parser = new SplittingTreeParser(tokens);
-			// tell ANTLR to build a parse tree
-			parser.setBuildParseTree(true);
-			ParseTree tree = parser.splitting_tree();
-			SplittingTreeVisitorImpl antlrVisitor = new SplittingTreeVisitorImpl();
-			NoEmptySplittingTree st = (NoEmptySplittingTree) antlrVisitor.visit(tree);
-			learn(st);
+			learn(sTree);
 
 		} else if (W != null) {
 			learn(W);
@@ -263,7 +235,7 @@ public class NoResetLearner extends Learner {
 		long start = System.nanoTime();
 
 		driver.reset();
-		
+
 		alLearner.localize(depth, st, n, driver);
 
 	}

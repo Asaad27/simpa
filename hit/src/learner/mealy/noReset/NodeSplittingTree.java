@@ -1,4 +1,4 @@
-package learner.mealy.tree;
+package learner.mealy.noReset;
 
 import java.util.ArrayList;
 

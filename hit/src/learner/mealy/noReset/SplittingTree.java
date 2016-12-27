@@ -1,4 +1,4 @@
-package learner.mealy.tree;
+package learner.mealy.noReset;
 
 public abstract class SplittingTree {
 	

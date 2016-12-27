@@ -3,7 +3,7 @@ package learner.mealy;
 import java.util.ArrayList;
 import automata.mealy.InputSequence;
 import automata.mealy.OutputSequence;
-import learner.mealy.tree.NodeSplittingTree;
+import learner.mealy.noReset.NodeSplittingTree;
 
 public class LmTrace {
 	// at any time, inputs and outputs must have the same length

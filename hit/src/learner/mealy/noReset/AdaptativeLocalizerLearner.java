@@ -6,9 +6,6 @@ import automata.mealy.OutputSequence;
 import drivers.mealy.MealyDriver;
 import examples.mealy.Test3Mealy;
 import learner.mealy.LmTrace;
-import learner.mealy.tree.Branch;
-import learner.mealy.tree.NoEmptySplittingTree;
-import learner.mealy.tree.NodeSplittingTree;
 
 public class AdaptativeLocalizerLearner {
 	// int time = 0;
