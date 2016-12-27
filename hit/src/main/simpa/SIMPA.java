@@ -181,7 +181,7 @@ class StringOption extends Option<String> {
 
 }
 
-/** add SplittingTreeOptin 12/27/2016 **/
+/** add SplittingTreeOption 12/27/2016 **/
 
 class SplittingTreeOption extends Option<NoEmptySplittingTree> {
 
