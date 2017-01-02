@@ -9,12 +9,6 @@ splitting_tree
 	; 
 	
 	
-//branch 
-//	: input   '(' (output '(' state ')' ';')* ')' 
-//	;	
-	
-	
-	
 /*	
 splitting_tree 
 	: input   '(' (splitting_tree ';')+  ')'  
