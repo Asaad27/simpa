@@ -19,7 +19,9 @@
   - Click Finish to start the import.
 
 
-If you are getting a problem like (`The method getTextContent() is undefined for the type Node`) in Eclipse, my tested solution would be : ***Java Build Path*** > ***Order and Export***, select **JRE System Library** and move it to Top.
+—> If you are getting a problem like (`The method getTextContent() is undefined for the type Node`) in Eclipse, my tested solution would be : ***Java Build Path*** > ***Order and Export***, select **JRE System Library** and move it to Top.
+
+—> For compile all parts of SIMPA (include antlr4 files), we need add .g4 files into builders. Right click on project SIMPA, click ***Properties***, and then click the "***Builders***" in the window. Click "***import...***", add .g4 files, for exemple, add "DotMealy.g4" and "SplittingTree.g4".
 
 ### o USAGE
 
