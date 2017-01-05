@@ -23,9 +23,11 @@ import drivers.Driver;
 public class MealyDriver extends Driver {
 	public class UnableToComputeException extends Exception {
 		private static final long serialVersionUID = -6169240870495799817L;
+
 		public UnableToComputeException() {
 			super();
 		}
+
 		public UnableToComputeException(String message) {
 			super(message);
 		}
@@ -56,13 +58,10 @@ public class MealyDriver extends Driver {
 	}
 
 	public List<String> getStats() {
-		return Utils.createArrayList(String.valueOf(nbStates),
-				String.valueOf(getInputSymbols().size()),
+		return Utils.createArrayList(String.valueOf(nbStates), String.valueOf(getInputSymbols().size()),
 				String.valueOf(getOutputSymbols().size()),
-				String.valueOf(((float) numberOfAtomicRequest / numberOfRequest)),
-				String.valueOf(numberOfRequest),
-				String.valueOf(((float) duration / 1000000000)),
-				String.valueOf(automata.getTransitionCount()));
+				String.valueOf(((float) numberOfAtomicRequest / numberOfRequest)), String.valueOf(numberOfRequest),
+				String.valueOf(((float) duration / 1000000000)), String.valueOf(automata.getTransitionCount()));
 	}
 
 	protected List<InputSequence> getForcedCE() {
@@ -121,13 +120,13 @@ public class MealyDriver extends Driver {
 			ce = forcedCE.remove(0);
 			LogManager.logInfo("Counter example found (forced) : " + ce);
 		}
-		if (Options.STOP_ON_CE_SEARCH){
+		if (Options.STOP_ON_CE_SEARCH) {
 			LogManager.logInfo("CE search aborted (see Options.STOP_ON_CE_SEARCH");
 			return null;
 		}
 
 		boolean shortestCEFailed = false;
-		if (ce == null){
+		if (ce == null) {
 			LogManager.logInfo("search theorical CE");
 			try {
 				if (m.isConnex())
@@ -135,29 +134,29 @@ public class MealyDriver extends Driver {
 				else
 					throw new UnableToComputeException("automata is not connex");
 			} catch (UnableToComputeException e) {
-				LogManager.logInfo("unable to compute theorical CE "+(e.getMessage()));
+				LogManager.logInfo("unable to compute theorical CE " + (e.getMessage()));
 				shortestCEFailed = true;
 			}
 
-			if (ce != null){
+			if (ce != null) {
 				reset();
 				for (String i : ce.sequence)
 					execute(i);
 			}
 		}
 
-		if (shortestCEFailed && ce == null){
+		if (shortestCEFailed && ce == null) {
 			LogManager.logInfo("search random CE");
 			ce = getRandomCounterExemple(m);
 		}
 
 		if (ce == null)
 			LogManager.logInfo("No counter example found");
-		LogManager.logInfo("found ce : "+ce);
+		LogManager.logInfo("found ce : " + ce);
 		return ce;
 	}
 
-	public InputSequence getRandomCounterExemple(Mealy c){
+	public InputSequence getRandomCounterExemple(Mealy c) {
 		boolean found = false;
 		InputSequence ce = null;
 
@@ -184,9 +183,7 @@ public class MealyDriver extends Driver {
 						osSystem.addOutput(_sys);
 						osConj.addOutput(_conj);
 					}
-					if (!_sys.equals(_conj)
-							&& (osSystem.getLength() > 0 && !osSystem
-									.getLastSymbol().isEmpty())) {
+					if (!_sys.equals(_conj) && (osSystem.getLength() > 0 && !osSystem.getLastSymbol().isEmpty())) {
 						found = true;
 						ce = ce.getIthPreffix(osSystem.getLength());
 						LogManager.logInfo("Counter example found : " + ce);
@@ -204,35 +201,48 @@ public class MealyDriver extends Driver {
 	}
 
 	/**
-	 * get a shortest distinguish sequence for an automata
-	 * the computed sequence is not applied to the driver
-	 * The two automata are supposed to be connex.
-	 * @param s1 the position in the driver equivalent to s2. If null, the current position is chosen
-	 * @param a2 the second automata
-	 * @param s2 the current position in a2
-	 * @return a distinguish sequence for the two automata starting from their current states.
+	 * get a shortest distinguish sequence for an automata the computed sequence
+	 * is not applied to the driver The two automata are supposed to be connex.
+	 * 
+	 * @param s1
+	 *            the position in the driver equivalent to s2. If null, the
+	 *            current position is chosen
+	 * @param a2
+	 *            the second automata
+	 * @param s2
+	 *            the current position in a2
+	 * @return a distinguish sequence for the two automata starting from their
+	 *         current states.
 	 */
-	public InputSequence getShortestCounterExemple(
-			State s1, Mealy a2, State s2) {
+	public InputSequence getShortestCounterExemple(State s1, Mealy a2, State s2) {
 		if (s1 == null)
 			s1 = currentState;
 		assert automata.isConnex() && a2.isConnex();
 		int maxLength = (automata.getStateCount() > a2.getStateCount() ? automata.getStateCount() : a2.getStateCount());
-		class Node{public InputSequence i; public State originalEnd; public State conjectureEnd;public String toString(){return "for input '" + i + "' this driver go to '" + originalEnd + "' and the other go to '"+conjectureEnd+"'\n";}}
+		class Node {
+			public InputSequence i;
+			public State originalEnd;
+			public State conjectureEnd;
+
+			public String toString() {
+				return "for input '" + i + "' this driver go to '" + originalEnd + "' and the other go to '"
+						+ conjectureEnd + "'\n";
+			}
+		}
 		LinkedList<Node> toCompute = new LinkedList<Node>();
 		Node n = new Node();
 		n.i = new InputSequence();
 		n.originalEnd = s1;
 		n.conjectureEnd = s2;
 		toCompute.add(n);
-		while (!toCompute.isEmpty()){
+		while (!toCompute.isEmpty()) {
 			Node current = toCompute.pollFirst();
 			if (current.i.getLength() > maxLength)
 				continue;
-			for (String i : getInputSymbols()){
+			for (String i : getInputSymbols()) {
 				MealyTransition originalT = automata.getTransitionFromWithInput(current.originalEnd, i);
 				MealyTransition conjectureT = a2.getTransitionFromWithInput(current.conjectureEnd, i);
-				if (!originalT.getOutput().equals(conjectureT.getOutput())){
+				if (!originalT.getOutput().equals(conjectureT.getOutput())) {
 					current.i.addInput(i);
 					return current.i;
 				}
@@ -249,12 +259,15 @@ public class MealyDriver extends Driver {
 	}
 
 	/**
-	 * get a shortest distinguish sequence for an automata
-	 * the computed sequence is not applied to the driver
-	 * The two automata ares supposed to be connex.
-	 * @param a2 the second automata
-	 * @return a distinguish sequence for the two automata starting from their initial states or null if the two automata are equivalents.
-	 * @throws UnableToComputeException if there is not enough data to compute a CE.
+	 * get a shortest distinguish sequence for an automata the computed sequence
+	 * is not applied to the driver The two automata ares supposed to be connex.
+	 * 
+	 * @param a2
+	 *            the second automata
+	 * @return a distinguish sequence for the two automata starting from their
+	 *         initial states or null if the two automata are equivalents.
+	 * @throws UnableToComputeException
+	 *             if there is not enough data to compute a CE.
 	 */
 	public InputSequence getShortestCounterExemple(Mealy m) throws UnableToComputeException {
 		if (automata == null)
@@ -294,38 +307,42 @@ public class MealyDriver extends Driver {
 	}
 
 	/**
-	 * compute an input sequence s.t. the output sequence entirely define the final state
+	 * compute an input sequence s.t. the output sequence entirely define the
+	 * final state
+	 * 
 	 * @return null if a such sequence cannot be computed
-	 * @throws UnableToComputeException 
+	 * @throws UnableToComputeException
 	 */
-	public InputSequence getHomingSequence() throws UnableToComputeException{
+	public InputSequence getHomingSequence() throws UnableToComputeException {
 		LogManager.logInfo("Computing homing sequence");
-		if (automata == null){
+		if (automata == null) {
 			LogManager.logInfo("Unable to compute homing sequence");
 			throw new UnableToComputeException();
 		}
 		InputSequence r = new InputSequence();
 		boolean found = false;
-		while (!found){
+		while (!found) {
 			found = true;
-			for (int i = 0; i < automata.getStateCount(); i++){
+			for (int i = 0; i < automata.getStateCount(); i++) {
 				State s1 = automata.getState(i);
-				for (int j = i+1; j < automata.getStateCount(); j++){
+				for (int j = i + 1; j < automata.getStateCount(); j++) {
 					State s2 = automata.getState(j);
 					OutputSequence o1 = automata.apply(r, s1);
 					State os1 = automata.applyGetState(r, s1);
 					OutputSequence o2 = automata.apply(r, s2);
 					State os2 = automata.applyGetState(r, s2);
-					if (o1.equals(o2) && os1 != os2){
+					if (o1.equals(o2) && os1 != os2) {
 						found = false;
 						LinkedList<InputSequence> l = new LinkedList<>();
 						l.add(new InputSequence());
 						boolean foundLocalSeq = false;
-						while(!foundLocalSeq){
+						while (!foundLocalSeq) {
 							InputSequence current = l.poll();
-							if (current.getLength() >= nbStates){
-								LogManager.logInfo("Unable to compute homming sequence because " + os1 + " and " + os2 + " have same outputs which leads in differents states");
-								LogManager.logInfo("Maybe thoose states are equivalent and you can use "+r+" as homming sequence (be careful, some states have not been tested). But in strict definition of homing sequence, if you got the same output, you must be in the same state");
+							if (current.getLength() >= nbStates) {
+								LogManager.logInfo("Unable to compute homming sequence because " + os1 + " and " + os2
+										+ " have same outputs which leads in differents states");
+								LogManager.logInfo("Maybe thoose states are equivalent and you can use " + r
+										+ " as homming sequence (be careful, some states have not been tested). But in strict definition of homing sequence, if you got the same output, you must be in the same state");
 								automata.exportToDot();
 								throw new UnableToComputeException(os1 + " and " + os2 + " seems to be equivalents");
 							}
@@ -333,23 +350,26 @@ public class MealyDriver extends Driver {
 							State currentOs1 = automata.applyGetState(current, os1);
 							OutputSequence currentO2 = automata.apply(current, os2);
 							State currentOs2 = automata.applyGetState(current, os2);
-							if (currentOs1 == currentOs2 || !currentO1.equals(currentO2)){
+							if (currentOs1 == currentOs2 || !currentO1.equals(currentO2)) {
 								foundLocalSeq = true;
 								r.addInputSequence(current);
-								if (Options.LOG_LEVEL != LogLevel.LOW){
-									LogManager.logInfo("appending " + current + " to homing sequence in order to distinguish " + os1 + " and " + os2 
-											+ " respectively reached from " + s1 + " and "+ s2 + " with output " + o1);
+								if (Options.LOG_LEVEL != LogLevel.LOW) {
+									LogManager.logInfo("appending " + current
+											+ " to homing sequence in order to distinguish " + os1 + " and " + os2
+											+ " respectively reached from " + s1 + " and " + s2 + " with output " + o1);
 									if (currentOs1 == currentOs2)
-										LogManager.logInfo("Now, applying homing sequence from " + s1 + " and " + s2 + " lead in same state " + currentOs1);
-									else{
+										LogManager.logInfo("Now, applying homing sequence from " + s1 + " and " + s2
+												+ " lead in same state " + currentOs1);
+									else {
 										o1.addOutputSequence(currentO1);
 										o2.addOutputSequence(currentO2);
-										LogManager.logInfo("Now, applying homing sequence from " + s1 + " and " + s2 + " give outputs " + o1 + " and " + o2);
+										LogManager.logInfo("Now, applying homing sequence from " + s1 + " and " + s2
+												+ " give outputs " + o1 + " and " + o2);
 									}
 								}
 
-							}else{
-								for (String in : getInputSymbols()){
+							} else {
+								for (String in : getInputSymbols()) {
 									InputSequence toTry = new InputSequence();
 									toTry.addInputSequence(current);
 									toTry.addInput(in);
@@ -364,4 +384,10 @@ public class MealyDriver extends Driver {
 		LogManager.logInfo("Found homing sequence " + r);
 		return r;
 	}
+
+	/** Get current state **/
+	public State getCurrentState() {
+		return currentState;
+	}
+
 }
