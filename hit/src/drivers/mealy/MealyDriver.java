@@ -389,5 +389,11 @@ public class MealyDriver extends Driver {
 	public State getCurrentState() {
 		return currentState;
 	}
-
+	/** Get init state **/
+	public State getInitState() {
+		return automata.getInitialState();
+	}
+	
+	
+	
 }

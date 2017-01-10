@@ -795,8 +795,8 @@ public class SIMPA {
 		Options.LogOptions();
 		LogManager
 				.logInfo("you can try to do this learning again by running something like '" + makeLaunchLine() + "'");
-		System.out
-				.println("you can try to do this learning again by running something like '" + makeLaunchLine() + "'");
+		LogManager.logConsole(
+				"you can try to do this learning again by running something like '" + makeLaunchLine() + "'");
 		driver = loadDriver(Options.SYSTEM);
 		if (Options.NORESETINFERENCE) {
 			if (STATE_NUMBER_BOUND.getValue() > 0)

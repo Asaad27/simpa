@@ -1,9 +1,6 @@
 package learner.mealy.noReset;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -11,10 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
 
 import automata.State;
 import automata.mealy.InputSequence;
@@ -31,9 +24,7 @@ import learner.mealy.noReset.dataManager.FullyQualifiedState;
 import main.simpa.Options;
 import tools.AdenilsoSimaoTool;
 import tools.Utils;
-import tools.antlr4.SplittingTree.SplittingTreeLexer;
-import tools.antlr4.SplittingTree.SplittingTreeParser;
-import tools.antlr4.SplittingTree.SplittingTreeVisitorImpl;
+
 import tools.loggers.LogManager;
 
 public class NoResetLearner extends Learner {
@@ -50,7 +41,8 @@ public class NoResetLearner extends Learner {
 
 	/*
 	 * if we don't have a W-set (no value in option), we use
-	 * computeCharacterizationSet(driver) for create W-set.
+	 * computeCharacterizationSet(driver) for create W-set. if we have a
+	 * splitting tree (value from a file), we use learn(NoEmptySplittingTree).
 	 */
 	public void learn() {
 		List<InputSequence> W = Options.CHARACTERIZATION_SET;
@@ -218,6 +210,7 @@ public class NoResetLearner extends Learner {
 
 		int depth = 0;
 		int nbState = 0;
+
 		/** get depth and number of states **/
 		AdaptativeLocalizerLearner alLearner = new AdaptativeLocalizerLearner();
 		for (NodeSplittingTree node : alLearner.getLeaves(st)) {
@@ -225,17 +218,20 @@ public class NoResetLearner extends Learner {
 				depth = node.size();
 		}
 		nbState = alLearner.getLeaves(st).size();
+		System.err.println();
 
-		LogManager.logStep(LogManager.STEPOTHER, "Inferring the system");
+		LogManager.logStep(LogManager.STEPOTHER, "Inferring the system with Splitting Tree");
 		LogManager.logConsole(
 				"Inferring the system with splitting tree : " + st + ", depth=" + depth + " and n=" + nbState);
 
-		StringBuilder logSTree = new StringBuilder("Using splitting tree : [ " + st.toString() + " ]");
+		StringBuilder logSTree = new StringBuilder("Using splitting tree : [ " + st.toString()
+				+ " ], We already know the all leaves ( " + alLearner.getLeaves(st) + " )");
 		LogManager.logInfo(logSTree.toString());
+
 		long start = System.nanoTime();
-
+	
 		driver.reset();
-
+		LogManager.logConsole("We start from initial state : " + driver.getInitState().getName());
 		alLearner.localize(depth, st, n, driver);
 
 	}
@@ -253,9 +249,7 @@ public class NoResetLearner extends Learner {
 
 	/**
 	 * 
-	 * @param trace
-	 *            omega the global trace of the automata, will be completed \in
-	 *            (IO)*
+	 * @param trace omega the global trace of the automata, will be completed \in (IO)*
 	 * @param inputSequences
 	 *            a subset of the characterization state \subset W \subset I*
 	 * @return the position of the fully identified state in the GlobalTrace
@@ -272,6 +266,7 @@ public class NoResetLearner extends Learner {
 
 	}
 
+	
 	private List<OutputSequence> localize_intern(DataManager dataManager, List<InputSequence> inputSequences) {
 		if (inputSequences.size() == 1) {
 			List<OutputSequence> WResponses = new ArrayList<OutputSequence>();
@@ -339,8 +334,7 @@ public class NoResetLearner extends Learner {
 		// We can do a random walk
 
 		int max_try = driver.getInputSymbols().size() * n * 10;
-		dataManager = null;// we use directly the driver for the walk so
-							// dataManager is not up to date;
+		dataManager = null;// we use directly the driver for the walk so dataManager is not up to date;
 		driver.stopLog();
 		for (int j = 0; j < max_try; j++) {
 			int rand = Utils.randInt(driver.getInputSymbols().size());
