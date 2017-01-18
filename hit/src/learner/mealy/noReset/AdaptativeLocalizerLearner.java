@@ -1,11 +1,11 @@
 package learner.mealy.noReset;
 
 import java.util.ArrayList;
+
 import automata.mealy.InputSequence;
 import automata.mealy.OutputSequence;
 import drivers.mealy.MealyDriver;
-import examples.mealy.Test3Mealy;
-import learner.mealy.LmTrace;
+
 import tools.loggers.LogManager;
 
 public class AdaptativeLocalizerLearner {
@@ -13,6 +13,9 @@ public class AdaptativeLocalizerLearner {
 	InputSequence omegaInputSequence = new InputSequence();
 	OutputSequence omegaOutputSequence = new OutputSequence();
 	NodeSplittingTree trace = new NodeSplittingTree();
+	ArrayList<NodeSplittingTree> listState = new ArrayList<NodeSplittingTree>();
+	ArrayList<NodeSplittingTree> listNode = new ArrayList<NodeSplittingTree>();
+	// MealyDriver driver;
 
 	/**
 	 * @param depth
@@ -22,7 +25,9 @@ public class AdaptativeLocalizerLearner {
 	 * @return SplittingTree
 	 */
 	public NodeSplittingTree localize(int depth, NoEmptySplittingTree spTree, int n, MealyDriver driver) {
+		
 		NodeSplittingTree node = new NodeSplittingTree();
+		LogManager.logInfo("Localizing...");
 
 		/** if depth= 0 return root(T). **/
 		if (depth == 0) {
@@ -37,12 +42,15 @@ public class AdaptativeLocalizerLearner {
 
 			node.append(getDriverIO(spTree.getInputSequence(), driver));
 			LogManager.logConsole("Depth of splitting tree is 1, and we put inputs for getting all states.");
+			LogManager.logInfo("Depth of splitting tree is 1, and we put inputs for getting all states.");
 
 		} else {
-			// time++;
 			node.append(localize_intern(depth, spTree, n, driver));
-			LogManager.logConsole("Return the node : " + node + ", and " + trace.size() + " steps.");
-			LogManager.logConsole("Trace is " + trace);
+			LogManager.logConsole("Total length of sequence is " + trace.size() + " steps.");
+			LogManager.logConsole("Sequence is " + trace);
+			LogManager.logInfo("Total length of sequence is " + trace.size() + " steps.");
+			LogManager.logInfo("Sequence is " + trace);
+
 		}
 
 		return node;
@@ -60,7 +68,7 @@ public class AdaptativeLocalizerLearner {
 			NodeSplittingTree driverIO = new NodeSplittingTree();
 
 			/** if depth =1, here will do L(1, T) **/
-
+			LogManager.logInfo("If depth =1, here will do L(1, T) ");
 			for (String input : spTree.getInputSequence().sequence) {
 
 				for (int e = 1; e <= input.length(); e++) {
@@ -84,7 +92,7 @@ public class AdaptativeLocalizerLearner {
 
 						/** if Nt is a leaf **/
 						if (b.getSPTree().toString().equals("ε()")) {
-
+							LogManager.logInfo("There is a leaf, so return it ");
 							/** Here is a leaf, so return it **/
 							ns.append(driverIO);
 							// LogManager.logConsole("Predictable is true, we
@@ -134,6 +142,7 @@ public class AdaptativeLocalizerLearner {
 															.equals(t.getOutputsProjection().toString())) {
 														if (br.getSPTree().toString().equals("ε()")) {
 															LogManager.logConsole("We get a leaf, state is " + ns);
+															listState.add(ns);
 														} else {
 															LogManager.logConsole("We get a subTree: " + ns);
 															ns.append(localize_intern(depth,
@@ -340,6 +349,14 @@ public class AdaptativeLocalizerLearner {
 
 		return j;
 	}
+
+	// public void inferSystem(int depth, NoEmptySplittingTree spTree, int n,
+	// MealyDriver driver) {
+	// State s = driver.getCurrentState();
+	//
+	//
+	//
+	// }
 
 	// public static void main(String[] args) {
 	// AdaptativeLocalizerLearner all = new AdaptativeLocalizerLearner();
