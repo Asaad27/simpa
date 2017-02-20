@@ -1,6 +1,5 @@
 package learner.mealy.noReset;
 
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -218,7 +217,7 @@ public class NoResetLearner extends Learner {
 				depth = node.size();
 		}
 		nbState = alLearner.getLeaves(st).size();
-		System.err.println();
+		// System.err.println();
 
 		LogManager.logStep(LogManager.STEPOTHER, "Inferring the system with Splitting Tree");
 		LogManager.logConsole(
@@ -229,11 +228,30 @@ public class NoResetLearner extends Learner {
 		LogManager.logInfo(logSTree.toString());
 
 		long start = System.nanoTime();
-	
+
 		driver.reset();
 		LogManager.logConsole("We start from initial state : " + driver.getInitState().getName());
-		alLearner.localize(depth, st, n, driver);
+		// System.err.println(nbState);
+		// for (int i = 0; i < alLearner.getLeaves(st).size(); i++) {
+		alLearner.localize(depth, st, nbState, driver);
+		System.err.println("nbState ------ " + nbState);
+		System.err.println("InitState ------ " + driver.getInitState());
+		System.err.println("CurrentState ------ " + driver.getCurrentState());
 
+		/** infer system for automate **/
+		// TransparentMealyDriver
+		// Mealy automata = driver.getAutomata();
+		// }
+		// alLearner.localize(depth, st, nbState, driver);
+		// System.err.println("nbState ------ " + nbState);
+		// System.err.println("InitState ------ " + driver.getInitState());
+		// System.err.println("CurrentState ------ " +
+		// driver.getCurrentState());
+		//
+		// System.err.println(alLearner.listState);
+		// System.err.println(driver.getCurrentState());
+		// }
+		driver.stopLog();
 	}
 
 	public LmConjecture createConjecture() {
@@ -249,7 +267,9 @@ public class NoResetLearner extends Learner {
 
 	/**
 	 * 
-	 * @param trace omega the global trace of the automata, will be completed \in (IO)*
+	 * @param trace
+	 *            omega the global trace of the automata, will be completed \in
+	 *            (IO)*
 	 * @param inputSequences
 	 *            a subset of the characterization state \subset W \subset I*
 	 * @return the position of the fully identified state in the GlobalTrace
@@ -266,7 +286,6 @@ public class NoResetLearner extends Learner {
 
 	}
 
-	
 	private List<OutputSequence> localize_intern(DataManager dataManager, List<InputSequence> inputSequences) {
 		if (inputSequences.size() == 1) {
 			List<OutputSequence> WResponses = new ArrayList<OutputSequence>();
@@ -334,7 +353,8 @@ public class NoResetLearner extends Learner {
 		// We can do a random walk
 
 		int max_try = driver.getInputSymbols().size() * n * 10;
-		dataManager = null;// we use directly the driver for the walk so dataManager is not up to date;
+		dataManager = null;// we use directly the driver for the walk so
+							// dataManager is not up to date;
 		driver.stopLog();
 		for (int j = 0; j < max_try; j++) {
 			int rand = Utils.randInt(driver.getInputSymbols().size());

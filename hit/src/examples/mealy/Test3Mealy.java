@@ -9,12 +9,12 @@ public class Test3Mealy {
 	public static Mealy getAutomata() {
 		Mealy test = new Mealy("Test_6_States");
 
-		State s0 = new State("S0", false);
+		State s0 = new State("S0", true);
 		State s1 = new State("S1", false);
 		State s2 = new State("S2", false);
 		State s3 = new State("S3", false);
 		State s4 = new State("S4", false);
-		State s5 = new State("S5", true);
+		State s5 = new State("S5", false);
 
 		test.addState(s0);
 		test.addState(s1);
