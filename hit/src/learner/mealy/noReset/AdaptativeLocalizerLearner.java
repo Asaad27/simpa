@@ -74,14 +74,13 @@ public class AdaptativeLocalizerLearner {
 				for (int e = 1; e <= input.length(); e++) {
 					String in = input.substring(e - 1, e);
 					String out = driver.execute(in).toString();
-					outs += driver.execute(in).toString();
+					outs += out;
 					trace.append(in, out);
-
+					
 				}
 				driverIO.append(input, outs);
-
 			}
-//			System.err.println("ALERT 1 ------- " + driverIO);
+			
 			// trace.append(driverIO);
 
 			for (Branch b : spTree.getBranch()) {
@@ -100,8 +99,7 @@ public class AdaptativeLocalizerLearner {
 							LogManager.logInfo("There is a leaf, so return it ");
 							/** Here is a leaf, so return it **/
 							ns.append(driverIO);
-							// LogManager.logConsole("Predictable is true, we
-							// get N1 = " + ns);
+							 LogManager.logConsole("Predictable is true, we get N1 = " + ns);
 
 						} else {
 							
@@ -112,18 +110,19 @@ public class AdaptativeLocalizerLearner {
 							while (flag) {
 
 								for (String input : spTree.getInputSequence().sequence) {
-									
+									LogManager.logInfo("Input from splittingtree : " + input );
 									String outs = "";
 									for (int e = 1; e <= input.length(); e++) {
 										String in = input.substring(e - 1, e);
 										String out = driver.execute(in);
-										outs += driver.execute(in).toString();
+										outs += out;
 
 										trace.append(in, out);
-
+										LogManager.logInfo("Trace add new I/O : " + in+"/"+out );
+											
 									}
 									driverIO.append(input, outs);
-//									System.err.println("ALERT 2 ------- " + driverIO);
+//									System.err.println("Trace ------- " + trace);	
 								}
 
 								if (predictable(driverIO.size() - 1, driverIO, n1, spTree)) {
