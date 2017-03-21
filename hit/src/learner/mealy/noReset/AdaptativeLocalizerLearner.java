@@ -10,11 +10,18 @@ import tools.loggers.LogManager;
 
 public class AdaptativeLocalizerLearner {
 	// int time = 0;
-	InputSequence omegaInputSequence = new InputSequence();
-	OutputSequence omegaOutputSequence = new OutputSequence();
+
 	NodeSplittingTree trace = new NodeSplittingTree();
 	ArrayList<NodeSplittingTree> listState = new ArrayList<NodeSplittingTree>();
-	ArrayList<NodeSplittingTree> listNode = new ArrayList<NodeSplittingTree>();
+	// ArrayList<NodeSplittingTree> nt = new ArrayList<NodeSplittingTree>();
+	/**
+	 * list for outputs of driver
+	 **/
+	NodeSplittingTree driverIO = new NodeSplittingTree();
+	NodeSplittingTree listIO = new NodeSplittingTree();
+
+	// NodeSplittingTree tmp = new NodeSplittingTree();
+
 	// MealyDriver driver;
 
 	/**
@@ -27,13 +34,13 @@ public class AdaptativeLocalizerLearner {
 	public NodeSplittingTree localize(int depth, NoEmptySplittingTree spTree, int n, MealyDriver driver) {
 
 		NodeSplittingTree node = new NodeSplittingTree();
-		LogManager.logInfo("Localizing...");
 
 		/** if depth= 0 return root(T). **/
 		if (depth == 0) {
 			NodeSplittingTree ns = new NodeSplittingTree(spTree);
 			node.append(ns);
 			LogManager.logConsole("Depth of splitting tree is 0, and we discovered all states.");
+			return node;
 
 		} else if (depth == 1) {
 			/**
@@ -41,229 +48,206 @@ public class AdaptativeLocalizerLearner {
 			 **/
 
 			node.append(getDriverIO(spTree.getInputSequence(), driver));
-			LogManager.logConsole("Depth of splitting tree is 1, and we put inputs for getting all states.");
-			LogManager.logInfo("Depth of splitting tree is 1, and we put inputs for getting all states.");
+			System.err.println("Driver input/output : " + node);
+			return node;
+			/**
+			 * System.err.println("node ===== " + node); return node;
+			 * LogManager.logConsole("Depth of splitting tree is 1, and we put
+			 * inputs for getting all states."); LogManager.logInfo("Depth of
+			 * splitting tree is 1, and we put inputs for getting all states.");
+			 **/
 
 		} else {
-			node.append(localize_intern(depth, spTree, n, driver));
-			LogManager.logConsole("Total length of sequence is " + trace.size() + " steps.");
-			LogManager.logConsole("Sequence is " + trace);
-			LogManager.logInfo("Total length of sequence is " + trace.size() + " steps.");
-			LogManager.logInfo("Sequence is " + trace);
 
-		}
+			boolean flag = true;
+			int i = 0;
+			NodeSplittingTree nt = new NodeSplittingTree();
+			NodeSplittingTree n1 = new NodeSplittingTree();
 
-		return node;
-
-	}
-
-	public NodeSplittingTree localize_intern(int depth, NoEmptySplittingTree spTree, int n, MealyDriver driver) {
-		NodeSplittingTree ns = new NodeSplittingTree();
-		if (depth > 1) {
-			/** if depth > 1, depth-- **/
-			ns.append(localize_intern(depth - 1, spTree, n, driver));
-
-		} else if (depth == 1) {
-
-			NodeSplittingTree driverIO = new NodeSplittingTree();
-
-			/** if depth =1, here will do L(1, T) **/
-			LogManager.logInfo("If depth =1, here will do L(1, T) ");
-			for (String input : spTree.getInputSequence().sequence) {
-				String outs = "";
-				for (int e = 1; e <= input.length(); e++) {
-					String in = input.substring(e - 1, e);
-					String out = driver.execute(in).toString();
-					outs += out;
-					trace.append(in, out);
-					
-				}
-				driverIO.append(input, outs);
-			}
-			
-			// trace.append(driverIO);
-
-			for (Branch b : spTree.getBranch()) {
-
-				/** comparer with every branch **/
+			do {
+				System.out.println("i === " + i);
 				
-				if (spTree.getInputSequence().getLength() == b.getOutputSequence().getLength()) {
-//					tmp = handleIO(spTree.getInputSequence(), b.getOutputSequence());
-					NodeSplittingTree tmp = new NodeSplittingTree();
-					tmp.append(spTree.getInputSequence(), b.getOutputSequence());
-					
-					if (driverIO.equals(tmp)) {
-						
-						/** if Nt is a leaf **/
-						if (b.getSPTree().toString().equals("ε()")) {
-							LogManager.logInfo("There is a leaf, so return it ");
-							/** Here is a leaf, so return it **/
-							ns.append(driverIO);
-							 LogManager.logConsole("Predictable is true, we get N1 = " + ns);
+				nt.append(localize(depth - 1, spTree, n, driver));
+				/** get input from SplittingTree, and get ouput from driver **/
+				if (nt.getIO(i).getInputsProjection().toString().equals(spTree.getInputSequence().toString())) {
+ 
+					Branch b = null;
+					for (Branch btmp : spTree.getBranch()) {
 
-						} else {
-							
-							/** if it's not a leaf, so here is an iteration **/
-							boolean flag = true;
-							NodeSplittingTree n1 = new NodeSplittingTree();
-							
-							while (flag) {
+						/** comparer with every branch **/
+						if (btmp.getOutputSequence().toString().equals(nt.getIO(i).getOutputsProjection().toString())) {
+							b = btmp;
+						}
+					}
 
-								for (String input : spTree.getInputSequence().sequence) {
-									LogManager.logInfo("Input from splittingtree : " + input );
-									String outs = "";
-									for (int e = 1; e <= input.length(); e++) {
-										String in = input.substring(e - 1, e);
-										String out = driver.execute(in);
-										outs += out;
+					if (b.getSPTree().toString().equals("ε()")) {
+						LogManager.logConsole("There is a leaf, so return it ");
+						/** Here is a leaf, so return it **/
+						flag = false;
+						return (NodeSplittingTree) nt.getIO(i);
 
-										trace.append(in, out);
-										LogManager.logInfo("Trace add new I/O : " + in+"/"+out );
-											
+					} else {
+						// System.out.println("predictable(i, nt, n1, spTree)
+						// --- " + i);
+						i = i + 1;
+						/**
+						 * if it's not a leaf, so here is an iteration
+						 **/
+
+						if (predictable(i, nt, n1, spTree)) {
+							flag = false;
+							listIO.append(nt);
+							/** Predictable is true, return n1. **/
+							LogManager.logConsole("Predictable is true, we get N1 = " + n1);
+							if (spTree.getInputSequence().equals(n1.getInputsProjection())) {
+								Branch sub = null;
+								for (Branch subtmp : spTree.getBranch()) {
+									if (subtmp.getOutputSequence().equals(n1.getOutputsProjection())) {
+										sub = subtmp;
 									}
-									driverIO.append(input, outs);
-//									System.err.println("Trace ------- " + trace);	
 								}
 
-								if (predictable(driverIO.size() - 1, driverIO, n1, spTree)) {
-									LogManager.logConsole("Predictable is true, we get N1 = " + n1);
+								NoEmptySplittingTree subTree = (NoEmptySplittingTree) sub.getSPTree();
 
-									ns.append(n1);
-									if (spTree.getInputSequence().equals(n1.getInputsProjection())) {
-										
-										for (Branch sub : spTree.getBranch()) {
-											if (sub.getOutputSequence().equals(n1.getOutputsProjection())) {
+								NodeSplittingTree tmp = new NodeSplittingTree();
+								// System.err.println("subTree -------- " +
+								// subTree + ", depth = " + depth);
+								tmp.append(localize(depth - 1, subTree, n, driver));
 
-												NodeSplittingTree t = new NodeSplittingTree();
-												NoEmptySplittingTree subTree = (NoEmptySplittingTree) sub.getSPTree();
-
-												t.append(getDriverIO(subTree.getInputSequence(), driver));
-
-												ns.append(t.getInputsProjection().toString(),
-														t.getOutputsProjection().toString());
-
-												trace.append(t);
-
-												for (Branch br : subTree.getBranch()) {
-
-													if (br.getOutputSequence().toString()
-															.equals(t.getOutputsProjection().toString())) {
-														if (br.getSPTree().toString().equals("ε()")) {
-															LogManager.logConsole("We get a leaf, state is " + ns);
-															listState.add(ns);
-															// localize_intern(depth,(NoEmptySplittingTree)
-															// spTree,n,driver);
-														} else {
-															LogManager.logConsole("We get a subTree: " + ns);
-															ns.append(localize_intern(depth,
-																	(NoEmptySplittingTree) spTree, n, driver));
-
-														}
-
-													}
-												}
-
-											}
-
-										}
-									}
-									flag = false;
-								}
+								nt.append(tmp.getInputsProjection().toString(), tmp.getOutputsProjection().toString());
+								node.append(n1);
+								node.append(tmp.getInputsProjection().toString(),
+										tmp.getOutputsProjection().toString());
+								listIO.append(handleIO(tmp.getInputsProjection(), tmp.getOutputsProjection()));
+								System.out.println("listIO ---- " + listIO);
+								System.err.println("N ---- " + node);
 							}
 
 						}
 					}
-				}
-			}
 
+				} else {
+					flag = false;
+				}
+
+			} while (flag);
+
+			// node.append(localize_intern(depth, spTree, n, driver));
+
+			// LogManager.logInfo("Total length of sequence is " + listIO.size()
+			// + " steps.");
+			// LogManager.logInfo("Sequence is " + listIO);
+			return node;
 		}
-		return ns;
 
 	}
 
 	public boolean predictable(int i, NodeSplittingTree nt, NodeSplittingTree n1, NoEmptySplittingTree st) {
 
 		boolean sign = false;
+		boolean flag = true;
+		ArrayList<NodeSplittingTree> ns = new ArrayList<NodeSplittingTree>();
+
 		/** repetition factor **/
 		int r = 0;
-
-		/** Set of all leaf node : card(Nt(i-r)) **/
 		int s = 0;
-
-		while (r < i && s >= r) {
-
-			r++;
+		while (flag) {
+			r = r + 1;
 			int pos = i - r;
+
 			NodeSplittingTree p = new NodeSplittingTree();
-			 System.err.println(" i = " + i + ", r = " + r + ", s = " + s);
-			p.append(nt.getInput(pos), nt.getOutput(pos));
-//			 System.err.println("ALERT P --------- "+ nt);
+
+			p.append(nt.getIO(pos));
 
 			/** set of states in last r elements of Nt **/
-			ArrayList<NodeSplittingTree> ns = new ArrayList<NodeSplittingTree>();
+
 			for (NodeSplittingTree it : getLeaves(st)) {
 				NodeSplittingTree tmp = new NodeSplittingTree();
 				tmp.append(it.getInput(0), it.getOutput(0));
-				if (p.equals(tmp)) {
+				if (p.equals(tmp) && !ns.contains(it)) {
 					ns.add(it);
 				}
 			}
 			s = ns.size();
-
-			// System.out.println(" i = " + i + ", r = " + r + ", s = " + s);
-			// System.out.println("pos => " + pos + " i = " + i + ", r = " + r +
-			// ", s = " + s + ", nt = " + nt);
+			if (r == i) {
+				flag = false;
+			} else if (s <= r) {
+				flag = false;
+			}
 
 		}
-
-		if (s == r) {
+		// System.err.println("i --- = " + i + ", r --- = " + r + ", s --- = " +
+		// s + ", nt --- = " + nt);
+		if (s > r) {
 			sign = false;
 		} else {
+			int result = 0;
 
-			NodeSplittingTree p = new NodeSplittingTree();
-			// p.append(nt.getInput(i - r - 1), nt.getOutput(i - r - 1));
-			p.append(nt.getInput(i - r), nt.getOutput(i - r));
-			ArrayList<NodeSplittingTree> ntleaves = new ArrayList<NodeSplittingTree>();
+			if (i - r - 1 >= 0) {
+				// System.err.println("Here --- man");
+				NodeSplittingTree p = new NodeSplittingTree();
+				p.append(nt.getInput(i - r - 1), nt.getOutput(i - r - 1));
+				ArrayList<NodeSplittingTree> ntleaves = new ArrayList<NodeSplittingTree>();
 
-			for (NodeSplittingTree it : getLeaves(st)) {
-				NodeSplittingTree tmp = new NodeSplittingTree();
-				tmp.append(it.getInput(0), it.getOutput(0));
+				for (NodeSplittingTree it : getLeaves(st)) {
+					NodeSplittingTree tmp = new NodeSplittingTree();
+					tmp.append(it.getInput(0), it.getOutput(0));
 
-				if (p.equals(tmp)) {
-					ntleaves.add(it);
+					if (p.equals(tmp)) {
+						ntleaves.add(it);
+					}
+				}
+
+				/** leaves(Nt(i-r-1)) is a subset Ns **/
+
+				int count = 0;
+
+				while (ns.containsAll(ntleaves) && i - 1 - r >= 0) {
+
+					r = r + 1;
+					for (int m = 0; m <= r - s - 1; m++) {
+
+						for (int j = i - 2; j >= i - r; j--) {
+
+							if (nt.getIO(j - m).equals(nt.getIO(i - 1 - m))) {
+
+								count = j;
+							}
+							if (count >= result) {
+
+								result = count;
+							}
+						}
+					}
+
+					// System.err.println("i --- = " + i + ", r --- = " + r + ",
+					// s --- = " + s + ", nt --- = " + nt);
+					// System.err.println("result --- " + result);
+					n1.append(nt.getIO(result + 1));
+					// System.err.println(driverIO.getIO(count));
+					System.err.println("i --- = " + i + ", r --- = " + r + ", s --- = " + s + ", nt --- = " + nt);
+					sign = true;
 				}
 			}
 
-			/** leaves(Nt(i-r-1)) is a subset Ns **/
-			int j = 0;
-			while (r < i - 1) {
-				r++;
+			while (result > i - s) {
 
-				NodeSplittingTree q1 = new NodeSplittingTree();
-				q1.append(nt.subtrace(i - r - 1, i - r + s));
+				result--;
+				for (int m = 0; m <= r - s - 1; m++) {
 
-				NodeSplittingTree q2 = new NodeSplittingTree();
-				q2.append(nt.subtrace(i - r + s, i + 1));
-
-				if (findJ(q1, q2) != 0) {
-					j = findJ(q1, q2);
+					if (nt.getIO(result - m).equals(nt.getIO(i - 1 - m)) && !nt.getIO(result + 1).equals(n1)) {
+						sign = false;
+					}
+					// System.err.println("j --- " + result + ", i-s = " +(i-s)
+					// + ", m = " + m );
 				}
 
-				NodeSplittingTree tmp = new NodeSplittingTree();
-				tmp.append(nt.getInput(i - 1 - r + j), nt.getOutput(i - 1 - r + j));
-				n1.append(tmp);
-				sign = true;
-			}
-			while (j > i - s) {
-
-				j = j - 1;
-				// TODO : ...
-				sign = false;
 			}
 
 		}
-
+		// System.out.println("sign --- " + sign);
 		return sign;
+
 	}
 
 	/**
@@ -298,17 +282,20 @@ public class AdaptativeLocalizerLearner {
 	public NodeSplittingTree getDriverIO(InputSequence inSeq, MealyDriver driver) {
 
 		NodeSplittingTree result = new NodeSplittingTree();
-
+		String i = "";
+		String o = "";
 		for (String input : inSeq.sequence) {
 
 			for (int e = 1; e <= input.length(); e++) {
 				String in = input.substring(e - 1, e);
+				i += in;
 				String out = driver.execute(in);
-				result.append(in, out);
+				o += out;
+				// result.append(in, out);
 			}
 
 		}
-
+		result.append(i, o);
 		return result;
 	}
 
@@ -337,75 +324,4 @@ public class AdaptativeLocalizerLearner {
 		return list;
 	}
 
-	public int findJ(NodeSplittingTree q1, NodeSplittingTree q2) {
-
-		int j = 0;
-
-		for (int i = 0; i < q2.size(); i++) {
-			int k = i;
-			int count = 0;
-
-			for (int it = 0; it < q1.size(); it++) {
-				if (it < q2.size() && k < q2.size() && q2.getIO(k).equals(q1.getIO(it))) {
-					k++;
-					count++;
-				}
-
-			}
-			if (count >= j) {
-				j = count;
-				j = i + j;
-			}
-		}
-
-		return j;
-	}
-
-	// public void inferSystem(int depth, NoEmptySplittingTree spTree, int n,
-	// MealyDriver driver) {
-	// State s = driver.getCurrentState();
-	//
-	//
-	//
-	// }
-
-	// public static void main(String[] args) {
-	// AdaptativeLocalizerLearner all = new AdaptativeLocalizerLearner();
-	// NodeSplittingTree q1 = new NodeSplittingTree();
-	// NodeSplittingTree q2 = new NodeSplittingTree();
-	//
-	// q1.append("a", "0");
-	// q1.append("a", "1");
-	// q1.append("a", "0");
-	// q1.append("a", "1");
-	// q1.append("a", "0");
-	//
-	// q2.append("a", "0");
-	// q2.append("a", "1");
-	// q2.append("a", "0");
-
-	// System.err.println(all.findJ(q1, q2));
-	// File file = new File("/Users/wang/Desktop/sptree.txt");
-	// if (!file.exists()) {
-	// throw new IOException("'" + file.getAbsolutePath() + "' do not
-	// exists");
-	// }
-	// ANTLRInputStream stream = new ANTLRInputStream(new
-	// FileInputStream(file));
-	// SplittingTreeLexer lexer = new SplittingTreeLexer(stream);
-	// CommonTokenStream tokens = new CommonTokenStream(lexer);
-	// SplittingTreeParser parser = new SplittingTreeParser(tokens);
-	// // tell ANTLR to build a parse tree
-	// parser.setBuildParseTree(true);
-	// ParseTree tree = parser.splitting_tree();
-	// SplittingTreeVisitorImpl antlrVisitor = new
-	// SplittingTreeVisitorImpl();
-	// NoEmptySplittingTree st = (NoEmptySplittingTree)
-	// antlrVisitor.visit(tree);
-	//
-	// for (NodeSplittingTree at : all.getLeaves(st)) {
-	// System.err.println("NodeSplittingTree ---- " + at);
-	// }
-	// }
-	// }
 }

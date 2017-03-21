@@ -217,7 +217,7 @@ public class NoResetLearner extends Learner {
 				depth = node.size();
 		}
 		nbState = alLearner.getLeaves(st).size();
-		// System.err.println();
+		// System.err.println(alLearner.getLeaves(st));
 
 		LogManager.logStep(LogManager.STEPOTHER, "Inferring the system with Splitting Tree");
 		LogManager.logConsole(
@@ -231,26 +231,13 @@ public class NoResetLearner extends Learner {
 
 		driver.reset();
 		LogManager.logConsole("We start from initial state : " + driver.getInitState().getName());
-		// System.err.println(nbState);
-		// for (int i = 0; i < alLearner.getLeaves(st).size(); i++) {
-		alLearner.localize(depth, st, nbState, driver);
-		System.err.println("nbState ------ " + nbState);
-		System.err.println("InitState ------ " + driver.getInitState());
-		System.err.println("CurrentState ------ " + driver.getCurrentState());
 
+		alLearner.localize(depth, st, nbState, driver);
+		LogManager.logConsole("Total length of sequence is " +alLearner.listIO.size() + " steps.");
+		LogManager.logConsole("Sequence is " + alLearner.listIO); 
+ 
 		/** infer system for automate **/
-		// TransparentMealyDriver
-		// Mealy automata = driver.getAutomata();
-		// }
-		// alLearner.localize(depth, st, nbState, driver);
-		// System.err.println("nbState ------ " + nbState);
-		// System.err.println("InitState ------ " + driver.getInitState());
-		// System.err.println("CurrentState ------ " +
-		// driver.getCurrentState());
-		//
-		// System.err.println(alLearner.listState);
-		// System.err.println(driver.getCurrentState());
-		// }
+
 		driver.stopLog();
 	}
 
