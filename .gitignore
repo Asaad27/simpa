@@ -1,17 +1,3 @@
 /hit/build/
 /hit/dist/
 **/testAgent_*.txt
-hit/src/tools/antlr4/DotMealy/DotMealy.tokens
-hit/src/tools/antlr4/DotMealy/DotMealyBaseListener.java
-hit/src/tools/antlr4/DotMealy/DotMealyLexer.java
-hit/src/tools/antlr4/DotMealy/DotMealyLexer.tokens
-hit/src/tools/antlr4/DotMealy/DotMealyListener.java
-hit/src/tools/antlr4/DotMealy/DotMealyParser.java
-hit/src/tools/antlr4/SplittingTree/SplittingTree.tokens
-hit/src/tools/antlr4/SplittingTree/SplittingTreeLexer.tokens
-hit/src/tools/antlr4/SplittingTree/SplittingTreeListener.java
-hit/src/tools/antlr4/SplittingTree/SplittingTreeParser.java
-hit/src/tools/antlr4/SplittingTree/SplittingTreeBaseListener.java
-hit/src/tools/antlr4/SplittingTree/SplittingTreeVisitor.java
-hit/src/tools/antlr4/SplittingTree/SplittingTreeBaseVisitor.java   
-hit/src/tools/antlr4/SplittingTree/SplittingTreeLexer.java

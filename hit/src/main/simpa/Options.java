@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.List;
 
 import automata.mealy.InputSequence;
-import learner.mealy.noReset.NoEmptySplittingTree;
+import learner.mealy.noReset.SplittingTree;
 import tools.Utils;
 import tools.loggers.LogManager;
 
@@ -60,27 +60,21 @@ public class Options {
 	public static boolean FORCE_J48 = false;
 	public static int STATE_NUMBER_BOUND;
 	public static List<InputSequence> CHARACTERIZATION_SET;
-	/**
-	 * 11/14/2016 add SplitingTree input sequence;
-	 * 12/27/2016 Change the type to splitting tree; 
-	 **/
-	public static NoEmptySplittingTree SPLITTING_TREE;
+	public static SplittingTree SPLITTING_TREE;
 
 	public static boolean ICTSS2015_WITHOUT_SPEEDUP = false;
-	public static boolean INTERACTIVE = false; // For algorithms which can
-												// prompt user for counter
-												// example or chosen sequences
-
+	public static boolean INTERACTIVE = false; //For algorithms which can prompt user for counter example or chosen sequences
+	
 	// Counterexample options
-
+	
 	public static boolean STOP_ON_CE_SEARCH = false;
 
-	// Web application analysis
+	//Web application analysis
 	public static boolean XSS_DETECTION = false;
 
 	public static int MAX_CE_LENGTH = 20;
 	public static int MAX_CE_RESETS = 10;
-
+	
 	// Output's options
 
 	public static LogLevel LOG_LEVEL = LogLevel.ALL;

@@ -4,29 +4,24 @@ grammar SplittingTree;
 
 
 splitting_tree 
-	: input   '(' (output '(' splitting_tree ')' ';')* ')'   
-	| state* 
+	: input_sequence   '{' (output_sequence ':' splitting_tree ';')+ '}'
+	|
 	; 
 	
 	
-/*	
-splitting_tree 
-	: input   '(' (splitting_tree ';')+  ')'  
-	| '(' (state ';')*  ')'
-	| output '(' splitting_tree ')' 
-	| output   '(' state? ')' 
-	; 	
-	 */
-	
-state
-	: 	ID 	
-	| 	NUMBER
+input_sequence
+	: input
+	| input ',' input_sequence
 	;
-
 
 input
 	:	ID
 	|	NUMBER	
+	;
+
+output_sequence
+	: output
+	| output ',' output_sequence
 	;
 
 output
@@ -82,7 +77,7 @@ PREPROC
 
 
 WS
-   : [\t\n\r]+ -> skip 
+   : [\t\n\r ]+ -> skip 
    ;
    
  

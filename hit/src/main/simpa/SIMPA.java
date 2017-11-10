@@ -27,7 +27,7 @@ import drivers.efsm.real.GenericDriver;
 import drivers.efsm.real.ScanDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
-import learner.mealy.noReset.NoEmptySplittingTree;
+import learner.mealy.noReset.SplittingTree;
 import main.simpa.Options.LogLevel;
 import stats.GlobalGraphGenerator;
 import stats.GraphGenerator;
@@ -183,9 +183,9 @@ class StringOption extends Option<String> {
 
 /** add SplittingTreeOption 12/27/2016 **/
 
-class SplittingTreeOption extends Option<NoEmptySplittingTree> {
+class SplittingTreeOption extends Option<SplittingTree> {
 
-	public SplittingTreeOption(String consoleName, String description, NoEmptySplittingTree defaultValue) {
+	public SplittingTreeOption(String consoleName, String description, SplittingTree defaultValue) {
 		super(consoleName, description, defaultValue);
 	}
 
@@ -226,7 +226,7 @@ class SplittingTreeOption extends Option<NoEmptySplittingTree> {
 				parser.setBuildParseTree(true);
 				ParseTree tree = parser.splitting_tree();
 				SplittingTreeVisitorImpl antlrVisitor = new SplittingTreeVisitorImpl();
-				NoEmptySplittingTree st = (NoEmptySplittingTree) antlrVisitor.visit(tree);
+				SplittingTree st = antlrVisitor.visit(tree);
 
 				value = st;
 			}

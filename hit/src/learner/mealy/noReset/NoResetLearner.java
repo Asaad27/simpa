@@ -31,24 +31,15 @@ public class NoResetLearner extends Learner {
 	private DataManager dataManager;
 	private NoResetStatsEntry stats;
 	protected ArrayList<InputSequence> W;
-	protected String splittingTree;
 	private int n;// the maximum number of states
 
 	public NoResetLearner(MealyDriver d) {
 		driver = d;
 	}
 
-	/*
-	 * if we don't have a W-set (no value in option), we use
-	 * computeCharacterizationSet(driver) for create W-set. if we have a
-	 * splitting tree (value from a file), we use learn(NoEmptySplittingTree).
-	 */
 	public void learn() {
 		List<InputSequence> W = Options.CHARACTERIZATION_SET;
-		// handle splitting tree option
-		NoEmptySplittingTree sTree = Options.SPLITTING_TREE;
-
-		if (W == null && sTree == null) {
+		if (W == null) {
 			W = computeCharacterizationSet(driver);
 			class InputSequenceComparator implements Comparator<InputSequence> {
 				@Override
@@ -58,23 +49,18 @@ public class NoResetLearner extends Learner {
 				}
 			}
 			W.sort(new InputSequenceComparator());
-			learn(W);
-		} else if (sTree != null) {
-
-			learn(sTree);
-
-		} else if (W != null) {
-			learn(W);
 		}
+		learn(W);
 	}
 
-	/** add new learn for AdaptativeLocalizer **/
 	public void learn(List<InputSequence> W) {
 		LogManager.logStep(LogManager.STEPOTHER, "Inferring the system");
-		LogManager.logConsole("Inferring the system with W=" + W + " and n=" + Options.STATE_NUMBER_BOUND);
+		LogManager.logConsole("Inferring the system with W=" + W + " and n="
+				+ Options.STATE_NUMBER_BOUND);
 
 		n = Options.STATE_NUMBER_BOUND;
 		stats = new NoResetStatsEntry(W, driver, n);
+
 		this.W = new ArrayList<InputSequence>(W);
 		StringBuilder logW = new StringBuilder("Using characterization set : [");
 		for (InputSequence w : this.W) {
@@ -82,6 +68,7 @@ public class NoResetLearner extends Learner {
 		}
 		logW.append("]");
 		LogManager.logInfo(logW.toString());
+
 		long start = System.nanoTime();
 
 		// GlobalTrace trace = new GlobalTrace(driver);
@@ -93,23 +80,28 @@ public class NoResetLearner extends Learner {
 		while (!dataManager.isFullyKnown()) {
 			Runtime runtime = Runtime.getRuntime();
 			runtime.gc();
-			stats.updateMemory((int) (runtime.totalMemory() - runtime.freeMemory()));
+			stats.updateMemory((int) (runtime.totalMemory() - runtime
+					.freeMemory()));
 
 			LogManager.logLine();
 			int qualifiedStatePos;
 			LmTrace sigma;
 			if (dataManager.getC(dataManager.traceSize()) != null) {
-				FullyQualifiedState q = dataManager.getC(dataManager.traceSize());
-				LogManager.logInfo("We already know the current state (q = " + q + ")");
+				FullyQualifiedState q = dataManager.getC(dataManager
+						.traceSize());
+				LogManager.logInfo("We already know the current state (q = "
+						+ q + ")");
 				InputSequence alpha = dataManager.getShortestAlpha(q);
 				dataManager.apply(alpha);
 				assert dataManager.updateCKVT();
 				assert dataManager.getC(dataManager.traceSize()) != null;
 				qualifiedStatePos = dataManager.traceSize();
-				FullyQualifiedState quallifiedState = dataManager.getC(qualifiedStatePos);
+				FullyQualifiedState quallifiedState = dataManager
+						.getC(qualifiedStatePos);
 				Set<String> X = dataManager.getxNotInR(quallifiedState);
 				if (X.isEmpty()) {
-					LogManager.logInfo("We discovered the missing transition when we applied alpha");
+					LogManager
+							.logInfo("We discovered the missing transition when we applied alpha");
 					continue;// we already are in a known state (because we
 								// applied alpha) so we didn't need to localize
 				}
@@ -119,20 +111,20 @@ public class NoResetLearner extends Learner {
 				String o = dataManager.apply(x);
 				sigma = new LmTrace(x, o);
 				LogManager.logInfo("So sigma = " + sigma);
-				assert dataManager.getC(dataManager
-						.traceSize()) == null : "we are trying to qualify this state, that should not be already done.";
+				assert dataManager.getC(dataManager.traceSize()) == null : "we are trying to qualify this state, that should not be already done.";
 			} else {
 				LogManager.logInfo("We don't know the current state");
 				qualifiedStatePos = dataManager.traceSize() - 1;
 				while (dataManager.getC(qualifiedStatePos) == null)
 					qualifiedStatePos--;
-				LogManager.logInfo("last qualified state is " + dataManager.getC(qualifiedStatePos));
-				sigma = dataManager.getSubtrace(qualifiedStatePos, dataManager.traceSize());
+				LogManager.logInfo("last qualified state is "
+						+ dataManager.getC(qualifiedStatePos));
+				sigma = dataManager.getSubtrace(qualifiedStatePos,
+						dataManager.traceSize());
 				LogManager.logInfo("We got sigma = " + sigma);
 			}
 			FullyQualifiedState q = dataManager.getC(qualifiedStatePos);
 			List<InputSequence> allowed_W = dataManager.getwNotInK(q, sigma);
-
 			InputSequence w = allowed_W.get(0); // here we CHOOSE to take the
 												// first.
 			if (Options.LOG_LEVEL != Options.LogLevel.LOW)
@@ -140,9 +132,18 @@ public class NoResetLearner extends Learner {
 			int newStatePos = dataManager.traceSize();
 			dataManager.apply(w);
 			if (Options.LOG_LEVEL != Options.LogLevel.LOW)
-				LogManager.logInfo("We found that " + q + " followed by " + sigma + "gives "
-						+ dataManager.getSubtrace(newStatePos, dataManager.traceSize()));
-			dataManager.addPartiallyKnownTrace(q, sigma, dataManager.getSubtrace(newStatePos, dataManager.traceSize()));
+				LogManager.logInfo("We found that "
+						+ q
+						+ " followed by "
+						+ sigma
+						+ "gives "
+						+ dataManager.getSubtrace(newStatePos,
+								dataManager.traceSize()));
+			dataManager.addPartiallyKnownTrace(
+					q,
+					sigma,
+					dataManager.getSubtrace(newStatePos,
+							dataManager.traceSize()));
 			if (Options.TEST)
 				dataManager.updateCKVT();
 			if (dataManager.getC(dataManager.traceSize()) == null) {
@@ -163,19 +164,14 @@ public class NoResetLearner extends Learner {
 			LogManager.logConsole(dataManager.readableTrace());
 		dataManager.getConjecture().exportToDot();
 		if (driver instanceof TransparentMealyDriver) {
-			if (AdenilsoSimaoTool.isToolPresent()) {
-				int minTraceLength = AdenilsoSimaoTool.minLengthForExhaustivAutomata(
-						((TransparentMealyDriver) driver).getAutomata(), dataManager.getTrace().getInputsProjection());
-				if (minTraceLength > dataManager.traceSize())
-					throw new RuntimeException(
-							"error in learning, there is another automata which produce the same trace");
-				stats.setMinTraceLength(minTraceLength);
-			} else {
-				LogManager.logConsole("info: AdenilsoSimaoTool 'n-complete-exhaustive' tool is missing, "
-						+ "the minLengthForExhaustivAutomata() will not be computed.");
-				LogManager.logInfo("info: AdenilsoSimaoTool 'n-complete-exhaustive' tool is missing, "
-						+ "the minLengthForExhaustivAutomata() will not be computed.");
-			}
+			int minTraceLength = AdenilsoSimaoTool
+					.minLengthForExhaustivAutomata(
+							((TransparentMealyDriver) driver).getAutomata(),
+							dataManager.getTrace().getInputsProjection());
+			if (minTraceLength > dataManager.traceSize())
+				throw new RuntimeException(
+						"error in learning, there is another automata which produce the same trace");
+			stats.setMinTraceLength(minTraceLength);
 		} else {
 			stats.setMinTraceLength(-2);
 		}
@@ -192,8 +188,10 @@ public class NoResetLearner extends Learner {
 			}
 		} else {
 			if (checkRandomWalk()) {
-				LogManager.logConsole("The computed conjecture seems to be consistent with the driver");
-				LogManager.logInfo("The computed conjecture seems to be consistent with the driver");
+				LogManager
+						.logConsole("The computed conjecture seems to be consistent with the driver");
+				LogManager
+						.logInfo("The computed conjecture seems to be consistent with the driver");
 			} else {
 				LogManager.logConsole("The computed conjecture is not correct");
 				LogManager.logInfo("The computed conjecture is not correct");
@@ -202,49 +200,10 @@ public class NoResetLearner extends Learner {
 
 	}
 
-	/*
-	 * Add learn for splitting tree
-	 */
-	public void learn(NoEmptySplittingTree st) {
-
-		int depth = 0;
-		int nbState = 0;
-
-		/** get depth and number of states **/
-		AdaptativeLocalizerLearner alLearner = new AdaptativeLocalizerLearner();
-		for (NodeSplittingTree node : alLearner.getLeaves(st)) {
-			if (node.size() > depth)
-				depth = node.size();
-		}
-		nbState = alLearner.getLeaves(st).size();
-		// System.err.println(alLearner.getLeaves(st));
-
-		LogManager.logStep(LogManager.STEPOTHER, "Inferring the system with Splitting Tree");
-		LogManager.logConsole(
-				"Inferring the system with splitting tree : " + st + ", depth=" + depth + " and n=" + nbState);
-
-		StringBuilder logSTree = new StringBuilder("Using splitting tree : [ " + st.toString()
-				+ " ], We already know the all leaves ( " + alLearner.getLeaves(st) + " )");
-		LogManager.logInfo(logSTree.toString());
-
-		long start = System.nanoTime();
-
-		driver.reset();
-		LogManager.logConsole("We start from initial state : " + driver.getInitState().getName());
-
-		alLearner.localize(depth, st, nbState, driver);
-		LogManager.logConsole("Total length of sequence is " +alLearner.listIO.size() + " steps.");
-		LogManager.logConsole("Sequence is " + alLearner.listIO); 
- 
-		/** infer system for automate **/
-
-		driver.stopLog();
-	}
-
 	public LmConjecture createConjecture() {
 		LmConjecture c = dataManager.getConjecture();
-		LogManager.logInfo(
-				"Conjecture has " + c.getStateCount() + " states and " + c.getTransitionCount() + " transitions : ");
+		LogManager.logInfo("Conjecture has " + c.getStateCount()
+				+ " states and " + c.getTransitionCount() + " transitions : ");
 		return c;
 	}
 
@@ -261,19 +220,25 @@ public class NoResetLearner extends Learner {
 	 *            a subset of the characterization state \subset W \subset I*
 	 * @return the position of the fully identified state in the GlobalTrace
 	 */
-	private int localize(DataManager dataManager, List<InputSequence> inputSequences) {
+	private int localize(DataManager dataManager,
+			List<InputSequence> inputSequences) {
 		int startTracePos = dataManager.traceSize();
 		LogManager.logInfo("Localizing...");
-		List<OutputSequence> WResponses = localize_intern(dataManager, inputSequences);
+		List<OutputSequence> WResponses = localize_intern(dataManager,
+				inputSequences);
 		FullyQualifiedState s = dataManager.getFullyQualifiedState(WResponses);
-		dataManager.setC(dataManager.traceSize() - WResponses.get(WResponses.size() - 1).getLength(), s);
+		dataManager.setC(
+				dataManager.traceSize()
+						- WResponses.get(WResponses.size() - 1).getLength(), s);
 		stats.setLocalizeSequenceLength(dataManager.traceSize() - startTracePos);
 		stats.increaseLocalizeCallNb();
-		return dataManager.traceSize() - WResponses.get(inputSequences.size() - 1).getLength();
+		return dataManager.traceSize()
+				- WResponses.get(inputSequences.size() - 1).getLength();
 
 	}
 
-	private List<OutputSequence> localize_intern(DataManager dataManager, List<InputSequence> inputSequences) {
+	private List<OutputSequence> localize_intern(DataManager dataManager,
+			List<InputSequence> inputSequences) {
 		if (inputSequences.size() == 1) {
 			List<OutputSequence> WResponses = new ArrayList<OutputSequence>();
 			WResponses.add(dataManager.apply(inputSequences.get(0)));
@@ -281,11 +246,13 @@ public class NoResetLearner extends Learner {
 		}
 		LogManager.logInfo("Localizer : Localize with " + inputSequences);
 
-		ArrayList<InputSequence> Z1 = new ArrayList<InputSequence>(inputSequences);
+		ArrayList<InputSequence> Z1 = new ArrayList<InputSequence>(
+				inputSequences);
 		Z1.remove(Z1.size() - 1);
 		ArrayList<List<OutputSequence>> localizerResponses = new ArrayList<List<OutputSequence>>();
 		if (Options.LOG_LEVEL != Options.LogLevel.LOW)
-			LogManager.logInfo("Localizer : Applying " + (2 * n - 1) + " times localize(" + Z1 + ")");
+			LogManager.logInfo("Localizer : Applying " + (2 * n - 1)
+					+ " times localize(" + Z1 + ")");
 		for (int i = 0; i < 2 * n - 1; i++) {
 			localizerResponses.add(localize_intern(dataManager, Z1));
 		}
@@ -297,11 +264,14 @@ public class NoResetLearner extends Learner {
 			assert (j >= 0) : "no loop was found";
 			isLoop = true;
 			for (int m = 0; m < n - 1; m++) {
-				if (!localizerResponses.get(j + m).equals(localizerResponses.get(n + m))) {
+				if (!localizerResponses.get(j + m).equals(
+						localizerResponses.get(n + m))) {
 					isLoop = false;
 					if (Options.LOG_LEVEL != Options.LogLevel.LOW)
-						LogManager.logInfo("Tried size " + (n - j) + " : it's not a loop : [" + (j + m) + "] = (" + Z1
-								+ " → " + localizerResponses.get(j + m) + ") ≠ [" + (n + m) + "] = (" + Z1 + " → "
+						LogManager.logInfo("Tried size " + (n - j)
+								+ " : it's not a loop : [" + (j + m) + "] = ("
+								+ Z1 + " → " + localizerResponses.get(j + m)
+								+ ") ≠ [" + (n + m) + "] = (" + Z1 + " → "
 								+ localizerResponses.get(n + m) + ")");
 					break;
 				}
@@ -310,8 +280,11 @@ public class NoResetLearner extends Learner {
 		if (Options.LOG_LEVEL != Options.LogLevel.LOW)
 			LogManager.logInfo("Localizer : Found a loop of size " + (n - j));
 		if (Options.LOG_LEVEL == Options.LogLevel.ALL)
-			LogManager.logInfo("Localizer : We know that applying localize_intern(" + Z1 + ") will produce "
-					+ localizerResponses.get(j + n - 1));
+			LogManager
+					.logInfo("Localizer : We know that applying localize_intern("
+							+ Z1
+							+ ") will produce "
+							+ localizerResponses.get(j + n - 1));
 
 		List<OutputSequence> WResponses = localizerResponses.get(j + n - 1);
 		List<InputSequence> Z2 = new ArrayList<InputSequence>(Z1);
@@ -321,20 +294,25 @@ public class NoResetLearner extends Learner {
 		WResponses.add(Z2Responses.get(Z2Responses.size() - 1));
 		StringBuilder s = new StringBuilder();
 		for (int i = 0; i < inputSequences.size(); i++) {
-			s.append(new LmTrace(inputSequences.get(i), WResponses.get(i)) + ", ");
+			s.append(new LmTrace(inputSequences.get(i), WResponses.get(i))
+					+ ", ");
 		}
 		if (Options.LOG_LEVEL != Options.LogLevel.LOW)
-			LogManager.logInfo(
-					"Localizer : Before " + inputSequences.get(inputSequences.size() - 1) + " we were in " + s);
+			LogManager.logInfo("Localizer : Before "
+					+ inputSequences.get(inputSequences.size() - 1)
+					+ " we were in " + s);
 		assert WResponses.size() == inputSequences.size();
 		return WResponses;
 	}
 
 	private boolean checkRandomWalk() {
-		LogManager.logStep(LogManager.STEPOTHER, "checking the computed conjecture with Random Walk");
-		NoResetMealyDriver generatedDriver = new NoResetMealyDriver(dataManager.getConjecture());
+		LogManager.logStep(LogManager.STEPOTHER,
+				"checking the computed conjecture with Random Walk");
+		NoResetMealyDriver generatedDriver = new NoResetMealyDriver(
+				dataManager.getConjecture());
 		generatedDriver.stopLog();
-		generatedDriver.setCurrentState(dataManager.getC(dataManager.traceSize()).getState());
+		generatedDriver.setCurrentState(dataManager.getC(
+				dataManager.traceSize()).getState());
 
 		// Now the two automata are in same state.
 		// We can do a random walk
@@ -368,7 +346,8 @@ public class NoResetLearner extends Learner {
 	 * @return true if the two automata are equivalent
 	 */
 	public boolean checkExact(Mealy automata, State currentState) {
-		LogManager.logStep(LogManager.STEPOTHER, "checking the computed conjecture is exactly equivalent");
+		LogManager.logStep(LogManager.STEPOTHER,
+				"checking the computed conjecture is exactly equivalent");
 		class FoundState {
 			public State computedState; // a state in the conjecture
 			public List<String> uncheckedTransitions;
@@ -379,13 +358,14 @@ public class NoResetLearner extends Learner {
 			}
 
 			public String toString() {
-				return computedState + " but transitions " + uncheckedTransitions + "have not been checked";
+				return computedState + " but transitions "
+						+ uncheckedTransitions + "have not been checked";
 			}
 		}
 		// currentFoundState is maintained in order that
 		// currentFoundState.computedState is the current state in conjecture
-		FoundState currentFoundState = new FoundState(dataManager.getC(dataManager.traceSize()).getState(),
-				driver.getInputSymbols());
+		FoundState currentFoundState = new FoundState(dataManager.getC(
+				dataManager.traceSize()).getState(), driver.getInputSymbols());
 		// assigned is a table to associate a FoundState to each state in the
 		// given automata
 		Map<State, FoundState> assigned = new HashMap<State, FoundState>();
@@ -398,14 +378,16 @@ public class NoResetLearner extends Learner {
 		// now we iterate over all unchecked transitions
 		while (uncheckedState != null) {
 			FoundState uncheckedFoundState = assigned.get(uncheckedState);
-			LogManager.logInfo("Applying " + path + "in order to go in state " + uncheckedState + " and then try "
+			LogManager.logInfo("Applying " + path + "in order to go in state "
+					+ uncheckedState + " and then try "
 					+ uncheckedFoundState.uncheckedTransitions.get(0));
 			path.add(uncheckedFoundState.uncheckedTransitions.get(0));
 
 			// we follow path in driver (the conjecture) and the given automata
 			for (String i : path) {
 				currentFoundState.uncheckedTransitions.remove(i);
-				MealyTransition t = automata.getTransitionFromWithInput(currentState, i);
+				MealyTransition t = automata.getTransitionFromWithInput(
+						currentState, i);
 				currentState = t.getTo();
 				String o = dataManager.apply(i);
 				if (!o.equals(t.getOutput())) {
@@ -414,11 +396,14 @@ public class NoResetLearner extends Learner {
 				}
 				currentFoundState = assigned.get(currentState);
 				if (currentFoundState == null) {
-					currentFoundState = new FoundState(dataManager.getC(dataManager.traceSize()).getState(),
+					currentFoundState = new FoundState(dataManager.getC(
+							dataManager.traceSize()).getState(),
 							driver.getInputSymbols());
 					assigned.put(currentState, currentFoundState);
-				} else if (currentFoundState.computedState != dataManager.getC(dataManager.traceSize()).getState()) {
-					LogManager.logInfo("it was expected to arrive in " + t.getTo());
+				} else if (currentFoundState.computedState != dataManager.getC(
+						dataManager.traceSize()).getState()) {
+					LogManager.logInfo("it was expected to arrive in "
+							+ t.getTo());
 					return false;
 				}
 			}
@@ -476,7 +461,8 @@ public class NoResetLearner extends Learner {
 					Node newNode = new Node();
 					newNode.path = new ArrayList<String>(node.path);
 					newNode.path.add(i);
-					newNode.state = automata.getTransitionFromWithInput(node.state, i).getTo();
+					newNode.state = automata.getTransitionFromWithInput(
+							node.state, i).getTo();
 					nodes.add(newNode);
 					crossed.put(node.state, true);
 				}
@@ -486,7 +472,8 @@ public class NoResetLearner extends Learner {
 		return true;
 	}
 
-	private static List<InputSequence> computeCharacterizationSet(MealyDriver driver) {
+	private static List<InputSequence> computeCharacterizationSet(
+			MealyDriver driver) {
 		if (driver instanceof TransparentMealyDriver) {
 			return computeCharacterizationSet((TransparentMealyDriver) driver);
 		} else {
@@ -494,8 +481,10 @@ public class NoResetLearner extends Learner {
 		}
 	}
 
-	private static List<InputSequence> computeCharacterizationSet(TransparentMealyDriver driver) {
-		LogManager.logStep(LogManager.STEPOTHER, "computing characterization set");
+	private static List<InputSequence> computeCharacterizationSet(
+			TransparentMealyDriver driver) {
+		LogManager.logStep(LogManager.STEPOTHER,
+				"computing characterization set");
 		Mealy automata = driver.getAutomata();
 		List<InputSequence> W = new ArrayList<InputSequence>();
 		List<State> distinguishedStates = new ArrayList<State>();
@@ -511,8 +500,10 @@ public class NoResetLearner extends Learner {
 				}
 				if (haveSameOutputs) {
 					if (Options.LOG_LEVEL != Options.LogLevel.LOW)
-						LogManager.logInfo(s1 + " and " + s2 + " have the same outputs for W=" + W);
-					addDistinctionSequence(automata, driver.getInputSymbols(), s1, s2, W);
+						LogManager.logInfo(s1 + " and " + s2
+								+ " have the same outputs for W=" + W);
+					addDistinctionSequence(automata, driver.getInputSymbols(),
+							s1, s2, W);
 					if (Options.LOG_LEVEL == Options.LogLevel.ALL)
 						LogManager.logInfo("W is now " + W);
 				}
@@ -534,15 +525,16 @@ public class NoResetLearner extends Learner {
 	 * @param s2
 	 * @param w2
 	 */
-	private static void addDistinctionSequence(Mealy automata, List<String> inputSymbols, State s1, State s2,
-			List<InputSequence> W) {
+	private static void addDistinctionSequence(Mealy automata,
+			List<String> inputSymbols, State s1, State s2, List<InputSequence> W) {
 		// first we try to add an input symbol to the existing W
 		for (InputSequence w : W) {
 			for (String i : inputSymbols) {
 				InputSequence testw = new InputSequence();
 				testw.addInputSequence(w);
 				testw.addInput(i);
-				if (!apply(testw, automata, s1).equals(apply(testw, automata, s2))) {
+				if (!apply(testw, automata, s1).equals(
+						apply(testw, automata, s2))) {
 					w.addInput(i);
 					return;
 				}
@@ -556,9 +548,11 @@ public class NoResetLearner extends Learner {
 			InputSequence testw = testW.pollFirst();
 			if (apply(testw, automata, s1).equals(apply(testw, automata, s2))) {
 				if (testw.getLength() > automata.getStateCount()) {
-					LogManager.logInfo("unable to get find a w to distinguish " + s1 + " and " + s2
+					LogManager.logInfo("unable to get find a w to distinguish "
+							+ s1 + " and " + s2
 							+ ".Those states may be equivalent");
-					throw new RuntimeException("unable to distinguish two states for W set");
+					throw new RuntimeException(
+							"unable to distinguish two states for W set");
 				}
 				for (String i : inputSymbols) {
 					InputSequence newTestw = new InputSequence();
@@ -582,8 +576,10 @@ public class NoResetLearner extends Learner {
 
 	// Initial attempt to compute a better W set, but currently disused because
 	// inefficient
-	private static List<InputSequence> computeCharacterizationSetNaiv(TransparentMealyDriver driver) {
-		LogManager.logStep(LogManager.STEPOTHER, "computing characterization set");
+	private static List<InputSequence> computeCharacterizationSetNaiv(
+			TransparentMealyDriver driver) {
+		LogManager.logStep(LogManager.STEPOTHER,
+				"computing characterization set");
 		Mealy automata = driver.getAutomata();
 		automata.exportToDot();
 		List<InputSequence> W = new ArrayList<InputSequence>();
@@ -593,7 +589,8 @@ public class NoResetLearner extends Learner {
 		boolean isCaracterizationSet = false;
 		while (!isCaracterizationSet) {
 			if (Options.LOG_LEVEL == Options.LogLevel.ALL)
-				LogManager.logInfo("computing caracterization set : W is now " + W);
+				LogManager.logInfo("computing caracterization set : W is now "
+						+ W);
 			isCaracterizationSet = true;
 			for (State s1 : automata.getStates()) {
 				for (State s2 : automata.getStates()) {
@@ -612,7 +609,8 @@ public class NoResetLearner extends Learner {
 																						// same
 																						// output
 					for (InputSequence w : W) {
-						if (apply(w, automata, s1).equals(apply(w, automata, s2))) {
+						if (apply(w, automata, s1).equals(
+								apply(w, automata, s2))) {
 							haveSameOutput.add(w);
 						}
 					}
@@ -637,7 +635,8 @@ public class NoResetLearner extends Learner {
 							InputSequence newW = new InputSequence();
 							newW.addInputSequence(toSplit);
 							newW.addInput(i);
-							if (!apply(newW, automata, s1).equals(apply(newW, automata, s2))) {
+							if (!apply(newW, automata, s1).equals(
+									apply(newW, automata, s2))) {
 								W.add(newW);
 								break;
 							}
