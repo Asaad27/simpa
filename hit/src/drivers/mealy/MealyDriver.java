@@ -49,6 +49,7 @@ public class MealyDriver extends Driver {
 		triedCE = new HashSet<>();
 		this.nbStates = automata.getStateCount();
 		this.name = automata.getName();
+		this.currentState = automata.getInitialState();
 	}
 
 	public MealyDriver(String name) {
@@ -68,6 +69,14 @@ public class MealyDriver extends Driver {
 		return null;
 	}
 
+	public OutputSequence execute(InputSequence in){
+		OutputSequence out=new OutputSequence();
+		for (String i:in.sequence){
+			out.addOutput(execute(i));
+		}
+		return out;
+	}
+	
 	public String execute(String input) {
 		String output = null;
 		if (input.length() > 0) {
