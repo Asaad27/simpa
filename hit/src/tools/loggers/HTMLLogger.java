@@ -144,6 +144,20 @@ public class HTMLLogger implements ILogger {
 	}
 
 	@Override
+	public void logWarning(String s) {
+		try {
+			writer.flush();
+			writer.write("<li class=\"warning\">\n");
+			writer.write("<span class=\"date\">" + tfm.format(new Date())
+					+ "</span><span class=\"content\">Warning : "
+					+ Utils.escapeHTML(s) + "</span>");
+			writer.write("</li>\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
 	public void logRequest(ParameterizedInput pi, ParameterizedOutput po) {
 		try {
 			writer.flush();

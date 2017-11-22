@@ -29,6 +29,8 @@ public interface ILogger {
 
 	public void logInfo(String s);
 
+	public void logWarning(String s);
+
 	public void logRequest(ParameterizedInput pi, ParameterizedOutput po);
 
 	public void logRequest(String input, String ouput);

@@ -214,6 +214,16 @@ public class TextLogger implements ILogger {
 	}
 
 	@Override
+	public void logWarning(String s) {
+		try {
+			writer.write(tfm.format(new Date()) + "Warning : " + s + ret);
+			writer.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
 	public void logRequest(ParameterizedInput pi, ParameterizedOutput po) {
 		try {
 			writer.write(tfm.format(new Date()) + pi + " -> " + po + ret);

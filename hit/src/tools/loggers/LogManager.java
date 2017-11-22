@@ -84,6 +84,8 @@ public class LogManager {
 	public static void logError(String s) {
 		System.err.flush();
 		System.err.println(tfm.format(new Date()) + prefix + s);
+		for (ILogger l : loggers)
+			l.logError(prefix + s);
 	}
 
 	public static void logException(String s, Exception e) {
@@ -95,6 +97,11 @@ public class LogManager {
 	public static void logInfo(String s) {
 		for (ILogger l : loggers)
 			l.logInfo(prefix + s);
+	}
+
+	public static void logWarning(String s) {
+		for (ILogger l : loggers)
+			l.logWarning(prefix + s);
 	}
 
 	public static void logRequest(ParameterizedInput pi, ParameterizedOutput po) {

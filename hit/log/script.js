@@ -18,10 +18,12 @@ var log_event = function(el) {
 		$(".testing").show();
 		$("br").show();
 		$(".step").show();
+		$(".warning").show();
 	} else {
 		$(".testing").hide();
 		$("br").hide();
 		$(".step").hide();
+		$(".warning").hide();
 	}
 	return;
 }

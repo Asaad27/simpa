@@ -85,7 +85,7 @@ table.cti td, table.dti td{
 	margin-top:10px;
 }
 
-.nbp .content, .ncr .content, .ndf .content, .ndv .content, .stepunknown .content, .number {
+.nbp .content, .ncr .content, .ndf .content, .ndv .content, .stepunknown .content, .number, .warning .content{
 	font-weight:bold;
 }
 
@@ -157,6 +157,6 @@ img {
 }
 
 /* Hiding almost everything, will be displayed by JS checkboxes */
-table, img, .testing, .data, br, .step, .info, .transition {
+table, img, .testing, .data, br, .step, .info, .transition, .warning {
 	display: none;
 }
