@@ -48,6 +48,7 @@ public class Options {
 	public static boolean TREEINFERENCE = false;
 	public static boolean LMINFERENCE = false;
 	public static boolean LOCALIZER_BASED_INFERENCE = false;
+	public static boolean HW_INFERENCE = false;
 	public static boolean COMBINATORIALINFERENCE = false;
 	public static boolean CUTTERCOMBINATORIALINFERENCE = false;
 	public static boolean RIVESTSCHAPIREINFERENCE = false;
