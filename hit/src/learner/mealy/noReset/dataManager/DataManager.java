@@ -16,9 +16,12 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 
+import automata.State;
 import automata.mealy.InputSequence;
+import automata.mealy.Mealy;
 import automata.mealy.OutputSequence;
 import drivers.mealy.MealyDriver;
+import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import learner.mealy.noReset.dataManager.vTree.AbstractNode;
@@ -620,5 +623,32 @@ public class DataManager {
 			LogManager.logException("Error writing dot file", e);
 		}
 	}
-	
+
+	/**
+	 * 
+	 * @param WResponses
+	 * @return states in driver matching this WResponses (or null if driver is not available)
+	 */
+	public List<State> getDriverStates(List<OutputSequence>WResponses) {
+		if (driver instanceof TransparentMealyDriver) {
+			TransparentMealyDriver tDriver = (TransparentMealyDriver) driver;
+			Mealy automata = tDriver.getAutomata();
+			List<State>states =new ArrayList<>();
+			for (State s : automata.getStates()) {
+				boolean stateMatch=true;
+				for (int i=0;i<W.size();i++){
+					if(!automata.apply(W.get(i),s).equals(WResponses.get(i))){
+						stateMatch=false;
+						break;
+					}
+					
+				}
+				if (stateMatch)
+					states.add(s);
+			}
+			return states;
+		}
+		return null;
+	}
+
 }

@@ -27,6 +27,8 @@ public class FullyQualifiedState{
 	private final State state;
 	private final StateNode vNode;
 	
+	private List<State> driverStates;
+	
 	protected FullyQualifiedState(List<OutputSequence> WResponses, Collection<String> inputSymbols, State state){
 		this.WResponses = WResponses;
 		this.state = state;
@@ -38,6 +40,7 @@ public class FullyQualifiedState{
 			vNode = null;
 		else
 			vNode = new StateNode(this);
+		driverStates = DataManager.instance.getDriverStates(WResponses);
 	}
 	
 	public Boolean equals(FullyQualifiedState other){
@@ -155,6 +158,15 @@ public class FullyQualifiedState{
 	public String toString(){
 		return state.toString();
 	}
+	public String toStringWithMatching() {
+		if (driverStates == null)
+			return state.toString();
+		if (driverStates.isEmpty())
+			return state.toString() + " (not matching any state in driver)";
+		return state.toString() + " (matching states " + driverStates
+				+ " in driver)";
+	}
+
 
 	public Collection<FullyKnownTrace> getVerifiedTrace() {
 		return V.values();
