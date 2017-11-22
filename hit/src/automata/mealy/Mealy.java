@@ -11,11 +11,13 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import automata.Automata;
 import automata.State;
@@ -302,4 +304,148 @@ public class Mealy extends Automata implements Serializable {
 		return result;
 	}
 
+	/**
+	 *  find an input sequence which distinguish two states (i.e. applying this 
+	 *  sequence from the two states do not provide the same output).
+	 * @param s1 one state to distinguish
+	 * @param s2 one state to distinguish
+	 * @return an {@link InputSequence} for which provide two different outputs when applied from s1 and s2.
+	 */
+	public InputSequence getDistinctionSequence(State s1, State s2) {
+		assert (s1 != s2);
+		class StatePair {
+			private final State s1;
+			private final State s2;
+
+			StatePair(State s1, State s2) {
+				this.s1 = s1;
+				this.s2 = s2;
+			}
+
+			public boolean equals(Object other) {
+				if (other instanceof StatePair)
+					return equals((StatePair) other);
+				return false;
+			}
+			public boolean equals(StatePair other) {
+				return (s1 == other.s1 && s2 == other.s2)
+						|| (s1 == other.s2 && s2 == other.s1);
+			}
+			public int HashCode(){
+				return s1.hashCode()*s2.hashCode()+s1.hashCode()+s2.hashCode();
+			}
+
+			public String toString() {
+				if (s1.getId() < s2.getId())
+					return "(" + s1 + "," + s2 + ")";
+				else
+					return "(" + s2 + "," + s1 + ")";
+
+			}
+		}
+		Set<StatePair> seenPair = new HashSet<>();
+
+		class SameSequence {
+			public final InputSequence seq;
+			public final State s1;
+			public final State s2;
+
+			public SameSequence(InputSequence seq, State s1, State s2) {
+				this.seq = seq;
+				this.s1 = s1;
+				this.s2 = s2;
+			}
+
+			public StatePair getPair() {
+				return new StatePair(s1, s2);
+			}
+		}
+		LinkedList<SameSequence> toCompute = new LinkedList<>();
+		toCompute.add(new SameSequence(new InputSequence(), s1, s2));
+		seenPair.add(new StatePair(s1, s2));
+
+		while (!toCompute.isEmpty()) {
+			SameSequence current = toCompute.poll();
+			if (current.seq.getLength()>getStateCount())
+				continue;
+
+			// transitions from s1 and s2 should have the same input set. We
+			// assert this by checking same size and then checking if each input
+			// in transitions(s1) is also in transitions(s2)
+			assert (getTransitionFrom(current.s1).size() == getTransitionFrom(
+					current.s2).size());
+			for (MealyTransition t1 : getTransitionFrom(current.s1)) {
+				MealyTransition t2 = getTransitionFromWithInput(current.s2,
+						t1.getInput());
+				assert (t2 != null);
+				InputSequence newSeq = current.seq.clone();
+				newSeq.addInput(t1.getInput());
+
+				if (!t1.getOutput().equals(t2.getOutput()))
+					return newSeq;
+
+				SameSequence newSameSeq = new SameSequence(newSeq, t1.getTo(),
+						t2.getTo());
+				if (!seenPair.contains(newSameSeq.getPair()))
+					toCompute.add(newSameSeq);
+				seenPair.add(newSameSeq.getPair());
+			}
+		}
+		throw new RuntimeException("unable to distinguish "+s1+" and "+s2);
+
+	}
+	
+	public OutputSequence simulateOutput(State start,InputSequence inSeq){
+		OutputSequence outSeq=new OutputSequence();
+		for (String i:inSeq.sequence){
+			MealyTransition t= getTransitionFromWithInput(start, i);
+			start=t.getTo();
+			outSeq.addOutput(t.getOutput());
+		}
+		return outSeq;
+	}
+	public State simulateState(State start,InputSequence inSeq){
+		for (String i:inSeq.sequence){
+			MealyTransition t= getTransitionFromWithInput(start, i);
+			start=t.getTo();
+		}
+		return start;
+	}
+	
+	/**
+	 * indicate if the sequence provided is a homing sequence for this automata
+	 * @param h the sequence to test
+	 * @return true if it is a homing sequence
+	 */
+	public boolean acceptHomingSequence(InputSequence h){
+		Map<OutputSequence,State> responses=new HashMap<>();
+		for (State s:getStates()){
+			OutputSequence response=apply(h, s);
+			State end=applyGetState(h, s);
+			if (responses.containsKey(response)&&responses.get(response)!=end)
+				return false;
+			responses.put(response, end);
+		}
+		return true;
+	}
+
+	/**
+	 * indicate if the set of sequence provided is a characterization set for this automata.
+	 * @param W the W-set to test
+	 * @return true if it is a characterization set for this automata. Note that if the automata is not minimal (i.e. two states are equivalents) this will always return false.
+	 */
+	public boolean acceptCharacterizationSet(List<InputSequence> W) {
+		Set<List<OutputSequence>> responses = new HashSet<>();
+		for (State s : getStates()) {
+			List<OutputSequence> WResponses = new ArrayList<>();
+			for (InputSequence inputSeq : W) {
+				OutputSequence response = apply(inputSeq, s);
+				WResponses.add(response);
+			}
+			if (responses.contains(WResponses))
+				return false;
+			responses.add(WResponses);
+		}
+		return true;
+	}
 }
