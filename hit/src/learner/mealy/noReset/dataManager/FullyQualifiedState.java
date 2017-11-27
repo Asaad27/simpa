@@ -27,6 +27,8 @@ public class FullyQualifiedState{
 	private Set<String> R_;//Complementary set of R : unknown transition
 	private final State state;
 	
+	private TraceTree expectedTraces;
+	
 	private List<State> driverStates;
 	
 	protected FullyQualifiedState(List<OutputSequence> WResponses, Collection<String> inputSymbols, State state){
@@ -37,6 +39,11 @@ public class FullyQualifiedState{
 		V = new HashMap<LmTrace, FullyKnownTrace>();
 		T = new HashMap<String, FullyKnownTrace>();
 		driverStates = SimplifiedDataManager.instance.getDriverStates(WResponses);
+		expectedTraces=new TraceTree();
+		for (int i=0;i<WResponses.size();i++){
+			LmTrace trace=new LmTrace(SimplifiedDataManager.instance.getW().get(i), WResponses.get(i));
+			expectedTraces.addTrace(trace);
+		}
 	}
 	
 	public Boolean equals(FullyQualifiedState other){
@@ -46,7 +53,11 @@ public class FullyQualifiedState{
 	public Boolean equals(ArrayList<ArrayList<String>> WResponses){
 		return this.WResponses.equals(WResponses);
 	}
-	
+
+	public TraceTree getExpectedTraces() {
+		return expectedTraces;
+	}
+
 	/**
 	 * this method must be called by DataManager because in order to have T and V coherent
 	 * @param t a trace starting from this state
@@ -81,8 +92,8 @@ public class FullyQualifiedState{
 			LmConjecture conjecture = SimplifiedDataManager.instance.getConjecture();
 			conjecture.addTransition(new MealyTransition(conjecture, v.getStart().getState(), v.getEnd().getState(), v.getTrace().getInput(0), v.getTrace().getOutput(0)));
 			if (Options.LOG_LEVEL == Options.LogLevel.ALL)
-				conjecture.exportToDot();
-			T.put(v.getTrace(),v);
+				SimplifiedDataManager.instance.exportConjecture();
+			T.put(v.getTrace().getInput(0),v);
 			R_.remove(v.getTrace().getInput(0));//the transition with this symbol is known
 			if (R_.isEmpty()){
 				if (Options.LOG_LEVEL != Options.LogLevel.LOW)
@@ -90,8 +101,36 @@ public class FullyQualifiedState{
 				SimplifiedDataManager.instance.setKnownState(this);
 			}
 		}
+		InputSequence inputs = v.getTrace().getInputsProjection();
+		OutputSequence outputs = v.getTrace().getOutputsProjection();
+		if (expectedTraces.contains(inputs)) {
+			if (!expectedTraces.getOutput(inputs).equals(outputs))
+				// this is not supposed to happen because this trace should have
+				// been checked before
+				LogManager.logWarning(""+ new RuntimeException("third type of inconsistancy"));
+			TraceTree subTree = expectedTraces.pollTree(v.getTrace()
+					.getInputsProjection());
+			v.getEnd().addExpectedTraces(subTree);
+		}
 		//clean K ?
 		return true;
+	}
+	
+	public void addExpectedTraces(TraceTree newTraces){
+		if (newTraces==null)
+			return;
+		for (FullyKnownTrace v:V.values()){
+			InputSequence inSeq=v.getTrace().getInputsProjection();
+			OutputSequence outseq=v.getTrace().getOutputsProjection();
+			OutputSequence traceOut=newTraces.getOutput(inSeq);
+			if (traceOut!=null&&!outseq.equals(traceOut))
+				LogManager.logWarning("ignored ND : "+ new InconsistancyWhileMergingExpectedTracesException(newTraces, v));
+			TraceTree subtree=newTraces.pollTree(inSeq);
+			v.getEnd().addExpectedTraces(subtree);
+		}
+		if (!expectedTraces.add(newTraces)) {
+			LogManager.logWarning("ignored ND : "+ new InconsistancyWhileMergingExpectedTracesException(newTraces, expectedTraces));
+		}
 	}
 	
 	/**
@@ -128,7 +167,7 @@ public class FullyQualifiedState{
 	}
 	
 	/**
-	 * @see learn.mealy.noReset.dataManager.DataManager.getwNotInK
+	 * @see mealy.noReset.dataManager.SimplifiedDataManager.getwNotInK
 	 */
 	protected List<InputSequence> getwNotInK(LmTrace transition){
 		assert !V.containsKey(transition);
