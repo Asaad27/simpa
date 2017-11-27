@@ -311,11 +311,16 @@ public class Mealy extends Automata implements Serializable {
 	}
 
 	/**
-	 *  find an input sequence which distinguish two states (i.e. applying this 
-	 *  sequence from the two states do not provide the same output).
-	 * @param s1 one state to distinguish
-	 * @param s2 one state to distinguish
-	 * @return an {@link InputSequence} for which provide two different outputs when applied from s1 and s2.
+	 * find an input sequence which distinguish two states (i.e. applying this
+	 * sequence from the two states do not provide the same output).
+	 * 
+	 * @param s1
+	 *            one state to distinguish
+	 * @param s2
+	 *            one state to distinguish
+	 * @return an {@link InputSequence} for which provide two different outputs
+	 *         when applied from s1 and s2. If s1 and s2 are equivalents (i.e.
+	 *         cannot be distinguished by any sequence) then returns null.
 	 */
 	public InputSequence getDistinctionSequence(State s1, State s2) {
 		assert (s1 != s2);
@@ -333,12 +338,15 @@ public class Mealy extends Automata implements Serializable {
 					return equals((StatePair) other);
 				return false;
 			}
+
 			public boolean equals(StatePair other) {
 				return (s1 == other.s1 && s2 == other.s2)
 						|| (s1 == other.s2 && s2 == other.s1);
 			}
-			public int HashCode(){
-				return s1.hashCode()*s2.hashCode()+s1.hashCode()+s2.hashCode();
+
+			public int hashCode() {
+				return s1.hashCode() * s2.hashCode() + s1.hashCode()
+						+ s2.hashCode();
 			}
 
 			public String toString() {
@@ -372,7 +380,7 @@ public class Mealy extends Automata implements Serializable {
 
 		while (!toCompute.isEmpty()) {
 			SameSequence current = toCompute.poll();
-			if (current.seq.getLength()>getStateCount())
+			if (current.seq.getLength() > getStateCount())
 				continue;
 
 			// transitions from s1 and s2 should have the same input set. We
@@ -397,7 +405,7 @@ public class Mealy extends Automata implements Serializable {
 				seenPair.add(newSameSeq.getPair());
 			}
 		}
-		throw new RuntimeException("unable to distinguish "+s1+" and "+s2);
+		return null;
 
 	}
 	

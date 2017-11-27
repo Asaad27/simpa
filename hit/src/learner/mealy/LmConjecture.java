@@ -12,6 +12,8 @@ import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
 import drivers.Driver;
+import tools.loggers.LogManager;
+
 
 public class LmConjecture extends automata.mealy.Mealy {
 	private static final long serialVersionUID = -6920082057724492261L;
@@ -44,8 +46,6 @@ public class LmConjecture extends automata.mealy.Mealy {
 	 * suppose that input symbols of conjecture are the same as automata
 	 * (otherwise it will check for counter example matching only symbols from
 	 * conjecture)
-	 * 
-	 * suppose that this conjecture do not have equivalent states
 	 * 
 	 * This method is implemented by walking in real automata and checking if we
 	 * can associate a state of conjecture to each real state. This mean that
@@ -128,11 +128,20 @@ public class LmConjecture extends automata.mealy.Mealy {
 				}
 				// then check if transition in both automata lead in same state
 				if (mappedTarget != conjectureTarget) {
-					// We supposed that states in conjecture are not equivalents
-					// so we should find a sequence to distinguish them.
+					// if that states in conjecture are not equivalent, we
+					// should find a distinction sequence.
 					InputSequence distinctionSequence = conjecture
 							.getDistinctionSequence(conjectureTarget,
 									mappedTarget);
+					if (distinctionSequence == null) {
+						// the two states are equivalents
+						LogManager
+								.logWarning("We found two equivalent states in conjecture while looking for counter example (states "
+										+ conjectureTarget
+										+ " and "
+										+ mappedTarget + ").");
+						continue;
+					}
 					// now, we have realTarget which can be reach by to
 					// sequences and this two sequences leads in two different
 					// states in conjecture.
