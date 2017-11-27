@@ -4,6 +4,8 @@ import automata.mealy.InputSequence;
 import learner.mealy.LmTrace;
 
 public class InvalidHException extends RuntimeException {
+
+	private static final long serialVersionUID = 3270985693866307108L;
 	private LmTrace traceA;
 	private LmTrace traceB;
 	private InputSequence h;
@@ -26,7 +28,8 @@ public class InvalidHException extends RuntimeException {
 				+ " have same answer to homing sequence " + h
 				+ " but differs after applying the same inputs";
 	}
-	public InputSequence getNewH(){
+
+	public InputSequence getNewH() {
 		return traceA.getInputsProjection();
 	}
 

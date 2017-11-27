@@ -6,6 +6,8 @@ import main.simpa.Options;
 import java.util.ArrayList;
 import java.util.List;
 
+import tools.loggers.LogManager;
+
 import automata.mealy.InputSequence;
 import automata.mealy.OutputSequence;
 
@@ -37,23 +39,21 @@ public class PartiallyKnownTrace {
 	 * @return false if the print was already known
 	 */
 	protected boolean addPrint(LmTrace print){
-		assert DataManager.instance.getW().contains(print.getInputsProjection());
+		assert SimplifiedDataManager.instance.getW().contains(print.getInputsProjection());
 		if (!unknownPrints.remove(print.getInputsProjection())){ //the print wasn't in W or has been already removed
 			return false;
 		}
-		WResponses.set(DataManager.instance.getW().indexOf(print.getInputsProjection()), print.getOutputsProjection());
+		WResponses.set(SimplifiedDataManager.instance.getW().indexOf(print.getInputsProjection()), print.getOutputsProjection());
 		if (Options.LOG_LEVEL != Options.LogLevel.LOW)
-			DataManager.instance.logRecursivity("New print(=a response to W input) found : " + start + " followed by " + transition + " → " + print);
-		DataManager.instance.startRecursivity();
+			LogManager.logInfo("New print(=a response to W input) found : " + start + " followed by " + transition + " → " + print);
 		if (Options.LOG_LEVEL == Options.LogLevel.ALL)
-			DataManager.instance.logRecursivity("K is now : " + DataManager.instance.getK());
+			LogManager.logInfo("K is now : " + SimplifiedDataManager.instance.getK());
 		if (unknownPrints.isEmpty()){// rule 4 in algorithm
 			//we have totally found a transition
-			FullyQualifiedState state = DataManager.instance.getFullyQualifiedState(WResponses);
+			FullyQualifiedState state = SimplifiedDataManager.instance.getFullyQualifiedState(WResponses);
 			FullyKnownTrace t = new FullyKnownTrace(start, transition, state);
-			DataManager.instance.addFullyKnownTrace(t);//TODO avoid loop in this call
+			SimplifiedDataManager.instance.addFullyKnownTrace(t);//TODO avoid loop in this call
 		}
-		DataManager.instance.endRecursivity();
 		return true;
 	}
 	
@@ -67,9 +67,9 @@ public class PartiallyKnownTrace {
 	
 	public String toString(){
 		StringBuilder s = new StringBuilder();
-		for (int i = 0 ; i < DataManager.instance.getW().size(); i++){
+		for (int i = 0 ; i < SimplifiedDataManager.instance.getW().size(); i++){
 			if (WResponses.get(i) != null){
-				LmTrace t = new LmTrace(DataManager.instance.getW().get(i),WResponses.get(i));
+				LmTrace t = new LmTrace(SimplifiedDataManager.instance.getW().get(i),WResponses.get(i));
 				s.append("(" + start + ", " + transition + ", " + t + "),");
 			}
 		}

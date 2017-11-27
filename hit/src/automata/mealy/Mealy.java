@@ -91,6 +91,9 @@ public class Mealy extends Automata implements Serializable {
 	}
 
 	public void exportToDot() {
+		exportToDot("");
+	}
+	public void exportToDot(String comments) {
 		Writer writer = null;
 		File file = null;
 		File dir = new File(Options.OUTDIR + Options.DIRGRAPH);
@@ -109,6 +112,7 @@ public class Mealy extends Automata implements Serializable {
 					writer.write("\t" + s.getName() + " [shape=doubleoctagon]\n");
 				}
 			}
+			writer.write(comments);
 			writer.write("}\n");
 			writer.close();
 			LogManager.logInfo("Conjecture has been exported to " + file.getName());

@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Collection;
 
+import tools.loggers.LogManager;
+
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import learner.mealy.noReset.dataManager.vTree.StateNode;
@@ -21,8 +23,8 @@ import automata.mealy.OutputSequence;
 public class FullyQualifiedState{
 	private final List<OutputSequence> WResponses;//used to identify the State
 	private Map<LmTrace, FullyKnownTrace> V;//FullyKnownTrace starting from this node
-	private Map<LmTrace, PartiallyKnownTrace> K;//PartialyllyKnownTrace starting from this node
-	private Map<LmTrace, FullyKnownTrace> T;//Fully known transitions starting from this node
+	private Map<String, PartiallyKnownTrace> K;//PartialyllyKnownTrace starting from this node
+	private Map<String, FullyKnownTrace> T;//Fully known transitions starting from this node
 	private Set<String> R_;//Complementary set of R : unknown transition
 	private final State state;
 	private final StateNode vNode;
@@ -33,14 +35,14 @@ public class FullyQualifiedState{
 		this.WResponses = WResponses;
 		this.state = state;
 		R_ = new HashSet<String>(inputSymbols);
-		K = new HashMap<LmTrace, PartiallyKnownTrace>();
+		K = new HashMap<String, PartiallyKnownTrace>();
 		V = new HashMap<LmTrace, FullyKnownTrace>();
-		T = new HashMap<LmTrace, FullyKnownTrace>();
+		T = new HashMap<String, FullyKnownTrace>();
 		if (Options.ICTSS2015_WITHOUT_SPEEDUP)
 			vNode = null;
 		else
 			vNode = new StateNode(this);
-		driverStates = DataManager.instance.getDriverStates(WResponses);
+		driverStates = SimplifiedDataManager.instance.getDriverStates(WResponses);
 	}
 	
 	public Boolean equals(FullyQualifiedState other){
@@ -61,8 +63,7 @@ public class FullyQualifiedState{
 			return false;
 		}
 		if (Options.LOG_LEVEL != Options.LogLevel.LOW)
-			DataManager.instance.logRecursivity("New transition found : " + v);
-		DataManager.instance.startRecursivity();
+			LogManager.logInfo("New transition found : " + v);
 		if (!Options.ICTSS2015_WITHOUT_SPEEDUP){
 			vNode.addFullyKnownTrace(v);
 			//DataManager.instance.exportVTreeToDot();
@@ -72,10 +73,8 @@ public class FullyQualifiedState{
 			if (v.getTrace().equals(knownV.getTrace().subtrace(0, v.getTrace().size()))){
 				FullyKnownTrace vToAdd = new FullyKnownTrace(v.getEnd(), knownV.getTrace().subtrace(v.getTrace().size(), knownV.getTrace().size()), knownV.getEnd());
 				if (Options.LOG_LEVEL != Options.LogLevel.LOW)
-					DataManager.instance.logRecursivity("Split transition : " + v + " + " + vToAdd);
-				DataManager.instance.startRecursivity();
-				DataManager.instance.addFullyKnownTrace(vToAdd);
-				DataManager.instance.endRecursivity();
+					LogManager.logInfo("Split transition : " + v + " + " + vToAdd);
+				SimplifiedDataManager.instance.addFullyKnownTrace(vToAdd);
 				toRemove.add(knownV.getTrace());
 			}
 		}
@@ -87,9 +86,9 @@ public class FullyQualifiedState{
 		K.remove(v.getTrace());
 		V.put(v.getTrace(), v);
 		if (Options.LOG_LEVEL == Options.LogLevel.ALL)
-			DataManager.instance.logRecursivity("V is now : " + DataManager.instance.getV());
+			LogManager.logInfo("V is now : " + SimplifiedDataManager.instance.getV());
 		if (v.getTrace().size() == 1){
-			LmConjecture conjecture = DataManager.instance.getConjecture();
+			LmConjecture conjecture = SimplifiedDataManager.instance.getConjecture();
 			conjecture.addTransition(new MealyTransition(conjecture, v.getStart().getState(), v.getEnd().getState(), v.getTrace().getInput(0), v.getTrace().getOutput(0)));
 			if (Options.LOG_LEVEL == Options.LogLevel.ALL)
 				conjecture.exportToDot();
@@ -97,14 +96,10 @@ public class FullyQualifiedState{
 			R_.remove(v.getTrace().getInput(0));//the transition with this symbol is known
 			if (R_.isEmpty()){
 				if (Options.LOG_LEVEL != Options.LogLevel.LOW)
-					DataManager.instance.logRecursivity("All transitions from state " + this + " are known.");
-				DataManager.instance.startRecursivity();
-				DataManager.instance.setKnownState(this);
-				DataManager.instance.endRecursivity();
+					LogManager.logInfo("All transitions from state " + this + " are known.");
+				SimplifiedDataManager.instance.setKnownState(this);
 			}
 		}
-		DataManager.instance.updateC(v);
-		DataManager.instance.endRecursivity();
 		//clean K ?
 		return true;
 	}
@@ -123,31 +118,21 @@ public class FullyQualifiedState{
 	 * @return a new or an existing K entry
 	 */
 	private PartiallyKnownTrace getKEntry(LmTrace transition){
-		PartiallyKnownTrace k = K.get(transition);
+		assert transition.size()==1;
+		PartiallyKnownTrace k = K.get(transition.getInput(0));
 		if (k == null){
-			k = new PartiallyKnownTrace(this, transition, DataManager.instance.getW());
-			K.put(transition, k);
+			k = new PartiallyKnownTrace(this, transition, SimplifiedDataManager.instance.getW());
+			K.put(transition.getInput(0), k);
 		}
+		assert k.getTransition().equals(transition);
 		return k;
 	}
 
+	public FullyKnownTrace getKnownTransition(String input){
+		return T.get(input);
+	}
+	
 	protected boolean addPartiallyKnownTrace(LmTrace transition, LmTrace print) {
-		if (V.containsKey(transition))
-			return false;
-		for (LmTrace v:V.keySet()){
-			if (v.getInputsProjection().equals(transition.getInputsProjection())){
-				//if we are here, outputs differs (if output are the same we should have returned false before)
-				throw new RuntimeException("inconsistency with conjecture (but not at the end of the trace)");
-			}
-		}
-		//try to reduce transition
-		for (FullyKnownTrace v : V.values()){
-			if (v.equals(transition.subtrace(0, v.getTrace().size())) && v.getTrace().size() < transition.size()){
-				if (Options.LOG_LEVEL != Options.LogLevel.LOW)
-					DataManager.instance.logRecursivity("Trace reduced using " + v + " : " + v.getEnd() +" followed by "+ transition + " → " +print);
-				return v.getEnd().addPartiallyKnownTrace(transition.subtrace(v.getTrace().size(), transition.size()), print);
-			}
-		}
 		PartiallyKnownTrace k = getKEntry(transition);
 		return k.addPrint(print);
 	}
@@ -160,7 +145,15 @@ public class FullyQualifiedState{
 		PartiallyKnownTrace k = getKEntry(transition);
 		return k.getUnknownPrints();
 	}
-	
+
+	protected String getExpectedKOutput(String input) {
+		PartiallyKnownTrace k = K.get(input);
+		if (k == null)
+			return null;
+		else
+			return k.getTransition().getOutput(0);
+	}
+
 	public String toString(){
 		return state.toString();
 	}
