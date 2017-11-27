@@ -14,7 +14,7 @@ import java.util.Set;
 
 import automata.mealy.InputSequence;
 import automata.mealy.OutputSequence;
-import learner.mealy.noReset.dataManager.DataManager;
+import learner.mealy.noReset.dataManager.OptimizedDataManager;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
 import tools.loggers.LogManager;
@@ -207,7 +207,7 @@ public abstract class AbstractNode {
 	public abstract boolean isStateNode();
 
 	public boolean isEndOfTrace() {
-		return DataManager.instance.getCurrentVNode() == this;
+		return OptimizedDataManager.instance.getCurrentVNode() == this;
 	}
 
 	/**
@@ -293,7 +293,7 @@ public abstract class AbstractNode {
 												// unreachable from the others
 				Queue<AbstractNode> toCompute = new LinkedList<>();
 				Set<AbstractNode> computed = new HashSet<>();
-				toCompute.add(DataManager.instance.getStates().iterator().next().getVNode());
+				toCompute.add(OptimizedDataManager.instance.getStates().iterator().next().getVNode());
 				while (!toCompute.isEmpty()) {
 					AbstractNode n = toCompute.poll();
 					if (computed.contains(n))
@@ -310,7 +310,7 @@ public abstract class AbstractNode {
 		for (AbstractNode n : other.incompatibleNodes)
 			setIncompatible(n);
 		if (other.isEndOfTrace())
-			DataManager.instance.setCurrentVNode(this);
+			OptimizedDataManager.instance.setCurrentVNode(this);
 		LogManager.logInfo("merging " + this + " with " + other);
 		for (String i : other.children.keySet()) {
 			assert(getOutput(i) == null || getOutput(i).equals(other.getOutput(i)));

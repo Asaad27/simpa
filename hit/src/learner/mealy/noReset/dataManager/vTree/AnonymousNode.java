@@ -3,7 +3,7 @@ package learner.mealy.noReset.dataManager.vTree;
 import java.util.ArrayList;
 import java.util.List;
 
-import learner.mealy.noReset.dataManager.DataManager;
+import learner.mealy.noReset.dataManager.OptimizedDataManager;
 import learner.mealy.noReset.dataManager.FullyQualifiedState;
 
 public class AnonymousNode extends AbstractNode {
@@ -49,7 +49,7 @@ public class AnonymousNode extends AbstractNode {
 	@Override
 	public List<StateNode> getIncompatibleStateNode_full() {
 		List<StateNode> r = new ArrayList<>();
-		for (FullyQualifiedState s : DataManager.instance.getStates()) {
+		for (FullyQualifiedState s : OptimizedDataManager.instance.getStates()) {
 			if (!isCompatibleWith_full(s.getVNode())) {
 				r.add(s.getVNode());
 			}

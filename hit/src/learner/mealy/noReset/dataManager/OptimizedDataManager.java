@@ -32,9 +32,9 @@ import main.simpa.Options;
 import tools.GraphViz;
 import tools.loggers.LogManager;
 
-public class DataManager {
+public class OptimizedDataManager {
 	class WaitingState {public FullyQualifiedState state; public int pos;}
-	public static DataManager instance;//TODO either make a proper singleton either do something else
+	public static OptimizedDataManager instance;//TODO either make a proper singleton either do something else
 	private MealyDriver driver;
 	private LmTrace trace;
 	private ArrayList<FullyQualifiedState> C;//Identified states in trace
@@ -101,7 +101,7 @@ public class DataManager {
 
 	public int maxStates;
 
-	public DataManager(MealyDriver driver, List<InputSequence> W,InputSequence h, int maxStates){
+	public OptimizedDataManager(MealyDriver driver, List<InputSequence> W,InputSequence h, int maxStates){
 		this.maxStates = maxStates;
 		this.trace = new LmTrace();
 		this.W = W;
@@ -451,6 +451,8 @@ public class DataManager {
 	 * @param pos the position of a discovered state
 	 */
 	protected void updateK(int pos){
+		//if (pos!=traceSize())
+		//	return;
 		assert C.get(pos) != null;
 		FullyQualifiedState s = C.get(pos);
 		//try to find an element of I
@@ -495,7 +497,7 @@ public class DataManager {
 			s.append(new LmTrace(W.get(i),WResponses.get(i)) + ", ");
 		}
 		logRecursivity("New state discovered : " + newState.toStringWithMatching() + " (" + s + ")");
-		LogManager.logConsole("New state discovered : " + newState.toStringWithMatching() + " (" + s + ")");
+//		LogManager.logConsole("New state discovered : " + newState.toStringWithMatching() + " (" + s + ")");
 		Q.put(WResponses,newState);
 		return newState;
 	}
@@ -601,7 +603,7 @@ public class DataManager {
 	public void deduceFromVTree(){
 		if (Options.ICTSS2015_WITHOUT_SPEEDUP)
 			return;
-		if (DataManager.instance.getStates().size() != DataManager.instance.maxStates){
+		if (OptimizedDataManager.instance.getStates().size() != OptimizedDataManager.instance.maxStates){
 			LogManager.logInfo("cannot deduce while there is unknown states");
 			return;
 		}
@@ -612,10 +614,10 @@ public class DataManager {
 				if (child.isStateNode())
 					continue;
 				List<StateNode> incompatibleNodes = child.getIncompatibleStateNode();
-				if (incompatibleNodes.size() + 1 == DataManager.instance.maxStates){
+				if (incompatibleNodes.size() + 1 == OptimizedDataManager.instance.maxStates){
 					LogManager.logInfo("Found a node which is almost incompatible with all others ! "+sn+" followed by "+i+"/"+sn.getOutput(i)+" give "+child+" which is incompatible with "+incompatibleNodes);
 					FullyQualifiedState end = null;
-					for (FullyQualifiedState fqs : DataManager.instance.getStates())
+					for (FullyQualifiedState fqs : OptimizedDataManager.instance.getStates())
 						if (!incompatibleNodes.contains(fqs.getVNode()))
 							end = fqs;
 					FullyKnownTrace v = new FullyKnownTrace(s, new LmTrace(i, sn.getOutput(i)), end);

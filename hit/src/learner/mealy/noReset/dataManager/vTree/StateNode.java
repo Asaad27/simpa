@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import learner.mealy.noReset.dataManager.DataManager;
+import learner.mealy.noReset.dataManager.OptimizedDataManager;
 import learner.mealy.noReset.dataManager.FullyKnownTrace;
 import learner.mealy.noReset.dataManager.FullyQualifiedState;
 
@@ -64,7 +64,7 @@ public class StateNode extends AbstractNode {
 	@Override
 	public List<StateNode> getIncompatibleStateNode() {
 		List<StateNode> r = new ArrayList<>();
-		for (FullyQualifiedState s : DataManager.instance.getStates())
+		for (FullyQualifiedState s : OptimizedDataManager.instance.getStates())
 			if (s.getVNode() != this)
 				r.add(s.getVNode());
 		return r;
