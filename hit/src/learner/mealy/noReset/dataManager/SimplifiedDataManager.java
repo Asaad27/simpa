@@ -48,6 +48,9 @@ public class SimplifiedDataManager {
 	public Collection<FullyQualifiedState> getIdentifiedFakeStates() {
 		return identifiedFakeStates;
 	}
+	public int getHResponsesNb(){
+		return hResponse2State.keySet().size();
+	}
 
 	public FullyQualifiedState getState(OutputSequence hResponse) {
 		assert (hResponse.getLength() == h.getLength());

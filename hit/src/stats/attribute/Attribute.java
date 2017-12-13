@@ -3,8 +3,13 @@ package stats.attribute;
 import stats.Units;
 
 public class Attribute <T extends Comparable<T>> {
-	public final static Attribute<Integer> W_SIZE = 				new Attribute<Integer>(	"Size of W",						Units.SEQUENCES,false,	true,	false);
-	public final static Attribute<Integer> W1_LENGTH = 				new Attribute<Integer>(	"Length of first W element",		Units.SYMBOLS,	false,	true,	false);
+	public final static Attribute<Integer> W_SIZE = 				new Attribute<Integer>(	"Size of W",						Units.SEQUENCES,false,	false,	false);
+	public final static Attribute<Integer> W_TOTAL_LENGTH = 			new Attribute<Integer>(	"sum of length of W sequences",		Units.SYMBOLS,	false,	false,	false);
+	public final static Attribute<Integer> W1_LENGTH = 				new Attribute<Integer>(	"Length of first W element",		Units.SYMBOLS,	false,	false,	false);
+	public final static Attribute<Integer> MAX_W_LENGTH = 			new Attribute<Integer>(	"Length of longest W element",		Units.SYMBOLS,	false,	false,	false);
+	public final static Attribute<Float>   AVERAGE_W_LENGTH = 		new Attribute<Float>(	"average length of W element",		Units.SYMBOLS,	false,	false,	true);
+	public final static Attribute<Integer> H_LENGTH = 				new Attribute<Integer>(	"Length of homing sequence",		Units.SYMBOLS,	false,	false,	false);
+	public final static Attribute<Integer> H_ANSWERS_NB =			new Attribute<Integer>(	"number of answers to h",			Units.SEQUENCES,false,	false,	false);
 	public final static Attribute<Integer> LOCALIZER_CALL_NB = 		new Attribute<Integer>(	"Number of call to localizer",		Units.FUNCTION_CALL,false,false,false);
 	public final static Attribute<Integer> LOCALIZER_SEQUENCE_LENGTH = new Attribute<Integer>("Length of localizer sequence",	Units.SYMBOLS,	false,	false,	false);
 	public final static Attribute<Integer> TRACE_LENGTH = 			new Attribute<Integer>(	"length of trace",					Units.SYMBOLS,	true,	false,	false);
@@ -23,9 +28,17 @@ public class Attribute <T extends Comparable<T>> {
 	public final static Attribute<Integer>HOMING_SEQUENCE_LENGTH =	new Attribute<Integer>(	"length of homing sequence",		Units.SYMBOLS,	false,	true,	false);
 	public final static Attribute<Integer>LEARNER_NUMBER =			new Attribute<Integer>(	"number of sub-learner",			Units.LEARNER,	false,	true,	false);
 	public final static Attribute<Boolean>WITH_SPEEDUP =			new Attribute<Boolean>(	"inference with speed up",			Units.BOOLEAN,	false,	true,	false);
+	public final static Attribute<Integer>MAX_RECKONED_STATES =		new Attribute<Integer>(	"maximum number of reckoned states",Units.STATES,	false,	false,	false);
+	public final static Attribute<Integer>MAX_FAKE_STATES =			new Attribute<Integer>(	"maximum number of fake states",	Units.STATES,	false,	false,	false);
+	public final static Attribute<Long>   SEED =					new Attribute<Long>(	"seed used to create automaton",	Units.NO_UNITS,false,	false,	false);
+	public final static Attribute<Integer>ASKED_COUNTER_EXAMPLE =	new Attribute<Integer>(	"number of counter example asked",	Units.FUNCTION_CALL,false,false,false);
+	public final static Attribute<Integer>H_INCONSISTENCY_FOUND =	new Attribute<Integer>(	"number of inconsistency on h",		Units.FUNCTION_CALL,false,false,false);
+	public final static Attribute<Integer>W_INCONSISTENCY_FOUND =	new Attribute<Integer>(	"number of inconsistency on w",		Units.FUNCTION_CALL,false,false,false);
+	public final static Attribute<Integer>SUB_INFERANCE_NB =		new Attribute<Integer>(	"number of sub-inference",			Units.FUNCTION_CALL,false,false,true);
 	public final static Attribute<Boolean>RS_WITH_GIVEN_H =			new Attribute<Boolean>(	"homing sequence is known",			Units.BOOLEAN,	false,	true,	false);
 	public final static Attribute<Integer>FAILED_PROBALISTIC_SEARCH=new Attribute<Integer>(	"number of failed probalistic search",Units.FUNCTION_CALL,false,	false,	false);
 	public final static Attribute<Integer>SUCCEEDED_PROBALISTIC_SEARCH=new Attribute<Integer>(	"number of succeeded probalistic search",Units.FUNCTION_CALL,false,	false,	false);
+
 	
 	
 	private String name;

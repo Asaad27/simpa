@@ -39,6 +39,8 @@ public class FullyQualifiedState{
 		V = new HashMap<LmTrace, FullyKnownTrace>();
 		T = new HashMap<String, FullyKnownTrace>();
 		driverStates = SimplifiedDataManager.instance.getDriverStates(WResponses);
+		if (driverStates!=null && driverStates.size()==0)
+			SimplifiedDataManager.instance.identifiedFakeStates.add(this);
 		expectedTraces=new TraceTree();
 		for (int i=0;i<WResponses.size();i++){
 			LmTrace trace=new LmTrace(SimplifiedDataManager.instance.getW().get(i), WResponses.get(i));

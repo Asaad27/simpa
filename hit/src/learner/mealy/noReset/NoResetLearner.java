@@ -24,6 +24,7 @@ import learner.mealy.noReset.dataManager.FullyQualifiedState;
 import learner.mealy.noReset.dataManager.InconsistancyWithConjectureAtEndOfTraceException;
 import learner.mealy.noReset.dataManager.InvalidHException;
 import main.simpa.Options;
+import main.simpa.Options.LogLevel;
 import tools.Utils;
 
 import tools.loggers.LogManager;
@@ -100,18 +101,33 @@ public class NoResetLearner extends Learner {
 			if ((!d.getAutomata().isConnex()))
 				throw new RuntimeException("driver must be strongly connected");
 		}
+		Runtime runtime = Runtime.getRuntime();
+		runtime.gc();
+		long start = System.nanoTime();
+
 		List<InputSequence> W = new ArrayList<InputSequence>();
 		W.add(new InputSequence());
 		InputSequence h = new InputSequence();
+		stats = new NoResetStatsEntry(driver);
 		learn(W, h);// We suppose that this one do not throw
 					// InconsistenceException
+		stats.updateWithDataManager(dataManager);
 		W = new ArrayList<InputSequence>();
+
+		
 		InputSequence counterExample = null;
 		boolean inconsistencyFound = false;
 		while (inconsistencyFound
-				|| (counterExample = getCounterExemple()) != null) {
+		|| (counterExample = getCounterExemple()) != null) {
+			runtime.gc();
+			stats.updateMemory((int) (runtime.totalMemory() - runtime
+					.freeMemory()));
+			if (!inconsistencyFound)
+				stats.increaseOracleCallNb();
 			if (counterExample != null) {
-				if (!inconsistencyFound){
+				if (!inconsistencyFound)
+					stats.increaseTraceLength(counterExample.getLength());
+				if (!inconsistencyFound && Options.LOG_LEVEL!=LogLevel.LOW){
 					LogManager
 					.logInfo(counterExample
 							+ " should be a counter example for this automata.");
@@ -179,26 +195,36 @@ public class NoResetLearner extends Learner {
 			try {
 				learn(W, h);
 			} catch (InvalidHException e) {
-				LogManager
-						.logInfo("Non-determinism found (due to homming sequence) : "
-								+ e);
-				LogManager
-				.logConsole("Non-determinism found (due to homming sequence) : "
-						+ e);
+				stats.increaseHInconsitencies();
+				if (Options.LOG_LEVEL != LogLevel.LOW) {
+					LogManager
+							.logInfo("Non-determinism found (due to homming sequence) : "
+									+ e);
+					LogManager
+							.logConsole("Non-determinism found (due to homming sequence) : "
+									+ e);
+				}
 				h = e.getNewH();
 				LogManager.logInfo("h is now "+h);
 				inconsistencyFound = true;
 			} catch (ConjectureNotConnexException e) {
+				stats.increaseWInconsistencies();
+				if (Options.LOG_LEVEL != LogLevel.LOW) {
 				LogManager
 						.logInfo("The conjecture is not connex. We stop here and look for a counter example");
 
 				LogManager
 						.logConsole("The conjecture is not connex. We stop here and look for a counter example");
-			} catch (InconsistancyWithConjectureAtEndOfTraceException e) {
-				LogManager.logInfo("Non-determinism found : " + e);
-				LogManager.logConsole("Non-determinism found : " + e);
+				}
+				} catch (InconsistancyWithConjectureAtEndOfTraceException e) {
+				if (Options.LOG_LEVEL != LogLevel.LOW) {
+					LogManager.logInfo("Non-determinism found : " + e);
+					LogManager.logConsole("Non-determinism found : " + e);
+				}
 				counterExample = new InputSequence();
 				inconsistencyFound = true;
+			}finally{
+				stats.updateWithDataManager(dataManager);
 			}
 		}
 		if ((counterExample = getCounterExemple()) != null) {
@@ -209,6 +235,12 @@ public class NoResetLearner extends Learner {
 					.logInfo("no counter example can be found, this almost mean that the conjecture is correct"
 							+ " (more precisely, this mean we are in a sub part of the automata which is equivalent to the driver)");
 		}
+		float duration = (float) (System.nanoTime() - start) / 1000000000;
+		stats.setDuration(duration);
+	
+		stats.updateMemory((int) (runtime.totalMemory() - runtime.freeMemory()));
+		stats.finalUpdate(dataManager);
+
 		// The transition count should be stopped
 		driver.stopLog();
 		if (driver instanceof TransparentMealyDriver) {
@@ -236,9 +268,9 @@ public class NoResetLearner extends Learner {
 
 	public void learn(List<InputSequence> W, InputSequence h) {
 		LogManager.logStep(LogManager.STEPOTHER, "Inferring the system");
+		if (Options.LOG_LEVEL!=LogLevel.LOW)
 		LogManager.logConsole("Inferring the system with W=" + W + "and h=" + h);
 
-		stats = new NoResetStatsEntry(W, driver, Options.STATE_NUMBER_BOUND);
 
 		this.W = W;
 		StringBuilder logW = new StringBuilder("Using characterization set : [");
@@ -264,7 +296,6 @@ public class NoResetLearner extends Learner {
 								: " (which is not a homing sequence for driver)")
 								: ""));
 
-		long start = System.nanoTime();
 
 		dataManager = new SimplifiedDataManager(driver, this.W, h);
 
@@ -334,13 +365,7 @@ public class NoResetLearner extends Learner {
 				 localize(dataManager);
 			}
 		} while (!dataManager.isFullyKnown());
-		float duration = (float) (System.nanoTime() - start) / 1000000000;
-		stats.setDuration(duration);
-		Runtime runtime = Runtime.getRuntime();
-		runtime.gc();
-		stats.updateMemory((int) (runtime.totalMemory() - runtime.freeMemory()));
-		stats.setTraceLength(dataManager.traceSize());
-		stats.updateWithConjecture(dataManager.getConjecture());
+
 //		if (Options.LOG_LEVEL == Options.LogLevel.ALL || Options.TEST)
 //			LogManager.logConsole(dataManager.readableTrace());
 		dataManager.getConjecture().exportToDot();
@@ -372,7 +397,6 @@ public class NoResetLearner extends Learner {
 
 	
 	private FullyQualifiedState localize(SimplifiedDataManager dataManager) {
-		int startTracePos = dataManager.traceSize();
 		LogManager.logInfo("Localizing...");
 		FullyQualifiedState s = dataManager.getCurrentState();
 		if (s != null) {
@@ -402,7 +426,6 @@ public class NoResetLearner extends Learner {
 				+ " means we arrived in state " + s);
 		dataManager.setCurrentState(s);
 
-		stats.setLocalizeSequenceLength(dataManager.traceSize() - startTracePos);
 		stats.increaseLocalizeCallNb();
 		return s;
 	}
