@@ -3,6 +3,8 @@ package stats;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,6 +27,9 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		private PlotStyle(String plotLine) {
 			this.plotLine = plotLine;
 		}
+	}
+	public enum EstimationMode {
+		POWER(),;
 	}
 
 	private static boolean forcePoints = false; // set this to true in order to
@@ -61,7 +66,7 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		this.stats.getStats().addAll(stats.getStats());
 		File tempPlot = makeDataFile(stats, style);
 		StringBuilder plotTitle = new StringBuilder();
-		plotTitle.append(style + " of " + stats.size() + " inferences ");
+		plotTitle.append((""+style).replaceAll("_", " ") + " of " + stats.size() + " inferences ");
 		plotTitle.append(titleSuffix);
 		plotLines.append("\"" + tempPlot.getAbsolutePath() + "\" " + style.plotLine + " title \"" + plotTitle + "\", ");
 		if (forcePoints && style != PlotStyle.POINTS)
@@ -73,10 +78,10 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 	}
 
 	/**
-	 * plot a theorical function
+	 * plot a theoretical function
 	 * 
 	 * @param f
-	 *            the function expression (must depends of x)
+	 *            the function expression (must depends of 'x')
 	 * @param title
 	 *            the title of the function
 	 */
@@ -84,6 +89,66 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		linesStyles.add(lineStyle);
 		// plotLines.append(f + " with lines lt 3 title \"" + title + "\", ");
 		plotLines.append(f + " with lines linestyle " + lineStyle.index + " title \"" + title + "\", ");
+	}
+	
+	public void plotEstimation(StatsSet set, EstimationMode estimationMode) {
+		switch (estimationMode) {
+		case POWER:
+			double sumX = 0;
+			double sumY = 0;
+			double sumCoef = 0;
+			double avgLogX = 0;
+			double avgLogY = 0;
+			double varLogX = 0;
+			double coVarLog = 0;
+			for (StatsEntry s : set.getStats()) {
+				double x = s.getFloatValue(abs);
+				double y = s.getFloatValue(ord);
+				if (x <= 0 || y <= 0)
+					continue;
+				double logX = Math.log(x);
+				double logY = Math.log(y);
+				double coef = x * x;
+				sumX += x * coef;
+				sumY += y * coef;
+				avgLogX += logX * coef;
+				avgLogY += logY * coef;
+				varLogX += logX * logX * coef;
+				coVarLog += logX * logY * coef;
+				sumCoef += coef;
+			}
+
+			varLogX /= sumCoef;
+			coVarLog /= sumCoef;
+			avgLogX /= sumCoef;
+			avgLogY /= sumCoef;
+			double avgX = sumX / sumCoef;
+			double avgY = sumY / sumCoef;
+
+			varLogX -= avgLogX * avgLogX;
+			coVarLog -= avgLogX * avgLogY;
+			double a;
+			if (varLogX == 0)
+				a = 0;
+			else
+				a = coVarLog / varLogX;
+			double b = avgY / Math.pow(avgX, a);
+			DecimalFormat df = new DecimalFormat("#.#");
+			df.setRoundingMode(RoundingMode.CEILING);
+
+			plotFunc(
+					b + "*x**" + a,
+					((set.getTitle().equals("")) ? "" : "estimation of "
+							+ set.getTitle() + "(based on " + set.size()
+							+ " points) : ")
+							+ df.format(b)
+							+ "×["
+							+ abs.getName()
+							+ "]^{"
+							+ df.format(a) + "}",
+					LineStyle.buildApproximation(linesStyles.size()));
+			break;
+		}
 	}
 
 	public <T extends Comparable<T>> void plotGroup(StatsSet stats, Attribute<T> groupBy, PlotStyle style) {

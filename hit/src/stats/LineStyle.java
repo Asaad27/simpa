@@ -12,4 +12,8 @@ public class LineStyle {
 	public LineStyle(String plotLine){
 		this.plotLine = plotLine;
 	}
+	
+	public static LineStyle buildApproximation(int approximationIndex){
+		return new LineStyle("dashtype "+(2+approximationIndex)+" linewidth 2 linecolor \"red\"");
+	}
 }
