@@ -23,6 +23,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 
 import automata.mealy.InputSequence;
 import drivers.Driver;
+import drivers.ExhaustiveGenerator;
 import drivers.efsm.real.GenericDriver;
 import drivers.efsm.real.ScanDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
@@ -486,7 +487,9 @@ public class SIMPA {
 	private static BooleanOption MAKE_GRAPH = new BooleanOption("--makeGraph", "create graph based on csv files");
 	private static BooleanOption STATS_MODE = new BooleanOption("--stats",
 			"enable stats mode\n - save results to csv\n - disable some feature");
-	private static Option<?>[] statsOptions = new Option<?>[] { NB_TEST, MAKE_GRAPH, STATS_MODE };
+	private static BooleanOption ENUMERATE_MODE = new BooleanOption("--enumerate",
+			"generate automata with an interval of seeds");
+	private static Option<?>[] statsOptions = new Option<?>[] { NB_TEST, MAKE_GRAPH, STATS_MODE, ENUMERATE_MODE };
 
 	// Other options undocumented //TODO sort and explain them.
 	private static StringListOption URLS = new StringListOption("--urls", "??? TODO", "url1", "url2", Options.URLS);
@@ -681,6 +684,10 @@ public class SIMPA {
 						"you cannot impose seed for stats (that may duplicate results and make wrong average)");
 				System.exit(1);
 			}
+			if (ENUMERATE_MODE.getValue()){
+				System.err.println("stats are not compatible with enumerate mode yet.");
+				System.exit(1);
+			}
 		}
 
 		if (Options.NBTEST < 0)
@@ -721,7 +728,8 @@ public class SIMPA {
 				} else {
 					driver = (Driver) Class.forName(system).newInstance();
 				}
-				LogManager.logConsole("System : " + driver.getSystemName());
+				if (Options.LOG_LEVEL!=LogLevel.LOW)
+					LogManager.logConsole("System : " + driver.getSystemName());
 				return driver;
 			} catch (InstantiationException e) {
 				throw new Exception("Unable to instantiate the driver : " + system);
@@ -730,6 +738,10 @@ public class SIMPA {
 			} catch (ClassNotFoundException e) {
 				throw new Exception("Unable to find the driver. Please check the system name (" + system + ")");
 			}
+		} catch (ExhaustiveGenerator.TooBigSeedException e) {
+			throw e;
+		} catch (ExhaustiveGenerator.EndOfLoopException e) {
+			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
 			usage();
@@ -934,6 +946,129 @@ public class SIMPA {
 
 	}
 
+	protected static void run_enum() {
+		Class<?> driverClass = null;
+		try {
+			driverClass = Class.forName(Options.SYSTEM);
+		} catch (ClassNotFoundException e2) {
+			System.err.println(e2);
+			System.exit(1);
+		}
+
+		if (!(ExhaustiveGenerator.class.isAssignableFrom(driverClass))) {
+			System.err.println("The driver " + driverClass.getCanonicalName()
+					+ " does not support enumeration of automaton"
+					+ " (must implements "
+					+ ExhaustiveGenerator.class.getCanonicalName() + ")");
+			System.exit(1);
+		}
+		
+		String baseDir = Options.OUTDIR+File.separator+"enum"+File.separator;
+		File f = new File(baseDir + File.separator + Options.DIRSTATSCSV);
+		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
+			throw new RuntimeException("Unable to create/write " + f.getName());
+		String statsDir = Utils.makePath(f.getAbsolutePath());
+		
+		f = new File(baseDir + File.separator + Options.DIRTEST);
+		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
+			throw new RuntimeException("Unable to create/write " + f.getName());
+		String logDir = Utils.makePath(f.getAbsolutePath());
+		Utils.cleanDir(new File(logDir));
+		Options.OUTDIR = logDir;
+		
+		System.out.println("[+] Testing " + Options.NBTEST + " automaton");
+		 Options.LOG_LEVEL = LogLevel.LOW;
+		int testedAutomata = 0;
+		boolean seedTooBig = false;
+		for (Options.SEED = 0; !seedTooBig
+				&& (!NB_TEST.haveBeenParsed() || Options.SEED < Options.NBTEST); Options.SEED++) {
+			Runtime.getRuntime().gc();
+			System.out
+					.println("\t" + testedAutomata + " // " + Options.SEED);
+			Utils.setSeed(Options.SEED);
+			try {
+				Learner l = learnOneTime();
+				testedAutomata++;
+				StatsEntry learnerStats = l.getStats();
+
+				File globalStats = new File(statsDir + File.separator
+						+ learnerStats.getClass().getName() + ".csv");
+				Writer globalStatsWriter;
+				if (!globalStats.exists()) {
+					globalStats.createNewFile();
+					globalStatsWriter = new BufferedWriter(new FileWriter(
+							globalStats));
+					globalStatsWriter
+							.append(learnerStats.getCSVHeader() + "\n");
+				} else {
+					globalStatsWriter = new BufferedWriter(new FileWriter(
+							globalStats, true));
+				}
+
+				 globalStatsWriter.append(learnerStats.toCSV() + "\n");
+				 globalStatsWriter.close();
+			} catch (ExhaustiveGenerator.TooBigSeedException e) {
+				System.out.println("\nSeed is too big for this driver");
+				seedTooBig = true;
+			} catch (ExhaustiveGenerator.EndOfLoopException e) {
+				System.out
+						.println("\nAll loops of generating automata are done");
+				seedTooBig = true;
+			} catch (Exception e) {
+				LogManager.end();
+				String failDir = baseDir + File.separator + Options.DIRFAIL
+						+ File.separator + "enum";
+				Utils.createDir(new File(failDir));
+				failDir = failDir + File.separator
+						+ e.getClass().getSimpleName() + "-" + e.getMessage();
+				if (!Utils.createDir(new File(failDir)))
+					failDir = failDir + File.separator
+							+ e.getClass().getSimpleName();
+				Utils.createDir(new File(failDir));
+				failDir = failDir
+						+ File.separator
+						+ new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS")
+								.format(new Date());
+				try {
+					Utils.copyDir(Paths.get(Options.OUTDIR), Paths.get(failDir));
+					File readMe = new File(failDir + File.separator
+							+ "ReadMe.txt");
+					Writer readMeWriter = new BufferedWriter(new FileWriter(
+							readMe));
+					readMeWriter.write(name
+							+ " "
+							+ new SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
+									.format(new Date()));
+					readMeWriter
+							.write("\nOne learner during stats throw an exception");
+					readMeWriter.write("\n");
+					e.printStackTrace(new PrintWriter(readMeWriter));
+					readMeWriter.write("\n");
+					readMeWriter.write("\n");
+					readMeWriter.write("\nthe driver was " + Options.SYSTEM);
+					readMeWriter.write("\nthe seed was " + Options.SEED);
+					readMeWriter
+							.write("\nyou can try to do this learning again by running something like '"
+									+ makeLaunchLine() + "'");
+
+					readMeWriter.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+					System.exit(1);
+				}
+				e.printStackTrace();
+				System.err.println("data saved in " + failDir);
+			
+			} finally {
+				LogManager.clearsLoggers();
+			}
+
+		}
+		System.out.println(testedAutomata + " automata tested");
+
+	}
+	
+	
 	public static void main(String[] args) {
 		launchArgs = args;
 		welcome();
@@ -942,7 +1077,9 @@ public class SIMPA {
 
 		if (STATS_MODE.getValue()) {
 			run_stats();
-		} else {
+		} else if (ENUMERATE_MODE.getValue()){
+			run_enum();
+		}else {
 			try {
 				Utils.deleteDir(new File(Options.OUTDIR + Options.DIRGRAPH));
 				Utils.deleteDir(new File(Options.OUTDIR + Options.DIRARFF));

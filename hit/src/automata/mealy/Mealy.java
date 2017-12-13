@@ -49,6 +49,12 @@ public class Mealy extends Automata implements Serializable {
 				+ " have same hash " + t.hashCode();
 		return false;
 	}
+	public void removeTransition(MealyTransition t){
+		MealyTransition existant=transitions.get(t.hashCode());
+		assert t.equals(existant);
+		transitions.remove(t.hashCode());
+		super.transitions.remove(existant);
+	}
 
 	public Collection<MealyTransition> getTransitions() {
 		return transitions.values();
