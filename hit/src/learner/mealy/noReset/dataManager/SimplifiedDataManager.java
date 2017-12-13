@@ -39,9 +39,15 @@ public class SimplifiedDataManager {
 
 	private Map<OutputSequence, FullyQualifiedState> hResponse2State;
 	private Map<OutputSequence, List<OutputSequence>> hResponse2Wresponses;
-	private List<Integer> hInTrace;
+	private HomingSequenceChecker hChecker;
 
 	private Collection<TraceTree> expectedTraces;
+	
+	protected Collection<FullyQualifiedState> identifiedFakeStates=new ArrayList<>();
+
+	public Collection<FullyQualifiedState> getIdentifiedFakeStates() {
+		return identifiedFakeStates;
+	}
 
 	public FullyQualifiedState getState(OutputSequence hResponse) {
 		assert (hResponse.getLength() == h.getLength());
@@ -100,9 +106,9 @@ public class SimplifiedDataManager {
 		instance = this;
 		hResponse2State = new HashMap<>();
 		hResponse2Wresponses = new HashMap<>();
-		hInTrace = new ArrayList<>();
 		currentState = null;
 		expectedTraces = new ArrayList<>();
+		hChecker = new HomingSequenceChecker(h);
 	}
 
 	public String apply(String input) {
@@ -110,27 +116,7 @@ public class SimplifiedDataManager {
 		String output = driver.execute(input);
 		trace.append(input, output);
 		// check for Non-Determinism after homing sequence
-		LmTrace lastApplied = getSubtrace(traceSize() - h.getLength(),
-				traceSize());
-		if (lastApplied.getInputsProjection().equals(h)) {
-			hInTrace.add(traceSize() - h.getLength());
-		}
-		for (int i = hInTrace.size() - 1; i > 0; i--) {
-			for (int j = i - 1; j >= 0; j--) {
-				int startJ = hInTrace.get(j);
-				int startI = hInTrace.get(i);
-				if (getSubtrace(startJ, startJ + h.getLength()).equals(
-						getSubtrace(startI, startI + h.getLength()))) {
-					LmTrace traceI = getSubtrace(startI, traceSize());
-					LmTrace traceJ = getSubtrace(startJ, startJ + traceI.size());
-					if (traceI.getInputsProjection().equals(
-							traceJ.getInputsProjection())
-							&& !traceI.getOutputsProjection().equals(
-									traceJ.getOutputsProjection()))
-						throw new InvalidHException(traceI, traceJ, h);
-				}
-			}
-		}
+		hChecker.applyInput(input, output);
 
 		// checking the compatibility with K
 		if (currentState != null) {
@@ -255,13 +241,11 @@ public class SimplifiedDataManager {
 		}
 		LogManager.logInfo("New state discovered : "
 				+ newState.toStringWithMatching() + " (" + s + ")");
-		// LogManager.logConsole("New state discovered : " +
-		// newState.toStringWithMatching() + " (" + s + ")");
 		Q.put(WResponses, newState);
 		return newState;
 	}
 
-	protected List<InputSequence> getW() {
+	public List<InputSequence> getW() {
 		return W;
 	}
 

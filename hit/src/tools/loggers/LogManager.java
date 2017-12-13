@@ -1,10 +1,17 @@
 package tools.loggers;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
+
+import tools.GraphViz;
 
 import learner.efsm.table.LiControlTable;
 import learner.efsm.table.LiDataTable;
@@ -161,6 +168,31 @@ public class LogManager {
 	public static void logImage(String path) {
 		for (ILogger l : loggers)
 			l.logImage(path);
+	}
+
+	public static void logDot(String dot, String name) {
+		Writer writer = null;
+		File file = null;
+		File dir = new File(Options.OUTDIR + Options.DIRGRAPH);
+		try {
+			if (!dir.isDirectory() && !dir.mkdirs())
+				throw new IOException("unable to create " + dir.getName()
+						+ " directory");
+
+			file = new File(dir.getPath() + File.separatorChar + name + ".dot");
+			writer = new BufferedWriter(new FileWriter(file));
+			writer.write("digraph G {\n");
+			writer.write(dot);
+			writer.write("}\n");
+			writer.close();
+			LogManager.logInfo("Conjecture has been exported to "
+					+ file.getName());
+			File imagePath = GraphViz.dotToFile(file.getPath());
+			if (imagePath != null)
+				logImage(imagePath.getPath());
+		} catch (IOException e) {
+			LogManager.logException("Error writing dot file", e);
+		}
 	}
 
 	public static void logConcrete(String data) {
