@@ -74,7 +74,7 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 	}
 
 	public void plot(StatsSet stats, PlotStyle style) {
-		plot(stats, style, "");
+		plot(stats, style, stats.getTitle());
 	}
 
 	/**

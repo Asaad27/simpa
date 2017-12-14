@@ -17,6 +17,7 @@ import stats.attribute.restriction.Restriction;
 public class StatsSet {
 	private List<StatsEntry> restrictedStats;
 	private List<Restriction> restrictions;
+	private String title="";
 
 	private StatsSet(List<Restriction> r){
 		restrictedStats = new ArrayList<StatsEntry>();
@@ -31,6 +32,7 @@ public class StatsSet {
 	public StatsSet(StatsSet o){
 		restrictedStats = o.restrictedStats;
 		restrictions = new ArrayList<Restriction>(o.restrictions);
+		title=o.title;
 	}
 
 	public StatsSet(File f){
@@ -74,6 +76,14 @@ public class StatsSet {
 		}
 	}
 
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
 	public void add(StatsEntry s){
 		for (Restriction r : restrictions)
 			if (!r.contains(s))
@@ -89,6 +99,9 @@ public class StatsSet {
 	public void restrict(Restriction r){
 		restrictions.add(r);//TODO check if one restriction is not a subRestriction of another
 		restrictedStats = r.apply(restrictedStats);
+		if (!title.equals(""))
+			title+=", ";
+		title+=r.toString();
 	}
 
 	protected List<StatsEntry> getStats() {
