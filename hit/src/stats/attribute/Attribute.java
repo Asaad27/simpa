@@ -32,7 +32,7 @@ public class Attribute <T extends Comparable<T>> {
 	private boolean isVirtual;
 	private boolean useLogScale;
 
-	public Attribute(String name, Units units, boolean useLogScale,boolean isParameter,boolean isVirtual) {
+	private Attribute(String name, Units units, boolean useLogScale,boolean isParameter,boolean isVirtual) {
 		this.units = units;
 		this.name = name;
 		this.useLogScale = useLogScale;

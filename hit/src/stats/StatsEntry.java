@@ -42,6 +42,8 @@ public abstract class StatsEntry {
 	protected static String makeCSVHeader(Attribute<?>[] A){
 		StringBuilder r = new StringBuilder();
 		for (Attribute<?> a : A){
+			if (a.isVirtualParameter())
+				continue;
 			r.append(a.getName());
 			r.append(",");
 		}
