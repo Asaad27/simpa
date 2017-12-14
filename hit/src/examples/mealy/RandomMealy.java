@@ -7,7 +7,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import main.simpa.Options;
 import tools.Utils;
@@ -47,25 +51,21 @@ public class RandomMealy extends Mealy implements Serializable {
 	}
 
 	public RandomMealy() {
-		super("Random");
+		this(false);
+	}
+
+	public RandomMealy(boolean forceConnex) {
+		super(forceConnex ? "ConnexRandom()" : ("Random("
+				+ Options.TRANSITIONPERCENT + ")"));
 		LogManager.logStep(LogManager.STEPOTHER, "Generating random Mealy");
 		seed = Utils.randLong();
 		generateSymbols();
-		createStates(true);
-		createTransitions();
-		if (!Options.TEST) exportToDot();
-		//RandomMealy.serialize(this);
-	}
-	
-	public RandomMealy(boolean verbose) {
-		super("Random("+Options.TRANSITIONPERCENT+")");
-		if (verbose)
-			LogManager.logStep(LogManager.STEPOTHER, "Generating random Mealy");
-		seed = Utils.randLong();
-		generateSymbols();
-		createStates(verbose);
-		createTransitions();
-		if (verbose) exportToDot();
+		createStates();
+		if (forceConnex)
+			createConnexTransitions();
+		else
+			createTransitions();
+		exportToDot();
 	}
 	
 	public long getSeed(){
@@ -120,26 +120,79 @@ public class RandomMealy extends Mealy implements Serializable {
 		}
 	}
 
-	private void createStates(boolean verbose) {
+	private void createConnexTransitions() {
+		Set<State> reachedFromStartAndNotComplete = new HashSet<>();
+		Set<State> notReachedFromStart = new HashSet<>();
+		List<State> reachingStart = new ArrayList<>();
+		State initial = states.get(0);
+		assert (initial.isInitial());
+		reachedFromStartAndNotComplete.add(initial);
+		reachingStart.add(initial);
+		notReachedFromStart.addAll(states);
+		notReachedFromStart.remove(initial);
+
+		Map<State, Set<String>> remainingInputs = new HashMap<>();
+		for (State s : states) {
+			remainingInputs.put(s, new HashSet<>(inputSymbols));
+		}
+
+		for (State s : states) {
+			if (s != initial) {
+				String input = Utils.randIn(inputSymbols);
+				String output = Utils.randIn(outputSymbols);
+				State target = Utils.randIn(reachingStart);
+				addTransition(new MealyTransition(this, s, target, input,
+						output));
+				reachingStart.add(s);
+				remainingInputs.get(s).remove(input);
+			}
+		}
+		assert (reachingStart.containsAll(states));
+
+		while (!notReachedFromStart.isEmpty()) {
+			State s = Utils.randIn(reachedFromStartAndNotComplete);
+			String input = Utils.randIn(remainingInputs.get(s));
+			String output = Utils.randIn(outputSymbols);
+			State target = Utils.randIn(notReachedFromStart);
+			addTransition(new MealyTransition(this, s, target, input, output));
+
+			Set<String> remaining = remainingInputs.get(s);
+			remaining.remove(input);
+			if (remaining.isEmpty())
+				reachedFromStartAndNotComplete.remove(s);
+			// we suppose that at this time, there is only one transition
+			// starting from states in notReachedFromStart
+			State reached = target;
+			while (reached != null && notReachedFromStart.contains(reached)) {
+				List<MealyTransition> transitions = getTransitionFrom(reached);
+				assert (transitions.size() == 1);
+				reachedFromStartAndNotComplete.add(reached);
+				notReachedFromStart.remove(reached);
+				reached = transitions.get(0).getTo();
+			}
+
+		}
+
+		for (State s1 : states) {
+			for (String is : remainingInputs.get(s1)) {
+				addTransition(new MealyTransition(this, s1,
+						Utils.randIn(states), is, Utils.randIn(outputSymbols)));
+			}
+		}
+	}
+
+	private void createStates() {
 		int nbStates = Utils.randIntBetween(Options.MINSTATES,
 				Options.MAXSTATES);
 		for (int i = 0; i < nbStates; i++)
 			addState(i == 0);
-		if (verbose) LogManager.logInfo("Number of states : " + nbStates);
+		LogManager.logInfo("Number of states : " + nbStates);
 	}
 
-	public static RandomMealy getConnexRandomMealy(){
-		int max_try = 500;
-		LogManager.logStep(LogManager.STEPOTHER, "Generating random Mealy ("+max_try+" try)");
-		for (int i = 0 ; i < max_try; i++){
-			RandomMealy automata = new RandomMealy(false);
-			if (automata.isConnex()){
-				LogManager.logInfo("found a connex automata after trying " + (i+1) + " times");
-				automata.exportToDot();
-				automata.name = "Connex(" + automata.name + ")";
-				return automata;
-			}
-		}
-		throw new RuntimeException("Tried " + max_try + " times to create a randomMealy but it never was connex. You're unluky or try other options (more inputs symbols)");
+	public static RandomMealy getConnexRandomMealy() {
+
+		RandomMealy automata = new RandomMealy(true);
+
+		return automata;
 	}
 }
