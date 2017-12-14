@@ -1,6 +1,5 @@
 package learner.mealy.noReset;
 
-import java.util.List;
 import java.util.StringTokenizer;
 
 import automata.Transition;
@@ -44,7 +43,9 @@ public class NoResetStatsEntry extends StatsEntry {
 	public final static Attribute<Integer>H_INCONSISTENCY_FOUND =	Attribute.H_INCONSISTENCY_FOUND;
 	public final static Attribute<Integer>W_INCONSISTENCY_FOUND =	Attribute.W_INCONSISTENCY_FOUND;
 	public final static Attribute<Integer>SUB_INFERANCE_NB =		Attribute.SUB_INFERANCE_NB;
-
+	public final static Attribute<String> ORACLE_USED =				Attribute.ORACLE_USED;
+	public final static Attribute<Integer>ORACLE_TRACE_LENGTH = 	Attribute.ORACLE_TRACE_LENGTH;
+	public final static Attribute<Float>  ORACLE_DURATION = 		Attribute.ORACLE_DURATION;
 	
 	private static Attribute<?>[] attributes = new Attribute<?>[]{
 			W_SIZE,
@@ -74,6 +75,9 @@ public class NoResetStatsEntry extends StatsEntry {
 			ASKED_COUNTER_EXAMPLE,
 			H_INCONSISTENCY_FOUND,
 			W_INCONSISTENCY_FOUND,
+			ORACLE_USED,
+			ORACLE_TRACE_LENGTH,
+			ORACLE_DURATION,
 			SUB_INFERANCE_NB,
 	};
 	
@@ -118,7 +122,11 @@ public class NoResetStatsEntry extends StatsEntry {
 	private int askedCE=0;
 	private int hInconsistencies=0;
 	private int wInconsistencies=0;
-	
+	private String oracleUsed="Unknown";
+	private int oracleTraceLength=0;
+	private float oracleDuration=0;
+	private int subInferenceNb=0;
+
 
 	/**
 	 * rebuild a NoResetStats object from a CSV line
@@ -151,6 +159,13 @@ public class NoResetStatsEntry extends StatsEntry {
 		askedCE = Integer.parseInt(st.nextToken());
 		hInconsistencies = Integer.parseInt(st.nextToken());
 		wInconsistencies = Integer.parseInt(st.nextToken());
+		oracleUsed = st.nextToken();
+		oracleTraceLength = Integer.parseInt(st.nextToken());
+		oracleDuration = Float.parseFloat(st.nextToken());
+		subInferenceNb = Integer.parseInt(st.nextToken());
+
+
+		
 	}
 
 	public NoResetStatsEntry( MealyDriver d){
@@ -167,14 +182,22 @@ public class NoResetStatsEntry extends StatsEntry {
 //	protected void setLocalizeSequenceLength(int length){
 //		localizeSequenceLength = length;
 //	}
+
+	protected void setOracle(String oracle) {
+		oracleUsed = oracle;
+	}
+
 	protected void increaseHInconsitencies(){
 		hInconsistencies++;
 	}
 	protected void increaseWInconsistencies() {
 		wInconsistencies++;
 	}
-	protected void increaseOracleCallNb() {
+
+	protected void increaseOracleCallNb(int traceLength, float duration) {
 		askedCE++;
+		oracleTraceLength += traceLength;
+		oracleDuration += duration;
 	}
 
 	protected void increaseLocalizeCallNb(){
@@ -201,7 +224,8 @@ public class NoResetStatsEntry extends StatsEntry {
 			maxFakeStates=fakeStates;
 	}
 
-	protected void updateWithDataManager(SimplifiedDataManager dataManager) {
+	protected void increaseWithDataManager(SimplifiedDataManager dataManager) {
+		subInferenceNb++;
 		updateMaxReckonedStates(dataManager.getConjecture().getStateCount());
 		updateMaxFakeStates(dataManager.getIdentifiedFakeStates().size());
 		increaseTraceLength(dataManager.traceSize());
@@ -291,7 +315,13 @@ public class NoResetStatsEntry extends StatsEntry {
 		if (a==W_INCONSISTENCY_FOUND)
 			return (T) new Integer(wInconsistencies);
 		if (a==SUB_INFERANCE_NB)
-			return (T) new Integer(askedCE+hInconsistencies+wInconsistencies);
+			return (T) new Integer(subInferenceNb);
+		if (a == ORACLE_USED)
+			return (T) oracleUsed;
+		if (a == ORACLE_TRACE_LENGTH)
+			return (T) new Integer(oracleTraceLength);
+		if (a == ORACLE_DURATION)
+			return (T) new Float(oracleDuration);
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 
 	}
@@ -317,11 +347,12 @@ public class NoResetStatsEntry extends StatsEntry {
 				a == H_ANSWERS_NB ||
 				a == SUB_INFERANCE_NB ||
 				a == LOOP_RATIO ||
-				a == ASKED_COUNTER_EXAMPLE)
+				a == ASKED_COUNTER_EXAMPLE||
+				a == ORACLE_TRACE_LENGTH)
 			return ((Integer) get(a)).floatValue();
 		if (a == SEED)
 			return ((Long) get(a)).floatValue();
-		if (a == DURATION || a == AVERAGE_W_LENGTH)
+		if (a == DURATION || a == AVERAGE_W_LENGTH || a == ORACLE_DURATION)
 			return (Float) get(a);
 		throw new RuntimeException(a.getName() + " is not available or cannot be cast to float");
 

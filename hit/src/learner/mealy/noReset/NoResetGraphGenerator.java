@@ -190,135 +190,147 @@ public class NoResetGraphGenerator extends GraphGenerator {
 		withCounter.restrict(
 				new EqualsRestriction<String>(NoResetStatsEntry.AUTOMATA, new RandomAndCounterMealyDriver().getSystemName()));
 
-
 		StatsSet s4Counter = new StatsSet(withCounter);
-		s4Counter.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.INPUT_SYMBOLS, 2));
+		s4Counter.restrict(new EqualsRestriction<Integer>(
+				NoResetStatsEntry.INPUT_SYMBOLS, 2));
 
-		StatsSet s4Without = new StatsSet(randomWithout);
-		s4Without.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.OUTPUT_SYMBOLS, 2));
-		s4Without.restrict(new EqualsRestriction<Integer>(
+		StatsSet random = new StatsSet(randomWithout);
+		random.restrict(new EqualsRestriction<Integer>(
+				NoResetStatsEntry.OUTPUT_SYMBOLS, 2));
+		random.restrict(new EqualsRestriction<Integer>(
 				NoResetStatsEntry.INPUT_SYMBOLS, 2));
 		int maxStates = 200;
 		Integer[] mult5 = new Integer[maxStates / 5];
 		for (int i = 0; i < maxStates / 5; i++) {
 			mult5[i] = new Integer(5 * i);
 		}
-		s4Without.restrict(new InSetRestriction<Integer>(
+		random.restrict(new InSetRestriction<Integer>(
 				NoResetStatsEntry.STATE_NUMBER, mult5));
+
+		StatsSet randomBean = new StatsSet(random);
+		randomBean.restrict(new EqualsRestriction<>(
+				NoResetStatsEntry.ORACLE_USED, "MrBean"));
+		randomBean.setTitle("random automata, MrBean");
+		StatsSet randomShortest = new StatsSet(random);
+		randomShortest.restrict(new EqualsRestriction<>(
+				NoResetStatsEntry.ORACLE_USED, "shortest"));
+		randomShortest.setTitle("random automata, shortest CE");
+
+		StatsSet counterBean = new StatsSet(s4Counter);
+		counterBean.restrict(new EqualsRestriction<>(
+				NoResetStatsEntry.ORACLE_USED, "MrBean"));
+		counterBean.setTitle("counter automata, MrBean");
+		StatsSet counterShortest = new StatsSet(s4Counter);
+		counterShortest.restrict(new EqualsRestriction<>(
+				NoResetStatsEntry.ORACLE_USED, "shortest"));
+		counterShortest.setTitle("counter automata, shortest CE");
+
+		List<StatsSet> statsSets = new ArrayList<>();
+		statsSets.add(randomBean);
+		statsSets.add(randomShortest);
+		statsSets.add(counterBean);
+		statsSets.add(counterShortest);
 
 		Graph<Integer, Float> g4bw2 = new Graph<Integer, Float>(
 				NoResetStatsEntry.STATE_NUMBER, NoResetStatsEntry.DURATION);
-		//g4bw2.plot(s4bw2W, Graph.PlotStyle.MEDIAN);
-		StatsSet s4bw2WO = new StatsSet(s4Without);
-		
-		g4bw2.plot(s4bw2WO, Graph.PlotStyle.AVERAGE_WITH_EXTREMA,"random automata");
-		//g4bw2.plot(s4bw2WO, Graph.PlotStyle.MEDIAN);
-		StatsSet s4bw2C = new StatsSet(s4Counter);
 
-		g4bw2.plot(s4bw2C, Graph.PlotStyle.AVERAGE_WITH_EXTREMA,"random and counter automata");
-		
+		for (StatsSet statSet : statsSets) {
+			g4bw2.plot(statSet, Graph.PlotStyle.AVERAGE_WITH_EXTREMA);
+		}
+
 		g4bw2.setForceOrdLogScale(true);
 		g4bw2.setFileName("influence_of_state_number_on_duration");
 		g4bw2.export();
 
-		
 		Graph<Integer, Integer> gWt = new Graph<Integer, Integer>(
-				NoResetStatsEntry.STATE_NUMBER, NoResetStatsEntry.W_TOTAL_LENGTH);
-		gWt.plot(s4bw2WO, Graph.PlotStyle.AVERAGE_WITH_EXTREMA,"random automata");
-		gWt.plot(s4bw2C, Graph.PlotStyle.AVERAGE_WITH_EXTREMA,"random and counter automata");
+				NoResetStatsEntry.STATE_NUMBER,
+				NoResetStatsEntry.W_TOTAL_LENGTH);
+		for (StatsSet statSet : statsSets) {
+			gWt.plot(statSet, Graph.PlotStyle.AVERAGE_WITH_EXTREMA);
+		}
 		gWt.setFileName("influence_of_state_number_on_W_total_length");
 		gWt.export();
-		
-		
 
 		Graph<Integer, Integer> gW = new Graph<Integer, Integer>(
 				NoResetStatsEntry.STATE_NUMBER, NoResetStatsEntry.W_SIZE);
-		gW.plot(s4bw2WO, Graph.PlotStyle.AVERAGE_WITH_EXTREMA,"random automata");
-		gW.plot(s4bw2C, Graph.PlotStyle.AVERAGE_WITH_EXTREMA,"random and counter automata");
+		for (StatsSet statSet : statsSets) {
+			gW.plot(statSet, Graph.PlotStyle.AVERAGE_WITH_EXTREMA);
+		}
 		gW.setFileName("influence_of_state_number_on_W_size");
 		gW.export();
-		
 
-		Graph<Integer,Float> gw = new Graph<Integer, Float>(
-				NoResetStatsEntry.STATE_NUMBER, NoResetStatsEntry.AVERAGE_W_LENGTH);
-		gw.plot(s4bw2WO, Graph.PlotStyle.AVERAGE_WITH_EXTREMA,"random automata");
-		gw.plot(s4bw2C, Graph.PlotStyle.AVERAGE_WITH_EXTREMA,"random and counter automata");
+		Graph<Integer, Float> gw = new Graph<Integer, Float>(
+				NoResetStatsEntry.STATE_NUMBER,
+				NoResetStatsEntry.AVERAGE_W_LENGTH);
+		for (StatsSet statSet : statsSets) {
+			gw.plot(statSet, Graph.PlotStyle.AVERAGE_WITH_EXTREMA);
+		}
 		gw.setFileName("influence_of_state_number_on_W_sequences_length");
 		gw.export();
-		
 
-		
 		Graph<Integer, Integer> go = new Graph<Integer, Integer>(
-				NoResetStatsEntry.STATE_NUMBER, NoResetStatsEntry.ASKED_COUNTER_EXAMPLE);
-		go.plot(s4bw2WO, Graph.PlotStyle.AVERAGE_WITH_EXTREMA,"random automata");
-		go.plot(s4bw2C, Graph.PlotStyle.AVERAGE_WITH_EXTREMA,"random and counter automata");
+				NoResetStatsEntry.STATE_NUMBER,
+				NoResetStatsEntry.ASKED_COUNTER_EXAMPLE);
+		for (StatsSet statSet : statsSets) {
+			go.plot(statSet, Graph.PlotStyle.AVERAGE_WITH_EXTREMA);
+		}
 		go.setFileName("influence_of_state_number_on_number_of_call_to_oracle");
 		go.export();
 
-		
 		Graph<Integer, Integer> gs = new Graph<Integer, Integer>(
-				NoResetStatsEntry.STATE_NUMBER, NoResetStatsEntry.SUB_INFERANCE_NB);
-		gs.plot(s4bw2WO, Graph.PlotStyle.AVERAGE_WITH_EXTREMA,"random automata");
-		gs.plot(s4bw2C, Graph.PlotStyle.AVERAGE_WITH_EXTREMA,"random and counter automata");
+				NoResetStatsEntry.STATE_NUMBER,
+				NoResetStatsEntry.SUB_INFERANCE_NB);
+		for (StatsSet statSet : statsSets) {
+			gs.plot(statSet, Graph.PlotStyle.AVERAGE_WITH_EXTREMA);
+		}
 		gs.setFileName("influence_of_state_number_on_number_of_sub-inference");
 		gs.export();
 
-		
 		Graph<Integer, Integer> ghr = new Graph<Integer, Integer>(
 				NoResetStatsEntry.STATE_NUMBER, NoResetStatsEntry.H_ANSWERS_NB);
-		ghr.plot(s4bw2WO, Graph.PlotStyle.AVERAGE_WITH_EXTREMA,"random automata");
-		ghr.plot(s4bw2C, Graph.PlotStyle.AVERAGE_WITH_EXTREMA,"random and counter automata");
+		for (StatsSet statSet : statsSets) {
+			ghr.plot(statSet, Graph.PlotStyle.AVERAGE_WITH_EXTREMA);
+		}
 		ghr.setFileName("influence_of_state_number_on_homing_sequence_responses");
 		ghr.export();
-		
 
-		
 		Graph<Integer, Integer> gh = new Graph<Integer, Integer>(
 				NoResetStatsEntry.STATE_NUMBER, NoResetStatsEntry.H_LENGTH);
-		gh.plot(s4bw2WO, Graph.PlotStyle.AVERAGE_WITH_EXTREMA,"random automata");
-		gh.plot(s4bw2C, Graph.PlotStyle.AVERAGE_WITH_EXTREMA,"random and counter automata");
+		for (StatsSet statSet : statsSets) {
+			gh.plot(statSet, Graph.PlotStyle.AVERAGE_WITH_EXTREMA);
+		}
 		gh.setFileName("influence_of_state_number_on_homing_sequence_length");
 		gh.export();
-		
-		
-		
-		
+
 		Graph<Integer, Integer> g4bw3 = new Graph<Integer, Integer>(
 				NoResetStatsEntry.STATE_NUMBER, NoResetStatsEntry.TRACE_LENGTH);
-		g4bw3.plot(s4bw2WO, Graph.PlotStyle.AVERAGE_WITH_EXTREMA,"random automata");
-		g4bw3.plot(s4bw2C, Graph.PlotStyle.AVERAGE_WITH_EXTREMA,"random and counter automata");
-		//g4bw3.plot(s4bw3O, Graph.PlotStyle.MEDIAN);
+		for (StatsSet statSet : statsSets) {
+			g4bw3.plot(statSet, Graph.PlotStyle.AVERAGE_WITH_EXTREMA);
+		}
 		g4bw3.setForceOrdLogScale(false);
-//		g4bw3.setForceAbsLogScale(true);
-		g4bw3.plotEstimation(s4bw2C, Graph.EstimationMode.POWER);
-		g4bw3.plotEstimation(s4bw2WO, Graph.EstimationMode.POWER);
+		// g4bw3.setForceAbsLogScale(true);
+		// g4bw3.plotEstimation(counterShortest, Graph.EstimationMode.POWER);
+		// g4bw3.plotEstimation(randomShortest, Graph.EstimationMode.POWER);
 		g4bw3.setFileName("influence_of_state_number_on_trace_length");
 		g4bw3.export();
-		
-		
-		
-		
-		
-		StatsSet s5Without = new StatsSet(randomWithout);
-		s5Without.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.OUTPUT_SYMBOLS, 5));
-		s5Without.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.INPUT_SYMBOLS, 5));
-//		s5Without.restrict(new EqualsRestriction<Integer>(NoResetStatsEntry.STATE_BOUND_OFFSET, 0));
 
-		
-		
-		
+		StatsSet s5Without = new StatsSet(randomWithout);
+		s5Without.restrict(new EqualsRestriction<Integer>(
+				NoResetStatsEntry.OUTPUT_SYMBOLS, 5));
+		s5Without.restrict(new EqualsRestriction<Integer>(
+				NoResetStatsEntry.INPUT_SYMBOLS, 5));
+		// s5Without.restrict(new
+		// EqualsRestriction<Integer>(NoResetStatsEntry.STATE_BOUND_OFFSET, 0));
+
 		Graph<Integer, Integer> g5 = new Graph<Integer, Integer>(
 				NoResetStatsEntry.STATE_NUMBER, NoResetStatsEntry.TRACE_LENGTH);
 		g5.plot(s5Without, Graph.PlotStyle.AVERAGE_WITH_EXTREMA);
-		//g5.setForceOrdLogScale(false);
-		//g4bw3.setForceAbsLogScale(true);
-		//g5.plotFunc("6*x**2","O(n^2)",LineStyle.APPROXIMATION);
-		//g5.plotFunc("2*x**2.5","O(n^{2.5})",LineStyle.APPROXIMATION);
+		// g5.setForceOrdLogScale(false);
+		// g4bw3.setForceAbsLogScale(true);
+		// g5.plotFunc("6*x**2","O(n^2)",LineStyle.APPROXIMATION);
+		// g5.plotFunc("2*x**2.5","O(n^{2.5})",LineStyle.APPROXIMATION);
 		g5.setFileName("influence_of_state_number_on_trace_length_5");
 		g5.export();
-
-		
-		
 		
 		
 		

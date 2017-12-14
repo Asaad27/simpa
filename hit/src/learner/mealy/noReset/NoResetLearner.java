@@ -46,16 +46,24 @@ public class NoResetLearner extends Learner {
 	 * @return the trace applied on driver or null if no counter example is found
 	 */
 	public LmTrace getCounterExemple() {
-		LmTrace shortestCe=getShortestCounterExemple();
-		if (shortestCe==null)
-			return null;
-		return getRandomCounterExemple();
+		int startSize = dataManager.traceSize();
+		long startTime = System.nanoTime();
+		stats.setOracle("MrBean");
+		LmTrace shortestCe = getShortestCounterExemple();
+		LmTrace returnedCE = (shortestCe == null) ? null
+				: getRandomCounterExemple();// we do not compute random CE if we
+											// know that there is no CE
+
+		float duration = (float) (System.nanoTime() - startTime) / 1000000000;
+		stats.increaseOracleCallNb(dataManager.traceSize() - startSize
+				+ ((returnedCE == null) ? 0 : returnedCE.size()), duration);
+		return returnedCE;
 	}
 
 	public LmTrace getRandomCounterExemple() {
 		if (driver instanceof TransparentMealyDriver) {
 			TransparentMealyDriver d = (TransparentMealyDriver) driver;
-			Options.MAX_CE_LENGTH = d.getAutomata().getStateCount() *d.getAutomata().getStateCount() * 10;
+			Options.MAX_CE_LENGTH = d.getAutomata().getStateCount() *d.getAutomata().getStateCount() * 100;
 		}
 		LmConjecture conjecture = dataManager.getConjecture();
 		State conjectureStartingState = dataManager.getCurrentState()
@@ -133,36 +141,75 @@ public class NoResetLearner extends Learner {
 		W.add(new InputSequence());
 		InputSequence h = new InputSequence();
 		stats = new NoResetStatsEntry(driver);
-		learn(W, h);// We suppose that this one do not throw
-					// InconsistenceException
-		stats.updateWithDataManager(dataManager);
-		W = new ArrayList<InputSequence>();
 
-		
-		//InputSequence counterExample = null;
-		LmTrace counterExampleTrace=null;
-		boolean inconsistencyFound = false;
-		while (inconsistencyFound
-		|| (counterExampleTrace = getCounterExemple()) != null) {
+		LmTrace counterExampleTrace;
+		boolean inconsistencyFound;
+
+		do {
 			runtime.gc();
 			stats.updateMemory((int) (runtime.totalMemory() - runtime
 					.freeMemory()));
-			if (!inconsistencyFound)
-				stats.increaseOracleCallNb();
+
+			counterExampleTrace = null;
+			inconsistencyFound = false;
+			LogManager.logLine();
+			LogManager.logStep(LogManager.STEPOTHER, "Starting new learning");
+			try {
+				learn(W, h);
+			} catch (InvalidHException e) {
+				stats.increaseHInconsitencies();
+				if (Options.LOG_LEVEL != LogLevel.LOW) {
+					LogManager
+							.logInfo("Non-determinism found (due to homming sequence) : "
+									+ e);
+					LogManager
+							.logConsole("Non-determinism found (due to homming sequence) : "
+									+ e);
+				}
+				h = e.getNewH();
+				LogManager.logInfo("h is now " + h);
+				inconsistencyFound = true;
+			} catch (ConjectureNotConnexException e) {
+				if (Options.LOG_LEVEL != LogLevel.LOW) {
+					LogManager
+							.logInfo("The conjecture is not connex. We stop here and look for a counter example");
+
+					LogManager
+							.logConsole("The conjecture is not connex. We stop here and look for a counter example");
+				}
+			} catch (InconsistancyWithConjectureAtEndOfTraceException e) {
+				stats.increaseWInconsistencies();
+				if (Options.LOG_LEVEL != LogLevel.LOW) {
+					LogManager.logInfo("Non-determinism found : " + e);
+					LogManager.logConsole("Non-determinism found : " + e);
+				}
+				counterExampleTrace = new LmTrace();
+				inconsistencyFound = true;
+			} finally {
+				stats.increaseWithDataManager(dataManager);
+			}
+
+			if (!inconsistencyFound) {
+				counterExampleTrace = getCounterExemple();
+
+				
+			}
 
 			if (counterExampleTrace != null) {
 
-				if (!inconsistencyFound && Options.LOG_LEVEL!=LogLevel.LOW){
+				if (!inconsistencyFound && Options.LOG_LEVEL != LogLevel.LOW) {
 					LogManager
-					.logInfo(counterExampleTrace
-							+ " should be a counter example for this automata.");
+							.logInfo(counterExampleTrace
+									+ " should be a counter example for this automata.");
 					LogManager
-					.logConsole(counterExampleTrace
-							+ " should be a counter example for this automata.");
-					
+							.logConsole(counterExampleTrace
+									+ " should be a counter example for this automata.");
+
 				}
-				OutputSequence ConjectureCEOut = dataManager.walkWithoutCheck( counterExampleTrace);
-				OutputSequence DriverCEOut = counterExampleTrace.getOutputsProjection();
+				OutputSequence ConjectureCEOut = dataManager
+						.walkWithoutCheck(counterExampleTrace);
+				OutputSequence DriverCEOut = counterExampleTrace
+						.getOutputsProjection();
 				assert inconsistencyFound
 						|| !ConjectureCEOut.equals(DriverCEOut);
 
@@ -173,7 +220,8 @@ public class NoResetLearner extends Learner {
 				InputSequence newW;
 				boolean newWIsPrefixInW;
 				do {
-					InputSequence counterExample=counterExampleTrace.getInputsProjection();
+					InputSequence counterExample = counterExampleTrace
+							.getInputsProjection();
 					l++;
 					if (l <= counterExample.getLength()) {
 						newW = counterExample.getIthSuffix(l);
@@ -200,7 +248,7 @@ public class NoResetLearner extends Learner {
 							.logWarning("We are adding new element to W but it is already a W-set for this driver");
 				}
 				for (InputSequence w : W) {
-					if (newW.startsWith(w)) {
+					if (newW.startsWith(w)||w.getLength()==0) {
 						W.remove(w);
 						LogManager
 								.logInfo("removing "
@@ -212,45 +260,9 @@ public class NoResetLearner extends Learner {
 				LogManager.logInfo("W-set extended with " + newW);
 				W.add(newW);
 			}
-			counterExampleTrace = null;
-			inconsistencyFound = false;
-			LogManager.logLine();
-			LogManager.logStep(LogManager.STEPOTHER, "Starting new learning");
-			try {
-				learn(W, h);
-			} catch (InvalidHException e) {
-				stats.increaseHInconsitencies();
-				if (Options.LOG_LEVEL != LogLevel.LOW) {
-					LogManager
-							.logInfo("Non-determinism found (due to homming sequence) : "
-									+ e);
-					LogManager
-							.logConsole("Non-determinism found (due to homming sequence) : "
-									+ e);
-				}
-				h = e.getNewH();
-				LogManager.logInfo("h is now "+h);
-				inconsistencyFound = true;
-			} catch (ConjectureNotConnexException e) {
-				stats.increaseWInconsistencies();
-				if (Options.LOG_LEVEL != LogLevel.LOW) {
-				LogManager
-						.logInfo("The conjecture is not connex. We stop here and look for a counter example");
 
-				LogManager
-						.logConsole("The conjecture is not connex. We stop here and look for a counter example");
-				}
-				} catch (InconsistancyWithConjectureAtEndOfTraceException e) {
-				if (Options.LOG_LEVEL != LogLevel.LOW) {
-					LogManager.logInfo("Non-determinism found : " + e);
-					LogManager.logConsole("Non-determinism found : " + e);
-				}
-				counterExampleTrace = new LmTrace();
-				inconsistencyFound = true;
-			}finally{
-				stats.updateWithDataManager(dataManager);
-			}
-		}
+		} while (counterExampleTrace != null || inconsistencyFound);
+
 		if ((counterExampleTrace = getShortestCounterExemple()) != null) {
 			dataManager.walkWithoutCheck(counterExampleTrace);
 			LogManager.logError("another counter example can be found");
