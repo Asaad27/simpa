@@ -113,6 +113,27 @@ public class SimplifiedDataManager {
 		expectedTraces = new ArrayList<>();
 		hChecker = new HomingSequenceChecker(h);
 	}
+	
+	public String walkWithoutCheck(String input, String output){
+		trace.append(input, output);
+		String expectedOutput=null;
+		if (currentState != null) {
+			FullyKnownTrace transition = currentState.getKnownTransition(input);
+			if (transition != null) {
+				expectedOutput=transition.getTrace().getOutput(0);
+				currentState = transition.getEnd();
+			} else
+				currentState = null;
+		}
+		return expectedOutput;
+	}
+	public OutputSequence walkWithoutCheck(LmTrace seq){
+		OutputSequence outputs=new OutputSequence();
+		for (int i=0;i<seq.size();i++)
+			outputs.addOutput(walkWithoutCheck(seq.getInput(i),seq.getOutput(i)));
+		return outputs;
+	}
+	
 
 	public String apply(String input) {
 		LogManager.logInfo("expected Traces are " + expectedTraces);

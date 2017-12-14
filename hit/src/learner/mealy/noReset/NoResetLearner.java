@@ -41,10 +41,34 @@ public class NoResetLearner extends Learner {
 	}
 
 	/**
+	 * If some sequence are applied on driver but not returned, the datamanager is also updated.
 	 * 
-	 * @return null if no counter example is found
+	 * @return the trace applied on driver or null if no counter example is found
 	 */
-	public InputSequence getCounterExemple() {
+	public LmTrace getCounterExemple() {
+		LmTrace shortestCe=getShortestCounterExemple();
+		if (shortestCe==null)
+			return null;
+		return getRandomCounterExemple();
+	}
+
+	public LmTrace getRandomCounterExemple() {
+		if (driver instanceof TransparentMealyDriver) {
+			TransparentMealyDriver d = (TransparentMealyDriver) driver;
+			Options.MAX_CE_LENGTH = d.getAutomata().getStateCount() *d.getAutomata().getStateCount() * 10;
+		}
+		LmConjecture conjecture = dataManager.getConjecture();
+		State conjectureStartingState = dataManager.getCurrentState()
+				.getState();
+		LmTrace ce = new LmTrace();
+		boolean found = driver.getRandomCounterExample_noReset(conjecture,
+				conjectureStartingState, ce);
+		if (!found)
+			dataManager.walkWithoutCheck(ce);
+		return found ? ce : null;
+	}
+
+	public LmTrace getShortestCounterExemple() {
 		if (driver instanceof TransparentMealyDriver) {
 			TransparentMealyDriver d = (TransparentMealyDriver) driver;
 			Mealy realAutomata = d.getAutomata();
@@ -85,7 +109,7 @@ public class NoResetLearner extends Learner {
 					LogManager.logInfo("user choose «" + counterExample
 							+ "» as counterExemple");
 				}
-				return counterExample;
+				return new LmTrace(counterExample,driver.execute(counterExample));
 			} else {
 				return null;
 			}
@@ -104,7 +128,7 @@ public class NoResetLearner extends Learner {
 		Runtime runtime = Runtime.getRuntime();
 		runtime.gc();
 		long start = System.nanoTime();
-
+		
 		List<InputSequence> W = new ArrayList<InputSequence>();
 		W.add(new InputSequence());
 		InputSequence h = new InputSequence();
@@ -115,31 +139,30 @@ public class NoResetLearner extends Learner {
 		W = new ArrayList<InputSequence>();
 
 		
-		InputSequence counterExample = null;
+		//InputSequence counterExample = null;
+		LmTrace counterExampleTrace=null;
 		boolean inconsistencyFound = false;
 		while (inconsistencyFound
-		|| (counterExample = getCounterExemple()) != null) {
+		|| (counterExampleTrace = getCounterExemple()) != null) {
 			runtime.gc();
 			stats.updateMemory((int) (runtime.totalMemory() - runtime
 					.freeMemory()));
 			if (!inconsistencyFound)
 				stats.increaseOracleCallNb();
-			if (counterExample != null) {
-				if (!inconsistencyFound)
-					stats.increaseTraceLength(counterExample.getLength());
+
+			if (counterExampleTrace != null) {
+
 				if (!inconsistencyFound && Options.LOG_LEVEL!=LogLevel.LOW){
 					LogManager
-					.logInfo(counterExample
+					.logInfo(counterExampleTrace
 							+ " should be a counter example for this automata.");
 					LogManager
-					.logConsole(counterExample
+					.logConsole(counterExampleTrace
 							+ " should be a counter example for this automata.");
 					
 				}
-				OutputSequence ConjectureCEOut = dataManager.getConjecture()
-						.simulateOutput(
-								dataManager.getCurrentState().getState(), counterExample);
-				OutputSequence DriverCEOut = driver.execute(counterExample);
+				OutputSequence ConjectureCEOut = dataManager.walkWithoutCheck( counterExampleTrace);
+				OutputSequence DriverCEOut = counterExampleTrace.getOutputsProjection();
 				assert inconsistencyFound
 						|| !ConjectureCEOut.equals(DriverCEOut);
 
@@ -150,6 +173,7 @@ public class NoResetLearner extends Learner {
 				InputSequence newW;
 				boolean newWIsPrefixInW;
 				do {
+					InputSequence counterExample=counterExampleTrace.getInputsProjection();
 					l++;
 					if (l <= counterExample.getLength()) {
 						newW = counterExample.getIthSuffix(l);
@@ -188,7 +212,7 @@ public class NoResetLearner extends Learner {
 				LogManager.logInfo("W-set extended with " + newW);
 				W.add(newW);
 			}
-			counterExample = null;
+			counterExampleTrace = null;
 			inconsistencyFound = false;
 			LogManager.logLine();
 			LogManager.logStep(LogManager.STEPOTHER, "Starting new learning");
@@ -221,13 +245,14 @@ public class NoResetLearner extends Learner {
 					LogManager.logInfo("Non-determinism found : " + e);
 					LogManager.logConsole("Non-determinism found : " + e);
 				}
-				counterExample = new InputSequence();
+				counterExampleTrace = new LmTrace();
 				inconsistencyFound = true;
 			}finally{
 				stats.updateWithDataManager(dataManager);
 			}
 		}
-		if ((counterExample = getCounterExemple()) != null) {
+		if ((counterExampleTrace = getShortestCounterExemple()) != null) {
+			dataManager.walkWithoutCheck(counterExampleTrace);
 			LogManager.logError("another counter example can be found");
 			throw new RuntimeException("wrong conjecture");
 		} else {
@@ -488,7 +513,9 @@ public class NoResetLearner extends Learner {
 		}
 		// currentFoundState is maintained in order that
 		// currentFoundState.computedState is the current state in conjecture
-		FoundState currentFoundState = new FoundState(dataManager.getCurrentState().getState(), driver.getInputSymbols());
+		State currentConjectureState = dataManager.getCurrentState().getState();
+		FoundState currentFoundState = new FoundState(currentConjectureState,
+				driver.getInputSymbols());
 		// assigned is a table to associate a FoundState to each state in the
 		// given automata
 		Map<State, FoundState> assigned = new HashMap<State, FoundState>();
@@ -512,7 +539,8 @@ public class NoResetLearner extends Learner {
 				MealyTransition t = automata.getTransitionFromWithInput(
 						currentState, i);
 				currentState = t.getTo();
-				String o = dataManager.apply(i);
+				String o = driver.execute(i);
+				dataManager.walkWithoutCheck(i, o);
 				if (!o.equals(t.getOutput())) {
 					LogManager.logInfo("expected output was " + t.getOutput());
 					return false;

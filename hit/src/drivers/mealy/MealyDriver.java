@@ -173,6 +173,30 @@ public class MealyDriver extends Driver {
 		return ce;
 	}
 
+	public boolean getRandomCounterExample_noReset(Mealy c, State currentState,LmTrace ce) {
+		boolean found = false;
+		int maxTries = Options.MAX_CE_LENGTH;
+		List<String> is = getInputSymbols();
+		stopLog();
+		int i = 0;
+		while (i < maxTries && !found) {
+			String input = Utils.randIn(is);
+			String driverOutput = execute(input);
+			ce.append(input, driverOutput);
+
+			MealyTransition t = c.getTransitionFromWithInput(currentState,
+					input);
+			if (!t.getOutput().equals(driverOutput)) {
+				found=true;
+				break;
+			}
+			currentState = t.getTo();
+			i++;
+		}
+		startLog();
+		return found ;
+	}
+	
 	public LmTrace getRandomCounterExemple(Mealy c) {
 		LmTrace ceTrace=null;
 		boolean found = false;
