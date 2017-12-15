@@ -71,6 +71,7 @@ public class Options {
 	// Counterexample options
 	
 	public static boolean STOP_ON_CE_SEARCH = false;
+	public static boolean USE_SHORTEST_CE;
 
 	//Web application analysis
 	public static boolean XSS_DETECTION = false;

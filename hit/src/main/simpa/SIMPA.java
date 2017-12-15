@@ -504,7 +504,11 @@ public class SIMPA {
 	// Other options undocumented //TODO sort and explain them.
 	private static StringListOption URLS = new StringListOption("--urls", "??? TODO", "url1", "url2", Options.URLS);
 	private static BooleanOption XSS_DETECTION = new BooleanOption("--xss", "Detect XSS vulnerability");
-	private static Option<?>[] otherOptions = new Option<?>[] { URLS, XSS_DETECTION };
+	private static BooleanOption SHORTEST_CE = new BooleanOption(
+			"--shortestCE",
+			"use transparent driver to compute the shortest counter example possible");
+	private static Option<?>[] otherOptions = new Option<?>[] { URLS,
+			XSS_DETECTION, SHORTEST_CE };
 
 	private static void parse(String[] args, ArrayList<Boolean> used, Option<?>[] options) {
 		for (Option<?> o : options)
@@ -638,6 +642,7 @@ public class SIMPA {
 		Options.XSS_DETECTION = XSS_DETECTION.getValue();
 		Options.URLS = URLS.getValue();
 		Options.SCAN = SCAN.getValue();
+		Options.USE_SHORTEST_CE = SHORTEST_CE.getValue();
 	}
 
 	private static void check() {

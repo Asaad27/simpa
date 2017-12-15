@@ -41,19 +41,28 @@ public class NoResetLearner extends Learner {
 	}
 
 	/**
-	 * If some sequence are applied on driver but not returned, the datamanager is also updated.
+	 * If some sequence are applied on driver but not returned, the datamanager
+	 * is also updated.
 	 * 
-	 * @return the trace applied on driver or null if no counter example is found
+	 * @return the trace applied on driver or null if no counter example is
+	 *         found
 	 */
 	public LmTrace getCounterExemple() {
 		int startSize = dataManager.traceSize();
 		long startTime = System.nanoTime();
-		stats.setOracle("MrBean");
-		LmTrace shortestCe = (driver instanceof TransparentMealyDriver) ? getShortestCounterExemple()
-				: new LmTrace();
-		LmTrace returnedCE = (shortestCe == null) ? null
-				: getRandomCounterExemple();// we do not compute random CE if we
-											// know that there is no CE
+		LmTrace returnedCE = null;
+		if (Options.USE_SHORTEST_CE) {
+			stats.setOracle("shortest");
+			returnedCE = getShortestCounterExemple();
+		} else {
+			stats.setOracle("MrBean");
+			LmTrace shortestCe = (driver instanceof TransparentMealyDriver) ? getShortestCounterExemple(false)
+					: new LmTrace();
+			returnedCE = (shortestCe == null) ? null
+					: getRandomCounterExemple();// we do not compute random CE
+												// if we know that there is no
+												// CE
+		}
 		float duration = (float) (System.nanoTime() - startTime) / 1000000000;
 		stats.increaseOracleCallNb(dataManager.traceSize() - startSize
 				+ ((returnedCE == null) ? 0 : returnedCE.size()), duration);
@@ -77,6 +86,9 @@ public class NoResetLearner extends Learner {
 	}
 
 	public LmTrace getShortestCounterExemple() {
+		return getShortestCounterExemple(true);
+	}
+	public LmTrace getShortestCounterExemple(boolean applyOndriver) {
 		if (driver instanceof TransparentMealyDriver) {
 			TransparentMealyDriver d = (TransparentMealyDriver) driver;
 			Mealy realAutomata = d.getAutomata();
@@ -117,7 +129,13 @@ public class NoResetLearner extends Learner {
 					LogManager.logInfo("user choose «" + counterExample
 							+ "» as counterExemple");
 				}
-				return new LmTrace(counterExample,driver.execute(counterExample));
+				if (applyOndriver)
+					return new LmTrace(counterExample,
+							driver.execute(counterExample));
+				else
+					return new LmTrace(counterExample,
+							realAutomata.simulateOutput(realStartingState,
+									counterExample));
 			} else {
 				return null;
 			}
@@ -190,22 +208,22 @@ public class NoResetLearner extends Learner {
 			}
 
 			if (!inconsistencyFound) {
+				LogManager.logInfo("asking for a counter example");
 				counterExampleTrace = getCounterExemple();
+				if (counterExampleTrace == null)
+					LogManager.logInfo("No counter example found");
+				else {
+					LogManager.logInfo("one counter example found : "
+							+ counterExampleTrace);
+					if (Options.LOG_LEVEL != LogLevel.LOW)
+						LogManager.logConsole("one counter example found : "
+								+ counterExampleTrace);
+				}
 
-				
 			}
 
 			if (counterExampleTrace != null) {
 
-				if (!inconsistencyFound && Options.LOG_LEVEL != LogLevel.LOW) {
-					LogManager
-							.logInfo(counterExampleTrace
-									+ " should be a counter example for this automata.");
-					LogManager
-							.logConsole(counterExampleTrace
-									+ " should be a counter example for this automata.");
-
-				}
 				OutputSequence ConjectureCEOut = dataManager
 						.walkWithoutCheck(counterExampleTrace);
 				OutputSequence DriverCEOut = counterExampleTrace
