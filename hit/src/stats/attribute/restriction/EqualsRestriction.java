@@ -17,4 +17,7 @@ public class EqualsRestriction<T extends Comparable<T>> extends Restriction {
 		return s.get(a).equals(value);
 	}
 
+	public String toString() {
+		return a.toString() + "=" + value;
+	}
 }
