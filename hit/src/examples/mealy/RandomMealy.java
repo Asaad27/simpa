@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 import main.simpa.Options;
+import main.simpa.Options.LogLevel;
 import tools.Utils;
 import tools.loggers.LogManager;
 import automata.State;
@@ -23,9 +24,14 @@ import automata.mealy.MealyTransition;
 public class RandomMealy extends Mealy implements Serializable {
 	private static final long serialVersionUID = -4610287835922377376L;
 
+	public enum OUTPUT_STYLE {
+		RANDOM, ONE_DIFF_PER_STATE,
+	}
+
 	private List<String> inputSymbols = null;
 	private List<String> outputSymbols = null;
 	private long seed = 0;
+	private OUTPUT_STYLE outputStyle;
 
 	public static String replaceCharAt(String s, int pos, char c) {
 		StringBuffer buf = new StringBuffer(s);
@@ -50,21 +56,63 @@ public class RandomMealy extends Mealy implements Serializable {
 		}
 	}
 
+	private Map<State, Map<String, String>> chooseOutputs() {
+		Map<State, Map<String, String>> outputs = new HashMap<>();
+		for (State s : states) {
+			Map<String, String> localOutputs = new HashMap<>();
+			switch (outputStyle) {
+			case RANDOM:
+				for (String i : inputSymbols) {
+					localOutputs.put(i, Utils.randIn(outputSymbols));
+				}
+				break;
+			case ONE_DIFF_PER_STATE:
+				String diff = Utils.randIn(inputSymbols);
+				if (Options.LOG_LEVEL != LogLevel.LOW)
+					LogManager.logInfo("Changing output for state " + s
+							+ " is " + diff);
+				for (String i : inputSymbols) {
+					localOutputs.put(i, (i.equals(diff)) ? "special" : "same");
+				}
+				break;
+			}
+			outputs.put(s, localOutputs);
+		}
+		return outputs;
+	}
+
 	public RandomMealy() {
-		this(false);
+		this(false, OUTPUT_STYLE.RANDOM);
 	}
 
 	public RandomMealy(boolean forceConnex) {
-		super(forceConnex ? "ConnexRandom()" : ("Random("
-				+ Options.TRANSITIONPERCENT + ")"));
+		this(forceConnex, OUTPUT_STYLE.RANDOM);
+	}
+
+	private static String getOutputStyleName(OUTPUT_STYLE outputStyle) {
+		switch (outputStyle) {
+		case RANDOM:
+			return "randomOutputs";
+		case ONE_DIFF_PER_STATE:
+			return "oneOutputDiff";
+		default:
+			return "unknown output style";
+		}
+	}
+
+	public RandomMealy(boolean forceConnex, OUTPUT_STYLE outputStyle) {
+		super((forceConnex ? "ConnexRandom(" : ("Random("
+				+ Options.TRANSITIONPERCENT + ";"))
+				+ getOutputStyleName(outputStyle) + ")");
 		LogManager.logStep(LogManager.STEPOTHER, "Generating random Mealy");
 		seed = Utils.randLong();
+		this.outputStyle = outputStyle;
 		generateSymbols();
 		createStates();
 		if (forceConnex)
-			createConnexTransitions();
+			createConnexTransitions(chooseOutputs());
 		else
-			createTransitions();
+			createTransitions(chooseOutputs());
 		exportToDot();
 	}
 	
@@ -105,22 +153,21 @@ public class RandomMealy extends Mealy implements Serializable {
 		return (RandomMealy) o;
 	}
 
-	private void createTransitions() {
+	private void createTransitions(Map<State, Map<String, String>> outputs) {
 		for (State s1 : states) {
 			for (String is : inputSymbols) {
+				String output = outputs.get(s1).get(is);
 				if (Utils.randBoolWithPercent(Options.TRANSITIONPERCENT)) {
 					addTransition(new MealyTransition(this, s1,
-							Utils.randIn(states), is,
-							Utils.randIn(outputSymbols)));
+							Utils.randIn(states), is, output));
 				} else {
-					addTransition(new MealyTransition(this, s1, s1, is,
-							Utils.randIn(outputSymbols)));
+					addTransition(new MealyTransition(this, s1, s1, is, output));
 				}
 			}
 		}
 	}
 
-	private void createConnexTransitions() {
+	private void createConnexTransitions(Map<State, Map<String, String>> outputs) {
 		Set<State> reachedFromStartAndNotComplete = new HashSet<>();
 		Set<State> notReachedFromStart = new HashSet<>();
 		List<State> reachingStart = new ArrayList<>();
@@ -139,7 +186,7 @@ public class RandomMealy extends Mealy implements Serializable {
 		for (State s : states) {
 			if (s != initial) {
 				String input = Utils.randIn(inputSymbols);
-				String output = Utils.randIn(outputSymbols);
+				String output = outputs.get(s).get(input);
 				State target = Utils.randIn(reachingStart);
 				addTransition(new MealyTransition(this, s, target, input,
 						output));
@@ -152,7 +199,7 @@ public class RandomMealy extends Mealy implements Serializable {
 		while (!notReachedFromStart.isEmpty()) {
 			State s = Utils.randIn(reachedFromStartAndNotComplete);
 			String input = Utils.randIn(remainingInputs.get(s));
-			String output = Utils.randIn(outputSymbols);
+			String output = outputs.get(s).get(input);
 			State target = Utils.randIn(notReachedFromStart);
 			addTransition(new MealyTransition(this, s, target, input, output));
 
@@ -176,7 +223,7 @@ public class RandomMealy extends Mealy implements Serializable {
 		for (State s1 : states) {
 			for (String is : remainingInputs.get(s1)) {
 				addTransition(new MealyTransition(this, s1,
-						Utils.randIn(states), is, Utils.randIn(outputSymbols)));
+						Utils.randIn(states), is, outputs.get(s1).get(is)));
 			}
 		}
 	}
@@ -190,8 +237,12 @@ public class RandomMealy extends Mealy implements Serializable {
 	}
 
 	public static RandomMealy getConnexRandomMealy() {
+		return getConnexRandomMealy(OUTPUT_STYLE.RANDOM);
+	}
 
-		RandomMealy automata = new RandomMealy(true);
+	public static RandomMealy getConnexRandomMealy(OUTPUT_STYLE outputStyle) {
+
+		RandomMealy automata = new RandomMealy(true, outputStyle);
 
 		return automata;
 	}
