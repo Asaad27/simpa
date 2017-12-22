@@ -88,6 +88,36 @@ public class NoResetLearner extends Learner {
 	public LmTrace getShortestCounterExemple() {
 		return getShortestCounterExemple(true);
 	}
+
+	/**
+	 * Add a new sequence in a W-set. If an element of W is a prefix of new
+	 * sequence, it is replaced by the new sequence.
+	 * 
+	 * @param newW
+	 *            The sequence to add in W. This is not allowed to be a prefix
+	 *            of an existing sequence in W
+	 * @param W
+	 *            The set to extend
+	 */
+	private void addOrExtendInW(InputSequence newW, List<InputSequence> W) {
+		for (InputSequence w : W) {
+			assert (!w.startsWith(newW));
+			if (newW.startsWith(w) || w.getLength() == 0) {
+				W.remove(w);
+				LogManager
+						.logInfo("removing "
+								+ w
+								+ " from W-set because it's a prefix of new inputSequence");
+				break;// because W is only extended with this method, there is
+						// at most one prefix of newW in W (otherwise, one
+						// prefix of newW in W is also a prefix of the other
+						// prefix of newW in W, which is not possible by
+						// construction of W)
+			}
+		}
+		LogManager.logInfo("W-set extended with " + newW);
+		W.add(newW);
+	}
 	public LmTrace getShortestCounterExemple(boolean applyOndriver) {
 		if (driver instanceof TransparentMealyDriver) {
 			TransparentMealyDriver d = (TransparentMealyDriver) driver;
@@ -186,6 +216,15 @@ public class NoResetLearner extends Learner {
 				}
 				h = e.getNewH();
 				LogManager.logInfo("h is now " + h);
+				boolean hIsInW = false;
+				for (InputSequence w : W) {
+					if (w.startsWith(h)) {
+						hIsInW = true;
+						break;
+					}
+				}
+				if (!hIsInW)
+					addOrExtendInW(h, W);
 				inconsistencyFound = true;
 			} catch (ConjectureNotConnexException e) {
 				if (Options.LOG_LEVEL != LogLevel.LOW) {
@@ -265,18 +304,7 @@ public class NoResetLearner extends Learner {
 					LogManager
 							.logWarning("We are adding new element to W but it is already a W-set for this driver");
 				}
-				for (InputSequence w : W) {
-					if (newW.startsWith(w)||w.getLength()==0) {
-						W.remove(w);
-						LogManager
-								.logInfo("removing "
-										+ w
-										+ " from W-set because it's a prefix of new inputSequence");
-						break;
-					}
-				}
-				LogManager.logInfo("W-set extended with " + newW);
-				W.add(newW);
+				addOrExtendInW(newW, W);
 			}
 
 		} while (counterExampleTrace != null || inconsistencyFound);
