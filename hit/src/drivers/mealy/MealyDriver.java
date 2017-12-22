@@ -2,9 +2,11 @@ package drivers.mealy;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import learner.mealy.LmConjecture;
@@ -238,6 +240,11 @@ public class MealyDriver extends Driver {
 						+ conjectureEnd + "'\n";
 			}
 		}
+		Map<State, Set<State>> seen = new HashMap<>();// a set of pair of
+														// <original
+														// state,conjecture
+														// state> already added
+														// to toCompute
 		LinkedList<Node> toCompute = new LinkedList<Node>();
 		Node n = new Node();
 		n.i = new InputSequence();
@@ -255,6 +262,12 @@ public class MealyDriver extends Driver {
 					current.i.addInput(i);
 					return current.i;
 				}
+				State originalTo=originalT.getTo();
+				State conjectureTo = conjectureT.getTo();
+				if (seen.get(originalTo) == null)
+					seen.put(originalTo, new HashSet<State>());
+				else if (seen.get(originalTo).contains(conjectureTo))
+					continue;
 				Node newNode = new Node();
 				newNode.i = new InputSequence();
 				newNode.i.addInputSequence(current.i);
@@ -262,6 +275,8 @@ public class MealyDriver extends Driver {
 				newNode.originalEnd = originalT.getTo();
 				newNode.conjectureEnd = conjectureT.getTo();
 				toCompute.add(newNode);
+				
+				seen.get(originalTo).add(conjectureTo);
 			}
 		}
 		return null;
