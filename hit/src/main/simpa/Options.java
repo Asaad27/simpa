@@ -70,6 +70,7 @@ public class Options {
 	
 	// Counterexample options
 	
+	public static boolean TRY_TRACE_AS_CE = true;
 	public static boolean STOP_ON_CE_SEARCH = false;
 	public static boolean USE_SHORTEST_CE;
 

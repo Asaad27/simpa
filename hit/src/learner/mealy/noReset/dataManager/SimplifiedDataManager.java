@@ -26,6 +26,7 @@ public class SimplifiedDataManager {
 													// something else
 	private MealyDriver driver;
 	private LmTrace trace;
+	private LmTrace globalTrace;
 	private final List<InputSequence> W; // Characterization set
 	public final InputSequence h;
 	private final ArrayList<String> I;// Input Symbols
@@ -97,8 +98,9 @@ public class SimplifiedDataManager {
 
 
 	public SimplifiedDataManager(MealyDriver driver, List<InputSequence> W,
-			InputSequence h) {
+			InputSequence h, LmTrace globalTrace) {
 		this.trace = new LmTrace();
+		this.globalTrace = globalTrace;
 		this.W = W;
 		this.h = h;
 		this.I = new ArrayList<String>(driver.getInputSymbols());
@@ -114,8 +116,13 @@ public class SimplifiedDataManager {
 		hChecker = new HomingSequenceChecker(h);
 	}
 	
-	public String walkWithoutCheck(String input, String output){
+	private void extendTrace(String input, String output){
 		trace.append(input, output);
+		globalTrace.append(input, output);
+	}
+	
+	public String walkWithoutCheck(String input, String output){
+		extendTrace(input, output);
 		String expectedOutput=null;
 		if (currentState != null) {
 			FullyKnownTrace transition = currentState.getKnownTransition(input);
@@ -138,7 +145,7 @@ public class SimplifiedDataManager {
 	public String apply(String input) {
 		LogManager.logInfo("expected Traces are " + expectedTraces);
 		String output = driver.execute(input);
-		trace.append(input, output);
+		extendTrace(input, output);
 		// check for Non-Determinism after homing sequence
 		hChecker.applyInput(input, output);
 

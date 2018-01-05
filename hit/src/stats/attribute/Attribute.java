@@ -34,15 +34,14 @@ public class Attribute <T extends Comparable<T>> {
 	public final static Attribute<Integer>ASKED_COUNTER_EXAMPLE =	new Attribute<Integer>(	"number of counter example asked",	Units.FUNCTION_CALL,false,false,false);
 	public final static Attribute<Integer>H_INCONSISTENCY_FOUND =	new Attribute<Integer>(	"number of inconsistency on h",		Units.FUNCTION_CALL,false,false,false);
 	public final static Attribute<Integer>W_INCONSISTENCY_FOUND =	new Attribute<Integer>(	"number of inconsistency on w",		Units.FUNCTION_CALL,false,false,false);
-	public final static Attribute<Integer>SUB_INFERANCE_NB =		new Attribute<Integer>(	"number of sub-inference",			Units.FUNCTION_CALL,false,false,true);
+	public final static Attribute<Integer>SUB_INFERANCE_NB =		new Attribute<Integer>(	"number of sub-inference",			Units.FUNCTION_CALL,false,false,false);
 	public final static Attribute<String> ORACLE_USED =				new Attribute<String>(	"oracle giving counter examples",	Units.NO_UNITS,	false, 	true, 	false);
 	public final static Attribute<Integer>ORACLE_TRACE_LENGTH = 	new Attribute<Integer>(	"length of trace used by oracle",	Units.SYMBOLS,	true,	false,	false);
 	public final static Attribute<Float>  ORACLE_DURATION = 		new Attribute<Float>(	"duration of oracle",				Units.SECONDS,	false,	false,	false);
+	public final static Attribute<String> SEARCH_CE_IN_TRACE =		new Attribute<String>(	"using trace for counter-example",	Units.NO_UNITS,	false, 	true, 	false);
 	public final static Attribute<Boolean>RS_WITH_GIVEN_H =			new Attribute<Boolean>(	"homing sequence is known",			Units.BOOLEAN,	false,	true,	false);
 	public final static Attribute<Integer>FAILED_PROBALISTIC_SEARCH=new Attribute<Integer>(	"number of failed probalistic search",Units.FUNCTION_CALL,false,	false,	false);
 	public final static Attribute<Integer>SUCCEEDED_PROBALISTIC_SEARCH=new Attribute<Integer>(	"number of succeeded probalistic search",Units.FUNCTION_CALL,false,	false,	false);
-
-
 	
 	
 	private String name;

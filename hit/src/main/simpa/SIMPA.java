@@ -433,13 +433,18 @@ public class SIMPA {
 			"Don't use speedUp (deduction from trace based on state incompatibilities)\nthis is usefull if you don't know the real state number but only the bound.");
 	private static Option<?>[] localizerBasedOptions = new Option<?>[] { STATE_NUMBER_BOUND, CHARACTERIZATION_SET,
 			WITHOUT_SPEEDUP, SPLITTING_TREE };
+
 	// hW options
-	private static Option<?>[] hWOptions = new Option<?>[] {};
+	private static BooleanOption TRY_CE_FROM_TRACE = new BooleanOption(
+			"--tryTraceCE", "Try to use trace as a counter example.");
+	private static Option<?>[] hWOptions = new Option<?>[] { TRY_CE_FROM_TRACE };
+
 	// RS Options
 	private static BooleanOption RS_WITH_UNKNOWN_H = new BooleanOption(
 			"--RS-probabilistic",
 			"do not compute a homming sequence to give to RS algorithme. h will be computed by RS itself.");
 	private static Option<?>[] RSOptions = new Option<?>[] {RS_WITH_UNKNOWN_H};
+
 	// EFSM options
 	private static BooleanOption GENERIC_DRIVER = new BooleanOption("--generic", "Use generic driver");
 	private static BooleanOption SCAN = new BooleanOption("--scan", "Use scan driver");
@@ -612,7 +617,8 @@ public class SIMPA {
 		Options.SPLITTING_TREE = SPLITTING_TREE.getValue();
 
 		Options.ICTSS2015_WITHOUT_SPEEDUP = WITHOUT_SPEEDUP.getValue();
-		
+		Options.TRY_TRACE_AS_CE = TRY_CE_FROM_TRACE.getValue();
+
 		Options.RS_WITH_UNKNOWN_H = RS_WITH_UNKNOWN_H.getValue();
 
 		Options.GENERICDRIVER = GENERIC_DRIVER.getValue();

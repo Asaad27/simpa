@@ -46,6 +46,7 @@ public class NoResetStatsEntry extends StatsEntry {
 	public final static Attribute<String> ORACLE_USED =				Attribute.ORACLE_USED;
 	public final static Attribute<Integer>ORACLE_TRACE_LENGTH = 	Attribute.ORACLE_TRACE_LENGTH;
 	public final static Attribute<Float>  ORACLE_DURATION = 		Attribute.ORACLE_DURATION;
+	public final static Attribute<String> SEARCH_CE_IN_TRACE =		Attribute.SEARCH_CE_IN_TRACE;
 	
 	private static Attribute<?>[] attributes = new Attribute<?>[]{
 			W_SIZE,
@@ -79,6 +80,7 @@ public class NoResetStatsEntry extends StatsEntry {
 			ORACLE_TRACE_LENGTH,
 			ORACLE_DURATION,
 			SUB_INFERANCE_NB,
+			SEARCH_CE_IN_TRACE,
 	};
 	
 	public static String getCSVHeader_s(){
@@ -126,6 +128,7 @@ public class NoResetStatsEntry extends StatsEntry {
 	private int oracleTraceLength=0;
 	private float oracleDuration=0;
 	private int subInferenceNb=0;
+	private String searchCEInTrace;
 
 
 	/**
@@ -164,6 +167,7 @@ public class NoResetStatsEntry extends StatsEntry {
 		oracleDuration = Float.parseFloat(st.nextToken());
 		subInferenceNb = Integer.parseInt(st.nextToken());
 
+		searchCEInTrace = st.nextToken();
 
 		
 	}
@@ -322,6 +326,8 @@ public class NoResetStatsEntry extends StatsEntry {
 			return (T) new Integer(oracleTraceLength);
 		if (a == ORACLE_DURATION)
 			return (T) new Float(oracleDuration);
+		if (a == SEARCH_CE_IN_TRACE)
+			return (T) searchCEInTrace;
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 
 	}
@@ -371,4 +377,8 @@ public class NoResetStatsEntry extends StatsEntry {
 			memory = currentMemory;
 	}
 
+	protected void setSearchCEInTrace(String string) {
+		searchCEInTrace = string;
+	}
+	
 }

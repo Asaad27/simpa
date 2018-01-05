@@ -35,6 +35,7 @@ public class NoResetLearner extends Learner {
 	private NoResetStatsEntry stats;
 	protected List<InputSequence> W;
 	private int n;// the maximum number of states
+	private LmTrace fullTrace;
 
 	public NoResetLearner(MealyDriver d) {
 		driver = d;
@@ -181,6 +182,7 @@ public class NoResetLearner extends Learner {
 			if ((!d.getAutomata().isConnex()))
 				throw new RuntimeException("driver must be strongly connected");
 		}
+		fullTrace = new LmTrace();
 		Runtime runtime = Runtime.getRuntime();
 		runtime.gc();
 		long start = System.nanoTime();
@@ -246,6 +248,39 @@ public class NoResetLearner extends Learner {
 				stats.increaseWithDataManager(dataManager);
 			}
 
+			if (!inconsistencyFound && Options.TRY_TRACE_AS_CE) {
+				// try to apply fullTrace on any state of conjecture to detect
+				// inconsistency.
+				LmConjecture conjecture = dataManager.getConjecture();
+				if (conjecture.isConnex()) {
+					int firstDiff = conjecture.simulateOnAllStates(fullTrace);
+					if (firstDiff != fullTrace.size()) {
+						counterExampleTrace = fullTrace.subtrace(0,
+								firstDiff + 1);
+						LogManager
+								.logInfo("The trace from start of learning cannot be applied on any state of conjecture."
+										+ "We will try to use it as a counter example.");
+						OutputSequence ConjectureCEOut = conjecture
+								.simulateOutput(dataManager.getCurrentState()
+										.getState(), counterExampleTrace
+										.getInputsProjection());
+						OutputSequence DriverCEOut = driver.execute(counterExampleTrace
+								.getInputsProjection());
+						if (ConjectureCEOut.equals(DriverCEOut)){
+							LogManager.logInfo("When trying to apply the expected counter example, the driver produced the same output than the conjecture."+"This cannot be used as counter example");
+							dataManager.walkWithoutCheck(counterExampleTrace);
+							counterExampleTrace=null;
+						}else{
+							LogManager.logInfo("The trace was a counter example");
+							inconsistencyFound = true;
+						}
+					} else {
+						LogManager
+								.logInfo("The trace from start of learning can be applied on at leat one state");
+					}
+				}
+			}
+
 			if (!inconsistencyFound) {
 				LogManager.logInfo("asking for a counter example");
 				counterExampleTrace = getCounterExemple();
@@ -263,12 +298,6 @@ public class NoResetLearner extends Learner {
 
 			if (counterExampleTrace != null) {
 
-				OutputSequence ConjectureCEOut = dataManager
-						.walkWithoutCheck(counterExampleTrace);
-				OutputSequence DriverCEOut = counterExampleTrace
-						.getOutputsProjection();
-				assert inconsistencyFound
-						|| !ConjectureCEOut.equals(DriverCEOut);
 
 				LogManager
 						.logInfo("geting smallest suffix in counter example which is not in W and not a prefix of a W element");
@@ -311,6 +340,7 @@ public class NoResetLearner extends Learner {
 
 		float duration = (float) (System.nanoTime() - start) / 1000000000;
 		stats.setDuration(duration);
+		stats.setSearchCEInTrace(Options.TRY_TRACE_AS_CE?"naive":"none");
 	
 		stats.updateMemory((int) (runtime.totalMemory() - runtime.freeMemory()));
 		stats.finalUpdate(dataManager);
@@ -386,7 +416,7 @@ public class NoResetLearner extends Learner {
 								: ""));
 
 
-		dataManager = new SimplifiedDataManager(driver, this.W, h);
+		dataManager = new SimplifiedDataManager(driver, this.W, h,fullTrace);
 
 		// start of the algorithm
 		do {
