@@ -6,6 +6,7 @@ import java.util.List;
 import stats.StatsEntry;
 
 public abstract class Restriction {
+	protected String title=null;
 	
 	public abstract boolean contains(StatsEntry s);
 	
@@ -17,5 +18,13 @@ public abstract class Restriction {
 			}
 		}
 		return kept;
+	}
+	
+	public void setTitle(String newTitle){
+		title=newTitle;
+	}
+	public String getTitle(){
+		if (title==null)return toString();
+		return title;
 	}
 }

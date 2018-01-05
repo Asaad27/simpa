@@ -101,7 +101,7 @@ public class StatsSet {
 		restrictedStats = r.apply(restrictedStats);
 		if (!title.equals(""))
 			title+=", ";
-		title+=r.toString();
+		title+=r.getTitle();
 	}
 
 	protected List<StatsEntry> getStats() {
