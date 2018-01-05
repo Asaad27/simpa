@@ -9,6 +9,8 @@ public class LmControlTableRow {
 	private InputSequence is;
 	private List<LmControlTableItem> cols;
 	private List<InputSequence> E;
+	private LmControlTableRow equivRow=null;//a row in S with same columns
+	private LmControlTableRow candidateEquiv=null;//a row which might be equivalent
 
 	public LmControlTableRow(InputSequence is, List<InputSequence> E) {
 		this.is = is;
@@ -74,5 +76,28 @@ public class LmControlTableRow {
 
 	public void addColumn(InputSequence col) {
 		cols.add(new LmControlTableItem(null));
+		candidateEquiv=equivRow;
+		equivRow=null;
+	}
+	
+	public boolean isClosed(LmControlTable t){
+		if (equivRow!=null)return true;
+		boolean rowIsClosed = false;
+		if (candidateEquiv!=null){
+			if (isEquivalentTo(candidateEquiv)){
+				equivRow=candidateEquiv;
+				return true;
+			}else{
+				candidateEquiv=null;
+			}
+		}
+		for (int j = 0; j < t.S.size(); j++) {
+			if (isEquivalentTo(t.S.get(j))) {
+				rowIsClosed = true;
+				equivRow=t.S.get(j);
+				break;
+			}
+		}
+		return rowIsClosed;
 	}
 }

@@ -65,19 +65,14 @@ public class LmControlTable {
 	public List<Integer> getNonClosedRows() {
 		List<Integer> ncr = new ArrayList<Integer>();
 		for (int i = 0; i < R.size(); i++) {
-			boolean rowIsClosed = false;
-			for (int j = 0; j < S.size(); j++) {
-				if (R.get(i).isEquivalentTo(S.get(j))) {
-					rowIsClosed = true;
-					break;
+			boolean rowIsClosed=R.get(i).isClosed(this);
+			if (!rowIsClosed)
+				for (int j : ncr) {
+					if (R.get(i).isEquivalentTo(R.get(j))) {
+						rowIsClosed = true;
+						break;
+					}
 				}
-			}
-			for (int j : ncr) {
-				if (R.get(i).isEquivalentTo(R.get(j))) {
-					rowIsClosed = true;
-					break;
-				}
-			}
 			if (!rowIsClosed)
 				ncr.add(i);
 		}
