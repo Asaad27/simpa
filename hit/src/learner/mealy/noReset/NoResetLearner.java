@@ -218,15 +218,17 @@ public class NoResetLearner extends Learner {
 				}
 				h = e.getNewH();
 				LogManager.logInfo("h is now " + h);
-				boolean hIsInW = false;
-				for (InputSequence w : W) {
-					if (w.startsWith(h)) {
-						hIsInW = true;
-						break;
+				if (Options.ADD_H_IN_W) {
+					boolean hIsInW = false;
+					for (InputSequence w : W) {
+						if (w.startsWith(h)) {
+							hIsInW = true;
+							break;
+						}
 					}
+					if (!hIsInW)
+						addOrExtendInW(h, W);
 				}
-				if (!hIsInW)
-					addOrExtendInW(h, W);
 				inconsistencyFound = true;
 			} catch (ConjectureNotConnexException e) {
 				if (Options.LOG_LEVEL != LogLevel.LOW) {
@@ -341,6 +343,7 @@ public class NoResetLearner extends Learner {
 		float duration = (float) (System.nanoTime() - start) / 1000000000;
 		stats.setDuration(duration);
 		stats.setSearchCEInTrace(Options.TRY_TRACE_AS_CE?"naive":"none");
+		stats.setAddHInW(Options.ADD_H_IN_W);
 	
 		stats.updateMemory((int) (runtime.totalMemory() - runtime.freeMemory()));
 		stats.finalUpdate(dataManager);
