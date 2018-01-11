@@ -2,238 +2,358 @@ package tools;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ErrorNode;
-import org.antlr.v4.runtime.tree.TerminalNode;
+
+import automata.State;
+import automata.mealy.Mealy;
+import automata.mealy.MealyTransition;
 
 import tools.antlr4.DotMealy.DotMealyBaseListener;
 import tools.antlr4.DotMealy.DotMealyParser;
 
 public class DotAntlrListener extends DotMealyBaseListener {
+	public class ParseException extends RuntimeException {
+		private static final long serialVersionUID = 3326922575373002881L;
 
-	Map<String, ArrayList> transation = new HashMap<String, ArrayList>();
-	ArrayList<ArrayList> set = new ArrayList<ArrayList>();
+		public ParseException(String what) {
+			super(what);
+		}
+	}
+
+	class WaitingEdge {
+		String start;
+		String end;
+		String input;
+		String output;
+	}
+
+	static protected String getNodeId(ParserRuleContext upperCtx) {
+		DotMealyParser.Node_idContext nodeIdCtx = upperCtx.getRuleContext(
+				DotMealyParser.Node_idContext.class, 0);
+		assert nodeIdCtx != null;
+		return getId(nodeIdCtx);
+	}
+
+	/**
+	 * take the first ID of a context
+	 * 
+	 * @see #getId(ParserRuleContext,int)
+	 */
+	static protected String getId(ParserRuleContext upperCtx) {
+		return getId(upperCtx, 0);
+	}
+
+	/**
+	 * IDs in dot files can be expressed in different forms (quoted string, HTML
+	 * string or simple word) with a different syntax.
+	 * 
+	 * @param upperCtx
+	 *            the context containing the ID
+	 * @param index
+	 *            the index of the ID to return (
+	 *            {@link #getId(ParserRuleContext) optional})
+	 * @return the ID (without external quotes or other dot delimiter)
+	 */
+	static protected String getId(ParserRuleContext upperCtx, int index) {
+		DotMealyParser.IdContext idCtx = upperCtx.getRuleContext(
+				DotMealyParser.IdContext.class, index);
+		assert idCtx != null;
+		if (idCtx.DOUBLE_QUOTED_STRING() != null) {
+			String full = idCtx.DOUBLE_QUOTED_STRING().getText();
+			return full.substring(1, full.length() - 1).replace("\\\"", "\"");
+		} else if (idCtx.HTML_STRING() != null) {
+			String full = idCtx.HTML_STRING().getText();
+			return full.substring(1, full.length() - 1);
+		} else
+			return idCtx.getText();
+
+	}
+
+	Mealy automaton = null;
+
+	String name = "";
+	String startNode = null;
+	// store attributes definitions for each node
+	Map<String, List<DotMealyParser.A_listContext>> nodeDeclarations = new HashMap<>();
+	List<WaitingEdge> waitingEdges = new ArrayList<>();
+	String firstStateDefined = null;// first state seen and defined as a state
+	String firstStateUsed = null;// first state seen in a transition
+	String startEdgeNode = null;// start state for next transition
+	String edgeInput = null;// input symbol for next transition
+	String edgeOutput = null;// output symbol for next transition
 
 	@Override
 	public void enterGraph(DotMealyParser.GraphContext ctx) {
-		ArrayList<String> value = new ArrayList<String>();
-//		System.err.println("start-------" + ctx.ID().getText());
-		String dotName = ctx.ID().getText();
-		value.add(dotName);
-		transation.put("GNAME", value);
+		if (ctx.getChild(DotMealyParser.IdContext.class, 0) != null)
+			name = getId(ctx);
+		else
+			name = "unamed dot graph";
 	}
 
 	@Override
 	public void exitGraph(DotMealyParser.GraphContext ctx) {
-		transation.put("TRANSALTION", set);
-//		System.err.println("fin-------" + ctx.ID().getText());
+		searchInitialState();
+		buildAutomaton();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>
-	 * The default implementation does nothing.
-	 * </p>
-	 */
-
-	@Override
-	public void exitMealy_list(DotMealyParser.Mealy_listContext ctx) {
-//		System.out.println("Mealy_list>>>" + ctx.getChildCount());
-
-	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>
-	 * The default implementation does nothing.
-	 * </p>
-	 */
-	@Override
-	public void exitMealy_trans(DotMealyParser.Mealy_transContext ctx) {
-		ArrayList<String> value = new ArrayList<String>();
-		if (ctx.getChildCount() > 3) {
-			String node = ctx.getChild(0).getText();
-			String io = ctx.getChild(2).getText();
-			if (node.contains("->") && io.contains("/")) {
-
-				String statein = ctx.getChild(0).getChild(0).getText();
-				value.add(statein);
-				String stateout = ctx.getChild(0).getChild(2).getText();
-				value.add(stateout);
-				String input = ctx.getChild(2).getChild(3).getText();
-				value.add(input);
-				String output = ctx.getChild(2).getChild(5).getText();
-				value.add(output);
-				// transation.put("TRANSALTION", value);
-				set.add(value);
+	private void searchInitialState() {
+		// first, try to find a transition '__start0 -> someState'
+		final String START_NODE = "__start0";
+		WaitingEdge found = null;
+		for (WaitingEdge w : waitingEdges) {
+			if (w.start.equals(START_NODE)) {
+				if (found != null)
+					throw new ParseException(
+							"There is a node named "
+									+ START_NODE
+									+ " but it has two output transitions instead of only one.");
+				startNode = w.end;
+				found = w;
 			}
-			if (!node.contains("->") && io.contains("=")) {
-				String initStates = ctx.getChild(0).getChild(0).getText();
-				value.add(initStates);
-				String label = ctx.getChild(2).getChild(0).getText();
-				value.add(label);
-				String val = ctx.getChild(2).getChild(2).getText();
-				value.add(val);
-				// System.out.println(" " + initStates + " " + label + " " +
-				// val);
-				transation.put("INIT", value);
+		}
+		if (found != null) {
+			waitingEdges.remove(found);
+			nodeDeclarations.remove(START_NODE);
+		} else {
+			// if first state is not defined, try to find a state with different
+			// attribute declaration
+			for (Entry<String, List<DotMealyParser.A_listContext>> pair : nodeDeclarations
+					.entrySet()) {
+				List<DotMealyParser.A_listContext> attributes = pair.getValue();
+				if (!attributes.isEmpty()) {
+					if (startNode != pair.getKey()) {
+						System.err
+								.println("Two states have attributes. We cannot use attribute presence to detect initial state");
+						startNode = null;
+						break;
+					}
+					startNode = pair.getKey();
+				}
 			}
+		}
+		if (startNode == null) {
+			// if initial state is still undefined, take the first declared or
+			// first used state
+			if (firstStateDefined != null) {
+				startNode = firstStateDefined;
+				System.err
+						.println("warning : using first state defined as initial state of the automaton");
+			} else {
+				startNode = firstStateUsed;
+				assert firstStateUsed != null;
+				System.err
+						.println("warning : using first state used as initial state of the automaton");
+			}
+			System.out.println(startNode);
 		}
 
 	}
 
-	
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>
-	 * The default implementation does nothing.
-	 * </p>
-	 */
-	@Override
-	public void exitMealy_attrs(DotMealyParser.Mealy_attrsContext ctx) {
-		 }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>
-	 * The default implementation does nothing.
-	 * </p>
-	 */
-
-	@Override
-	public void exitLabel_name(DotMealyParser.Label_nameContext ctx) {
-		 
+	private void buildAutomaton() {
+		automaton = new Mealy("dot_file(" + name + ")");
+		Map<String, State> states = new HashMap<>();
+		Set<String> inputs = new HashSet<>();
+		// first, create states declared in node statements
+		for (Entry<String, List<DotMealyParser.A_listContext>> entry : nodeDeclarations
+				.entrySet()) {
+			String stateName = entry.getKey();
+			String visualName = stateName;
+			List<DotMealyParser.A_listContext> attributes = entry.getValue();
+			for (DotMealyParser.A_listContext aList : attributes) {
+				String key = getId(aList);
+				if (key.equalsIgnoreCase("label")) {
+					visualName = getId(aList, 1);
+				}
+			}
+			State s = new State(visualName, stateName.equals(startNode));
+			states.put(stateName, s);
+			automaton.addState(s);
+		}
+		// if the initial state was not declared in a node statement, create it
+		// in conjecture
+		if (!states.containsKey(startNode)) {
+			State s = new State(startNode, true);
+			states.put(startNode, s);
+			automaton.addState(s);
+		}
+		// add transitions and create missing states
+		for (WaitingEdge e : waitingEdges) {
+			assert e.end != null && e.start != null;
+			if (e.input == null || e.output == null)
+				throw new ParseException(
+						"input/output not defined for transition from "
+								+ e.start + " to " + e.end + ".");
+			State from = states.get(e.start);
+			if (from == null) {
+				from = new State(e.start, false);
+				automaton.addState(from);
+				states.put(e.start, from);
+			}
+			State to = states.get(e.end);
+			if (to == null) {
+				to = new State(e.end, false);
+				automaton.addState(to);
+				states.put(e.end, to);
+			}
+			automaton.addTransition(new MealyTransition(automaton, from, to,
+					e.input, e.output));
+			inputs.add(e.input);
+		}
+		// check completion of builded automaton
+		for (String i : inputs) {
+			for (State s : states.values())
+				if (automaton.getTransitionFromWithInput(s, i) == null)
+					throw new ParseException("automaton is not complete");
+		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>
-	 * The default implementation does nothing.
-	 * </p>
-	 */
+	@Override
+	public void enterNode_stmt(DotMealyParser.Node_stmtContext ctx) {
+		String id = getNodeId(ctx);
+		List<DotMealyParser.A_listContext> attributes;
+		if (nodeDeclarations.containsKey(id)) {
+			attributes = nodeDeclarations.get(id);
+		} else {
+			attributes = new ArrayList<>();
+			nodeDeclarations.put(id, attributes);
+		}
+		DotMealyParser.Attr_listContext attrs = ctx.getRuleContext(
+				DotMealyParser.Attr_listContext.class, 0);
+		while (attrs != null) {
+			DotMealyParser.A_listContext aList = attrs.getRuleContext(
+					DotMealyParser.A_listContext.class, 0);
+			while (aList != null) {
+				attributes.add(aList);
+				aList = aList.getRuleContext(
+						DotMealyParser.A_listContext.class, 0);
+			}
+			attrs = attrs.getRuleContext(DotMealyParser.Attr_listContext.class,
+					0);
+		}
+	}
 
 	@Override
-	public void exitEdge(DotMealyParser.EdgeContext ctx) {
-	 
-	}
+	public void enterEdge_stmt(DotMealyParser.Edge_stmtContext ctx) {
+		assert startEdgeNode == null;
 
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>
-	 * The default implementation does nothing.
-	 * </p>
-	 */
+		if (ctx.getRuleContext(DotMealyParser.Node_idContext.class, 0) != null) {
+			startEdgeNode = getNodeId(ctx);
+		} else {
+			DotMealyParser.SubgraphContext subgraphCtx = ctx.getRuleContext(
+					DotMealyParser.SubgraphContext.class, 0);
+			assert subgraphCtx != null;
+			startEdgeNode = getNodeId(subgraphCtx);
+		}
+		assert startEdgeNode != null;
+		if (firstStateUsed == null)
+			firstStateUsed = startEdgeNode;
+		DotMealyParser.Attr_listContext attrs = ctx.getRuleContext(
+				DotMealyParser.Attr_listContext.class, 0);
+		String label = null;
+		while (attrs != null) {
+			DotMealyParser.A_listContext aList = attrs.getRuleContext(
+					DotMealyParser.A_listContext.class, 0);
+			while (aList != null) {
+				String key = getId(aList);
+				if (key.equalsIgnoreCase("label")) {
+					if (label != null)
+						throw new ParseException(
+								"label is defined more than one time");
+					label = getId(aList, 1);
+				}
+				aList = aList.getRuleContext(
+						DotMealyParser.A_listContext.class, 0);
+			}
+			attrs = attrs.getRuleContext(DotMealyParser.Attr_listContext.class,
+					0);
+
+		}
+		if (label != null) {
+			String[] split = label.split("/");
+			if (split.length > 2) {
+				// in case where label is "input / output1/output2" we use
+				// "input" and "output1/output2" as tokens
+				String[] split2 = label.split(" / ");
+				if (split2.length == 2)
+					split = split2;
+			}
+			if (split.length > 2) {
+				// trying to ignore '/' in html tags
+				boolean fail = false;
+				int opening = 0;
+				int closing = 0;
+				List<String> split2 = new ArrayList<>();
+				int splitStart = 0;
+				for (int i = 0; i < label.length() && !fail; i++) {
+					if (label.charAt(i) == '<') {
+						opening++;
+						if (opening > closing + 1)
+							fail = true;
+					} else if (label.charAt(i) == '>') {
+						closing++;
+						if (closing > opening)
+							fail = true;
+					} else if (label.charAt(i) == '/') {
+						if (opening == closing) {
+							split2.add(label.substring(splitStart, i));
+							splitStart = i + 1;
+						}
+					}
+				}
+				split2.add(label.substring(splitStart, label.length()));
+
+				if (split2.size() == 2 && !fail) {
+					split = new String[2];
+					split2.toArray(split);
+				}
+			}
+			if (split.length == 2) {
+				edgeInput = split[0];
+				edgeOutput = split[1];
+				if (edgeInput.endsWith(" "))
+					edgeInput = edgeInput.substring(0, edgeInput.length() - 1);
+				if (edgeOutput.startsWith(" "))
+					edgeOutput = edgeOutput.substring(1);
+			} else
+				throw new ParseException("label must be 'input'/'output'");
+		}
+
+	}
 
 	@Override
-	public void exitState(DotMealyParser.StateContext ctx) {
-
- 
+	public void enterEdgeRHS(DotMealyParser.EdgeRHSContext ctx) {
+		WaitingEdge waitingEdge = new WaitingEdge();
+		waitingEdge.start = startEdgeNode;
+		String end;
+		if (ctx.getRuleContext(DotMealyParser.Node_idContext.class, 0) != null) {
+			end = getNodeId(ctx);
+		} else {
+			DotMealyParser.SubgraphContext subgraphCtx = ctx.getRuleContext(
+					DotMealyParser.SubgraphContext.class, 0);
+			assert subgraphCtx != null;
+			end = getNodeId(subgraphCtx);
+		}
+		waitingEdge.end = end;
+		waitingEdge.input = edgeInput;
+		waitingEdge.output = edgeOutput;
+		waitingEdges.add(waitingEdge);
 	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>
-	 * The default implementation does nothing.
-	 * </p>
-	 */
 
 	@Override
-	public void exitTrans(DotMealyParser.TransContext ctx) {
- 
+	public void exitEdge_stmt(DotMealyParser.Edge_stmtContext ctx) {
+		startEdgeNode = null;
+		edgeInput = null;
+		edgeOutput = null;
 	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>
-	 * The default implementation does nothing.
-	 * </p>
-	 */
 
 	@Override
-	public void exitValue(DotMealyParser.ValueContext ctx) {
-
+	public void enterSubgraph(DotMealyParser.SubgraphContext ctx) {
+		throw new ParseException("subgraphs are not handled");
 	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>
-	 * The default implementation does nothing.
-	 * </p>
-	 */
-
-	@Override
-	public void exitInput(DotMealyParser.InputContext ctx) {
-	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>
-	 * The default implementation does nothing.
-	 * </p>
-	 */
-
-	@Override
-	public void exitOutput(DotMealyParser.OutputContext ctx) {
-
-	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>
-	 * The default implementation does nothing.
-	 * </p>
-	 */
-
-	@Override
-	public void exitEveryRule(ParserRuleContext ctx) {
-	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>
-	 * The default implementation does nothing.
-	 * </p>
-	 */
-	@Override
-	public void visitTerminal(TerminalNode node) {
-
-
-	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>
-	 * The default implementation does nothing.
-	 * </p>
-	 */
-	@Override
-	public void visitErrorNode(ErrorNode node) {
-	}
-
-	public void allElements(ErrorNode node) {
-
-	}
-	
-	
-	
-	
-	
-	
-
 }

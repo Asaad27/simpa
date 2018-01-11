@@ -1,9 +1,7 @@
 package automata.mealy;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
@@ -12,11 +10,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import automata.Automata;
@@ -204,110 +200,14 @@ public class Mealy extends Automata implements Serializable {
 		}
 	}
 
-	private static State getStateOrCreate(HashMap<String, State> h, String name) {
-		if (!h.containsKey(name))
-			h.put(name, new State(name, false));
-		return h.get(name);
-	}
-
-	/*
-	 * public static Mealy importFromDot(File f) throws IOException { if
-	 * (!f.exists()) throw new IOException("'" + f.getAbsolutePath() +
-	 * "' do not exists"); if (!f.getName().endsWith(".dot"))
-	 * LogManager.logError("Are you sure that '" + f + "' is a dot file ?");
-	 * BufferedReader reader = new BufferedReader(new FileReader(f)); String
-	 * line = reader.readLine(); String name = line.split(" ")[1]; Mealy result
-	 * = new Mealy(name); Mealy tmpMealy = new Mealy("tmp");// used to store
-	 * transition before // states update. HashMap<String, State> states = new
-	 * HashMap<>(); while ((line = reader.readLine()) != null) { if
-	 * (line.contains(" ")) { String[] splitedLine = line.split(" "); if
-	 * (splitedLine.length >= 4) { assert splitedLine[1].equals("->"); State s1
-	 * = getStateOrCreate(states, splitedLine[0].substring(1)); State s2 =
-	 * getStateOrCreate(states, splitedLine[2]); String label =
-	 * splitedLine[3].substring(splitedLine[3].indexOf("\"") + 1,
-	 * splitedLine[3].lastIndexOf("\"")); String input = label.split("/")[0];
-	 * String output = label.split("/")[1]; System.err.println("----result: " +
-	 * result + "---- S1: " + s1 + "----S2:" + s2 + "----input: " + input +
-	 * "----output: " + output); MealyTransition t = new MealyTransition(result,
-	 * s1, s2, input, output); tmpMealy.addTransition(t);
-	 * 
-	 * } if (splitedLine.length == 2) { // System.out.println(line); // assert
-	 * splitedLine[1].startsWith("["); System.err.println(splitedLine[1]);
-	 * String stateName = splitedLine[0].substring(1); states.put(stateName, new
-	 * State(stateName, true));
-	 * 
-	 * } } else {// ajouter le traitement pour déclaration d'état
-	 * System.out.println(line);
-	 * 
-	 * }
-	 * 
-	 * } reader.close();
-	 * 
-	 * for (State s : states.values()) result.addState(s); for (MealyTransition
-	 * t : tmpMealy.getTransitions()) { State s1 =
-	 * states.get(t.getFrom().getName()); State s2 =
-	 * states.get(t.getTo().getName()); result.addTransition(new
-	 * MealyTransition(result, s1, s2, t.getInput(), t.getOutput())); } return
-	 * result; }
-	 */
 	public static Mealy importFromDot(File file) throws IOException {
-
 		if (!file.exists())
 			throw new IOException("'" + file.getAbsolutePath() + "' do not exists");
 		if (!file.getName().endsWith(".dot"))
 			LogManager.logError("Are you sure that '" + file + "' is a dot file ?");
 
 		DotParser dotParser = new DotParser();
-
-		Map<String, ArrayList> allTrans = dotParser.getAutomate(file);
-
-		HashMap<String, State> states = new HashMap<>();
-
-		Mealy tmpMealy = new Mealy("tmp");
-
-		String name = allTrans.get("GNAME").get(0).toString();
-
-		// System.out.println(">>>>>>>>>>>> "+allTrans.size());
-		Mealy result = new Mealy(name);
-
-		Iterator it = allTrans.entrySet().iterator();
-		while (it.hasNext()) {
-			// System.err.println("simpa ---- test");
-			Map.Entry<String, ArrayList> entry = (Entry<String, ArrayList>) it.next();
-			String key = entry.getKey();
-			ArrayList<String> value = entry.getValue();
-			// System.out.println(">>>>>>>>>>>> "+value.size());
-			// System.out.println(">>>>>>>>>>>> "+key);
-			if (key.equals("TRANSALTION")) {
-				ArrayList<ArrayList> set = entry.getValue();
-				for (ArrayList element : set) {
-
-					State s1 = getStateOrCreate(states, element.get(0).toString());
-					State s2 = getStateOrCreate(states, element.get(1).toString());
-					String input = element.get(2).toString();
-					String output = element.get(3).toString();
-					System.err.println(" S1 : " + s1 + " S2:" + s2 + " input " + input + " output " + output);
-					MealyTransition t = new MealyTransition(result, s1, s2, input, output);
-					tmpMealy.addTransition(t);
-				}
-
-			}
-			if (key.equals("INIT")) {
-
-				String stateName = value.get(0).toString();
-				states.put(stateName, new State(stateName, true));
-			}
-			// ...
-		}
-
-		for (State s : states.values())
-			result.addState(s);
-		for (MealyTransition t : tmpMealy.getTransitions()) {
-			State s1 = states.get(t.getFrom().getName());
-			State s2 = states.get(t.getTo().getName());
-			result.addTransition(new MealyTransition(result, s1, s2, t.getInput(), t.getOutput()));
-		}
-		return result;
+		return dotParser.getAutomaton(file);
 	}
 
 	/**

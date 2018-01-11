@@ -34,6 +34,7 @@ import stats.GlobalGraphGenerator;
 import stats.GraphGenerator;
 import stats.StatsEntry;
 import stats.StatsSet;
+import tools.DotAntlrListener;
 import tools.GraphViz;
 import tools.Utils;
 import tools.antlr4.SplittingTree.SplittingTreeLexer;
@@ -741,6 +742,8 @@ public class SIMPA {
 		} catch (ExhaustiveGenerator.TooBigSeedException e) {
 			throw e;
 		} catch (ExhaustiveGenerator.EndOfLoopException e) {
+			throw e;
+		} catch (DotAntlrListener.ParseException e) {
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();

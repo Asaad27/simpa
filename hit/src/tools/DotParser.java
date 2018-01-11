@@ -24,6 +24,8 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.misc.TestRig;
 
+import automata.mealy.Mealy;
+
 public class DotParser {
 
 	public DotParser() {
@@ -41,9 +43,7 @@ public class DotParser {
 		view.open();
 	}
 
-	public Map<String, ArrayList> getAutomate(File file) throws FileNotFoundException, IOException {
-		Map<String, ArrayList> states = new HashMap<String, ArrayList>();
-
+	public Mealy getAutomaton(File file) throws FileNotFoundException, IOException {
 		if (!file.exists())
 			throw new IOException("'" + file.getAbsolutePath() + "' do not exists");
 		if (!file.getName().endsWith(".dot"))
@@ -53,7 +53,6 @@ public class DotParser {
 		final DotMealyLexer lexer = new DotMealyLexer(stream);
 		final CommonTokenStream tokens = new CommonTokenStream(lexer);
 		final DotMealyParser parser = new DotMealyParser(tokens);
-		// parser.setBuildParseTree(true); // tell ANTLR to build a parse tree
 
 		final ParseTree tree = parser.graph();
 		ParseTreeWalker walker = new ParseTreeWalker();
@@ -61,11 +60,7 @@ public class DotParser {
 		DotAntlrListener antlrL = new DotAntlrListener();
 
 		walker.walk(antlrL, tree);
-		// states.put("GNAME", antlrL.dotName);
-		states = antlrL.transation;
-		// System.out.println("Lingxiao ==========> " +
-		// states.get(tree.getParent()));
-		return states;
+		return antlrL.automaton;
 	}
 
 	public static void main(String[] args) throws IOException {

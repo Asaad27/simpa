@@ -1,86 +1,91 @@
 grammar DotMealy;
 
-		
+/*
+From https://graphviz.gitlab.io/_pages/doc/info/lang.html
+graph 	: 	[ strict ] (graph | digraph) [ ID ] '{' stmt_list '}'
+stmt_list 	: 	[ stmt [ ';' ] stmt_list ]
+stmt 	: 	node_stmt
+	| 	edge_stmt
+	| 	attr_stmt
+	| 	ID '=' ID
+	| 	subgraph
+attr_stmt 	: 	(graph | node | edge) attr_list
+attr_list 	: 	'[' [ a_list ] ']' [ attr_list ]
+a_list 	: 	ID '=' ID [ (';' | ',') ] [ a_list ]
+edge_stmt 	: 	(node_id | subgraph) edgeRHS [ attr_list ]
+edgeRHS 	: 	edgeop (node_id | subgraph) [ edgeRHS ]
+node_stmt 	: 	node_id [ attr_list ]
+node_id 	: 	ID [ port ]
+port 	: 	':' ID [ ':' compass_pt ]
+	| 	':' compass_pt
+subgraph 	: 	[ subgraph [ ID ] ] '{' stmt_list '}'
+compass_pt 	: 	(n | ne | e | se | s | sw | w | nw | c | _)
+*/
+
+
+
 graph
-	:	STRICT? ( GRAPH | DIGRAPH ) ID? '{' mealy_list '}' 
+	:	STRICT? (GRAPH | DIGRAPH)  id? '{' stmt_list '}'
 	;
 
-
-mealy_list
-	: ( mealy_trans ';'? )* //| ( mealy_trans ? )*
+stmt_list
+	:	(stmt  ';'?)*
 	;
 
-
-mealy_trans
-	:	edge ( '[' mealy_attrs ']' )+
-    |	label_name '=' ( value | '"'* ) 
-    |	state (  '[' mealy_attrs ']' )*
-    |	state ('=' value*)
-    ;
-
-//attr_list
-//	: 	( '[' mealy_attrs ']' )+
-//	;
-
-
-mealy_attrs
-//	:	label_name ('=' '"'? mealy_io '"'? )*
-	:	label_name ('=' '"'? ( input '/' output )* '"'? )*
-	|	label_name ('=' '"'? value* '"'? )*  
-    ;
-
-
- 
-
-label_name
-	: ID
+stmt
+	:	node_stmt
+	|	edge_stmt
+	|	attr_stmt
+	|	id '=' id
+	|	subgraph
 	;
 
-
-edge
- 	:	//ID '->' ID
- 	|	(ID '->' (ID)*)* ';'? 	
- 	|	(NUMBER '->' (NUMBER)*)* ';'?
- //	|	(state edgeop (state)*)* ';'?
- 	;
- 	
-state
-	: 	ID | NUMBER
-	;
- 	
-edgeop
- 	: '->' | '--' 
- 	;	
- 	
- 	
-
-trans
-	:	edge ( '[' mealy_attrs ']' )*
+attr_stmt
+	:	(GRAPH | NODE | EDGE) attr_list
 	;
 
-value
-	:	ID | HTML_STRING | NUMBER  
+attr_list
+	:	'['  a_list? ']'  attr_list?
 	;
 
-input
-	:	ID
-	|	NUMBER	
+a_list
+	: 	id '=' id (';' | ',')? a_list?
 	;
 
-output
-	:	ID 
-	|	NUMBER
+edge_stmt
+	:	(node_id | subgraph) edgeRHS attr_list?
 	;
 
-//sentence
-//  :  (STRING)+
-//  ;
-//  
-//word
-//  :  ( LETTER | DIGIT) ( LETTER | DIGIT)*
-//  ;
+edgeRHS
+	:	EDGEOP (node_id | subgraph) edgeRHS?
+	;
 
+node_stmt
+	:	node_id attr_list?
+	;
 
+node_id
+	:	id port?
+	;
+
+port
+	:	':' id ( ':' COMPASS_PT )?
+	|	':' COMPASS_PT
+	;
+
+subgraph
+	:	( SUBGRAPH id? )? '{' stmt_list '}'
+	;
+
+COMPASS_PT
+	:	[NnSs] [eEwW]?
+	|	[eEwW]
+	|	[cC_]
+	;
+
+EDGEOP
+	: '->' | '--'
+	;
 
 
 
@@ -99,7 +104,6 @@ STRICT
 
 GRAPH
    : [Gg] [Rr] [Aa] [Pp] [Hh]
-//   :  'graph' | 'digraph'
    ;
 
 
@@ -123,7 +127,15 @@ SUBGRAPH
    ;
 
 
-/** "a numeral [-]?(.[0-9]+ | [0-9]+(.[0-9]*)? )" */ 
+/***************************** */
+
+id
+   :	UNQUOTED_STRING
+   |	NUMBER
+   |	DOUBLE_QUOTED_STRING
+   |	HTML_STRING
+   ;
+
 NUMBER
    : '-'? ( '.' DIGIT+ | DIGIT+ ( '.' DIGIT* )? )
    ;
@@ -133,18 +145,13 @@ fragment DIGIT
    : ('0'..'9')
    ;
 
-/** "Any string of alphabetic ([a-zA-Z\200-\377]) characters, underscores
- *  ('_') or digits ([0-9])"
- */ 
-ID
-   : LETTER ( LETTER | DIGIT )*
-   | DIGIT ( LETTER | DIGIT )*   
-   ;
+UNQUOTED_STRING 
+	: LETTER ( LETTER | DIGIT )*
+	;
 
-//STRING 
-//	: ('a'..'z'|'A'..'Z'|'0'..'9'|'_')+ 
-//	;
-
+DOUBLE_QUOTED_STRING
+	:	'"' ('\\\\' | '\\"' | ~["\\])* '"'
+	;
 
 
 /** "HTML strings, angle brackets must occur in matched pairs, and
@@ -162,6 +169,8 @@ fragment TAG
    : '<' .*? '>'
    ;
 
+
+/***************************** */
 
 COMMENT
    : '/*' .*? '*/' -> skip
@@ -184,5 +193,5 @@ PREPROC
 WS
    : [ \t\n\r]+ -> skip
    ;
-   
- 
+
+

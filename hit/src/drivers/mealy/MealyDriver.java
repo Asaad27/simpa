@@ -52,6 +52,8 @@ public class MealyDriver extends Driver {
 		this.nbStates = automata.getStateCount();
 		this.name = automata.getName();
 		this.currentState = automata.getInitialState();
+		if (this.currentState==null)
+			throw new RuntimeException("the driver has no initial state");
 	}
 
 	public MealyDriver(String name) {
@@ -80,6 +82,7 @@ public class MealyDriver extends Driver {
 	}
 	
 	public String execute(String input) {
+		assert currentState != null : "is the initial state of driver specified ?";
 		String output = null;
 		if (input.length() > 0) {
 			if (addtolog)
