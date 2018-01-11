@@ -54,5 +54,38 @@ public class GraphViz{
 			return 2;
 		}
 	}
+
+	/**
+	 * encode an identifier to dot format (i.e. with a syntax accepted by the
+	 * grammar) This version choose between using {@link #id2DotHtml(String)
+	 * id2DotHtml} or {@link #id2DotSimpleText(String) id2SimpleText}
+	 * 
+	 * @param id
+	 *            the identifier to encode
+	 * @return a string ready to put in the dot file
+	 */
+	public static String id2DotAuto(String id) {
+		if (id.replace("<", "").length() == id.replace(">", "").length()
+				&& id.contains("<"))// this test for detecting HTML contents can
+									// be largely improved
+			return id2DotHtml(id);
+		else
+			return id2DotSimpleText(id);
+	}
+
+	/**
+	 * @see #id2DotAuto(String)
+	 */
+	public static String id2DotHtml(String id) {
+		return "<" + id + ">";
+	}
+
+	/**
+	 * @see #id2DotAuto(String)
+	 */
+	public static String id2DotSimpleText(String id) {
+		return "\"" + id.replace("\"", "\\\"") + "\"";
+	}
+
 }
 

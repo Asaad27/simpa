@@ -34,7 +34,8 @@ public class MealyTransition extends Transition {
 	}
 
 	public String toDot() {
-		return from + " -> " + to + " [label=\"" + input + "/" + output + "\"];";
+		return from + " -> " + to + " [label="
+				+ tools.GraphViz.id2DotAuto(input + " / " + output) + "];";
 	}
 
 	public String getName() {
