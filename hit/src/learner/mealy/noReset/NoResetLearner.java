@@ -49,11 +49,11 @@ public class NoResetLearner extends Learner {
 		int startSize = dataManager.traceSize();
 		long startTime = System.nanoTime();
 		stats.setOracle("MrBean");
-		LmTrace shortestCe = getShortestCounterExemple();
+		LmTrace shortestCe = (driver instanceof TransparentMealyDriver) ? getShortestCounterExemple()
+				: new LmTrace();
 		LmTrace returnedCE = (shortestCe == null) ? null
 				: getRandomCounterExemple();// we do not compute random CE if we
 											// know that there is no CE
-
 		float duration = (float) (System.nanoTime() - startTime) / 1000000000;
 		stats.increaseOracleCallNb(dataManager.traceSize() - startSize
 				+ ((returnedCE == null) ? 0 : returnedCE.size()), duration);
@@ -263,15 +263,6 @@ public class NoResetLearner extends Learner {
 
 		} while (counterExampleTrace != null || inconsistencyFound);
 
-		if ((counterExampleTrace = getShortestCounterExemple()) != null) {
-			dataManager.walkWithoutCheck(counterExampleTrace);
-			LogManager.logError("another counter example can be found");
-			throw new RuntimeException("wrong conjecture");
-		} else {
-			LogManager
-					.logInfo("no counter example can be found, this almost mean that the conjecture is correct"
-							+ " (more precisely, this mean we are in a sub part of the automata which is equivalent to the driver)");
-		}
 		float duration = (float) (System.nanoTime() - start) / 1000000000;
 		stats.setDuration(duration);
 	
@@ -280,6 +271,21 @@ public class NoResetLearner extends Learner {
 
 		// The transition count should be stopped
 		driver.stopLog();
+
+		if (driver instanceof TransparentMealyDriver) {
+			if ((counterExampleTrace = getShortestCounterExemple()) != null) {
+				dataManager.walkWithoutCheck(counterExampleTrace);
+				LogManager.logError("another counter example can be found");
+				throw new RuntimeException("wrong conjecture");
+			} else {
+				LogManager
+						.logInfo("no counter example can be found, this almost mean that the conjecture is correct"
+								+ " (more precisely, this mean we are in a sub part of the automata which is equivalent to the driver)");
+			}
+		} else {
+			LogManager
+					.logInfo("black box is not transparent. cannot do a real verification of conjecture");
+		}
 		if (driver instanceof TransparentMealyDriver) {
 			TransparentMealyDriver d = (TransparentMealyDriver) driver;
 			if (checkExact(d.getAutomata(), d.getCurrentState())) {
