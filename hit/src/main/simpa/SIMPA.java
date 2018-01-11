@@ -812,7 +812,10 @@ public class SIMPA {
 				.logInfo("you can try to do this learning again by running something like '" + makeLaunchLine() + "'");
 		LogManager.logConsole(
 				"you can try to do this learning again by running something like '" + makeLaunchLine() + "'");
+		driver = null;
 		driver = loadDriver(Options.SYSTEM);
+		if (driver == null)
+			System.exit(1);
 		if (Options.NORESETINFERENCE) {
 			if (STATE_NUMBER_BOUND.getValue() > 0)
 				Options.STATE_NUMBER_BOUND = STATE_NUMBER_BOUND.getValue();
@@ -1091,6 +1094,7 @@ public class SIMPA {
 				LogManager.end();
 				System.err.println("Unexpected error");
 				e.printStackTrace(System.err);
+				System.exit(1);
 			}
 		}
 		System.out.println("[+] End");
