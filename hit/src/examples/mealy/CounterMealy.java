@@ -8,6 +8,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import main.simpa.Options;
+import main.simpa.Options.LogLevel;
 import tools.loggers.LogManager;
 import automata.State;
 import automata.mealy.Mealy;
@@ -30,7 +31,8 @@ public class CounterMealy extends Mealy implements Serializable {
 		ResetSymbol = resetSuffix;
 		createStates(nbStates, true,inputSymbol);
 		createTransitions(inputSymbol);
-		if (!Options.TEST) exportToDot();
+		if (Options.LOG_LEVEL != LogLevel.LOW)
+			exportToDot();
 	}
 	
 	private void createTransitions(String inputSymbol){

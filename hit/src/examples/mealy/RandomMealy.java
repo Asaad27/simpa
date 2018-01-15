@@ -113,7 +113,8 @@ public class RandomMealy extends Mealy implements Serializable {
 			createConnexTransitions(chooseOutputs());
 		else
 			createTransitions(chooseOutputs());
-		exportToDot();
+		if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+			exportToDot();
 	}
 	
 	public long getSeed(){

@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import main.simpa.Options;
+import main.simpa.Options.LogLevel;
 import tools.loggers.LogManager;
 import automata.State;
 import automata.mealy.Mealy;
@@ -36,7 +37,7 @@ public class CombinedMealy extends Mealy implements Serializable {
 		LogManager.logStep(LogManager.STEPOTHER, "Generate product of "+m1.getName() +" and "+m2.getName());
 		Map<State,Map<State,State>> combinedStates = createStates();
 		createTransitions(combinedStates);
-		if (!Options.TEST) exportToDot();
+		if (Options.LOG_LEVEL==LogLevel.ALL) exportToDot();
 	}
 	
 	private Map<State, Map<State, State>> createStates(){
