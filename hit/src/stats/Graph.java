@@ -28,8 +28,9 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 			this.plotLine = plotLine;
 		}
 	}
+
 	public enum EstimationMode {
-		POWER(),;
+		POWER(), EXPONENTIAL(), ;
 	}
 
 	private static boolean forcePoints = false; // set this to true in order to
@@ -88,66 +89,93 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 	public void plotFunc(String f, String title, LineStyle lineStyle) {
 		linesStyles.add(lineStyle);
 		// plotLines.append(f + " with lines lt 3 title \"" + title + "\", ");
-		plotLines.append(f + " with lines linestyle " + lineStyle.index + " title \"" + title + "\", ");
+		plotLines.append(f + " with lines linestyle " + lineStyle.index
+				+ " title \"" + title + "\", ");
 	}
-	
+
+	public String formatDouble(double d) {
+		return String.format("%.2g", d);
+	}
+
 	public void plotEstimation(StatsSet set, EstimationMode estimationMode) {
 		switch (estimationMode) {
-		case POWER:
-			double sumX = 0;
-			double sumY = 0;
-			double sumCoef = 0;
-			double avgLogX = 0;
-			double avgLogY = 0;
-			double varLogX = 0;
-			double coVarLog = 0;
+		case POWER: {
+			Utils.DataSet dataSet = new Utils.DataSet();
+			Utils.DataSet dataSetLog = new Utils.DataSet();
 			for (StatsEntry s : set.getStats()) {
 				double x = s.getFloatValue(abs);
 				double y = s.getFloatValue(ord);
 				if (x <= 0 || y <= 0)
 					continue;
-				double logX = Math.log(x);
-				double logY = Math.log(y);
-				double coef = x * x;
-				sumX += x * coef;
-				sumY += y * coef;
-				avgLogX += logX * coef;
-				avgLogY += logY * coef;
-				varLogX += logX * logX * coef;
-				coVarLog += logX * logY * coef;
-				sumCoef += coef;
+				double weight = x * x;
+				Utils.DataPoint p = new Utils.DataPoint();
+				p.x = x;
+				p.y = y;
+				p.weight = weight;
+				dataSet.add(p);
+				Utils.DataPoint logP = new Utils.DataPoint();
+				logP.x = Math.log(x);
+				logP.y = Math.log(y);
+				logP.weight = weight;
+				dataSetLog.add(logP);
 			}
-
-			varLogX /= sumCoef;
-			coVarLog /= sumCoef;
-			avgLogX /= sumCoef;
-			avgLogY /= sumCoef;
-			double avgX = sumX / sumCoef;
-			double avgY = sumY / sumCoef;
-
-			varLogX -= avgLogX * avgLogX;
-			coVarLog -= avgLogX * avgLogY;
-			double a;
-			if (varLogX == 0)
-				a = 0;
-			else
-				a = coVarLog / varLogX;
-			double b = avgY / Math.pow(avgX, a);
-			DecimalFormat df = new DecimalFormat("#.#");
-			df.setRoundingMode(RoundingMode.CEILING);
+			Utils.AffineRegressionResults affineR = Utils
+					.affineRegression(dataSet);
+			Utils.AffineRegressionResults affineRLog = Utils
+					.affineRegression(dataSetLog);
+			double a = affineRLog.a;
+			double b = affineR.averageY / Math.pow(affineR.averageX, a);
 
 			plotFunc(
 					b + "*x**" + a,
 					((set.getTitle().equals("")) ? "" : "estimation of "
 							+ set.getTitle() + "(based on " + set.size()
 							+ " points) : ")
-							+ df.format(b)
+							+ formatDouble(b)
 							+ "×["
 							+ abs.getName()
 							+ "]^{"
-							+ df.format(a) + "}",
+							+ formatDouble(a) + "}",
 					LineStyle.buildApproximation(linesStyles.size()));
 			break;
+		}
+		case EXPONENTIAL: {
+			Utils.DataSet dataSetLog = new Utils.DataSet();
+			for (StatsEntry s : set.getStats()) {
+				double x = s.getFloatValue(abs);
+				double y = s.getFloatValue(ord);
+				if (x <= 0 || y <= 0)
+					continue;
+				double weight = x;
+				Utils.DataPoint logP = new Utils.DataPoint();
+				logP.x = x;
+				logP.y = Math.log(y);
+				logP.weight = weight;
+				dataSetLog.add(logP);
+			}
+			Utils.AffineRegressionResults affineRLog = Utils
+					.affineRegression(dataSetLog);
+			double logA = affineRLog.a;
+			double a = Math.exp(logA);
+			double b = Math.exp(affineRLog.b);
+			;
+			plotFunc(
+					b + "*" + a + "**x",
+					((set.getTitle().equals("")) ? "" : "estimation of "
+							+ set.getTitle() + "(based on " + set.size()
+							+ " points) : ")
+							+ formatDouble(b)
+							+ "×"
+							+ formatDouble(a)
+							+ "^{["
+							+ abs.getName()
+							+ "]}="
+							+ formatDouble(b)
+							+ "×e^{"
+							+ formatDouble(logA) + "×[" + abs.getName() + "]}",
+					LineStyle.buildApproximation(linesStyles.size()));
+			break;
+		}
 		}
 	}
 
