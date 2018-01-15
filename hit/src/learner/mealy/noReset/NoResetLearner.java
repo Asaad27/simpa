@@ -488,22 +488,9 @@ public class NoResetLearner extends Learner {
 			}
 		} while (!dataManager.isFullyKnown());
 
-//		if (Options.LOG_LEVEL == Options.LogLevel.ALL || Options.TEST)
-//			LogManager.logConsole(dataManager.readableTrace());
-		dataManager.getConjecture().exportToDot();
-//		if (driver instanceof TransparentMealyDriver) {
-//			int minTraceLength = AdenilsoSimaoTool
-//					.minLengthForExhaustivAutomata(
-//							((TransparentMealyDriver) driver).getAutomata(),
-//							dataManager.getTrace().getInputsProjection());
-//			if (minTraceLength > dataManager.traceSize())
-//				throw new RuntimeException(
-//						"error in learning, there is another automata which produce the same trace");
-//			stats.setMinTraceLength(minTraceLength);
-//		} else {
-//			stats.setMinTraceLength(-2);
-//		}
-		LogManager.logInfo("end of learning.");
+		if (Options.LOG_LEVEL == Options.LogLevel.ALL)
+			dataManager.getConjecture().exportToDot();
+		LogManager.logInfo("end of sub-learning.");
 	}
 
 	public LmConjecture createConjecture() {
