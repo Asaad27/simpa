@@ -13,6 +13,8 @@ import drivers.mealy.MealyDriver;
 import drivers.mealy.MealyDriver.UnableToComputeException;
 import learner.Learner;
 import learner.mealy.LmTrace;
+import main.simpa.Options;
+import main.simpa.Options.LogLevel;
 import stats.StatsEntry;
 import tools.loggers.LogManager;
 
@@ -79,7 +81,8 @@ public class RivestSchapireLearner extends Learner {
 		stats.setDuration(((float)(System.nanoTime() - start))/ 1000000000);
 		stats.setTraceLength(driver.numberOfAtomicRequest);
 		stats.setLearnerNumber(drivers.size());
-		createConjecture().exportToDot();
+		if (Options.LOG_LEVEL == LogLevel.ALL)
+			createConjecture().exportToDot();
 		stats.updateWithConjecture(createConjecture());
 	}
 	
@@ -103,8 +106,10 @@ public class RivestSchapireLearner extends Learner {
 	public void resetCall() {
 		stats.increaseresetCallNb();
 		Runtime runtime = Runtime.getRuntime();
-	    runtime.gc();
-	    stats.updateMemory((int) (runtime.totalMemory() - runtime.freeMemory()));
+		// The garbage collection was removed because it really slow down the
+		// algorithm.
+		// runtime.gc();
+		stats.updateMemory((int) (runtime.totalMemory() - runtime.freeMemory()));
 	    LogManager.setPrefix("");
 		StateDriver next = home();
 		LogManager.logInfo("giving hand to " + next.homingSequenceResponse);

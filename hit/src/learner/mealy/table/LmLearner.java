@@ -6,6 +6,8 @@ import java.util.List;
 
 import learner.Learner;
 import learner.mealy.LmConjecture;
+import main.simpa.Options;
+import main.simpa.Options.LogLevel;
 import tools.loggers.LogManager;
 import automata.State;
 import automata.mealy.InputSequence;
@@ -97,16 +99,17 @@ public class LmLearner extends Learner {
 			}
 		}*/
 
-		LogManager.logInfo("Conjecture has " + c.getStateCount()
-				+ " states and " + c.getTransitionCount() + " transitions : ");
-		for (MealyTransition t : c.getTransitions()) {
-			LogManager.logTransition(t.toString());
+		if (Options.LOG_LEVEL == LogLevel.ALL) {
+			LogManager.logInfo("Conjecture has " + c.getStateCount()
+					+ " states and " + c.getTransitionCount()
+					+ " transitions : ");
+			for (MealyTransition t : c.getTransitions()) {
+				LogManager.logTransition(t.toString());
+			}
+			LogManager.logConsole("Exporting conjecture");
+			c.exportToDot();
 		}
 		LogManager.logLine();
-
-		if (addtolog)
-			LogManager.logConsole("Exporting conjecture");
-		//c.exportToDot();
 
 		return c;
 	}
@@ -141,10 +144,12 @@ public class LmLearner extends Learner {
 				for (int nonClosedRow : cTable.getNonClosedRows()) {
 					potentialNewNonClosedRows=true;
 //					finished = false;
-					LogManager.logStep(LogManager.STEPNCR,
-							cTable.R.get(nonClosedRow).getIS());
+					if (Options.LOG_LEVEL != LogLevel.LOW)
+						LogManager.logStep(LogManager.STEPNCR,
+								cTable.R.get(nonClosedRow).getIS());
 					handleNonClosed(nonClosedRow - (alreadyNonClosed++));
-					LogManager.logControlTable(cTable);
+					if (Options.LOG_LEVEL == LogLevel.ALL)
+						LogManager.logControlTable(cTable);
 				}
 			}
 			stopLog();
@@ -168,7 +173,8 @@ public class LmLearner extends Learner {
 				if (cTable.getNonClosedRows().isEmpty())
 // RG: this should not happen with Lm. Test could be converted to assert once we are sure.
 					LogManager.logInfo("Counter example failed to exhibit new state");
-				LogManager.logControlTable(cTable);
+				if (Options.LOG_LEVEL == LogLevel.ALL)
+					LogManager.logControlTable(cTable);
 			}
 			else
 //				finished = true;
