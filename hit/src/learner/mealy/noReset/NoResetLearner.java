@@ -196,7 +196,6 @@ public class NoResetLearner extends Learner {
 		boolean inconsistencyFound;
 
 		do {
-			runtime.gc();
 			stats.updateMemory((int) (runtime.totalMemory() - runtime
 					.freeMemory()));
 
