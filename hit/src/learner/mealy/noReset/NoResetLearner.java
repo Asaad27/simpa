@@ -79,7 +79,8 @@ public class NoResetLearner extends Learner {
 
 		while (!dataManager.isFullyKnown()) {
 			Runtime runtime = Runtime.getRuntime();
-			runtime.gc();
+			// runtime.gc(); //The garbage collection takes time and induce
+			// wrong measurement of duration
 			stats.updateMemory((int) (runtime.totalMemory() - runtime
 					.freeMemory()));
 
