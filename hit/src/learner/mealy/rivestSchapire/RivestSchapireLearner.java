@@ -25,12 +25,13 @@ public class RivestSchapireLearner extends Learner {
 	protected StateDriver finishedLearner;
 	protected Throwable threadThrown = null;
 	private Automata conjecture = null;
-	private RivestSchapireStatsEntry stats;
+	protected RivestSchapireStatsEntry stats;
 	protected Lock lock = new ReentrantLock();//When a learner is computing, it take the lock. When the lock is free, the main thread try to notify a stateDriver
-
+	protected int n=-1;
+	protected boolean hIsGiven=true;
+	
 	public RivestSchapireLearner(MealyDriver driver) {
 		this.driver = driver;
-		drivers = new HashMap<OutputSequence,StateDriver>();
 	}
 
 	@Override
@@ -44,26 +45,62 @@ public class RivestSchapireLearner extends Learner {
 
 	@Override
 	public void learn() {
-		driver.reset();
-		LogManager.logStep(LogManager.STEPOTHER, "Computing homing sequence");
-		try {
-			homingSequence = driver.getHomingSequence();
-		} catch (UnableToComputeException e) {
-			throw new RuntimeException(e);
-		}
-		LogManager.logStep(LogManager.STEPOTHER,"Inferring the system");
-		LogManager.logConsole("Inferring the system (global)");
-		stats = new RivestSchapireStatsEntry(driver, homingSequence);
-		//StateDriver first = home();
-		//first.unpause();
 		long start = System.nanoTime();
+		if (Options.RS_WITH_UNKNOWN_H) {
+			n = Options.STATE_NUMBER_BOUND;
+			System.out.println(n);
+			hIsGiven = false;
+			homingSequence = new InputSequence();
+		} else {
+			LogManager.logStep(LogManager.STEPOTHER,
+					"Computing homing sequence");
+			try {
+				homingSequence = driver.getHomingSequence();
+			} catch (UnableToComputeException e) {
+				throw new RuntimeException(e);
+			}
+			hIsGiven = true;
+		}
+		LogManager.logStep(LogManager.STEPOTHER, "Inferring the system");
+		LogManager.logConsole("Inferring the system (global)");
+		stats = new RivestSchapireStatsEntry(driver, hIsGiven);
+
+		boolean hIsCorrect = hIsGiven;
+		do {
+			hIsCorrect = true;
+			try {
+				learn(homingSequence);
+			} catch (KnownTracesTree.InconsistencyException e) {
+				hIsCorrect = false;
+				homingSequence.addInputSequence(e.seen.getInputsProjection());
+			} catch (Throwable e) {
+				throw new RuntimeException(e);
+			}
+		} while (!hIsCorrect);
+		stats.setDuration(((float) (System.nanoTime() - start)) / 1000000000);
+		stats.setTraceLength(driver.numberOfAtomicRequest);
+		stats.setLearnerNumber(drivers.size());
+		if (Options.LOG_LEVEL == LogLevel.ALL)
+			createConjecture().exportToDot();
+		stats.updateWithConjecture(createConjecture());
+		stats.updateWithHomingSequence(homingSequence);
+	}
+
+	protected void learn(InputSequence homingSequence) throws Throwable {
+		if (Options.LOG_LEVEL != LogLevel.LOW)
+			LogManager.logConsole("lerning with homming sequence "
+					+ homingSequence);
+		LogManager.logInfo("learning with homing sequence h=" + homingSequence);
+		drivers = new HashMap<OutputSequence, StateDriver>();
 		resetCall();
 		while (finishedLearner == null){
 			if (threadThrown != null){
 				LogManager.setPrefix("");
 				for (StateDriver s : drivers.values())
 					s.killThread();
-				throw new RuntimeException(threadThrown);
+				Throwable e = threadThrown;
+				threadThrown = null;
+				throw e;
 			}
 			lock.lock();//if we can lock that mean that no thread is computing. So we try to notify the one which is waiting.
 			for (StateDriver s : drivers.values())
@@ -78,12 +115,6 @@ public class RivestSchapireLearner extends Learner {
 		LogManager.logStep(LogManager.STEPOTHER,"killing threads");
 		for (StateDriver s : drivers.values())
 			s.killThread();
-		stats.setDuration(((float)(System.nanoTime() - start))/ 1000000000);
-		stats.setTraceLength(driver.numberOfAtomicRequest);
-		stats.setLearnerNumber(drivers.size());
-		if (Options.LOG_LEVEL == LogLevel.ALL)
-			createConjecture().exportToDot();
-		stats.updateWithConjecture(createConjecture());
 	}
 	
 	protected StateDriver home(){

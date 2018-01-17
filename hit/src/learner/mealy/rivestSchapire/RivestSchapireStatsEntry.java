@@ -27,6 +27,9 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 	public static final Attribute<String> AUTOMATA = Attribute.AUTOMATA;
 	public static final Attribute<Float> DURATION = Attribute.DURATION;
 	public static final Attribute<Integer>MEMORY = Attribute.MEMORY;
+	public static final Attribute<Boolean> H_IS_GIVEN = Attribute.RS_WITH_GIVEN_H;
+	public static final Attribute<Integer> FAILED_PROBABILISTIC_SEARCH = Attribute.FAILED_PROBALISTIC_SEARCH;
+	public static final Attribute<Integer> SUCCEEDED_PROBALISTIC_SEARCH = Attribute.SUCCEEDED_PROBALISTIC_SEARCH;
 
 	private static Attribute<?>[] attributes = new Attribute<?>[]{
 		RESET_CALL_NB,
@@ -40,6 +43,9 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 		AUTOMATA,
 		DURATION,
 		MEMORY,
+		H_IS_GIVEN,
+		FAILED_PROBABILISTIC_SEARCH,
+		SUCCEEDED_PROBALISTIC_SEARCH,
 	};
 
 	public static String getCSVHeader_s(){
@@ -69,6 +75,9 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 	private String automata;
 	private float duration;
 	private int memory = 0;
+	private boolean hIsGiven = false;
+	private int failedProbalisticSearch = 0;
+	private int succeededProbabilisticSearch = 0;
 
 	/**
 	 * rebuild a NoResetStats object from a CSV line
@@ -87,11 +96,13 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 		automata = st.nextToken();
 		duration = Float.parseFloat(st.nextToken());
 		memory = Integer.parseUnsignedInt(st.nextToken());
-		resetCallNb = 0;
+		hIsGiven = Boolean.parseBoolean(st.nextToken());
+		failedProbalisticSearch = Integer.parseUnsignedInt(st.nextToken());
+		succeededProbabilisticSearch = Integer.parseUnsignedInt(st.nextToken());
 	}
 
-	public RivestSchapireStatsEntry(MealyDriver d,InputSequence h){
-		hommingSequenceLength = h.getLength();
+	public RivestSchapireStatsEntry(MealyDriver d, boolean hIsGiven) {
+		this.hIsGiven = hIsGiven;
 		this.inputSymbols = d.getInputSymbols().size();
 		this.outputSymbols = d.getOutputSymbols().size();
 		this.automata = d.getSystemName();
@@ -104,6 +115,10 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 
 	protected void setTraceLength(int traceLength) {
 		this.traceLength = traceLength;
+	}
+
+	protected void updateWithHomingSequence(InputSequence h) {
+		hommingSequenceLength = h.getLength();
 	}
 
 	protected void setLearnerNumber(int LearnerNumber) {
@@ -145,6 +160,12 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 			return (T) new Float(duration);
 		if (a == MEMORY)
 			return (T) new Integer(memory);
+		if (a == H_IS_GIVEN)
+			return (T) new Boolean(hIsGiven);
+		if (a == FAILED_PROBABILISTIC_SEARCH)
+			return (T) new Integer(failedProbalisticSearch);
+		if (a == SUCCEEDED_PROBALISTIC_SEARCH)
+			return (T) new Integer(succeededProbabilisticSearch);
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 
 	}
@@ -158,6 +179,8 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 				a == OUTPUT_SYMBOLS ||
 				a == STATE_NUMBER ||
 				a == LOOP_RATIO ||
+				a == FAILED_PROBABILISTIC_SEARCH ||
+				a == SUCCEEDED_PROBALISTIC_SEARCH ||
 				a == MEMORY)
 			return ((Integer) get(a)).floatValue();
 		if (a == DURATION)
@@ -282,6 +305,12 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 	public void updateMemory(int currentMemory) {
 		if (currentMemory > memory)
 			memory = currentMemory;
+	}
+	public void increaseFailedProbabilisticSearch(){
+		failedProbalisticSearch++;
+	}
+	public void increaseSucceededProbabilisticSearch(){
+		succeededProbabilisticSearch++;
 	}
 
 }

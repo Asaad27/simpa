@@ -10,6 +10,7 @@ import java.util.Map;
 
 import learner.Learner;
 import learner.mealy.LmConjecture;
+import learner.mealy.LmTrace;
 import learner.mealy.Node;
 import main.simpa.Options;
 import tools.loggers.LogManager;
@@ -175,7 +176,11 @@ public class ZLearner extends Learner {
 
 		// 4. while there exists an unprocessed counterexample CE
 		do {
-			ce = driver.getCounterExample(Z_Q);
+			LmTrace ceTrace = driver.getCounterExample(Z_Q);
+			if (ceTrace != null)
+				ce = ceTrace.getInputsProjection();
+			else
+				ce = null;
 			if (ce != null) {
 				LogManager.logInfo("Adding the counter example to tree");
 

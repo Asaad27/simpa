@@ -23,7 +23,9 @@ public class Attribute <T extends Comparable<T>> {
 	public final static Attribute<Integer>HOMING_SEQUENCE_LENGTH =	new Attribute<Integer>(	"length of homing sequence",		Units.SYMBOLS,	false,	true,	false);
 	public final static Attribute<Integer>LEARNER_NUMBER =			new Attribute<Integer>(	"number of sub-learner",			Units.LEARNER,	false,	true,	false);
 	public final static Attribute<Boolean>WITH_SPEEDUP =			new Attribute<Boolean>(	"inference with speed up",			Units.BOOLEAN,	false,	true,	false);
-	
+	public final static Attribute<Boolean>RS_WITH_GIVEN_H =			new Attribute<Boolean>(	"homing sequence is known",			Units.BOOLEAN,	false,	true,	false);
+	public final static Attribute<Integer>FAILED_PROBALISTIC_SEARCH=new Attribute<Integer>(	"number of failed probalistic search",Units.FUNCTION_CALL,false,	false,	false);
+	public final static Attribute<Integer>SUCCEEDED_PROBALISTIC_SEARCH=new Attribute<Integer>(	"number of succeeded probalistic search",Units.FUNCTION_CALL,false,	false,	false);
 	
 	
 	private String name;

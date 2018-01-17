@@ -430,7 +430,11 @@ public class SIMPA {
 			"Don't use speedUp (deduction from trace based on state incompatibilities)\nthis is usefull if you don't know the real state number but only the bound.");
 	private static Option<?>[] noResetOptions = new Option<?>[] { STATE_NUMBER_BOUND, CHARACTERIZATION_SET,
 			WITHOUT_SPEEDUP, SPLITTING_TREE };
-
+	
+	private static BooleanOption RS_WITH_UNKNOWN_H = new BooleanOption(
+			"--RS-probabilistic",
+			"do not compute a homming sequence to give to RS algorithme. h will be computed by RS itself.");
+	private static Option<?>[] RSOptions = new Option<?>[] {RS_WITH_UNKNOWN_H};
 	// EFSM options
 	private static BooleanOption GENERIC_DRIVER = new BooleanOption("--generic", "Use generic driver");
 	private static BooleanOption SCAN = new BooleanOption("--scan", "Use scan driver");
@@ -532,6 +536,9 @@ public class SIMPA {
 		if (NORESET_INFERENCE.getValue()) {
 			parse(args, used, noResetOptions);
 		}
+		if (RIVETSCHAPIRE_INFERENCE.getValue()) {
+			parse(args, used, RSOptions);
+		}
 
 		parse(args, used, EFSMOptions);
 		parse(args, used, randomAutomataOptions);
@@ -575,8 +582,14 @@ public class SIMPA {
 		Options.RIVESTSCHAPIREINFERENCE = RIVETSCHAPIRE_INFERENCE.getValue();
 
 		Options.STOP_ON_CE_SEARCH = STOP_AT_CE_SEARCH.getValue();
-		Options.MAX_CE_LENGTH = MAX_CE_LENGTH.getValue();
-		Options.MAX_CE_RESETS = MAX_CE_RESETS.getValue();
+		if (!RIVETSCHAPIRE_INFERENCE.getValue()) {
+			Options.MAX_CE_RESETS = MAX_CE_RESETS.getValue();
+			Options.MAX_CE_LENGTH = MAX_CE_LENGTH.getValue();
+		} else {
+			Options.MAX_CE_RESETS = 1;
+			Options.MAX_CE_LENGTH = MAX_CE_LENGTH.getValue()
+					* MAX_CE_RESETS.getValue();
+		}
 		Options.INITIAL_INPUT_SYMBOLS = INITIAL_INPUT_SYMBOLS.getValue();
 		Options.INITIAL_INPUT_SEQUENCES = INITIAL_INPUT_SEQUENCES.getValue();
 		Options.INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = INITIAL_INPUT_SYMBOLS_EQUALS_TO_X.getValue();
@@ -586,6 +599,8 @@ public class SIMPA {
 		Options.SPLITTING_TREE = SPLITTING_TREE.getValue();
 
 		Options.ICTSS2015_WITHOUT_SPEEDUP = WITHOUT_SPEEDUP.getValue();
+		
+		Options.RS_WITH_UNKNOWN_H = RS_WITH_UNKNOWN_H.getValue();
 
 		Options.GENERICDRIVER = GENERIC_DRIVER.getValue();
 		Options.REUSE_OP_IFNEEDED = REUSE_OP_IFNEEDED.getValue();
@@ -816,7 +831,8 @@ public class SIMPA {
 		driver = loadDriver(Options.SYSTEM);
 		if (driver == null)
 			System.exit(1);
-		if (Options.NORESETINFERENCE) {
+		if (Options.NORESETINFERENCE
+				|| (Options.RIVESTSCHAPIREINFERENCE && Options.RS_WITH_UNKNOWN_H)) {
 			if (STATE_NUMBER_BOUND.getValue() > 0)
 				Options.STATE_NUMBER_BOUND = STATE_NUMBER_BOUND.getValue();
 			else {
@@ -1121,6 +1137,9 @@ public class SIMPA {
 
 		System.out.println("> Algorithm noReset (ICTSS2015)");
 		printUsage(noResetOptions);
+		
+		System.out.println("> Algorithm Rivest&Schapire");
+		printUsage(RSOptions);
 
 		System.out.println("> Algorithm EFSM");
 		printUsage(EFSMOptions);

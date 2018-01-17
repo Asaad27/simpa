@@ -18,7 +18,7 @@ class StateDriver extends MealyDriver {
 	private MealyDriver realDriver;
 	protected OutputSequence homingSequenceResponse;
 	private Learner stateLearner;
-	private RivestSchapireLearner learner;
+	protected RivestSchapireLearner learner;
 	protected Thread thread;
 	private boolean resetDone;
 	protected boolean paused;
@@ -34,13 +34,16 @@ class StateDriver extends MealyDriver {
 		prefixBuilder.append("[");
 		for (String o : homingSequenceResponse.sequence)
 			prefixBuilder.append(o+"\t");
+		if (homingSequenceResponse.getLength()==0)
+			prefixBuilder.append("empty ");
 		prefixBuilder.setCharAt(prefixBuilder.length()-1, ']');
 		prefixBuilder.append("  \t");
 		prefix = prefixBuilder.toString();
 		this.realDriver = realDriver;
 		this.learner = learner;
 		resetDone = true;
-		stateLearner = new LmLearner(this);
+		stateLearner = (learner.hIsGiven) ? new LmLearner(this)
+				: new LmForRSLearner(this);
 		paused = true;
 		class R implements Runnable{
 			private Learner learner;
@@ -58,6 +61,8 @@ class StateDriver extends MealyDriver {
 					LogManager.logInfo(d.homingSequenceResponse + " learner has finish");
 				}catch(ThreadEndException e){
 					LogManager.logInfo(d.homingSequenceResponse + " interrupted");
+				} catch (KnownTracesTree.InconsistencyException e) {
+					d.learner.threadThrown = e;
 				}catch(Throwable e){
 					LogManager.logInfo("Exception caught in thread " + homingSequenceResponse);
 					LogManager.logException("in thread "+homingSequenceResponse, new Exception(e));
@@ -117,6 +122,7 @@ class StateDriver extends MealyDriver {
 		learner.lock.lock();//we take the hand so main thread will stop notifying
 		if (learner.finishedLearner != null || learner.threadThrown != null)
 			throw new ThreadEndException();
+		resetDone = true;
 		return;
 	}
 
@@ -151,5 +157,9 @@ class StateDriver extends MealyDriver {
 
 	public String getPrefix() {
 		return prefix;
+	}
+
+	public boolean isAfterReset() {
+		return resetDone;
 	}
 }

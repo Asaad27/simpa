@@ -6,6 +6,7 @@ import java.util.List;
 
 import learner.Learner;
 import learner.mealy.LmConjecture;
+import learner.mealy.LmTrace;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
 import tools.loggers.LogManager;
@@ -18,7 +19,7 @@ import drivers.mealy.MealyDriver;
 
 public class LmLearner extends Learner {
 	private MealyDriver driver;
-	private LmControlTable cTable;
+	protected LmControlTable cTable;
 
 	public LmLearner(Driver driver) {
 		this.driver = (MealyDriver) driver;
@@ -32,21 +33,34 @@ public class LmLearner extends Learner {
 			fillTablesForRow(cTable.getRowInR(i));
 	}
 
+	protected void resetDriver() {
+		driver.reset();
+	}
+
+	protected OutputSequence applyOnDriver(InputSequence inSeq) {
+		return driver.execute(inSeq);
+	}
+
+	/**
+	 * this is overriden for Rivest&Schapire learner to detect inconsistencies
+	 * on h
+	 * 
+	 * @param trace
+	 *            the trace applied on driver
+	 */
+	protected void handleNewCounterExample(LmTrace trace) {
+	}
+
 	private void fillTablesForRow(LmControlTableRow ctr) {
 		InputSequence querie = null;
 		for (int i = 0; i < ctr.getColumnCount(); i++) {
 			if (ctr.getColumn(i).getOutputSymbol() == null) {
-				driver.reset();
+				resetDriver();
 				querie = ctr.getIS();
 				querie.addInputSequence(ctr.getInputSequence(i));
 				InputSequence is = new InputSequence();
-				OutputSequence os = new OutputSequence();
-				for (int j = 0; j < querie.sequence.size(); j++) {
-					String pi = new String(querie.sequence.get(j));
-					is.addInput(pi);
-					String po = driver.execute(pi);
-					os.addOutput(po);
-				}
+				is.addInputSequence(querie);
+				OutputSequence os = applyOnDriver(is);
 				LmControlTableItem cti = new LmControlTableItem(os
 						.getIthSuffix(ctr.getColSuffixSize(i)).toString());
 				ctr.setAtColumn(i, cti);
@@ -155,9 +169,14 @@ public class LmLearner extends Learner {
 			stopLog();
 			LmConjecture conj = createConjecture();
 			startLog();
-			if (!driver.isCounterExample(ce, conj))
-				ce = driver.getCounterExample(conj);
-			else
+			if (!driver.isCounterExample(ce, conj)) {
+				LmTrace ceTrace = driver.getCounterExample(conj);
+				if (ceTrace != null) {
+					handleNewCounterExample(ceTrace);
+					ce = ceTrace.getInputsProjection();
+				} else
+					ce = null;
+			} else
 				LogManager.logInfo("Previous counter example : " + ce
 						+ " is still a counter example for the new conjecture");
 			if (ce != null) {

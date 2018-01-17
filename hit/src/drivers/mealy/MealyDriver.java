@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import learner.mealy.LmConjecture;
+import learner.mealy.LmTrace;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
 import tools.Utils;
@@ -126,12 +127,13 @@ public class MealyDriver extends Driver {
 		return name;
 	}
 
-	public InputSequence getCounterExample(Automata c) {
+	public LmTrace getCounterExample(Automata c) {
 		Mealy m = (Mealy) c;
 		LogManager.logInfo("Searching counter example");
-		InputSequence ce = null;
+		LmTrace ce = null;
 		if (forcedCE != null && !forcedCE.isEmpty()) {
-			ce = forcedCE.remove(0);
+			InputSequence inputCe = forcedCE.remove(0);
+			ce = new LmTrace(inputCe, execute(inputCe));
 			LogManager.logInfo("Counter example found (forced) : " + ce);
 		}
 		if (Options.STOP_ON_CE_SEARCH) {
@@ -142,9 +144,10 @@ public class MealyDriver extends Driver {
 		boolean shortestCEFailed = false;
 		if (ce == null) {
 			LogManager.logInfo("search theorical CE");
+			InputSequence inputCe = null;
 			try {
 				if (m.isConnex())
-					ce = getShortestCounterExemple(m);
+					inputCe = getShortestCounterExemple(m);
 				else
 					throw new UnableToComputeException("automata is not connex");
 			} catch (UnableToComputeException e) {
@@ -152,10 +155,9 @@ public class MealyDriver extends Driver {
 				shortestCEFailed = true;
 			}
 
-			if (ce != null) {
+			if (inputCe != null) {
 				reset();
-				for (String i : ce.sequence)
-					execute(i);
+				ce = new LmTrace(inputCe, execute(inputCe));
 			}
 		}
 
@@ -166,11 +168,13 @@ public class MealyDriver extends Driver {
 
 		if (ce == null)
 			LogManager.logInfo("No counter example found");
-		LogManager.logInfo("found ce : " + ce);
+		else
+			LogManager.logInfo("found ce : " + ce);
 		return ce;
 	}
 
-	public InputSequence getRandomCounterExemple(Mealy c) {
+	public LmTrace getRandomCounterExemple(Mealy c) {
+		LmTrace ceTrace=null;
 		boolean found = false;
 		InputSequence ce = null;
 
@@ -187,12 +191,14 @@ public class MealyDriver extends Driver {
 			triedCE.add(ce);
 			OutputSequence osSystem = new OutputSequence();
 			OutputSequence osConj = new OutputSequence();
+			ceTrace = new LmTrace();
 			reset();
 			conjDriver.reset();
 			if (ce.getLength() > 0) {
 				for (String input : ce.sequence) {
 					String _sys = execute(input);
 					String _conj = conjDriver.execute(input);
+					ceTrace.append(input, _sys);
 					if (_sys.length() > 0) {
 						osSystem.addOutput(_sys);
 						osConj.addOutput(_conj);
@@ -211,7 +217,7 @@ public class MealyDriver extends Driver {
 		}
 		startLog();
 		conjDriver.startLog();
-		return (found ? ce : null);
+		return (found ? ceTrace : null);
 	}
 
 	/**
