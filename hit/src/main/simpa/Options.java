@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.List;
 
 import automata.mealy.InputSequence;
-import learner.mealy.noReset.SplittingTree;
+import learner.mealy.localizerBased.SplittingTree;
 import tools.Utils;
 import tools.loggers.LogManager;
 
@@ -47,7 +47,7 @@ public class Options {
 	public static boolean SCAN = false;
 	public static boolean TREEINFERENCE = false;
 	public static boolean LMINFERENCE = false;
-	public static boolean NORESETINFERENCE = false;
+	public static boolean LOCALIZER_BASED_INFERENCE = false;
 	public static boolean COMBINATORIALINFERENCE = false;
 	public static boolean CUTTERCOMBINATORIALINFERENCE = false;
 	public static boolean RIVESTSCHAPIREINFERENCE = false;

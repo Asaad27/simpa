@@ -30,7 +30,7 @@ public class SIMPATestMealy {
 				else if (args[i].equals("--tree"))
 					Options.TREEINFERENCE = true;
 				else if (args[i].equals("--noReset"))
-					Options.NORESETINFERENCE = true;
+					Options.LOCALIZER_BASED_INFERENCE = true;
 				else if (args[i].equals("--minstates"))
 					Options.MINSTATES = Integer.parseInt(args[++i]);
 				else if (args[i].equals("--maxstates"))

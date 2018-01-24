@@ -1,4 +1,4 @@
-package learner.mealy.noReset;
+package learner.mealy.localizerBased;
 
 import java.util.HashMap;
 import java.util.Map;

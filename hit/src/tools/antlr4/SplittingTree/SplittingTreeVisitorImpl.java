@@ -2,7 +2,7 @@ package tools.antlr4.SplittingTree;
 
 import automata.mealy.InputSequence;
 import automata.mealy.OutputSequence;
-import learner.mealy.noReset.SplittingTree;
+import learner.mealy.localizerBased.SplittingTree;
 
 public class SplittingTreeVisitorImpl extends
 		SplittingTreeBaseVisitor<SplittingTree> {

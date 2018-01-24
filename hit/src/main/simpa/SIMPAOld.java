@@ -74,7 +74,7 @@ public class SIMPAOld {
 				else if (args[i].equals("--tree"))
 					Options.TREEINFERENCE = true;
 				else if (args[i].equals("--noReset"))
-					Options.NORESETINFERENCE = true;
+					Options.LOCALIZER_BASED_INFERENCE = true;
 				else if (args[i].equals("--combinatorial"))
 					Options.COMBINATORIALINFERENCE = true;
 				else if (args[i].equals("--rivestSchapire"))

@@ -1,4 +1,4 @@
-package learner.mealy.noReset.dataManager;
+package learner.mealy.localizerBased.dataManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.Collection;
 
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
-import learner.mealy.noReset.dataManager.vTree.StateNode;
+import learner.mealy.localizerBased.dataManager.vTree.StateNode;
 import main.simpa.Options;
 import automata.State;
 import automata.mealy.InputSequence;
@@ -110,7 +110,7 @@ public class FullyQualifiedState{
 	}
 	
 	/**
-	 * @see learner.mealy.noReset.dataManager.DataManeger.getxNotInR
+	 * @see learner.mealy.localizerBased.dataManager.DataManeger.getxNotInR
 	 * @return
 	 */
 	public Set<String> getUnknowTransitions(){
@@ -147,7 +147,7 @@ public class FullyQualifiedState{
 	}
 	
 	/**
-	 * @see learn.mealy.noReset.dataManager.DataManager.getwNotInK
+	 * @see learn.mealy.localizerBased.dataManager.DataManager.getwNotInK
 	 */
 	protected List<InputSequence> getwNotInK(LmTrace transition){
 		assert !V.containsKey(transition);

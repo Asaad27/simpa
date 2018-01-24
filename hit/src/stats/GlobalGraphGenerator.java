@@ -4,7 +4,7 @@ import java.io.File;
 
 import drivers.mealy.transparent.RandomMealyDriver;
 import learner.mealy.combinatorial.CutterCombinatorialStatsEntry;
-import learner.mealy.noReset.NoResetStatsEntry;
+import learner.mealy.localizerBased.LocalizerBasedStatsEntry;
 import learner.mealy.rivestSchapire.RivestSchapireStatsEntry;
 import main.simpa.Options;
 import stats.Graph.PlotStyle;
@@ -26,7 +26,7 @@ public class GlobalGraphGenerator extends GraphGenerator {
 		if (s.size() == 0)
 			return;
 		StatsEntry s1 = s.get(0);
-		if (s1 instanceof NoResetStatsEntry)
+		if (s1 instanceof LocalizerBasedStatsEntry)
 			noReset = s;
 		if (s1 instanceof RivestSchapireStatsEntry)
 			rivestSchapire = s;

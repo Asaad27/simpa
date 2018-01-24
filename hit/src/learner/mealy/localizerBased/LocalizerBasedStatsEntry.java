@@ -1,4 +1,4 @@
-package learner.mealy.noReset;
+package learner.mealy.localizerBased;
 
 import java.util.List;
 import java.util.StringTokenizer;
@@ -12,7 +12,7 @@ import stats.GraphGenerator;
 import stats.StatsEntry;
 import stats.attribute.Attribute;
 
-public class NoResetStatsEntry extends StatsEntry {
+public class LocalizerBasedStatsEntry extends StatsEntry {
 	public static final Attribute<Integer>W_SIZE = Attribute.W_SIZE;
 	public static final Attribute<Integer>W1_LENGTH = Attribute.W1_LENGTH;
 	public static final Attribute<Integer>LOCALIZER_CALL_NB = Attribute.LOCALIZER_CALL_NB;
@@ -82,10 +82,10 @@ public class NoResetStatsEntry extends StatsEntry {
 	private int minTraceLength = -1;
 	
 	/**
-	 * rebuild a NoResetStats object from a CSV line
+	 * rebuild a LocalizerBasedStats object from a CSV line
 	 * @param line the line to parse
 	 */
-	public NoResetStatsEntry(String line){
+	public LocalizerBasedStatsEntry(String line){
 		StringTokenizer st = new StringTokenizer(line, ",");
 		WSize = Integer.parseInt(st.nextToken());
 		w1Length = Integer.parseInt(st.nextToken());
@@ -104,7 +104,7 @@ public class NoResetStatsEntry extends StatsEntry {
 		minTraceLength = Integer.parseInt(st.nextToken());
 	}
 
-	public NoResetStatsEntry(List<InputSequence> W, MealyDriver d, int n){
+	public LocalizerBasedStatsEntry(List<InputSequence> W, MealyDriver d, int n){
 		WSize = W.size();
 		w1Length = W.get(0).getLength();
 		this.inputSymbols = d.getInputSymbols().size();
@@ -204,7 +204,7 @@ public class NoResetStatsEntry extends StatsEntry {
 	}
 	@Override
 	public GraphGenerator getDefaultsGraphGenerator() {
-		return new NoResetGraphGenerator();
+		return new LocalizerBasedGraphGenerator();
 	}
 
 	public void setDuration(float duration) {

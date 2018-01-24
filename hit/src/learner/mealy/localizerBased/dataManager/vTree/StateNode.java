@@ -1,12 +1,12 @@
-package learner.mealy.noReset.dataManager.vTree;
+package learner.mealy.localizerBased.dataManager.vTree;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import learner.mealy.noReset.dataManager.DataManager;
-import learner.mealy.noReset.dataManager.FullyKnownTrace;
-import learner.mealy.noReset.dataManager.FullyQualifiedState;
+import learner.mealy.localizerBased.dataManager.DataManager;
+import learner.mealy.localizerBased.dataManager.FullyKnownTrace;
+import learner.mealy.localizerBased.dataManager.FullyQualifiedState;
 
 public class StateNode extends AbstractNode {
 	private FullyQualifiedState state;

@@ -1,4 +1,4 @@
-package learner.mealy.noReset.dataManager;
+package learner.mealy.localizerBased.dataManager;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -24,8 +24,8 @@ import drivers.mealy.MealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
-import learner.mealy.noReset.dataManager.vTree.AbstractNode;
-import learner.mealy.noReset.dataManager.vTree.StateNode;
+import learner.mealy.localizerBased.dataManager.vTree.AbstractNode;
+import learner.mealy.localizerBased.dataManager.vTree.StateNode;
 import main.simpa.Options;
 import tools.GraphViz;
 import tools.loggers.LogManager;

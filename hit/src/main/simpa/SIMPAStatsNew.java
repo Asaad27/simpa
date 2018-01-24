@@ -9,7 +9,7 @@ import java.util.Date;
 
 import drivers.Driver;
 import learner.Learner;
-import learner.mealy.noReset.NoResetLearner;
+import learner.mealy.localizerBased.LocalizerBasedLearner;
 import main.simpa.Options.LogLevel;
 import stats.GraphGenerator;
 import stats.StatsEntry;
@@ -39,7 +39,7 @@ public class SIMPAStatsNew {
 				else if (args[i].equals("--combinatorial"))
 					Options.COMBINATORIALINFERENCE = true;
 				else if (args[i].equals("--noReset"))
-					Options.NORESETINFERENCE = true;
+					Options.LOCALIZER_BASED_INFERENCE = true;
 				else if (args[i].equals("--minstates"))
 					Options.MINSTATES = Integer.parseInt(args[++i]);
 				else if (args[i].equals("--maxstates"))
@@ -135,7 +135,7 @@ public class SIMPAStatsNew {
 
 				driver = SIMPA.loadDriver(Options.SYSTEM);
 				Learner gl = Learner.getLearnerFor(driver);
-				assert gl instanceof NoResetLearner;
+				assert gl instanceof LocalizerBasedLearner;
 				//NoResetLearner l = (NoResetLearner) gl;
 				Learner l = gl;
 				l.learn();

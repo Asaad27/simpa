@@ -1,4 +1,4 @@
-package learner.mealy.noReset;
+package learner.mealy.localizerBased;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -18,22 +18,22 @@ import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
-import learner.mealy.noReset.dataManager.DataManager;
-import learner.mealy.noReset.dataManager.FullyQualifiedState;
+import learner.mealy.localizerBased.dataManager.DataManager;
+import learner.mealy.localizerBased.dataManager.FullyQualifiedState;
 import main.simpa.Options;
 import tools.AdenilsoSimaoTool;
 import tools.Utils;
 
 import tools.loggers.LogManager;
 
-public class NoResetLearner extends Learner {
+public class LocalizerBasedLearner extends Learner {
 	private MealyDriver driver;
 	private DataManager dataManager;
-	private NoResetStatsEntry stats;
+	private LocalizerBasedStatsEntry stats;
 	protected ArrayList<InputSequence> W;
 	private int n;// the maximum number of states
 
-	public NoResetLearner(MealyDriver d) {
+	public LocalizerBasedLearner(MealyDriver d) {
 		driver = d;
 	}
 
@@ -59,7 +59,7 @@ public class NoResetLearner extends Learner {
 				+ Options.STATE_NUMBER_BOUND);
 
 		n = Options.STATE_NUMBER_BOUND;
-		stats = new NoResetStatsEntry(W, driver, n);
+		stats = new LocalizerBasedStatsEntry(W, driver, n);
 
 		this.W = new ArrayList<InputSequence>(W);
 		StringBuilder logW = new StringBuilder("Using characterization set : [");
@@ -208,7 +208,7 @@ public class NoResetLearner extends Learner {
 		return c;
 	}
 
-	public NoResetStatsEntry getStats() {
+	public LocalizerBasedStatsEntry getStats() {
 		return stats;
 	}
 
@@ -309,7 +309,7 @@ public class NoResetLearner extends Learner {
 	private boolean checkRandomWalk() {
 		LogManager.logStep(LogManager.STEPOTHER,
 				"checking the computed conjecture with Random Walk");
-		NoResetMealyDriver generatedDriver = new NoResetMealyDriver(
+		LocalizerBasedMealyDriver generatedDriver = new LocalizerBasedMealyDriver(
 				dataManager.getConjecture());
 		generatedDriver.stopLog();
 		generatedDriver.setCurrentState(dataManager.getC(

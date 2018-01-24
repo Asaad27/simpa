@@ -6,7 +6,7 @@ import learner.mealy.table.LmLearner;
 import learner.mealy.tree.ZLearner;
 import learner.mealy.combinatorial.CombinatorialLearner;
 import learner.mealy.combinatorial.CutterCombinatorialLearner;
-import learner.mealy.noReset.NoResetLearner;
+import learner.mealy.localizerBased.LocalizerBasedLearner;
 import main.simpa.Options;
 import stats.StatsEntry;
 import stats.attribute.Attribute;
@@ -62,8 +62,8 @@ public abstract class Learner {
 					return new CutterCombinatorialLearner((MealyDriver)driver);
 			else if (Options.RIVESTSCHAPIREINFERENCE)
 				return new RivestSchapireLearner((MealyDriver)driver);
-			else if (Options.NORESETINFERENCE)
-				return new NoResetLearner((MealyDriver)driver);
+			else if (Options.LOCALIZER_BASED_INFERENCE)
+				return new LocalizerBasedLearner((MealyDriver)driver);
 			else if (Options.LMINFERENCE)
 				return new LmLearner(driver);
 		default:

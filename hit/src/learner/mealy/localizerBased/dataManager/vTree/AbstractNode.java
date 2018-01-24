@@ -1,4 +1,4 @@
-package learner.mealy.noReset.dataManager.vTree;
+package learner.mealy.localizerBased.dataManager.vTree;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -14,7 +14,7 @@ import java.util.Set;
 
 import automata.mealy.InputSequence;
 import automata.mealy.OutputSequence;
-import learner.mealy.noReset.dataManager.DataManager;
+import learner.mealy.localizerBased.dataManager.DataManager;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
 import tools.loggers.LogManager;

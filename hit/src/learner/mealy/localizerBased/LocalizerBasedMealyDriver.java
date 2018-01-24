@@ -1,13 +1,13 @@
-package learner.mealy.noReset;
+package learner.mealy.localizerBased;
 
 import automata.State;
 import automata.mealy.Mealy;
 import drivers.mealy.MealyDriver;
 import tools.loggers.LogManager;
 
-public class NoResetMealyDriver extends MealyDriver {
+public class LocalizerBasedMealyDriver extends MealyDriver {
 
-	public NoResetMealyDriver(Mealy automata) {
+	public LocalizerBasedMealyDriver(Mealy automata) {
 		super(automata);
 	}
 

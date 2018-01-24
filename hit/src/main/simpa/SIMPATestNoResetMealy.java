@@ -12,8 +12,8 @@ import java.util.List;
 import drivers.Driver;
 import drivers.mealy.transparent.RandomAndCounterMealyDriver;
 import learner.Learner;
-import learner.mealy.noReset.NoResetLearner;
-import learner.mealy.noReset.NoResetStats;
+import learner.mealy.localizerBased.LocalizerBasedLearner;
+import learner.mealy.localizerBased.LocalizerBasedStats;
 import main.simpa.Options.LogLevel;
 import tools.GraphViz;
 import tools.Utils;
@@ -37,7 +37,7 @@ public class SIMPATestNoResetMealy {
 				else if (args[i].equals("--tree"))
 					Options.TREEINFERENCE = true;
 				else if (args[i].equals("--noReset"))
-					Options.NORESETINFERENCE = true;
+					Options.LOCALIZER_BASED_INFERENCE = true;
 				else if (args[i].equals("--minstates"))
 					Options.MINSTATES = Integer.parseInt(args[++i]);
 				else if (args[i].equals("--maxstates"))
@@ -97,14 +97,14 @@ public class SIMPATestNoResetMealy {
 		try {
 			check();
 			String dir = Options.OUTDIR;
-			List<NoResetStats> noResetStats = new ArrayList<NoResetStats>();
+			List<LocalizerBasedStats> noResetStats = new ArrayList<LocalizerBasedStats>();
 			File globalStats = new File(Options.OUTDIR +"../globalstats.csv");
 
 			Writer globalStatsWriter;
 			if (!globalStats.exists()){
 				globalStats.createNewFile();
 				globalStatsWriter = new BufferedWriter(new FileWriter(globalStats));
-				globalStatsWriter.append(NoResetStats.CSVHeader() + "\n");
+				globalStatsWriter.append(LocalizerBasedStats.CSVHeader() + "\n");
 			}else{
 				globalStatsWriter = new BufferedWriter(new FileWriter(globalStats,true));
 			}
@@ -131,8 +131,8 @@ public class SIMPATestNoResetMealy {
 
 						driver = new RandomAndCounterMealyDriver();
 						Learner gl = Learner.getLearnerFor(driver);
-						assert gl instanceof NoResetLearner;
-						NoResetLearner l = (NoResetLearner) gl;
+						assert gl instanceof LocalizerBasedLearner;
+						LocalizerBasedLearner l = (LocalizerBasedLearner) gl;
 						l.learn();
 						driver.logStats();
 
@@ -145,13 +145,13 @@ public class SIMPATestNoResetMealy {
 					}
 				}
 				globalStatsWriter.close();
-				System.out.print(NoResetStats.makeTextStats(noResetStats));
+				System.out.print(LocalizerBasedStats.makeTextStats(noResetStats));
 				Options.OUTDIR = dir;
-				NoResetStats.makeGraph(noResetStats);
+				LocalizerBasedStats.makeGraph(noResetStats);
 			}
 			Options.OUTDIR = dir + "../out/global_stats/";
 			Utils.cleanDir(new File(Options.OUTDIR));
-			NoResetStats.makeGraph(NoResetStats.setFromCSV(globalStats.getAbsolutePath()));
+			LocalizerBasedStats.makeGraph(LocalizerBasedStats.setFromCSV(globalStats.getAbsolutePath()));
 			//if (!Options.STAT)
 				System.out.println("[+] End");
 		} catch (Exception e) {

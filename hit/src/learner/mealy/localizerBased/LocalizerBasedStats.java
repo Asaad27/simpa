@@ -1,4 +1,4 @@
-package learner.mealy.noReset;
+package learner.mealy.localizerBased;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -22,7 +22,7 @@ import main.simpa.Options;
 import tools.GNUPlot;
 import tools.loggers.LogManager;
 
-public class NoResetStats {
+public class LocalizerBasedStats {
 	enum Atribute {
 		W_SIZE("Size of W",							"sequences",false,	true,	"W",	false),
 		W1_LENGTH("Length of first W element",		"symbols",	false,	true,	"w1",	false),
@@ -78,7 +78,7 @@ public class NoResetStats {
 	private int loopTransitionPercentage;
 	
 	
-	public NoResetStats(List<InputSequence> W, int inputSymbols, int outputSymbols, int n){
+	public LocalizerBasedStats(List<InputSequence> W, int inputSymbols, int outputSymbols, int n){
 		WSize = W.size();
 		w1Length = W.get(0).getLength();
 		this.inputSymbols = inputSymbols;
@@ -86,7 +86,7 @@ public class NoResetStats {
 		this.n = n;
 	}
 	
-	private NoResetStats(){
+	private LocalizerBasedStats(){
 	}
 
 	protected void setLocalizeSequenceLength(int length){
@@ -172,11 +172,11 @@ public class NoResetStats {
 	}
 	
 	/**
-	 * rebuild a NoResetStats object from a CSV line
+	 * rebuild a LocalizerBasedStats object from a CSV line
 	 * @param line the line to parse
 	 */
-	public static NoResetStats entrieFromCSV(String line){
-		NoResetStats stats = new NoResetStats();
+	public static LocalizerBasedStats entrieFromCSV(String line){
+		LocalizerBasedStats stats = new LocalizerBasedStats();
 		StringTokenizer st = new StringTokenizer(line, ",");
 		stats.WSize = Integer.parseInt(st.nextToken());
 		stats.w1Length = Integer.parseInt(st.nextToken());
@@ -192,11 +192,11 @@ public class NoResetStats {
 	}
 
 	/**
-	 * build a list of NoResetStats from a CSV file
+	 * build a list of localizerBasedStats from a CSV file
 	 * @param filename the name of the file to parse
 	 */
-	public static List<NoResetStats> setFromCSV(String filename){
-		List<NoResetStats> r = new ArrayList<NoResetStats>();
+	public static List<LocalizerBasedStats> setFromCSV(String filename){
+		List<LocalizerBasedStats> r = new ArrayList<LocalizerBasedStats>();
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(filename));
 			String strLine;
@@ -216,12 +216,12 @@ public class NoResetStats {
 		}
 	}
 
-	private static Map<Integer,List<NoResetStats>> sortByAtribute(List<NoResetStats> allStats, Atribute a){
-		Map<Integer,List<NoResetStats>> sorted = new HashMap<Integer,List<NoResetStats>>();
-		for (NoResetStats s : allStats){
-			List<NoResetStats> Entry = sorted.get(s.getAtribute(a));
+	private static Map<Integer,List<LocalizerBasedStats>> sortByAtribute(List<LocalizerBasedStats> allStats, Atribute a){
+		Map<Integer,List<LocalizerBasedStats>> sorted = new HashMap<Integer,List<LocalizerBasedStats>>();
+		for (LocalizerBasedStats s : allStats){
+			List<LocalizerBasedStats> Entry = sorted.get(s.getAtribute(a));
 			if (Entry == null){
-				Entry = new ArrayList<NoResetStats>();
+				Entry = new ArrayList<LocalizerBasedStats>();
 				sorted.put(s.getAtribute(a), Entry);
 			}
 			Entry.add(s);
@@ -229,52 +229,52 @@ public class NoResetStats {
 		return sorted;
 	}
 	
-	private static List<NoResetStats> selectFromRange(List<NoResetStats> allStats, Atribute a, int min, int max){
-		List<NoResetStats> kept = new ArrayList<NoResetStats>();
-		for (NoResetStats s : allStats){
+	private static List<LocalizerBasedStats> selectFromRange(List<LocalizerBasedStats> allStats, Atribute a, int min, int max){
+		List<LocalizerBasedStats> kept = new ArrayList<LocalizerBasedStats>();
+		for (LocalizerBasedStats s : allStats){
 			if (s.getAtribute(a) <= max && s.getAtribute(a) >= min)
 				kept.add(s);
 		}
 		return kept;
 	}
 
-	private static List<NoResetStats> selectFromValues(List<NoResetStats> allStats, Atribute a, List<Integer> values){
-		List<NoResetStats> kept = new ArrayList<NoResetStats>();
-		for (NoResetStats s : allStats){
+	private static List<LocalizerBasedStats> selectFromValues(List<LocalizerBasedStats> allStats, Atribute a, List<Integer> values){
+		List<LocalizerBasedStats> kept = new ArrayList<LocalizerBasedStats>();
+		for (LocalizerBasedStats s : allStats){
 			if (values.contains(s.getAtribute(a)))
 				kept.add(s);
 		}
 		return kept;
 	}
 	
-	private static List<NoResetStats> selectFromValues(List<NoResetStats> allStats, Atribute a, Integer[] values){
+	private static List<LocalizerBasedStats> selectFromValues(List<LocalizerBasedStats> allStats, Atribute a, Integer[] values){
 		return selectFromValues(allStats, a, Arrays.asList(values));
 	}
 
-	private static float AtributeAvg(List<NoResetStats> allStats, Atribute a){
+	private static float AtributeAvg(List<LocalizerBasedStats> allStats, Atribute a){
 		int sum = 0;
-		for (NoResetStats s : allStats)
+		for (LocalizerBasedStats s : allStats)
 			sum += s.getAtribute(a);
 		return (float) sum / allStats.size();
 	}
 
-	private static Integer AtributeMin(List<NoResetStats> allStats, Atribute a) {
+	private static Integer AtributeMin(List<LocalizerBasedStats> allStats, Atribute a) {
 		int min = allStats.get(0).getAtribute(a);
-		for (NoResetStats s : allStats)
+		for (LocalizerBasedStats s : allStats)
 			if (min > s.getAtribute(a))
 				min = s.getAtribute(a);
 		return min;
 	}
 
-	private static Integer AtributeMax(List<NoResetStats> allStats, Atribute a) {
+	private static Integer AtributeMax(List<LocalizerBasedStats> allStats, Atribute a) {
 		int max = allStats.get(0).getAtribute(a);
-		for (NoResetStats s : allStats)
+		for (LocalizerBasedStats s : allStats)
 			if (max < s.getAtribute(a))
 				max = s.getAtribute(a);
 		return max;
 	}
 	
-	private static Integer AtributeMedian(List<NoResetStats> allStats, Atribute a){
+	private static Integer AtributeMedian(List<LocalizerBasedStats> allStats, Atribute a){
 		Integer[] values = new Integer[allStats.size()];
 		for (int i = 0; i < allStats.size(); i++){
 			values[i] = allStats.get(i).getAtribute(a);
@@ -283,12 +283,12 @@ public class NoResetStats {
 		return values[allStats.size()/2];
 	}
 
-	public static String makeTextStats(List<NoResetStats> statsCol) {
-		Map<Integer, List<NoResetStats>> sorted = sortByAtribute(statsCol, Atribute.W_SIZE);
+	public static String makeTextStats(List<LocalizerBasedStats> statsCol) {
+		Map<Integer, List<LocalizerBasedStats>> sorted = sortByAtribute(statsCol, Atribute.W_SIZE);
 
 		StringBuilder r = new StringBuilder();
 		for (Integer WSize : sorted.keySet()){
-			List<NoResetStats> entry = sorted.get(WSize);
+			List<LocalizerBasedStats> entry = sorted.get(WSize);
 			r.append("for W sets of size " + WSize + " (" + entry.size() + " inference(s)) :\n");
 			r.append("\tcalls to localizer :\t" + AtributeAvg(entry, Atribute.LOCALIZER_CALL_NB) + " calls\n");
 			r.append("\tlength of localizer :\t" + AtributeAvg(entry, Atribute.LOCALIZER_SEQUENCE_LENGTH) + " symbols\n");
@@ -330,7 +330,7 @@ public class NoResetStats {
 		}
 	}
 	
-	private static File makeDataFile(List<NoResetStats> allStats, Atribute ord, Atribute abs, PlotStyle style){
+	private static File makeDataFile(List<LocalizerBasedStats> allStats, Atribute ord, Atribute abs, PlotStyle style){
 		File tempPlot;
 		PrintWriter tempWriter;
 		try {
@@ -343,12 +343,12 @@ public class NoResetStats {
 		}
 		switch (style) {
 		case POINTS:
-			for (NoResetStats s : allStats){
+			for (LocalizerBasedStats s : allStats){
 				tempWriter.write(s.getAtribute(abs) + " " + s.getAtribute(ord) + "\n");	
 			}
 			break;
 		case AVERAGE:{
-			Map<Integer,List<NoResetStats>> sorted = sortByAtribute(allStats, abs);
+			Map<Integer,List<LocalizerBasedStats>> sorted = sortByAtribute(allStats, abs);
 			List<Integer> keys = new ArrayList<Integer>(sorted.keySet());
 			Collections.sort(keys);
 			for (Integer key : keys){
@@ -357,18 +357,18 @@ public class NoResetStats {
 		}
 		break;
 		case AVERAGE_WITH_EXTREMA:{
-			Map<Integer,List<NoResetStats>> sorted = sortByAtribute(allStats, abs);
+			Map<Integer,List<LocalizerBasedStats>> sorted = sortByAtribute(allStats, abs);
 			List<Integer> keys = new ArrayList<Integer>(sorted.keySet());
 			Collections.sort(keys);
 			for (Integer key : keys){
-				List<NoResetStats> entrie = sorted.get(key);
+				List<LocalizerBasedStats> entrie = sorted.get(key);
 				tempWriter.write(key + " " + AtributeAvg(entrie, ord) + 
 						" " + AtributeMin(entrie, ord) + " " + AtributeMax(entrie, ord) + "\n");
 			}
 		}
 		break;
 		case MEDIAN:{
-			Map<Integer,List<NoResetStats>> sorted = sortByAtribute(allStats, abs);
+			Map<Integer,List<LocalizerBasedStats>> sorted = sortByAtribute(allStats, abs);
 			List<Integer> keys = new ArrayList<Integer>(sorted.keySet());
 			Collections.sort(keys);
 			for (Integer key : keys){
@@ -384,20 +384,20 @@ public class NoResetStats {
 		return tempPlot;
 	}
 
-	private static String makeTitle(List<NoResetStats> allStats, Atribute ord, PlotStyle style){
+	private static String makeTitle(List<LocalizerBasedStats> allStats, Atribute ord, PlotStyle style){
 		StringBuilder r = new StringBuilder();
 		r.append(style + " of " + allStats.size() + " inferences ");
 		return r.toString();
 	}
 	
-	private static String makeTitle(List<NoResetStats> allStats, Atribute ord, Atribute group, Integer key, PlotStyle style){
+	private static String makeTitle(List<LocalizerBasedStats> allStats, Atribute ord, Atribute group, Integer key, PlotStyle style){
 		StringBuilder r = new StringBuilder();
 		r.append(makeTitle(allStats, ord, style));
 		r.append("(" + group.name + " : " + key + " " + group.units + ")");
 		return r.toString();
 	}
 	
-	private static String makeDataId(List<NoResetStats> allStats){
+	private static String makeDataId(List<LocalizerBasedStats> allStats){
 		if (allStats.size() == 0)
 			return "_empty_";
 		StringBuilder r = new StringBuilder();
@@ -413,7 +413,7 @@ public class NoResetStats {
 		return r.toString();
 	}
 	
-	private static String makeDataDescritption(List<NoResetStats> allStats, List<Atribute> ignorefields){
+	private static String makeDataDescritption(List<LocalizerBasedStats> allStats, List<Atribute> ignorefields){
 		StringBuilder r = new StringBuilder();
 		String separator = "\\n";
 		for (Atribute a : Atribute.class.getEnumConstants()){
@@ -432,7 +432,7 @@ public class NoResetStats {
 		return r.toString();
 	}
 	
-	private static String makeDataDescritption(List<NoResetStats> allStats, Atribute[] ignorefields){
+	private static String makeDataDescritption(List<LocalizerBasedStats> allStats, Atribute[] ignorefields){
 		return makeDataDescritption(allStats, Arrays.asList(ignorefields));
 	}
 	
@@ -446,7 +446,7 @@ public class NoResetStats {
 	 * @param plotLines
 	 * @return
 	 */
-	private static String makeGnuPlotInstructions(List<NoResetStats> allStats, Atribute ord, Atribute abs, Atribute group, PlotStyle style, String plotLines){
+	private static String makeGnuPlotInstructions(List<LocalizerBasedStats> allStats, Atribute ord, Atribute abs, Atribute group, PlotStyle style, String plotLines){
 		StringBuilder r = new StringBuilder();
 
 		r.append("set terminal png enhanced font \"Sans,10\"\n");
@@ -476,17 +476,17 @@ public class NoResetStats {
 		return r.toString();
 	}
 
-	public static void makeMap(List<NoResetStats> allStats, Atribute ord, Atribute abs, Atribute watch,int watchMin ,int watchMax){
+	public static void makeMap(List<LocalizerBasedStats> allStats, Atribute ord, Atribute abs, Atribute watch,int watchMin ,int watchMax){
 		if (allStats.isEmpty())
 			return;
 		int maxSize = 0;
 		Set<Integer> absKeys = new HashSet<Integer>();
-		Map<Integer, List<NoResetStats>> groupORD = sortByAtribute(allStats, ord);
-		Map<Integer,Map<Integer, List<NoResetStats>>> groupMAP = new HashMap<Integer,Map<Integer,List<NoResetStats>>>();
+		Map<Integer, List<LocalizerBasedStats>> groupORD = sortByAtribute(allStats, ord);
+		Map<Integer,Map<Integer, List<LocalizerBasedStats>>> groupMAP = new HashMap<Integer,Map<Integer,List<LocalizerBasedStats>>>();
 		for (Integer key : groupORD.keySet()){
-			Map<Integer, List<NoResetStats>> groupABS = sortByAtribute(groupORD.get(key), abs);
+			Map<Integer, List<LocalizerBasedStats>> groupABS = sortByAtribute(groupORD.get(key), abs);
 			for (Integer keyAbs : groupABS.keySet()){
-				List<NoResetStats> values = groupABS.get(keyAbs);
+				List<LocalizerBasedStats> values = groupABS.get(keyAbs);
 				if (values.size() > maxSize)
 					maxSize = values.size();
 			}
@@ -510,17 +510,17 @@ public class NoResetStats {
 		List<Integer> keyValuesAbs = new ArrayList<Integer>(absKeys);
 		Collections.sort(keyValuesAbs);
 		for (Integer keyOrd : keyValuesOrd){
-			Map<Integer, List<NoResetStats>> groupABS = groupMAP.get(keyOrd);
+			Map<Integer, List<LocalizerBasedStats>> groupABS = groupMAP.get(keyOrd);
 			for (Integer keyAbs : keyValuesAbs){
 				float RatioSize = 0;
 				float RatioWatch = 0;
-				List<NoResetStats> pointValues = groupABS.get(keyAbs);
+				List<LocalizerBasedStats> pointValues = groupABS.get(keyAbs);
 				if (pointValues != null){
 					RatioSize = ((float)pointValues.size())/maxSize;
 					//to increase visibility 
 //					RatioSize *= 3./4.;
 //					RatioSize += .25;
-					List<NoResetStats> watchValues = selectFromRange(pointValues, watch, watchMin, watchMax);
+					List<LocalizerBasedStats> watchValues = selectFromRange(pointValues, watch, watchMin, watchMax);
 					RatioWatch = ((float)watchValues.size())/pointValues.size();
 				}
 				tempWriter.append(keyOrd + " " + keyAbs + " " + RatioSize + " " + RatioWatch + "\n");
@@ -556,11 +556,11 @@ public class NoResetStats {
 		
 	}
 	
-	public static void makeGraph(List<NoResetStats> allStats, Atribute ord, Atribute abs, Atribute sort, PlotStyle style){
+	public static void makeGraph(List<LocalizerBasedStats> allStats, Atribute ord, Atribute abs, Atribute sort, PlotStyle style){
 		if (allStats.isEmpty())
 			return;
 		StringBuilder plotLines = new StringBuilder("plot ");
-		Map<Integer, List<NoResetStats>> sorted = sortByAtribute(allStats, sort);
+		Map<Integer, List<LocalizerBasedStats>> sorted = sortByAtribute(allStats, sort);
 		List<Integer> keyValues = new ArrayList<Integer>(sorted.keySet());
 		Collections.sort(keyValues);
 		for (Integer Size : keyValues){
@@ -572,7 +572,7 @@ public class NoResetStats {
 		GNUPlot.makeGraph(makeGnuPlotInstructions(allStats, ord, abs, sort, style, plotLines.toString()));
 	}
 	
-	public static void makeGraph(List<NoResetStats> allStats, Atribute ord, Atribute abs, PlotStyle style){
+	public static void makeGraph(List<LocalizerBasedStats> allStats, Atribute ord, Atribute abs, PlotStyle style){
 		if (allStats.isEmpty())
 			return;
 		StringBuilder plotLines = new StringBuilder("plot ");
@@ -583,7 +583,7 @@ public class NoResetStats {
 		GNUPlot.makeGraph(makeGnuPlotInstructions(allStats, ord, abs, null, style, plotLines.toString()));
 	}
 
-	public static void makeGraph(List<NoResetStats> allStats){
+	public static void makeGraph(List<LocalizerBasedStats> allStats){
 		//utils : points repartition
 //		makeGraph(selectFromRange(selectFromRange(selectFromRange(selectFromRange(allStats, 
 //				Atribute.INPUT_SYMBOLS, 0, 500),
@@ -592,7 +592,7 @@ public class NoResetStats {
 //				Atribute.OUTPUT_SYMBOLS, 0, 500),
 //				Atribute.INPUT_SYMBOLS, Atribute.STATE_NUMBER, Atribute.OUTPUT_SYMBOLS,PlotStyle.POINTS);
 
-		List<NoResetStats> chosenStats;
+		List<LocalizerBasedStats> chosenStats;
 		
 		//not enough data
 //		chosenStats = allStats;
