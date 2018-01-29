@@ -143,6 +143,10 @@ public class BooleanOption extends OptionTree {
 				+ (isEnabled ? " activated" : " disactivated");
 	}
 
+	public boolean isEnabled() {
+		return isEnabled;
+	}
+
 	@Override
 	protected boolean isActivatedByArg(ArgumentValue arg) {
 		return (arg.getName().equals(enableArgumentDescriptor.name)

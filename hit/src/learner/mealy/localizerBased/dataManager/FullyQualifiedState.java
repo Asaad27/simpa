@@ -36,7 +36,7 @@ public class FullyQualifiedState{
 		K = new HashMap<LmTrace, PartiallyKnownTrace>();
 		V = new HashMap<LmTrace, FullyKnownTrace>();
 		T = new HashMap<LmTrace, FullyKnownTrace>();
-		if (Options.ICTSS2015_WITHOUT_SPEEDUP)
+		if (!DataManager.instance.options.useSpeedUp())
 			vNode = null;
 		else
 			vNode = new StateNode(this);
@@ -63,7 +63,7 @@ public class FullyQualifiedState{
 		if (Options.LOG_LEVEL != Options.LogLevel.LOW)
 			DataManager.instance.logRecursivity("New transition found : " + v);
 		DataManager.instance.startRecursivity();
-		if (!Options.ICTSS2015_WITHOUT_SPEEDUP){
+		if (DataManager.instance.options.useSpeedUp()) {
 			vNode.addFullyKnownTrace(v);
 			//DataManager.instance.exportVTreeToDot();
 		}

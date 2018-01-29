@@ -55,6 +55,7 @@ public class HWStatsEntry extends StatsEntry {
 	public static final Attribute<Float> ORACLE_TRACE_PERCENTAGE =	Attribute.ORACLE_TRACE_PERCENTAGE;
 
 	
+	// TODO : remove the USE_SPEEDUP which not used by hW.
 	private static Attribute<?>[] attributes = new Attribute<?>[]{
 			MAX_W_TOTAL_LENGTH,
 			AVERAGE_W_SIZE,

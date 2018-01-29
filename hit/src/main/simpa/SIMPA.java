@@ -1,19 +1,30 @@
 package main.simpa;
 
+import java.awt.Container;
+import java.awt.HeadlessException;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 import java.util.StringTokenizer;
+
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneLayout;
 
 import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
@@ -24,6 +35,7 @@ import drivers.efsm.real.ScanDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
 import main.simpa.Options.LogLevel;
+import options.automataOptions.AutomataChoice;
 import stats.GlobalGraphGenerator;
 import stats.GraphGenerator;
 import stats.StatsEntry;
@@ -363,10 +375,8 @@ public class SIMPA {
 	private static InputSequenceListOption CHARACTERIZATION_SET = new InputSequenceListOption("--characterizationSeq",
 			"use the given charcacterization sequences", null);
 
-	private static BooleanOption WITHOUT_SPEEDUP = new BooleanOption("--noSpeedUp",
-			"Don't use speedUp (deduction from trace based on state incompatibilities)\nthis is usefull if you don't know the real state number but only the bound.");
-	private static Option<?>[] localizerBasedOptions = new Option<?>[] { STATE_NUMBER_BOUND, CHARACTERIZATION_SET,
-			WITHOUT_SPEEDUP };
+	private static Option<?>[] localizerBasedOptions = new Option<?>[] {
+			STATE_NUMBER_BOUND, CHARACTERIZATION_SET, };
 
 	// hW options
 	private static BooleanOption ADD_H_IN_W = new BooleanOption("--addHInW",
@@ -565,7 +575,6 @@ public class SIMPA {
 
 		Options.CHARACTERIZATION_SET = CHARACTERIZATION_SET.getValue();
 
-		Options.ICTSS2015_WITHOUT_SPEEDUP = WITHOUT_SPEEDUP.getValue();
 		Options.ADD_H_IN_W = ADD_H_IN_W.getValue();
 		Options.CHECK_INCONSISTENCY_H_NOT_HOMING = CHECK_INCONSISTENCY_H_MAPPING
 				.getValue();
@@ -1086,30 +1095,103 @@ public class SIMPA {
 
 	}
 	
-	
-	public static void main(String[] args) {
-		launchArgs = args;
-		welcome();
-		parseArguments(args);
-		check();
+	public static AutomataChoice automataChoice = new AutomataChoice();
 
-		if (STATS_MODE.getValue()) {
-			run_stats();
-		} else if (ENUMERATE_MODE.getValue()){
-			run_enum();
-		}else {
-			try {
-				Utils.deleteDir(new File(Options.OUTDIR + Options.DIRGRAPH));
-				Utils.deleteDir(new File(Options.OUTDIR + Options.DIRARFF));
-				learnOneTime();
-			} catch (Exception e) {
-				LogManager.end();
-				System.err.println("Unexpected error");
-				e.printStackTrace(System.err);
-				System.exit(1);
+	private static void createAndShowGUI() {
+		JFrame frame = new JFrame(
+				"SIMPA - Simpa Infers Models Pretty Automatically");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		Container pane = frame.getContentPane();
+
+		pane.setLayout(new BoxLayout(pane, BoxLayout.PAGE_AXIS));
+		JScrollPane scroll = new JScrollPane();
+		scroll.setLayout(new ScrollPaneLayout());
+		JPanel optionsPanel = new JPanel();
+		optionsPanel
+				.setLayout(new BoxLayout(optionsPanel, BoxLayout.PAGE_AXIS));
+		scroll.getViewport().add(optionsPanel);
+		optionsPanel.add(automataChoice.getComponent());
+		optionsPanel.add(Box.createGlue());
+		pane.add(scroll);
+
+		// Display the window.
+		frame.pack();
+		frame.setVisible(true);
+	}
+
+	private static final String GUI_ARGUMENT = "--gui";
+
+	public static void main(String[] args) {
+		if (args.length == 0) {
+			javax.swing.SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					try {
+						createAndShowGUI();
+					} catch (HeadlessException e) {
+						System.err.println("Cannot open gui");
+						System.out.println(
+								"To run SIMPA in console, try option --help to see complete list of arguments");
+					}
+				}
+			});
+		} else {
+			List<String> arrayArgs = new ArrayList<String>(Arrays.asList(args));
+			boolean openGui = arrayArgs.contains(GUI_ARGUMENT);
+			while (arrayArgs.remove(GUI_ARGUMENT))
+				;
+			@SuppressWarnings("resource")
+			PrintStream parsingErrorStream = (openGui ? System.out
+					: System.err);
+			boolean parsedSuccessfully = automataChoice
+					.parseArguments(arrayArgs, parsingErrorStream);
+			if (!parsedSuccessfully)
+				parsingErrorStream
+						.println("there was errors while parsing arguments");
+
+			launchArgs = args;
+			welcome();
+			// parseArguments(args);
+			// check();
+
+			if (openGui) {
+
+				javax.swing.SwingUtilities.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							createAndShowGUI();
+						} catch (HeadlessException e) {
+							System.err.println("Cannot open gui");
+							System.out
+									.println("Please remove the " + GUI_ARGUMENT
+											+ " and try to run SIMPA in CLI.");
+						}
+					}
+				});
+			} else {
+				if (!parsedSuccessfully) {
+					System.exit(1);
+				}
+				if (STATS_MODE.getValue()) {
+					run_stats();
+				} else if (ENUMERATE_MODE.getValue()) {
+					run_enum();
+				} else {
+					try {
+						Utils.deleteDir(
+								new File(Options.OUTDIR + Options.DIRGRAPH));
+						Utils.deleteDir(
+								new File(Options.OUTDIR + Options.DIRARFF));
+						learnOneTime();
+					} catch (Exception e) {
+						LogManager.end();
+						System.err.println("Unexpected error");
+						e.printStackTrace(System.err);
+						System.exit(1);
+					}
+				}
+				System.out.println("[+] End");
 			}
 		}
-		System.out.println("[+] End");
 	}
 
 	private static void welcome() {

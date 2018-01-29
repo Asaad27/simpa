@@ -24,6 +24,7 @@ import drivers.mealy.MealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
+import learner.mealy.localizerBased.LocalizerBasedOptions;
 import learner.mealy.localizerBased.dataManager.vTree.AbstractNode;
 import learner.mealy.localizerBased.dataManager.vTree.StateNode;
 import main.simpa.Options;
@@ -49,10 +50,12 @@ public class DataManager {
 	private LinkedList<FullyKnownTrace> waitingFullyKnownTrace;
 	private boolean lockAdd;//indicate whether an add is currently running.
 	private AbstractNode currentVNode;
+	protected LocalizerBasedOptions options;
 	
 	public int maxStates;
 
-	public DataManager(MealyDriver driver, ArrayList<InputSequence> W, int maxStates){
+	public DataManager(MealyDriver driver, ArrayList<InputSequence> W,
+			int maxStates, LocalizerBasedOptions options) {
 		this.maxStates = maxStates;
 		this.trace = new LmTrace();
 		this.W = W;
@@ -74,6 +77,7 @@ public class DataManager {
 		instance = this;
 		driver.reset();
 		currentVNode = null;
+		this.options = options;
 	}
 
 	public String apply(String input){
@@ -151,7 +155,7 @@ public class DataManager {
 	}
 
 	public void setC(int pos,FullyQualifiedState s){
-		if (!Options.ICTSS2015_WITHOUT_SPEEDUP){
+		if (options.useSpeedUp()) {
 			if (currentVNode == null){
 				AbstractNode n = s.getVNode();
 				for (int i = pos; i < traceSize(); i++){
@@ -505,7 +509,7 @@ public class DataManager {
 	}
 
 	public void deduceFromVTree(){
-		if (Options.ICTSS2015_WITHOUT_SPEEDUP)
+		if (!options.useSpeedUp())
 			return;
 		if (DataManager.instance.getStates().size() != DataManager.instance.maxStates){
 			LogManager.logInfo("cannot deduce while there is unknown states");
@@ -591,7 +595,7 @@ public class DataManager {
 
 	private static int n_export = 0;
 	public void exportVTreeToDot(){
-		if (Options.ICTSS2015_WITHOUT_SPEEDUP)
+		if (!options.useSpeedUp())
 			return;
 		if (Options.LOG_LEVEL != Options.LogLevel.ALL)
 			return;

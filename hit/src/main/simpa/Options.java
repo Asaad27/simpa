@@ -63,7 +63,6 @@ public class Options {
 
 	public static boolean RS_WITH_UNKNOWN_H = false;
 
-	public static boolean ICTSS2015_WITHOUT_SPEEDUP = false;
 	public static boolean ADD_H_IN_W = false;
 	public static boolean CHECK_INCONSISTENCY_H_NOT_HOMING = false;
 	public static boolean REUSE_HZXW = false;

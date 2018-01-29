@@ -104,14 +104,15 @@ public class LocalizerBasedStatsEntry extends StatsEntry {
 		minTraceLength = Integer.parseInt(st.nextToken());
 	}
 
-	public LocalizerBasedStatsEntry(List<InputSequence> W, MealyDriver d, int n){
+	public LocalizerBasedStatsEntry(List<InputSequence> W, MealyDriver d,
+			int n, LocalizerBasedOptions options) {
 		WSize = W.size();
 		w1Length = W.get(0).getLength();
 		this.inputSymbols = d.getInputSymbols().size();
 		this.outputSymbols = d.getOutputSymbols().size();
 		this.n = n;
 		this.automata = d.getSystemName();
-		this.with_speedup = !Options.ICTSS2015_WITHOUT_SPEEDUP;
+		this.with_speedup = options.useSpeedUp();
 	}
 
 	protected void setLocalizeSequenceLength(int length){

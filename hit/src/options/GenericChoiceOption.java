@@ -19,7 +19,6 @@ import options.OptionTree;
  * 
  * @author Nicolas BREMOND
  */
-
 public abstract class GenericChoiceOption<T extends ChoiceOptionItem>
 		extends OptionTree {
 

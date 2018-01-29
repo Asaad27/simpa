@@ -34,9 +34,11 @@ public class LocalizerBasedLearner extends Learner {
 	private LocalizerBasedStatsEntry stats;
 	protected ArrayList<InputSequence> W;
 	private int n;// the maximum number of states
+	protected LocalizerBasedOptions options;
 
-	public LocalizerBasedLearner(MealyDriver d) {
+	public LocalizerBasedLearner(MealyDriver d, LocalizerBasedOptions options) {
 		driver = d;
+		this.options = options;
 	}
 
 	public void learn() {
@@ -63,7 +65,7 @@ public class LocalizerBasedLearner extends Learner {
 				+ Options.STATE_NUMBER_BOUND);
 
 		n = Options.STATE_NUMBER_BOUND;
-		stats = new LocalizerBasedStatsEntry(W, driver, n);
+		stats = new LocalizerBasedStatsEntry(W, driver, n, options);
 
 		this.W = new ArrayList<InputSequence>(W);
 		StringBuilder logW = new StringBuilder("Using characterization set : [");
@@ -76,7 +78,7 @@ public class LocalizerBasedLearner extends Learner {
 		long start = System.nanoTime();
 
 		// GlobalTrace trace = new GlobalTrace(driver);
-		dataManager = new DataManager(driver, this.W, n);
+		dataManager = new DataManager(driver, this.W, n, options);
 
 		// start of the algorithm
 		localize(dataManager, W);
