@@ -1,8 +1,11 @@
 package options;
 
 import java.awt.Component;
+import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -23,11 +26,55 @@ import javax.swing.JPanel;
  */
 
 public abstract class OptionTree {
+	static protected class ArgumentDescriptor {
+		enum AcceptedValues {
+			NONE, ONE, SEVERAL,
+		};
+
+		public AcceptedValues acceptedValues;
+		public String name;
+		public OptionTree parentOption;
+
+		public ArgumentDescriptor(AcceptedValues acceptedValues, String name,
+				OptionTree parentOption) {
+			this.acceptedValues = acceptedValues;
+			this.name = name;
+			this.parentOption = parentOption;
+		}
+
+		@Override
+		public String toString() {
+			return name;
+		}
+	}
+
+	static protected class ArgumentValue {
+		public List<String> values = new ArrayList<>();
+		ArgumentDescriptor descriptor; // descriptor is hidden at this time
+										// because in creation of list of
+										// ArgumentsValues, we use Descriptors
+										// which may not have the same
+										// parentOption
+
+		public ArgumentValue(ArgumentDescriptor descriptor) {
+			this.descriptor = descriptor;
+		}
+
+		public String getName() {
+			return descriptor.name;
+		}
+
+		public String toString() {
+			return getName();
+		}
+
+	}
 
 	private List<List<OptionTree>> sortedChildren = new ArrayList<>();
 	private List<OptionTree> children = new ArrayList<>();
 	protected JPanel mainContainer = null;
 	protected JPanel subTreeContainer = null;
+	protected String description = "";
 
 	/**
 	 * get the graphical component for this option and build it if necessary.
@@ -133,7 +180,7 @@ public abstract class OptionTree {
 	 * @return <code>true</code> if and only if the argument can be parsed by
 	 *         this option.
 	 */
-	protected abstract boolean isActivatedByArg(String arg);
+	protected abstract boolean isActivatedByArg(ArgumentValue arg);
 
 	/**
 	 * Set the value of this option from one argument.
@@ -144,7 +191,7 @@ public abstract class OptionTree {
 	 * @warning if {@link isActivatedByArg(String)} do not accept
 	 *          <code>arg</code>, the behavior of this function is undefined.
 	 */
-	protected abstract void setValueFromArg(String arg);
+	protected abstract void setValueFromArg(ArgumentValue arg);
 
 	/**
 	 * Set the value of this option in order to allow the use of sub-options
@@ -176,7 +223,7 @@ public abstract class OptionTree {
 	 *            the argument to test
 	 * @return <code>true</code> if one option in this tree accept the argument.
 	 */
-	private boolean thisOrSubTreeIsActivatedByArg(String arg) {
+	private boolean thisOrSubTreeIsActivatedByArg(ArgumentValue arg) {
 		if (isActivatedByArg(arg))
 			return true;
 		for (OptionTree child : getChildren())
@@ -198,7 +245,7 @@ public abstract class OptionTree {
 	 *         argument.
 	 */
 	private static boolean oneSubTreeIsActivatedByArg(List<OptionTree> group,
-			String arg) {
+			ArgumentValue arg) {
 		for (OptionTree tree : group)
 			if (tree.thisOrSubTreeIsActivatedByArg(arg))
 				return true;
@@ -211,6 +258,121 @@ public abstract class OptionTree {
 	 * interface and thus the parsing should do as many work as possible and not
 	 * stop on first error.
 	 * 
+	 * The first part of this function is to translate String arguments into
+	 * ArgumentValues and try to detect errors like misspelling. Then it calls
+	 * {@link parseArgumentsInternal} which will transpose ArgumentValue in the
+	 * OptionTree
+	 * 
+	 * @param args
+	 *            the list of arguments.
+	 * @param parsingErrorStream
+	 *            a stream on which errors should be written (typically
+	 *            System.out when the graphical user interface will let the user
+	 *            repair her/his mistakes and System.err when errors are fatal).
+	 * @return <code>false</code> if the parsing cannot be achieved,
+	 *         <code>true</code> if the option tree is defined from arguments,
+	 *         even if there was minor mistakes.
+	 */
+	public boolean parseArguments(List<String> args,
+			PrintStream parsingErrorStream) {
+		boolean parsingError = false;
+		List<ArgumentDescriptor> descriptors = getSubTreeAcceptedArguments();
+		Map<ArgumentDescriptor, ArgumentValue> values = new HashMap<>();
+		List<ArgumentValue> valuesList = new ArrayList<>();
+		for (int i = 0; i < args.size(); i++) {
+			String arg = args.get(i);
+			String value = null;
+			if (arg.contains("=")) {
+				int pos = arg.indexOf("=");
+				value = arg.substring(pos + 1, arg.length());
+				arg = arg.substring(0, pos);
+			}
+			ArgumentValue valueArg = null;
+			ArgumentDescriptor descriptor = null;
+			for (ArgumentDescriptor desc : descriptors) {
+				if (desc.name.equals(arg)) {
+					valueArg = values.get(desc);
+					if (valueArg == null) {
+						valueArg = new ArgumentValue(desc);
+						values.put(desc, valueArg);
+						valuesList.add(valueArg);
+					}
+					descriptor = desc;
+					break;
+				}
+			}
+			if (valueArg == null) {
+				parsingErrorStream
+						.println("Argument " + arg + " is not interpreted.");
+				parsingError = true;
+			} else {
+				if (value == null) {
+					// try to use next argument as value
+					String nextArg = null;
+					boolean nextArgIsOption = false;
+					if (i + 1 < args.size()) {
+						nextArg = args.get(i + 1);
+						for (ArgumentDescriptor desc : descriptors) {
+							if (desc.name.equals(nextArg)) {
+								nextArgIsOption = true;
+								break;
+							}
+						}
+						if (!nextArgIsOption) {
+							value = nextArg;
+							i++;
+						}
+					}
+				}
+				if (value != null) {
+					valueArg.values.add(value);
+				}
+				switch (descriptor.acceptedValues) {
+				case NONE:
+					if (valueArg.values.size() > 0) {
+						System.out.println("Warning : argument "
+								+ descriptor.name
+								+ " should not have a value and '" + value
+								+ "' cannot be parsed as an argument");
+					}
+					break;
+				case ONE:
+					if (valueArg.values.size() > 1) {
+						System.out
+								.println("Warning : argument " + descriptor.name
+										+ " should have only one value and '"
+										+ valueArg.values
+										+ "' cannot be parsed as arguments");
+					} else if (valueArg.values.size() == 0) {
+						System.out
+								.println("Warning : argument " + descriptor.name
+										+ " is waiting for some value");
+					}
+					break;
+				case SEVERAL:
+					if (valueArg.values.size() == 0) {
+						System.out
+								.println("Warning : argument " + descriptor.name
+										+ " is waiting for some value");
+					}
+				}
+
+			}
+		}
+		boolean parsingInternalSucces = parseArgumentsInternal(valuesList);
+		if (valuesList.size() != 0) {
+			System.out.println(
+					"Warning : some arguments were not used because they are not compatible with options of upper level."
+							+ " You can remove the following options : "
+							+ valuesList);
+
+		}
+		return parsingInternalSucces && (!parsingError);
+	}
+
+	/**
+	 * Recursive function to place arguments in the option tree.
+	 * 
 	 * @param args
 	 *            the list of arguments. Arguments successfully parsed will be
 	 *            removed from this list.
@@ -218,10 +380,10 @@ public abstract class OptionTree {
 	 *         <code>true</code> if the option tree is defined from arguments,
 	 *         even if there was minor mistakes.
 	 */
-	public boolean parseArguments(List<String> args) {
+	private boolean parseArgumentsInternal(List<ArgumentValue> args) {
 		// first check if this option is activated by an argument provided
-		String activatingArg = null;
-		for (String arg : args) {
+		ArgumentValue activatingArg = null;
+		for (ArgumentValue arg : args) {
 			if (isActivatedByArg(arg)) {
 				if (activatingArg != null) {
 					System.err.println("Warning : both arguments '"
@@ -239,7 +401,7 @@ public abstract class OptionTree {
 			// this option is not activated, but maybe a sub option can be
 			// activated to choose which subTree to select
 			List<List<OptionTree>> subTrees = getSortedChildren();
-			for (String arg : args) {
+			for (ArgumentValue arg : args) {
 				if (thisOrSubTreeIsActivatedByArg(arg)) {
 					List<List<OptionTree>> keptSubTrees = new ArrayList<>();
 					for (List<OptionTree> selectableGroup : subTrees) {
@@ -268,11 +430,94 @@ public abstract class OptionTree {
 		boolean subTreeSuccessfullyParsed = true;
 		List<OptionTree> selectedSubTrees = getSelectedChildren();
 		for (OptionTree subtree : selectedSubTrees)
-			if (!subtree.parseArguments(args)) {
+			if (!subtree.parseArgumentsInternal(args)) {
 				System.out.println("cannot define value of " + subtree
 						+ " with arguments " + args);
 				subTreeSuccessfullyParsed = false;
 			}
 		return subTreeSuccessfullyParsed;
+	}
+
+	/**
+	 * 
+	 * @return the list of arguments which can be accepted by this option
+	 *         (should not include sub-options)
+	 */
+	protected abstract List<ArgumentDescriptor> getAcceptedArguments();
+
+	/**
+	 * Get the list of arguments accepted by the sub-trees of a list of options
+	 * and check for conflicting argument.
+	 * 
+	 * This function asserts that an argument do not appear two times in the
+	 * same list.
+	 * 
+	 * @param options
+	 *            a list of option which are selected simultaneously.
+	 * @return the list of argument used by any option from the list or sub-tree
+	 *         of the list.
+	 */
+	static private List<ArgumentDescriptor> getListAcceptedArguments(
+			List<OptionTree> options) {
+		List<ArgumentDescriptor> args = new ArrayList<>();
+		for (OptionTree option : options) {
+			for (ArgumentDescriptor optionArg : option
+					.getSubTreeAcceptedArguments()) {
+				for (ArgumentDescriptor seenArg : args) {
+					assert !seenArg.name.equals(optionArg.name);
+				}
+				args.add(optionArg);
+			}
+		}
+		return args;
+	}
+
+	/**
+	 * Get the arguments accepted by this option and sub-tree (including
+	 * sub-option not selected currently) and check for conflicts.
+	 * 
+	 * This function asserts that no sub-option use the same argument as its
+	 * ancestor. Two options can use the same argument if they are not active at
+	 * the same time but in this case, this function asserts that the argument
+	 * used accept the same number of values.
+	 * 
+	 * @return the list of arguments accepted by this option and any of it's
+	 *         sub-option.
+	 */
+	private List<ArgumentDescriptor> getSubTreeAcceptedArguments() {
+		List<ArgumentDescriptor> thisArguments = new ArrayList<>(
+				getAcceptedArguments());
+		for (ArgumentDescriptor arg : thisArguments) {
+			assert isActivatedByArg(new ArgumentValue(arg));
+		}
+		List<ArgumentDescriptor> subTreeArguments = new ArrayList<>(
+				thisArguments);
+
+		for (List<OptionTree> sortedOption : getSortedChildren()) {
+			List<ArgumentDescriptor> childrenArguments = getListAcceptedArguments(
+					sortedOption);
+			for (ArgumentDescriptor newArg : childrenArguments) {
+				for (ArgumentDescriptor thisArg : thisArguments) {
+					// children cannot have same argument as their father
+					assert !newArg.name.equals(thisArg.name);
+				}
+				boolean seen = false;
+				for (ArgumentDescriptor brothersArg : subTreeArguments) {
+					if (brothersArg.name.equals(newArg.name)) {
+						// two option can use the same argument if they are not
+						// activated at the same time, but the arguments should
+						// be equals
+						seen = true;
+						assert brothersArg.acceptedValues == newArg.acceptedValues;
+						assert brothersArg.parentOption
+								.getClass() == newArg.parentOption.getClass();
+					}
+
+				}
+				if (!seen)
+					subTreeArguments.add(newArg);
+			}
+		}
+		return subTreeArguments;
 	}
 }

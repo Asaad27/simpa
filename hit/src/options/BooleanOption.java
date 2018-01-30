@@ -9,7 +9,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
-import options.OptionTree;
+import options.OptionTree.ArgumentDescriptor.AcceptedValues;
 
 /**
  * An option to select a boolean choice.
@@ -24,24 +24,23 @@ public class BooleanOption extends OptionTree {
 	private List<OptionTree> subTreeIfFalse = new ArrayList<>();
 	private Boolean isEnabled = false;
 	private String name;
-	private String argument;
+
+	protected ArgumentDescriptor enableArgumentDescriptor = null;
+	protected ArgumentDescriptor disableArgumentDescriptor = null;
 
 	/**
-	 * Get the argument which enable this option.
+	 * This function is called by constructor to build the default arguments to
+	 * enable or disable this option. You can override it to define your own
+	 * arguments.
 	 * 
-	 * @return the argument which enable this option.
+	 * @param argument
+	 *            a string used to build the default arguments
 	 */
-	private String getSelectArgument() {
-		return "--" + argument;
-	}
-
-	/**
-	 * Get the argument which disable this option.
-	 * 
-	 * @return the argument which disable this option.
-	 */
-	private String getUnSelectArgument() {
-		return "--no-" + argument;
+	protected void makeArgumentDescriptors(String argument) {
+		enableArgumentDescriptor = new ArgumentDescriptor(AcceptedValues.NONE,
+				"--" + argument, this);
+		disableArgumentDescriptor = new ArgumentDescriptor(AcceptedValues.NONE,
+				"--no-" + argument, this);
 	}
 
 	/**
@@ -49,9 +48,12 @@ public class BooleanOption extends OptionTree {
 	 * @param name
 	 *            the name of this option
 	 * @param argument
-	 *            the base for the argument of this option. It will be
-	 *            automatically completed in <code>--{argument}</code> and
-	 *            <code>--no-{argument}</code>
+	 *            the base passed to {@link makeArgumentDescriptors} to build
+	 *            arguments. If {@link makeArgumentDescriptors} is not
+	 *            overridden, it will be automatically completed in
+	 *            <code>--{argument}</code> and <code>--no-{argument}</code>
+	 * @param description
+	 *            the description of this option
 	 * @param subTreeIfTrue
 	 *            the list of sub-options available when this option is
 	 *            activated
@@ -61,12 +63,13 @@ public class BooleanOption extends OptionTree {
 	 * @param enabled
 	 *            the initial status of this option.
 	 */
-	public BooleanOption(String name, String argument,
+	public BooleanOption(String name, String argument, String description,
 			List<OptionTree> subTreeIfTrue, List<OptionTree> subTreeIfFalse,
 			boolean enabled) {
 		assert !argument.startsWith("-");
 		this.name = name;
-		this.argument = argument;
+		makeArgumentDescriptors(argument);
+		this.description = description;
 		this.subTreeIfTrue = subTreeIfTrue;
 		this.subTreeIfFalse = subTreeIfFalse;
 		addSortedChildren(subTreeIfTrue);
@@ -74,13 +77,13 @@ public class BooleanOption extends OptionTree {
 		setEnabled(enabled);
 	}
 
-	public BooleanOption(String name, String argument,
+	public BooleanOption(String name, String argument, String description,
 			List<OptionTree> subTreeIfTrue, List<OptionTree> subTreeIfFalse) {
-		this(name, argument, subTreeIfTrue, subTreeIfFalse, false);
+		this(name, argument, description, subTreeIfTrue, subTreeIfFalse, false);
 	}
 
-	public BooleanOption(String name, String argument) {
-		this(name, argument, new ArrayList<OptionTree>(),
+	public BooleanOption(String name, String argument, String description) {
+		this(name, argument, description, new ArrayList<OptionTree>(),
 				new ArrayList<OptionTree>(), false);
 	}
 
@@ -125,20 +128,21 @@ public class BooleanOption extends OptionTree {
 	}
 
 	@Override
-	protected boolean isActivatedByArg(String arg) {
-		return (arg.equals(getSelectArgument())
-				|| arg.equals(getUnSelectArgument()));
+	protected boolean isActivatedByArg(ArgumentValue arg) {
+		return (arg.getName().equals(enableArgumentDescriptor.name)
+				|| arg.getName().equals(disableArgumentDescriptor.name));
 	}
 
 	@Override
-	protected void setValueFromArg(String arg) {
+	protected void setValueFromArg(ArgumentValue arg) {
 		assert isActivatedByArg(arg);
-		setEnabled(arg.equals(getSelectArgument()));
+		setEnabled(arg.getName().equals(enableArgumentDescriptor.name));
 	}
 
 	@Override
 	public String getSelectedArgument() {
-		return isEnabled ? getSelectArgument() : getUnSelectArgument();
+		return isEnabled ? enableArgumentDescriptor.name
+				: disableArgumentDescriptor.name;
 	}
 
 	@Override
@@ -159,7 +163,16 @@ public class BooleanOption extends OptionTree {
 	}
 
 	@Override
+	protected List<ArgumentDescriptor> getAcceptedArguments() {
+		List<ArgumentDescriptor> descriptors = new ArrayList<>();
+		descriptors.add(enableArgumentDescriptor);
+		descriptors.add(disableArgumentDescriptor);
+		return descriptors;
+	}
+
+	@Override
 	public String toString() {
 		return "option " + name;
 	}
+
 }

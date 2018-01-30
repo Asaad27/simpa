@@ -10,6 +10,7 @@ import javax.swing.JComboBox;
 import javax.swing.JPanel;
 
 import options.OptionTree;
+import options.OptionTree.ArgumentDescriptor.AcceptedValues;
 
 /**
  * An option to select one choice in a list.
@@ -23,17 +24,19 @@ public class ChoiceOption extends OptionTree {
 	 */
 	protected class ChoiceItem {
 		public final String name;
-		public final String argument;
+		public final ArgumentDescriptor argument;
 		public List<OptionTree> subTrees = new ArrayList<>();
 
-		public ChoiceItem(String name, String argument) {
+		public ChoiceItem(String name, String argument, ChoiceOption parent) {
+			assert argument.startsWith("-");
 			this.name = name;
-			this.argument = argument;
+			this.argument = new ArgumentDescriptor(AcceptedValues.NONE,
+					argument, parent);
 		}
 
-		public ChoiceItem(String name, String argument,
+		public ChoiceItem(String name, String argument, ChoiceOption parent,
 				List<OptionTree> subTrees) {
-			this(name, argument);
+			this(name, argument, parent);
 			if (subTrees != null)
 				this.subTrees = subTrees;
 		}
@@ -117,19 +120,21 @@ public class ChoiceOption extends OptionTree {
 	}
 
 	@Override
-	protected boolean isActivatedByArg(String arg) {
+	protected boolean isActivatedByArg(ArgumentValue arg) {
 		for (ChoiceItem choice : choices) {
-			if (choice.argument.equals(arg))
+			if (choice.argument.name.equals(arg.getName()))
 				return true;
 		}
 		return false;
 	}
 
 	@Override
-	protected void setValueFromArg(String arg) {
+	protected void setValueFromArg(ArgumentValue arg) {
 		for (ChoiceItem choice : choices) {
-			if (choice.argument.equals(arg))
+			if (choice.argument.name.equals(arg.getName())) {
 				selectChoice(choice);
+				return;
+			}
 		}
 		assert false;
 	}
@@ -149,7 +154,24 @@ public class ChoiceOption extends OptionTree {
 
 	@Override
 	protected String getSelectedArgument() {
-		return selectedItem.argument;
+		return selectedItem.argument.name;
 	}
 
+	/**
+	 * Get the current value of this option.
+	 * 
+	 * @return the current value of this option.
+	 */
+	public ChoiceItem getSelectedItem() {
+		return selectedItem;
+	}
+
+	@Override
+	protected List<ArgumentDescriptor> getAcceptedArguments() {
+		List<ArgumentDescriptor> args = new ArrayList<>();
+		for (ChoiceItem choice : choices) {
+			args.add(choice.argument);
+		}
+		return args;
+	}
 }
