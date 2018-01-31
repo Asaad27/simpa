@@ -187,11 +187,14 @@ public abstract class OptionTree {
 	 * 
 	 * @param arg
 	 *            the argument used to set value of this option.
+	 * @return <code>false</code> if an error occurred, <code>true</code> if
+	 *         everything was fine
 	 * 
 	 * @warning if {@link isActivatedByArg(String)} do not accept
 	 *          <code>arg</code>, the behavior of this function is undefined.
 	 */
-	protected abstract void setValueFromArg(ArgumentValue arg);
+	protected abstract boolean setValueFromArg(ArgumentValue arg,
+			PrintStream parsingErrorStream);
 
 	/**
 	 * Set the value of this option in order to allow the use of sub-options
@@ -323,6 +326,10 @@ public abstract class OptionTree {
 					boolean nextArgIsOption = false;
 					if (i + 1 < args.size()) {
 						nextArg = args.get(i + 1);
+						if (nextArg.contains("=")) {
+							nextArg = nextArg.substring(0,
+									nextArg.indexOf("="));
+						}
 						for (ArgumentDescriptor desc : descriptors) {
 							if (desc.name.equals(nextArg)) {
 								nextArgIsOption = true;
@@ -370,7 +377,8 @@ public abstract class OptionTree {
 
 			}
 		}
-		boolean parsingInternalSucces = parseArgumentsInternal(valuesList);
+		boolean parsingInternalSucces = parseArgumentsInternal(valuesList,
+				parsingErrorStream);
 		if (valuesList.size() != 0) {
 			System.out.println(
 					"Warning : some arguments were not used because they are not compatible with options of upper level."
@@ -391,13 +399,15 @@ public abstract class OptionTree {
 	 *         <code>true</code> if the option tree is defined from arguments,
 	 *         even if there was minor mistakes.
 	 */
-	private boolean parseArgumentsInternal(List<ArgumentValue> args) {
+	private boolean parseArgumentsInternal(List<ArgumentValue> args,
+			PrintStream parsingErrorStream) {
+		boolean parseError = false;
 		// first check if this option is activated by an argument provided
 		ArgumentValue activatingArg = null;
 		for (ArgumentValue arg : args) {
 			if (isActivatedByArg(arg)) {
 				if (activatingArg != null) {
-					System.err.println("Warning : both arguments '"
+					parsingErrorStream.println("Warning : both arguments '"
 							+ activatingArg + "' and '" + arg
 							+ "' can activate this option."
 							+ " Ignoring the first and using the last one.");
@@ -407,7 +417,8 @@ public abstract class OptionTree {
 		}
 		if (activatingArg != null) {
 			args.remove(activatingArg);
-			setValueFromArg(activatingArg);
+			if (!setValueFromArg(activatingArg, parsingErrorStream))
+				parseError = true;
 		} else {
 			// this option is not activated, but maybe a sub option can be
 			// activated to choose which subTree to select
@@ -419,14 +430,13 @@ public abstract class OptionTree {
 						if (oneSubTreeIsActivatedByArg(selectableGroup, arg)) {
 							keptSubTrees.add(selectableGroup);
 						}
-
 					}
 					subTrees = keptSubTrees;
 				}
 			}
 			if (subTrees.size() == 1) {
 				setValueFromSelectedChildren(subTrees.get(0));
-				System.out.println(
+				parsingErrorStream.println(
 						"Warning : deduced value of this option by trying sub options."
 								+ " It is better to specify directly the value of this option ("
 								+ getSelectedArgument()
@@ -437,7 +447,9 @@ public abstract class OptionTree {
 				if (defaultValue == null)
 					return false;
 				else {
-					setValueFromArg(defaultValue);
+					boolean r = setValueFromArg(defaultValue,
+							parsingErrorStream);
+					assert r;
 				}
 			}
 		}
@@ -446,12 +458,12 @@ public abstract class OptionTree {
 		boolean subTreeSuccessfullyParsed = true;
 		List<OptionTree> selectedSubTrees = getSelectedChildren();
 		for (OptionTree subtree : selectedSubTrees)
-			if (!subtree.parseArgumentsInternal(args)) {
-				System.out.println("cannot define value of " + subtree
+			if (!subtree.parseArgumentsInternal(args, parsingErrorStream)) {
+				parsingErrorStream.println("cannot define value of " + subtree
 						+ " with arguments " + args);
 				subTreeSuccessfullyParsed = false;
 			}
-		return subTreeSuccessfullyParsed;
+		return subTreeSuccessfullyParsed && !parseError;
 	}
 
 	/**

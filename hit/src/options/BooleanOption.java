@@ -2,6 +2,7 @@ package options;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -149,9 +150,11 @@ public class BooleanOption extends OptionTree {
 	}
 
 	@Override
-	protected void setValueFromArg(ArgumentValue arg) {
+	protected boolean setValueFromArg(ArgumentValue arg,
+			PrintStream parsingErrorStream) {
 		assert isActivatedByArg(arg);
 		setEnabled(arg.getName().equals(enableArgumentDescriptor.name));
+		return true;
 	}
 
 	@Override

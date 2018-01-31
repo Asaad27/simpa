@@ -10,45 +10,23 @@ import javax.swing.JComboBox;
 import javax.swing.JPanel;
 
 import options.OptionTree;
-import options.OptionTree.ArgumentDescriptor.AcceptedValues;
 
 /**
- * An option to select one choice in a list.
+ * An option to select one choice in a list. The command line argument can be
+ * either one argument per choice using class {@link MultiArgChoiceOption} or
+ * one argument for the option and one value per choice with
+ * {@link GenericOneArgChoiceOption}.
  * 
  * @author Nicolas BREMOND
  */
-public class ChoiceOption extends OptionTree {
-	/**
-	 * A class to represent one possible choice in the list of a
-	 * {@link ChoiceOption}.
-	 */
-	protected class ChoiceItem {
-		public final String name;
-		public final ArgumentDescriptor argument;
-		public List<OptionTree> subTrees = new ArrayList<>();
 
-		public ChoiceItem(String name, String argument, ChoiceOption parent) {
-			assert argument.startsWith("-");
-			this.name = name;
-			this.argument = new ArgumentDescriptor(AcceptedValues.NONE,
-					argument, parent);
-		}
+public abstract class GenericChoiceOption<T extends ChoiceOptionItem>
+		extends OptionTree {
 
-		public ChoiceItem(String name, String argument, ChoiceOption parent,
-				List<OptionTree> subTrees) {
-			this(name, argument, parent);
-			if (subTrees != null)
-				this.subTrees = subTrees;
-		}
-
-		public String toString() {
-			return name;
-		}
-	}
-
-	private JComboBox<ChoiceItem> choiceCombo = null;
-	private List<ChoiceItem> choices = new ArrayList<>();
-	private ChoiceItem selectedItem = null;
+	private JComboBox<T> choiceCombo = null;
+	protected List<T> choices = new ArrayList<>();
+	private T selectedItem = null;
+	protected T defaultItem = null;
 
 	/**
 	 * Add a possible choice in the list.
@@ -57,7 +35,7 @@ public class ChoiceOption extends OptionTree {
 	 *            the choice to add.
 	 * @warning must be called in constructor, like {@link addSortedChildren}.
 	 */
-	protected void addChoice(ChoiceItem choice) {
+	protected void addChoice(T choice) {
 		assert mainContainer == null;
 		choices.add(choice);
 		addSortedChildren(choice.subTrees);
@@ -73,7 +51,7 @@ public class ChoiceOption extends OptionTree {
 		mainContainer.setLayout(new BoxLayout(mainContainer, BoxLayout.Y_AXIS));
 
 		choiceCombo = new JComboBox<>();
-		for (ChoiceItem choice : choices) {
+		for (T choice : choices) {
 			choiceCombo.addItem(choice);
 		}
 		choiceCombo.addItemListener(new ItemListener() {
@@ -104,14 +82,14 @@ public class ChoiceOption extends OptionTree {
 	 * @param choice
 	 *            the value to use.
 	 */
-	public void selectChoice(ChoiceItem choice) {
+	public void selectChoice(T choice) {
 		assert choices.contains(choice);
 		selectedItem = choice;
 		if (choiceCombo != null && choiceCombo.getSelectedItem() != choice) {
 			choiceCombo.setSelectedItem(choice);
 			choiceCombo.validate();
 		}
-		updateSubTreeComponent("options for " + selectedItem.name);
+		updateSubTreeComponent("options for " + selectedItem.displayName);
 	}
 
 	@Override
@@ -120,29 +98,9 @@ public class ChoiceOption extends OptionTree {
 	}
 
 	@Override
-	protected boolean isActivatedByArg(ArgumentValue arg) {
-		for (ChoiceItem choice : choices) {
-			if (choice.argument.name.equals(arg.getName()))
-				return true;
-		}
-		return false;
-	}
-
-	@Override
-	protected void setValueFromArg(ArgumentValue arg) {
-		for (ChoiceItem choice : choices) {
-			if (choice.argument.name.equals(arg.getName())) {
-				selectChoice(choice);
-				return;
-			}
-		}
-		assert false;
-	}
-
-	@Override
 	protected void setValueFromSelectedChildren(
 			List<OptionTree> selectedChildren) {
-		for (ChoiceItem choice : choices) {
+		for (T choice : choices) {
 			if (choice.subTrees == selectedChildren) {
 				selectChoice(choice);
 				assert getSelectedChildren() == selectedChildren;
@@ -152,26 +110,25 @@ public class ChoiceOption extends OptionTree {
 		assert false : "sub tree do not match any item";
 	}
 
-	@Override
-	protected String getSelectedArgument() {
-		return selectedItem.argument.name;
-	}
-
 	/**
 	 * Get the current value of this option.
 	 * 
 	 * @return the current value of this option.
 	 */
-	public ChoiceItem getSelectedItem() {
+	public T getSelectedItem() {
 		return selectedItem;
 	}
 
-	@Override
-	protected List<ArgumentDescriptor> getAcceptedArguments() {
-		List<ArgumentDescriptor> args = new ArrayList<>();
-		for (ChoiceItem choice : choices) {
-			args.add(choice.argument);
-		}
-		return args;
+	/**
+	 * set the default item for this choice option. classes inheriting this
+	 * class must implements the method {@link #getDefaultValue()}
+	 * 
+	 * @param item
+	 *            an item in the choices recorded.
+	 */
+	public void setDefaultItem(T item) {
+		assert choices.contains(item);
+		defaultItem = item;
 	}
+
 }
