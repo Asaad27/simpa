@@ -98,6 +98,7 @@ public class Options {
 	 */
 	public static int REDUCE_DISPLAYED_TRACES = 25;
 
+	@Deprecated
 	public static String SYSTEM = "";
 	public static List<String> URLS = null;
 	public static String OUTDIR = System.getProperty("user.dir");
