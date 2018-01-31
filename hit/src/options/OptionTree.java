@@ -548,4 +548,88 @@ public abstract class OptionTree {
 		}
 		return subTreeArguments;
 	}
+
+	/**
+	 * Get description/helping text for the provided argument.
+	 * 
+	 * @param arg
+	 *            an argument activating this option.
+	 * @return a text to display in CLI or GUI.
+	 */
+	public abstract String getHelpByArgument(ArgumentDescriptor arg);
+
+	public void printHelp(PrintStream stream) {
+		// first, list all argument and get their helping text.
+		List<OptionTree> toCompute = new ArrayList<>();
+		toCompute.add(this);
+		Map<String, ArgumentDescriptor> seenDescriptors = new HashMap<>();
+		Map<ArgumentDescriptor, String> helps = new HashMap<>();
+		while (!toCompute.isEmpty()) {
+			OptionTree current = toCompute.remove(0);
+			for (ArgumentDescriptor descriptor : current
+					.getAcceptedArguments()) {
+				String help = current.getHelpByArgument(descriptor);
+				if (seenDescriptors.containsKey(descriptor.name)) {
+					assert helps
+							.get(seenDescriptors.get(descriptor.name)) == help;
+				} else {
+					helps.put(descriptor, help);
+					seenDescriptors.put(descriptor.name, descriptor);
+				}
+			}
+			toCompute.addAll(current.getChildren());
+		}
+
+		// now print arguments in a readable format;
+		int maxArgDispLength = 0;
+		Map<ArgumentDescriptor, String> displayedArgs = new HashMap<>();
+		for (ArgumentDescriptor descriptor : helps.keySet()) {
+			String disp = descriptor.name;
+			switch (descriptor.acceptedValues) {
+			case NONE:
+				break;
+			case ONE:
+				disp = disp + "=<>";
+				break;
+			case SEVERAL:
+				disp = disp + "=<> ...";
+				break;
+			}
+			displayedArgs.put(descriptor, disp);
+			if (disp.length() > maxArgDispLength)
+				maxArgDispLength = disp.length();
+		}
+
+		int MAX_LENGTH = 80;// maximum length of lines, for readability.
+		int argColumnWidth = maxArgDispLength;
+		argColumnWidth++;// put a blank space between argument and help.
+		for (ArgumentDescriptor descriptor : helps.keySet()) {
+			String argDisp = displayedArgs.get(descriptor);
+			String help = helps.get(descriptor);
+			stream.print(argDisp);
+			int blankNumber = argColumnWidth - argDisp.length();
+
+			do {
+				for (int i = 0; i < blankNumber; i++) {
+					stream.print(" ");
+				}
+				blankNumber = argColumnWidth;
+				int helpLineLength = MAX_LENGTH - argColumnWidth;
+				int lastWordEnd = help.length();
+				if (help.length() > MAX_LENGTH - argColumnWidth) {
+					lastWordEnd = help.lastIndexOf(' ', helpLineLength);
+					if (lastWordEnd == -1)
+						lastWordEnd = help.indexOf(' ');
+					if (lastWordEnd == -1)
+						lastWordEnd = help.length();
+				}
+				stream.println(help.substring(0, lastWordEnd));
+				if (lastWordEnd < help.length() - 1)
+					help = help.substring(lastWordEnd + 1);
+				else
+					help = "";
+			} while (help.length() > 0);
+
+		}
+	}
 }

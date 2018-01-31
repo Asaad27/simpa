@@ -101,4 +101,9 @@ public class GenericOneArgChoiceOption<T extends OneArgChoiceOptionItem>
 		return list;
 	}
 
+	@Override
+	public String getHelpByArgument(ArgumentDescriptor arg) {
+		return description;
+	}
+
 }

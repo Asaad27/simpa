@@ -6,6 +6,7 @@ import java.util.List;
 
 public class GenericMultiArgChoiceOption<T extends MultiArgChoiceOptionItem>
 		extends GenericChoiceOption<T> {
+	protected String optionName = "";
 
 	@Override
 	protected boolean isActivatedByArg(ArgumentValue arg) {
@@ -16,17 +17,27 @@ public class GenericMultiArgChoiceOption<T extends MultiArgChoiceOptionItem>
 		return false;
 	}
 
-	@Override
-	protected boolean setValueFromArg(ArgumentValue arg,
-			PrintStream parsingErrorStream) {
+	protected T getItemFromArg(ArgumentValue arg) {
 		for (T choice : choices) {
 			if (choice.argument.name.equals(arg.getName())) {
 				selectChoice(choice);
-				return true;
+				return choice;
 			}
 		}
 		assert false;
-		return false;
+		return null;
+	}
+
+	@Override
+	protected boolean setValueFromArg(ArgumentValue arg,
+			PrintStream parsingErrorStream) {
+		T item = getItemFromArg(arg);
+		if (item == null)
+			return false;
+
+		selectChoice(item);
+		return true;
+
 	}
 
 	@Override
@@ -49,5 +60,11 @@ public class GenericMultiArgChoiceOption<T extends MultiArgChoiceOptionItem>
 			assert choice.argument.name.startsWith("-");
 		}
 		return args;
+	}
+
+	@Override
+	public String getHelpByArgument(ArgumentDescriptor arg) {
+		return "set value of option " + optionName + " to "
+				+ getItemFromArg(new ArgumentValue(arg));
 	}
 }

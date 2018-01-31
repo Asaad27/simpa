@@ -198,6 +198,16 @@ public class BooleanOption extends OptionTree {
 	}
 
 	@Override
+	public String getHelpByArgument(ArgumentDescriptor arg) {
+		if (arg == enableArgumentDescriptor)
+			return "enable " + name;
+		else {
+			assert arg == disableArgumentDescriptor;
+			return "disable " + name;
+		}
+	}
+
+	@Override
 	public String toString() {
 		return "option " + name;
 	}
