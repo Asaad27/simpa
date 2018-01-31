@@ -570,8 +570,8 @@ public abstract class OptionTree {
 					.getAcceptedArguments()) {
 				String help = current.getHelpByArgument(descriptor);
 				if (seenDescriptors.containsKey(descriptor.name)) {
-					assert helps
-							.get(seenDescriptors.get(descriptor.name)) == help;
+					assert helps.get(seenDescriptors.get(descriptor.name))
+							.equals(help);
 				} else {
 					helps.put(descriptor, help);
 					seenDescriptors.put(descriptor.name, descriptor);

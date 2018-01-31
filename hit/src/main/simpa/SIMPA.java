@@ -296,8 +296,8 @@ class HelpOption extends Option<Object> {
 				used.set(i, true);
 				System.out.println("you don't know how it works ?");
 				SIMPA.usage();
+				System.exit(0);
 			}
-		// TODO add a more detailed help for each commands.
 	}
 
 	protected void postCheck(String[] args, ArrayList<Boolean> used) {
@@ -503,6 +503,7 @@ public class SIMPA {
 		if (TREE_INFERENCE.getValue() && LOCALIZER_BASED_INFERENCE.getValue()) {
 			System.out.println("You cannot choose two inference system");
 			usage();
+			System.exit(1);
 		}
 		if (TREE_INFERENCE.getValue() || LM_INFERENCE.getValue()) {
 			parse(args, used, ZQOptions);
@@ -1120,6 +1121,8 @@ public class SIMPA {
 	}
 
 	private static final String GUI_ARGUMENT = "--gui";
+	private static final String HELP_ARGUMENT = "--help";
+	private static final String SHORT_HELP_ARGUMENT = "-h";
 
 	public static void main(String[] args) {
 		if (args.length == 0) {
@@ -1129,13 +1132,20 @@ public class SIMPA {
 						createAndShowGUI();
 					} catch (HeadlessException e) {
 						System.err.println("Cannot open gui");
-						System.out.println(
-								"To run SIMPA in console, try option --help to see complete list of arguments");
+						System.out
+								.println("To run SIMPA in console, try option "
+										+ HELP_ARGUMENT
+										+ " to see complete list of arguments");
 					}
 				}
 			});
 		} else {
 			List<String> arrayArgs = new ArrayList<String>(Arrays.asList(args));
+			if (arrayArgs.contains(HELP_ARGUMENT)
+					|| arrayArgs.contains(SHORT_HELP_ARGUMENT)) {
+				usage();
+				return;
+			}
 			boolean openGui = arrayArgs.contains(GUI_ARGUMENT);
 			while (arrayArgs.remove(GUI_ARGUMENT))
 				;
@@ -1169,6 +1179,7 @@ public class SIMPA {
 				});
 			} else {
 				if (!parsedSuccessfully) {
+					usage();
 					System.exit(1);
 				}
 				if (STATS_MODE.getValue()) {
@@ -1200,6 +1211,7 @@ public class SIMPA {
 	}
 
 	public static void usage() {
+		automataChoice.printHelp(System.out);
 		System.out.println("Usage : SIMPA driverClass [Options]");
 		System.out.println("");
 		System.out.println("Options");
@@ -1243,6 +1255,8 @@ public class SIMPA {
 		System.out.println();
 		System.out.println("Ex: SIMPA drivers.efsm.NSPKDriver --outdir mydir --text");
 		System.out.println();
+
+		automataChoice.printHelp(System.out);
 	}
 
 	protected static void printUsage(Option<?>[] options) {
