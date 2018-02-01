@@ -82,14 +82,14 @@ public class RivestSchapireLearner extends Learner {
 		stats.setTraceLength(
 				finishedLearner.getGlobalTraceLengthBeforeLastCE());
 		stats.setLearnerNumber(drivers.size());
-		if (Options.LOG_LEVEL == LogLevel.ALL)
+		if (Options.getLogLevel() == LogLevel.ALL)
 			createConjecture().exportToDot();
 		stats.updateWithConjecture(createConjecture());
 		stats.updateWithHomingSequence(homingSequence);
 	}
 
 	protected void learn(InputSequence homingSequence) throws Throwable {
-		if (Options.LOG_LEVEL != LogLevel.LOW)
+		if (Options.getLogLevel() != LogLevel.LOW)
 			LogManager.logConsole("lerning with homming sequence "
 					+ homingSequence);
 		LogManager.logInfo("learning with homing sequence h=" + homingSequence);

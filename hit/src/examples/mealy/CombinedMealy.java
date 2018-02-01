@@ -37,7 +37,8 @@ public class CombinedMealy extends Mealy implements Serializable {
 		LogManager.logStep(LogManager.STEPOTHER, "Generate product of "+m1.getName() +" and "+m2.getName());
 		Map<State,Map<State,State>> combinedStates = createStates();
 		createTransitions(combinedStates);
-		if (Options.LOG_LEVEL==LogLevel.ALL) exportToDot();
+		if (Options.getLogLevel() == LogLevel.ALL)
+			exportToDot();
 	}
 	
 	private Map<State, Map<State, State>> createStates(){

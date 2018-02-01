@@ -88,6 +88,10 @@ public class Options {
 	
 	// Output's options
 
+	public static LogLevel getLogLevel() {
+		return SIMPA.getLogLevel();
+	}
+	@Deprecated
 	public static LogLevel LOG_LEVEL = LogLevel.ALL;
 	public static boolean LOG_TEXT = false;
 	public static boolean LOG_HTML = false;

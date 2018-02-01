@@ -156,7 +156,7 @@ public class FixedHomingSequenceChecker extends GenericHomingSequenceChecker {
 			traceB.append(input, knownOutput);
 			traceA.append(input, output);
 			this.currentNode=previousNode.children.get(input).n;
-			if (Options.LOG_LEVEL == LogLevel.ALL){
+			if (Options.getLogLevel() == LogLevel.ALL) {
 				LogManager.logInfo("Inconsistency found in homing sequence");
 				exportToDot();
 				}

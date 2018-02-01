@@ -48,9 +48,9 @@ public class PartiallyKnownTrace {
 		assert WResponses.acceptNextPrint(print);
 
 		WResponses.addPrint(print);
-		if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+		if (Options.getLogLevel() != Options.LogLevel.LOW)
 			LogManager.logInfo("New print(=a response to W input) found : " + start + " followed by " + transition + " → " + print);
-		if (Options.LOG_LEVEL == Options.LogLevel.ALL)
+		if (Options.getLogLevel() == Options.LogLevel.ALL)
 			LogManager.logInfo("K is now : " + SimplifiedDataManager.instance.getK());
 		if (WResponses.isComplete()) {
 			//we have totally found a transition

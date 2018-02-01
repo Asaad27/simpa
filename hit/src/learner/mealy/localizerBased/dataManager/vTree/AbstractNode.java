@@ -90,7 +90,7 @@ public abstract class AbstractNode {
 	protected AbstractNode() {
 		children = new HashMap<>();
 		outputs = new HashMap<>();
-		if (Options.LOG_LEVEL == LogLevel.ALL)
+		if (Options.getLogLevel() == LogLevel.ALL)
 			instances.add(this);
 	}
 
@@ -231,7 +231,7 @@ public abstract class AbstractNode {
 		}
 		if (!incompatibleNodes.add(o))
 			return;
-		if (o.isStateNode() && Options.LOG_LEVEL != LogLevel.LOW)
+		if (o.isStateNode() && Options.getLogLevel() != LogLevel.LOW)
 			LogManager.logInfo(this + "is incompatible with " + o);
 		for (AbstractNode p : getParents())
 			for (AbstractNode oP : o.getParents())
@@ -245,7 +245,7 @@ public abstract class AbstractNode {
 	}
 
 	protected void changeChild(String input, StateNode newNode) {
-		if (Options.LOG_LEVEL != LogLevel.LOW)
+		if (Options.getLogLevel() != LogLevel.LOW)
 			LogManager.logInfo(this + " change child for " + input + " (" + getChild(input) + ") to " + newNode);
 		AbstractNode oldNode = getChild(input);
 		assert oldNode != null;

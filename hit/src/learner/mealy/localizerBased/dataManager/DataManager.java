@@ -187,7 +187,7 @@ public class DataManager {
 			return;
 		}
 		C.set(pos, s);
-		if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+		if (Options.getLogLevel() != Options.LogLevel.LOW)
 			logRecursivity("Labelling trace : position " + pos + " is now " + s);
 		startRecursivity();
 		for (FullyQualifiedState q : Q.values()){
@@ -597,7 +597,7 @@ public class DataManager {
 	public void exportVTreeToDot(){
 		if (!options.useSpeedUp())
 			return;
-		if (Options.LOG_LEVEL != Options.LogLevel.ALL)
+		if (Options.getLogLevel() != Options.LogLevel.ALL)
 			return;
 		if (currentVNode == null){
 			LogManager.logInfo("VTree is unknown");

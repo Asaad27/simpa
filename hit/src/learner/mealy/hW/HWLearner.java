@@ -131,7 +131,7 @@ public class HWLearner extends Learner {
 			for (GenericInputSequence w : characterization.unknownPrints()) {
 				dataManager.reset();
 				GenericOutputSequence r = dataManager.apply(w);
-				if (Options.LOG_LEVEL != LogLevel.LOW)
+				if (Options.getLogLevel() != LogLevel.LOW)
 					LogManager.logInfo(
 							"characterizing initial state with sequence ", w);
 				characterization.addPrint(w, r);
@@ -271,7 +271,7 @@ public class HWLearner extends Learner {
 			for (GenericInputSequence w : characterization.unknownPrints()) {
 				dataManager.reset();
 				GenericOutputSequence r = dataManager.apply(w);
-				if (Options.LOG_LEVEL != LogLevel.LOW)
+				if (Options.getLogLevel() != LogLevel.LOW)
 					LogManager.logInfo(
 							"characterizing initial state with sequence ", w);
 				characterization.addPrint(w, r);
@@ -394,7 +394,7 @@ public class HWLearner extends Learner {
 
 	private GenericInputSequence proceedHException(GenericHNDException e) {
 		stats.increaseHInconsitencies();
-		if (Options.LOG_LEVEL != LogLevel.LOW) {
+		if (Options.getLogLevel() != LogLevel.LOW) {
 			LogManager.logInfo(
 					"Non-determinism found (due to homming sequence) : " + e);
 			LogManager.logConsole(
@@ -405,7 +405,7 @@ public class HWLearner extends Learner {
 		if (e instanceof AdaptiveHomingSequenceChecker.AdaptiveHNDException) {
 			AdaptiveHomingSequenceChecker.AdaptiveHNDException adaptiveE = (AdaptiveHomingSequenceChecker.AdaptiveHNDException) e;
 			adaptiveE.updateH();
-			if (Options.LOG_LEVEL != LogLevel.LOW)
+			if (Options.getLogLevel() != LogLevel.LOW)
 				adaptiveE.getNewH().exportToDot();
 			List<GenericOutputSequence> responses = new ArrayList<>(
 					hZXWSequences.keySet());
@@ -526,7 +526,7 @@ public class HWLearner extends Learner {
 				h = proceedHException(e);
 				inconsistencyFound = true;
 			} catch (ConjectureNotConnexException e) {
-				if (Options.LOG_LEVEL != LogLevel.LOW) {
+				if (Options.getLogLevel() != LogLevel.LOW) {
 					LogManager
 							.logInfo("The conjecture is not connex. We stop here and look for a counter example");
 
@@ -535,7 +535,7 @@ public class HWLearner extends Learner {
 				}
 			} catch (InconsistancyWithConjectureAtEndOfTraceException e) {
 				stats.increaseWInconsistencies();
-				if (Options.LOG_LEVEL != LogLevel.LOW) {
+				if (Options.getLogLevel() != LogLevel.LOW) {
 					LogManager.logInfo("Non-determinism found : " + e);
 					LogManager.logConsole("Non-determinism found : " + e);
 				}
@@ -543,7 +543,7 @@ public class HWLearner extends Learner {
 				inconsistencyFound = true;
 			} catch (InconsistancyWhileMergingExpectedTracesException e) {
 				stats.increaseWInconsistencies();
-				if (Options.LOG_LEVEL != LogLevel.LOW) {
+				if (Options.getLogLevel() != LogLevel.LOW) {
 					LogManager.logInfo("Non-determinism found : " + e);
 					LogManager.logConsole("Non-determinism found : " + e);
 				}
@@ -557,7 +557,7 @@ public class HWLearner extends Learner {
 				LogManager
 						.logInfo("one counter example found during inference: "
 								+ counterExampleTrace);
-				if (Options.LOG_LEVEL != LogLevel.LOW)
+				if (Options.getLogLevel() != LogLevel.LOW)
 					LogManager.logConsole(
 							"one counter example found during inference : "
 									+ counterExampleTrace);
@@ -617,7 +617,7 @@ public class HWLearner extends Learner {
 				else {
 					LogManager.logInfo("one counter example found : "
 							+ counterExampleTrace);
-					if (Options.LOG_LEVEL != LogLevel.LOW)
+					if (Options.getLogLevel() != LogLevel.LOW)
 						LogManager.logConsole("one counter example found : "
 								+ counterExampleTrace);
 				}
@@ -824,7 +824,7 @@ public class HWLearner extends Learner {
 				}
 			} catch (InconsistancyHMappingAndConjectureException e) {
 				String INC_NAME = "3rd inconsistency";
-				if (Options.LOG_LEVEL != LogLevel.LOW)
+				if (Options.getLogLevel() != LogLevel.LOW)
 					LogManager.logInfo("Inconsistency found :" + e);
 				GenericInputSequence distinctionW = e.getDistinctionSequence();
 				if (distinctionW == null) {
@@ -928,7 +928,7 @@ public class HWLearner extends Learner {
 		State bEnd = conjecture.applyGetState(dataManager.h, bStart);
 		assert aEnd != bEnd;
 
-		if (Options.LOG_LEVEL != LogLevel.LOW) {
+		if (Options.getLogLevel() != LogLevel.LOW) {
 			LogManager.logInfo(
 					"New inconsistency found : h is not homming for this conjecture. In conjecture, from states "
 							+ aStart + " and " + bStart
@@ -963,7 +963,7 @@ public class HWLearner extends Learner {
 
 			if (!conjecture.apply(w, aEnd).equals(conjecture.apply(w, bEnd))) {
 				statesAreEquivalents = false;
-				if (Options.LOG_LEVEL != LogLevel.LOW) {
+				if (Options.getLogLevel() != LogLevel.LOW) {
 					LogManager.logInfo("States " + aEnd + " and " + bEnd
 							+ " can be distinguished by ");
 				}
@@ -978,7 +978,7 @@ public class HWLearner extends Learner {
 				if (path != null) {
 					LogManager.logInfo(
 							"there is a path in conjecture which will raise an inconsistency of type one or two");
-					if (Options.LOG_LEVEL != LogLevel.LOW) {
+					if (Options.getLogLevel() != LogLevel.LOW) {
 						LogManager.logConsole(
 								"inconsistency found : h is not homming for conjecture. Moreover there is a path in conjecture to raise an inconsistency of type one or two");
 					}
@@ -995,7 +995,7 @@ public class HWLearner extends Learner {
 				}
 			}
 		}
-		if (Options.LOG_LEVEL != LogLevel.LOW) {
+		if (Options.getLogLevel() != LogLevel.LOW) {
 			if (statesAreEquivalents)
 				LogManager.logInfo("States " + aEnd + " and " + bEnd
 						+ " have the same characterization in conjecture. We cannot say that h is not homming because conjecture is not minimal.");
@@ -1166,7 +1166,7 @@ public class HWLearner extends Learner {
 		assert checkTraces();
 		if (!continueLastLearning) {
 			LogManager.logStep(LogManager.STEPOTHER, "Inferring the system");
-			if (Options.LOG_LEVEL != LogLevel.LOW)
+			if (Options.getLogLevel() != LogLevel.LOW)
 				LogManager.logConsole(
 						"Inferring the system with W=" + W + " and h=" + h);
 
@@ -1174,7 +1174,7 @@ public class HWLearner extends Learner {
 			StringBuilder logW = new StringBuilder(
 					"Using characterization struct : ");
 			W.toString(logW);
-			if (Options.LOG_LEVEL == LogLevel.ALL
+			if (Options.getLogLevel() == LogLevel.ALL
 					&& driver instanceof TransparentMealyDriver) {
 				TransparentMealyDriver tDriver = (TransparentMealyDriver) driver;
 				if (tDriver.getAutomata()
@@ -1185,12 +1185,12 @@ public class HWLearner extends Learner {
 				}
 			}
 			if (W instanceof TotallyAdaptiveW
-					&& Options.LOG_LEVEL == LogLevel.ALL) {
+					&& Options.getLogLevel() == LogLevel.ALL) {
 				((TotallyAdaptiveW) W).exportToDot();
 			}
 			LogManager.logInfo(logW.toString());
 			LogManager.logInfo("Using homing sequence «" + h + "»"
-					+ ((Options.LOG_LEVEL == LogLevel.ALL
+					+ ((Options.getLogLevel() == LogLevel.ALL
 							&& driver instanceof TransparentMealyDriver)
 									? (((TransparentMealyDriver) driver)
 											.getAutomata()
@@ -1316,11 +1316,11 @@ public class HWLearner extends Learner {
 			GenericInputSequence w = new InputSequence();
 			if (!W.isEmpty())
 				w = allowed_W.get(0); // here we CHOOSE to take the first.
-			if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+			if (Options.getLogLevel() != Options.LogLevel.LOW)
 				LogManager.logInfo("We choose w = " + w + " in " + allowed_W);
 			GenericOutputSequence wResponse = dataManager.apply(w);
 			LmTrace wTrace = w.buildTrace(wResponse);
-			if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+			if (Options.getLogLevel() != Options.LogLevel.LOW)
 				LogManager.logInfo("We found that "
 						+ lastKnownQ
 						+ " followed by "
@@ -1348,7 +1348,7 @@ public class HWLearner extends Learner {
 			}
 		} while (!dataManager.isFullyKnown());
 
-		if (Options.LOG_LEVEL == Options.LogLevel.ALL)
+		if (Options.getLogLevel() == Options.LogLevel.ALL)
 			dataManager.getConjecture().exportToDot();
 		LogManager.logInfo("end of sub-learning.");
 	}
@@ -1368,7 +1368,7 @@ public class HWLearner extends Learner {
 			}
 			if (initialState
 					.getKnownTransition(transition.getInput(0)) != null) {
-				if (Options.LOG_LEVEL != LogLevel.LOW)
+				if (Options.getLogLevel() != LogLevel.LOW)
 					LogManager.logInfo(
 							"cannot reuse trace " + localizedSeq.sequence
 									+ " because transition from " + initialState
@@ -1379,7 +1379,7 @@ public class HWLearner extends Learner {
 					.getPartiallTransitionOutput(transition.getInput(0));
 			if (expectedTransitionOutput != null && !expectedTransitionOutput
 					.equals(transition.getOutput(0))) {
-				if (Options.LOG_LEVEL != LogLevel.LOW)
+				if (Options.getLogLevel() != LogLevel.LOW)
 					LogManager.logWarning("cannot reuse trace "
 							+ localizedSeq.sequence
 							+ " because it is not consistent with partially known traces");
@@ -1407,13 +1407,13 @@ public class HWLearner extends Learner {
 								.getInputsProjection(),
 						localizedSeq.sequence.getTransferSequence()
 								.getOutputsProjection());
-				if (Options.LOG_LEVEL != LogLevel.LOW)
+				if (Options.getLogLevel() != LogLevel.LOW)
 					LogManager.logInfo("trace ", localizedSeq.sequence,
 							" from dictionary is inconsistent with others observations");
 				throw inc;
 			}
 			if (initialState.hZXWSequenceIsInNeededW(localizedSeq)) {
-				if (Options.LOG_LEVEL != LogLevel.LOW)
+				if (Options.getLogLevel() != LogLevel.LOW)
 					LogManager
 							.logInfo("reusing trace " + localizedSeq.sequence);
 				dataManager.addPartiallyKnownTrace(initialState, transition,

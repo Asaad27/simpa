@@ -184,7 +184,7 @@ public class CutterCombinatorialLearner extends Learner {
 			MealyTransition t = n.getTransitionFromWithInput(n.getState(), i);
 			if (t != null){
 				if (!t.getOutput().equals(o)){
-					if (Options.LOG_LEVEL  != LogLevel.LOW)
+					if (Options.getLogLevel()  != LogLevel.LOW)
 						LogManager.logInfo("we supposed to have transition '" + t + "' but applying '" + i +"' produced '" + o + "'. cutting.");
 					n.cut();
 					continue;
@@ -310,7 +310,7 @@ public class CutterCombinatorialLearner extends Learner {
 	 */
 	private InputSequence getShortestUnknowntransition(State start, Conjecture c){
 		LogManager.logInfo("searching an unknown transition from " + start);
-		if (Options.LOG_LEVEL == LogLevel.ALL)
+		if (Options.getLogLevel() == LogLevel.ALL)
 			c.exportToDot();
 		class Node{public InputSequence i; public State end;}
 		LinkedList<Node> toCompute = new LinkedList<Node>();
@@ -465,7 +465,7 @@ public class CutterCombinatorialLearner extends Learner {
 
 	private int n_export=0;
 	public void exportTreeToDot() {
-		if (Options.LOG_LEVEL == Options.LogLevel.LOW)
+		if (Options.getLogLevel() == Options.LogLevel.LOW)
 			return;
 		n_export++;
 		Writer writer = null;

@@ -77,7 +77,7 @@ public class CombinatorialLearner extends Learner {
 	 */
 	private TreeNode compute(TreeNode n){
 		//TODO make a non-recursive version of that ?
-		if (Options.LOG_LEVEL  != LogLevel.LOW)
+		if (Options.getLogLevel() != LogLevel.LOW)
 			LogManager.logInfo("currently in " + n.getStatesTrace(trace));
 		if (n.isCut())
 			return null;
@@ -107,7 +107,7 @@ public class CombinatorialLearner extends Learner {
 		MealyTransition t = n.getTransitionFromWithInput(n.getState(), i);
 		if (t != null){
 			if (!t.getOutput().equals(o)){
-				if (Options.LOG_LEVEL  != LogLevel.LOW)
+				if (Options.getLogLevel() != LogLevel.LOW)
 					LogManager.logInfo("we supposed to have transition '" + t + "' but applying '" + i +"' produced '" + o + "'. cutting.");
 				n.cut();
 				return null;
@@ -131,7 +131,7 @@ public class CombinatorialLearner extends Learner {
 			if (returnedNode != null)
 				return returnedNode;
 			checkedChildren ++;
-			if (Options.LOG_LEVEL != LogLevel.ALL)
+			if (Options.getLogLevel() != LogLevel.ALL)
 				n.removeChild(q);
 		}
 		return null;
@@ -146,7 +146,7 @@ public class CombinatorialLearner extends Learner {
 	 */
 	private InputSequence getShortestUnknowntransition(State start, Conjecture c){
 		LogManager.logInfo("searching an unknown transition from " + start);
-		if (Options.LOG_LEVEL == LogLevel.ALL)
+		if (Options.getLogLevel() == LogLevel.ALL)
 			c.exportToDot();
 		class Node{public InputSequence i; public State end;}
 		LinkedList<Node> toCompute = new LinkedList<Node>();
@@ -303,7 +303,7 @@ public class CombinatorialLearner extends Learner {
 
 	public void exportTreeToDot() {
 		boolean hideCutBranches = false;
-		if (Options.LOG_LEVEL != Options.LogLevel.ALL)
+		if (Options.getLogLevel() != Options.LogLevel.ALL)
 			return;
 		n_export++;
 		Writer writer = null;

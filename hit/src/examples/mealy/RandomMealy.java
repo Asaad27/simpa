@@ -69,7 +69,7 @@ public class RandomMealy extends Mealy implements Serializable {
 				break;
 			case ONE_DIFF_PER_STATE:
 				String diff = Utils.randIn(inputSymbols);
-				if (Options.LOG_LEVEL != LogLevel.LOW)
+				if (Options.getLogLevel() != LogLevel.LOW)
 					LogManager.logInfo("Changing output for state " + s
 							+ " is " + diff);
 				for (String i : inputSymbols) {
@@ -114,7 +114,7 @@ public class RandomMealy extends Mealy implements Serializable {
 			createConnexTransitions(chooseOutputs());
 		else
 			createTransitions(chooseOutputs());
-		if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+		if (Options.getLogLevel() != Options.LogLevel.LOW)
 			exportToDot();
 	}
 	

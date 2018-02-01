@@ -117,7 +117,7 @@ public abstract class OptionTree {
 						new BoxLayout(subTreeContainer, BoxLayout.Y_AXIS));
 				mainContainer.add(subTreeContainer);
 			}
-			mainContainer.validate();
+			mainContainer.revalidate();
 		}
 	}
 

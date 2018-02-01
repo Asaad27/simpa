@@ -262,7 +262,7 @@ public class SimplifiedDataManager {
 	}
 
 	public String apply(String input) {
-		if (Options.LOG_LEVEL == Options.LogLevel.ALL)
+		if (Options.getLogLevel() == Options.LogLevel.ALL)
 			LogManager.logInfo("expected Traces are ", expectedTraces);
 		String output = driver.execute(input);
 		extendTrace(input, output);
@@ -306,7 +306,7 @@ public class SimplifiedDataManager {
 							.logInfo("According to conjecture, we are now in state "
 									+ currentState);
 				expectedTraces.add(currentState.getExpectedTraces());
-				if (Options.LOG_LEVEL == LogLevel.ALL)
+				if (Options.getLogLevel() == LogLevel.ALL)
 					LogManager.logInfo("adding expected traces ",
 							currentState.getExpectedTraces());
 			} else

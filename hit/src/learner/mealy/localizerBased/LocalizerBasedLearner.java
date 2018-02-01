@@ -134,11 +134,11 @@ public class LocalizerBasedLearner extends Learner {
 			List<InputSequence> allowed_W = dataManager.getwNotInK(q, sigma);
 			InputSequence w = allowed_W.get(0); // here we CHOOSE to take the
 												// first.
-			if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+			if (Options.getLogLevel() != Options.LogLevel.LOW)
 				LogManager.logInfo("We choose w = " + w + " in " + allowed_W);
 			int newStatePos = dataManager.traceSize();
 			dataManager.apply(w);
-			if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+			if (Options.getLogLevel() != Options.LogLevel.LOW)
 				LogManager.logInfo("We found that "
 						+ q
 						+ " followed by "
@@ -167,7 +167,7 @@ public class LocalizerBasedLearner extends Learner {
 		stats.updateMemory((int) (runtime.totalMemory() - runtime.freeMemory()));
 		stats.setTraceLength(dataManager.traceSize());
 		stats.updateWithConjecture(dataManager.getConjecture());
-		if (Options.LOG_LEVEL == Options.LogLevel.ALL || Options.TEST)
+		if (Options.getLogLevel() == Options.LogLevel.ALL || Options.TEST)
 			LogManager.logConsole(dataManager.readableTrace());
 		dataManager.getConjecture().exportToDot();
 		if (driver instanceof TransparentMealyDriver) {
@@ -257,7 +257,7 @@ public class LocalizerBasedLearner extends Learner {
 				inputSequences);
 		Z1.remove(Z1.size() - 1);
 		ArrayList<List<OutputSequence>> localizerResponses = new ArrayList<List<OutputSequence>>();
-		if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+		if (Options.getLogLevel() != Options.LogLevel.LOW)
 			LogManager.logInfo("Localizer : Applying " + (2 * n - 1)
 					+ " times localize(" + Z1 + ")");
 		for (int i = 0; i < 2 * n - 1; i++) {
@@ -274,7 +274,7 @@ public class LocalizerBasedLearner extends Learner {
 				if (!localizerResponses.get(j + m).equals(
 						localizerResponses.get(n + m))) {
 					isLoop = false;
-					if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+					if (Options.getLogLevel() != Options.LogLevel.LOW)
 						LogManager.logInfo("Tried size " + (n - j)
 								+ " : it's not a loop : [" + (j + m) + "] = ("
 								+ Z1 + " → " + localizerResponses.get(j + m)
@@ -284,9 +284,9 @@ public class LocalizerBasedLearner extends Learner {
 				}
 			}
 		}
-		if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+		if (Options.getLogLevel() != Options.LogLevel.LOW)
 			LogManager.logInfo("Localizer : Found a loop of size " + (n - j));
-		if (Options.LOG_LEVEL == Options.LogLevel.ALL)
+		if (Options.getLogLevel() == Options.LogLevel.ALL)
 			LogManager
 					.logInfo("Localizer : We know that applying localize_intern("
 							+ Z1
@@ -304,7 +304,7 @@ public class LocalizerBasedLearner extends Learner {
 			s.append(new LmTrace(inputSequences.get(i), WResponses.get(i))
 					+ ", ");
 		}
-		if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+		if (Options.getLogLevel() != Options.LogLevel.LOW)
 			LogManager.logInfo("Localizer : Before "
 					+ inputSequences.get(inputSequences.size() - 1)
 					+ " we were in " + s);
@@ -619,7 +619,7 @@ public class LocalizerBasedLearner extends Learner {
 		List<State> randomizedStates = automata.getStates();
 		Collections.shuffle(randomizedStates, new Random(Utils.randLong()));
 		for (State s1 : automata.getStates()) {
-			if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+			if (Options.getLogLevel() != Options.LogLevel.LOW)
 				LogManager.logInfo("adding state " + s1);
 			Collections.shuffle(distinguishedStates,
 					new Random(Utils.randLong()));
@@ -632,14 +632,14 @@ public class LocalizerBasedLearner extends Learner {
 					}
 				}
 				if (haveSameOutputs) {
-					if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+					if (Options.getLogLevel() != Options.LogLevel.LOW)
 						LogManager.logInfo(s1 + " and " + s2
 								+ " have the same outputs for W=" + W);
 					List<String> inputs = driver.getInputSymbols();
 					Collections.shuffle(inputs, new Random(Utils.randLong()));
 					addDistinctionSequence(automata, driver.getInputSymbols(),
 							s1, s2, W);
-					if (Options.LOG_LEVEL == Options.LogLevel.ALL)
+					if (Options.getLogLevel() == Options.LogLevel.ALL)
 						LogManager.logInfo("W is now " + W);
 				}
 			}
@@ -729,7 +729,7 @@ public class LocalizerBasedLearner extends Learner {
 		}
 		boolean isCaracterizationSet = false;
 		while (!isCaracterizationSet) {
-			if (Options.LOG_LEVEL == Options.LogLevel.ALL)
+			if (Options.getLogLevel() == Options.LogLevel.ALL)
 				LogManager.logInfo("computing caracterization set : W is now "
 						+ W);
 			isCaracterizationSet = true;

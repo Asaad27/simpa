@@ -31,7 +31,7 @@ public class CounterMealy extends Mealy implements Serializable {
 		ResetSymbol = resetSuffix;
 		createStates(nbStates, true,inputSymbol);
 		createTransitions(inputSymbol);
-		if (Options.LOG_LEVEL != LogLevel.LOW)
+		if (Options.getLogLevel() != LogLevel.LOW)
 			exportToDot();
 	}
 	

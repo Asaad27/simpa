@@ -474,7 +474,7 @@ public class MealyDriver extends Driver {
 							if (currentOs1 == currentOs2 || !currentO1.equals(currentO2)) {
 								foundLocalSeq = true;
 								r.addInputSequence(current);
-								if (Options.LOG_LEVEL != LogLevel.LOW) {
+								if (Options.getLogLevel() != LogLevel.LOW) {
 									LogManager.logInfo("appending " + current
 											+ " to homing sequence in order to distinguish " + os1 + " and " + os2
 											+ " respectively reached from " + s1 + " and " + s2 + " with output " + o1);

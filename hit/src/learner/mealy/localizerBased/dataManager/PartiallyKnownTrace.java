@@ -42,10 +42,10 @@ public class PartiallyKnownTrace {
 			return false;
 		}
 		WResponses.set(DataManager.instance.getW().indexOf(print.getInputsProjection()), print.getOutputsProjection());
-		if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+		if (Options.getLogLevel() != Options.LogLevel.LOW)
 			DataManager.instance.logRecursivity("New print(=a response to W input) found : " + start + " followed by " + transition + " → " + print);
 		DataManager.instance.startRecursivity();
-		if (Options.LOG_LEVEL == Options.LogLevel.ALL)
+		if (Options.getLogLevel() == Options.LogLevel.ALL)
 			DataManager.instance.logRecursivity("K is now : " + DataManager.instance.getK());
 		if (unknownPrints.isEmpty()){// rule 4 in algorithm
 			//we have totally found a transition

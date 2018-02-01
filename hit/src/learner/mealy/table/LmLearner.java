@@ -115,7 +115,7 @@ public class LmLearner extends Learner {
 			}
 		}*/
 
-		if (Options.LOG_LEVEL == LogLevel.ALL) {
+		if (Options.getLogLevel() == LogLevel.ALL) {
 			LogManager.logInfo("Conjecture has " + c.getStateCount()
 					+ " states and " + c.getTransitionCount()
 					+ " transitions : ");
@@ -163,11 +163,11 @@ public class LmLearner extends Learner {
 				for (int nonClosedRow : cTable.getNonClosedRows()) {
 					potentialNewNonClosedRows=true;
 //					finished = false;
-					if (Options.LOG_LEVEL != LogLevel.LOW)
+					if (Options.getLogLevel() != LogLevel.LOW)
 						LogManager.logStep(LogManager.STEPNCR,
 								cTable.R.get(nonClosedRow).getIS());
 					handleNonClosed(nonClosedRow - (alreadyNonClosed++));
-					if (Options.LOG_LEVEL == LogLevel.ALL)
+					if (Options.getLogLevel() == LogLevel.ALL)
 						LogManager.logControlTable(cTable);
 				}
 			}
@@ -208,7 +208,7 @@ public class LmLearner extends Learner {
 				if (cTable.getNonClosedRows().isEmpty())
 // RG: this should not happen with Lm. Test could be converted to assert once we are sure.
 					LogManager.logInfo("Counter example failed to exhibit new state");
-				if (Options.LOG_LEVEL == LogLevel.ALL)
+				if (Options.getLogLevel() == LogLevel.ALL)
 					LogManager.logControlTable(cTable);
 			}
 			else

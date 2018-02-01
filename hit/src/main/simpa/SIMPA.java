@@ -741,7 +741,7 @@ public class SIMPA {
 				} else {
 					driver = (Driver) Class.forName(system).newInstance();
 				}
-				if (Options.LOG_LEVEL!=LogLevel.LOW)
+				if (getLogLevel() != LogLevel.LOW)
 					LogManager.logConsole("System : " + driver.getSystemName());
 				return driver;
 			} catch (InstantiationException e) {
@@ -919,7 +919,8 @@ public class SIMPA {
 			Utils.cleanDir(new File(logDir));
 		Options.OUTDIR = logDir;
 		System.out.println("[+] Testing " + Options.NBTEST + " automaton");
-		Options.LOG_LEVEL = LogLevel.LOW;
+		if (getLogLevel() != LogLevel.LOW)
+			throw new RuntimeException();
 
 		for (int i = 1; i <= Options.NBTEST; i++) {
 			Runtime.getRuntime().gc();
@@ -1036,7 +1037,9 @@ public class SIMPA {
 		Options.OUTDIR = logDir;
 		
 		System.out.println("[+] Testing " + Options.NBTEST + " automaton");
-		 Options.LOG_LEVEL = LogLevel.LOW;
+		if (getLogLevel() != LogLevel.LOW)
+			throw new RuntimeException();
+
 		int testedAutomata = 0;
 		boolean seedTooBig = false;
 		for (Options.SEED = 0; !seedTooBig
@@ -1132,6 +1135,10 @@ public class SIMPA {
 
 	private static OutputOptions getOutputsOptions() {
 		return outputsOptions;
+	}
+
+	protected static LogLevel getLogLevel() {
+		return getOutputsOptions().logLevel.getSelectedItem().level;
 	}
 
 	private static OptionsGroup allOptions = new OptionsGroup("all") {

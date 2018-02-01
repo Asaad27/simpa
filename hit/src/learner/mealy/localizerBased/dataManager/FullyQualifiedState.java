@@ -60,7 +60,7 @@ public class FullyQualifiedState{
 		if (V.containsKey(v.getTrace())){
 			return false;
 		}
-		if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+		if (Options.getLogLevel() != Options.LogLevel.LOW)
 			DataManager.instance.logRecursivity("New transition found : " + v);
 		DataManager.instance.startRecursivity();
 		if (DataManager.instance.options.useSpeedUp()) {
@@ -71,7 +71,7 @@ public class FullyQualifiedState{
 		for (FullyKnownTrace knownV : V.values()){
 			if (v.getTrace().equals(knownV.getTrace().subtrace(0, v.getTrace().size()))){
 				FullyKnownTrace vToAdd = new FullyKnownTrace(v.getEnd(), knownV.getTrace().subtrace(v.getTrace().size(), knownV.getTrace().size()), knownV.getEnd());
-				if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+				if (Options.getLogLevel() != Options.LogLevel.LOW)
 					DataManager.instance.logRecursivity("Split transition : " + v + " + " + vToAdd);
 				DataManager.instance.startRecursivity();
 				DataManager.instance.addFullyKnownTrace(vToAdd);
@@ -86,17 +86,17 @@ public class FullyQualifiedState{
 		
 		K.remove(v.getTrace());
 		V.put(v.getTrace(), v);
-		if (Options.LOG_LEVEL == Options.LogLevel.ALL)
+		if (Options.getLogLevel() == Options.LogLevel.ALL)
 			DataManager.instance.logRecursivity("V is now : " + DataManager.instance.getV());
 		if (v.getTrace().size() == 1){
 			LmConjecture conjecture = DataManager.instance.getConjecture();
 			conjecture.addTransition(new MealyTransition(conjecture, v.getStart().getState(), v.getEnd().getState(), v.getTrace().getInput(0), v.getTrace().getOutput(0)));
-			if (Options.LOG_LEVEL == Options.LogLevel.ALL)
+			if (Options.getLogLevel() == Options.LogLevel.ALL)
 				conjecture.exportToDot();
 			T.put(v.getTrace(),v);
 			R_.remove(v.getTrace().getInput(0));//the transition with this symbol is known
 			if (R_.isEmpty()){
-				if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+				if (Options.getLogLevel() != Options.LogLevel.LOW)
 					DataManager.instance.logRecursivity("All transitions from state " + this + " are known.");
 				DataManager.instance.startRecursivity();
 				DataManager.instance.setKnownState(this);
@@ -137,7 +137,7 @@ public class FullyQualifiedState{
 		//try to reduce transition
 		for (FullyKnownTrace v : V.values()){
 			if (v.equals(transition.subtrace(0, v.getTrace().size())) && v.getTrace().size() < transition.size()){
-				if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+				if (Options.getLogLevel() != Options.LogLevel.LOW)
 					DataManager.instance.logRecursivity("Trace reduced using " + v + " : " + v.getEnd() +" followed by "+ transition + " → " +print);
 				return v.getEnd().addPartiallyKnownTrace(transition.subtrace(v.getTrace().size(), transition.size()), print);
 			}

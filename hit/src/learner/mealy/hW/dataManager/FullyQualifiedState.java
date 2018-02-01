@@ -225,13 +225,13 @@ public class FullyQualifiedState{
 		if (V.containsKey(v.getTrace())){
 			return false;
 		}
-		if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+		if (Options.getLogLevel() != Options.LogLevel.LOW)
 			LogManager.logInfo("New transition found : " + v);
 		LinkedList<LmTrace> toRemove = new LinkedList<LmTrace>();
 		for (FullyKnownTrace knownV : V.values()){
 			if (v.getTrace().equals(knownV.getTrace().subtrace(0, v.getTrace().size()))){
 				FullyKnownTrace vToAdd = new FullyKnownTrace(v.getEnd(), knownV.getTrace().subtrace(v.getTrace().size(), knownV.getTrace().size()), knownV.getEnd());
-				if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+				if (Options.getLogLevel() != Options.LogLevel.LOW)
 					LogManager.logInfo("Split transition : " + v + " + " + vToAdd);
 				SimplifiedDataManager.instance.addFullyKnownTrace(vToAdd);
 				toRemove.add(knownV.getTrace());
@@ -246,17 +246,17 @@ public class FullyQualifiedState{
 		K.remove(v.getTrace().getInput(0));
 		
 		V.put(v.getTrace(), v);
-		if (Options.LOG_LEVEL == Options.LogLevel.ALL)
+		if (Options.getLogLevel() == Options.LogLevel.ALL)
 			LogManager.logInfo("V is now : " + SimplifiedDataManager.instance.getV());
 		if (v.getTrace().size() == 1){
 			LmConjecture conjecture = SimplifiedDataManager.instance.getConjecture();
 			conjecture.addTransition(new MealyTransition(conjecture, v.getStart().getState(), v.getEnd().getState(), v.getTrace().getInput(0), v.getTrace().getOutput(0)));
-			if (Options.LOG_LEVEL == Options.LogLevel.ALL)
+			if (Options.getLogLevel() == Options.LogLevel.ALL)
 				SimplifiedDataManager.instance.exportConjecture();
 			T.put(v.getTrace().getInput(0),v);
 			R_.remove(v.getTrace().getInput(0));//the transition with this symbol is known
 			if (R_.isEmpty()){
-				if (Options.LOG_LEVEL != Options.LogLevel.LOW)
+				if (Options.getLogLevel() != Options.LogLevel.LOW)
 					LogManager.logInfo("All transitions from state " + this + " are known.");
 				SimplifiedDataManager.instance.setKnownState(this);
 			}
