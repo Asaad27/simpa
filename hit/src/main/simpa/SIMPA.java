@@ -38,7 +38,9 @@ import drivers.efsm.real.ScanDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
 import main.simpa.Options.LogLevel;
+import options.OptionsGroup;
 import options.automataOptions.AutomataChoice;
+import options.outputOptions.OutputOptions;
 import stats.GlobalGraphGenerator;
 import stats.GraphGenerator;
 import stats.StatsEntry;
@@ -812,18 +814,30 @@ public class SIMPA {
 	}
 
 	protected static void inferOneTime() {
-		Driver d=null;
-		Learner l=null;
-		if (automataChoice.getSelectedItem()==automataChoice.mealy) {
-			d=automataChoice.mealyDriverChoice.createDriver();
+		if (getOutputsOptions().textLoggerOption.isEnabled())
+			LogManager.addLogger(new TextLogger());
+		if (getOutputsOptions().htmlLoggerOption.isEnabled())
+			LogManager.addLogger(new HTMLLogger());
+		LogManager.start();
+		Driver d = null;
+		Learner l = null;
+		if (automataChoice.getSelectedItem() == automataChoice.mealy) {
+			d = automataChoice.mealyDriverChoice.createDriver();
 			try {
-				l=Learner.getLearnerFor(d);
+				l = Learner.getLearnerFor(d);
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.exit(1);
 			}
 		}
-		l.learn();
+		try {
+			l.learn();
+			l.logStats();
+			// TODO check conjecture
+		} finally {
+			LogManager.end();
+			LogManager.clearsLoggers();
+		}
 	}
 	protected static Learner learnOneTime() throws Exception {
 		if (Options.LOG_TEXT)
@@ -1114,6 +1128,19 @@ public class SIMPA {
 	}
 
 	public static AutomataChoice automataChoice = new AutomataChoice();
+	private static OutputOptions outputsOptions = new OutputOptions();
+
+	private static OutputOptions getOutputsOptions() {
+		return outputsOptions;
+	}
+
+	private static OptionsGroup allOptions = new OptionsGroup("all") {
+		{
+			addSubOption(outputsOptions);
+			addSubOption(automataChoice);
+			validateSubOptions();
+		}
+	};
 	static Thread inferThread = null;
 
 	private static void createAndShowGUI() {
@@ -1130,6 +1157,7 @@ public class SIMPA {
 				.setLayout(new BoxLayout(optionsPanel, BoxLayout.PAGE_AXIS));
 		scroll.getViewport().add(optionsPanel);
 		optionsPanel.add(automataChoice.getComponent());
+		optionsPanel.add(outputsOptions.getComponent());
 		optionsPanel.add(Box.createGlue());
 		pane.add(scroll);
 
@@ -1206,7 +1234,7 @@ public class SIMPA {
 			@SuppressWarnings("resource")
 			PrintStream parsingErrorStream = (openGui ? System.out
 					: System.err);
-			boolean parsedSuccessfully = automataChoice
+			boolean parsedSuccessfully = allOptions
 					.parseArguments(arrayArgs, parsingErrorStream);
 			if (!parsedSuccessfully)
 				parsingErrorStream
@@ -1265,7 +1293,7 @@ public class SIMPA {
 	}
 
 	public static void usage() {
-		automataChoice.printHelp(System.out);
+		allOptions.printHelp(System.out);
 		System.out.println("Usage : SIMPA driverClass [Options]");
 		System.out.println("");
 		System.out.println("Options");
@@ -1310,7 +1338,7 @@ public class SIMPA {
 		System.out.println("Ex: SIMPA drivers.efsm.NSPKDriver --outdir mydir --text");
 		System.out.println();
 
-		automataChoice.printHelp(System.out);
+		allOptions.printHelp(System.out);
 	}
 
 	protected static void printUsage(Option<?>[] options) {
