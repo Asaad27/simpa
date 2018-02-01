@@ -814,6 +814,15 @@ public class SIMPA {
 	protected static void inferOneTime() {
 		Driver d=null;
 		Learner l=null;
+		if (automataChoice.getSelectedItem()==automataChoice.mealy) {
+			d=automataChoice.mealyDriverChoice.createDriver();
+			try {
+				l=Learner.getLearnerFor(d);
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+		}
 		l.learn();
 	}
 	protected static Learner learnOneTime() throws Exception {
