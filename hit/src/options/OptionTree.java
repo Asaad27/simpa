@@ -419,7 +419,7 @@ public abstract class OptionTree {
 			args.remove(activatingArg);
 			if (!setValueFromArg(activatingArg, parsingErrorStream))
 				parseError = true;
-		} else {
+		} else if (getSortedChildren().size() != 1) {
 			// this option is not activated, but maybe a sub option can be
 			// activated to choose which subTree to select
 			List<List<OptionTree>> subTrees = getSortedChildren();
