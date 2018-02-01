@@ -2,6 +2,8 @@ package main.simpa;
 
 import java.awt.Container;
 import java.awt.HeadlessException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -21,6 +23,7 @@ import java.util.StringTokenizer;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -808,6 +811,11 @@ public class SIMPA {
 		return r.toString();
 	}
 
+	protected static void inferOneTime() {
+		Driver d=null;
+		Learner l=null;
+		l.learn();
+	}
 	protected static Learner learnOneTime() throws Exception {
 		if (Options.LOG_TEXT)
 			LogManager.addLogger(new TextLogger());
@@ -1095,11 +1103,12 @@ public class SIMPA {
 		System.out.println(testedAutomata + " automata tested");
 
 	}
-	
+
 	public static AutomataChoice automataChoice = new AutomataChoice();
+	static Thread inferThread = null;
 
 	private static void createAndShowGUI() {
-		JFrame frame = new JFrame(
+		final JFrame frame = new JFrame(
 				"SIMPA - Simpa Infers Models Pretty Automatically");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		Container pane = frame.getContentPane();
@@ -1114,6 +1123,42 @@ public class SIMPA {
 		optionsPanel.add(automataChoice.getComponent());
 		optionsPanel.add(Box.createGlue());
 		pane.add(scroll);
+
+		final JButton startButton = new JButton("start inference");
+		startButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				frame.setEnabled(false);
+				startButton.setEnabled(false);
+				assert (inferThread == null || !inferThread.isAlive());
+				inferThread = new Thread() {
+					@Override
+					public void run() {
+						try {
+							inferOneTime();
+						} catch (Throwable e) {
+							e.printStackTrace();
+							System.err.println(
+									"error while inferring the system.");
+							throw e;
+						}
+					}
+				};
+				inferThread.start();
+				try {
+					inferThread.join();
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+					System.exit(1);
+				}
+				startButton.setEnabled(true);
+				frame.setEnabled(true);
+
+			}
+
+		});
+		pane.add(startButton);
 
 		// Display the window.
 		frame.pack();
