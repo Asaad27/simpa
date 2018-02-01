@@ -69,17 +69,27 @@ public class Automata implements Serializable {
 	public void reset(){
 	}
 
-	public boolean isConnex(){
+	public boolean isConnex() {
 		if (transitions.size() == 0)
 			return states.size() == 0;
+		HashSet<State> reachingAllState = new HashSet<State>();
 		for (State s : states){
+			if (reachingAllState.contains(s))
+				continue;
 			LinkedList<Transition> toCheck = new LinkedList<Transition>();
 			HashSet<State> crossed = new HashSet<State>();
 			for (Transition initialTransition : transitions)
 				if (initialTransition.getFrom() == s)
 					toCheck.add(initialTransition);
+			boolean reachingAll = false;
 			while (!toCheck.isEmpty()){
 				Transition t = toCheck.poll();
+				if (reachingAllState.contains(t.getTo())) {
+					reachingAllState.add(t.getFrom());
+					reachingAllState.add(s);
+					reachingAll = true;
+					break;
+				}
 				if (!crossed.contains(t.getTo())){
 					crossed.add(t.getTo());
 					for (Transition t2 : transitions)
@@ -87,10 +97,13 @@ public class Automata implements Serializable {
 							toCheck.add(t2);
 				}
 			}
+			if (reachingAll)
+				continue;
 			for (State s2 : states){
 				if (!crossed.contains(s2))
 					return false;
 			}
+			reachingAllState.add(s);
 		}
 		return true;
 	}
