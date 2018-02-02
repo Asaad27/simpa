@@ -12,6 +12,8 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
+import options.OptionValidator.CriticalityLevel;
+
 /**
  * 
  * This class aims to represent an option of SIMPA. It can be an option for the
@@ -73,9 +75,11 @@ public abstract class OptionTree {
 
 	private List<List<OptionTree>> sortedChildren = new ArrayList<>();
 	private List<OptionTree> children = new ArrayList<>();
+	private List<OptionValidator> validators = new ArrayList<>();
 	protected Component mainConponent = null;
 	private JPanel mainContainer = null;
 	protected JPanel subTreeContainer = null;
+	private JPanel validationContainer = null;
 	protected String description = "";
 
 	/**
@@ -89,14 +93,19 @@ public abstract class OptionTree {
 			JPanel topContainer = new JPanel();
 			topContainer.setLayout(
 					new BoxLayout(topContainer, BoxLayout.LINE_AXIS));
+			validationContainer = new JPanel();
+			validationContainer.setLayout(
+					new BoxLayout(validationContainer, BoxLayout.PAGE_AXIS));
 
 			mainContainer.add(topContainer);
 			createMainComponent();
 			if (mainConponent != null)
 				topContainer.add(mainConponent);
+			topContainer.add(validationContainer);
 			topContainer.add(Box.createGlue());
 			mainContainer.setLayout(
 					new BoxLayout(mainContainer, BoxLayout.PAGE_AXIS));
+			checkValidators();
 		}
 		return mainContainer;
 
@@ -139,6 +148,23 @@ public abstract class OptionTree {
 	 * This function must create and fill the Component this.mainComponent
 	 */
 	protected abstract void createMainComponent();
+
+	/**
+	 * Record a new validator for this option.
+	 * 
+	 * @param validator
+	 *            the validator to record.
+	 */
+	protected void addValidator(OptionValidator validator) {
+		validators.add(validator);
+	}
+
+	/**
+	 * @return the list of validators
+	 */
+	protected List<OptionValidator> getValidators() {
+		return validators;
+	}
 
 	/**
 	 * Record a new set of sub-options which can be activated for a value of
@@ -645,5 +671,43 @@ public abstract class OptionTree {
 			} while (help.length() > 0);
 
 		}
+	}
+
+	/**
+	 * Check validators of this option and update graphical interface if needed.
+	 */
+	private void checkValidators() {
+		if (validationContainer != null)
+			validationContainer.removeAll();
+		for (OptionValidator validator : validators) {
+			validator.check();
+			if (validationContainer != null) {
+				validationContainer.add(validator.createComponent());
+			}
+		}
+		if (validationContainer != null)
+			validationContainer.revalidate();
+	}
+
+	/**
+	 * Validate every selected option and return the maximum criticality level
+	 * encountered.
+	 * 
+	 * @return the maximum criticality level encountered in the tree.
+	 */
+	public OptionValidator.CriticalityLevel validateSelectedTree() {
+		CriticalityLevel max = CriticalityLevel.NOTHING;
+		checkValidators();
+		for (OptionValidator validator : validators) {
+			if (validator.getCriticality().compareTo(max) > 0)
+				max = validator.getCriticality();
+		}
+		for (OptionTree option : getSelectedChildren()) {
+			CriticalityLevel optionLevel = option.validateSelectedTree();
+			if (optionLevel.compareTo(max) > 0)
+				max = optionLevel;
+		}
+		return max;
+
 	}
 }
