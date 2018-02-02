@@ -4,8 +4,6 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JPanel;
-
 public class OptionsGroup extends OptionTree {
 	String groupName;
 	List<OptionTree> subOptions = new ArrayList<>();
@@ -35,7 +33,7 @@ public class OptionsGroup extends OptionTree {
 
 	@Override
 	protected void createMainComponent() {
-		mainContainer = new JPanel();
+		mainConponent = null;
 		updateSubTreeComponent("options related to " + groupName);
 	}
 

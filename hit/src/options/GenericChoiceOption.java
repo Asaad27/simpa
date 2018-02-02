@@ -5,9 +5,7 @@ import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
-import javax.swing.JPanel;
 
 import options.OptionTree;
 
@@ -35,7 +33,7 @@ public abstract class GenericChoiceOption<T extends ChoiceOptionItem>
 	 * @warning must be called in constructor, like {@link addSortedChildren}.
 	 */
 	protected void addChoice(T choice) {
-		assert mainContainer == null;
+		assert mainConponent == null;
 		choices.add(choice);
 		addSortedChildren(choice.subTrees);
 		if (selectedItem == null) {
@@ -46,9 +44,6 @@ public abstract class GenericChoiceOption<T extends ChoiceOptionItem>
 	@Override
 	protected void createMainComponent() {
 		assert choices.size() != 0;
-		mainContainer = new JPanel();
-		mainContainer.setLayout(new BoxLayout(mainContainer, BoxLayout.Y_AXIS));
-
 		choiceCombo = new JComboBox<>();
 		for (T choice : choices) {
 			choiceCombo.addItem(choice);
@@ -59,7 +54,7 @@ public abstract class GenericChoiceOption<T extends ChoiceOptionItem>
 				selectChoice(choiceCombo.getSelectedIndex());
 			}
 		});
-		mainContainer.add(choiceCombo);
+		mainConponent = choiceCombo;
 		selectChoice(selectedItem);
 	}
 

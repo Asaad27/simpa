@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
@@ -72,7 +73,8 @@ public abstract class OptionTree {
 
 	private List<List<OptionTree>> sortedChildren = new ArrayList<>();
 	private List<OptionTree> children = new ArrayList<>();
-	protected JPanel mainContainer = null;
+	protected Component mainConponent = null;
+	private JPanel mainContainer = null;
 	protected JPanel subTreeContainer = null;
 	protected String description = "";
 
@@ -82,8 +84,20 @@ public abstract class OptionTree {
 	 * @return the component to display.
 	 */
 	public Component getComponent() {
-		if (mainContainer == null)
+		if (mainContainer == null) {
+			mainContainer = new JPanel();
+			JPanel topContainer = new JPanel();
+			topContainer.setLayout(
+					new BoxLayout(topContainer, BoxLayout.LINE_AXIS));
+
+			mainContainer.add(topContainer);
 			createMainComponent();
+			if (mainConponent != null)
+				topContainer.add(mainConponent);
+			topContainer.add(Box.createGlue());
+			mainContainer.setLayout(
+					new BoxLayout(mainContainer, BoxLayout.PAGE_AXIS));
+		}
 		return mainContainer;
 
 	}

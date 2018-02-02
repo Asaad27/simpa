@@ -6,9 +6,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
-import javax.swing.JPanel;
 
 import options.OptionTree.ArgumentDescriptor.AcceptedValues;
 
@@ -94,9 +92,6 @@ public class BooleanOption extends OptionTree {
 
 	@Override
 	protected void createMainComponent() {
-		mainContainer = new JPanel();
-		mainContainer.setLayout(new BoxLayout(mainContainer, BoxLayout.Y_AXIS));
-
 		checkBox = new JCheckBox(name);
 		checkBox.addActionListener(new ActionListener() {
 
@@ -106,7 +101,7 @@ public class BooleanOption extends OptionTree {
 
 			}
 		});
-		mainContainer.add(checkBox);
+		mainConponent = checkBox;
 
 		setEnabled(isEnabled);
 	}
@@ -118,7 +113,7 @@ public class BooleanOption extends OptionTree {
 	 *            the value to set.
 	 */
 	public void setEnabled(Boolean checked) {
-		if (mainContainer != null) {
+		if (mainConponent != null) {
 			assert checkBox != null;
 			if (checkBox.isSelected() != checked)
 				checkBox.setSelected(checked);
