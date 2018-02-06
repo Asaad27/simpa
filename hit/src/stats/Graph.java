@@ -31,6 +31,24 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		POWER(), EXPONENTIAL(), ;
 	}
 
+	public static class PointType {
+		public final int style;
+
+		public PointType(int style) {
+			this.style = style;
+		}
+
+		public final static PointType PLUS_CROSS = new PointType(1);
+		public final static PointType TIMES_CROSS = new PointType(2);
+		public final static PointType EMPTY_SQUARE = new PointType(4);
+		public final static PointType FILLED_SQUARE = new PointType(5);
+		public final static PointType FILLED_CIRCLE = new PointType(7);
+		public final static PointType EMPTY_TRIANGLE_UP = new PointType(8);
+		public final static PointType FILLED_TRIANGLE_UP = new PointType(9);
+
+
+	}
+
 	private static boolean forcePoints = false; // set this to true in order to
 												// plot points for each graph
 
@@ -60,6 +78,11 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 	}
 
 	public void plot(StatsSet stats, PlotStyle style, String titleSuffix) {
+		plot(stats, style, titleSuffix, null);
+	}
+
+	public void plot(StatsSet stats, PlotStyle style, String titleSuffix,
+			PointType pointType) {
 		if (stats.size() == 0)
 			return;
 		this.stats.getStats().addAll(stats.getStats());
@@ -67,7 +90,12 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		StringBuilder plotTitle = new StringBuilder();
 		plotTitle.append((""+style).replaceAll("_", " ") + " of " + stats.size() + " inferences ");
 		plotTitle.append(titleSuffix);
-		plotLines.append("\"" + tempPlot.getAbsolutePath() + "\" " + style.plotLine + " title \"" + plotTitle + "\", ");
+		plotLines.append("\"" + tempPlot.getAbsolutePath() + "\" "
+				+ style.plotLine);
+		if (pointType!=null) {
+			plotLines.append(" pt "+pointType.style);
+		}
+		plotLines.append(" title \"" + plotTitle + "\", ");
 		if (forcePoints && style != PlotStyle.POINTS)
 			plot(stats, PlotStyle.POINTS, titleSuffix);
 	}
