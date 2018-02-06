@@ -3,8 +3,6 @@ package stats;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -94,6 +92,14 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 	}
 
 	public String formatDouble(double d) {
+		if (Math.abs(d) < 10000 && Math.abs(d) > 0.001) {
+			double log = Math.log10(Math.abs(d));
+			double roundingValue = Math.pow(10, Math.floor(log) - 2);
+			d = Math.round(d / roundingValue) * roundingValue;
+			if (d == (int) d)
+				return String.format("%d", (int) d);
+			return String.format("%s", d);
+		}
 		return String.format("%.2g", d);
 	}
 
