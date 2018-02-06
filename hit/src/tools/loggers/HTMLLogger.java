@@ -48,7 +48,7 @@ public class HTMLLogger implements ILogger {
 
 	public HTMLLogger() {
 		file = null;
-		dir = new File(Options.OUTDIR + "log");
+		dir = Options.getLogDir();
 		filenameFm = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS");
 		dfm = new SimpleDateFormat("MM/dd/yyyy");
 		tfm = new SimpleDateFormat("[HH:mm:ss:SSS] ");

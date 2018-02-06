@@ -230,7 +230,7 @@ public class Mealy extends Automata implements Serializable {
 	public void exportToDot(String comments) {
 		Writer writer = null;
 		File file = null;
-		File dir = new File(Options.OUTDIR + Options.DIRGRAPH);
+		File dir = Options.getDotDir();
 		try {
 			if (!dir.isDirectory() && !dir.mkdirs())
 				throw new IOException("unable to create " + dir.getName() + " directory");
@@ -377,12 +377,8 @@ public class Mealy extends Automata implements Serializable {
 			InputSequence testw = testW.pollFirst();
 			if (apply(testw, s1).equals(apply(testw, s2))) {
 				if (testw.getLength() > getStateCount()) {
-					// TODO find a better way to log and save the automata
-					String dir = Options.OUTDIR;
-					Options.OUTDIR = "/tmp/";
 					LogManager.logInfo("unable to compute distinguish sequence for " + s1 + " and " + s2);
 					exportToDot();
-					Options.OUTDIR = dir;
 					throw new RuntimeException("it looks like if we will not find a w to distinguish " + s1 + " and "
 							+ s2 + ".Those state may are equivalents, please look in /tmp");
 				}

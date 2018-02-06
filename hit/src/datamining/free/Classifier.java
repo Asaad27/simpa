@@ -139,7 +139,7 @@ public class Classifier {
 	public static String generateFileForPredicate(
 			List<EFSMTransition> list, TreeMap<String, List<String>> paramNames) {
 		File file = null;
-		File dir = new File(Options.OUTDIR + Options.DIRARFF);
+		File dir = Options.getArffDir();
 		Writer writer = null;
 		int i = 0; int currentParamIndex = 0;
 		try {
@@ -239,7 +239,7 @@ public class Classifier {
 	
 	public static String generateFileForVar(EFSMTransition transition, TreeMap<String, List<String>> paramNames) {
 		File file = null;
-		File dir = new File(Options.OUTDIR + Options.DIRARFF);
+		File dir = Options.getArffDir();
 		Writer writer = null;
 		int i = 0;
 		try {
@@ -301,8 +301,8 @@ public class Classifier {
 	public static String filterDoubleLines(String dataFile) {
 		File fileNew = null;
 		
-		fileNew = new File(Options.OUTDIR + File.separator +"arff" +File.separator
-				+ filename(dataFile) + "_filtered.arff");
+		fileNew = new File(Options.getArffDir().getAbsolutePath()
+				+ File.separator + filename(dataFile) + "_filtered.arff");
 		
 		try {
 			//Set up writting 
@@ -416,8 +416,8 @@ public class Classifier {
 	}
 	
 	public static String RemoveCol(String dataFile, ArrayList<Integer> nbCol) {
-		File fileNew = new File(Options.OUTDIR + File.separatorChar + "arff" +File.separatorChar
-				+ filename(dataFile) + "_step1.arff");
+		File fileNew = new File(Options.getArffDir().getAbsolutePath()
+				+ File.separatorChar + filename(dataFile) + "_step1.arff");
 		try {
 			//Set up writting 
 			FileWriter fw = new FileWriter (fileNew);
@@ -590,9 +590,9 @@ public class Classifier {
 	
 	private static String writeRelForOutput(String dataFile, List<String> L_att, List<LinkedList<String>> L_col, int nb_att) {
 		File fileNew = null;
-		
-		fileNew = new File(Options.OUTDIR + File.separatorChar+"arff" +File.separatorChar
-				+ filename(dataFile) + "_related.arff");
+
+		fileNew = new File(Options.getArffDir().getAbsolutePath()
+				+ File.separatorChar + filename(dataFile) + "_related.arff");
 		try {
 			//Set up writting 
 			FileWriter fw = new FileWriter (fileNew);

@@ -1,6 +1,5 @@
 package stats;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -18,7 +17,6 @@ import learner.mealy.localizerBased.LocalizerBasedStatsEntry;
 import learner.mealy.rivestSchapire.RivestSchapireStatsEntry;
 import learner.mealy.table.LmStatsEntry;
 import learner.mealy.tree.ZStatsEntry;
-import main.simpa.Options;
 import stats.Graph.PlotStyle;
 import stats.attribute.Attribute;
 import stats.attribute.ComputedAttribute;
@@ -58,17 +56,12 @@ public class GlobalGraphGenerator extends GraphGenerator {
 	}
 
 	public void generate() {
-		String outdir = Options.OUTDIR;
-		File outFile = new File(outdir + "/../RS_Comb_ICTSS");
-		outFile.mkdir();
-		Options.OUTDIR = outFile.getAbsolutePath();
 		if (rivestSchapire != null && combinatorialPruning != null
 				&& locW != null && hW__ != null) {
 			makeRS_Comb_NoReset();
 			generate_ICGI2018();
 		}
 		generate_JSS2018();
-		Options.OUTDIR = outdir;
 	}
 
 	@Override

@@ -1,7 +1,12 @@
 package options.outputOptions;
 
+import java.io.File;
+
 import main.simpa.Options.LogLevel;
 import options.BooleanOption;
+import options.FileOption;
+import options.FileOption.FileExistance;
+import options.FileOption.FileSelectionMode;
 import options.OptionsGroup;
 
 public class OutputOptions extends OptionsGroup {
@@ -10,6 +15,7 @@ public class OutputOptions extends OptionsGroup {
 	public final BooleanOption htmlLoggerOption = new BooleanOption(
 			"html logger", "html", "write output log to a .html file");
 	public final LogLevelOption logLevel = new LogLevelOption();
+	public final FileOption outputDir;
 
 	public OutputOptions() {
 		super("outputs");
@@ -19,6 +25,12 @@ public class OutputOptions extends OptionsGroup {
 		addSubOption(textLoggerOption);
 		addSubOption(htmlLoggerOption);
 		addSubOption(logLevel);
+		outputDir = new FileOption("--outdir", "output directory",
+				new File(System.getProperty("user.dir")),
+				FileSelectionMode.DIRECTORIES_ONLY, FileExistance.NO_CHECK);
+		// TODO add an option validator to indicate when the "out" directory
+		// will be overwritten
+		addSubOption(outputDir);
 		validateSubOptions();
 	}
 

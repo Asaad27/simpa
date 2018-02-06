@@ -331,9 +331,7 @@ public class SIMPA {
 	private static BooleanOption LOG_HTML = new BooleanOption("--html", "Use HTML logger");
 	private static BooleanOption LOG_TEXT = new BooleanOption("--text", "Use the text logger");
 	private static BooleanOption AUTO_OPEN_HTML = new BooleanOption("--openhtml", "Open HTML log automatically");
-	private static StringOption OUTDIR = new StringOption("--outdir", "Where to save arff and graph files",
-			Options.OUTDIR);
-	private static Option<?>[] outputOptions = new Option<?>[] { LOG_HTML, LOG_TEXT, AUTO_OPEN_HTML, OUTDIR };
+	private static Option<?>[] outputOptions = new Option<?>[] { LOG_HTML, LOG_TEXT, AUTO_OPEN_HTML };
 
 	// inference choice
 	private static BooleanOption TREE_INFERENCE = new BooleanOption("--tree",
@@ -555,7 +553,6 @@ public class SIMPA {
 		Options.LOG_HTML = LOG_HTML.getValue();
 		Options.LOG_TEXT = LOG_TEXT.getValue();
 		Options.AUTO_OPEN_HTML = AUTO_OPEN_HTML.getValue();
-		Options.OUTDIR = OUTDIR.getValue();
 
 		Options.LMINFERENCE = LM_INFERENCE.getValue();
 		Options.TREEINFERENCE = TREE_INFERENCE.getValue();
@@ -652,19 +649,6 @@ public class SIMPA {
 			Options.GRAPHVIZ = false;
 			LogManager.logError("Warning : Unable to find GraphViz dot. Check your environment.");
 		}
-
-		File f = new File(Options.OUTDIR);
-		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
-			throw new RuntimeException("Unable to create/write " + f.getName());
-		Options.OUTDIR = Utils.makePath(f.getAbsolutePath());
-
-		f = new File(Options.OUTDIR + Options.DIRGRAPH);
-		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
-			throw new RuntimeException("Unable to create/write " + f.getName());
-
-		f = new File(Options.OUTDIR + Options.DIRARFF);
-		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
-			throw new RuntimeException("Unable to create/write " + f.getName());
 
 		if (STATS_MODE.getValue()) {
 			boolean assert_test = false;
@@ -904,7 +888,7 @@ public class SIMPA {
 	}
 
 	protected static void run_stats() {
-		String baseDir = Options.OUTDIR;
+		String baseDir = Options.getLogDir().getAbsolutePath();
 		File f = new File(baseDir + File.separator + Options.DIRSTATSCSV);
 		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
 			throw new RuntimeException("Unable to create/write " + f.getName());
@@ -1133,7 +1117,7 @@ public class SIMPA {
 	public static AutomataChoice automataChoice = new AutomataChoice();
 	private static OutputOptions outputsOptions = new OutputOptions();
 
-	private static OutputOptions getOutputsOptions() {
+	static OutputOptions getOutputsOptions() {
 		return outputsOptions;
 	}
 

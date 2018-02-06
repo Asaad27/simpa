@@ -46,7 +46,7 @@ public class TextLogger implements ILogger {
 
 	public TextLogger() {
 		ret = System.getProperty("line.separator");
-		dir = new File(Options.OUTDIR + "log");
+		dir = Options.getLogDir();
 		filenameFm = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS");
 		tfm = new SimpleDateFormat("[HH:mm:ss:SSS] ");
 		dfm = new SimpleDateFormat("MM/dd/yyyy");

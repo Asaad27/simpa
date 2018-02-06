@@ -454,7 +454,8 @@ public class LocalizerBasedStats {
 		String name = new String("relationship between "+ord+" and  "+abs+(group == null ? "" : " grouped by " + group));
 		r.append("set title \"" + name + "\"\n");
 		
-		String filename = new String(Options.OUTDIR + File.separator + name + "(" + makeDataId(allStats) + ").png");
+		String filename = new String(Options.getStatsGraphDir() + File.separator
+				+ name + "(" + makeDataId(allStats) + ").png");
 		r.append("set output \"" + filename + "\"\n");
 		
 		r.append("set xlabel \"" + abs.name + " (" + abs.units + ")\"\n");
@@ -536,7 +537,8 @@ public class LocalizerBasedStats {
 		String name = new String("Map of value in "+ord+" and  "+abs+" observing " + watch);
 		r.append("set title \"" + name + "\"\n");
 		
-		String filename = new String(Options.OUTDIR + File.separator + name + "(" + makeDataId(allStats) + ").png");
+		String filename = new String(Options.getStatsGraphDir() + File.separator
+				+ name + "(" + makeDataId(allStats) + ").png");
 		r.append("set output \"" + filename + "\"\n");
 		
 		r.append("set xlabel \"" + abs.name + " (" + abs.units + ")\"\n");

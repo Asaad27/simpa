@@ -27,7 +27,7 @@ public class XSSLogger {
 
 	public XSSLogger() {
 		lineReturn = System.getProperty("line.separator");
-		dir = new File(Options.OUTDIR + "log/xss");
+		dir = Options.getXSSLogDir();
 		filenameFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS");
 		dateFormat = new SimpleDateFormat("MM/dd/yyyy");
 		try {

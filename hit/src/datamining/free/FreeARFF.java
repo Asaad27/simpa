@@ -105,7 +105,7 @@ public class FreeARFF {
 	public static String generateFileForPredicate(List<EFSMTransition> list,
 			TreeMap<String, List<String>> paramNames) {
 		File file = null;
-		File dir = new File(Options.OUTDIR + Options.DIRARFF);
+		File dir = Options.getArffDir();
 		Writer writer = null;
 		int i = 0;
 		int currentParamIndex = 0;
@@ -223,7 +223,7 @@ public class FreeARFF {
 	public static String generateFileForVar(EFSMTransition transition,
 			TreeMap<String, List<String>> paramNames) {
 		File file = null;
-		File dir = new File(Options.OUTDIR + Options.DIRARFF);
+		File dir = Options.getArffDir();
 		Writer writer = null;
 		int i = 0;
 		try {
@@ -320,9 +320,9 @@ public class FreeARFF {
 			}
 			ArffSaver saver = new ArffSaver();
 			saver.setInstances(data);
-			newFile = new File(Options.OUTDIR + Options.DIRARFF
-					+ File.separatorChar + Utils.removeExtension(dataFile)
-					+ "_step1.arff");
+			newFile = new File(
+					Options.getArffDir().getAbsolutePath() + File.separatorChar
+							+ Utils.removeExtension(dataFile) + "_step1.arff");
 			saver.setFile(newFile);
 			saver.writeBatch();
 			LogManager.logData(constantOutputs.size()
@@ -381,7 +381,7 @@ public class FreeARFF {
 			if (data.numAttributes() > 0) {
 				ArffSaver saver = new ArffSaver();
 				saver.setInstances(data);
-				newFile = new File(Options.OUTDIR + Options.DIRARFF
+				newFile = new File(Options.getArffDir().getAbsolutePath()
 						+ File.separatorChar + Utils.removeExtension(dataFile)
 						+ "_filtered.arff");
 				saver.setFile(newFile);
@@ -436,7 +436,7 @@ public class FreeARFF {
 			if (data.numAttributes() > 0) {
 				ArffSaver saver = new ArffSaver();
 				saver.setInstances(data);
-				newFile = new File(Options.OUTDIR + Options.DIRARFF
+				newFile = new File(Options.getArffDir().getAbsolutePath()
 						+ File.separatorChar + Utils.removeExtension(dataFile)
 						+ "_filtered.arff");
 				saver.setFile(newFile);
@@ -588,8 +588,9 @@ public class FreeARFF {
 
 			ArffSaver saver = new ArffSaver();
 			saver.setInstances(data);
-			newFile = new File(Options.OUTDIR + Options.DIRARFF + File.separatorChar
-					+ Utils.removeExtension(dataFile) + "_step2.arff");
+			newFile = new File(
+					Options.getArffDir().getAbsolutePath() + File.separatorChar
+							+ Utils.removeExtension(dataFile) + "_step2.arff");
 			saver.setFile(newFile);
 			saver.writeBatch();
 			LogManager.logData(differentOutputs.size()
@@ -658,7 +659,7 @@ public class FreeARFF {
 			if (newData.numAttributes() > 0 && !allRelation.isEmpty()) {
 				ArffSaver saver = new ArffSaver();
 				saver.setInstances(newData);
-				newFile = new File(Options.OUTDIR + Options.DIRARFF
+				newFile = new File(Options.getArffDir().getAbsolutePath()
 						+ File.separatorChar + Utils.removeExtension(dataFile)
 						+ "_related.arff");
 				saver.setFile(newFile);
@@ -740,7 +741,7 @@ public class FreeARFF {
 			if (newData.numAttributes() > 0 && !allRelation.isEmpty()) {
 				ArffSaver saver = new ArffSaver();
 				saver.setInstances(newData);
-				newFile = new File(Options.OUTDIR + Options.DIRARFF
+				newFile = new File(Options.getArffDir().getAbsolutePath()
 						+ File.separatorChar + Utils.removeExtension(dataFile)
 						+ "_related.arff");
 				saver.setFile(newFile);

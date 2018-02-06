@@ -65,7 +65,7 @@ public class LiConjecture extends automata.efsm.EFSM {
 		LogManager.logConsole("Exporting raw conjecture");
 		Writer writer = null;
 		File file = null;
-		File dir = new File(Options.OUTDIR + Options.DIRGRAPH);
+		File dir = Options.getDotDir();
 		try {
 			if (!dir.isDirectory() && !dir.mkdirs())
 				throw new IOException("unable to create " + dir.getName()
@@ -143,7 +143,7 @@ public class LiConjecture extends automata.efsm.EFSM {
 		LogManager.logConsole("Cleaning and exporting the final conjecture");
 		Writer writer = null;
 		File file = null;
-		File dir = new File(Options.OUTDIR + Options.DIRGRAPH);
+		File dir = Options.getDotDir();
 			LogManager.logInfo("Exporting final conjecture to file");
 			try {
 				if (Utils.createDir(dir)) {
@@ -191,8 +191,9 @@ public class LiConjecture extends automata.efsm.EFSM {
 		FileOutputStream fos = null;
 		ObjectOutputStream oos = null;
 		try {
-			fos = new FileOutputStream(Options.OUTDIR + Options.DIRGRAPH + File.separator
-					+ filename);
+			fos = new FileOutputStream(
+					Options.getDotDir().getAbsolutePath()
+							+ File.separator + filename);
 			oos = new ObjectOutputStream(fos);
 			oos.writeObject(o);
 			oos.flush();
@@ -205,7 +206,8 @@ public class LiConjecture extends automata.efsm.EFSM {
 
 	public static LiConjecture deserialize(String filename) {
 		Object o = null;
-		File f = new File(Options.OUTDIR + Options.DIRGRAPH + File.separator + filename);
+		File f = new File(Options.getDotDir().getAbsolutePath()
+				+ File.separator + filename);
 		LogManager.logStep(LogManager.STEPOTHER, "Loading LiConjecture from "
 				+ f.getName());
 		try {
@@ -231,7 +233,7 @@ public class LiConjecture extends automata.efsm.EFSM {
 		Writer writer = null;
 		File file = null;
 		try {
-			File dir = new File(Options.OUTDIR + Options.DIRASLAN);
+			File dir = Options.getAslanDir();
 			if (Utils.createDir(dir)) {
 				file = new File(dir.getPath() + File.separatorChar
 						+ name.replace(" ", "_").toUpperCase() + ".aslan++");
@@ -258,7 +260,7 @@ public class LiConjecture extends automata.efsm.EFSM {
 		Writer writer = null;
 		File file = null;
 		try {
-			File dir = new File(Options.OUTDIR + Options.DIRASLAN);
+			File dir = Options.getAslanDir();
 			if (Utils.createDir(dir)) {
 				file = new File(dir.getPath() + File.separatorChar
 						+ name.replace(" ", "_").toUpperCase() + ".xml");

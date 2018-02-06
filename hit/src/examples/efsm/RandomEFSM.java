@@ -74,8 +74,9 @@ public class RandomEFSM extends EFSM implements Serializable {
 		FileOutputStream fos = null;
 		ObjectOutputStream oos = null;
 		try {
-			fos = new FileOutputStream(Options.OUTDIR + o.getName()
-					+ ".serialized");
+			fos = new FileOutputStream(
+					Options.getSerializedObjectsDir().getAbsolutePath()
+							+ File.separator + o.getName() + ".serialized");
 			oos = new ObjectOutputStream(fos);
 			oos.writeObject(o);
 			oos.flush();

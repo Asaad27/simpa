@@ -1,9 +1,7 @@
 package learner.mealy.combinatorial;
 
-import java.io.File;
 
 import drivers.mealy.transparent.RandomMealyDriver;
-import main.simpa.Options;
 import stats.Graph;
 import stats.GraphGenerator;
 import stats.LineStyle;
@@ -150,11 +148,6 @@ public class CombinatorialGraphGenerator extends GraphGenerator {
 		if (withCut == null || withoutCut == null)
 			return;
 
-		String previousOutdir = Options.OUTDIR;
-		File outFile = new File(previousOutdir + "/../bothCombinatorial");
-		outFile.mkdir();
-		Options.OUTDIR = outFile.getAbsolutePath();
-
 		StatsSet s3withCut = new StatsSet(withCut);
 		s3withCut.restrict(new EqualsRestriction<String>(CombinatorialStatsEntry.AUTOMATA,
 				new RandomMealyDriver().getSystemName()));
@@ -255,6 +248,5 @@ public class CombinatorialGraphGenerator extends GraphGenerator {
 		g4c.setFileName("influence_of_states_number");
 		g4c.export();
 
-		Options.OUTDIR = previousOutdir;
 	}
 }

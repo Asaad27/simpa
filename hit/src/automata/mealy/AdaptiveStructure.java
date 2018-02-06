@@ -630,7 +630,7 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 
 	public void exportToDot() {
 		File file = null;
-		File dir = new File(Options.OUTDIR + Options.DIRGRAPH);
+		File dir = Options.getDotDir();
 		try {
 			if (!dir.isDirectory() && !dir.mkdirs())
 				throw new IOException(

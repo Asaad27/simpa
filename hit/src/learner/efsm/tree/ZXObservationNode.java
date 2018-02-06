@@ -55,7 +55,7 @@ public class ZXObservationNode extends Node {
 		Writer writer = null;
 		File file = null;
 		File imagePath = null;
-		File dir = new File(Options.OUTDIR + Options.DIRGRAPH);
+		File dir = Options.getDotDir();
 		try {
 			if (!dir.isDirectory() && !dir.mkdirs())
 				throw new IOException("unable to create " + dir.getName()

@@ -26,13 +26,21 @@ public class Options {
 	public static final String SYMBOL_SIGMA = "\u03a3";
 	public static final String SYMBOL_NOT_EQUAL = "\u2260";
 
+	@Deprecated
 	public static String DIRGRAPH = "out";
+	@Deprecated
 	public static String DIRGRAPHSTATS = "stats" + File.separator + "graphs";
+	@Deprecated
 	public static String DIRARFF = "arff";
+	@Deprecated
 	public static String DIRTEST = "test";
+	@Deprecated
 	public static String DIRSTATSCSV = "stats" + File.separator + "CSV";
+	@Deprecated
 	public static String DIRLOG = "log";
+	@Deprecated
 	public static String DIRASLAN = "model";
+	@Deprecated
 	public static String DIRFAIL = "fails";// where to store logs of fails
 											// during stats computation
 
@@ -105,7 +113,79 @@ public class Options {
 	@Deprecated
 	public static String SYSTEM = "";
 	public static List<String> URLS = null;
+	@Deprecated
 	public static String OUTDIR = System.getProperty("user.dir");
+
+	public static boolean useTmpLog = false;
+
+	public static void useTmpLogDir() {
+		useTmpLog = true;
+	}
+
+	public static void useNormalLogDir() {
+		useTmpLog = false;
+	}
+
+	private static File getOutDir() {
+		return SIMPA.getOutputsOptions().outputDir.getcompletePath();
+	}
+
+	public static File getDotDir() {
+		if (useTmpLog)
+			return new File(
+					getOutDir().getAbsoluteFile() + File.separator + "tmpOut");
+		File dir = new File(
+				getOutDir().getAbsoluteFile() + File.separator + "out");
+		return dir;
+	}
+
+	public static File getStatsGraphDir() {
+		File dir = new File(
+				getOutDir().getAbsoluteFile() + File.separator + "stats");
+		return dir;
+	}
+
+	public static File getStatsCSVDir() {
+		File dir = new File(getOutDir().getAbsoluteFile() + File.separator
+				+ "stats" + File.separator + "CSV");
+		return dir;
+	}
+
+	public static File getAslanDir() {
+		File dir = new File(
+				getOutDir().getAbsoluteFile() + File.separator + "model");
+		return dir;
+	}
+
+	public static File getLogDir() {
+		if (useTmpLog)
+			return new File(
+					getOutDir().getAbsoluteFile() + File.separator + "tmpOut");
+		File dir = new File(
+				getOutDir().getAbsoluteFile() + File.separator + "log");
+		return dir;
+	}
+
+	public static File getXSSLogDir() {
+		File dir = new File(getLogDir() + File.separator + "xss");
+		return dir;
+	}
+
+	public static File getArffDir() {
+		File dir = new File(
+				getOutDir().getAbsoluteFile() + File.separator + "arff");
+		return dir;
+	}
+
+	public static File getSerializedObjectsDir() {
+		return getDotDir();
+	}
+
+	public static File getFailDir() {
+		File dir = new File(
+				getOutDir().getAbsoluteFile() + File.separator + "fail");
+		return dir;
+	}
 
 	// SIMPATest's options
 	public static int RETEST = -1;

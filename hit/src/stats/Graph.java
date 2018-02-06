@@ -560,7 +560,22 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		String name = new String("relationship between " + ord + " and  " + abs);
 		r.append("set title \"" + (title == null ? name : title) + "\"\n");
 
-		StringBuilder totalFileName = new StringBuilder(Options.OUTDIR + File.separator);
+		
+		StringBuilder totalFileName = new StringBuilder(
+				Options.getStatsGraphDir().getAbsolutePath() + File.separator);
+		List<Class<?>> classUsed=new ArrayList<>();
+		for (StatsEntry stat:stats.getStats()) {
+			Class<?> c=stat.getClass();
+			if (!classUsed.contains(c)) {
+				classUsed.add(c);
+			}
+		}
+		for (int i=0;i<classUsed.size();i++) {
+			Class<?> c=classUsed.get(i);
+			totalFileName.append(c.getPackage().getName());
+			if (i<classUsed.size()-1)
+				totalFileName.append("_");
+		}
 		if (fileName == null)
 			totalFileName.append(name + "(" + stats.hashCode() + ")");
 		else
