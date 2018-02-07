@@ -62,10 +62,10 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 	private Integer imageWidth;
 	private Boolean forceOrdLogScale;
 	private Boolean forceAbsLogScale = false;
-	private Integer minAbs = null;
-	private Integer maxAbs = null;
-	private Integer minOrd = null;
-	private Integer maxOrd = null;
+	private Double minAbs = null;
+	private Double maxAbs = null;
+	private Double minOrd = null;
+	private Double maxOrd = null;
 	private List<Attribute<?>> dataDescriptionfields = null;
 	private Set<LineStyle> linesStyles = new HashSet<LineStyle>();
 
@@ -277,9 +277,9 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 	 * @param min
 	 * @param max
 	 */
-	public void forceAbsRange(Integer min, Integer max) {
-		minAbs = min;
-		maxAbs = max;
+	public void forceAbsRange(Number min, Number max) {
+		minAbs = (min == null) ? null : min.doubleValue();
+		maxAbs = (max == null) ? null : max.doubleValue();
 	}
 
 	/**
@@ -288,9 +288,9 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 	 * @param min
 	 * @param max
 	 */
-	public void forceOrdRange(Integer min, Integer max) {
-		minOrd = min;
-		maxOrd = max;
+	public void forceOrdRange(Number min, Number max) {
+		minOrd = (min == null) ? null : min.doubleValue();
+		maxOrd = (max == null) ? null : max.doubleValue();
 	}
 
 	public void export() {
