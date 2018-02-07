@@ -79,19 +79,18 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		toDelete = new ArrayList<File>();
 	}
 
-	public void plot(StatsSet stats, PlotStyle style, String titleSuffix) {
-		plot(stats, style, titleSuffix, null);
+	public void plot(StatsSet stats, PlotStyle style, String title) {
+		plot(stats, style, title, null);
 	}
 
-	public void plot(StatsSet stats, PlotStyle style, String titleSuffix,
+	public void plot(StatsSet stats, PlotStyle style, String title,
 			PointType pointType) {
 		if (stats.size() == 0)
 			return;
 		this.stats.getStats().addAll(stats.getStats());
 		File tempPlot = makeDataFile(stats, style);
 		StringBuilder plotTitle = new StringBuilder();
-		plotTitle.append((""+style).replaceAll("_", " ") + " of " + stats.size() + " inferences ");
-		plotTitle.append(titleSuffix);
+		plotTitle.append(title);
 		plotLines.append("\"" + tempPlot.getAbsolutePath() + "\" "
 				+ style.plotLine);
 		if (pointType!=null) {
@@ -99,11 +98,12 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		}
 		plotLines.append(" title \"" + plotTitle + "\", ");
 		if (forcePoints && style != PlotStyle.POINTS)
-			plot(stats, PlotStyle.POINTS, titleSuffix);
+			plot(stats, PlotStyle.POINTS, title);
 	}
 
 	public void plot(StatsSet stats, PlotStyle style) {
-		plot(stats, style, stats.getTitle());
+		plot(stats, style, ("" + style).replaceAll("_", " ") + " of "
+				+ stats.size() + " inferences " + stats.getTitle());
 	}
 
 	/**
