@@ -10,11 +10,8 @@ package tools;
 ***/
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import tools.antlr4.DotMealy.*;
 import org.antlr.v4.gui.TreeViewer;
@@ -22,7 +19,6 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.antlr.v4.runtime.misc.TestRig;
 
 import automata.mealy.Mealy;
 
