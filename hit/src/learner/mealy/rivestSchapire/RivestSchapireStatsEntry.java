@@ -7,6 +7,7 @@ import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import drivers.mealy.MealyDriver;
 import drivers.mealy.transparent.RandomMealyDriver;
+import main.simpa.Options;
 import stats.Graph;
 import stats.GraphGenerator;
 import stats.LineStyle;
@@ -30,6 +31,7 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 	public static final Attribute<Boolean> H_IS_GIVEN = Attribute.RS_WITH_GIVEN_H;
 	public static final Attribute<Integer> FAILED_PROBABILISTIC_SEARCH = Attribute.FAILED_PROBALISTIC_SEARCH;
 	public static final Attribute<Integer> SUCCEEDED_PROBALISTIC_SEARCH = Attribute.SUCCEEDED_PROBALISTIC_SEARCH;
+	public final static Attribute<String> ORACLE_USED = Attribute.ORACLE_USED;
 
 	private static Attribute<?>[] attributes = new Attribute<?>[]{
 		RESET_CALL_NB,
@@ -46,6 +48,7 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 		H_IS_GIVEN,
 		FAILED_PROBABILISTIC_SEARCH,
 		SUCCEEDED_PROBALISTIC_SEARCH,
+		ORACLE_USED,
 	};
 
 	public static String getCSVHeader_s(){
@@ -78,6 +81,7 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 	private boolean hIsGiven = false;
 	private int failedProbalisticSearch = 0;
 	private int succeededProbabilisticSearch = 0;
+	private String oracleUsed;
 
 	/**
 	 * rebuild a NoResetStats object from a CSV line
@@ -99,6 +103,7 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 		hIsGiven = Boolean.parseBoolean(st.nextToken());
 		failedProbalisticSearch = Integer.parseUnsignedInt(st.nextToken());
 		succeededProbabilisticSearch = Integer.parseUnsignedInt(st.nextToken());
+		oracleUsed = st.nextToken();
 	}
 
 	public RivestSchapireStatsEntry(MealyDriver d, boolean hIsGiven) {
@@ -107,6 +112,7 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 		this.outputSymbols = d.getOutputSymbols().size();
 		this.automata = d.getSystemName();
 		memory = 0;
+		oracleUsed = Options.USE_SHORTEST_CE ? "shortest" : "MrBean";
 	}
 
 	protected void increaseresetCallNb(){
@@ -166,6 +172,8 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 			return (T) new Integer(failedProbalisticSearch);
 		if (a == SUCCEEDED_PROBALISTIC_SEARCH)
 			return (T) new Integer(succeededProbabilisticSearch);
+		if (a == ORACLE_USED)
+			return (T) oracleUsed;
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 
 	}

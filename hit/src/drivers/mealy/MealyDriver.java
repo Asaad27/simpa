@@ -156,8 +156,12 @@ public class MealyDriver extends Driver {
 			}
 
 			if (inputCe != null) {
-				reset();
-				ce = new LmTrace(inputCe, execute(inputCe));
+				if (Options.USE_SHORTEST_CE) {
+					reset();
+					ce = new LmTrace(inputCe, execute(inputCe));
+				} else {
+					shortestCEFailed = true;
+				}
 			}
 		}
 
