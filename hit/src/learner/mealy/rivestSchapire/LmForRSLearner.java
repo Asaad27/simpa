@@ -12,13 +12,14 @@ import tools.loggers.LogManager;
 import learner.mealy.LmTrace;
 import learner.mealy.table.LmControlTableRow;
 import learner.mealy.table.LmLearner;
+import learner.mealy.table.LmOptions;
 
 public class LmForRSLearner extends LmLearner {
 	StateDriver driver;
 	KnownTracesTree knownTraces = new KnownTracesTree();
 
-	public LmForRSLearner(StateDriver driver) {
-		super(driver);
+	public LmForRSLearner(StateDriver driver, LmOptions options) {
+		super(driver, options);
 		this.driver = driver;
 	}
 

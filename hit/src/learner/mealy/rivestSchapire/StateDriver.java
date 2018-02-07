@@ -2,13 +2,16 @@ package learner.mealy.rivestSchapire;
 
 import java.util.List;
 
-import automata.mealy.InputSequence;
-import automata.mealy.Mealy;
+import automata.State;
 import automata.mealy.OutputSequence;
 import drivers.mealy.MealyDriver;
 import learner.Learner;
+import learner.mealy.CeExposedUnknownStateException;
+import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import learner.mealy.table.LmLearner;
+import options.learnerOptions.OracleOption;
+import stats.StatsEntry_OraclePart;
 import tools.loggers.LogManager;
 
 class StateDriver extends MealyDriver {
@@ -44,8 +47,9 @@ class StateDriver extends MealyDriver {
 		this.realDriver = realDriver;
 		this.learner = learner;
 		resetDone = true;
-		stateLearner = (learner.hIsGiven) ? new LmLearner(this)
-				: new LmForRSLearner(this);
+		stateLearner = (learner.hIsGiven)
+				? new LmLearner(this, learner.options.lmOptions)
+				: new LmForRSLearner(this, learner.options.lmOptions);
 		paused = true;
 		class R implements Runnable{
 			private Learner learner;
@@ -91,23 +95,6 @@ class StateDriver extends MealyDriver {
 		return realDriver.getInputSymbols();
 	}
 
-	@Override
-	public LmTrace getRandomCounterExemple(Mealy c) {
-		globalTraceLengthBeforeLastCE = realDriver.numberOfAtomicRequest;
-		learner.stats.counterExampleCalled();
-		return super.getRandomCounterExemple(c);
-	}
-
-	@Override
-	public InputSequence getShortestCounterExemple(Mealy m){
-		LogManager.logInfo("reset the driver in order to get the initial state");
-		reset();
-		globalTraceLengthBeforeLastCE = realDriver.numberOfAtomicRequest;
-		learner.stats.counterExampleCalled();
-		return realDriver.getShortestCounterExemple(null,m,m.getInitialState());
-	}
-
-
 	//	//this let us to have a global dictionary for used CE.
 	//	public InputSequence getRandomCounterExemple(Mealy c){
 	//		return realDriver.getRandomCounterExemple(c); // this do not work because returned CE start from initial state of realDriver
@@ -136,6 +123,18 @@ class StateDriver extends MealyDriver {
 			throw new ThreadEndException();
 		resetDone = true;
 		return;
+	}
+
+	@Override
+	public boolean getCounterExample(OracleOption options,
+			LmConjecture conjecture, State conjectureStartingState,
+			List<LmTrace> appliedSequences, Boolean forbidReset,
+			StatsEntry_OraclePart oracleStats)
+			throws CeExposedUnknownStateException {
+		learner.stats.counterExampleCalled();
+		return super.getCounterExample(options, conjecture,
+				conjectureStartingState, appliedSequences, forbidReset,
+				oracleStats);
 	}
 
 	public RivestSchapireLearner getLearner() {

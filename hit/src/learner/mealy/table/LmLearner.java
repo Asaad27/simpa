@@ -1,5 +1,6 @@
 package learner.mealy.table;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -21,11 +22,13 @@ public class LmLearner extends Learner {
 	private MealyDriver driver;
 	protected LmControlTable cTable;
 	private LmStatsEntry stats;
+	private LmOptions options;
 
-	public LmLearner(Driver driver) {
+	public LmLearner(Driver driver, LmOptions options) {
+		this.options = options;
 		this.driver = (MealyDriver) driver;
 		this.cTable = new LmControlTable(driver.getInputSymbols());
-		stats = new LmStatsEntry(this.driver);
+		stats = new LmStatsEntry(this.driver, options);
 	}
 
 	private void completeTable() {
@@ -149,8 +152,6 @@ public class LmLearner extends Learner {
 // RG: changed Karim's use of finished that repeated CE search after final conjecture.
 //		boolean finished = false;
 		boolean potentialNewNonClosedRows = true;
-		int lastOracleLength = 0;
-		int lastOracleResets = 0;
 		InputSequence ce = null;
 		completeTable();
 		LogManager.logControlTable(cTable);
@@ -175,22 +176,15 @@ public class LmLearner extends Learner {
 			LmConjecture conj = createConjecture();
 			startLog();
 			if (!driver.isCounterExample(ce, conj)) {
-				int traceLength = driver.numberOfAtomicRequest;
-				int resetNb = driver.numberOfRequest;
-				long oracleStart = System.nanoTime();
-				LmTrace ceTrace = driver.getCounterExample(conj);
-				float oracleDuration = (float) ((System.nanoTime()
-						- oracleStart) / 1000000000.);
-				lastOracleLength = driver.numberOfAtomicRequest - traceLength;
-				lastOracleResets = driver.numberOfRequest - resetNb;
-				if (ceTrace != null) {
+				List<LmTrace> appliedSequences = new ArrayList<>();
+				if (driver.getCounterExample_noThrow(options.oracle, conj, null,
+						appliedSequences, false, stats.getOracle())) {
+					LmTrace ceTrace = appliedSequences
+							.get(appliedSequences.size() - 1);
 					handleNewCounterExample(ceTrace);
 					ce = ceTrace.getInputsProjection();
-					stats.increaseOracleCallNb(lastOracleLength,
-							lastOracleResets, oracleDuration);
 				} else {
 					ce = null;
-					stats.increaseOracleCallNb(0, 0, 0);
 				}
 			} else
 				LogManager.logInfo("Previous counter example : " + ce
@@ -218,20 +212,8 @@ public class LmLearner extends Learner {
 		float duration = (float) ((System.nanoTime() - startTime)
 				/ 1000000000.);
 		stats.finalUpdate(createConjecture(), duration,
-				driver.numberOfAtomicRequest - lastOracleLength,
-				driver.numberOfRequest - lastOracleResets);
-		int maxLength = Options.MAX_CE_LENGTH;
-		int maxResets = Options.MAX_CE_RESETS;
-		Options.MAX_CE_LENGTH = maxLength * 5 + 20;
-		Options.MAX_CE_RESETS = maxResets * 5 + 20;
-		LmConjecture conjecture = createConjecture();
-		LmTrace ceTrace = driver.getCounterExample(conjecture);
-		Options.MAX_CE_LENGTH = maxLength;
-		Options.MAX_CE_RESETS = maxResets;
-		if (ceTrace != null) {
-			System.err.println(ce);
-			throw new RuntimeException("wrong conjecture");
-		}
+				driver.numberOfAtomicRequest, driver.numberOfRequest);
+		//TODO check conjecture (should be done in main)
 	}
 
 	@Override

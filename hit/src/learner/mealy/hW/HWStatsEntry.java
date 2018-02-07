@@ -13,6 +13,7 @@ import learner.mealy.hW.dataManager.SimplifiedDataManager;
 import main.simpa.Options;
 import stats.GraphGenerator;
 import stats.StatsEntry;
+import stats.StatsEntry_OraclePart;
 import stats.attribute.Attribute;
 
 public class HWStatsEntry extends StatsEntry {
@@ -98,7 +99,7 @@ public class HWStatsEntry extends StatsEntry {
 	public static String getCSVHeader_s(){
 		return makeCSVHeader(attributes);
 	}
-	
+
 	/**
 	 * a static version of {@link#getAttributes}
 	 * @return the attributes of this class;
@@ -129,13 +130,9 @@ public class HWStatsEntry extends StatsEntry {
 	private int maxReckonedStates = -1;
 	private int maxFakeStates = -1;
 	private long seed;
-	private int askedCE=0;
-	private int hInconsistencies=0;
-	private int wInconsistencies=0;
-	private String oracleUsed="Unknown";
-	private int oracleTraceLength=0;
-	private float oracleDuration=0;
-	private int subInferenceNb=0;
+	private int hInconsistencies = 0;
+	private int wInconsistencies = 0;
+	private int subInferenceNb = 0;
 	private String searchCEInTrace;
 	private boolean add_h_in_w=false;
 	private boolean check_3rd_inconsistency=false;
@@ -146,12 +143,8 @@ public class HWStatsEntry extends StatsEntry {
 	private boolean useReset = false;
 	private float avgNbTriedWSuffixes = -1;
 	private int resetCallNb = 0;
-	private int oracleResetNb = 0;
 
-	// the following variable are only used to build stats during inference.
-	private int lastOracleTraceLength = 0;
-	private int lastOracleReset = 0;
-	private float lastOracleDuration = 0;
+	final StatsEntry_OraclePart oracle;
 
 	/**
 	 * rebuild a HWStats object from a CSV line
@@ -177,12 +170,12 @@ public class HWStatsEntry extends StatsEntry {
 		maxReckonedStates = Integer.parseInt(st.nextToken());
 		maxFakeStates = Integer.parseInt(st.nextToken());
 		seed = Long.parseLong(st.nextToken());
-		askedCE = Integer.parseInt(st.nextToken());
+		st.nextToken();
 		hInconsistencies = Integer.parseInt(st.nextToken());
 		wInconsistencies = Integer.parseInt(st.nextToken());
-		oracleUsed = st.nextToken();
-		oracleTraceLength = Integer.parseInt(st.nextToken());
-		oracleDuration = Float.parseFloat(st.nextToken());
+		st.nextToken();
+		st.nextToken();
+		st.nextToken();
 		subInferenceNb = Integer.parseInt(st.nextToken());
 		searchCEInTrace = st.nextToken();
 		add_h_in_w = Boolean.parseBoolean(st.nextToken());
@@ -194,15 +187,15 @@ public class HWStatsEntry extends StatsEntry {
 		useReset = Boolean.parseBoolean(st.nextToken());
 		avgNbTriedWSuffixes = Float.parseFloat(st.nextToken());
 		resetCallNb = Integer.parseInt(st.nextToken());
-		oracleResetNb = Integer.parseInt(st.nextToken());
+		st.nextToken();//Oracle reset nb
 		
+		st = new StringTokenizer(line, ",");
+		oracle = new StatsEntry_OraclePart(st, getAttributes());
+
 	}
 
-	public HWStatsEntry( MealyDriver d){
-//		WSize = W.size();
-//		w1Length = (W.size()==0)?0:W.get(0).getLength();
+	public HWStatsEntry(MealyDriver d, HWOptions options) {
 		this.inputSymbols = d.getInputSymbols().size();
-//		this.n = n;
 		this.automata = d.getSystemName();
 		this.seed=Options.SEED;
 		this.reuse_hzxw = Options.REUSE_HZXW;
@@ -210,32 +203,19 @@ public class HWStatsEntry extends StatsEntry {
 		this.useAdaptiveH = Options.ADAPTIVE_H;
 		this.useAdaptiveW = Options.ADAPTIVE_W_SEQUENCES;
 		this.useReset = Options.HW_WITH_RESET;
+		this.add_h_in_w = options.addHInW.isEnabled();
+		oracle = new StatsEntry_OraclePart(options.oracle);
 	}
 
 //	protected void setLocalizeSequenceLength(int length){
 //		localizeSequenceLength = length;
 //	}
 
-	protected void setOracle(String oracle) {
-		oracleUsed = oracle;
-	}
-
 	protected void increaseHInconsitencies(){
 		hInconsistencies++;
 	}
 	protected void increaseWInconsistencies() {
 		wInconsistencies++;
-	}
-
-	protected void increaseOracleCallNb(int traceLength, float duration,
-			int resetNb) {
-		askedCE++;
-		oracleTraceLength += traceLength;
-		oracleDuration += duration;
-		oracleResetNb +=resetNb;
-		lastOracleTraceLength = traceLength;
-		lastOracleDuration = duration;
-		lastOracleReset = resetNb;
 	}
 
 	protected void increaseLocalizeCallNb(){
@@ -294,12 +274,9 @@ public class HWStatsEntry extends StatsEntry {
 		hResponses = dataManager.getHResponsesNb();
 		hMaxLength = dataManager.h.getMaxLength();
 		resetCallNb = dataManager.getTotalResetNb();
-		traceLength -= lastOracleTraceLength;
-		oracleTraceLength -= lastOracleTraceLength;
-		duration -= lastOracleDuration;
-		oracleDuration -= lastOracleDuration;
-		resetCallNb -= lastOracleReset;
-		oracleResetNb -= lastOracleReset;
+		traceLength -= oracle.getLastTraceLength();
+		duration -= oracle.getLastDuration();
+		resetCallNb -= oracle.getLastResetNb();
 	}
 
 	
@@ -336,7 +313,7 @@ public class HWStatsEntry extends StatsEntry {
 //		if (a == LOCALIZER_SEQUENCE_LENGTH)
 //			return (T) new Integer(localizeSequenceLength);
 		if (a == TRACE_LENGTH)
-			return (T) new Integer(traceLength);
+			return (T) new Integer(traceLength - oracle.getLastTraceLength());
 		if (a == INPUT_SYMBOLS)
 			return (T) new Integer(inputSymbols);
 		if (a == OUTPUT_SYMBOLS)
@@ -352,7 +329,7 @@ public class HWStatsEntry extends StatsEntry {
 		if (a == AUTOMATA)
 			return (T) automata;
 		if (a == DURATION)
-			return (T) new Float(duration);
+			return (T) new Float(duration - oracle.getLastDuration());
 		if (a == MEMORY)
 			return (T) new Integer(memory);
 		if (a == MIN_TRACE_LENGTH)
@@ -363,20 +340,20 @@ public class HWStatsEntry extends StatsEntry {
 			return (T) new Integer(maxFakeStates);
 		if (a == SEED)
 			return (T) new Long(seed);
-		if (a==ASKED_COUNTER_EXAMPLE)
-			return (T) new Integer(askedCE);
-		if (a==H_INCONSISTENCY_FOUND)
+		if (a == ASKED_COUNTER_EXAMPLE)
+			return (T) new Integer(oracle.getAskedCE());
+		if (a == H_INCONSISTENCY_FOUND)
 			return (T) new Integer(hInconsistencies);
 		if (a==W_INCONSISTENCY_FOUND)
 			return (T) new Integer(wInconsistencies);
 		if (a==SUB_INFERANCE_NB)
 			return (T) new Integer(subInferenceNb);
 		if (a == ORACLE_USED)
-			return (T) oracleUsed;
+			return (T) oracle.getName();
 		if (a == ORACLE_TRACE_LENGTH)
-			return (T) new Integer(oracleTraceLength);
+			return (T) new Integer(oracle.getLastTraceLength());
 		if (a == ORACLE_DURATION)
-			return (T) new Float(oracleDuration);
+			return (T) new Float(oracle.getDuration());
 		if (a == SEARCH_CE_IN_TRACE)
 			return (T) searchCEInTrace;
 		if (a == ADD_H_IN_W)
@@ -394,13 +371,14 @@ public class HWStatsEntry extends StatsEntry {
 		if (a == USE_RESET)
 				return (T) new Boolean(useReset);
 		if (a == ORACLE_TRACE_PERCENTAGE)
-			return (T) new Float(100. * oracleTraceLength / traceLength);
+			return (T) new Float(
+					100. * oracle.getLastTraceLength() / traceLength);
 		if (a == AVG_NB_TRIED_W)
 			return (T) new Float(avgNbTriedWSuffixes);
 		if (a == RESET_CALL_NB)
 			return (T) new Integer(resetCallNb);
 		if (a == ORACLE_RESET_NB)
-			return (T) new Integer(oracleResetNb);
+			return (T) new Integer(oracle.getResetNb());
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 
 	}
@@ -454,10 +432,6 @@ public class HWStatsEntry extends StatsEntry {
 		searchCEInTrace = string;
 	}
 	
-	protected void setAddHInW(boolean b) {
-		add_h_in_w=b;
-	}
-
 	protected void setCheck3rdInconsistency(boolean b) {
 		check_3rd_inconsistency = b;
 	}

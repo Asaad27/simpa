@@ -108,7 +108,6 @@ public abstract class EFSMDriver extends Driver {
 		return res;
 	}
 
-	@Override
 	public ParameterizedInputSequence getCounterExample(Automata a) {
 		return null;
 	}

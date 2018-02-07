@@ -2,20 +2,21 @@ package drivers.mealy;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 
+import learner.mealy.CeExposedUnknownStateException;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
+import options.learnerOptions.OracleOption;
+import stats.StatsEntry_OraclePart;
 import tools.Utils;
 import tools.loggers.LogManager;
-import automata.Automata;
 import automata.State;
 import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
@@ -128,105 +129,66 @@ public class MealyDriver extends Driver {
 		return name;
 	}
 
-	@Override
-	public Object getCounterExample(Automata a) {
-		return getCounterExample((LmConjecture) a);
+	/**
+	 * Search a counter-example.
+	 * 
+	 * @param options
+	 *            the options for oracle selection and settings
+	 * @param conjecture
+	 *            the conjecture to test
+	 * @param conjectureStartingState
+	 *            the current state in conjecture (can be {@code null} if the
+	 *            oracle is allowed to reset the driver)
+	 * @param appliedSequences
+	 *            a list in which all sequence applied on driver will be added.
+	 *            A reset is applied between each trace of this list.
+	 * @param oracleStats
+	 *            the object which will be used to record statistics about
+	 *            oracle.
+	 * @return true if a counter example is found, false otherwise.
+	 * @throws CeExposedUnknownStateException
+	 *             if a new state is found while searching the initial state in
+	 *             conjecture (during the potential call to
+	 *             {@link LmConjecture#searchInitialState(List)})
+	 */
+	public boolean getCounterExample(OracleOption options,
+			LmConjecture conjecture, State conjectureStartingState,
+			List<LmTrace> appliedSequences, Boolean forbidReset,
+			StatsEntry_OraclePart oracleStats)
+			throws CeExposedUnknownStateException {
+		int startSize = numberOfAtomicRequest;
+		long startTime = System.nanoTime();
+		boolean result;
+		try {
+			result = getCounterExample(options, conjecture,
+					conjectureStartingState, appliedSequences, forbidReset);
+		} finally {
+			float duration = (float) (System.nanoTime() - startTime)
+					/ 1000000000;
+			oracleStats.addOracleCall(numberOfAtomicRequest - startSize,
+					duration);
+		}
+		return result;
 	}
 
-	public LmTrace getCounterExample(LmConjecture c) {
-		LogManager.logInfo("Searching counter example");
-		LmTrace ce = null;
-		if (forcedCE != null && !forcedCE.isEmpty()) {
-			InputSequence inputCe = forcedCE.remove(0);
-			ce = new LmTrace(inputCe, execute(inputCe));
-			LogManager.logInfo("Counter example found (forced) : " + ce);
+	/**
+	 * same as
+	 * {@link #getCounterExample(OracleOption, LmConjecture, State, List, Boolean, StatsEntry_OraclePart)}
+	 * but for algorithms where the conjecture will not search initial state.
+	 */
+	public boolean getCounterExample_noThrow(OracleOption options,
+			LmConjecture conjecture, State conjectureStartingState,
+			List<LmTrace> appliedSequences, Boolean forbidReset,
+			StatsEntry_OraclePart oracleStats) {
+		assert conjecture.getInitialState() != null || forbidReset
+				|| !options.isResetAllowed();
+		try {
+			return getCounterExample(options, conjecture,
+					conjectureStartingState, appliedSequences, forbidReset,
+					oracleStats);
+		} catch (CeExposedUnknownStateException e) {
+			throw new RuntimeException(e);
 		}
-		if (Options.STOP_ON_CE_SEARCH) {
-			LogManager.logInfo("CE search aborted (see Options.STOP_ON_CE_SEARCH");
-			return null;
-		}
-
-		boolean shortestCEFailed = false;
-		if (ce == null) {
-			LogManager.logInfo("search theorical CE");
-			InputSequence inputCe = null;
-			try {
-				if (c.isConnex())
-					inputCe = getShortestCounterExemple(c);
-				else
-					throw new UnableToComputeException("automata is not connex");
-			} catch (UnableToComputeException e) {
-				LogManager.logInfo("unable to compute theorical CE " + (e.getMessage()));
-				shortestCEFailed = true;
-			}
-
-			if (inputCe != null) {
-				if (Options.USE_SHORTEST_CE) {
-					reset();
-					ce = new LmTrace(inputCe, execute(inputCe));
-				} else {
-					shortestCEFailed = true;
-				}
-			}
-		}
-
-		if (shortestCEFailed && ce == null) {
-			LogManager.logInfo("search CE by using a distinction sequence");
-			reset();
-			List<LmTrace> traces = new ArrayList<>();
-			traces.add(new LmTrace());
-			traces.add(new LmTrace());// record reset in traces
-			boolean found = false;
-			if (Options.USE_DT_CE) {
-				found = getDistinctionTreeBasedCE(c, c.getInitialState(),
-						traces, true);
-			}
-			if (found)
-				ce = traces.get(traces.size() - 1);
-		}
-
-		if (shortestCEFailed && ce == null) {
-			LogManager.logInfo("search random CE");
-			ce = getRandomCounterExemple(c);
-		}
-
-		if (ce == null)
-			LogManager.logInfo("No counter example found");
-		else
-			LogManager.logInfo("found ce : " + ce);
-		return ce;
-	}
-
-	private int maxLength(Mealy c) {
-		int conjectureBound = c.getStateCount() * getInputSymbols().size() * 100
-				+ 500;
-		if (conjectureBound < Options.MAX_CE_LENGTH)
-			return conjectureBound;
-		return Options.MAX_CE_LENGTH;
-	}
-
-	public boolean getRandomCounterExample_noReset(Mealy c, State currentState,LmTrace ce) {
-		boolean found = false;
-		int maxTries = maxLength(c);
-		List<String> is = getInputSymbols();
-		stopLog();
-		int i = 0;
-		while (i < maxTries && !found) {
-			String input = Utils.randIn(is);
-			String driverOutput = execute(input);
-			ce.append(input, driverOutput);
-
-			MealyTransition t = c.getTransitionFromWithInput(currentState,
-					input);
-			if (!t.getOutput().equals(driverOutput)) {
-				found=true;
-				break;
-			}
-			currentState = t.getTo();
-			i++;
-		}
-		startLog();
-		return found;
 	}
 
 	/**
@@ -260,140 +222,221 @@ public class MealyDriver extends Driver {
 		startLog();
 		return found;
 	}
-	
-	public LmTrace getRandomCounterExemple(Mealy c) {
-		LmTrace ceTrace=null;
-		boolean found = false;
-		InputSequence ce = null;
 
-		int maxTries = Options.MAX_CE_RESETS;
-		List<String> is = getInputSymbols();
-		MealyDriver conjDriver = new MealyDriver(c);
-		stopLog();
-		conjDriver.stopLog();
-		int i = 0;
-		while (i < maxTries && !found) {
-			ce = InputSequence.generate(is, maxLength(c));
-			while (triedCE.contains(ce))
-				ce = InputSequence.generate(is, maxLength(c));
-			triedCE.add(ce);
-			OutputSequence osSystem = new OutputSequence();
-			OutputSequence osConj = new OutputSequence();
-			ceTrace = new LmTrace();
+	/**
+	 * Same as
+	 * {@link #getCounterExample(OracleOption, LmConjecture, State, List, StatsEntry_OraclePart)}
+	 * but this method do not record statistics.
+	 * 
+	 * @throws CeExposedUnknownStateException
+	 *             if a new state is found while searching the initial state in
+	 *             conjecture (during the potential call to
+	 *             {@link LmConjecture#searchInitialState(List)})
+	 */
+	protected boolean getCounterExample(OracleOption options,
+			LmConjecture conjecture, State conjectureState,
+			List<LmTrace> appliedSequences, Boolean forbidReset)
+			throws CeExposedUnknownStateException {
+		if (forbidReset == null)
+			forbidReset = false;
+		boolean resetIsAllowed = options.isResetAllowed() && !forbidReset;
+		if (resetIsAllowed) {
+			if (conjectureState != null) {
+				// first, try to find a CE without using reset
+				boolean result = getCounterExample(options, conjecture,
+						conjectureState, appliedSequences, true);
+				if (result)
+					return true;
+			}
+			// we need to reset to let some oracle start from initial state
+			// (e.g. the search of shortest counter-example needs to be in a
+			// state were all others states are reachable).
+			conjectureState = conjecture.searchInitialState(appliedSequences);
 			reset();
-			conjDriver.reset();
-			if (ce.getLength() > 0) {
-				for (String input : ce.sequence) {
-					String _sys = execute(input);
-					String _conj = conjDriver.execute(input);
-					ceTrace.append(input, _sys);
-					if (_sys.length() > 0) {
-						osSystem.addOutput(_sys);
-						osConj.addOutput(_conj);
-					}
-					if (!_sys.equals(_conj) && (osSystem.getLength() > 0 && !osSystem.getLastSymbol().isEmpty())) {
-						found = true;
-						ce = ce.getIthPreffix(osSystem.getLength());
-						LogManager.logInfo("Counter example found : " + ce);
-						LogManager.logInfo("On system : " + osSystem);
-						LogManager.logInfo("On conjecture : " + osConj);
-						break;
+			appliedSequences.add(new LmTrace());
+		}
+
+		assert conjectureState != null;
+		if (options.getSelectedItem() == options.shortest) {
+			assert this.automata != null;
+			assert this.getCurrentState() != null;
+			if (!this.automata.isConnex())
+				throw new RuntimeException(
+						"automata must be strongly connected");
+			List<InputSequence> counterExamples = conjecture.getCounterExamples(
+					conjectureState, this.automata, getCurrentState(), true);
+			if (counterExamples.isEmpty() && options.isResetAllowed()) {
+				reset();
+				appliedSequences.add(new LmTrace());
+				conjectureState = conjecture.getInitialState();
+				assert conjectureState != null;
+				counterExamples = conjecture.getCounterExamples(conjectureState,
+						this.automata, getCurrentState(), true);
+			}
+			if (counterExamples.isEmpty())
+				return false;
+			else {
+				InputSequence ceIn = counterExamples.get(0);
+				OutputSequence ceOut = execute(ceIn);
+				appliedSequences.add(new LmTrace(ceIn, ceOut));
+				return true;
+			}
+		} else if (options.getSelectedItem() == options.mrBean) {
+			if (options.mrBean.onlyIfCEExists()) {
+				assert this.automata != null;
+				assert this.getCurrentState() != null;
+				if (!this.automata.isConnex())
+					throw new RuntimeException(
+							"automata must be strongly connected");
+				List<InputSequence> counterExamples = conjecture
+						.getCounterExamples(conjectureState, this.automata,
+								getCurrentState(), true);
+				if (counterExamples.isEmpty() && resetIsAllowed) {
+					reset();
+					appliedSequences.add(new LmTrace());
+					conjectureState = conjecture.getInitialState();
+					assert conjectureState != null;
+					counterExamples = conjecture.getCounterExamples(
+							conjectureState, this.automata, getCurrentState(),
+							true);
+				}
+				if (counterExamples.isEmpty())
+					return false;
+				else {
+					LogManager.logInfo("a counter example exixst (e.g. "
+							+ counterExamples.get(0)
+							+ "). Doing random walk until a CE is found");
+					if (options.isResetAllowed()) {
+						int maxLength = options.mrBean.getMaxTraceLength();
+						int conjectureBound = conjecture.getStateCount()
+								* getInputSymbols().size() * 100 + 500;
+						if (conjectureBound < maxLength)
+							maxLength = conjectureBound;
+						boolean counterExampleIsFound;
+						do {
+							LmTrace trace = new LmTrace();
+							counterExampleIsFound = doRandomWalk(conjecture,
+									conjectureState, trace, maxLength);
+							reset();
+							appliedSequences.add(trace);
+							// here is a difficult point : a short length is
+							// good if the automaton is not connex and the
+							// counter-example is near the start but a long
+							// sequence is good for automaton which have CE in a
+							// point «far» from initial state.
+							maxLength = maxLength + maxLength / 10 + 1;
+						} while (!counterExampleIsFound);
+						return true;
+					} else {
+						assert this.automata.isConnex();
+						LmTrace trace = new LmTrace();
+						doRandomWalk(conjecture, conjectureState, trace, -1);
+						appliedSequences.add(trace);
+						return true;
 					}
 				}
-				i++;
-			}
-		}
-		startLog();
-		conjDriver.startLog();
-		return (found ? ceTrace : null);
-	}
-
-	/**
-	 * get a shortest distinguish sequence for an automata the computed sequence
-	 * is not applied to the driver The two automata are supposed to be connex.
-	 * 
-	 * @param s1
-	 *            the position in the driver equivalent to s2. If null, the
-	 *            current position is chosen
-	 * @param a2
-	 *            the second automata
-	 * @param s2
-	 *            the current position in a2
-	 * @return a distinguish sequence for the two automata starting from their
-	 *         current states.
-	 */
-	public InputSequence getShortestCounterExemple(State s1, Mealy a2, State s2) {
-		if (s1 == null)
-			s1 = currentState;
-		assert automata.isConnex() && a2.isConnex();
-		int maxLength = (automata.getStateCount() > a2.getStateCount() ? automata.getStateCount() : a2.getStateCount());
-		class Node {
-			public InputSequence i;
-			public State originalEnd;
-			public State conjectureEnd;
-
-			public String toString() {
-				return "for input '" + i + "' this driver go to '" + originalEnd + "' and the other go to '"
-						+ conjectureEnd + "'\n";
-			}
-		}
-		Map<State, Set<State>> seen = new HashMap<>();// a set of pair of
-														// <original
-														// state,conjecture
-														// state> already added
-														// to toCompute
-		LinkedList<Node> toCompute = new LinkedList<Node>();
-		Node n = new Node();
-		n.i = new InputSequence();
-		n.originalEnd = s1;
-		n.conjectureEnd = s2;
-		toCompute.add(n);
-		while (!toCompute.isEmpty()) {
-			Node current = toCompute.pollFirst();
-			if (current.i.getLength() > maxLength)
-				continue;
-			for (String i : getInputSymbols()) {
-				MealyTransition originalT = automata.getTransitionFromWithInput(current.originalEnd, i);
-				MealyTransition conjectureT = a2.getTransitionFromWithInput(current.conjectureEnd, i);
-				if (!originalT.getOutput().equals(conjectureT.getOutput())) {
-					current.i.addInput(i);
-					return current.i;
+			} else {
+				for (int i = 0; i < options.mrBean.getMaxTraceNumber(); i++) {
+					LmTrace trace = new LmTrace();
+					boolean counterExampleIsFound = doRandomWalk(conjecture,
+							conjectureState, trace,
+							options.mrBean.getMaxTraceLength());
+					appliedSequences.add(trace);
+					if (counterExampleIsFound)
+						return true;
 				}
-				State originalTo=originalT.getTo();
-				State conjectureTo = conjectureT.getTo();
-				if (seen.get(originalTo) == null)
-					seen.put(originalTo, new HashSet<State>());
-				else if (seen.get(originalTo).contains(conjectureTo))
-					continue;
-				Node newNode = new Node();
-				newNode.i = new InputSequence();
-				newNode.i.addInputSequence(current.i);
-				newNode.i.addInput(i);
-				newNode.originalEnd = originalT.getTo();
-				newNode.conjectureEnd = conjectureT.getTo();
-				toCompute.add(newNode);
-				
-				seen.get(originalTo).add(conjectureTo);
+				LogManager.logInfo(
+						"no counter example found with random walk. the conjecture might be equivalent to the driver.");
+				return false;
 			}
+		} else if (options.getSelectedItem() == options.interactive) {
+			return getInteractiveCounterExample(options, conjecture,
+					conjectureState, appliedSequences);
+		} else {
+			throw new RuntimeException("option not implemented");
 		}
-		return null;
 	}
 
-	/**
-	 * get a shortest distinguish sequence for an automata the computed sequence
-	 * is not applied to the driver The two automata ares supposed to be connex.
-	 * 
-	 * @param a2
-	 *            the second automata
-	 * @return a distinguish sequence for the two automata starting from their
-	 *         initial states or null if the two automata are equivalents.
-	 * @throws UnableToComputeException
-	 *             if there is not enough data to compute a CE.
-	 */
-	public InputSequence getShortestCounterExemple(Mealy m) throws UnableToComputeException {
-		if (automata == null)
-			throw new UnableToComputeException();
-		return getShortestCounterExemple(automata.getInitialState(), m, m.getInitialState());
+	private boolean getInteractiveCounterExample(OracleOption options,
+			LmConjecture conjecture, State conjectureState,
+			List<LmTrace> appliedSequences) {
+
+		List<InputSequence> counterExamples = null;
+		if (this.automata != null && getCurrentState() != null) {
+			counterExamples = conjecture.getCounterExamples(conjectureState,
+					this.automata, getCurrentState(), false);
+			if (counterExamples.size() == 0)
+				return false;
+			LogManager.logInfo(
+					"there is no more counter example. user were not asked about one");
+		}
+		InputSequence counterExample = new InputSequence();
+		LogManager.logInfo("asking for counter exemple");
+		Scanner input = new Scanner(System.in);
+		if (counterExamples != null) {
+			StringBuilder s = new StringBuilder();
+			for (InputSequence iS : counterExamples) {
+				s.append(iS + ", ");
+			}
+			System.out.println("Some counter example are " + s.toString());
+			counterExample = counterExamples.get(0);
+		}
+		System.out.println(
+				"What do you want to apply ? \n\tEnter «auto» to use default sequence '"
+						+ counterExample
+						+ "'\n\t'a,b,c' for the sequence a, b, c\n");
+
+		String answer = input.nextLine();
+		input.close();
+		if (answer.equals(""))
+			answer = "auto";
+		System.out.println("understood «" + answer + "»");
+		if (!answer.equals("auto")) {
+			counterExample = new InputSequence();
+			for (String i : answer.split(",")) {
+				if (!getInputSymbols().contains(i))
+					throw new RuntimeException(
+							"user provided an input which is not available for the driver.");
+				counterExample.addInput(i);
+			}
+		}
+		System.out.println("using «" + counterExample + "»\n");
+		LogManager.logInfo(
+				"user choose «" + counterExample + "» as counterExemple");
+
+		OutputSequence driverOut = execute(counterExample);
+		appliedSequences.add(new LmTrace(counterExample, driverOut));
+		if (driverOut.equals(
+				conjecture.simulateOutput(conjectureState, counterExample))) {
+			LogManager.logInfo(
+					"CounterExample provided by user is not a counter example."
+							+ "Assuming that conjecture is equivalent to the driver.");
+			return false;
+		}
+
+		return true;
+
+	}
+
+	private boolean doRandomWalk(LmConjecture conjecture, State conjectureState,
+			LmTrace trace, int maxLength) {
+		if (Options.getLogLevel().compareTo(LogLevel.ALL) >= 0)
+			LogManager.logInfo("Starting a random walk");
+		int tried = 0;
+		List<String> is = getInputSymbols();
+		while (maxLength < 0 || tried < maxLength) {
+			String input = Utils.randIn(is);
+			String output = execute(input);
+			trace.append(input, output);
+			MealyTransition transition = conjecture
+					.getTransitionFromWithInput(conjectureState, input);
+			if (!transition.getOutput().equals(output)) {
+				return true;
+			}
+			conjectureState = transition.getTo();
+			tried++;
+		}
+		return false;
 	}
 
 	@Override

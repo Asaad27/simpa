@@ -144,26 +144,35 @@ public class LmConjecture extends automata.mealy.Mealy {
 	 * can associate a state of conjecture to each real state. This mean that
 	 * the conjecture can have extra states which will not be checked.
 	 * 
+	 * The conjecture can be not minimal and in this case, a warning might be
+	 * logged (but this is not systematically the case, for instance it will not
+	 * be logged if real automaton has the same «non-minimality» as conjecture).
+	 * 
 	 * @param conjectureStartingState
-	 *            state to start algorithm in conjecture. Should be equivalent
-	 *            to realStartingState
+	 *            state to start algorithm in conjecture (this). Must be
+	 *            equivalent to realStartingState
 	 * @param realAutomata
 	 *            the reference automata. All states must be reachable from the
 	 *            given starting state, otherwise the checking will be partial.
 	 * @param realStartingState
 	 *            state to start algorithm in reference automata. Should be
 	 *            equivalent to conjectureStartingState
+	 * @param stopOnFirst
+	 *            if {@code false}, The list including all counter examples
+	 *            which are not containing loop will be returned. If
+	 *            {@code true}, at most one counter example will be returned
+	 *            (the first of the list). Note that the first is not always the
+	 *            shortest.
 	 * @return a list of {@link InputSequence} which will provide different
 	 *         output if applied in conjecture and real automata from the
-	 *         provided starting states. This list include all counter examples
-	 *         which are not containing loops.
+	 *         provided starting states.
 	 */
-	public List<InputSequence> getAllCounterExamplesWithoutReset(
-			State conjectureStartingState, Mealy realAutomata,
-			State realStartingState) {
+	public List<InputSequence> getCounterExamples(State conjectureStartingState,
+			Mealy realAutomata, State realStartingState, boolean stopOnFirst) {
 		assert realAutomata.isConnex();
 		CounterExampleResult counterExamples = getAllCounterExamplesReachable(
-				conjectureStartingState, realAutomata, realStartingState);
+				conjectureStartingState, realAutomata, realStartingState,
+				false);
 		assert counterExamples.testedRealStates
 				.containsAll(realAutomata.getStates());
 		return counterExamples.noResetCE;
@@ -175,16 +184,22 @@ public class LmConjecture extends automata.mealy.Mealy {
 	 * @param realAutomata
 	 *            the reference automaton. Only states reachable from initial
 	 *            state of this automaton will be checked.
+	 * @param stopOnFirst
+	 *            if <code>false</code>, The list including all counter examples
+	 *            which are not containing loop will be returned. If
+	 *            <code>true>,at most one counter example will be returned (the
+	 *            first of the list). Note that the first is not always the
+	 *            shortest.
 	 * @return a {@link CounterExampleResult} object
 	 */
-	public CounterExampleResult getAllCounterExamplesWithReset(
-			Mealy realAutomata) {
+	public CounterExampleResult getCounterExamplesWithReset(
+			Mealy realAutomata,boolean stopOnFirst) {
 		assert (getInitialState() != null
 				&& realAutomata.getInitialState() != null);
 
 		CounterExampleResult result = getAllCounterExamplesReachable(
 				getInitialState(), realAutomata,
-				realAutomata.getInitialState());
+				realAutomata.getInitialState(), false);
 		result.fromResetCE = result.noResetCE;
 		result.noResetCE = new ArrayList<>();
 		return result;
@@ -193,7 +208,7 @@ public class LmConjecture extends automata.mealy.Mealy {
 	/**
 	 * Search counter examples both from given states and from initial state (if
 	 * defined in conjecture). It can return a same counter example two times,
-	 * one with a path using after a reset and one with a path from current
+	 * one with a path starting after a reset and one with a path from current
 	 * state.
 	 * 
 	 * @param conjectureStartingState
@@ -204,18 +219,25 @@ public class LmConjecture extends automata.mealy.Mealy {
 	 *            either from starting state or from initial state.
 	 * @param realStartingState
 	 *            the starting state in real automaton.
+	 * @param stopOnFirst
+	 *            if <code>false</code>, The list including all counter examples
+	 *            which are not containing loop will be returned. If
+	 *            <code>true>,at most one counter example will be returned (the
+	 *            first of the list). Note that the first is not always the
+	 *            shortest.
 	 * @return a {@link CounterExampleResult} object
 	 */
 	public CounterExampleResult getAllCounterExamples(
 			State conjectureStartingState, Mealy realAutomaton,
-			State realStartingState) {
+			State realStartingState, boolean stopOnFirst) {
 		assert realAutomaton.isConnex() || getInitialState() != null;
 
 		CounterExampleResult result = getAllCounterExamplesReachable(
-				conjectureStartingState, realAutomaton, realStartingState);
+				conjectureStartingState, realAutomaton, realStartingState,
+				stopOnFirst);
 		if (getInitialState() != null) {
-			CounterExampleResult resultFromReset = getAllCounterExamplesWithReset(
-					realAutomaton);
+			CounterExampleResult resultFromReset = getCounterExamplesWithReset(
+					realAutomaton,stopOnFirst);
 			result.fromResetCE = resultFromReset.fromResetCE;
 			result.reachedConjectureStates
 					.addAll(resultFromReset.reachedConjectureStates);
@@ -226,8 +248,9 @@ public class LmConjecture extends automata.mealy.Mealy {
 	}
 
 	/**
-	 * Search counter example by testing paths in the reference automaton and
-	 * checking if it produce the same output in conjecture.
+	 * Search counter example starting from the given state by testing paths in
+	 * the reference automaton and checking if it produce the same output in
+	 * conjecture.
 	 * 
 	 * @param conjectureStartingState
 	 *            the starting state in conjecture
@@ -235,11 +258,17 @@ public class LmConjecture extends automata.mealy.Mealy {
 	 *            the reference automaton
 	 * @param realStartingState
 	 *            the starting state in reference automaton.
+	 * @param stopOnFirst
+	 *            if <code>false</code>, The list including all counter examples
+	 *            which are not containing loop will be returned. If
+	 *            <code>true>,at most one counter example will be returned (the
+	 *            first of the list). Note that the first is not always the
+	 *            shortest.
 	 * @return a {@link CounterExampleResult} object
 	 */
 	protected CounterExampleResult getAllCounterExamplesReachable(
 			State conjectureStartingState, Mealy realAutomaton,
-			State realStartingState) {
+			State realStartingState, boolean stopOnFirst) {
 		CounterExampleResult result = new CounterExampleResult(
 				realAutomaton.getStates(), getStates());
 		LmConjecture conjecture = this;
@@ -257,6 +286,7 @@ public class LmConjecture extends automata.mealy.Mealy {
 		while (!uncheckedStates.isEmpty()) {
 			State realState = uncheckedStates.pollFirst();
 			State conjectureState = realToConjecture.get(realState);
+			assert conjectureState != null;
 			for (String i : inputSymbols) {
 				MealyTransition realTransition = realAutomaton
 						.getTransitionFromWithInput(realState, i);
@@ -271,10 +301,12 @@ public class LmConjecture extends automata.mealy.Mealy {
 				// first check if transition in both automata provide same
 				// output
 				if (!realOutput.equals(conjectureOutput)) {
-					InputSequence counterExample = accesPath.get(realState)
-							.clone();
+					InputSequence counterExample = new InputSequence();
+					counterExample.addInputSequence(accesPath.get(realState));
 					counterExample.addInput(i);
 					result.addNoResetCE(counterExample);
+					if (stopOnFirst)
+						return result;
 				}
 				// now map the realTarget to a state in conjecture (if not
 				// already done)
@@ -296,10 +328,9 @@ public class LmConjecture extends automata.mealy.Mealy {
 									mappedTarget);
 					if (distinctionSequence == null) {
 						// the two states are equivalents
-						LogManager
-								.logWarning("We found two equivalent states in conjecture while looking for counter example (states "
-										+ conjectureTarget
-										+ " and "
+						LogManager.logWarning(
+								"We found two equivalent states in conjecture while looking for counter example (states "
+										+ conjectureTarget + " and "
 										+ mappedTarget + ").");
 						continue;
 					}
@@ -319,17 +350,36 @@ public class LmConjecture extends automata.mealy.Mealy {
 						assert !conjecture.simulateOutput(conjectureTarget,
 								distinctionSequence).equals(realDistinctionOutput);
 						// We have to use the other path which lead to realTarget
-						// conjectureTarget
+						// and conjectureTarget
 						counterExample.addInputSequence(accesPath
 								.get(realState));
 						counterExample.addInput(i);
 					}
 					counterExample.addInputSequence(distinctionSequence);
 					result.addNoResetCE(counterExample);
+					if (stopOnFirst)
+						return result;
 				}
 			}
 			result.addTestedRealState(realState);
 		}
 		return result;
+	}
+
+	/**
+	 * Use the driver to identify the initial state of the conjecture.
+	 * 
+	 * This method is designed to be overridden by algorithms with low resets
+	 * calls.
+	 * 
+	 * @param appliedSequences
+	 *            the sequences applied on driver to identify the initial state.
+	 *            A new sequence must be added in the list after each reset.
+	 * @return the initial state of the conjecture or null if the initial state
+	 *         cannot be discovered.
+	 */
+	public State searchInitialState(List<LmTrace> appliedSequences)
+			throws CeExposedUnknownStateException {
+		return getInitialState();
 	}
 }

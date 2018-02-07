@@ -8,8 +8,10 @@ import automata.mealy.MealyTransition;
 import drivers.mealy.MealyDriver;
 import learner.mealy.LmConjecture;
 import main.simpa.Options;
+import options.learnerOptions.OracleOption;
 import stats.GraphGenerator;
 import stats.StatsEntry;
+import stats.StatsEntry_OraclePart;
 import stats.StatsSet;
 import stats.attribute.Attribute;
 
@@ -71,12 +73,14 @@ public class ZStatsEntry extends StatsEntry {
 	private String automata;
 	private float duration;
 	private long seed;
-	private int askedCE = 0;
-	private String oracleUsed = "Unknown";
-	private int oracleTraceLength = 0;
-	private float oracleDuration = 0;
 	private int resetNb;
 	private int oracleResetNb = 0;
+
+	private final StatsEntry_OraclePart oracle;
+
+	public StatsEntry_OraclePart getOracle() {
+		return oracle;
+	}
 
 	/**
 	 * rebuild a StatsEntry object from a CSV line
@@ -94,37 +98,45 @@ public class ZStatsEntry extends StatsEntry {
 		automata = st.nextToken();
 		duration = Float.parseFloat(st.nextToken());
 		seed = Long.parseLong(st.nextToken());
-		askedCE = Integer.parseInt(st.nextToken());
-		oracleUsed = st.nextToken();
-		oracleTraceLength = Integer.parseInt(st.nextToken());
-		oracleDuration = Float.parseFloat(st.nextToken());
+		st.nextToken();// CE_NB
+		st.nextToken();// ORACLE_USED
+		st.nextToken();// ORACLE_TRACE_LENGTH
+		st.nextToken();// ORACLE_DURATION
 		resetNb = Integer.parseInt(st.nextToken());
-		oracleResetNb = Integer.parseInt(st.nextToken());
+		st.nextToken();//ORACLE_RESET_NB
 
+		st = new StringTokenizer(line, ",");
+		oracle = new StatsEntry_OraclePart(st, getAttributes());
 	}
 
-	public ZStatsEntry(MealyDriver d) {
+	public ZStatsEntry(MealyDriver d, OracleOption oracleOptions) {
 		this.inputSymbols = d.getInputSymbols().size();
 		this.automata = d.getSystemName();
 		this.seed = Options.SEED;
-		oracleUsed = (Options.USE_DT_CE ? "distinctionTree + " : "") + "MrBean";
-
+		oracle = new StatsEntry_OraclePart(oracleOptions);
 	}
 
-	public void increaseOracleCallNb(int traceLength, int resetNb,
-			float duration) {
-		askedCE++;
-		oracleTraceLength += traceLength;
-		oracleDuration += duration;
-		oracleResetNb += resetNb;
-	}
-
+	/**
+	 * Record data available after inference for statistics.
+	 * 
+	 * @param conjecture
+	 *            the conjecture built.
+	 * @param duration
+	 *            the total duration of inference (duration of last oracle will
+	 *            be removed);
+	 * @param traceLength
+	 *            the total trace length of inference (trace length of last
+	 *            oracle will be removed)
+	 * @param resets
+	 *            the total number of reset for inference. (reset used by last
+	 *            oracle will be removed).
+	 */
 	public void finalUpdate(LmConjecture conjecture, float duration,
 			int traceLength, int resets) {
 		updateWithConjecture(conjecture);
-		this.duration = duration;
-		this.traceLength = traceLength;
-		this.resetNb = resets;
+		this.duration = duration - oracle.getLastDuration();
+		this.traceLength = traceLength - oracle.getLastTraceLength();
+		this.resetNb = resets - oracle.getLastResetNb();
 	}
 
 	public void updateWithConjecture(LmConjecture conjecture) {
@@ -161,17 +173,17 @@ public class ZStatsEntry extends StatsEntry {
 		if (a == SEED)
 			return (T) new Long(seed);
 		if (a == ASKED_COUNTER_EXAMPLE)
-			return (T) new Integer(askedCE);
+			return (T) new Integer(getOracle().getAskedCE());
 		if (a == ORACLE_USED)
-			return (T) oracleUsed;
+			return (T) getOracle().getName();
 		if (a == ORACLE_TRACE_LENGTH)
-			return (T) new Integer(oracleTraceLength);
+			return (T) new Integer(getOracle().getTraceLength());
 		if (a == ORACLE_DURATION)
-			return (T) new Float(oracleDuration);
+			return (T) new Float(getOracle().getDuration());
 		if (a == RESET_NB)
 			return (T) new Integer(resetNb);
 		if (a == ORACLE_RESET_NB)
-			return (T) new Integer(oracleResetNb);
+			return (T) new Integer(oracle.getResetNb());
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 
 	}
@@ -192,7 +204,8 @@ public class ZStatsEntry extends StatsEntry {
 			return ((Long) get(a)).floatValue();
 		if (a == DURATION || a == ORACLE_DURATION)
 			return (Float) get(a);
-		throw new RuntimeException(a.getName() + " is not available or cannot be cast to float");
+		throw new RuntimeException(
+				a.getName() + " is not available or cannot be cast to float");
 
 	}
 

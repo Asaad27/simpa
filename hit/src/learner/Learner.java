@@ -57,7 +57,8 @@ public abstract class Learner {
 		ChoiceOptionItem selectedAutomataChoice = automataChoice
 				.getSelectedItem();
 		if (selectedAutomataChoice == automataChoice.scan) {
-			return new ZLearner(driver);
+			throw new RuntimeException("not implemented yet");
+			// return new ZLearner(driver);
 		} else if (selectedAutomataChoice == automataChoice.efsm) {
 			return new LiLearner(driver);
 		} else if (selectedAutomataChoice == automataChoice.mealy) {
@@ -65,20 +66,21 @@ public abstract class Learner {
 			ChoiceOptionItem selectedLearnerChoice = learnerChoice
 					.getSelectedItem();
 			if (selectedLearnerChoice == learnerChoice.tree) {
-				return new ZLearner(driver);
+				return new ZLearner(driver, learnerChoice.tree);
 			} else if (selectedLearnerChoice == learnerChoice.combinatorial) {
 				return new CombinatorialLearner((MealyDriver) driver);
 			} else if (selectedLearnerChoice == learnerChoice.cutCombinatorial) {
 				return new CutterCombinatorialLearner((MealyDriver) driver);
 			} else if (selectedLearnerChoice == learnerChoice.rivestSchapire) {
-				return new RivestSchapireLearner((MealyDriver) driver);
+				return new RivestSchapireLearner((MealyDriver) driver,
+						learnerChoice.rivestSchapire);
 			} else if (selectedLearnerChoice == learnerChoice.localizerBased) {
 				return new LocalizerBasedLearner((MealyDriver) driver,
 						learnerChoice.localizerBased);
 			} else if (selectedLearnerChoice == learnerChoice.hW) {
-				return new HWLearner((MealyDriver)driver);
+				return new HWLearner((MealyDriver) driver, learnerChoice.hW);
 			} else if (selectedLearnerChoice == learnerChoice.lm) {
-				return new LmLearner(driver);
+				return new LmLearner(driver, learnerChoice.lm);
 			} else {
 				assert false;
 				return null;

@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Set;
 
 import automata.State;
@@ -26,6 +25,7 @@ import automata.mealy.OutputSequence;
 import drivers.mealy.MealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
+import learner.mealy.CeExposedUnknownStateException;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmConjecture.CounterExampleResult;
 import learner.mealy.LmTrace;
@@ -71,9 +71,7 @@ public class HWLearner extends Learner {
 	int wRefinenmentNb = 0;
 	int nbOfTriedWSuffixes = 0;
 
-	public HWLearner(MealyDriver d) {
-		driver = d;
-	}
+	HWOptions options;
 
 	/**
 	 * Verify that recorded trace can be produced by the driver (need a
@@ -117,191 +115,54 @@ public class HWLearner extends Learner {
 
 	}
 
-	public LmTrace getCounterExempleReset(List<GenericHNDException> hExceptions)
-			throws CeExposedUnknownStateException {
-		LmTrace ce = null;
-		ce = getCounterExempleNoStats(hExceptions, false);
-		int resetCe = 0;
-		while (ce == null) {
-			resetCe++;
-			if (resetCe > Options.MAX_CE_RESETS)
-				break;
-			Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> characterization = dataManager
-					.getInitialCharacterization();
-			for (GenericInputSequence w : characterization.unknownPrints()) {
-				dataManager.reset();
-				GenericOutputSequence r = dataManager.apply(w);
-				if (Options.getLogLevel() != LogLevel.LOW)
-					LogManager.logInfo(
-							"characterizing initial state with sequence ", w);
-				characterization.addPrint(w, r);
-			}
-			if (!dataManager.hasState(characterization))
-				throw new CeExposedUnknownStateException(characterization);
-			dataManager.getInitialCharacterization();// update initial state in
-														// dataManager
-			dataManager.reset();
-			assert (dataManager.getCurrentState() != null);
-			ce = getCounterExempleNoStats(hExceptions, false);
-		}
-		return ce;
+	public HWLearner(MealyDriver d, HWOptions options) {
+		driver = d;
+		this.options = options;
 	}
 
 	/**
 	 * If some sequence are applied on driver but not returned, the datamanager
 	 * is also updated.
-	 * 
-	 * @return the trace applied on driver or null if no counter example is
-	 *         found
-	 * @throws CeExposedUnknownStateException 
+	 *
+	 * @return the trace applied on driver and not on dataManager or null if no
+	 *         counter example is found
+	 * @throws CeExposedUnknownStateException
+	 *             if a new state is discovered while searching the initial
+	 *             state in conjecture.
 	 */
 	public LmTrace getCounterExemple(List<GenericHNDException> hExceptions,
-			boolean withReset) throws CeExposedUnknownStateException {
-		int startSize = dataManager.traceSize();
-		long startTime = System.nanoTime();
-		int startReset = dataManager.getTotalResetNb();
-		if (Options.USE_SHORTEST_CE) {
-			stats.setOracle("shortest");
-		} else {
-			stats.setOracle(
-					(Options.USE_DT_CE ? "distinctionTree + " : "") + "MrBean");
-		}
-		LmTrace returnedCE;
-		CeExposedUnknownStateException exception = null;
-		try {
-			returnedCE = getDistinguishingSequenceCounterExample(hExceptions,
-					withReset);
-			if (returnedCE == null)
-				returnedCE = getCounterExempleNoStats(hExceptions, withReset);
-		} catch (CeExposedUnknownStateException e) {
-			assert withReset;
-			exception = e;
-			returnedCE = null;
-		}
-		assert checkTracesAreCompatible();
-		assert returnedCE == null || !dataManager.getConjecture()
-				.apply(returnedCE.getInputsProjection(),
-						dataManager.getCurrentState().getState())
-				.equals(returnedCE
-						.getOutputsProjection()) : "ce is not a counter example for conjecture…";
-		float duration = (float) (System.nanoTime() - startTime) / 1000000000;
-		stats.increaseOracleCallNb(
-				dataManager.traceSize() - startSize
-						+ ((returnedCE == null) ? 0 : returnedCE.size()),
-				duration, dataManager.getTotalResetNb() - startReset);
-		if (exception != null)
-			throw exception;
-		return returnedCE;
-	}
-
-	public LmTrace getCounterExempleNoStats(
-			List<GenericHNDException> hExceptions, boolean withReset)
-			throws CeExposedUnknownStateException {
+			boolean forbidReset) throws CeExposedUnknownStateException {
+		List<LmTrace> appliedSequences = new ArrayList<>();
 		LmTrace returnedCE = null;
-		if (withReset) {
-			returnedCE = getCounterExempleReset(hExceptions);
-		} else if (Options.USE_SHORTEST_CE) {
-			returnedCE = getShortestCounterExemple();
-		} else {
-			LmTrace shortestCe = (driver instanceof TransparentMealyDriver
-					&& !Options.HW_WITH_RESET /*
-												 * driver needs to be strongly
-												 * connected
-												 */)
-							? getShortestCounterExemple(false)
-							: new LmTrace();
-			returnedCE = (shortestCe == null) ? null
-					: getRandomCounterExemple(hExceptions);// we do not compute
-															// random CE if we
-															// know that there
-															// is no CE
-			if (shortestCe != null && returnedCE == null) {
-				LogManager
-						.logWarning("Random walk did not exposed counter example"
-										+ " but an exact search exposed the discreapency."
-										+ " One counter exemple is "
-										+ shortestCe);
+		LmConjecture conjecture = dataManager.getConjecture();
+		State conjectureStartingState = dataManager.getCurrentState()
+				.getState();
+		boolean found = false;
+		try {
+			found = driver.getCounterExample(options.oracle, conjecture,
+					conjectureStartingState, appliedSequences, forbidReset,
+					stats.oracle);
+		} finally {
+			if (found) {
+				assert appliedSequences.size() >= 1;
+				returnedCE = appliedSequences
+						.remove(appliedSequences.size() - 1);
+			} else {
+				returnedCE = null;
 			}
+			if (appliedSequences.size() > 0)
+				dataManager.walkWithoutCheck(appliedSequences.get(0),
+						hExceptions);
+			for (int i = 1; i < appliedSequences.size(); i++) {
+				dataManager.walkWithoutCheckReset();
+				dataManager.walkWithoutCheck(appliedSequences.get(i),
+						hExceptions);
+			}
+			if (found && !appliedSequences.isEmpty())
+				dataManager.walkWithoutCheckReset();
+			assert checkTracesAreCompatible();
 		}
 		return returnedCE;
-	}
-
-	public LmTrace getRandomCounterExemple(
-			List<GenericHNDException> hExceptions) {
-		LmConjecture conjecture = dataManager.getConjecture();
-
-		LmTrace ce = null;
-			ce = new LmTrace();
-		boolean	found = driver.getRandomCounterExample_noReset(conjecture,
-					dataManager.getCurrentState().getState(), ce);
-			if (!found) {
-				dataManager.walkWithoutCheck(ce, hExceptions);
-				ce = null;
-			}
-		return found ? ce : null;
-	}
-
-	public LmTrace getDistinguishingSequenceCounterExample(
-			List<GenericHNDException> hExceptions, boolean useReset)
-			throws CeExposedUnknownStateException {
-		assert Options.USE_DT_CE;
-		LmTrace ce = null;
-		if (useReset
-				&& !dataManager.getInitialCharacterization().isComplete()) {
-			// first, try without characterizing initial state.
-			List<LmTrace> traces = new ArrayList<>();
-			Boolean found = driver.getDistinctionTreeBasedCE(
-					dataManager.getConjecture(),
-					dataManager.getCurrentState().getState(), traces, false);
-			if (found != null && found)
-				ce = traces.remove(traces.size() - 1);
-			for (int i = 0; i < traces.size(); i++) {
-				dataManager.walkWithoutCheck(traces.get(i), hExceptions);
-				// there is a reset between each trace
-				if (i + 1 < traces.size() || ce != null)
-					dataManager.walkWithoutCheckReset();
-			}
-			if (found != null)// all transitions were tested
-				return ce;
-
-			// if we didn't succeed, characterize the initial state and try with
-			// this knowledge.
-			Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> characterization = dataManager
-					.getInitialCharacterization();
-			for (GenericInputSequence w : characterization.unknownPrints()) {
-				dataManager.reset();
-				GenericOutputSequence r = dataManager.apply(w);
-				if (Options.getLogLevel() != LogLevel.LOW)
-					LogManager.logInfo(
-							"characterizing initial state with sequence ", w);
-				characterization.addPrint(w, r);
-			}
-			if (!dataManager.hasState(characterization))
-				throw new CeExposedUnknownStateException(characterization);
-			dataManager.getInitialCharacterization();// update initial state in
-														// dataManager
-			dataManager.reset();
-		}
-		List<LmTrace> traces = new ArrayList<>();
-		Boolean found = driver.getDistinctionTreeBasedCE(
-				dataManager.getConjecture(),
-				dataManager.getCurrentState().getState(), traces, useReset);
-		if (found != null && found) {
-			assert ce == null;
-			ce = traces.remove(traces.size() - 1);
-		}
-		for (int i = 0; i < traces.size(); i++) {
-			dataManager.walkWithoutCheck(traces.get(i), hExceptions);
-			// there is a reset between each trace
-			if (i + 1 < traces.size() || ce != null)
-				dataManager.walkWithoutCheckReset();
-		}
-		assert checkTracesAreCompatible();
-		return ce;
-	}
-
-	public LmTrace getShortestCounterExemple() {
-		return getShortestCounterExemple(true);
 	}
 
 	/**
@@ -334,7 +195,10 @@ public class HWLearner extends Learner {
 		W.add(newW);
 	}
 
-	public LmTrace getShortestCounterExemple(boolean applyOndriver) {
+	// TODO this method is only used for checking conjecture after learning. The
+	// checking should be moved in main and this method should be deleted
+	@Deprecated
+	private LmTrace getShortestCounterExemple() {
 		if (driver instanceof TransparentMealyDriver) {
 			TransparentMealyDriver d = (TransparentMealyDriver) driver;
 			Mealy realAutomata = d.getAutomata();
@@ -344,49 +208,16 @@ public class HWLearner extends Learner {
 					.getState();
 			State realStartingState = d.getCurrentState();
 
-			List<InputSequence> counterExamples = conjecture
-					.getAllCounterExamplesWithoutReset(conjectureStartingState,
-							realAutomata, realStartingState);
+			List<InputSequence> counterExamples = conjecture.getCounterExamples(
+					conjectureStartingState, realAutomata, realStartingState,
+					true);
 			if (counterExamples.size() > 0) {
 				InputSequence counterExample = counterExamples.get(0);
-				if (Options.INTERACTIVE) {
-					LogManager.logInfo("asking for counter exemple");
-					Scanner input = new Scanner(System.in);
-					StringBuilder s = new StringBuilder();
-					for (InputSequence iS : counterExamples) {
-						s.append(iS + ", ");
-					}
-					System.out.println("Some counter example are "
-							+ s.toString());
-					System.out
-							.println("What do you want to apply ? \n\tEnter «auto» to use default sequence '"
-									+ counterExample
-									+ "'\n\t'a,b,c' for the sequence a, b, c\n");
-
-					String answer = input.nextLine();
-					if (answer.equals(""))
-						answer = "auto";
-					System.out.println("understood «" + answer + "»");
-					if (!answer.equals("auto")) {
-						counterExample = new InputSequence();
-						for (String i : answer.split(","))
-							counterExample.addInput(i);
-					}
-					System.out.println("using «" + counterExample + "»\n");
-					LogManager.logInfo("user choose «" + counterExample
-							+ "» as counterExemple");
-				}
-				if (applyOndriver)
 					return new LmTrace(counterExample,
 							driver.execute(counterExample));
-				else
-					return new LmTrace(counterExample,
-							realAutomata.simulateOutput(realStartingState,
-									counterExample));
 			} else {
 				return null;
 			}
-
 		} else {
 			throw new RuntimeException("not implemented");
 		}
@@ -430,7 +261,7 @@ public class HWLearner extends Learner {
 					return proceedHException(rec);
 				}
 		}
-		if (Options.ADD_H_IN_W) {
+		if (options.addHInW.isEnabled()) {
 			if (Options.ADAPTIVE_H)
 				throw new RuntimeException(
 						"not implemented : add h in W and adaptive h are incompatible at this time");
@@ -464,10 +295,6 @@ public class HWLearner extends Learner {
 			if ((!d.getAutomata().isConnex(true)) && !Options.HW_WITH_RESET)
 				throw new RuntimeException("driver must be strongly connected");
 		}
-		if (!Options.HW_WITH_RESET && Options.MAX_CE_RESETS != 0) {
-			Options.MAX_CE_LENGTH *= Options.MAX_CE_RESETS;
-			Options.MAX_CE_RESETS = 1;
-		}
 		fullTraces = new ArrayList<>();
 		fullTraces.add(new LmTrace());
 		Runtime runtime = Runtime.getRuntime();
@@ -496,7 +323,7 @@ public class HWLearner extends Learner {
 		else
 			h = new AdaptiveSymbolSequence();
 		hChecker = GenericHomingSequenceChecker.getChecker(h);
-		stats = new HWStatsEntry(driver);
+		stats = new HWStatsEntry(driver, options);
 
 		LmTrace counterExampleTrace;
 		boolean inconsistencyFound;
@@ -564,6 +391,9 @@ public class HWLearner extends Learner {
 				counterExampleTrace = e.getCounterExampletrace();
 			}
 
+			// TODO since we apply counterExampleTrace on dataManager after
+			// processing it, it would be nicer to add it just after running it
+			// on driver.
 			if (!inconsistencyFound && Options.TRY_TRACE_AS_CE
 					&& counterExampleTrace == null) {
 				inconsistencyFound = searchAndProceedCEInTrace();
@@ -596,22 +426,23 @@ public class HWLearner extends Learner {
 				if (Options.HW_WITH_RESET)
 					try {
 						counterExampleTrace = getCounterExemple(hExceptions,
-								true);
+								false);
 					} catch (CeExposedUnknownStateException e) {
 						dataManager.getFullyQualifiedState(e.characterization);
 						dataManager.getInitialCharacterization();
 						stateDiscoveredInCe = true;
 						continue;
 					}
-				else {
+				else
 					try {
 						counterExampleTrace = getCounterExemple(hExceptions,
-								false);
+								true);
 					} catch (CeExposedUnknownStateException e) {
-						// this is not supposed to happen
+						// this should not happen because the discovery of a
+						// new state needs to reset the driver
+						assert false;
 						throw new RuntimeException(e);
 					}
-				}
 				if (counterExampleTrace == null)
 					LogManager.logInfo("No counter example found");
 				else {
@@ -676,7 +507,6 @@ public class HWLearner extends Learner {
 		stats.setDuration(duration);
 		stats.setAvgTriedWSuffixes((float)nbOfTriedWSuffixes/wRefinenmentNb);
 		stats.setSearchCEInTrace(Options.TRY_TRACE_AS_CE ? "simple" : "none");
-		stats.setAddHInW(Options.ADD_H_IN_W);
 		stats.setCheck3rdInconsistency(
 				Options.CHECK_INCONSISTENCY_H_NOT_HOMING);
 	
@@ -723,7 +553,8 @@ public class HWLearner extends Learner {
 			LmConjecture conjecture = dataManager.getConjecture();
 			State conjectureState = dataManager.getCurrentState().getState();
 			CounterExampleResult result = conjecture
-					.getAllCounterExamples(conjectureState, d.getAutomata(),d.getCurrentState());
+					.getAllCounterExamples(conjectureState, d.getAutomata(),
+							d.getCurrentState(), true);
 			if (result.isCompletelyEquivalent()) {
 				LogManager.logConsole("The computed conjecture is exact");
 				LogManager.logInfo("The computed conjecture is exact");
@@ -1610,8 +1441,8 @@ public class HWLearner extends Learner {
 		boolean oneStateIsEquivalent = false;
 		for (State referenceState : matchingInitialState) {
 			List<InputSequence> counterExamples = conjecture
-					.getAllCounterExamplesWithoutReset(conjectureState.getState(),
-							reference, referenceState);
+					.getCounterExamples(conjectureState.getState(), reference,
+							referenceState, true);
 			if (counterExamples.isEmpty()) {
 				oneStateIsEquivalent = true;
 			}

@@ -45,7 +45,7 @@ public class SimplifiedDataManager {
 															// states with
 															// undefined
 															// transitions
-	private LmConjecture conjecture;
+	private HWConjecture conjecture;
 	private FullyQualifiedState currentState;
 	private FullyQualifiedState lastknownState = null;
 	private int lastknownStatePos = 0;
@@ -205,7 +205,7 @@ public class SimplifiedDataManager {
 		this.hWSequences = hWSequences;
 		Q = new HashMap<>();
 		notFullyKnownStates = new HashSet<FullyQualifiedState>();
-		conjecture = new LmConjecture(driver);
+		conjecture = new HWConjecture(driver, this);
 		instance = this;
 		hResponse2State = new HashMap<>();
 		hResponse2Wresponses = new HashMap<>();

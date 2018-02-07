@@ -7,7 +7,6 @@ import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import drivers.mealy.MealyDriver;
 import drivers.mealy.transparent.RandomMealyDriver;
-import main.simpa.Options;
 import stats.Graph;
 import stats.GraphGenerator;
 import stats.LineStyle;
@@ -110,17 +109,13 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 		askedCE = Integer.parseUnsignedInt(st.nextToken());
 	}
 
-	public RivestSchapireStatsEntry(MealyDriver d, boolean hIsGiven) {
+	public RivestSchapireStatsEntry(MealyDriver d, boolean hIsGiven,
+			RivestSchapireOptions options) {
 		this.hIsGiven = hIsGiven;
 		this.inputSymbols = d.getInputSymbols().size();
 		this.outputSymbols = d.getOutputSymbols().size();
 		this.automata = d.getSystemName();
 		memory = 0;
-		if (Options.USE_SHORTEST_CE)
-			oracleUsed = "shortest";
-		else
-			oracleUsed = (Options.USE_DT_CE ? "distinctionTree + " : "")
-					+ "MrBean";
 	}
 
 	protected void increaseresetCallNb(){
@@ -334,6 +329,10 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 
 	public void counterExampleCalled() {
 		askedCE++;
+	}
+
+	public void setOracle(String oracle) {
+		oracleUsed = oracle;
 	}
 
 }

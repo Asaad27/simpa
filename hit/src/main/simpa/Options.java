@@ -71,6 +71,7 @@ public class Options {
 
 	public static boolean RS_WITH_UNKNOWN_H = false;
 
+	@Deprecated
 	public static boolean ADD_H_IN_W = false;
 	public static boolean CHECK_INCONSISTENCY_H_NOT_HOMING = false;
 	public static boolean REUSE_HZXW = false;
@@ -84,13 +85,17 @@ public class Options {
 	// Counterexample options
 	
 	public static boolean TRY_TRACE_AS_CE = true;
+	@Deprecated
 	public static boolean STOP_ON_CE_SEARCH = false;
+	@Deprecated
 	public static boolean USE_SHORTEST_CE;
 
 	//Web application analysis
 	public static boolean XSS_DETECTION = false;
 
+	@Deprecated
 	public static int MAX_CE_LENGTH = 20;
+	@Deprecated
 	public static int MAX_CE_RESETS = 10;
 	public static  boolean USE_DT_CE = false;
 	
@@ -218,11 +223,6 @@ public class Options {
 		LogManager.logInfo("Seed used: " + SEED);
 		LogManager.logInfo("Applicable options:");
 
-		LogManager.logInfo("STOP_ON_CE_SEARCH = " + STOP_ON_CE_SEARCH);
-		if (!STOP_ON_CE_SEARCH) {
-			LogManager.logInfo("MAX_CE_LENGTH = " + MAX_CE_LENGTH);
-			LogManager.logInfo("MAX_CE_RESETS = " + MAX_CE_RESETS);
-		}
 		if (TEST) {
 			LogManager.logInfo("NBTEST = " + NBTEST);
 			LogManager.logInfo("MINSTATES = " + MINSTATES);

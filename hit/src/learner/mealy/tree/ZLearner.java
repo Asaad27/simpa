@@ -27,8 +27,10 @@ public class ZLearner extends Learner {
 	private ZObservationNode u;
 	private List<ZObservationNode> states;
 	private ZStatsEntry stats;
+	private ZOptions options;
 
-	public ZLearner(Driver driver) {
+	public ZLearner(Driver driver, ZOptions options) {
+		this.options = options;
 		this.driver = (MealyDriver) driver;
 
 		// Initialize I and Z with specified options
@@ -56,7 +58,7 @@ public class ZLearner extends Learner {
 
 		LogManager.logConsole("Options : I -> " + i.toString());
 		LogManager.logConsole("Options : Z -> " + z.toString());
-		stats = new ZStatsEntry(this.driver);
+		stats = new ZStatsEntry(this.driver, options.oracle);
 	}
 
 	private LmConjecture fixPointConsistency(LmConjecture K) {
@@ -170,8 +172,6 @@ public class ZLearner extends Learner {
 		LogManager.logConsole("Inferring the system");
 		long start_time = System.nanoTime();
 		InputSequence ce;
-		int lastOracleLength = 0;
-		int lastOracleResets = 0;
 
 		// 1. Build-quotient(A, I, Z, {€}) returning U and K = (Q, q0, I, O, hK)
 		LmConjecture Z_Q = buildQuotient(z);
@@ -181,21 +181,14 @@ public class ZLearner extends Learner {
 
 		// 4. while there exists an unprocessed counterexample CE
 		do {
-			long oracleStart = System.nanoTime();
-			int traceLength = driver.numberOfAtomicRequest;
-			int resetNb = driver.numberOfRequest;
-			LmTrace ceTrace = driver.getCounterExample(Z_Q);
-			float oracleDuration = (float) ((System.nanoTime() - oracleStart)
-					/ 1000000000.);
-			lastOracleLength = driver.numberOfAtomicRequest - traceLength;
-			lastOracleResets = driver.numberOfRequest - resetNb;
-			if (ceTrace != null) {
+			List<LmTrace> appliedSequences = new ArrayList<>();
+			if (driver.getCounterExample_noThrow(options.oracle, Z_Q, null,
+					appliedSequences, false, stats.getOracle())) {
+				LmTrace ceTrace = appliedSequences
+						.get(appliedSequences.size() - 1);
 				ce = ceTrace.getInputsProjection();
-				stats.increaseOracleCallNb(lastOracleLength, lastOracleResets,
-						oracleDuration);
 			} else {
 				ce = null;
-				stats.increaseOracleCallNb(0, 0, 0);
 			}
 			if (ce != null) {
 				LogManager.logInfo("Adding the counter example to tree");
@@ -213,21 +206,8 @@ public class ZLearner extends Learner {
 		float duration = (float) ((System.nanoTime() - start_time)
 				/ 1000000000.);
 		stats.finalUpdate(createConjecture(), duration,
-				driver.numberOfAtomicRequest - lastOracleLength,
-				driver.numberOfRequest - lastOracleResets);
-		System.out.println();
-		int maxLength = Options.MAX_CE_LENGTH;
-		int maxResets = Options.MAX_CE_RESETS;
-		Options.MAX_CE_LENGTH = maxLength * 5 + 20;
-		Options.MAX_CE_RESETS = maxResets * 5 + 20;
-		LmConjecture conjecture = createConjecture();
-		LmTrace ceTrace = driver.getCounterExample(conjecture);
-		Options.MAX_CE_LENGTH = maxLength;
-		Options.MAX_CE_RESETS = maxResets;
-		if (ceTrace != null) {
-			System.err.println(ce);
-			throw new RuntimeException("wrong conjecture");
-		}
+				driver.numberOfAtomicRequest, driver.numberOfRequest);
+		//TODO check conjecture (to be done in main)
 	}
 
 	private boolean noLabelledPred(ZObservationNode node) {

@@ -3,7 +3,6 @@ package drivers;
 import java.util.List;
 
 import tools.loggers.LogManager;
-import automata.Automata;
 
 public abstract class Driver {
 	public int numberOfRequest = 0;
@@ -33,8 +32,6 @@ public abstract class Driver {
 	public abstract List<String> getInputSymbols();
 
 	public abstract String getSystemName();
-
-	public abstract Object getCounterExample(Automata a);
 
 	public abstract boolean isCounterExample(Object ce, Object conjecture);
 

@@ -16,6 +16,7 @@ import learner.mealy.LmTrace;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
 import stats.StatsEntry;
+import stats.attribute.Attribute;
 import tools.loggers.LogManager;
 
 public class RivestSchapireLearner extends Learner {
@@ -29,9 +30,12 @@ public class RivestSchapireLearner extends Learner {
 	protected Lock lock = new ReentrantLock();//When a learner is computing, it take the lock. When the lock is free, the main thread try to notify a stateDriver
 	protected int n=-1;
 	protected boolean hIsGiven=true;
+	protected RivestSchapireOptions options;
 	
-	public RivestSchapireLearner(MealyDriver driver) {
+	public RivestSchapireLearner(MealyDriver driver,
+			RivestSchapireOptions options) {
 		this.driver = driver;
+		this.options = options;
 	}
 
 	@Override
@@ -63,7 +67,7 @@ public class RivestSchapireLearner extends Learner {
 		}
 		LogManager.logStep(LogManager.STEPOTHER, "Inferring the system");
 		LogManager.logConsole("Inferring the system (global)");
-		stats = new RivestSchapireStatsEntry(driver, hIsGiven);
+		stats = new RivestSchapireStatsEntry(driver, hIsGiven, options);
 
 		boolean hIsCorrect = hIsGiven;
 		do {
@@ -86,6 +90,8 @@ public class RivestSchapireLearner extends Learner {
 			createConjecture().exportToDot();
 		stats.updateWithConjecture(createConjecture());
 		stats.updateWithHomingSequence(homingSequence);
+		stats.setOracle(finishedLearner.getStateLearner().getStats()
+				.get(Attribute.ORACLE_USED));
 	}
 
 	protected void learn(InputSequence homingSequence) throws Throwable {

@@ -1,4 +1,4 @@
-package learner.mealy.hW;
+package learner.mealy;
 
 import automata.mealy.GenericInputSequence;
 import automata.mealy.GenericInputSequence.GenericOutputSequence;
