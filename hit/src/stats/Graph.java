@@ -58,6 +58,8 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 	private StringBuilder plotLines;
 	private String title;
 	private String fileName;
+	private Integer imageHeight;
+	private Integer imageWidth;
 	private Boolean forceOrdLogScale;
 	private Boolean forceAbsLogScale = false;
 	private Integer minAbs = null;
@@ -231,6 +233,11 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		this.title = title;
 	}
 
+	public void setSize(Integer width, Integer Height) {
+		this.imageWidth = width;
+		this.imageHeight = Height;
+	}
+
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
 	}
@@ -293,7 +300,13 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		}
 		StringBuilder r = new StringBuilder();
 
-		r.append("set terminal svg enhanced font \"Sans,10\"\n");
+		r.append("set terminal svg ");
+		if (imageHeight != null && imageWidth != null) {
+			r.append(" size " + imageWidth + "," + imageHeight);
+		} else {
+			r.append(" size 1200,800 dynamic");
+		}
+		r.append(" enhanced font \"Sans,12\"\n");
 
 		String name = new String("relationship between " + ord + " and  " + abs);
 		r.append("set title \"" + (title == null ? name : title) + "\"\n");
