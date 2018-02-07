@@ -13,7 +13,6 @@ import tools.loggers.LogManager;
 
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
-import learner.mealy.noReset.dataManager.vTree.StateNode;
 import main.simpa.Options;
 import automata.State;
 import automata.mealy.InputSequence;
@@ -27,7 +26,6 @@ public class FullyQualifiedState{
 	private Map<String, FullyKnownTrace> T;//Fully known transitions starting from this node
 	private Set<String> R_;//Complementary set of R : unknown transition
 	private final State state;
-	private final StateNode vNode;
 	
 	private List<State> driverStates;
 	
@@ -38,10 +36,6 @@ public class FullyQualifiedState{
 		K = new HashMap<String, PartiallyKnownTrace>();
 		V = new HashMap<LmTrace, FullyKnownTrace>();
 		T = new HashMap<String, FullyKnownTrace>();
-		if (Options.ICTSS2015_WITHOUT_SPEEDUP)
-			vNode = null;
-		else
-			vNode = new StateNode(this);
 		driverStates = SimplifiedDataManager.instance.getDriverStates(WResponses);
 	}
 	
@@ -64,10 +58,6 @@ public class FullyQualifiedState{
 		}
 		if (Options.LOG_LEVEL != Options.LogLevel.LOW)
 			LogManager.logInfo("New transition found : " + v);
-		if (!Options.ICTSS2015_WITHOUT_SPEEDUP){
-			vNode.addFullyKnownTrace(v);
-			//DataManager.instance.exportVTreeToDot();
-		}
 		LinkedList<LmTrace> toRemove = new LinkedList<LmTrace>();
 		for (FullyKnownTrace knownV : V.values()){
 			if (v.getTrace().equals(knownV.getTrace().subtrace(0, v.getTrace().size()))){
@@ -181,9 +171,5 @@ public class FullyQualifiedState{
 
 	public List<OutputSequence> getWResponses() {
 		return WResponses;
-	}
-	
-	public StateNode getVNode(){
-		return vNode;
 	}
 }
