@@ -131,4 +131,11 @@ public class LmTrace {
 			return equals((LmTrace) o);
 		return false;
 	}
+	
+	public LmTrace clone(){
+		LmTrace c=new LmTrace();
+		c.inputs=inputs.clone();
+		c.outputs=outputs.clone();
+		return c;
+	}
 }

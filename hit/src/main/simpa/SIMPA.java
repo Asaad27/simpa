@@ -384,6 +384,7 @@ public class SIMPA {
 			"Use tree inference (if available) instead of table");
 	private static BooleanOption LM_INFERENCE = new BooleanOption("--lm", "Use lm inference");
 	private static BooleanOption LOCALIZER_BASED_INFERENCE = new BooleanOption("--localizerBased", "use localizer based Algorithm (also called 'DUBAI' and 'ICTSS2015' and previously 'noReset')");
+	private static BooleanOption HW_INFERENCE = new BooleanOption("--hW", "use hW algorithm");
 	private static BooleanOption COMBINATORIAL_INFERENCE = new BooleanOption("--combinatorial",
 			"use the combinatorial inference");
 	private static BooleanOption CUTTER_COMBINATORIAL_INFERENCE = new BooleanOption("--cutCombinatorial",
@@ -392,8 +393,8 @@ public class SIMPA {
 			"use the RivestSchapire inference (must be used with an other learner)\nThis option let you to run an inference algorithm with resets on a driver without reset.");
 	private static Option<?>[] inferenceChoiceOptions = new Option<?>[] {
 			TREE_INFERENCE, LM_INFERENCE, LOCALIZER_BASED_INFERENCE,
-			CUTTER_COMBINATORIAL_INFERENCE, COMBINATORIAL_INFERENCE,
-			RIVETSCHAPIRE_INFERENCE };
+			HW_INFERENCE, CUTTER_COMBINATORIAL_INFERENCE,
+			COMBINATORIAL_INFERENCE, RIVETSCHAPIRE_INFERENCE };
 
 	// ZQ options
 	private static BooleanOption STOP_AT_CE_SEARCH = new BooleanOption("--stopatce",
@@ -432,7 +433,16 @@ public class SIMPA {
 			"Don't use speedUp (deduction from trace based on state incompatibilities)\nthis is usefull if you don't know the real state number but only the bound.");
 	private static Option<?>[] localizerBasedOptions = new Option<?>[] { STATE_NUMBER_BOUND, CHARACTERIZATION_SET,
 			WITHOUT_SPEEDUP, SPLITTING_TREE };
-	
+
+	// hW options
+	private static BooleanOption ADD_H_IN_W = new BooleanOption("--addHInW",
+			"add homing sequence in W-set.");
+	private static BooleanOption TRY_CE_FROM_TRACE = new BooleanOption(
+			"--tryTraceCE", "Try to use trace as a counter example.");
+	private static Option<?>[] hWOptions = new Option<?>[] { ADD_H_IN_W,
+			TRY_CE_FROM_TRACE };
+
+	// RS Options
 	private static BooleanOption RS_WITH_UNKNOWN_H = new BooleanOption(
 			"--RS-probabilistic",
 			"do not compute a homming sequence to give to RS algorithme. h will be computed by RS itself.");
@@ -501,7 +511,11 @@ public class SIMPA {
 	// Other options undocumented //TODO sort and explain them.
 	private static StringListOption URLS = new StringListOption("--urls", "??? TODO", "url1", "url2", Options.URLS);
 	private static BooleanOption XSS_DETECTION = new BooleanOption("--xss", "Detect XSS vulnerability");
-	private static Option<?>[] otherOptions = new Option<?>[] { URLS, XSS_DETECTION };
+	private static BooleanOption SHORTEST_CE = new BooleanOption(
+			"--shortestCE",
+			"use transparent driver to compute the shortest counter example possible");
+	private static Option<?>[] otherOptions = new Option<?>[] { URLS,
+			XSS_DETECTION, SHORTEST_CE };
 
 	private static void parse(String[] args, ArrayList<Boolean> used, Option<?>[] options) {
 		for (Option<?> o : options)
@@ -537,6 +551,9 @@ public class SIMPA {
 		}
 		if (LOCALIZER_BASED_INFERENCE.getValue()) {
 			parse(args, used, localizerBasedOptions);
+		}
+		if (HW_INFERENCE.getValue()) {
+			parse(args, used, hWOptions);
 		}
 		if (RIVETSCHAPIRE_INFERENCE.getValue()) {
 			parse(args, used, RSOptions);
@@ -579,6 +596,7 @@ public class SIMPA {
 		Options.LMINFERENCE = LM_INFERENCE.getValue();
 		Options.TREEINFERENCE = TREE_INFERENCE.getValue();
 		Options.LOCALIZER_BASED_INFERENCE = LOCALIZER_BASED_INFERENCE.getValue();
+		Options.HW_INFERENCE = HW_INFERENCE.getValue();
 		Options.COMBINATORIALINFERENCE = COMBINATORIAL_INFERENCE.getValue();
 		Options.CUTTERCOMBINATORIALINFERENCE = CUTTER_COMBINATORIAL_INFERENCE.getValue();
 		Options.RIVESTSCHAPIREINFERENCE = RIVETSCHAPIRE_INFERENCE.getValue();
@@ -601,7 +619,9 @@ public class SIMPA {
 		Options.SPLITTING_TREE = SPLITTING_TREE.getValue();
 
 		Options.ICTSS2015_WITHOUT_SPEEDUP = WITHOUT_SPEEDUP.getValue();
-		
+		Options.ADD_H_IN_W = ADD_H_IN_W.getValue();
+		Options.TRY_TRACE_AS_CE = TRY_CE_FROM_TRACE.getValue();
+
 		Options.RS_WITH_UNKNOWN_H = RS_WITH_UNKNOWN_H.getValue();
 
 		Options.GENERICDRIVER = GENERIC_DRIVER.getValue();
@@ -631,6 +651,7 @@ public class SIMPA {
 		Options.XSS_DETECTION = XSS_DETECTION.getValue();
 		Options.URLS = URLS.getValue();
 		Options.SCAN = SCAN.getValue();
+		Options.USE_SHORTEST_CE = SHORTEST_CE.getValue();
 	}
 
 	private static void check() {
@@ -1139,7 +1160,10 @@ public class SIMPA {
 
 		System.out.println("> Algorithm based on localizer (called ICTSS2015/Dubai/'noReset')");
 		printUsage(localizerBasedOptions);
-		
+
+		System.out.println("> Algorithm hW");
+		printUsage(hWOptions);
+
 		System.out.println("> Algorithm Rivest&Schapire");
 		printUsage(RSOptions);
 

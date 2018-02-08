@@ -17,6 +17,7 @@ import java.util.Set;
 
 import automata.Automata;
 import automata.State;
+import learner.mealy.LmTrace;
 import main.simpa.Options;
 import tools.DotParser;
 import tools.GraphViz;
@@ -91,6 +92,9 @@ public class Mealy extends Automata implements Serializable {
 	}
 
 	public void exportToDot() {
+		exportToDot("");
+	}
+	public void exportToDot(String comments) {
 		Writer writer = null;
 		File file = null;
 		File dir = new File(Options.OUTDIR + Options.DIRGRAPH);
@@ -109,6 +113,7 @@ public class Mealy extends Automata implements Serializable {
 					writer.write("\t" + s.getName() + " [shape=doubleoctagon]\n");
 				}
 			}
+			writer.write(comments);
 			writer.write("}\n");
 			writer.close();
 			LogManager.logInfo("Conjecture has been exported to " + file.getName());
@@ -324,6 +329,30 @@ public class Mealy extends Automata implements Serializable {
 			start=t.getTo();
 		}
 		return start;
+	}
+	
+	/**
+	 * try to apply a trace from any state of this automaton.
+	 * 
+	 * @param fullTrace the trace to test
+	 * @return position of input in trace which is incompatible with all states. if the trace is compatible with at least one state, leght of trace is returned.
+	 */
+	public int simulateOnAllStates(LmTrace fullTrace){
+		Set<State> compatibleStates=new HashSet<>(getStates());
+		int i=0;
+		while (i<fullTrace.size()){
+			Set<State> newcompatibles=new HashSet<>(compatibleStates.size());
+			for (State s : compatibleStates){
+				MealyTransition t= getTransitionFromWithInput(s, fullTrace.getInput(i));
+				if (t.getOutput().equals(fullTrace.getOutput(i)))
+					newcompatibles.add(t.getTo());
+			}
+			if (newcompatibles.isEmpty())
+				return i;
+			compatibleStates=newcompatibles;
+			i++;
+		}
+		return i;
 	}
 	
 	/**

@@ -48,6 +48,7 @@ public class Options {
 	public static boolean TREEINFERENCE = false;
 	public static boolean LMINFERENCE = false;
 	public static boolean LOCALIZER_BASED_INFERENCE = false;
+	public static boolean HW_INFERENCE = false;
 	public static boolean COMBINATORIALINFERENCE = false;
 	public static boolean CUTTERCOMBINATORIALINFERENCE = false;
 	public static boolean RIVESTSCHAPIREINFERENCE = false;
@@ -65,11 +66,14 @@ public class Options {
 	public static boolean RS_WITH_UNKNOWN_H = false;
 
 	public static boolean ICTSS2015_WITHOUT_SPEEDUP = false;
+	public static boolean ADD_H_IN_W = false;
 	public static boolean INTERACTIVE = false; //For algorithms which can prompt user for counter example or chosen sequences
 	
 	// Counterexample options
 	
+	public static boolean TRY_TRACE_AS_CE = true;
 	public static boolean STOP_ON_CE_SEARCH = false;
+	public static boolean USE_SHORTEST_CE;
 
 	//Web application analysis
 	public static boolean XSS_DETECTION = false;
