@@ -80,7 +80,7 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 	private int succeededProbabilisticSearch = 0;
 
 	/**
-	 * rebuild a NoResetStats object from a CSV line
+	 * rebuild a HWStats object from a CSV line
 	 * @param line the line to parse
 	 */
 	public RivestSchapireStatsEntry(String line){

@@ -1,4 +1,4 @@
-package learner.mealy.noReset.dataManager;
+package learner.mealy.hW.dataManager;
 
 import automata.mealy.InputSequence;
 import learner.mealy.LmTrace;

@@ -1,4 +1,4 @@
-package learner.mealy.noReset.dataManager;
+package learner.mealy.hW.dataManager;
 
 import learner.mealy.LmTrace;
 import main.simpa.Options;

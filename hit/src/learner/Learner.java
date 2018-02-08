@@ -6,8 +6,8 @@ import learner.mealy.table.LmLearner;
 import learner.mealy.tree.ZLearner;
 import learner.mealy.combinatorial.CombinatorialLearner;
 import learner.mealy.combinatorial.CutterCombinatorialLearner;
+import learner.mealy.hW.HWLearner;
 import learner.mealy.localizerBased.LocalizerBasedLearner;
-import learner.mealy.noReset.NoResetLearner;
 import main.simpa.Options;
 import stats.StatsEntry;
 import stats.attribute.Attribute;
@@ -66,7 +66,7 @@ public abstract class Learner {
 			else if (Options.LOCALIZER_BASED_INFERENCE)
 				return new LocalizerBasedLearner((MealyDriver)driver);
 			else if (Options.HW_INFERENCE)
-				return new NoResetLearner((MealyDriver)driver);
+				return new HWLearner((MealyDriver)driver);
 			else if (Options.LMINFERENCE)
 				return new LmLearner(driver);
 		default:

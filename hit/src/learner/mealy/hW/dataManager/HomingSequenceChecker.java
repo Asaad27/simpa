@@ -1,4 +1,4 @@
-package learner.mealy.noReset.dataManager;
+package learner.mealy.hW.dataManager;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
@@ -13,7 +13,7 @@ import tools.CompiledSearchGraph;
 import tools.loggers.LogManager;
 
 import learner.mealy.LmTrace;
-import learner.mealy.noReset.dataManager.HomingSequenceChecker.Node.Child;
+import learner.mealy.hW.dataManager.HomingSequenceChecker.Node.Child;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
 

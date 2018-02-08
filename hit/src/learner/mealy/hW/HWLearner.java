@@ -1,4 +1,4 @@
-package learner.mealy.noReset;
+package learner.mealy.hW;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,26 +18,26 @@ import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
-import learner.mealy.noReset.dataManager.ConjectureNotConnexException;
-import learner.mealy.noReset.dataManager.SimplifiedDataManager;
-import learner.mealy.noReset.dataManager.FullyQualifiedState;
-import learner.mealy.noReset.dataManager.InconsistancyWithConjectureAtEndOfTraceException;
-import learner.mealy.noReset.dataManager.InvalidHException;
+import learner.mealy.hW.dataManager.ConjectureNotConnexException;
+import learner.mealy.hW.dataManager.FullyQualifiedState;
+import learner.mealy.hW.dataManager.InconsistancyWithConjectureAtEndOfTraceException;
+import learner.mealy.hW.dataManager.InvalidHException;
+import learner.mealy.hW.dataManager.SimplifiedDataManager;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
 import tools.Utils;
 
 import tools.loggers.LogManager;
 
-public class NoResetLearner extends Learner {
+public class HWLearner extends Learner {
 	private MealyDriver driver;
 	private SimplifiedDataManager dataManager;
-	private NoResetStatsEntry stats;
+	private HWStatsEntry stats;
 	protected List<InputSequence> W;
 	private int n;// the maximum number of states
 	private LmTrace fullTrace;
 
-	public NoResetLearner(MealyDriver d) {
+	public HWLearner(MealyDriver d) {
 		driver = d;
 	}
 
@@ -190,7 +190,7 @@ public class NoResetLearner extends Learner {
 		List<InputSequence> W = new ArrayList<InputSequence>();
 		W.add(new InputSequence());
 		InputSequence h = new InputSequence();
-		stats = new NoResetStatsEntry(driver);
+		stats = new HWStatsEntry(driver);
 
 		LmTrace counterExampleTrace;
 		boolean inconsistencyFound;
@@ -499,7 +499,7 @@ public class NoResetLearner extends Learner {
 		return c;
 	}
 
-	public NoResetStatsEntry getStats() {
+	public HWStatsEntry getStats() {
 		return stats;
 	}
 
@@ -541,7 +541,7 @@ public class NoResetLearner extends Learner {
 	private boolean checkRandomWalk() {
 		LogManager.logStep(LogManager.STEPOTHER,
 				"checking the computed conjecture with Random Walk");
-		NoResetMealyDriver generatedDriver = new NoResetMealyDriver(
+		HWtMealyDriver generatedDriver = new HWtMealyDriver(
 				dataManager.getConjecture());
 		generatedDriver.stopLog();
 		generatedDriver.setCurrentState(dataManager.getCurrentState().getState());

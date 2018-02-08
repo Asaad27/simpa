@@ -1,13 +1,13 @@
-package learner.mealy.noReset;
+package learner.mealy.hW;
 
 import automata.State;
 import automata.mealy.Mealy;
 import drivers.mealy.MealyDriver;
 import tools.loggers.LogManager;
 
-public class NoResetMealyDriver extends MealyDriver {
+public class HWtMealyDriver extends MealyDriver {
 
-	public NoResetMealyDriver(Mealy automata) {
+	public HWtMealyDriver(Mealy automata) {
 		super(automata);
 	}
 

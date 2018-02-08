@@ -136,7 +136,7 @@ public class SIMPAStatsNew {
 				driver = SIMPA.loadDriver(Options.SYSTEM);
 				Learner gl = Learner.getLearnerFor(driver);
 				assert gl instanceof LocalizerBasedLearner;
-				//NoResetLearner l = (NoResetLearner) gl;
+				//HWLearner l = (HWLearner) gl;
 				Learner l = gl;
 				l.learn();
 				driver.logStats();

@@ -1,4 +1,4 @@
-package learner.mealy.noReset;
+package learner.mealy.hW;
 
 import java.util.StringTokenizer;
 
@@ -6,13 +6,13 @@ import automata.Transition;
 import automata.mealy.InputSequence;
 import drivers.mealy.MealyDriver;
 import learner.mealy.LmConjecture;
-import learner.mealy.noReset.dataManager.SimplifiedDataManager;
+import learner.mealy.hW.dataManager.SimplifiedDataManager;
 import main.simpa.Options;
 import stats.GraphGenerator;
 import stats.StatsEntry;
 import stats.attribute.Attribute;
 
-public class NoResetStatsEntry extends StatsEntry {
+public class HWStatsEntry extends StatsEntry {
 	public static final Attribute<Integer>W_SIZE = Attribute.W_SIZE;
 	public static final Attribute<Integer>W_TOTAL_LENGTH = Attribute.W_TOTAL_LENGTH;
 	public static final Attribute<Integer>MAX_W_LENGTH = Attribute.MAX_W_LENGTH;
@@ -136,10 +136,10 @@ public class NoResetStatsEntry extends StatsEntry {
 
 
 	/**
-	 * rebuild a NoResetStats object from a CSV line
+	 * rebuild a HWStats object from a CSV line
 	 * @param line the line to parse
 	 */
-	public NoResetStatsEntry(String line){
+	public HWStatsEntry(String line){
 		StringTokenizer st = new StringTokenizer(line, ",");
 		WSize = Integer.parseInt(st.nextToken());
 		WTotalLength = Integer.parseInt(st.nextToken());
@@ -175,7 +175,7 @@ public class NoResetStatsEntry extends StatsEntry {
 		
 	}
 
-	public NoResetStatsEntry( MealyDriver d){
+	public HWStatsEntry( MealyDriver d){
 //		WSize = W.size();
 //		w1Length = (W.size()==0)?0:W.get(0).getLength();
 		this.inputSymbols = d.getInputSymbols().size();
@@ -370,7 +370,7 @@ public class NoResetStatsEntry extends StatsEntry {
 	}
 	@Override
 	public GraphGenerator getDefaultsGraphGenerator() {
-		return new NoResetGraphGenerator();
+		return new HWGraphGenerator();
 	}
 
 	public void setDuration(float duration) {

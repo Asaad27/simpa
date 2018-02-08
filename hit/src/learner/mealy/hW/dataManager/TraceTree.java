@@ -1,4 +1,4 @@
-package learner.mealy.noReset.dataManager;
+package learner.mealy.hW.dataManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
