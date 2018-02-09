@@ -245,8 +245,6 @@ public class HWLearner extends Learner {
 				}
 				counterExampleTrace = new LmTrace();
 				inconsistencyFound = true;
-			} finally {
-				stats.increaseWithDataManager(dataManager);
 			}
 
 			if (!inconsistencyFound && Options.TRY_TRACE_AS_CE) {
@@ -335,8 +333,9 @@ public class HWLearner extends Learner {
 							.logWarning("We are adding new element to W but it is already a W-set for this driver");
 				}
 				addOrExtendInW(newW, W);
+				dataManager.walkWithoutCheck(counterExampleTrace);
 			}
-
+			stats.increaseWithDataManager(dataManager);
 		} while (counterExampleTrace != null || inconsistencyFound);
 
 		float duration = (float) (System.nanoTime() - start) / 1000000000;
