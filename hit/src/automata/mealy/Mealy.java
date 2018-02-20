@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import automata.Automata;
@@ -164,8 +165,44 @@ public class Mealy extends Automata implements Serializable {
 			file = new File(dir.getPath() + File.separatorChar + name + "_inf.dot");
 			writer = new BufferedWriter(new FileWriter(file));
 			writer.write("digraph G {\n");
-			for (MealyTransition t : getTransitions()) {
-				writer.write("\t" + t.toDot() + "\n");
+			boolean groupTransitions = false; // TODO make an option for this
+			if (groupTransitions) {
+				Map<State, Map<State, List<MealyTransition>>> grouped = new HashMap<>();
+				for (MealyTransition t : getTransitions()) {
+					Map<State, List<MealyTransition>> from = grouped
+							.get(t.getFrom());
+					if (from == null) {
+						from = new HashMap<>();
+						grouped.put(t.getFrom(), from);
+					}
+					List<MealyTransition> to = from.get(t.getTo());
+					if (to == null) {
+						to = new ArrayList<>();
+						from.put(t.getTo(), to);
+					}
+					to.add(t);
+				}
+				for (Map.Entry<State, Map<State, List<MealyTransition>>> from : grouped
+						.entrySet()) {
+					for (Entry<State, List<MealyTransition>> to : from
+							.getValue().entrySet()) {
+						StringBuilder txt = new StringBuilder();
+						for (MealyTransition t : to.getValue()) {
+							txt.append(
+									t.getInput() + "/" + t.getOutput() + "\\n");
+						}
+						txt.delete(txt.length() - 2, txt.length());
+						writer.write(
+								"\t" + from.getKey() + " -> " + to.getKey()
+										+ " [label=" + tools.GraphViz
+												.id2DotAuto(txt.toString())
+										+ "];\n");
+					}
+				}
+			} else {
+				for (MealyTransition t : getTransitions()) {
+					writer.write("\t" + t.toDot() + "\n");
+				}
 			}
 			for (State s : states) {
 				if (s.isInitial()) {
