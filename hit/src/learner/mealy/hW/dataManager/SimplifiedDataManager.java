@@ -443,4 +443,56 @@ public class SimplifiedDataManager {
 		}
 		conjecture.exportToDot(s.toString());
 	}
+
+	/**
+	 * Check for inconsistencies between h and conjecture. The inconsistency
+	 * detected here is a difference between a response from a state and a
+	 * responses recorded in mapping. This function also check partial mapping.
+	 * 
+	 * Characterization of states might be not consistent with built
+	 * transitions, in this case, thrown exception can have an empty distinction
+	 * sequence.
+	 * 
+	 * @param s
+	 *            the starting state from which homing sequence will be applied
+	 * @return true if the state match a recorded mapping, or null if the
+	 *         mapping is not recorded
+	 * @throws InconsistancyHMappingAndConjectureException
+	 *             if an inconsistency is discovered, either from complete or
+	 *             partial mapping.
+	 */
+	public Boolean isCompatibleWithHMapping(State s)
+			throws InconsistancyHMappingAndConjectureException {
+		OutputSequence output = conjecture.apply(h, s);
+		State targetState = conjecture.applyGetState(h, s);
+		List<OutputSequence> partialMapping = hResponse2Wresponses.get(output);
+		if (partialMapping != null) {
+			for (int i = 0; i < partialMapping.size(); i++) {
+				assert partialMapping.get(i) != null;
+				OutputSequence targetResponse = conjecture.apply(W.get(i),
+						targetState);
+				OutputSequence traceResponse = partialMapping.get(i);
+				if (!targetResponse.equals(traceResponse)) {
+					FullyQualifiedState mappedState = hResponse2State
+							.get(output);
+
+					throw new InconsistancyHMappingAndConjectureException(s,
+							targetState, output, mappedState, W.get(i),
+							targetResponse, traceResponse);
+				}
+			}
+			if (partialMapping.size() == W.size()) {
+				FullyQualifiedState mappedState = hResponse2State.get(output);
+				assert mappedState != null;
+				if (mappedState.getState() == targetState)
+					return true;
+				else
+					throw new InconsistancyHMappingAndConjectureException(s,
+							targetState, output, mappedState, null, null, null);
+			}
+		} else {
+			assert hResponse2State.get(output) == null;
+		}
+		return null;
+	}
 }

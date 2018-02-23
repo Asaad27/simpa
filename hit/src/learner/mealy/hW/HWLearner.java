@@ -2,6 +2,7 @@ package learner.mealy.hW;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import learner.mealy.hW.dataManager.ConjectureNotConnexException;
 import learner.mealy.hW.dataManager.FullyQualifiedState;
+import learner.mealy.hW.dataManager.InconsistancyHMappingAndConjectureException;
 import learner.mealy.hW.dataManager.InconsistancyWithConjectureAtEndOfTraceException;
 import learner.mealy.hW.dataManager.InvalidHException;
 import learner.mealy.hW.dataManager.SimplifiedDataManager;
@@ -205,6 +207,9 @@ public class HWLearner extends Learner {
 			LogManager.logStep(LogManager.STEPOTHER, "Starting new learning");
 			try {
 				learn(W, h);
+				// TODO also check inconsistency if there is a
+				// ConjectureNotConnexException
+				checkInconsistencyHMapping();
 			} catch (InvalidHException e) {
 				stats.increaseHInconsitencies();
 				if (Options.LOG_LEVEL != LogLevel.LOW) {
@@ -342,6 +347,7 @@ public class HWLearner extends Learner {
 		stats.setDuration(duration);
 		stats.setSearchCEInTrace(Options.TRY_TRACE_AS_CE?"naive":"none");
 		stats.setAddHInW(Options.ADD_H_IN_W);
+		stats.setCheck3rdInconsistency(Options.CHECK_INCONSISTENCY_H_MAPPING);
 	
 		stats.updateMemory((int) (runtime.totalMemory() - runtime.freeMemory()));
 		stats.finalUpdate(dataManager);
@@ -384,6 +390,70 @@ public class HWLearner extends Learner {
 			}
 		}
 
+	}
+
+	private void checkInconsistencyHMapping() {
+		if (!Options.CHECK_INCONSISTENCY_H_MAPPING)
+			return;
+		LogManager.logInfo(
+				"Checking for inconsistencies between conjecture and h mapping");
+		LinkedList<State> reachableStates = new LinkedList<>();
+		reachableStates.add(dataManager.getCurrentState().getState());
+		Set<State> seenStates = new HashSet<>();
+		while (!reachableStates.isEmpty()) {
+			State triedState = reachableStates.poll();
+			seenStates.add(triedState);
+			try {
+				if (dataManager.isCompatibleWithHMapping(triedState) == null) {
+					LogManager.logInfo("from state " + triedState
+							+ ", homing sequence produce a response unknown from mapping");
+					// TODO record this state for a test two by two.
+				}
+			} catch (InconsistancyHMappingAndConjectureException e) {
+				String INC_NAME = "3rd inconsistency";
+				if (Options.LOG_LEVEL != LogLevel.LOW)
+					LogManager.logInfo("Inconsistency found :" + e);
+				InputSequence distinctionW = e.getDistinctionSequence();
+				if (distinctionW == null) {
+					LogManager.logWarning(
+							"inconsistency can not be used because the state reached after homing sequence ("
+									+ e.getStateAfterH()
+									+ ")  has the same transitions than caracterization of mapped State ("
+									+ e.getMappedTarget() + ").");
+				} else {
+					assert W.contains(distinctionW);
+					LogManager.logInfo(
+							INC_NAME + " : first placing conjecture in state "
+									+ e.getStateBeforeH());
+					State currentState = dataManager.getCurrentState()
+							.getState();
+					dataManager.apply(dataManager.getConjecture()
+							.getShortestPath(currentState, e.getStateBeforeH())
+							.getInputsProjection());
+					currentState = dataManager.getCurrentState().getState();
+					assert currentState == e.getStateBeforeH();
+					LogManager.logInfo(
+							INC_NAME + " : then apply homing sequence");
+					dataManager.apply(dataManager.h);
+					currentState = dataManager.getCurrentState().getState();
+					assert currentState == e.getStateAfterH();
+					LogManager.logInfo(INC_NAME
+							+ " : finally, apply distinction sequence '"
+							+ distinctionW
+							+ "' in order to raise an inconsistency of type one or two");
+					;
+					dataManager.apply(distinctionW);
+					assert false : " there should be either an inconsistency of type one or two now";
+				}
+			}
+
+			for (MealyTransition t : dataManager.getConjecture()
+					.getTransitionFrom(triedState)) {
+				if (!seenStates.contains(t.getTo()))
+					reachableStates.add(t.getTo());
+			}
+		}
+		LogManager.logInfo("no inconsistencies discovered");
 	}
 
 	public void learn(List<InputSequence> W, InputSequence h) {

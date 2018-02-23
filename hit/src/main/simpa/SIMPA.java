@@ -437,10 +437,13 @@ public class SIMPA {
 	// hW options
 	private static BooleanOption ADD_H_IN_W = new BooleanOption("--addHInW",
 			"add homing sequence in W-set.");
+	private static BooleanOption CHECK_INCONSISTENCY_H_MAPPING = new BooleanOption(
+			"--3rd-inconsistency",
+			"search inconsistencies between mapping and conjecture");
 	private static BooleanOption TRY_CE_FROM_TRACE = new BooleanOption(
 			"--tryTraceCE", "Try to use trace as a counter example.");
 	private static Option<?>[] hWOptions = new Option<?>[] { ADD_H_IN_W,
-			TRY_CE_FROM_TRACE };
+			TRY_CE_FROM_TRACE ,CHECK_INCONSISTENCY_H_MAPPING};
 
 	// RS Options
 	private static BooleanOption RS_WITH_UNKNOWN_H = new BooleanOption(
@@ -620,6 +623,8 @@ public class SIMPA {
 
 		Options.ICTSS2015_WITHOUT_SPEEDUP = WITHOUT_SPEEDUP.getValue();
 		Options.ADD_H_IN_W = ADD_H_IN_W.getValue();
+		Options.CHECK_INCONSISTENCY_H_MAPPING = CHECK_INCONSISTENCY_H_MAPPING
+				.getValue();
 		Options.TRY_TRACE_AS_CE = TRY_CE_FROM_TRACE.getValue();
 
 		Options.RS_WITH_UNKNOWN_H = RS_WITH_UNKNOWN_H.getValue();

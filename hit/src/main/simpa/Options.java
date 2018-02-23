@@ -67,6 +67,7 @@ public class Options {
 
 	public static boolean ICTSS2015_WITHOUT_SPEEDUP = false;
 	public static boolean ADD_H_IN_W = false;
+	public static boolean CHECK_INCONSISTENCY_H_MAPPING = false;
 	public static boolean INTERACTIVE = false; //For algorithms which can prompt user for counter example or chosen sequences
 	
 	// Counterexample options

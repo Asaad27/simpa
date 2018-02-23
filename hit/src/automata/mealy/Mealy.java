@@ -91,6 +91,65 @@ public class Mealy extends Automata implements Serializable {
 		return null;
 	}
 
+	/**
+	 * Find a shortest path between two states of the automaton.
+	 * 
+	 * This function find one of the shortest path and the others (if they
+	 * exist) are ignored.
+	 * 
+	 * @param initial
+	 *            the starting state for the path.
+	 * @param target
+	 *            the ending state for the path.
+	 * @return the trace from the initial State to the target state or null if
+	 *         no path were found (e.g. if the automaton is not complete/not
+	 *         strongly connected).
+	 */
+	public LmTrace getShortestPath(State initial, State target) {
+		Set<State> addedStates = new HashSet<>();
+		class Path {
+			public State lastState;
+			public MealyTransition lastTransition = null;
+			public Path previousPath = null;
+		}
+		LinkedList<Path> toCompute = new LinkedList<>();
+		Path initialPath = new Path();
+		initialPath.lastState = initial;
+		toCompute.add(initialPath);
+		addedStates.add(initial);
+		while (!toCompute.isEmpty()) {
+			Path currentPath = toCompute.pollFirst();
+			if (currentPath.lastState == target) {
+				// we found the path, now we have to construct the trace
+				LinkedList<Path> stack = new LinkedList<>();
+				while (currentPath.lastTransition != null) {
+					stack.add(currentPath);
+					currentPath = currentPath.previousPath;
+					assert currentPath != null;
+				}
+				LmTrace trace = new LmTrace();
+				while (!stack.isEmpty()) {
+					currentPath = stack.pollLast();
+					trace.append(currentPath.lastTransition.getInput(),
+							currentPath.lastTransition.getOutput());
+				}
+				return trace;
+			}
+
+			for (MealyTransition t : getTransitionFrom(currentPath.lastState)) {
+				if (addedStates.contains(t.getTo()))
+					continue;
+				Path newPath = new Path();
+				newPath.lastState = t.getTo();
+				newPath.lastTransition = t;
+				newPath.previousPath = currentPath;
+				toCompute.add(newPath);
+				addedStates.add(t.getTo());
+			}
+		}
+		return null;
+	}
+
 	public void exportToDot() {
 		exportToDot("");
 	}

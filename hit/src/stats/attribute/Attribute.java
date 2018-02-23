@@ -40,6 +40,7 @@ public class Attribute <T extends Comparable<T>> {
 	public final static Attribute<Float>  ORACLE_DURATION = 		new Attribute<Float>(	"duration of oracle",				Units.SECONDS,	false,	false,	false);
 	public final static Attribute<String> SEARCH_CE_IN_TRACE =		new Attribute<String>(	"using trace for counter-example",	Units.NO_UNITS,	false, 	true, 	false);
 	public final static Attribute<Boolean>ADD_H_IN_W =				new Attribute<Boolean>(	"add homing sequence in W-set",		Units.BOOLEAN,	false,	true,	false);
+	public final static Attribute<Boolean>CHECK_3rd_INCONSISTENCY =	new Attribute<Boolean>(	"check inconsistency between h mapping and conjecture",Units.BOOLEAN,false,	true,	false);
 	public final static Attribute<Boolean>RS_WITH_GIVEN_H =			new Attribute<Boolean>(	"homing sequence is known",			Units.BOOLEAN,	false,	true,	false);
 	public final static Attribute<Integer>FAILED_PROBALISTIC_SEARCH=new Attribute<Integer>(	"number of failed probalistic search",Units.FUNCTION_CALL,false,	false,	false);
 	public final static Attribute<Integer>SUCCEEDED_PROBALISTIC_SEARCH=new Attribute<Integer>(	"number of succeeded probalistic search",Units.FUNCTION_CALL,false,	false,	false);

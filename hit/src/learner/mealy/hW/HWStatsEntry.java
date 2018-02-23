@@ -48,6 +48,7 @@ public class HWStatsEntry extends StatsEntry {
 	public final static Attribute<Float>  ORACLE_DURATION = 		Attribute.ORACLE_DURATION;
 	public final static Attribute<String> SEARCH_CE_IN_TRACE =		Attribute.SEARCH_CE_IN_TRACE;
 	public static final Attribute<Boolean>ADD_H_IN_W = 				Attribute.ADD_H_IN_W;
+	public static final Attribute<Boolean>CHECK_3rd_INCONSISTENCY =	Attribute.CHECK_3rd_INCONSISTENCY;
 
 	
 	private static Attribute<?>[] attributes = new Attribute<?>[]{
@@ -84,6 +85,7 @@ public class HWStatsEntry extends StatsEntry {
 			SUB_INFERANCE_NB,
 			SEARCH_CE_IN_TRACE,
 			ADD_H_IN_W,
+			CHECK_3rd_INCONSISTENCY,
 	};
 	
 	public static String getCSVHeader_s(){
@@ -133,6 +135,7 @@ public class HWStatsEntry extends StatsEntry {
 	private int subInferenceNb=0;
 	private String searchCEInTrace;
 	private boolean add_h_in_w=false;
+	private boolean check_3rd_inconsistency=false;
 
 
 	/**
@@ -172,6 +175,7 @@ public class HWStatsEntry extends StatsEntry {
 		subInferenceNb = Integer.parseInt(st.nextToken());
 		searchCEInTrace = st.nextToken();
 		add_h_in_w = Boolean.parseBoolean(st.nextToken());
+		check_3rd_inconsistency = Boolean.parseBoolean(st.nextToken());
 		
 	}
 
@@ -333,6 +337,8 @@ public class HWStatsEntry extends StatsEntry {
 			return (T) searchCEInTrace;
 		if (a == ADD_H_IN_W)
 			return (T) new Boolean(add_h_in_w);
+		if (a==CHECK_3rd_INCONSISTENCY)
+			return (T) new Boolean(check_3rd_inconsistency);
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 
 	}
@@ -388,6 +394,10 @@ public class HWStatsEntry extends StatsEntry {
 	
 	protected void setAddHInW(boolean b) {
 		add_h_in_w=b;
+	}
+
+	protected void setCheck3rdInconsistency(boolean b) {
+		check_3rd_inconsistency = b;
 	}
 
 }
