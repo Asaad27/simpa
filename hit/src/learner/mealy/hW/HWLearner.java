@@ -27,6 +27,7 @@ import learner.mealy.hW.dataManager.InvalidHException;
 import learner.mealy.hW.dataManager.SimplifiedDataManager;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
+import tools.CompiledSearchGraph;
 import tools.Utils;
 
 import tools.loggers.LogManager;
@@ -202,6 +203,7 @@ public class HWLearner extends Learner {
 					.freeMemory()));
 
 			counterExampleTrace = null;
+			boolean virtualCounterExample = false;
 			inconsistencyFound = false;
 			LogManager.logLine();
 			LogManager.logStep(LogManager.STEPOTHER, "Starting new learning");
@@ -256,39 +258,18 @@ public class HWLearner extends Learner {
 			}
 
 			if (!inconsistencyFound && Options.TRY_TRACE_AS_CE) {
-				// try to apply fullTrace on any state of conjecture to detect
-				// inconsistency.
-				LmConjecture conjecture = dataManager.getConjecture();
-				if (conjecture.isConnex()) {
-					int firstDiff = conjecture.simulateOnAllStates(fullTrace);
-					if (firstDiff != fullTrace.size()) {
-						counterExampleTrace = fullTrace.subtrace(0,
-								firstDiff + 1);
-						LogManager
-								.logInfo("The trace from start of learning cannot be applied on any state of conjecture."
-										+ "We will try to use it as a counter example.");
-						OutputSequence ConjectureCEOut = conjecture
-								.simulateOutput(dataManager.getCurrentState()
-										.getState(), counterExampleTrace
-										.getInputsProjection());
-						OutputSequence DriverCEOut = driver.execute(counterExampleTrace
-								.getInputsProjection());
-						if (ConjectureCEOut.equals(DriverCEOut)){
-							LogManager.logInfo("When trying to apply the expected counter example, the driver produced the same output than the conjecture."+"This cannot be used as counter example");
-							dataManager.walkWithoutCheck(counterExampleTrace);
-							counterExampleTrace=null;
-						}else{
-							LogManager.logInfo("The trace was a counter example");
-							inconsistencyFound = true;
-						}
-					} else {
-						LogManager
-								.logInfo("The trace from start of learning can be applied on at leat one state");
-					}
+				if (Options.CHECK_INCONSISTENCY_H_NOT_HOMING)
+					counterExampleTrace = tryTraceAsCeAfterH();
+				if (counterExampleTrace != null)
+					virtualCounterExample = true;
+				else {
+					counterExampleTrace = tryTraceAsCeNaive();
+					if (counterExampleTrace != null)
+						inconsistencyFound = true;
 				}
 			}
 
-			if (!inconsistencyFound) {
+			if (!inconsistencyFound && !virtualCounterExample) {
 				LogManager.logInfo("asking for a counter example");
 				counterExampleTrace = getCounterExemple();
 				if (counterExampleTrace == null)
@@ -319,6 +300,9 @@ public class HWLearner extends Learner {
 					if (l <= counterExample.getLength()) {
 						newW = counterExample.getIthSuffix(l);
 					} else {
+						if (virtualCounterExample)
+							throw new RuntimeException(
+									"virtual counter example is too short");
 						newW = dataManager.getSubtrace(
 								traceSize - l + counterExample.getLength(),
 								traceSize).getInputsProjection();
@@ -341,14 +325,17 @@ public class HWLearner extends Learner {
 							.logWarning("We are adding new element to W but it is already a W-set for this driver");
 				}
 				addOrExtendInW(newW, W);
-				dataManager.walkWithoutCheck(counterExampleTrace);
+				if (!virtualCounterExample)
+					dataManager.walkWithoutCheck(counterExampleTrace);
 			}
 			stats.increaseWithDataManager(dataManager);
 		} while (counterExampleTrace != null || inconsistencyFound);
 
 		float duration = (float) (System.nanoTime() - start) / 1000000000;
 		stats.setDuration(duration);
-		stats.setSearchCEInTrace(Options.TRY_TRACE_AS_CE?"naive":"none");
+		stats.setSearchCEInTrace(Options.TRY_TRACE_AS_CE
+				? (Options.CHECK_INCONSISTENCY_H_NOT_HOMING ? "better" : "naive")
+				: "none");
 		stats.setAddHInW(Options.ADD_H_IN_W);
 		stats.setCheck3rdInconsistency(
 				Options.CHECK_INCONSISTENCY_H_NOT_HOMING);
@@ -592,6 +579,131 @@ public class HWLearner extends Learner {
 				LogManager.logInfo(
 						"conjecture is not connex and we don't have a path to try the other state if we apply h and a distinction sequence.");
 		}
+	}
+
+	private LmTrace tryTraceAsCeAfterH() {
+		LmTrace counterExampleTrace = null;
+		LmConjecture conjecture = dataManager.getConjecture();
+		LogManager.logInfo("trying to use trace as CE");
+		CompiledSearchGraph compiled = new CompiledSearchGraph(dataManager.h);
+		int startTrace = 0;
+		while (!compiled.isAcceptingWord()) {
+			compiled.apply(fullTrace.getInput(startTrace));
+			startTrace++;
+		}
+		int hLength = compiled.neededTraceLength();
+		final LmTrace hApplied = fullTrace.subtrace(startTrace - hLength,
+				startTrace);
+		assert hApplied.getInputsProjection().equals(dataManager.h);
+		final LmTrace potentialCE = fullTrace.subtrace(startTrace, fullTrace.size());
+
+		if (Options.LOG_LEVEL != LogLevel.LOW)
+			LogManager.logInfo(
+					"found first occurence of h at position " + startTrace);
+		FullyQualifiedState fullyQualifiedAfterH = dataManager
+				.getState(hApplied.getOutputsProjection());
+		State afterH = null;
+		if (fullyQualifiedAfterH != null) {
+			afterH = fullyQualifiedAfterH.getState();
+			if (Options.LOG_LEVEL != LogLevel.LOW)
+				LogManager.logInfo("found a mapping for the answer '"
+						+ hApplied.getOutputsProjection()
+						+ "' to h : lead to state " + fullyQualifiedAfterH);
+		} else
+			for (State s : conjecture.getStates()) {
+				OutputSequence homingResponse = new OutputSequence();
+				if (!conjecture.applyIfTransitionExists(dataManager.h, s,
+						homingResponse))
+					continue;
+				if (hApplied.getOutputsProjection().equals(homingResponse)) {
+					afterH = conjecture.applyGetState(dataManager.h, s);
+					if (Options.LOG_LEVEL != LogLevel.LOW)
+						LogManager.logInfo("found that state " + s
+								+ " followed by homing sequence lead in "
+								+ afterH + " with wanted output");
+					break;
+				}
+			}
+		if (afterH == null) {
+			LogManager.logInfo(
+					"Unable to find a state which give the expected output");
+			return null;
+		}
+		State current = afterH;
+		for (int i = 0; i < potentialCE.size(); i++) {
+			MealyTransition t = conjecture.getTransitionFromWithInput(current,
+					potentialCE.getInput(i));
+			if (t == null) {
+				LogManager.logInfo(
+						"Cannot try trace as CE because conjecture is not complete");
+				break;
+			}
+			if (!t.getOutput().equals(potentialCE.getOutput(i))) {
+				LmTrace afterHCE = potentialCE.subtrace(0, i + 1);
+				counterExampleTrace = hApplied;
+				counterExampleTrace.append(afterHCE);
+				if (Options.LOG_LEVEL != LogLevel.LOW) {
+					String info = "Inconsistency found between trace and conjecture : from state "
+							+ afterH + ", if we apply sequence '"
+							+ afterHCE.getInputsProjection()
+							+ "' we get output '"
+							+ conjecture.apply(afterHCE.getInputsProjection(),
+									afterH)
+							+ "' instead of '" + afterHCE.getOutputsProjection()
+							+ "' from the trace observed since position "
+							+ startTrace
+							+ ". The eroneous transition in conjecture is " + t
+							+ ". This is a «virtual» inconsistency because we do not apply counter example on driver";
+					LogManager.logInfo(info);
+					LogManager.logConsole(info);
+				}
+				break;
+			}
+			current = t.getTo();
+		}
+		if (counterExampleTrace == null && Options.LOG_LEVEL != LogLevel.LOW)
+			LogManager
+					.logInfo("conjecture is coherent with trace from position "
+							+ startTrace);
+		return counterExampleTrace;
+
+	}
+
+	private LmTrace tryTraceAsCeNaive() {
+		LmConjecture conjecture = dataManager.getConjecture();
+		LmTrace counterExampleTrace = null;
+		LogManager.logInfo(
+				"trying to apply trace since very start of learning to any state");
+		// try to apply fullTrace on any state of conjecture to detect
+		// inconsistency.
+		if (conjecture.isConnex()) {
+			int firstDiff = conjecture.simulateOnAllStates(fullTrace);
+			if (firstDiff != fullTrace.size()) {
+				counterExampleTrace = fullTrace.subtrace(0, firstDiff + 1);
+				LogManager.logInfo(
+						"The trace from start of learning cannot be applied on any state of conjecture."
+								+ "We will try to use it as a counter example.");
+				OutputSequence ConjectureCEOut = conjecture.simulateOutput(
+						dataManager.getCurrentState().getState(),
+						counterExampleTrace.getInputsProjection());
+				OutputSequence DriverCEOut = driver
+						.execute(counterExampleTrace.getInputsProjection());
+				if (ConjectureCEOut.equals(DriverCEOut)) {
+					LogManager.logInfo(
+							"When trying to apply the expected counter example, the driver produced the same output than the conjecture."
+									+ "This cannot be used as counter example");
+					dataManager.walkWithoutCheck(counterExampleTrace);
+					counterExampleTrace = null;
+				} else {
+					LogManager.logInfo("The trace was a counter example");
+				}
+			} else {
+				LogManager.logInfo(
+						"The trace from start of learning can be applied on at leat one state");
+			}
+		}
+
+		return counterExampleTrace;
 	}
 
 	public void learn(List<InputSequence> W, InputSequence h) {

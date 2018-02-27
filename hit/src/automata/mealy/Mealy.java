@@ -232,6 +232,30 @@ public class Mealy extends Automata implements Serializable {
 		return O;
 	}
 
+	/**
+	 * apply an InputSequence on an incomplete automaton
+	 * 
+	 * @param inSeq
+	 *            the sequence to apply
+	 * @param s
+	 *            the state from which the sequence must be applied
+	 * @param outSeq
+	 *            a sequence to fill with outputs. can be null.
+	 * @return true if the full sequence was applied, false otherwise.
+	 */
+	public boolean applyIfTransitionExists(InputSequence inSeq, State s,
+			OutputSequence outSeq) {
+		for (String input : inSeq.sequence) {
+			MealyTransition t = getTransitionFromWithInput(s, input);
+			if (t == null)
+				return false;
+			s = t.getTo();
+			if (outSeq != null)
+				outSeq.addOutput(t.getOutput());
+		}
+		return true;
+	}
+
 	public State applyGetState(InputSequence I, State s) {
 		for (String i : I.sequence) {
 			MealyTransition t = getTransitionFromWithInput(s, i);
