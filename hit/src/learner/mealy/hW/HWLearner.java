@@ -350,7 +350,8 @@ public class HWLearner extends Learner {
 		stats.setDuration(duration);
 		stats.setSearchCEInTrace(Options.TRY_TRACE_AS_CE?"naive":"none");
 		stats.setAddHInW(Options.ADD_H_IN_W);
-		stats.setCheck3rdInconsistency(Options.CHECK_INCONSISTENCY_H_MAPPING);
+		stats.setCheck3rdInconsistency(
+				Options.CHECK_INCONSISTENCY_H_NOT_HOMING);
 	
 		stats.updateMemory((int) (runtime.totalMemory() - runtime.freeMemory()));
 		stats.finalUpdate(dataManager);
@@ -396,13 +397,18 @@ public class HWLearner extends Learner {
 	}
 
 	private void checkInconsistencyHMapping() {
-		if (!Options.CHECK_INCONSISTENCY_H_MAPPING)
+		if (!Options.CHECK_INCONSISTENCY_H_NOT_HOMING)
 			return;
 		LogManager.logInfo(
-				"Checking for inconsistencies between conjecture and h mapping");
+				"Checking for inconsistencies between conjecture and h");
 		LinkedList<State> reachableStates = new LinkedList<>();
 		reachableStates.add(dataManager.getCurrentState().getState());
 		Set<State> seenStates = new HashSet<>();
+		// knownResponses is a mapping with the structure :
+		// [observed h answer] -> (mapping [final state] -> [start state])
+		// this record for each answer what are the possible final state and how
+		// to reach them.
+		Map<OutputSequence, Map<State, List<State>>> knownResponses = new HashMap<>();
 		while (!reachableStates.isEmpty()) {
 			State triedState = reachableStates.poll();
 			if (seenStates.contains(triedState))
@@ -412,7 +418,6 @@ public class HWLearner extends Learner {
 				if (dataManager.isCompatibleWithHMapping(triedState) == null) {
 					LogManager.logInfo("from state " + triedState
 							+ ", homing sequence produce a response unknown from mapping");
-					// TODO record this state for a test two by two.
 				}
 			} catch (InconsistancyHMappingAndConjectureException e) {
 				String INC_NAME = "3rd inconsistency";
@@ -454,7 +459,37 @@ public class HWLearner extends Learner {
 							"an inconsistency of type one or two was expected");
 				}
 			}
+			LmConjecture conjecture = dataManager.getConjecture();
+			OutputSequence hResponse = conjecture.apply(dataManager.h,
+					triedState);
+			State endState = conjecture.applyGetState(dataManager.h,
+					triedState);
+			Map<State, List<State>> sameAnswerMap = knownResponses
+					.get(hResponse);
+			if (sameAnswerMap == null) {
+				sameAnswerMap = new HashMap<>();
+				knownResponses.put(hResponse, sameAnswerMap);
+				List<State> list = new ArrayList<>();
+				list.add(triedState);
+				sameAnswerMap.put(endState, list);
+			} else {
+				List<State> list = sameAnswerMap.get(endState);
+				if (list == null) {
+					list = new ArrayList<>();
+					sameAnswerMap.put(endState, list);
+				}
+				list.add(triedState);
 
+				for (State otherEnd : sameAnswerMap.keySet()) {
+					if (otherEnd == endState)
+						continue;
+					List<State> otherStarts = sameAnswerMap.get(otherEnd);
+					assert otherStarts != null && otherStarts.size() >= 1;
+					for (State otherStart : otherStarts) {
+						proceedHNotHomingforConjecture(otherStart, triedState);
+					}
+				}
+			}
 			for (MealyTransition t : dataManager.getConjecture()
 					.getTransitionFrom(triedState)) {
 				if (!seenStates.contains(t.getTo()))
@@ -462,6 +497,101 @@ public class HWLearner extends Learner {
 			}
 		}
 		LogManager.logInfo("no inconsistencies discovered");
+	}
+
+	/**
+	 * Use a detected inconsistency showing that h is not a homing sequence for
+	 * conjecture and try to transform this into an inconsistency of type one or
+	 * two.
+	 * 
+	 * This function suppose that the reachable part of conjecture is complete.
+	 * 
+	 * @param aStart
+	 *            a reachable State giving the same answer than bStart to h but
+	 *            leading in a different state.
+	 * @param bStart
+	 *            a reachable State giving the same answer than aStart to h but
+	 *            leading in a different state.
+	 */
+	private void proceedHNotHomingforConjecture(State aStart, State bStart) {
+		assert aStart != bStart;
+		LmConjecture conjecture = dataManager.getConjecture();
+		State currentState = dataManager.getCurrentState().getState();
+		assert conjecture.apply(dataManager.h, aStart)
+				.equals(conjecture.apply(dataManager.h, bStart));
+		assert conjecture.getShortestPath(currentState, aStart) != null
+				&& conjecture.getShortestPath(currentState,
+						bStart) != null : "states are supposed to be reachable";
+		State aEnd = conjecture.applyGetState(dataManager.h, aStart);
+		State bEnd = conjecture.applyGetState(dataManager.h, bStart);
+		assert aEnd != bEnd;
+
+		if (Options.LOG_LEVEL != LogLevel.LOW) {
+			LogManager.logInfo(
+					"New inconsistency found : h is not homming for this conjecture. In conjecture, from states "
+							+ aStart + " and " + bStart
+							+ " we can observe the same answer to homing sequence '"
+							+ conjecture.apply(dataManager.h, aStart)
+							+ "' but this lead in two differents states " + aEnd
+							+ " and " + bEnd
+							+ ". Now we try to use this inconsistency");
+		}
+
+		List<InputSequence> distinctionSequences = new ArrayList<>();
+		distinctionSequences.addAll(W);
+		// for the case were aEnd and bEnd have the same characterizing
+		// transitions, we try to find a custom distinction sequence. This can
+		// be improved in order to try a sequence which distinguish the two
+		// state and allow a path from one state to the other.
+		InputSequence distinctionSequence = conjecture
+				.getDistinctionSequence(aEnd, bEnd);
+		if (distinctionSequence != null) {
+			distinctionSequences.add(distinctionSequence);
+		}
+		boolean statesAreEquivalents = true;
+		for (InputSequence w : distinctionSequences) {
+			if (!conjecture.apply(w, aEnd).equals(conjecture.apply(w, bEnd))) {
+				statesAreEquivalents = false;
+				if (Options.LOG_LEVEL != LogLevel.LOW) {
+					LogManager.logInfo("States " + aEnd + " and " + bEnd
+							+ " can be distinguished by ");
+				}
+				State start = aStart;
+				LmTrace path = conjecture.getShortestPath(
+						conjecture.applyGetState(w, aEnd), bStart);
+				if (path == null) {
+					start = bStart;
+					path = conjecture.getShortestPath(
+							conjecture.applyGetState(w, bEnd), aStart);
+				}
+				if (path != null) {
+					LogManager.logInfo(
+							"there is a path in conjecture which will raise an inconsistency of type one or two");
+					if (Options.LOG_LEVEL != LogLevel.LOW) {
+						LogManager.logConsole(
+								"inconsistency found : h is not homming for conjecture. Moreover there is a path in conjecture to raise an inconsistency of type one or two");
+					}
+					dataManager.apply(
+							conjecture.getShortestPath(currentState, start)
+									.getInputsProjection());
+					dataManager.apply(dataManager.h);
+					dataManager.apply(w);
+					dataManager.apply(path.getInputsProjection());
+					dataManager.apply(dataManager.h);
+					dataManager.apply(w);
+					throw new RuntimeException(
+							"an inconsistency of type one or two should have been raised before");
+				}
+			}
+		}
+		if (Options.LOG_LEVEL != LogLevel.LOW) {
+			if (statesAreEquivalents)
+				LogManager.logInfo("States " + aEnd + " and " + bEnd
+						+ " have the same characterization in conjecture. We cannot say that h is not homming because conjecture is not minimal.");
+			else
+				LogManager.logInfo(
+						"conjecture is not connex and we don't have a path to try the other state if we apply h and a distinction sequence.");
+		}
 	}
 
 	public void learn(List<InputSequence> W, InputSequence h) {
