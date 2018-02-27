@@ -206,9 +206,12 @@ public class HWLearner extends Learner {
 			LogManager.logLine();
 			LogManager.logStep(LogManager.STEPOTHER, "Starting new learning");
 			try {
-				learn(W, h);
-				// TODO also check inconsistency if there is a
-				// ConjectureNotConnexException
+				try {
+					learn(W, h);
+				} catch (ConjectureNotConnexException e) {
+					checkInconsistencyHMapping();
+					throw e;
+				}
 				checkInconsistencyHMapping();
 			} catch (InvalidHException e) {
 				stats.increaseHInconsitencies();
@@ -402,6 +405,8 @@ public class HWLearner extends Learner {
 		Set<State> seenStates = new HashSet<>();
 		while (!reachableStates.isEmpty()) {
 			State triedState = reachableStates.poll();
+			if (seenStates.contains(triedState))
+				continue;
 			seenStates.add(triedState);
 			try {
 				if (dataManager.isCompatibleWithHMapping(triedState) == null) {
@@ -425,11 +430,13 @@ public class HWLearner extends Learner {
 					LogManager.logInfo(
 							INC_NAME + " : first placing conjecture in state "
 									+ e.getStateBeforeH());
+					assert e.getStateBeforeH() == triedState;
 					State currentState = dataManager.getCurrentState()
 							.getState();
 					dataManager.apply(dataManager.getConjecture()
 							.getShortestPath(currentState, e.getStateBeforeH())
-							.getInputsProjection());
+							.getInputsProjection());// path exists because
+													// triedState is reachable.
 					currentState = dataManager.getCurrentState().getState();
 					assert currentState == e.getStateBeforeH();
 					LogManager.logInfo(
@@ -443,7 +450,8 @@ public class HWLearner extends Learner {
 							+ "' in order to raise an inconsistency of type one or two");
 					;
 					dataManager.apply(distinctionW);
-					assert false : " there should be either an inconsistency of type one or two now";
+					throw new RuntimeException(
+							"an inconsistency of type one or two was expected");
 				}
 			}
 
