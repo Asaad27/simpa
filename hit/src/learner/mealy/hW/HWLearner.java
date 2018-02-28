@@ -679,21 +679,32 @@ public class HWLearner extends Learner {
 		if (conjecture.isConnex()) {
 			int firstDiff = conjecture.simulateOnAllStates(fullTrace);
 			if (firstDiff != fullTrace.size()) {
-				counterExampleTrace = fullTrace.subtrace(0, firstDiff + 1);
+				InputSequence counterExample = fullTrace
+						.subtrace(0, firstDiff + 1).getInputsProjection();
 				LogManager.logInfo(
 						"The trace from start of learning cannot be applied on any state of conjecture."
 								+ "We will try to use it as a counter example.");
 				OutputSequence ConjectureCEOut = conjecture.simulateOutput(
 						dataManager.getCurrentState().getState(),
-						counterExampleTrace.getInputsProjection());
-				OutputSequence DriverCEOut = driver
-						.execute(counterExampleTrace.getInputsProjection());
-				if (ConjectureCEOut.equals(DriverCEOut)) {
+						counterExample);
+				OutputSequence DriverCEOut = new OutputSequence();
+				for (int i = 0; i < counterExample.getLength(); i++) {
+					String out = driver.execute(counterExample.sequence.get(i));
+					DriverCEOut.addOutput(out);
+					if (!out.equals(ConjectureCEOut.sequence.get(i))) {
+						LogManager.logInfo("The trace was a counter example");
+						counterExampleTrace = new LmTrace(
+								counterExample.getIthPreffix(i + 1),
+								DriverCEOut);
+						break;
+					}
+				}
+				if (counterExampleTrace == null) {
 					LogManager.logInfo(
 							"When trying to apply the expected counter example, the driver produced the same output than the conjecture."
 									+ "This cannot be used as counter example");
-					dataManager.walkWithoutCheck(counterExampleTrace);
-					counterExampleTrace = null;
+					dataManager.walkWithoutCheck(
+							new LmTrace(counterExample, DriverCEOut));
 				} else {
 					LogManager.logInfo("The trace was a counter example");
 				}
