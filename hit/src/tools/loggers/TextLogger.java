@@ -29,6 +29,7 @@ import learner.mealy.table.LmControlTableRow;
 import learner.mealy.tree.ZObservationNode;
 import main.simpa.Options;
 import main.simpa.SIMPA;
+import automata.State;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedInputSequence;
 import automata.efsm.ParameterizedOutput;
@@ -485,6 +486,19 @@ public class TextLogger implements ILogger {
 	public void logRequest(String input, String ouput, int n) {
 		try {
 			writer.write(tfm.format(new Date()) + "transition n°" + n  + " : " + input + " -> " + ouput + ret);
+			writer.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void logRequest(String input, String ouput, int n, State before,
+			State after) {
+		try {
+			writer.write(tfm.format(new Date()) + "transition n°" + n + " : ("
+					+ before + ") --" + input + "/" + ouput + "--> (" + after
+					+ ")" + ret);
 			writer.flush();
 		} catch (IOException e) {
 			e.printStackTrace();

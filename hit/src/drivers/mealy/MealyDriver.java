@@ -88,6 +88,7 @@ public class MealyDriver extends Driver {
 		if (input.length() > 0) {
 			if (addtolog)
 				numberOfAtomicRequest++;
+			State before = currentState;
 			MealyTransition currentTrans = automata.getTransitionFromWithInput(currentState, input);
 			if (currentTrans != null) {
 				output = new String(currentTrans.getOutput());
@@ -96,7 +97,8 @@ public class MealyDriver extends Driver {
 				output = new String();
 			}
 			if (addtolog)
-				LogManager.logRequest(input, output, transitionCount);
+				LogManager.logRequest(input, output, transitionCount, before,
+						currentState);
 			transitionCount++;
 		}
 		return output;

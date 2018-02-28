@@ -19,6 +19,7 @@ import learner.efsm.tree.ZXObservationNode;
 import learner.mealy.table.LmControlTable;
 import learner.mealy.tree.ZObservationNode;
 import main.simpa.Options;
+import automata.State;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedOutput;
 import detection.Reflection;
@@ -124,6 +125,12 @@ public class LogManager {
 	public static void logRequest(String input, String output, int n) {
 		for (ILogger l : loggers)
 			l.logRequest(input, output, n);
+	}
+
+	public static void logRequest(String input, String output, int n,
+			State before, State after) {
+		for (ILogger l : loggers)
+			l.logRequest(input, output, n, before, after);
 	}
 
 	public static void start() {

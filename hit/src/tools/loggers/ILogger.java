@@ -7,6 +7,7 @@ import learner.efsm.table.LiDataTable;
 import learner.efsm.tree.ZXObservationNode;
 import learner.mealy.table.LmControlTable;
 import learner.mealy.tree.ZObservationNode;
+import automata.State;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedOutput;
 
@@ -36,6 +37,9 @@ public interface ILogger {
 	public void logRequest(String input, String ouput);
 
 	public void logRequest(String input, String ouput, int n);
+
+	public void logRequest(String input, String output, int n, State before,
+			State after);
 
 	public void logStart();
 
