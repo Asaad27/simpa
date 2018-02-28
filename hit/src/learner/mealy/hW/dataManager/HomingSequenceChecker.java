@@ -43,9 +43,8 @@ public class HomingSequenceChecker {
 		protected Node father;// null if the node was discovered after homing
 								// sequence
 
-		protected CompiledSearchGraph.Node searchStatus;// null if we don't need
-														// to search from this
-														// node
+		protected CompiledSearchGraph.Node searchStatus;
+		protected boolean searchIscomplete = false;
 
 		private Node(CompiledSearchGraph.Node status) {
 			this.children = new HashMap<>();
@@ -96,7 +95,7 @@ public class HomingSequenceChecker {
 			if (searchStatus != null) {
 				if (children.keySet().containsAll(
 						searchStatus.getNonResetingInput()))
-					searchStatus = null;
+					searchIscomplete = true;
 			}
 		}
 	}
@@ -127,20 +126,16 @@ public class HomingSequenceChecker {
 	public void applyInput(String input, String output) {
 		lastApplied.append(input, output);
 
-		CompiledSearchGraph.Node status = currentNode.searchStatus;
-		boolean hApplied = false;
-		if (status == null) {
-			compiledSearchGraph.resetStatus();
-		} 
-			hApplied = compiledSearchGraph.apply(input);
-			if (compiledSearchGraph.neededTraceLength() == 0)
-				lastApplied = new LmTrace();
-		
+		Node previousNode = currentNode;
+		boolean hIsObserved = false;
 
-		String knownOutput = currentNode.getOutput(input);
+		assert compiledSearchGraph.getStatus() == currentNode.searchStatus;
+		hIsObserved = compiledSearchGraph.apply(input);
+		
+		String knownOutput = previousNode.getOutput(input);
 		if (knownOutput != null && !knownOutput.equals(output)) {
 			Stack<Node> fromH = new Stack<>();
-			Node current = currentNode;
+			Node current = previousNode;
 			while (current.afterH == null) {
 				fromH.push(current);
 				current = current.father;
@@ -160,21 +155,24 @@ public class HomingSequenceChecker {
 			LmTrace traceB = traceA.clone();
 			traceB.append(input, knownOutput);
 			traceA.append(input, output);
-			currentNode=currentNode.children.get(input).n;
+			this.currentNode=previousNode.children.get(input).n;
 			if (Options.LOG_LEVEL == LogLevel.ALL){
 				LogManager.logInfo("Inconsistency found in homing sequence");
 				exportToDot();
 				}
 			throw new InvalidHException(traceA, traceB, h);
 		}
-		if (hApplied&&knownOutput==null) {
+		if (hIsObserved && knownOutput == null) {
 			LmTrace hTrace = (lastApplied.subtrace(
 					lastApplied.size() - h.getLength(), lastApplied.size()));
-			currentNode.addChild(input, output,
+			assert hTrace.getInputsProjection().equals(h);
+			previousNode.addChild(input, output,
 					getState(hTrace.getOutputsProjection()));
 		}
-		currentNode = currentNode.getChildOrCreate(input, output);
+		this.currentNode = previousNode.getChildOrCreate(input, output);
 
+		if (this.currentNode.searchStatus.getNeededTraceLength() == 0)
+			lastApplied = new LmTrace();
 	}
 
 	protected Node getState(OutputSequence seq) {

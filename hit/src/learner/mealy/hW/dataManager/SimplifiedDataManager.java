@@ -447,7 +447,7 @@ public class SimplifiedDataManager {
 	/**
 	 * Check for inconsistencies between h and conjecture. The inconsistency
 	 * detected here is a difference between a response from a state and a
-	 * responses recorded in mapping. This function also check partial mapping.
+	 * response recorded in mapping. This function also check partial mapping.
 	 * 
 	 * Characterization of states might be not consistent with built
 	 * transitions, in this case, thrown exception can have an empty distinction

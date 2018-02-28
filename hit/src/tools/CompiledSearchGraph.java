@@ -40,6 +40,14 @@ public class CompiledSearchGraph {
 		public Set<String> getNonResetingInput() {
 			return children.keySet();
 		}
+
+		public int getNeededTraceLength() {
+			return neededTraceLength;
+		}
+
+		public boolean acceptWord() {
+			return acceptWord;
+		}
 	}
 
 	private Node startNode;
@@ -76,7 +84,13 @@ public class CompiledSearchGraph {
 	}
 
 	public Node getStatus() {
+		assert currentNode != null;
 		return currentNode;
+	}
+
+	public void setStatus(Node status) {
+		currentNode = status;
+		assert currentNode != null;
 	}
 
 	public Node getStart() {
