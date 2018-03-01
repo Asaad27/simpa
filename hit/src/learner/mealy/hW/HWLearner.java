@@ -729,7 +729,8 @@ public class HWLearner extends Learner {
 			logW.append(w + ", ");
 		}
 		logW.append("]");
-		if (driver instanceof TransparentMealyDriver) {
+		if (Options.LOG_LEVEL == LogLevel.ALL
+				&& driver instanceof TransparentMealyDriver) {
 			TransparentMealyDriver tDriver = (TransparentMealyDriver) driver;
 			if (tDriver.getAutomata().acceptCharacterizationSet(W)) {
 				logW.append(" (which is a W-set for the driver)");
@@ -738,13 +739,13 @@ public class HWLearner extends Learner {
 			}
 		}
 		LogManager.logInfo(logW.toString());
-		LogManager
-				.logInfo("Using homing sequence «"
-						+ h
-						+ "»"
-						+ ((driver instanceof TransparentMealyDriver) ? (((TransparentMealyDriver) driver)
-								.getAutomata().acceptHomingSequence(h) ? " (which is a homming sequence for driver)"
-								: " (which is not a homing sequence for driver)")
+		LogManager.logInfo("Using homing sequence «" + h + "»"
+				+ ((Options.LOG_LEVEL == LogLevel.ALL
+						&& driver instanceof TransparentMealyDriver)
+								? (((TransparentMealyDriver) driver)
+										.getAutomata().acceptHomingSequence(h)
+												? " (which is a homming sequence for driver)"
+												: " (which is not a homing sequence for driver)")
 								: ""));
 
 
