@@ -49,6 +49,7 @@ public class HWStatsEntry extends StatsEntry {
 	public final static Attribute<String> SEARCH_CE_IN_TRACE =		Attribute.SEARCH_CE_IN_TRACE;
 	public static final Attribute<Boolean>ADD_H_IN_W = 				Attribute.ADD_H_IN_W;
 	public static final Attribute<Boolean>CHECK_3rd_INCONSISTENCY =	Attribute.CHECK_3rd_INCONSISTENCY;
+	public static final Attribute<Boolean>REUSE_HZXW =				Attribute.REUSE_HZXW;
 
 	
 	private static Attribute<?>[] attributes = new Attribute<?>[]{
@@ -86,6 +87,7 @@ public class HWStatsEntry extends StatsEntry {
 			SEARCH_CE_IN_TRACE,
 			ADD_H_IN_W,
 			CHECK_3rd_INCONSISTENCY,
+			REUSE_HZXW,
 	};
 	
 	public static String getCSVHeader_s(){
@@ -136,7 +138,7 @@ public class HWStatsEntry extends StatsEntry {
 	private String searchCEInTrace;
 	private boolean add_h_in_w=false;
 	private boolean check_3rd_inconsistency=false;
-
+	private boolean reuse_hzxw = false;
 
 	/**
 	 * rebuild a HWStats object from a CSV line
@@ -176,6 +178,7 @@ public class HWStatsEntry extends StatsEntry {
 		searchCEInTrace = st.nextToken();
 		add_h_in_w = Boolean.parseBoolean(st.nextToken());
 		check_3rd_inconsistency = Boolean.parseBoolean(st.nextToken());
+		reuse_hzxw = Boolean.parseBoolean(st.nextToken());
 		
 	}
 
@@ -188,6 +191,7 @@ public class HWStatsEntry extends StatsEntry {
 		this.automata = d.getSystemName();
 		this.with_speedup = !Options.ICTSS2015_WITHOUT_SPEEDUP;
 		this.seed=Options.SEED;
+		this.reuse_hzxw = Options.REUSE_HZXW;
 	}
 
 //	protected void setLocalizeSequenceLength(int length){
@@ -339,6 +343,8 @@ public class HWStatsEntry extends StatsEntry {
 			return (T) new Boolean(add_h_in_w);
 		if (a==CHECK_3rd_INCONSISTENCY)
 			return (T) new Boolean(check_3rd_inconsistency);
+		if (a==REUSE_HZXW)
+				return (T) new Boolean(reuse_hzxw);
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 
 	}

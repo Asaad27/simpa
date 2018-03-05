@@ -44,6 +44,9 @@ public class SimplifiedDataManager {
 
 	private Collection<TraceTree> expectedTraces;
 	
+	private Map<OutputSequence, List<HZXWSequence>> hZXWSequences;
+	private List<LocalizedHZXWSequence> readyForReapplyHZXWSequence = new ArrayList<>();
+
 	protected Collection<FullyQualifiedState> identifiedFakeStates=new ArrayList<>();
 
 	public Collection<FullyQualifiedState> getIdentifiedFakeStates() {
@@ -91,6 +94,16 @@ public class SimplifiedDataManager {
 			hResponse2State.put(hResponse, q);
 			LogManager.logInfo("We found that the response " + hResponse
 					+ " to homing sequence lead in state " + q);
+			List<HZXWSequence> sequences = hZXWSequences.get(hResponse);
+			if (sequences != null) {
+				for (HZXWSequence seq : sequences) {
+					LocalizedHZXWSequence localizedSeq = new LocalizedHZXWSequence(
+							seq);
+					if (q.addLocalizedHZXWSequence(localizedSeq)) {
+						readyForReapplyHZXWSequence.add(localizedSeq);
+					}
+				}
+			}
 			return q;
 		}
 		return null;
@@ -98,13 +111,15 @@ public class SimplifiedDataManager {
 
 
 	public SimplifiedDataManager(MealyDriver driver, List<InputSequence> W,
-			InputSequence h, LmTrace globalTrace) {
+			InputSequence h, LmTrace globalTrace,
+			Map<OutputSequence, List<HZXWSequence>> hZXWSequences) {
 		this.trace = new LmTrace();
 		this.globalTrace = globalTrace;
 		this.W = W;
 		this.h = h;
 		this.I = new ArrayList<String>(driver.getInputSymbols());
 		this.driver = driver;
+		this.hZXWSequences = hZXWSequences;
 		Q = new HashMap<List<OutputSequence>, FullyQualifiedState>();
 		notFullyKnownStates = new HashSet<FullyQualifiedState>();
 		conjecture = new LmConjecture(driver);
@@ -234,6 +249,15 @@ public class SimplifiedDataManager {
 
 	protected void addFullyKnownTrace(FullyKnownTrace v) {
 		v.getStart().addFullyKnownTrace(v);
+		assert v.getTrace().size() == 1;
+		String input = v.getTrace().getInput(0);
+		for (LocalizedHZXWSequence localizedSeq : v.getStart()
+				.getPendingSequences(input)) {
+			localizedSeq.transferPosition++;
+			if (v.getEnd().addLocalizedHZXWSequence(localizedSeq)) {
+				readyForReapplyHZXWSequence.add(localizedSeq);
+			}
+		}
 	}
 
 	public FullyQualifiedState getCurrentState() {
@@ -494,5 +518,11 @@ public class SimplifiedDataManager {
 			assert hResponse2State.get(output) == null;
 		}
 		return null;
+	}
+
+	public List<LocalizedHZXWSequence> getAndResetReadyForReapplyHZXWSequence() {
+		List<LocalizedHZXWSequence> r = readyForReapplyHZXWSequence;
+		readyForReapplyHZXWSequence = new ArrayList<>();
+		return r;
 	}
 }

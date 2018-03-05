@@ -28,9 +28,53 @@ public class FullyQualifiedState{
 	private final State state;
 	
 	private TraceTree expectedTraces;
+	private Map<String, List<LocalizedHZXWSequence>> pendingHZXWSequences = new HashMap<>();
 	
 	private List<State> driverStates;
 	
+	public List<LocalizedHZXWSequence> getPendingSequences(String input) {
+		List<LocalizedHZXWSequence> list = pendingHZXWSequences.get(input);
+		if (list == null) {
+			list = new ArrayList<>();
+			pendingHZXWSequences.put(input, list);
+
+		}
+		return list;
+	}
+
+	/**
+	 * Place a localized sequence as far as possible in the graph, according to
+	 * the transfer sequence. If we reach the state at the end of transfer
+	 * sequence, the sequence is not recorded in the graph, the
+	 * {@link LocalizedHZXWSequence#endOfTransferState} of sequence is set and
+	 * <code>true</code> is returned.
+	 * 
+	 * @param sequence
+	 *            the localized sequence to place.
+	 * @return true if the transfer sequence ends in this state, else otherwise.
+	 */
+	public boolean addLocalizedHZXWSequence(LocalizedHZXWSequence sequence) {
+		assert sequence.transferPosition <= sequence.sequence
+				.getTransferSequence().size();
+		assert sequence.endOfTransferState == null;
+		if (sequence.transferPosition == sequence.sequence.getTransferSequence()
+				.size()) {
+			sequence.endOfTransferState = this;
+			return true;
+		} else {
+			String input = sequence.sequence.getTransferSequence()
+					.getInput(sequence.transferPosition);
+			FullyKnownTrace t = getKnownTransition(input);
+			if (t == null) {
+				getPendingSequences(input).add(sequence);
+				return false;
+			} else {
+				sequence.transferPosition++;
+				return t.getEnd().addLocalizedHZXWSequence(sequence);
+			}
+		}
+	}
+
 	protected FullyQualifiedState(List<OutputSequence> WResponses, Collection<String> inputSymbols, State state){
 		this.WResponses = WResponses;
 		this.state = state;
@@ -159,6 +203,14 @@ public class FullyQualifiedState{
 		return k;
 	}
 
+	public String getPartiallTransitionOutput(String input) {
+		PartiallyKnownTrace k = K.get(input);
+		if (k == null)
+			return null;
+		assert k.getTransition().size() == 1;
+		return k.getTransition().getOutput(0);
+	}
+
 	public FullyKnownTrace getKnownTransition(String input){
 		return T.get(input);
 	}
@@ -173,7 +225,9 @@ public class FullyQualifiedState{
 	 */
 	protected List<InputSequence> getwNotInK(LmTrace transition){
 		assert !V.containsKey(transition);
-		PartiallyKnownTrace k = getKEntry(transition);
+		PartiallyKnownTrace k = K.get(transition.getInput(0));
+		if (k == null)
+			return SimplifiedDataManager.instance.getW();
 		return k.getUnknownPrints();
 	}
 

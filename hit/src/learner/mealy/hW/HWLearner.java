@@ -21,9 +21,11 @@ import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import learner.mealy.hW.dataManager.ConjectureNotConnexException;
 import learner.mealy.hW.dataManager.FullyQualifiedState;
+import learner.mealy.hW.dataManager.HZXWSequence;
 import learner.mealy.hW.dataManager.InconsistancyHMappingAndConjectureException;
 import learner.mealy.hW.dataManager.InconsistancyWithConjectureAtEndOfTraceException;
 import learner.mealy.hW.dataManager.InvalidHException;
+import learner.mealy.hW.dataManager.LocalizedHZXWSequence;
 import learner.mealy.hW.dataManager.SimplifiedDataManager;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
@@ -39,6 +41,8 @@ public class HWLearner extends Learner {
 	protected List<InputSequence> W;
 	private int n;// the maximum number of states
 	private LmTrace fullTrace;
+	private OutputSequence lastDeliberatelyAppliedH = null;
+	Map<OutputSequence, List<HZXWSequence>> hZXWSequences = new HashMap<>();
 
 	public HWLearner(MealyDriver d) {
 		driver = d;
@@ -226,6 +230,7 @@ public class HWLearner extends Learner {
 									+ e);
 				}
 				h = e.getNewH();
+				hZXWSequences = new HashMap<>();
 				LogManager.logInfo("h is now " + h);
 				if (Options.ADD_H_IN_W) {
 					boolean hIsInW = false;
@@ -749,7 +754,8 @@ public class HWLearner extends Learner {
 								: ""));
 
 
-		dataManager = new SimplifiedDataManager(driver, this.W, h,fullTrace);
+		dataManager = new SimplifiedDataManager(driver, this.W, h, fullTrace,
+				hZXWSequences);
 
 		// start of the algorithm
 		do {
@@ -763,18 +769,17 @@ public class HWLearner extends Learner {
 			LmTrace sigma;
 			FullyQualifiedState lastKnownQ = null;
 			FullyQualifiedState q = localize(dataManager);
+			proceedReadyHZXW(
+					dataManager.getAndResetReadyForReapplyHZXWSequence());
+			if (dataManager.isFullyKnown())
+				break;
 			InputSequence alpha = dataManager.getShortestAlpha(q);
-			dataManager.apply(alpha);
+			OutputSequence alphaResponse = dataManager.apply(alpha);
 			assert dataManager.getCurrentState() != null;
 			lastKnownQ = dataManager.getCurrentState();
 
 			Set<String> X = dataManager.getxNotInR(lastKnownQ);
-			if (X.isEmpty()) {
-				LogManager
-						.logInfo("We discovered the missing transition when we applied alpha");
-				continue;// we already are in a known state (because we
-							// applied alpha) so we didn't need to localize
-			}
+			assert !X.isEmpty();
 			String x = X.iterator().next(); // here we CHOOSE to take the
 											// first
 			LogManager.logInfo("We choose x = " + x + " in " + X);
@@ -790,6 +795,8 @@ public class HWLearner extends Learner {
 			}
 			assert dataManager.getCurrentState() == null : "we are trying to qualify this state, that should not be already done.";
 
+			assert dataManager.getConjecture().getTransitionFromWithInput(
+					lastKnownQ.getState(), x) == null;
 			List<InputSequence> allowed_W = dataManager.getwNotInK(lastKnownQ,
 					sigma);
 			InputSequence w = new InputSequence();
@@ -798,29 +805,86 @@ public class HWLearner extends Learner {
 										// first.
 			if (Options.LOG_LEVEL != Options.LogLevel.LOW)
 				LogManager.logInfo("We choose w = " + w + " in " + allowed_W);
-			int newStatePos = dataManager.traceSize();
-			dataManager.apply(w);
+			OutputSequence wResponse = dataManager.apply(w);
+			LmTrace wTrace = new LmTrace(w, wResponse);
 			if (Options.LOG_LEVEL != Options.LogLevel.LOW)
 				LogManager.logInfo("We found that "
 						+ lastKnownQ
 						+ " followed by "
 						+ sigma
 						+ "gives "
-						+ dataManager.getSubtrace(newStatePos,
-								dataManager.traceSize()));
+						+ wTrace);
 			dataManager.addPartiallyKnownTrace(
 					lastKnownQ,
 					sigma,
-					dataManager.getSubtrace(newStatePos,
-							dataManager.traceSize()));
+					wTrace);
+			addHZXWSequence(lastDeliberatelyAppliedH,
+					new LmTrace(alpha, alphaResponse), sigma, wTrace);
 			if (dataManager.getCurrentState() == null) {
 				 localize(dataManager);
 			}
+			proceedReadyHZXW(
+					dataManager.getAndResetReadyForReapplyHZXWSequence());
 		} while (!dataManager.isFullyKnown());
 
 		if (Options.LOG_LEVEL == Options.LogLevel.ALL)
 			dataManager.getConjecture().exportToDot();
 		LogManager.logInfo("end of sub-learning.");
+	}
+
+	private void proceedReadyHZXW(
+			List<LocalizedHZXWSequence> readyForReapplyHZXWSequence) {
+		if (!Options.REUSE_HZXW)
+			return;
+		for (LocalizedHZXWSequence localizedSeq : readyForReapplyHZXWSequence) {
+			LmTrace transition = localizedSeq.sequence.getTransition();
+			FullyQualifiedState initialState = localizedSeq.endOfTransferState;
+			if (initialState
+					.getKnownTransition(transition.getInput(0)) != null) {
+				if (Options.LOG_LEVEL != LogLevel.LOW)
+					LogManager.logInfo(
+							"cannot reuse trace " + localizedSeq.sequence
+									+ " because transition from " + initialState
+									+ " is already known");
+				continue;
+			}
+			String expectedTransitionOutput = initialState
+					.getPartiallTransitionOutput(transition.getInput(0));
+			if (expectedTransitionOutput != null && !expectedTransitionOutput
+					.equals(transition.getOutput(0))) {
+				if (Options.LOG_LEVEL != LogLevel.LOW)
+					LogManager.logWarning("cannot reuse trace "
+							+ localizedSeq.sequence
+							+ " because it is not consistent with partially known traces");
+				continue;
+			}
+			if (dataManager.getwNotInK(initialState, transition)
+					.contains(localizedSeq.sequence.getwResponse()
+							.getInputsProjection())) {
+				if (Options.LOG_LEVEL != LogLevel.LOW)
+					LogManager
+							.logInfo("reusing trace " + localizedSeq.sequence);
+				dataManager.addPartiallyKnownTrace(initialState, transition,
+						localizedSeq.sequence.getwResponse());
+			} else {// in current implementation this works. Be careful with the
+					// implementation of adaptative sequences because some
+					// traces should be kept for later.
+				if (Options.LOG_LEVEL != LogLevel.LOW)
+					LogManager.logInfo("we cannot reuse trace "
+							+ localizedSeq.sequence
+							+ " because dataManager is not asking trace for this w");
+			}
+		}
+	}
+
+	public void addHZXWSequence(OutputSequence hResponse, LmTrace transfer,
+			LmTrace transition, LmTrace wResponse) {
+		List<HZXWSequence> list = hZXWSequences.get(hResponse);
+		if (list == null) {
+			list = new ArrayList<>();
+			hZXWSequences.put(hResponse, list);
+		}
+		list.add(new HZXWSequence(hResponse, transfer, transition, wResponse));
 	}
 
 	public LmConjecture createConjecture() {
@@ -848,6 +912,7 @@ public class HWLearner extends Learner {
 			LogManager.logInfo("Applying h to localize (h=" + dataManager.h
 					+ ")");
 			hResponse = dataManager.apply(dataManager.h);
+			lastDeliberatelyAppliedH = hResponse;
 			s = dataManager.getState(hResponse);
 			if (s == null) {
 				InputSequence missingW = dataManager

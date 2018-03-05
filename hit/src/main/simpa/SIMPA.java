@@ -442,8 +442,10 @@ public class SIMPA {
 			"search inconsistencies between mapping and conjecture");
 	private static BooleanOption TRY_CE_FROM_TRACE = new BooleanOption(
 			"--tryTraceCE", "Try to use trace as a counter example.");
+	private static BooleanOption REUSE_HZXW = new BooleanOption("--hzxw",
+			"Reuse HZXW");
 	private static Option<?>[] hWOptions = new Option<?>[] { ADD_H_IN_W,
-			TRY_CE_FROM_TRACE ,CHECK_INCONSISTENCY_H_MAPPING};
+			TRY_CE_FROM_TRACE, CHECK_INCONSISTENCY_H_MAPPING, REUSE_HZXW };
 
 	// RS Options
 	private static BooleanOption RS_WITH_UNKNOWN_H = new BooleanOption(
@@ -626,6 +628,7 @@ public class SIMPA {
 		Options.CHECK_INCONSISTENCY_H_NOT_HOMING = CHECK_INCONSISTENCY_H_MAPPING
 				.getValue();
 		Options.TRY_TRACE_AS_CE = TRY_CE_FROM_TRACE.getValue();
+		Options.REUSE_HZXW=REUSE_HZXW.getValue();
 
 		Options.RS_WITH_UNKNOWN_H = RS_WITH_UNKNOWN_H.getValue();
 
