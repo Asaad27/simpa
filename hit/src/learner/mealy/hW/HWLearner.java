@@ -265,9 +265,42 @@ public class HWLearner extends Learner {
 			if (!inconsistencyFound && Options.TRY_TRACE_AS_CE) {
 				if (Options.CHECK_INCONSISTENCY_H_NOT_HOMING)
 					counterExampleTrace = tryTraceAsCeAfterH();
-				if (counterExampleTrace != null)
+				if (counterExampleTrace != null) {
 					virtualCounterExample = true;
-				else {
+					// we have to check if counterExempleTrace has a sufficient
+					// length for suffix1by1
+					for (InputSequence w : W) {
+						if (w.startsWith(
+								counterExampleTrace.getInputsProjection())) {
+							virtualCounterExample = false;
+							counterExampleTrace = null;
+							break;
+						}
+					}
+				}
+				if (counterExampleTrace == null) {
+					LmConjecture conjecture = dataManager.getConjecture();
+					if (conjecture.isConnex()) {
+						int firstDiff = conjecture
+								.simulateOnAllStates(fullTrace);
+						if (firstDiff != fullTrace.size()) {
+							counterExampleTrace = fullTrace.subtrace(0,
+									firstDiff + 1);
+							virtualCounterExample = true;
+							// we have to check if counterExempleTrace has a
+							// sufficient length for suffix1by1
+							for (InputSequence w : W) {
+								if (w.startsWith(counterExampleTrace
+										.getInputsProjection())) {
+									virtualCounterExample = false;
+									counterExampleTrace = null;
+									break;
+								}
+							}
+						}
+					}
+				}
+				if (counterExampleTrace == null) {
 					counterExampleTrace = tryTraceAsCeNaive();
 					if (counterExampleTrace != null)
 						inconsistencyFound = true;
