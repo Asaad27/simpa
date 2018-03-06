@@ -33,7 +33,6 @@ public class HWStatsEntry extends StatsEntry {
 	public static final Attribute<String> AUTOMATA = Attribute.AUTOMATA;
 	public static final Attribute<Float> DURATION = Attribute.DURATION;
 	public static final Attribute<Integer>MEMORY = Attribute.MEMORY;
-	public static final Attribute<Boolean>WITH_SPEEDUP = Attribute.WITH_SPEEDUP;
 	
 	public static final Attribute<Integer>MAX_RECKONED_STATES = Attribute.MAX_RECKONED_STATES;
 	public static final Attribute<Integer>MAX_FAKE_STATES = Attribute.MAX_FAKE_STATES;
@@ -72,7 +71,6 @@ public class HWStatsEntry extends StatsEntry {
 			AUTOMATA,
 			DURATION,
 			MEMORY,
-			WITH_SPEEDUP,
 			MIN_TRACE_LENGTH,
 			MAX_RECKONED_STATES,
 			MAX_FAKE_STATES,
@@ -163,7 +161,6 @@ public class HWStatsEntry extends StatsEntry {
 		automata = st.nextToken();
 		duration = Float.parseFloat(st.nextToken());
 		memory = Integer.parseUnsignedInt(st.nextToken());
-		with_speedup = Boolean.parseBoolean(st.nextToken());
 		minTraceLength = Integer.parseInt(st.nextToken());
 		maxReckonedStates = Integer.parseInt(st.nextToken());
 		maxFakeStates = Integer.parseInt(st.nextToken());
@@ -313,8 +310,6 @@ public class HWStatsEntry extends StatsEntry {
 			return (T) new Float(duration);
 		if (a == MEMORY)
 			return (T) new Integer(memory);
-		if (a == WITH_SPEEDUP)
-			return (T) new Boolean(with_speedup);
 		if (a == MIN_TRACE_LENGTH)
 			return (T) new Integer(minTraceLength);
 		if (a == MAX_RECKONED_STATES)

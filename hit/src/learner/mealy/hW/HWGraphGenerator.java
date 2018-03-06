@@ -123,7 +123,6 @@ public class HWGraphGenerator extends GraphGenerator {
 		printStats2(s);
 
 		StatsSet withoutSpeedUp = new StatsSet(s);
-		withoutSpeedUp.restrict(new EqualsRestriction<Boolean>(HWStatsEntry.WITH_SPEEDUP, false));
 		
 		StatsSet randomWithout = new StatsSet(withoutSpeedUp);
 		randomWithout.restrict(
