@@ -103,7 +103,10 @@ public class OutputSequence implements Cloneable {
 				s.append(input.toString());
 			else
 				s.append(Options.SYMBOL_OMEGA_LOW);
+			s.append('.');
 		}
+		if (s.length()>0)
+			s.deleteCharAt(s.length()-1);
 		return s.toString();
 	}
 	
