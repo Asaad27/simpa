@@ -22,6 +22,7 @@ import learner.mealy.LmTrace;
 import learner.mealy.hW.dataManager.ConjectureNotConnexException;
 import learner.mealy.hW.dataManager.FullyQualifiedState;
 import learner.mealy.hW.dataManager.HZXWSequence;
+import learner.mealy.hW.dataManager.HomingSequenceChecker;
 import learner.mealy.hW.dataManager.InconsistancyHMappingAndConjectureException;
 import learner.mealy.hW.dataManager.InconsistancyWithConjectureAtEndOfTraceException;
 import learner.mealy.hW.dataManager.InvalidHException;
@@ -42,6 +43,7 @@ public class HWLearner extends Learner {
 	private int n;// the maximum number of states
 	private LmTrace fullTrace;
 	private OutputSequence lastDeliberatelyAppliedH = null;
+	private HomingSequenceChecker hChecker = null;
 	Map<OutputSequence, List<HZXWSequence>> hZXWSequences = new HashMap<>();
 
 	public HWLearner(MealyDriver d) {
@@ -197,6 +199,7 @@ public class HWLearner extends Learner {
 		List<InputSequence> W = new ArrayList<InputSequence>();
 		W.add(new InputSequence());
 		InputSequence h = new InputSequence();
+		hChecker = new HomingSequenceChecker(h);
 		stats = new HWStatsEntry(driver);
 
 		LmTrace counterExampleTrace;
@@ -232,6 +235,7 @@ public class HWLearner extends Learner {
 				h = e.getNewH();
 				hZXWSequences = new HashMap<>();
 				LogManager.logInfo("h is now " + h);
+				hChecker = new HomingSequenceChecker(h);
 				if (Options.ADD_H_IN_W) {
 					boolean hIsInW = false;
 					for (InputSequence w : W) {
@@ -788,7 +792,7 @@ public class HWLearner extends Learner {
 
 
 		dataManager = new SimplifiedDataManager(driver, this.W, h, fullTrace,
-				hZXWSequences);
+				hZXWSequences, hChecker);
 
 		// start of the algorithm
 		do {

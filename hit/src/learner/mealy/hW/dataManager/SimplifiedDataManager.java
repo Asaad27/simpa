@@ -112,7 +112,8 @@ public class SimplifiedDataManager {
 
 	public SimplifiedDataManager(MealyDriver driver, List<InputSequence> W,
 			InputSequence h, LmTrace globalTrace,
-			Map<OutputSequence, List<HZXWSequence>> hZXWSequences) {
+			Map<OutputSequence, List<HZXWSequence>> hZXWSequences,
+			HomingSequenceChecker hChecker) {
 		this.trace = new LmTrace();
 		this.globalTrace = globalTrace;
 		this.W = W;
@@ -128,7 +129,8 @@ public class SimplifiedDataManager {
 		hResponse2Wresponses = new HashMap<>();
 		currentState = null;
 		expectedTraces = new ArrayList<>();
-		hChecker = new HomingSequenceChecker(h);
+		assert hChecker.h.equals(h);
+		this.hChecker = hChecker;
 	}
 	
 	private void extendTrace(String input, String output){
