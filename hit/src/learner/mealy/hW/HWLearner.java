@@ -82,7 +82,9 @@ public class HWLearner extends Learner {
 	public LmTrace getRandomCounterExemple() {
 		if (driver instanceof TransparentMealyDriver) {
 			TransparentMealyDriver d = (TransparentMealyDriver) driver;
-			Options.MAX_CE_LENGTH = d.getAutomata().getStateCount() *d.getAutomata().getStateCount() * 100;
+			Options.MAX_CE_LENGTH = d.getAutomata().getStateCount()
+					* d.getAutomata().getStateCount()
+					* d.getInputSymbols().size() * 1000;
 		}
 		LmConjecture conjecture = dataManager.getConjecture();
 		State conjectureStartingState = dataManager.getCurrentState()
