@@ -121,7 +121,6 @@ public class HWStatsEntry extends StatsEntry {
 	private String automata;
 	private float duration;
 	private int memory = 0;
-	private boolean with_speedup;
 	private int minTraceLength = -1;
 	private int maxReckonedStates = -1;
 	private int maxFakeStates = -1;
@@ -186,7 +185,6 @@ public class HWStatsEntry extends StatsEntry {
 		this.outputSymbols = d.getOutputSymbols().size();
 //		this.n = n;
 		this.automata = d.getSystemName();
-		this.with_speedup = !Options.ICTSS2015_WITHOUT_SPEEDUP;
 		this.seed=Options.SEED;
 		this.reuse_hzxw = Options.REUSE_HZXW;
 	}
