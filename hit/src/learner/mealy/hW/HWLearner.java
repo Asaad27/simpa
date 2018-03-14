@@ -976,10 +976,6 @@ public class HWLearner extends Learner {
 	private boolean checkRandomWalk() {
 		LogManager.logStep(LogManager.STEPOTHER,
 				"checking the computed conjecture with Random Walk");
-		HWtMealyDriver generatedDriver = new HWtMealyDriver(
-				dataManager.getConjecture());
-		generatedDriver.stopLog();
-		generatedDriver.setCurrentState(dataManager.getCurrentState().getState());
 
 		// Now the two automata are in same state.
 		// We can do a random walk
@@ -991,7 +987,7 @@ public class HWLearner extends Learner {
 		for (int j = 0; j < max_try; j++) {
 			int rand = Utils.randInt(driver.getInputSymbols().size());
 			String input = driver.getInputSymbols().get(rand);
-			if (!driver.execute(input).equals(generatedDriver.execute(input)))
+			if (!driver.execute(input).equals(dataManager.walkWithoutCheck(input, null)))
 				return false;
 		}
 

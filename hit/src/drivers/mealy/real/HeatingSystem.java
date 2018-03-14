@@ -67,9 +67,9 @@ public class HeatingSystem extends RealDriver {
 		}
 		byte b[] = new byte[4096];
 		try {
-			while (process.getErrorStream().read(b) > 0) {
-				// System.out.println(input+new String(b));
-			}
+			process.getErrorStream().read(b);
+			// System.out.println(input+new String(b));
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

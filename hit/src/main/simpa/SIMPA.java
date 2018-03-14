@@ -445,7 +445,8 @@ public class SIMPA {
 	private static BooleanOption REUSE_HZXW = new BooleanOption("--hzxw",
 			"Reuse HZXW");
 	private static Option<?>[] hWOptions = new Option<?>[] { ADD_H_IN_W,
-			TRY_CE_FROM_TRACE, CHECK_INCONSISTENCY_H_MAPPING, REUSE_HZXW };
+			TRY_CE_FROM_TRACE, CHECK_INCONSISTENCY_H_MAPPING, REUSE_HZXW,
+			MAX_CE_LENGTH };
 
 	// RS Options
 	private static BooleanOption RS_WITH_UNKNOWN_H = new BooleanOption(

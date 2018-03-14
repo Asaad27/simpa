@@ -1,9 +1,12 @@
 package learner.mealy.hW;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import automata.Transition;
 import automata.mealy.InputSequence;
+import automata.mealy.MealyTransition;
 import drivers.mealy.MealyDriver;
 import learner.mealy.LmConjecture;
 import learner.mealy.hW.dataManager.SimplifiedDataManager;
@@ -182,7 +185,6 @@ public class HWStatsEntry extends StatsEntry {
 //		WSize = W.size();
 //		w1Length = (W.size()==0)?0:W.get(0).getLength();
 		this.inputSymbols = d.getInputSymbols().size();
-		this.outputSymbols = d.getOutputSymbols().size();
 //		this.n = n;
 		this.automata = d.getSystemName();
 		this.seed=Options.SEED;
@@ -260,11 +262,14 @@ public class HWStatsEntry extends StatsEntry {
 	public void updateWithConjecture(LmConjecture conjecture) {
 		statesNumber = conjecture.getStateCount();
 		int loopTransitions=0;
-		for (Transition t : conjecture.getTransitions()){
+		Set<String> outputSymbols=new HashSet<>();
+		for (MealyTransition t : conjecture.getTransitions()){
+			outputSymbols.add(t.getOutput());
 			if (t.getTo() == t.getFrom())
 				loopTransitions++;
 		}
 		loopTransitionPercentage = ((100*loopTransitions)/conjecture.getTransitionCount());
+		this.outputSymbols = outputSymbols.size();
 	}
 
 	@SuppressWarnings("unchecked")
