@@ -47,17 +47,21 @@ public class HeatingSystem extends RealDriver {
 		boolean EOLseen = false;
 		String output = "";
 		while (!EOLseen) {
+			if (!process.isAlive())
+				throw new RuntimeException("SUI died during inference");
 			byte[] outputBytes = new byte[1024];
+			int numberRead;
 			try {
-				processOutput.read(outputBytes);
+				numberRead = processOutput.read(outputBytes);
 			} catch (IOException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e);
 			}
-			output = output + new String(outputBytes);
+			if (numberRead >= 0)
+				output = output + new String(outputBytes, 0, numberRead);
 			if (output.contains("\n")) {
-				assert output.split("\n").length == 1;
-				output = output.split("\n")[0];
+				output = output.substring(0, output.lastIndexOf("\n"));
+				assert !output.contains("\n");
 				EOLseen = true;
 			}
 		}
