@@ -1,5 +1,7 @@
 package learner.mealy.hW;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -387,6 +389,9 @@ public class HWLearner extends Learner {
 		stats.updateMemory((int) (runtime.totalMemory() - runtime.freeMemory()));
 		stats.finalUpdate(dataManager);
 
+		// the next call is not mandatory for algorithm, see checkEquivalence
+		// description.
+		//checkEquivalence(new File("reference.dot"));
 		// The transition count should be stopped
 		driver.stopLog();
 
@@ -1133,6 +1138,74 @@ public class HWLearner extends Learner {
 		}
 
 		return true;
+	}
+
+	/**
+	 * This function check equivalence between conjecture and a reference dot
+	 * file. It needs to have a complete conjecture.
+	 * 
+	 * This function is not needed by the algorithm itself, this is a tool for
+	 * improving usage of this learner. Actually, it was written for article
+	 * JSS2018 when we experimented the inference of muted versions of a same
+	 * software.
+	 * 
+	 * The procedure to use this is to infer the normal software, save the
+	 * generated dot file, and then add a call to this function at the end of
+	 * learner with the reference dot file as argument.
+	 * 
+	 * @param referenceFile
+	 *            the dot file containing reference automata
+	 * @return true if conjecture is equivalent to reference automata.
+	 */
+	public boolean checkEquivalence(File referenceFile) {
+		assert dataManager != null;
+		assert W != null;
+		Mealy reference;
+		try {
+			reference = Mealy.importFromDot(referenceFile);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		LmConjecture conjecture = dataManager.getConjecture();
+		FullyQualifiedState conjectureState = dataManager.getCurrentState();
+		// reference can have equivalents states and thus we must check all
+		// possible initial state
+		List<State> matchingInitialState = new ArrayList<>();
+		for (State referenceState : reference.getStates()) {
+			boolean matching = true;
+			for (int i = 0; i < W.size(); i++) {
+				if (!reference.apply(W.get(i), referenceState)
+						.equals(conjecture.apply(W.get(i), conjectureState.getState()))) {
+					matching = false;
+					break;
+				}
+			}
+			if (matching)
+				matchingInitialState.add(referenceState);
+		}
+		boolean isEquivalent = true;
+		if (matchingInitialState.size() == 0) {
+			isEquivalent = false;
+			LogManager.logConsole("no state in " + referenceFile
+					+ " match current state in conjecture");
+		}
+		boolean oneStateIsEquivalent = false;
+		for (State referenceState : matchingInitialState) {
+			List<InputSequence> counterExamples = conjecture
+					.getAllCounterExamples(conjectureState.getState(),
+							reference, referenceState);
+			if (counterExamples.isEmpty()) {
+				oneStateIsEquivalent = true;
+			}
+		}
+		if (!oneStateIsEquivalent)
+			isEquivalent = false;
+		if (isEquivalent) {
+			LogManager.logConsole("Conjecture is equivalent to reference file");
+		} else {
+			LogManager.logConsole("Conjecture is not equivalent to reference file");
+		}
+		return isEquivalent;
 	}
 
 }
