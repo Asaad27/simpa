@@ -107,6 +107,15 @@ public class LogManager {
 			l.logInfo(prefix + s);
 	}
 
+	public static void logInfo(Object... objects) {
+		if (!loggers.isEmpty()) {
+			StringBuilder sb = new StringBuilder();
+			for (Object o : objects)
+				sb.append(o.toString());
+			logInfo(sb.toString());
+		}
+	}
+
 	public static void logWarning(String s) {
 		for (ILogger l : loggers)
 			l.logWarning(prefix + s);

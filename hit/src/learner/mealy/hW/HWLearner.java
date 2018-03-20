@@ -655,9 +655,9 @@ public class HWLearner extends Learner {
 		if (fullyQualifiedAfterH != null) {
 			afterH = fullyQualifiedAfterH.getState();
 			if (Options.LOG_LEVEL != LogLevel.LOW)
-				LogManager.logInfo("found a mapping for the answer '"
-						+ hApplied.getOutputsProjection()
-						+ "' to h : lead to state " + fullyQualifiedAfterH);
+				LogManager.logInfo("found a mapping for the answer '",
+						hApplied.getOutputsProjection(),
+						"' to h : lead to state ", fullyQualifiedAfterH);
 		} else
 			for (State s : conjecture.getStates()) {
 				OutputSequence homingResponse = new OutputSequence();
@@ -667,9 +667,9 @@ public class HWLearner extends Learner {
 				if (hApplied.getOutputsProjection().equals(homingResponse)) {
 					afterH = conjecture.applyGetState(dataManager.h, s);
 					if (Options.LOG_LEVEL != LogLevel.LOW)
-						LogManager.logInfo("found that state " + s
-								+ " followed by homing sequence lead in "
-								+ afterH + " with wanted output");
+						LogManager.logInfo("found that state ", s,
+								" followed by homing sequence lead in ", afterH,
+								" with wanted output");
 					break;
 				}
 			}

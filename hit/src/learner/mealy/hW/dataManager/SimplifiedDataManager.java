@@ -18,6 +18,8 @@ import drivers.mealy.MealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
+import main.simpa.Options;
+import main.simpa.Options.LogLevel;
 import tools.loggers.LogManager;
 
 public class SimplifiedDataManager {
@@ -160,7 +162,8 @@ public class SimplifiedDataManager {
 	
 
 	public String apply(String input) {
-		LogManager.logInfo("expected Traces are " + expectedTraces);
+		if (Options.LOG_LEVEL == Options.LogLevel.ALL)
+			LogManager.logInfo("expected Traces are ", expectedTraces);
 		String output = driver.execute(input);
 		extendTrace(input, output);
 		// check for Non-Determinism after homing sequence
@@ -204,8 +207,9 @@ public class SimplifiedDataManager {
 							.logInfo("According to conjecture, we are now in state "
 									+ currentState);
 				expectedTraces.add(currentState.getExpectedTraces());
-				LogManager.logInfo("adding expected traces "
-						+ currentState.getExpectedTraces());
+				if (Options.LOG_LEVEL == LogLevel.ALL)
+					LogManager.logInfo("adding expected traces ",
+							currentState.getExpectedTraces());
 			} else
 				currentState = null;
 		}
