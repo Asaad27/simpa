@@ -631,6 +631,7 @@ public class HWLearner extends Learner {
 	}
 
 	private LmTrace tryTraceAsCeAfterH() {
+		assert Options.CHECK_INCONSISTENCY_H_NOT_HOMING;
 		LmTrace counterExampleTrace = null;
 		LmConjecture conjecture = dataManager.getConjecture();
 		LogManager.logInfo("trying to use trace as CE");
@@ -718,6 +719,14 @@ public class HWLearner extends Learner {
 
 	}
 
+	/**
+	 * This function take the longest prefix of trace which is incompatible with
+	 * all states of conjecture, apply it on driver and check for
+	 * inconsistencies of type 2.
+	 * 
+	 * @return the trace applied on driver if it makes a counter example, null
+	 *         otherwise
+	 */
 	private LmTrace tryTraceAsCeNaive() {
 		LmConjecture conjecture = dataManager.getConjecture();
 		LmTrace counterExampleTrace = null;
@@ -752,8 +761,7 @@ public class HWLearner extends Learner {
 					LogManager.logInfo(
 							"When trying to apply the expected counter example, the driver produced the same output than the conjecture."
 									+ "This cannot be used as counter example");
-					dataManager.walkWithoutCheck(
-							new LmTrace(counterExample, DriverCEOut));
+					dataManager.walkWithoutCheck(counterExampleTrace);
 				} else {
 					LogManager.logInfo("The trace was a counter example");
 				}
@@ -864,6 +872,9 @@ public class HWLearner extends Learner {
 					lastKnownQ,
 					sigma,
 					wTrace);
+			assert dataManager.getConjecture().getTransitionFromWithInput(
+					lastKnownQ.getState(), x) != null
+					|| !dataManager.getwNotInK(lastKnownQ, sigma).contains(w);
 			if (Options.REUSE_HZXW) {
 				addHZXWSequence(lastDeliberatelyAppliedH,
 						new LmTrace(alpha, alphaResponse), sigma, wTrace);

@@ -41,6 +41,9 @@ public class PartiallyKnownTrace {
 	protected boolean addPrint(LmTrace print){
 		assert SimplifiedDataManager.instance.getW().contains(print.getInputsProjection());
 		if (!unknownPrints.remove(print.getInputsProjection())){ //the print wasn't in W or has been already removed
+			assert false;// this was used in localizerBased approach, but for hW
+							// we are not supposed to try to add two time the
+							// same trace
 			return false;
 		}
 		WResponses.set(SimplifiedDataManager.instance.getW().indexOf(print.getInputsProjection()), print.getOutputsProjection());

@@ -352,6 +352,12 @@ public class SimplifiedDataManager {
 	}
 
 	/**
+	 * TODO This is a function often used in algorithm. It cost time and memory
+	 * (because of multiple creation/deletion).We should change it into a
+	 * version which keep data between calls. For example, keep in each state
+	 * the length of shortest path and the input used to reach it. Because this
+	 * length can only grows, it is easy to refine when it become wrong.
+	 * 
 	 * find a shortest path alpha to a FullyQualifiedState with unknown outputs.
 	 * 
 	 * @param s

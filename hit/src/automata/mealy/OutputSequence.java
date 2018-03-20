@@ -37,9 +37,7 @@ public class OutputSequence implements Cloneable {
 	@Override
 	public OutputSequence clone() {
 		OutputSequence newos = new OutputSequence();
-		for (String output : sequence) {
-			newos.addOutput(new String(output));
-		}
+		newos.addOutputSequence(this);
 		return newos;
 	}
 

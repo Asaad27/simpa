@@ -21,6 +21,9 @@ import automata.mealy.OutputSequence;
 
 public class FullyQualifiedState{
 	private final List<OutputSequence> WResponses;//used to identify the State
+	// TODO V should be a mapping from String to FullyKnownTrace (or can be
+	// removed because it will duplicate T (which already duplicate the
+	// conjecture))
 	private Map<LmTrace, FullyKnownTrace> V;//FullyKnownTrace starting from this node
 	private Map<String, PartiallyKnownTrace> K;//PartialyllyKnownTrace starting from this node
 	private Map<String, FullyKnownTrace> T;//Fully known transitions starting from this node
@@ -129,8 +132,10 @@ public class FullyQualifiedState{
 			LmTrace vtoRemove = toRemove.poll();
 			V.remove(vtoRemove);
 		}
+		assert v.getTrace().size() == 1;// otherwise, we should not remove it
+										// from K
+		K.remove(v.getTrace().getInput(0));
 		
-		K.remove(v.getTrace());
 		V.put(v.getTrace(), v);
 		if (Options.LOG_LEVEL == Options.LogLevel.ALL)
 			LogManager.logInfo("V is now : " + SimplifiedDataManager.instance.getV());
