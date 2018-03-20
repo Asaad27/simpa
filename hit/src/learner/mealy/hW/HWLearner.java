@@ -813,8 +813,10 @@ public class HWLearner extends Learner {
 			LmTrace sigma;
 			FullyQualifiedState lastKnownQ = null;
 			FullyQualifiedState q = localize(dataManager);
-			proceedReadyHZXW(
-					dataManager.getAndResetReadyForReapplyHZXWSequence());
+			if (Options.REUSE_HZXW) {
+				proceedReadyHZXW(
+						dataManager.getAndResetReadyForReapplyHZXWSequence());
+			}
 			if (dataManager.isFullyKnown())
 				break;
 			InputSequence alpha = dataManager.getShortestAlpha(q);
@@ -862,13 +864,15 @@ public class HWLearner extends Learner {
 					lastKnownQ,
 					sigma,
 					wTrace);
-			addHZXWSequence(lastDeliberatelyAppliedH,
-					new LmTrace(alpha, alphaResponse), sigma, wTrace);
+			if (Options.REUSE_HZXW) {
+				addHZXWSequence(lastDeliberatelyAppliedH,
+						new LmTrace(alpha, alphaResponse), sigma, wTrace);
+				proceedReadyHZXW(
+						dataManager.getAndResetReadyForReapplyHZXWSequence());
+			}
 			if (dataManager.getCurrentState() == null) {
 				 localize(dataManager);
 			}
-			proceedReadyHZXW(
-					dataManager.getAndResetReadyForReapplyHZXWSequence());
 		} while (!dataManager.isFullyKnown());
 
 		if (Options.LOG_LEVEL == Options.LogLevel.ALL)
@@ -878,8 +882,8 @@ public class HWLearner extends Learner {
 
 	private void proceedReadyHZXW(
 			List<LocalizedHZXWSequence> readyForReapplyHZXWSequence) {
-		if (!Options.REUSE_HZXW)
-			return;
+		assert Options.REUSE_HZXW;
+		
 		for (LocalizedHZXWSequence localizedSeq : readyForReapplyHZXWSequence) {
 			LmTrace transition = localizedSeq.sequence.getTransition();
 			FullyQualifiedState initialState = localizedSeq.endOfTransferState;
