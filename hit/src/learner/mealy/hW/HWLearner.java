@@ -85,7 +85,6 @@ public class HWLearner extends Learner {
 		if (driver instanceof TransparentMealyDriver) {
 			TransparentMealyDriver d = (TransparentMealyDriver) driver;
 			Options.MAX_CE_LENGTH = d.getAutomata().getStateCount()
-					* d.getAutomata().getStateCount()
 					* d.getInputSymbols().size() * 1000;
 		}
 		LmConjecture conjecture = dataManager.getConjecture();
