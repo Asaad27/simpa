@@ -120,7 +120,7 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 	private Integer imageHeight;
 	private Integer imageWidth;
 	private Boolean forceOrdLogScale;
-	private Boolean forceAbsLogScale = false;
+	private Boolean forceAbsLogScale;
 	private Double minAbs = null;
 	private Double maxAbs = null;
 	private Double minOrd = null;
@@ -136,6 +136,11 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		this.stats = new StatsSet();
 		plotLines = new StringBuilder();
 		toDelete = new ArrayList<File>();
+	}
+
+	public void plot(StatsSet stats, PlotStyle style, PointType pointType) {
+		plot(stats, style, ("" + style).replaceAll("_", " ") + " of "
+				+ stats.size() + " inferences " + stats.getTitle(), pointType);
 	}
 
 	public void plot(StatsSet stats, PlotStyle style, String title) {
