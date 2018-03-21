@@ -46,7 +46,63 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		public final static PointType EMPTY_TRIANGLE_UP = new PointType(8);
 		public final static PointType FILLED_TRIANGLE_UP = new PointType(9);
 
+	}
 
+	public static class KeyParameters {
+
+		public static enum VerticalPosition {
+			TOP("top"), BOTTOM("bottom"), V_CENTER("center");
+			public String gnuplot;
+
+			private VerticalPosition(String gnuplot) {
+				this.gnuplot = gnuplot;
+			}
+		}
+
+		public static enum HorizontalPosition {
+			RIGHT("right"), LEFT("left"), H_CENTER("center");
+			public String gnuplot;
+
+			private HorizontalPosition(String gnuplot) {
+				this.gnuplot = gnuplot;
+			}
+		}
+
+		public KeyParameters() {
+			this(null, null);
+		}
+
+		public KeyParameters(VerticalPosition vPosition,
+				HorizontalPosition hPosition) {
+			this.vPosition = vPosition;
+			this.hPosition = hPosition;
+		}
+
+		private VerticalPosition vPosition;
+		private HorizontalPosition hPosition;
+
+		public String toGnuplotLine() {
+			if (vPosition == null & hPosition == null)
+				return "";
+			return "set key"
+					+ (hPosition == null ? "" : (" " + hPosition.gnuplot))
+					+ (vPosition == null ? "" : (" " + vPosition.gnuplot))
+					+ "\n";
+		}
+
+		public void setvPosition(VerticalPosition vPosition) {
+			this.vPosition = vPosition;
+		}
+
+		public void sethPosition(HorizontalPosition hPosition) {
+			this.hPosition = hPosition;
+		}
+
+		public void setPosition(VerticalPosition vPosition,
+				HorizontalPosition hPosition) {
+			this.vPosition = vPosition;
+			this.hPosition = hPosition;
+		}
 	}
 
 	private static boolean forcePoints = false; // set this to true in order to
@@ -54,6 +110,7 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 
 	private Attribute<T_ABS> abs;
 	private Attribute<T_ORD> ord;
+	private KeyParameters keyParameters = new KeyParameters();
 	private StatsSet stats;
 	private StringBuilder plotLines;
 	private String title;
@@ -308,6 +365,8 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		}
 		r.append(" enhanced font \"Sans,12\"\n");
 
+		r.append(keyParameters.toGnuplotLine());
+
 		String name = new String("relationship between " + ord + " and  " + abs);
 		r.append("set title \"" + (title == null ? name : title) + "\"\n");
 
@@ -482,5 +541,13 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		// System.out.println(s);
 		// s = s + "\\\\LaTeX ntest";
 		return s;
+	}
+
+	public KeyParameters getKeyParameters() {
+		return keyParameters;
+	}
+
+	public void setKeyParameters(KeyParameters keyPosition) {
+		this.keyParameters = keyPosition;
 	}
 }
