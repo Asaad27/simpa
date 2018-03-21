@@ -760,7 +760,8 @@ public class HWLearner extends Learner {
 					LogManager.logInfo(
 							"When trying to apply the expected counter example, the driver produced the same output than the conjecture."
 									+ "This cannot be used as counter example");
-					dataManager.walkWithoutCheck(counterExampleTrace);
+					dataManager.walkWithoutCheck(
+							new LmTrace(counterExample, DriverCEOut));
 				} else {
 					LogManager.logInfo("The trace was a counter example");
 				}
