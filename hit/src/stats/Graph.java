@@ -6,9 +6,11 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import main.simpa.Options;
@@ -148,10 +150,26 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		File tempPlot = makeDataFile(stats, style);
 		StringBuilder plotTitle = new StringBuilder();
 		plotTitle.append(title);
-		plotLines.append("\"" + tempPlot.getAbsolutePath() + "\" "
-				+ style.plotLine);
-		if (pointType!=null) {
-			plotLines.append(" pt "+pointType.style);
+		plotLines.append("\"" + tempPlot.getAbsolutePath() + "\" ");
+		String lineStyle = style.plotLine;
+		if (stats.get(0).get(abs) instanceof String) {
+			switch (style) {
+			case SMOOTH:
+			case POINTS:
+			case MEDIAN:
+			case AVERAGE:
+				plotLines.append(" using 1:3:xticlabels(2)");
+				break;
+			case AVERAGE_WITH_EXTREMA:
+				plotLines.append(" using 1:3:4:5:xticlabels(2)");
+				break;
+			}
+			lineStyle = lineStyle.replace("linespoint", "point");
+			lineStyle = lineStyle.replace("errorlines", "errorbar");
+		}
+		plotLines.append(" " + lineStyle);
+		if (pointType != null) {
+			plotLines.append(" pt " + pointType.style);
 		}
 		plotLines.append(" title \"" + plotTitle + "\", ");
 		if (forcePoints && style != PlotStyle.POINTS)
@@ -386,6 +404,8 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 
 		r.append("set ylabel \"" + ord.getName() + " (" + ord.getUnits().getSymbol() + ")\"\n");
 
+		if (stats.size() > 0 && stats.get(0).get(abs) instanceof String)
+			r.append("set xtics rotate by -30\n");
 		r.append("set label \"");
 		String dataDescription = makeDataDescritption(stats, new Attribute[] { ord, abs }).toString();
 		r.append(dataDescription.replace("\"", "\\\""));
@@ -447,7 +467,55 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		return r;
 	}
 
+	private Map<String, Integer> labels = new HashMap<>();
+
+	private <T extends Comparable<T>> String getForDatafile(T value) {
+		if (value instanceof Integer)
+			return value.toString();
+		if (value instanceof Float)
+			return value.toString();
+		if (value instanceof String) {
+			Integer index = labels.get(value);
+			if (index == null) {
+				index = labels.size();
+				labels.put((String) value, index);
+			}
+			return index.toString() + " \"" + ((String) value)
+					.replaceAll("\"", "\\\\\"").replaceAll("_", "\\\\\\\\_")
+					+ "\"";
+		}
+		throw new RuntimeException("not implemented");
+	}
+
 	private File makeDataFile(StatsSet stats, PlotStyle style) {
+		if (stats.get(0).get(abs) instanceof String) {
+			Map<String, Integer> sortingValues = new HashMap<>();
+			for (StatsEntry s : stats.getStats()) {
+				String absValue = (String) s.get(abs);
+				if (sortingValues.containsKey(absValue))
+					continue;
+				Integer states = s.get(Attribute.STATE_NUMBER);
+				Integer inputs = s.get(Attribute.INPUT_SYMBOLS);
+				Integer sortingValue = states * inputs;
+				sortingValues.put(absValue, sortingValue);
+			}
+
+			List<Integer> sorted = new ArrayList<Integer>(
+					sortingValues.values());
+			Collections.sort(sorted);
+			String[] orderedLabels = new String[sorted.size()];
+			for (Entry<String, Integer> entry : sortingValues.entrySet()) {
+				for (int i = 0; i < sorted.size(); i++) {
+					if (orderedLabels[i] != null)
+						continue;
+					if (entry.getValue() == sorted.get(i)) {
+						orderedLabels[i] = entry.getKey();
+						labels.put(entry.getKey(), i);
+						break;
+					}
+				}
+			}
+		}
 		File tempPlot;
 		PrintWriter tempWriter;
 		try {
@@ -462,7 +530,8 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		switch (style) {
 		case POINTS:
 			for (StatsEntry s : stats.getStats()) {
-				tempWriter.write(s.get(abs) + " " + s.get(ord) + "\n");
+				tempWriter.write(getForDatafile(s.get(abs)) + " "
+						+ getForDatafile(s.get(ord)) + "\n");
 			}
 			break;
 		case AVERAGE: {
@@ -481,8 +550,10 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 			Collections.sort(keys);
 			for (T_ABS key : keys) {
 				StatsSet entrie = sorted.get(key);
-				tempWriter.write(key + " " + entrie.attributeAVG(ord) + " " + entrie.attributeMin(ord) + " "
-						+ entrie.attributeMax(ord) + "\n");
+				tempWriter.write(getForDatafile(key) + " "
+						+ getForDatafile(entrie.attributeAVG(ord)) + " "
+						+ getForDatafile(entrie.attributeMin(ord)) + " "
+						+ getForDatafile(entrie.attributeMax(ord)) + "\n");
 			}
 		}
 			break;
