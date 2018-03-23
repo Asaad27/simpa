@@ -289,7 +289,7 @@ public class HWLearner extends Learner {
 					LmConjecture conjecture = dataManager.getConjecture();
 					if (conjecture.isConnex()) {
 						int firstDiff = conjecture
-								.simulateOnAllStates(fullTrace);
+								.checkOnAllStates(fullTrace);
 						if (firstDiff != fullTrace.size()) {
 							counterExampleTrace = fullTrace.subtrace(0,
 									firstDiff + 1);
@@ -734,7 +734,7 @@ public class HWLearner extends Learner {
 		// try to apply fullTrace on any state of conjecture to detect
 		// inconsistency.
 		if (conjecture.isConnex()) {
-			int firstDiff = conjecture.simulateOnAllStates(fullTrace);
+			int firstDiff = conjecture.checkOnAllStates(fullTrace);
 			if (firstDiff != fullTrace.size()) {
 				InputSequence counterExample = fullTrace
 						.subtrace(0, firstDiff + 1).getInputsProjection();
@@ -1182,6 +1182,28 @@ public class HWLearner extends Learner {
 			throw new RuntimeException(e);
 		}
 		LmConjecture conjecture = dataManager.getConjecture();
+		InputSequence randomEquivalenceI = InputSequence
+				.generate(driver.getInputSymbols(), fullTrace.size()*10);
+		MealyDriver d;
+		try {
+			d = driver.getClass().newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
+		OutputSequence randomEquivalenceO = d.execute(randomEquivalenceI);
+		LmTrace randomEquivalence = new LmTrace(randomEquivalenceI,
+				randomEquivalenceO);
+		int firstDiscrepancyR = reference.checkOnOneState(randomEquivalence);
+		if (firstDiscrepancyR == randomEquivalence.size()) {
+			LogManager.logConsole(
+					"Random walk of length " + randomEquivalence.size()
+							+ " did not expose discrepancy (trace is "
+							+ fullTrace.size() + "symbols long).");
+		} else {
+			LogManager.logConsole("Random walk exposed discrepancy after "
+					+ (firstDiscrepancyR + 1) + " symbols (trace is "
+					+ fullTrace.size() + " symbols long).");
+		}
 		FullyQualifiedState conjectureState = dataManager.getCurrentState();
 		// reference can have equivalents states and thus we must check all
 		// possible initial state
@@ -1219,6 +1241,15 @@ public class HWLearner extends Learner {
 			LogManager.logConsole("Conjecture is equivalent to reference file");
 		} else {
 			LogManager.logConsole("Conjecture is not equivalent to reference file");
+		}
+		int firstDiscrepancy = reference.checkOnAllStates(fullTrace);
+		if (firstDiscrepancy == fullTrace.size()) {
+			LogManager.logConsole(
+					"This trace do not expose discrepancy with reference");
+		} else {
+			LogManager.logConsole(
+					"This trace expose discrepancy with reference after "
+							+ (firstDiscrepancy + 1) + " symbols");
 		}
 		return isEquivalent;
 	}

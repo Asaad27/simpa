@@ -454,10 +454,13 @@ public class Mealy extends Automata implements Serializable {
 	/**
 	 * try to apply a trace from any state of this automaton.
 	 * 
-	 * @param fullTrace the trace to test
-	 * @return position of input in trace which is incompatible with all states. if the trace is compatible with at least one state, leght of trace is returned.
+	 * @param fullTrace
+	 *            the trace to test
+	 * @return position of input in trace which is incompatible with all states.
+	 *         if the trace is compatible with at least one state, length of
+	 *         trace is returned.
 	 */
-	public int simulateOnAllStates(LmTrace fullTrace){
+	public int checkOnAllStates(LmTrace fullTrace) {
 		Set<State> compatibleStates=new HashSet<>(getStates());
 		int i=0;
 		while (i<fullTrace.size()){
@@ -474,7 +477,47 @@ public class Mealy extends Automata implements Serializable {
 		}
 		return i;
 	}
-	
+
+	/**
+	 * @see {@link #checkOnOneState(LmTrace, State)}
+	 */
+	public int checkOnOneState(LmTrace fullTrace) {
+		State initialState = getInitialState();
+		if (initialState == null)
+			throw new RuntimeException(
+					"cannot process, initial state of automata is not defined");
+		return checkOnOneState(fullTrace, initialState);
+	}
+
+	/**
+	 * try to apply a trace from a state of this automaton and check if the
+	 * output sequence matches the trace.
+	 * 
+	 * @param fullTrace
+	 *            the trace to test
+	 * @param startingState
+	 *            optional, indicate the starting state to apply sequence. If
+	 *            omitted, initial state is used.
+	 * @return position of input in trace which is incompatible with the initial
+	 *         state. if the trace is compatible with execution on this
+	 *         automaton, length of trace is returned.
+	 * 
+	 * @see {@link Mealy#checkOnAllStates(LmTrace)}
+	 */
+	public int checkOnOneState(LmTrace fullTrace, State startingState) {
+		State currentState = startingState;
+		int i = 0;
+		while (i < fullTrace.size()) {
+			MealyTransition t = getTransitionFromWithInput(currentState,
+					fullTrace.getInput(i));
+			if (!t.getOutput().equals(fullTrace.getOutput(i)))
+				return i;
+			currentState = t.getTo();
+			i++;
+		}
+		return i;
+	}
+
 	/**
 	 * indicate if the sequence provided is a homing sequence for this automata
 	 * @param h the sequence to test

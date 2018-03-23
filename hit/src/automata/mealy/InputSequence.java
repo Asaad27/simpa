@@ -161,6 +161,15 @@ public class InputSequence implements Cloneable {
 		return this;
 	}
 
+	/**
+	 * generate a sequence of random inputs
+	 * 
+	 * @param is
+	 *            the set of usable inputs
+	 * @param length
+	 *            the wanted length of sequence.
+	 * @return a sequence made of inputs randomly chosen.
+	 */
 	public static InputSequence generate(List<String> is, int length) {
 		InputSequence seq = new InputSequence();
 		for (int i = 0; i < length; i++) {
