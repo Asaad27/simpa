@@ -388,6 +388,14 @@ public class HWLearner extends Learner {
 		stats.updateMemory((int) (runtime.totalMemory() - runtime.freeMemory()));
 		stats.finalUpdate(dataManager);
 
+		if (dataManager.getConjecture().checkOnAllStates(fullTrace) != fullTrace
+				.size()) {
+			LogManager.logWarning(
+					"conjecture is false or driver is not strongly connected");
+			System.err.println(
+					"conjecture is false or driver is not strongly connected");
+		}
+
 		// the next call is not mandatory for algorithm, see checkEquivalence
 		// description.
 		//checkEquivalence(new File("reference.dot"));
