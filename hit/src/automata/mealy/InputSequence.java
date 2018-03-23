@@ -122,7 +122,24 @@ public class InputSequence implements Cloneable {
 		StringBuilder s = new StringBuilder();
 		if (sequence.isEmpty())
 			s.append(Options.SYMBOL_EPSILON);
-		else {
+		else if (Options.REDUCE_DISPLAYED_TRACES > 0
+				&& sequence.size() > Options.REDUCE_DISPLAYED_TRACES) {
+			int i = 0;
+			while (i < Options.REDUCE_DISPLAYED_TRACES / 2) {
+				s.append(sequence.get(i));
+				s.append('.');
+				i++;
+			}
+			s.append(" … ");
+			s.append('.');
+			while (i < Options.REDUCE_DISPLAYED_TRACES) {
+				s.append(sequence.get(
+						sequence.size() - Options.REDUCE_DISPLAYED_TRACES + i));
+				s.append('.');
+				i++;
+			}
+			s.deleteCharAt(s.length() - 1);
+		} else {
 			for (String input : sequence) {
 				s.append(input);
 				s.append('.');

@@ -96,15 +96,42 @@ public class OutputSequence implements Cloneable {
 	@Override
 	public String toString() {
 		StringBuffer s = new StringBuffer();
-		for (String input : sequence) {
-			if (input.length() > 0)
-				s.append(input.toString());
-			else
-				s.append(Options.SYMBOL_OMEGA_LOW);
+		if (Options.REDUCE_DISPLAYED_TRACES > 0
+				&& sequence.size() > Options.REDUCE_DISPLAYED_TRACES) {
+			int i = 0;
+			while (i < Options.REDUCE_DISPLAYED_TRACES / 2) {
+				String output = sequence.get(i);
+				if (output.length() > 0)
+					s.append(output.toString());
+				else
+					s.append(Options.SYMBOL_OMEGA_LOW);
+				s.append('.');
+				i++;
+			}
+			s.append(" … ");
 			s.append('.');
+			while (i < Options.REDUCE_DISPLAYED_TRACES) {
+				String output = sequence.get(
+						sequence.size() - Options.REDUCE_DISPLAYED_TRACES + i);
+				if (output.length() > 0)
+					s.append(output.toString());
+				else
+					s.append(Options.SYMBOL_OMEGA_LOW);
+				s.append('.');
+				i++;
+			}
+			s.deleteCharAt(s.length() - 1);
+		} else {
+			for (String output : sequence) {
+				if (output.length() > 0)
+					s.append(output.toString());
+				else
+					s.append(Options.SYMBOL_OMEGA_LOW);
+				s.append('.');
+			}
 		}
-		if (s.length()>0)
-			s.deleteCharAt(s.length()-1);
+		if (s.length() > 0)
+			s.deleteCharAt(s.length() - 1);
 		return s.toString();
 	}
 	

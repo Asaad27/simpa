@@ -3,6 +3,7 @@ package learner.mealy;
 import java.util.ArrayList;
 import automata.mealy.InputSequence;
 import automata.mealy.OutputSequence;
+import main.simpa.Options;
 
 public class LmTrace {
 	// at any time, inputs and outputs must have the same length
@@ -107,9 +108,30 @@ public class LmTrace {
 
 	public String toString() {
 		StringBuilder s = new StringBuilder();
-		for (int i = 0; i < size(); i++) {
-			s.append(inputs.sequence.get(i) + "/" + outputs.sequence.get(i) + " ");
+		if (Options.REDUCE_DISPLAYED_TRACES > 0
+				&& size() > Options.REDUCE_DISPLAYED_TRACES) {
+			int i = 0;
+			while (i < Options.REDUCE_DISPLAYED_TRACES / 2) {
+				s.append(inputs.sequence.get(i) + "/" + outputs.sequence.get(i)
+						+ " ");
+				i++;
+			}
+			s.append(" … ");
+			s.append('.');
+			while (i < Options.REDUCE_DISPLAYED_TRACES) {
+				s.append(inputs.sequence.get(i) + "/" + outputs.sequence.get(i)
+						+ " ");
+				i++;
+			}
+
+		} else {
+			for (int i = 0; i < size(); i++) {
+				s.append(inputs.sequence.get(i) + "/" + outputs.sequence.get(i)
+						+ " ");
+			}
 		}
+		if (s.length() > 0)
+			s.deleteCharAt(s.length() - 1);
 		return s.toString();
 	}
 

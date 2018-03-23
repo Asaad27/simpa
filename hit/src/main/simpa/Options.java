@@ -89,6 +89,11 @@ public class Options {
 	public static boolean LOG_TEXT = false;
 	public static boolean LOG_HTML = false;
 	public static boolean AUTO_OPEN_HTML = false;
+	/**
+	 * if greater than 0, only start and end of sequences are displayed in order
+	 * to be at most this size
+	 */
+	public static int REDUCE_DISPLAYED_TRACES = 25;
 
 	public static String SYSTEM = "";
 	public static List<String> URLS = null;
