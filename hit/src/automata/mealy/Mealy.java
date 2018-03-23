@@ -18,10 +18,12 @@ import java.util.Set;
 
 import automata.Automata;
 import automata.State;
+import automata.Transition;
 import learner.mealy.LmTrace;
 import main.simpa.Options;
 import tools.DotParser;
 import tools.GraphViz;
+import tools.Utils;
 import tools.loggers.LogManager;
 
 public class Mealy extends Automata implements Serializable {
@@ -31,6 +33,64 @@ public class Mealy extends Automata implements Serializable {
 
 	public final static String OMEGA = "omega|symbol";
 	public final static String EPSILON = "espilon|symbol";
+
+	/**
+	 * create a mutant version of this automaton. The mutation will occurs on
+	 * one specific transition, and have one chance over two to change the
+	 * output an one chance over two to change the destination.
+	 * 
+	 * @return a new automaton with a mutated transition.
+	 */
+	public Mealy mutate() {
+		boolean mutateOutput = Utils.randInt(2) > 0;
+		return mutate(mutateOutput);
+	}
+
+	/**
+	 * @see {@link #mutate()
+	 * @param mutat
+	 *            control if the mutation should be on output or on destination
+	 *            of transition.
+	 * @return a muted automaton
+	 */
+	public Mealy mutate(boolean mutateOutput) {
+		Mealy r = new Mealy("mutant_" + getName());
+		Map<State, State> states = new HashMap<>();
+		for (State s : getStates()) {
+			states.put(s, r.addState(s.isInitial()));
+		}
+		State mutantS = Utils.randIn(getStates());
+		List<String> inputs = new ArrayList<>();
+		for (Transition t : getTransitionFrom(mutantS)) {
+			inputs.add(t.getInput());
+		}
+		String mutantInput = Utils.randIn(inputs);
+		MealyTransition mutantT = null;
+		Set<String> outputs = new HashSet<String>();
+		for (MealyTransition t : getTransitions()) {
+			if (t.getFrom() == mutantS && t.getInput() == mutantInput) {
+				mutantT = t;
+				continue;
+			}
+			outputs.add(t.getOutput());
+			r.addTransition(new MealyTransition(r, states.get(t.getFrom()),
+					states.get(t.getTo()), t.getInput(), t.getOutput()));
+		}
+		String mutantOutput = mutantT.getOutput();
+		State mutantTo = mutantT.getTo();
+		if (mutateOutput) {
+			outputs.remove(mutantT.getOutput());
+			mutantOutput = Utils.randIn(outputs);
+		} else {
+			List<State> possibleStates = new ArrayList<>();
+			possibleStates.addAll(getStates());
+			possibleStates.remove(mutantT.getTo());
+			mutantTo = Utils.randIn(possibleStates);
+		}
+		r.addTransition(new MealyTransition(r, states.get(mutantS),
+				states.get(mutantTo), mutantInput, mutantOutput));
+		return r;
+	}
 
 	public Mealy(String name) {
 		super(name);
