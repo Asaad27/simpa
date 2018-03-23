@@ -123,13 +123,14 @@ public class DotAntlrListener extends DotMealyBaseListener {
 		} else {
 			// if first state is not defined, try to find a state with different
 			// attribute declaration
+			assert startNode == null;
 			for (Entry<String, List<DotMealyParser.A_listContext>> pair : nodeDeclarations
 					.entrySet()) {
 				List<DotMealyParser.A_listContext> attributes = pair.getValue();
 				if (!attributes.isEmpty()) {
-					if (startNode != pair.getKey()) {
-						System.err
-								.println("Two states have attributes. We cannot use attribute presence to detect initial state");
+					if (startNode != null && startNode != pair.getKey()) {
+						System.err.println(
+								"Two states (at least) have attributes. We cannot use attribute presence to detect initial state");
 						startNode = null;
 						break;
 					}
