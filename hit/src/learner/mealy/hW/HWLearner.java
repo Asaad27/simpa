@@ -1198,11 +1198,15 @@ public class HWLearner extends Learner {
 		InputSequence randomEquivalenceI = InputSequence
 				.generate(driver.getInputSymbols(), fullTrace.size()*10);
 		MealyDriver d;
-		try {
-			d = driver.getClass().newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new RuntimeException(e);
-		}
+		if (driver instanceof TransparentMealyDriver) {
+			d = new TransparentMealyDriver(
+					((TransparentMealyDriver) driver).getAutomata());
+		} else
+			try {
+				d = driver.getClass().newInstance();
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new RuntimeException(e);
+			}
 		OutputSequence randomEquivalenceO = d.execute(randomEquivalenceI);
 		LmTrace randomEquivalence = new LmTrace(randomEquivalenceI,
 				randomEquivalenceO);
@@ -1251,9 +1255,9 @@ public class HWLearner extends Learner {
 		if (!oneStateIsEquivalent)
 			isEquivalent = false;
 		if (isEquivalent) {
-			LogManager.logConsole("Conjecture is equivalent to reference file");
+			LogManager.logConsole("Conjecture is equivalent to reference");
 		} else {
-			LogManager.logConsole("Conjecture is not equivalent to reference file");
+			LogManager.logConsole("Conjecture is not equivalent to reference");
 		}
 		int firstDiscrepancy = reference.checkOnAllStates(fullTrace);
 		if (firstDiscrepancy == fullTrace.size()) {
