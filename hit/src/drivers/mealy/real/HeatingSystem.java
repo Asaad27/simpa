@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
+import automata.mealy.InputSequence;
 import tools.Utils;
 import tools.loggers.LogManager;
 
@@ -17,11 +18,21 @@ import tools.loggers.LogManager;
  *
  */
 public class HeatingSystem extends RealDriver {
+	public static class SUIDiedException extends RuntimeException {
+		private static final long serialVersionUID = -8200274705215297825L;
+
+		public SUIDiedException(int traceLength) {
+			super("SUI died during inference after transition " + traceLength);
+		}
+	}
+
 	private static String EXEC_PATH = "../../cheminée/arduino/simu/simulator";
 	Runtime RT = Runtime.getRuntime();
 	Process process = null;
 	private OutputStream processInput;
 	private InputStream processOutput;
+
+	public boolean doRandomWalkOnKilled = true;
 
 	public HeatingSystem() {
 		super("heating system");
@@ -47,8 +58,24 @@ public class HeatingSystem extends RealDriver {
 		boolean EOLseen = false;
 		String output = "";
 		while (!EOLseen) {
-			if (!process.isAlive())
-				throw new RuntimeException("SUI died during inference");
+			if (!process.isAlive()) {
+				if (doRandomWalkOnKilled) {
+					InputSequence randomSequence = InputSequence.generate(
+							getInputSymbols(), 10 * numberOfAtomicRequest);
+					HeatingSystem other = new HeatingSystem();
+					other.doRandomWalkOnKilled = false;
+					try {
+						other.execute(randomSequence);
+						LogManager.logConsole("Random walk of length "
+								+ randomSequence.getLength()
+								+ " did not kill SUI");
+					} catch (SUIDiedException e) {
+						LogManager.logConsole("Random walk killed SUI after "
+								+ other.numberOfAtomicRequest + " inputs");
+					}
+				}
+				throw new SUIDiedException(numberOfAtomicRequest);
+			}
 			byte[] outputBytes = new byte[1024];
 			int numberRead;
 			try {
