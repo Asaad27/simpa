@@ -473,7 +473,7 @@ public class LocalizerBasedLearner extends Learner {
 		return true;
 	}
 
-	private static List<InputSequence> computeCharacterizationSet(
+	public static List<InputSequence> computeCharacterizationSet(
 			MealyDriver driver) {
 		if (driver instanceof TransparentMealyDriver) {
 			return computeCharacterizationSet((TransparentMealyDriver) driver);

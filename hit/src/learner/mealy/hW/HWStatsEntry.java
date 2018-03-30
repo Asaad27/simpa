@@ -52,6 +52,7 @@ public class HWStatsEntry extends StatsEntry {
 	public static final Attribute<Boolean>ADD_H_IN_W = 				Attribute.ADD_H_IN_W;
 	public static final Attribute<Boolean>CHECK_3rd_INCONSISTENCY =	Attribute.CHECK_3rd_INCONSISTENCY;
 	public static final Attribute<Boolean>REUSE_HZXW =				Attribute.REUSE_HZXW;
+	public static final Attribute<Boolean>PRECOMPUTED_W =			Attribute.PRECOMPUTED_W;
 
 	
 	private static Attribute<?>[] attributes = new Attribute<?>[]{
@@ -89,6 +90,7 @@ public class HWStatsEntry extends StatsEntry {
 			ADD_H_IN_W,
 			CHECK_3rd_INCONSISTENCY,
 			REUSE_HZXW,
+			PRECOMPUTED_W,
 	};
 	
 	public static String getCSVHeader_s(){
@@ -139,6 +141,7 @@ public class HWStatsEntry extends StatsEntry {
 	private boolean add_h_in_w=false;
 	private boolean check_3rd_inconsistency=false;
 	private boolean reuse_hzxw = false;
+	private boolean precomputedW = false;
 
 	/**
 	 * rebuild a HWStats object from a CSV line
@@ -178,6 +181,7 @@ public class HWStatsEntry extends StatsEntry {
 		add_h_in_w = Boolean.parseBoolean(st.nextToken());
 		check_3rd_inconsistency = Boolean.parseBoolean(st.nextToken());
 		reuse_hzxw = Boolean.parseBoolean(st.nextToken());
+		precomputedW = Boolean.parseBoolean(st.nextToken());
 		
 	}
 
@@ -189,6 +193,7 @@ public class HWStatsEntry extends StatsEntry {
 		this.automata = d.getSystemName();
 		this.seed=Options.SEED;
 		this.reuse_hzxw = Options.REUSE_HZXW;
+		this.precomputedW = Options.HW_WITH_KNOWN_W;
 	}
 
 //	protected void setLocalizeSequenceLength(int length){
@@ -343,6 +348,8 @@ public class HWStatsEntry extends StatsEntry {
 			return (T) new Boolean(check_3rd_inconsistency);
 		if (a==REUSE_HZXW)
 				return (T) new Boolean(reuse_hzxw);
+		if (a == PRECOMPUTED_W)
+			return (T) new Boolean(precomputedW);
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 
 	}

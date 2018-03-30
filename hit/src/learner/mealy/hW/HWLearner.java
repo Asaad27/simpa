@@ -30,6 +30,7 @@ import learner.mealy.hW.dataManager.InconsistancyWithConjectureAtEndOfTraceExcep
 import learner.mealy.hW.dataManager.InvalidHException;
 import learner.mealy.hW.dataManager.LocalizedHZXWSequence;
 import learner.mealy.hW.dataManager.SimplifiedDataManager;
+import learner.mealy.localizerBased.LocalizerBasedLearner;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
 import tools.CompiledSearchGraph;
@@ -197,10 +198,15 @@ public class HWLearner extends Learner {
 		fullTrace = new LmTrace();
 		Runtime runtime = Runtime.getRuntime();
 		runtime.gc();
-		long start = System.nanoTime();
-		
+
 		List<InputSequence> W = new ArrayList<InputSequence>();
 		W.add(new InputSequence());
+		if (Options.HW_WITH_KNOWN_W) {
+			W = LocalizerBasedLearner.computeCharacterizationSet(driver);
+		}
+
+		long start = System.nanoTime();
+
 		InputSequence h = new InputSequence();
 		hChecker = new HomingSequenceChecker(h);
 		stats = new HWStatsEntry(driver);

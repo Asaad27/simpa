@@ -42,6 +42,7 @@ public class Attribute <T extends Comparable<T>> {
 	public final static Attribute<Boolean>ADD_H_IN_W =				new Attribute<Boolean>(	"add homing sequence in W-set",		Units.BOOLEAN,	false,	true,	false);
 	public final static Attribute<Boolean>CHECK_3rd_INCONSISTENCY =	new Attribute<Boolean>(	"check inconsistency between h mapping and conjecture",Units.BOOLEAN,false,	true,	false);
 	public final static Attribute<Boolean>REUSE_HZXW =				new Attribute<Boolean>(	"reuse hzxw sequences",				Units.BOOLEAN,	false,	true,	false);
+	public final static Attribute<Boolean>PRECOMPUTED_W =			new Attribute<Boolean>(	"using a known W-set",				Units.BOOLEAN,	false,	true,	false);
 	public final static Attribute<Boolean>RS_WITH_GIVEN_H =			new Attribute<Boolean>(	"homing sequence is known",			Units.BOOLEAN,	false,	true,	false);
 	public final static Attribute<Integer>FAILED_PROBALISTIC_SEARCH=new Attribute<Integer>(	"number of failed probalistic search",Units.FUNCTION_CALL,false,	false,	false);
 	public final static Attribute<Integer>SUCCEEDED_PROBALISTIC_SEARCH=new Attribute<Integer>(	"number of succeeded probalistic search",Units.FUNCTION_CALL,false,	false,	false);
