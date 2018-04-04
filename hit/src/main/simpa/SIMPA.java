@@ -465,8 +465,9 @@ public class SIMPA {
 	private static BooleanOption WEKA = new BooleanOption("--weka", "Force the use of weka");
 	private static IntegerOption SUPPORT_MIN = new IntegerOption("--supportmin", "Minimal support for relation (1-100)",
 			Options.SUPPORT_MIN);
-	private static Option<?>[] EFSMOptions = new Option<?>[] { GENERIC_DRIVER, SCAN, REUSE_OP_IFNEEDED, FORCE_J48, WEKA,
-			SUPPORT_MIN };
+	private static Option<?>[] EFSMOptions = new Option<?>[] { GENERIC_DRIVER,
+			SCAN, REUSE_OP_IFNEEDED, FORCE_J48, WEKA, SUPPORT_MIN,
+			MAX_CE_LENGTH, MAX_CE_RESETS };
 
 	// TestEFSM options //TODO group with Random generator ?
 	private static IntegerOption MIN_PARAMETER = new IntegerOption("--minparameter",
