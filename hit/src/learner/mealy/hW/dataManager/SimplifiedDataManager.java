@@ -140,9 +140,17 @@ public class SimplifiedDataManager {
 		globalTrace.append(input, output);
 	}
 	
-	public String walkWithoutCheck(String input, String output){
+	public String walkWithoutCheck(String input, String output,
+			List<InvalidHException> hExceptions) {
 		extendTrace(input, output);
-		String expectedOutput=null;
+		String expectedOutput = null;
+		// check for Non-Determinism after homing sequence
+		try {
+			hChecker.applyInput(input, output);
+		} catch (InvalidHException e) {
+			if (hExceptions != null)
+				hExceptions.add(e);
+		}
 		if (currentState != null) {
 			FullyKnownTrace transition = currentState.getKnownTransition(input);
 			if (transition != null) {
@@ -153,10 +161,13 @@ public class SimplifiedDataManager {
 		}
 		return expectedOutput;
 	}
-	public OutputSequence walkWithoutCheck(LmTrace seq){
-		OutputSequence outputs=new OutputSequence();
-		for (int i=0;i<seq.size();i++)
-			outputs.addOutput(walkWithoutCheck(seq.getInput(i),seq.getOutput(i)));
+
+	public OutputSequence walkWithoutCheck(LmTrace seq,
+			List<InvalidHException> hExceptions) {
+		OutputSequence outputs = new OutputSequence();
+		for (int i = 0; i < seq.size(); i++)
+			outputs.addOutput(walkWithoutCheck(seq.getInput(i),
+					seq.getOutput(i), hExceptions));
 		return outputs;
 	}
 	

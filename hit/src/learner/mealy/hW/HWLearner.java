@@ -60,7 +60,7 @@ public class HWLearner extends Learner {
 	 * @return the trace applied on driver or null if no counter example is
 	 *         found
 	 */
-	public LmTrace getCounterExemple() {
+	public LmTrace getCounterExemple(List<InvalidHException> hExceptions) {
 		int startSize = dataManager.traceSize();
 		long startTime = System.nanoTime();
 		LmTrace returnedCE = null;
@@ -72,9 +72,10 @@ public class HWLearner extends Learner {
 			LmTrace shortestCe = (driver instanceof TransparentMealyDriver) ? getShortestCounterExemple(false)
 					: new LmTrace();
 			returnedCE = (shortestCe == null) ? null
-					: getRandomCounterExemple();// we do not compute random CE
-												// if we know that there is no
-												// CE
+					: getRandomCounterExemple(hExceptions);// we do not compute
+															// random CE if we
+															// know that there
+															// is no CE
 		}
 		float duration = (float) (System.nanoTime() - startTime) / 1000000000;
 		stats.increaseOracleCallNb(dataManager.traceSize() - startSize
@@ -82,7 +83,8 @@ public class HWLearner extends Learner {
 		return returnedCE;
 	}
 
-	public LmTrace getRandomCounterExemple() {
+	public LmTrace getRandomCounterExemple(
+			List<InvalidHException> hExceptions) {
 		if (driver instanceof TransparentMealyDriver) {
 			TransparentMealyDriver d = (TransparentMealyDriver) driver;
 			Options.MAX_CE_LENGTH = d.getAutomata().getStateCount()
@@ -95,7 +97,7 @@ public class HWLearner extends Learner {
 		boolean found = driver.getRandomCounterExample_noReset(conjecture,
 				conjectureStartingState, ce);
 		if (!found)
-			dataManager.walkWithoutCheck(ce);
+			dataManager.walkWithoutCheck(ce, hExceptions);
 		return found ? ce : null;
 	}
 
@@ -189,6 +191,33 @@ public class HWLearner extends Learner {
 		}
 	}
 
+	private InputSequence proceedHException(InvalidHException e) {
+		stats.increaseHInconsitencies();
+		if (Options.LOG_LEVEL != LogLevel.LOW) {
+			LogManager.logInfo(
+					"Non-determinism found (due to homming sequence) : " + e);
+			LogManager.logConsole(
+					"Non-determinism found (due to homming sequence) : " + e);
+		}
+
+		InputSequence h = e.getNewH();
+		hZXWSequences = new HashMap<>();
+		LogManager.logInfo("h is now " + h);
+		hChecker = new HomingSequenceChecker(h);
+		if (Options.ADD_H_IN_W) {
+			boolean hIsInW = false;
+			for (InputSequence w : W) {
+				if (w.startsWith(h)) {
+					hIsInW = true;
+					break;
+				}
+			}
+			if (!hIsInW)
+				addOrExtendInW(h, W);
+		}
+		return h;
+	}
+
 	public void learn() {
 		if (driver instanceof TransparentMealyDriver) {
 			TransparentMealyDriver d = (TransparentMealyDriver) driver;
@@ -232,30 +261,7 @@ public class HWLearner extends Learner {
 				}
 				checkInconsistencyHMapping();
 			} catch (InvalidHException e) {
-				stats.increaseHInconsitencies();
-				if (Options.LOG_LEVEL != LogLevel.LOW) {
-					LogManager
-							.logInfo("Non-determinism found (due to homming sequence) : "
-									+ e);
-					LogManager
-							.logConsole("Non-determinism found (due to homming sequence) : "
-									+ e);
-				}
-				h = e.getNewH();
-				hZXWSequences = new HashMap<>();
-				LogManager.logInfo("h is now " + h);
-				hChecker = new HomingSequenceChecker(h);
-				if (Options.ADD_H_IN_W) {
-					boolean hIsInW = false;
-					for (InputSequence w : W) {
-						if (w.startsWith(h)) {
-							hIsInW = true;
-							break;
-						}
-					}
-					if (!hIsInW)
-						addOrExtendInW(h, W);
-				}
+				h = proceedHException(e);
 				inconsistencyFound = true;
 			} catch (ConjectureNotConnexException e) {
 				if (Options.LOG_LEVEL != LogLevel.LOW) {
@@ -296,9 +302,10 @@ public class HWLearner extends Learner {
 				}
 			}
 
+			List<InvalidHException> hExceptions = new ArrayList<>();
 			if (!inconsistencyFound && !virtualCounterExample) {
 				LogManager.logInfo("asking for a counter example");
-				counterExampleTrace = getCounterExemple();
+				counterExampleTrace = getCounterExemple(hExceptions);
 				if (counterExampleTrace == null)
 					LogManager.logInfo("No counter example found");
 				else {
@@ -353,9 +360,18 @@ public class HWLearner extends Learner {
 				}
 				addOrExtendInW(newW, W);
 				if (!virtualCounterExample)
-					dataManager.walkWithoutCheck(counterExampleTrace);
+					dataManager.walkWithoutCheck(counterExampleTrace,
+							hExceptions);
 			}
 			stats.increaseWithDataManager(dataManager);
+			if (hExceptions.size() > 0) {
+				h = proceedHException(hExceptions.get(0));
+				if (hExceptions.size() > 1) {
+					LogManager.logConsole(
+							"multiple h inconsistencies found, only one proceeded.");
+				}
+
+			}
 		} while (counterExampleTrace != null || inconsistencyFound);
 
 		float duration = (float) (System.nanoTime() - start) / 1000000000;
@@ -389,7 +405,7 @@ public class HWLearner extends Learner {
 
 		if (driver instanceof TransparentMealyDriver) {
 			if ((counterExampleTrace = getShortestCounterExemple()) != null) {
-				dataManager.walkWithoutCheck(counterExampleTrace);
+				dataManager.walkWithoutCheck(counterExampleTrace, null);
 				LogManager.logError("another counter example can be found");
 				throw new RuntimeException("wrong conjecture");
 			} else {
@@ -905,7 +921,8 @@ public class HWLearner extends Learner {
 		for (int j = 0; j < max_try; j++) {
 			int rand = Utils.randInt(driver.getInputSymbols().size());
 			String input = driver.getInputSymbols().get(rand);
-			if (!driver.execute(input).equals(dataManager.walkWithoutCheck(input, null)))
+			if (!driver.execute(input)
+					.equals(dataManager.walkWithoutCheck(input, null, null)))
 				return false;
 		}
 
@@ -972,7 +989,7 @@ public class HWLearner extends Learner {
 						currentState, i);
 				currentState = t.getTo();
 				String o = driver.execute(i);
-				dataManager.walkWithoutCheck(i, o);
+				dataManager.walkWithoutCheck(i, o, null);
 				if (!o.equals(t.getOutput())) {
 					LogManager.logInfo("expected output was " + t.getOutput());
 					return false;
