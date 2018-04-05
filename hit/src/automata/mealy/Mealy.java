@@ -19,6 +19,7 @@ import java.util.Set;
 import automata.Automata;
 import automata.State;
 import automata.Transition;
+import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import main.simpa.Options;
 import tools.DotParser;
@@ -514,6 +515,8 @@ public class Mealy extends Automata implements Serializable {
 	/**
 	 * try to apply a trace from any state of this automaton.
 	 * 
+	 * The automata is supposed to be complete.
+	 * 
 	 * @param fullTrace
 	 *            the trace to test
 	 * @return position of input in trace which is incompatible with all states.
@@ -521,6 +524,8 @@ public class Mealy extends Automata implements Serializable {
 	 *         trace is returned.
 	 */
 	public int checkOnAllStates(LmTrace fullTrace) {
+		assert !(this instanceof LmConjecture)
+				|| ((LmConjecture) this).isFullyKnown();
 		Set<State> compatibleStates=new HashSet<>(getStates());
 		int i=0;
 		while (i<fullTrace.size()){
