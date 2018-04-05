@@ -276,8 +276,7 @@ public class HWLearner extends Learner {
 			}
 
 			if (!inconsistencyFound && Options.TRY_TRACE_AS_CE) {
-				if (Options.CHECK_INCONSISTENCY_H_NOT_HOMING)
-					counterExampleTrace = tryTraceAsCeAfterH();
+				counterExampleTrace = searchCEInTrace();
 				if (counterExampleTrace != null) {
 					virtualCounterExample = true;
 					// we have to check if counterExempleTrace has a sufficient
@@ -285,38 +284,15 @@ public class HWLearner extends Learner {
 					for (InputSequence w : W) {
 						if (w.startsWith(
 								counterExampleTrace.getInputsProjection())) {
+							if (Options.LOG_LEVEL != LogLevel.LOW) {
+								LogManager.logInfo(
+										"Counter example is already in W. Forgetting it");
+							}
 							virtualCounterExample = false;
 							counterExampleTrace = null;
 							break;
 						}
 					}
-				}
-				if (counterExampleTrace == null) {
-					LmConjecture conjecture = dataManager.getConjecture();
-					if (conjecture.isConnex()) {
-						int firstDiff = conjecture
-								.checkOnAllStates(fullTrace);
-						if (firstDiff != fullTrace.size()) {
-							counterExampleTrace = fullTrace.subtrace(0,
-									firstDiff + 1);
-							virtualCounterExample = true;
-							// we have to check if counterExempleTrace has a
-							// sufficient length for suffix1by1
-							for (InputSequence w : W) {
-								if (w.startsWith(counterExampleTrace
-										.getInputsProjection())) {
-									virtualCounterExample = false;
-									counterExampleTrace = null;
-									break;
-								}
-							}
-						}
-					}
-				}
-				if (counterExampleTrace == null) {
-					counterExampleTrace = tryTraceAsCeNaive();
-					if (counterExampleTrace != null)
-						inconsistencyFound = true;
 				}
 			}
 
@@ -384,9 +360,7 @@ public class HWLearner extends Learner {
 
 		float duration = (float) (System.nanoTime() - start) / 1000000000;
 		stats.setDuration(duration);
-		stats.setSearchCEInTrace(Options.TRY_TRACE_AS_CE
-				? (Options.CHECK_INCONSISTENCY_H_NOT_HOMING ? "better" : "naive")
-				: "none");
+		stats.setSearchCEInTrace(Options.TRY_TRACE_AS_CE ? "simple" : "none");
 		stats.setAddHInW(Options.ADD_H_IN_W);
 		stats.setCheck3rdInconsistency(
 				Options.CHECK_INCONSISTENCY_H_NOT_HOMING);
@@ -648,149 +622,54 @@ public class HWLearner extends Learner {
 		}
 	}
 
-	private LmTrace tryTraceAsCeAfterH() {
-		assert Options.CHECK_INCONSISTENCY_H_NOT_HOMING;
-		LmTrace counterExampleTrace = null;
+	/**
+	 * This function search a sub-trace which is incompatible with any state of
+	 * conjecture.
+	 * 
+	 * @return a sub-trace which is a not accepted by any state of the driver or
+	 *         null if such sequence is not found
+	 */
+	private LmTrace searchCEInTrace() {
 		LmConjecture conjecture = dataManager.getConjecture();
-		LogManager.logInfo("trying to use trace as CE");
-		CompiledSearchGraph compiled = new CompiledSearchGraph(dataManager.h);
-		int startTrace = 0;
-		while (!compiled.isAcceptingWord()) {
-			compiled.apply(fullTrace.getInput(startTrace));
-			startTrace++;
-		}
-		int hLength = compiled.neededTraceLength();
-		final LmTrace hApplied = fullTrace.subtrace(startTrace - hLength,
-				startTrace);
-		assert hApplied.getInputsProjection().equals(dataManager.h);
-		final LmTrace potentialCE = fullTrace.subtrace(startTrace, fullTrace.size());
-
 		if (Options.LOG_LEVEL != LogLevel.LOW)
 			LogManager.logInfo(
-					"found first occurence of h at position " + startTrace);
-		FullyQualifiedState fullyQualifiedAfterH = dataManager
-				.getState(hApplied.getOutputsProjection());
-		State afterH = null;
-		if (fullyQualifiedAfterH != null) {
-			afterH = fullyQualifiedAfterH.getState();
-			if (Options.LOG_LEVEL != LogLevel.LOW)
-				LogManager.logInfo("found a mapping for the answer '",
-						hApplied.getOutputsProjection(),
-						"' to h : lead to state ", fullyQualifiedAfterH);
-		} else
-			for (State s : conjecture.getStates()) {
-				OutputSequence homingResponse = new OutputSequence();
-				if (!conjecture.applyIfTransitionExists(dataManager.h, s,
-						homingResponse))
-					continue;
-				if (hApplied.getOutputsProjection().equals(homingResponse)) {
-					afterH = conjecture.applyGetState(dataManager.h, s);
-					if (Options.LOG_LEVEL != LogLevel.LOW)
-						LogManager.logInfo("found that state ", s,
-								" followed by homing sequence lead in ", afterH,
-								" with wanted output");
-					break;
-				}
-			}
-		if (afterH == null) {
-			LogManager.logInfo(
-					"Unable to find a state which give the expected output");
-			return null;
-		}
-		State current = afterH;
-		for (int i = 0; i < potentialCE.size(); i++) {
-			MealyTransition t = conjecture.getTransitionFromWithInput(current,
-					potentialCE.getInput(i));
-			if (t == null) {
-				LogManager.logInfo(
-						"Cannot try trace as CE because conjecture is not complete");
-				break;
-			}
-			if (!t.getOutput().equals(potentialCE.getOutput(i))) {
-				LmTrace afterHCE = potentialCE.subtrace(0, i + 1);
-				counterExampleTrace = hApplied;
-				counterExampleTrace.append(afterHCE);
-				if (Options.LOG_LEVEL != LogLevel.LOW) {
-					String info = "Inconsistency found between trace and conjecture : from state "
-							+ afterH + ", if we apply sequence '"
-							+ afterHCE.getInputsProjection()
-							+ "' we get output '"
-							+ conjecture.apply(afterHCE.getInputsProjection(),
-									afterH)
-							+ "' instead of '" + afterHCE.getOutputsProjection()
-							+ "' from the trace observed since position "
-							+ startTrace
-							+ ". The eroneous transition in conjecture is " + t
-							+ ". This is a «virtual» inconsistency because we do not apply counter example on driver";
-					LogManager.logInfo(info);
-					LogManager.logConsole(info);
-				}
-				break;
-			}
-			current = t.getTo();
-		}
-		if (counterExampleTrace == null && Options.LOG_LEVEL != LogLevel.LOW)
-			LogManager
-					.logInfo("conjecture is coherent with trace from position "
-							+ startTrace);
-		return counterExampleTrace;
-
-	}
-
-	/**
-	 * This function take the longest prefix of trace which is incompatible with
-	 * all states of conjecture, apply it on driver and check for
-	 * inconsistencies of type 2.
-	 * 
-	 * @return the trace applied on driver if it makes a counter example, null
-	 *         otherwise
-	 */
-	private LmTrace tryTraceAsCeNaive() {
-		LmConjecture conjecture = dataManager.getConjecture();
-		LmTrace counterExampleTrace = null;
-		LogManager.logInfo(
-				"trying to apply trace since very start of learning to any state");
+					"trying to apply trace since very start of learning to any state");
 		// try to apply fullTrace on any state of conjecture to detect
 		// inconsistency.
-		if (conjecture.isConnex()) {
-			int firstDiff = conjecture.checkOnAllStates(fullTrace);
-			if (firstDiff != fullTrace.size()) {
-				InputSequence counterExample = fullTrace
-						.subtrace(0, firstDiff + 1).getInputsProjection();
-				LogManager.logInfo(
-						"The trace from start of learning cannot be applied on any state of conjecture."
-								+ "We will try to use it as a counter example.");
-				OutputSequence ConjectureCEOut = conjecture.simulateOutput(
-						dataManager.getCurrentState().getState(),
-						counterExample);
-				OutputSequence DriverCEOut = new OutputSequence();
-				for (int i = 0; i < counterExample.getLength(); i++) {
-					String out = driver.execute(counterExample.sequence.get(i));
-					DriverCEOut.addOutput(out);
-					if (!out.equals(ConjectureCEOut.sequence.get(i))) {
-						LogManager.logInfo("The trace was a counter example");
-						counterExampleTrace = new LmTrace(
-								counterExample.getIthPreffix(i + 1),
-								DriverCEOut);
-						break;
-					}
+		Set<State> compatibleStates = new HashSet<>(conjecture.getStates());
+		int i = 0;
+		int start = 0;// the start of counter example : reinitialized on unknown
+						// transition.
+		while (i < fullTrace.size()) {
+			Set<State> newcompatibles = new HashSet<>(compatibleStates.size());
+			for (State s : compatibleStates) {
+				MealyTransition t = conjecture.getTransitionFromWithInput(s,
+						fullTrace.getInput(i));
+				if (t == null) {
+					newcompatibles = new HashSet<>(conjecture.getStates());
+					start = i + 1;
+					break;
 				}
-				if (counterExampleTrace == null) {
-					LogManager.logInfo(
-							"When trying to apply the expected counter example, the driver produced the same output than the conjecture."
-									+ "This cannot be used as counter example");
-					dataManager.walkWithoutCheck(
-							new LmTrace(counterExample, DriverCEOut));
-				} else {
-					LogManager.logInfo("The trace was a counter example");
-				}
-			} else {
-				LogManager.logInfo(
-						"The trace from start of learning can be applied on at leat one state");
+				if (t.getOutput().equals(fullTrace.getOutput(i)))
+					newcompatibles.add(t.getTo());
 			}
-		}
+			if (newcompatibles.isEmpty()) {
+				if (Options.LOG_LEVEL != LogLevel.LOW)
+					LogManager.logInfo("The trace from position " + start
+							+ " to " + i
+							+ " cannot be applied on any state of conjecture."
+							+ "We will try to use it as a counter example.");
 
-		return counterExampleTrace;
+				return fullTrace.subtrace(start, i + 1);
+			}
+			compatibleStates = newcompatibles;
+			i++;
+		}
+		if (Options.LOG_LEVEL != LogLevel.LOW)
+			LogManager.logInfo(
+					"The trace from start of learning can be applied on at leat one state");
+
+		return null;
 	}
 
 	public void learn(List<InputSequence> W, InputSequence h) {
