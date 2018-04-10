@@ -214,6 +214,18 @@ public class LmLearner extends Learner {
 		stats.finalUpdate(createConjecture(), duration,
 				driver.numberOfAtomicRequest, driver.numberOfRequest,
 				lastOracleLength);
+		int maxLength = Options.MAX_CE_LENGTH;
+		int maxResets = Options.MAX_CE_RESETS;
+		Options.MAX_CE_LENGTH = maxLength * 5 + 20;
+		Options.MAX_CE_RESETS = maxResets * 5 + 20;
+		LmConjecture conjecture = createConjecture();
+		LmTrace ceTrace = driver.getCounterExample(conjecture);
+		Options.MAX_CE_LENGTH = maxLength;
+		Options.MAX_CE_RESETS = maxResets;
+		if (ceTrace != null) {
+			System.err.println(ce);
+			throw new RuntimeException("wrong conjecture");
+		}
 	}
 
 	@Override
