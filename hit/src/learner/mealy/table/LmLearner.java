@@ -20,10 +20,12 @@ import drivers.mealy.MealyDriver;
 public class LmLearner extends Learner {
 	private MealyDriver driver;
 	protected LmControlTable cTable;
+	private LmStatsEntry stats;
 
 	public LmLearner(Driver driver) {
 		this.driver = (MealyDriver) driver;
 		this.cTable = new LmControlTable(driver.getInputSymbols());
+		stats = new LmStatsEntry(this.driver);
 	}
 
 	private void completeTable() {
@@ -143,9 +145,11 @@ public class LmLearner extends Learner {
 
 	public void learn() {
 		LogManager.logConsole("Inferring the system");
+		long startTime = System.nanoTime();
 // RG: changed Karim's use of finished that repeated CE search after final conjecture.
 //		boolean finished = false;
 		boolean potentialNewNonClosedRows = true;
+		int lastOracleLength = 0;
 		InputSequence ce = null;
 		completeTable();
 		LogManager.logControlTable(cTable);
@@ -170,12 +174,18 @@ public class LmLearner extends Learner {
 			LmConjecture conj = createConjecture();
 			startLog();
 			if (!driver.isCounterExample(ce, conj)) {
+				int traceLength = driver.numberOfAtomicRequest;
+				long oracleStart = System.nanoTime();
 				LmTrace ceTrace = driver.getCounterExample(conj);
 				if (ceTrace != null) {
 					handleNewCounterExample(ceTrace);
 					ce = ceTrace.getInputsProjection();
 				} else
 					ce = null;
+				lastOracleLength = driver.numberOfAtomicRequest - traceLength;
+				stats.increaseOracleCallNb(lastOracleLength,
+						(float) ((System.nanoTime() - oracleStart)
+								/ 1000000000.));
 			} else
 				LogManager.logInfo("Previous counter example : " + ce
 						+ " is still a counter example for the new conjecture");
@@ -199,5 +209,15 @@ public class LmLearner extends Learner {
 //				finished = true;
 				break;
 		}
+		float duration = (float) ((System.nanoTime() - startTime)
+				/ 1000000000.);
+		stats.finalUpdate(createConjecture(), duration,
+				driver.numberOfAtomicRequest, driver.numberOfRequest,
+				lastOracleLength);
+	}
+
+	@Override
+	public LmStatsEntry getStats() {
+		return stats;
 	}
 }
