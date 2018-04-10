@@ -26,6 +26,7 @@ public class ZLearner extends Learner {
 	private List<String> i;
 	private ZObservationNode u;
 	private List<ZObservationNode> states;
+	private ZStatsEntry stats;
 
 	public ZLearner(Driver driver) {
 		this.driver = (MealyDriver) driver;
@@ -55,6 +56,7 @@ public class ZLearner extends Learner {
 
 		LogManager.logConsole("Options : I -> " + i.toString());
 		LogManager.logConsole("Options : Z -> " + z.toString());
+		stats = new ZStatsEntry(this.driver);
 	}
 
 	private LmConjecture fixPointConsistency(LmConjecture K) {
@@ -166,7 +168,9 @@ public class ZLearner extends Learner {
 
 	public void learn() {
 		LogManager.logConsole("Inferring the system");
+		long start_time = System.nanoTime();
 		InputSequence ce;
+		int lastOracleLength = 0;
 
 		// 1. Build-quotient(A, I, Z, {€}) returning U and K = (Q, q0, I, O, hK)
 		LmConjecture Z_Q = buildQuotient(z);
@@ -176,11 +180,17 @@ public class ZLearner extends Learner {
 
 		// 4. while there exists an unprocessed counterexample CE
 		do {
+			long oracleStart = System.nanoTime();
+			int traceLength = driver.numberOfAtomicRequest;
 			LmTrace ceTrace = driver.getCounterExample(Z_Q);
+			float oracleDuration = (float) ((System.nanoTime() - oracleStart)
+					/ 1000000000.);
 			if (ceTrace != null)
 				ce = ceTrace.getInputsProjection();
 			else
 				ce = null;
+			lastOracleLength = driver.numberOfAtomicRequest - traceLength;
+			stats.increaseOracleCallNb(lastOracleLength, oracleDuration);
 			if (ce != null) {
 				LogManager.logInfo("Adding the counter example to tree");
 
@@ -194,6 +204,11 @@ public class ZLearner extends Learner {
 
 			}
 		} while (ce != null);
+		float duration = (float) ((System.nanoTime() - start_time)
+				/ 1000000000.);
+		stats.finalUpdate(createConjecture(), duration,
+				driver.numberOfAtomicRequest, driver.numberOfRequest,
+				lastOracleLength);
 		System.out.println();
 	}
 
@@ -402,5 +417,10 @@ public class ZLearner extends Learner {
 		c.exportToDot();
 
 		return c;
+	}
+
+	@Override
+	public ZStatsEntry getStats() {
+		return stats;
 	}
 }
