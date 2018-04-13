@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import automata.Transition;
 import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
 import drivers.mealy.MealyDriver;
@@ -20,27 +19,21 @@ public class HWStatsEntry extends StatsEntry {
 	public static final Attribute<Integer>W_TOTAL_LENGTH = Attribute.W_TOTAL_LENGTH;
 	public static final Attribute<Integer>MAX_W_LENGTH = Attribute.MAX_W_LENGTH;
 	public static final Attribute<Float>AVERAGE_W_LENGTH = Attribute.AVERAGE_W_LENGTH;
-	//public static final Attribute<Integer>W1_LENGTH = Attribute.W1_LENGTH;
 	public static final Attribute<Integer>H_LENGTH = Attribute.H_LENGTH;
 	public final static Attribute<Integer> H_ANSWERS_NB =	Attribute.H_ANSWERS_NB;
 	public static final Attribute<Integer>LOCALIZER_CALL_NB = Attribute.LOCALIZER_CALL_NB;
-//	public static final Attribute<Integer>LOCALIZER_SEQUENCE_LENGTH = Attribute.LOCALIZER_SEQUENCE_LENGTH;
 	public static final Attribute<Integer>TRACE_LENGTH = Attribute.TRACE_LENGTH;
 	public static final Attribute<Integer>MIN_TRACE_LENGTH = Attribute.MIN_TRACE_LENGTH;
 	public static final Attribute<Integer>INPUT_SYMBOLS = Attribute.INPUT_SYMBOLS;
 	public static final Attribute<Integer>OUTPUT_SYMBOLS = Attribute.OUTPUT_SYMBOLS;
 	public static final Attribute<Integer>STATE_NUMBER = Attribute.STATE_NUMBER;
-//	public static final Attribute<Integer>STATE_NUMBER_BOUND = Attribute.STATE_NUMBER_BOUND;
-//	public static final Attribute<Integer>STATE_BOUND_OFFSET = Attribute.STATE_BOUND_OFFSET;
 	public static final Attribute<Integer>LOOP_RATIO = Attribute.LOOP_RATIO;
 	public static final Attribute<String> AUTOMATA = Attribute.AUTOMATA;
 	public static final Attribute<Float> DURATION = Attribute.DURATION;
 	public static final Attribute<Integer>MEMORY = Attribute.MEMORY;
-	
 	public static final Attribute<Integer>MAX_RECKONED_STATES = Attribute.MAX_RECKONED_STATES;
 	public static final Attribute<Integer>MAX_FAKE_STATES = Attribute.MAX_FAKE_STATES;
 	public static final Attribute<Long>SEED = Attribute.SEED;
-	
 	public final static Attribute<Integer>ASKED_COUNTER_EXAMPLE =	Attribute.ASKED_COUNTER_EXAMPLE;
 	public final static Attribute<Integer>H_INCONSISTENCY_FOUND =	Attribute.H_INCONSISTENCY_FOUND;
 	public final static Attribute<Integer>W_INCONSISTENCY_FOUND =	Attribute.W_INCONSISTENCY_FOUND;
@@ -53,6 +46,7 @@ public class HWStatsEntry extends StatsEntry {
 	public static final Attribute<Boolean>CHECK_3rd_INCONSISTENCY =	Attribute.CHECK_3rd_INCONSISTENCY;
 	public static final Attribute<Boolean>REUSE_HZXW =				Attribute.REUSE_HZXW;
 	public static final Attribute<Boolean>PRECOMPUTED_W =			Attribute.PRECOMPUTED_W;
+	public static final Attribute<Float> ORACLE_TRACE_PERCENTAGE =	Attribute.ORACLE_TRACE_PERCENTAGE;
 
 	
 	private static Attribute<?>[] attributes = new Attribute<?>[]{
@@ -60,17 +54,13 @@ public class HWStatsEntry extends StatsEntry {
 			W_TOTAL_LENGTH,
 			MAX_W_LENGTH,
 			AVERAGE_W_LENGTH,
-//			W1_LENGTH,
 			H_LENGTH,
 			H_ANSWERS_NB,
 			LOCALIZER_CALL_NB,
-//			LOCALIZER_SEQUENCE_LENGTH,
 			TRACE_LENGTH,
 			INPUT_SYMBOLS,
 			OUTPUT_SYMBOLS,
 			STATE_NUMBER,
-//			STATE_NUMBER_BOUND,
-//			STATE_BOUND_OFFSET,
 			LOOP_RATIO,
 			AUTOMATA,
 			DURATION,
@@ -114,14 +104,11 @@ public class HWStatsEntry extends StatsEntry {
 	private int maxWLength=-1;
 	private int hLength=-1;
 	private int hResponses;
-//	private int w1Length;
 	private int localizeCallNb = 0;
-//	private int localizeSequenceLength;
 	private int traceLength = 0;
 	private int inputSymbols;
 	private int outputSymbols;
 	private int statesNumber;
-//	private int n;
 	private int loopTransitionPercentage;
 	private String automata;
 	private float duration;
@@ -154,14 +141,11 @@ public class HWStatsEntry extends StatsEntry {
 		maxWLength = Integer.parseInt(st.nextToken());
 		hLength = Integer.parseInt(st.nextToken());
 		hResponses = Integer.parseInt(st.nextToken());
-//		w1Length = Integer.parseInt(st.nextToken());
 		localizeCallNb = Integer.parseInt(st.nextToken());
-//		localizeSequenceLength = Integer.parseInt(st.nextToken());
 		traceLength = Integer.parseInt(st.nextToken());
 		inputSymbols = Integer.parseInt(st.nextToken());
 		outputSymbols = Integer.parseInt(st.nextToken());
 		statesNumber = Integer.parseInt(st.nextToken());
-//		n = Integer.parseInt(st.nextToken());
 		loopTransitionPercentage = Integer.parseInt(st.nextToken());
 		automata = st.nextToken();
 		duration = Float.parseFloat(st.nextToken());
@@ -350,6 +334,8 @@ public class HWStatsEntry extends StatsEntry {
 				return (T) new Boolean(reuse_hzxw);
 		if (a == PRECOMPUTED_W)
 			return (T) new Boolean(precomputedW);
+		if (a == ORACLE_TRACE_PERCENTAGE)
+			return (T) new Float(100. * oracleTraceLength / traceLength);
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 
 	}
@@ -359,28 +345,27 @@ public class HWStatsEntry extends StatsEntry {
 				a == W_TOTAL_LENGTH ||
 				a == MAX_W_LENGTH ||
 				a == H_LENGTH ||
-//				a == W1_LENGTH ||
 				a == LOCALIZER_CALL_NB ||
-//				a == LOCALIZER_SEQUENCE_LENGTH ||
 				a == TRACE_LENGTH ||
 				a == INPUT_SYMBOLS ||
 				a == OUTPUT_SYMBOLS ||
 				a == STATE_NUMBER ||
-//				a == STATE_NUMBER_BOUND ||
-//				a == STATE_BOUND_OFFSET ||
 				a == MEMORY ||
 				a == MIN_TRACE_LENGTH ||
 				a == MAX_RECKONED_STATES ||
 				a == MAX_FAKE_STATES ||
 				a == H_ANSWERS_NB ||
+				a == W_INCONSISTENCY_FOUND ||
 				a == SUB_INFERANCE_NB ||
 				a == LOOP_RATIO ||
 				a == ASKED_COUNTER_EXAMPLE||
+				a == H_INCONSISTENCY_FOUND ||
 				a == ORACLE_TRACE_LENGTH)
 			return ((Integer) get(a)).floatValue();
 		if (a == SEED)
 			return ((Long) get(a)).floatValue();
-		if (a == DURATION || a == AVERAGE_W_LENGTH || a == ORACLE_DURATION)
+		if (a == DURATION || a == AVERAGE_W_LENGTH || a == ORACLE_DURATION
+				|| a == ORACLE_TRACE_PERCENTAGE)
 			return (Float) get(a);
 		throw new RuntimeException(a.getName() + " is not available or cannot be cast to float");
 
