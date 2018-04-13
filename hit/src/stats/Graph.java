@@ -33,20 +33,58 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		POWER(), EXPONENTIAL(), ;
 	}
 
-	public static class PointType {
+	public static class Color {
+		private int r, g, b;
+
+		public Color(int r, int g, int b) {
+			super();
+			this.r = r;
+			this.g = g;
+			this.b = b;
+		}
+
+		public Color(String htmlColor) {
+			assert htmlColor.startsWith("#");
+			assert htmlColor.length() == 7;
+			r = Integer.parseInt(htmlColor.substring(1, 3), 16);
+			g = Integer.parseInt(htmlColor.substring(3, 5), 16);
+			b = Integer.parseInt(htmlColor.substring(5, 7), 16);
+		}
+
+		public String toGnuplotString() {
+			String r_ = Integer.toHexString(r);
+			String g_ = Integer.toHexString(g);
+			String b_ = Integer.toHexString(b);
+			if (r_.length() < 2)
+				r_ = "0" + r_;
+			if (g_.length() < 2)
+				g_ = "0" + g_;
+			if (b_.length() < 2)
+				b_ = "0" + b_;
+			return "rgb '#" + r_ + g_ + b_ + "' ";
+		}
+	}
+
+	public static class PointShape {
 		public final int style;
 
-		public PointType(int style) {
+		public PointShape(int style) {
 			this.style = style;
 		}
 
-		public final static PointType PLUS_CROSS = new PointType(1);
-		public final static PointType TIMES_CROSS = new PointType(2);
-		public final static PointType EMPTY_SQUARE = new PointType(4);
-		public final static PointType FILLED_SQUARE = new PointType(5);
-		public final static PointType FILLED_CIRCLE = new PointType(7);
-		public final static PointType EMPTY_TRIANGLE_UP = new PointType(8);
-		public final static PointType FILLED_TRIANGLE_UP = new PointType(9);
+		public final static PointShape PLUS_CROSS = new PointShape(1);
+		public final static PointShape TIMES_CROSS = new PointShape(2);
+		public final static PointShape EMPTY_SQUARE = new PointShape(4);
+		public final static PointShape FILLED_SQUARE = new PointShape(5);
+		public final static PointShape EMPTY_CIRCLE = new PointShape(6);
+		public final static PointShape FILLED_CIRCLE = new PointShape(7);
+		public final static PointShape EMPTY_TRIANGLE_UP = new PointShape(8);
+		public final static PointShape FILLED_TRIANGLE_UP = new PointShape(9);
+		public final static PointShape EMPTY_TRIANGLE_DOWN = new PointShape(10);
+		public final static PointShape FILLED_TRIANGLE_DOWN = new PointShape(
+				11);
+		public final static PointShape EMPTY_DIAMOND = new PointShape(12);
+		public final static PointShape FILLED_DIAMOND = new PointShape(13);
 
 	}
 
@@ -138,17 +176,18 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		toDelete = new ArrayList<File>();
 	}
 
-	public void plot(StatsSet stats, PlotStyle style, PointType pointType) {
+	public void plot(StatsSet stats, PlotStyle style, PointShape pointType) {
 		plot(stats, style, ("" + style).replaceAll("_", " ") + " of "
-				+ stats.size() + " inferences " + stats.getTitle(), pointType);
+				+ stats.size() + " inferences " + stats.getTitle(), pointType,
+				null);
 	}
 
 	public void plot(StatsSet stats, PlotStyle style, String title) {
-		plot(stats, style, title, null);
+		plot(stats, style, title, null, null);
 	}
 
 	public void plot(StatsSet stats, PlotStyle style, String title,
-			PointType pointType) {
+			PointShape pointType, Color color) {
 		if (stats.size() == 0)
 			return;
 		this.stats.getStats().addAll(stats.getStats());
@@ -175,6 +214,9 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		plotLines.append(" " + lineStyle);
 		if (pointType != null) {
 			plotLines.append(" pt " + pointType.style);
+		}
+		if (color != null) {
+			plotLines.append(" lc " + color.toGnuplotString());
 		}
 		plotLines.append(" title \"" + plotTitle + "\", ");
 		if (forcePoints && style != PlotStyle.POINTS)
