@@ -175,6 +175,16 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 	private Set<LineStyle> linesStyles = new HashSet<LineStyle>();
 
 	private List<File> toDelete;
+	private boolean isForArticle = false;
+	private boolean exportForLatex = false;
+
+	public void setForArticle(boolean isForArticle) {
+		this.isForArticle = isForArticle;
+		exportForLatex = isForArticle;
+	}
+
+	private boolean fewData = false;// indicate that one set did not provide
+									// enough points for one value in abscissa
 
 	public Graph(Attribute<T_ABS> abs, Attribute<T_ORD> ord) {
 		this.abs = abs;
@@ -198,6 +208,17 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 			PointShape pointType, Color color) {
 		if (stats.size() == 0)
 			return;
+
+		Map<T_ABS, StatsSet> setByAbs = stats.sortByAtribute(abs);
+		for (Entry<T_ABS, StatsSet> e : setByAbs.entrySet()) {
+
+			if (e.getValue().size() < 150) {
+				fewData = true;
+				if (isForArticle)
+					System.err.println("few " + stats.getTitle() + " for value "
+							+ e.getKey());
+			}
+		}
 
 		if (style == null)
 			style = defaultStyle;
@@ -443,15 +464,26 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 			LogManager.logError("no data to plot" + ((fileName == null) ? "" : "(" + fileName + ")"));
 			return;
 		}
+		if (exportForLatex) {
+			exportForLatex = false;
+			export();
+			exportForLatex = true;
+		}
+
 		StringBuilder r = new StringBuilder();
 
-		r.append("set terminal svg ");
-		if (imageHeight != null && imageWidth != null) {
-			r.append(" size " + imageWidth + "," + imageHeight);
+		if (exportForLatex) {
+			r.append("set terminal epslatex ");
+			r.append("\n");
 		} else {
-			r.append(" size 1200,800 dynamic");
+			r.append("set terminal svg ");
+			if (imageHeight != null && imageWidth != null) {
+				r.append(" size " + imageWidth + "," + imageHeight);
+			} else {
+				r.append(" size 1200,800 dynamic");
+			}
+			r.append(" enhanced font \"Sans,12\"\n");
 		}
-		r.append(" enhanced font \"Sans,12\"\n");
 
 		r.append(keyParameters.toGnuplotLine());
 
@@ -462,14 +494,13 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		if (fileName == null)
 			totalFileName.append(name + "(" + stats.hashCode() + ")");
 		else
-			totalFileName.append(fileName);
-		totalFileName.append(".svg");
+			totalFileName.append(fileName.replace(" ", "_"));
+		if (exportForLatex) {
+			totalFileName.append(".tex");
+		} else
+			totalFileName.append(".svg");
 
 		r.append("set output \"" + totalFileName + "\"\n");
-		
-		//r.append("set format y \"$%3.1t\\\\\\\\times10\\\\^\\\\{%T\\\\}$\"\n");
-		//r.append("set format y \"%f\"\n");
-
 
 		r.append("set xlabel \"" + abs.getName()
 				+ (abs.shouldDisplayUnits()
@@ -491,6 +522,10 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		int linesNb = dataDescription.split("\\\\n").length;
 		r.append("\" at graph 1,"+ (linesNb/24.) + " right\n");
 
+		if (isForArticle && fewData)
+			r.append(
+					"set label \"DRAFT\" at graph 0.5,0.5 center font \",50\"\n");
+
 		boolean absLogScale = abs.useLogScale();
 		if (forceAbsLogScale != null)
 			absLogScale = forceAbsLogScale;
@@ -505,13 +540,6 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 
 		for (LineStyle ls : linesStyles)
 			r.append("set style line " + ls.index + " " + ls.plotLine + "\n");
-
-//		r.append("set style line 1 dashtype 2 linewidth 2\n");
-//		r.append("set style line 2 dashtype 4 linewidth 2\n");
-//		// r.append("set style line 1 linecolor rgb '#0060ad' linetype 1
-//		// linewidth 2\n");
-//		// r.append("set style line 2 linecolor rgb '#dd181f' linetype 4
-//		// linewidth 2\n ");
 
 		r.append("plot " + plotLines.substring(0, plotLines.length() - 2) + "\n");
 		GNUPlot.makeGraph(r.toString());
