@@ -33,11 +33,11 @@ class StateDriver extends MealyDriver {
 		StringBuilder prefixBuilder = new StringBuilder();
 		prefixBuilder.append("[");
 		for (String o : homingSequenceResponse.sequence)
-			prefixBuilder.append(o+"\t");
+			prefixBuilder.append(o + ", ");
 		if (homingSequenceResponse.getLength()==0)
 			prefixBuilder.append("empty ");
 		prefixBuilder.setCharAt(prefixBuilder.length()-1, ']');
-		prefixBuilder.append("  \t");
+		prefixBuilder.append(", ");
 		prefix = prefixBuilder.toString();
 		this.realDriver = realDriver;
 		this.learner = learner;
