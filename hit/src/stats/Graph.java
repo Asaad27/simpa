@@ -470,9 +470,18 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		//r.append("set format y \"$%3.1t\\\\\\\\times10\\\\^\\\\{%T\\\\}$\"\n");
 		//r.append("set format y \"%f\"\n");
 
-		r.append("set xlabel \"" + abs.getName() + " (" + abs.getUnits().getSymbol() + ")\"\n");
 
-		r.append("set ylabel \"" + ord.getName() + " (" + ord.getUnits().getSymbol() + ")\"\n");
+		r.append("set xlabel \"" + abs.getName()
+				+ (abs.shouldDisplayUnits()
+						? " (" + abs.getUnits().getSymbol() + ")"
+						: "")
+				+ "\"\n");
+
+		r.append("set ylabel \"" + ord.getName()
+				+ (ord.shouldDisplayUnits()
+						? " (" + ord.getUnits().getSymbol() + ")"
+						: "")
+				+ "\"\n");
 
 		if (stats.size() > 0 && stats.get(0).get(abs) instanceof String)
 			r.append("set xtics rotate by -30\n");
