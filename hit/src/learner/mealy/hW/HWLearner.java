@@ -33,7 +33,6 @@ import learner.mealy.hW.dataManager.SimplifiedDataManager;
 import learner.mealy.localizerBased.LocalizerBasedLearner;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
-import tools.CompiledSearchGraph;
 import tools.Utils;
 
 import tools.loggers.LogManager;
@@ -234,6 +233,7 @@ public class HWLearner extends Learner {
 			W = LocalizerBasedLearner.computeCharacterizationSet(driver);
 		}
 
+		LogManager.logConsole("hw : start of learning");
 		long start = System.nanoTime();
 
 		InputSequence h = new InputSequence();
@@ -375,6 +375,7 @@ public class HWLearner extends Learner {
 		} while (counterExampleTrace != null || inconsistencyFound);
 
 		float duration = (float) (System.nanoTime() - start) / 1000000000;
+		LogManager.logConsole("hw : end of learning : " + duration + "s");
 		stats.setDuration(duration);
 		stats.setSearchCEInTrace(Options.TRY_TRACE_AS_CE ? "simple" : "none");
 		stats.setAddHInW(Options.ADD_H_IN_W);
