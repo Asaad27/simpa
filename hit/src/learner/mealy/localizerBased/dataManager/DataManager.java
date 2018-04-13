@@ -27,6 +27,7 @@ import learner.mealy.LmTrace;
 import learner.mealy.localizerBased.dataManager.vTree.AbstractNode;
 import learner.mealy.localizerBased.dataManager.vTree.StateNode;
 import main.simpa.Options;
+import main.simpa.Options.LogLevel;
 import tools.GraphViz;
 import tools.loggers.LogManager;
 
@@ -399,7 +400,9 @@ public class DataManager {
 			s.append(new LmTrace(W.get(i),WResponses.get(i)) + ", ");
 		}
 		logRecursivity("New state discovered : " + newState + " (" + s + ")");
-		LogManager.logConsole("New state discovered : " + newState + " (" + s + ")");
+		if (Options.LOG_LEVEL != LogLevel.LOW)
+			LogManager.logConsole(
+					"New state discovered : " + newState + " (" + s + ")\r");
 		Q.put(WResponses,newState);
 		return newState;
 	}
