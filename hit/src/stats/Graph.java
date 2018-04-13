@@ -151,6 +151,7 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 	private Attribute<T_ABS> abs;
 	private Attribute<T_ORD> ord;
 	private KeyParameters keyParameters = new KeyParameters();
+	private PlotStyle defaultStyle = PlotStyle.POINTS;
 	private StatsSet stats;
 	private StringBuilder plotLines;
 	private String title;
@@ -190,6 +191,9 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 			PointShape pointType, Color color) {
 		if (stats.size() == 0)
 			return;
+
+		if (style == null)
+			style = defaultStyle;
 		this.stats.getStats().addAll(stats.getStats());
 		File tempPlot = makeDataFile(stats, style);
 		StringBuilder plotTitle = new StringBuilder();
@@ -415,6 +419,18 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		maxOrd = (max == null) ? null : max.doubleValue();
 	}
 
+	/**
+	 * Sets the style of plotting to use when it is not specified in plotLine
+	 * 
+	 * This must be set before the calls to plot.
+	 * 
+	 * @param defaultStyle
+	 *            the default style of plotting for this graph.
+	 */
+	public void setDefaultPlotStyle(PlotStyle defaultStyle) {
+		this.defaultStyle = defaultStyle;
+	}
+
 	public void export() {
 		if (plotLines.length() == 0) {
 			LogManager.logError("no data to plot" + ((fileName == null) ? "" : "(" + fileName + ")"));
@@ -535,6 +551,7 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 	}
 
 	private File makeDataFile(StatsSet stats, PlotStyle style) {
+		assert style != null;
 		if (stats.get(0).get(abs) instanceof String) {
 			Map<String, Integer> sortingValues = new HashMap<>();
 			for (StatsEntry s : stats.getStats()) {
