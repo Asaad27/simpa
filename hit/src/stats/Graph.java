@@ -120,14 +120,21 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 
 		private VerticalPosition vPosition;
 		private HorizontalPosition hPosition;
+		private boolean outside = false;
 
 		public String toGnuplotLine() {
-			if (vPosition == null & hPosition == null)
-				return "";
 			return "set key"
-					+ (hPosition == null ? "" : (" " + hPosition.gnuplot))
-					+ (vPosition == null ? "" : (" " + vPosition.gnuplot))
+					+ (outside ? " outside right tmargin"
+							: (" inside"
+									+ (hPosition == null ? ""
+											: (" " + hPosition.gnuplot))
+									+ (vPosition == null ? ""
+											: (" " + vPosition.gnuplot))))
 					+ "\n";
+		}
+
+		public void setOutside(boolean outside) {
+			this.outside = outside;
 		}
 
 		public void setvPosition(VerticalPosition vPosition) {
