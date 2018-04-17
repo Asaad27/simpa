@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +73,14 @@ public abstract class AdaptiveStructure<InputT, OutputT> {
 			ancestor = ancestor.father;
 		}
 		return false;
+	}
+
+	/**
+	 * get the input labeling the current position
+	 */
+	public InputT getInput() {
+		assert !isFinal();
+		return input;
 	}
 
 	/**
@@ -153,6 +163,26 @@ public abstract class AdaptiveStructure<InputT, OutputT> {
 	 */
 	protected abstract boolean checkCompatibility(InputT input, OutputT output);
 
+	/**
+	 * Get the all nodes of the tree. Include all nodes from root, even non-leaf
+	 * 
+	 * @return the collection of all nodes. The order in the collection is not
+	 *         specified.
+	 */
+	public Collection<AdaptiveStructure<InputT, OutputT>> getAllNodes() {
+		List<AdaptiveStructure<InputT, OutputT>> all = new ArrayList<>();
+		List<AdaptiveStructure<InputT, OutputT>> currentLevel = new ArrayList<>();
+		currentLevel.add(root);
+		while (!currentLevel.isEmpty()) {
+			all.addAll(currentLevel);
+			List<AdaptiveStructure<InputT, OutputT>> nextLevel = new ArrayList<>();
+			for (AdaptiveStructure<InputT, OutputT> node : currentLevel)
+				nextLevel.addAll(node.children.values());
+			currentLevel = nextLevel;
+		}
+		return all;
+	}
+
 	protected static long dotNodeNumber = 0;
 	private String dotName = null;
 
@@ -217,6 +247,10 @@ public abstract class AdaptiveStructure<InputT, OutputT> {
 			AdaptiveStructure<InputT, OutputT> child) throws IOException {
 		writer.write(getDotName() + " -> " + child.getDotName() + "[label="
 				+ GraphViz.id2DotAuto(child.output.toString()) + "];");
+	}
+
+	public boolean isRoot() {
+		return this == root;
 	}
 
 }
