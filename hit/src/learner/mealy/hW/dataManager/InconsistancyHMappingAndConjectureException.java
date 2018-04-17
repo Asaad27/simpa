@@ -1,6 +1,7 @@
 package learner.mealy.hW.dataManager;
 
 import automata.State;
+import automata.mealy.GenericInputSequence.GenericOutputSequence;
 import automata.mealy.InputSequence;
 import automata.mealy.OutputSequence;
 
@@ -9,14 +10,14 @@ public class InconsistancyHMappingAndConjectureException extends Exception {
 
 	private State stateBeforeH;
 	private State stateAfterH;
-	private OutputSequence hResponse;
+	private GenericOutputSequence hResponse;
 	private FullyQualifiedState mappedTarget;
 	private InputSequence distinctionSequence;
 	private OutputSequence targetResponse;
 	private OutputSequence traceResponse;
 
 	public InconsistancyHMappingAndConjectureException(State stateBeforeH,
-			State stateAfterH, OutputSequence hResponse,
+			State stateAfterH, GenericOutputSequence hResponse,
 			FullyQualifiedState mappedTarget, InputSequence distinctionSequence,
 			OutputSequence targetResponse, OutputSequence traceResponse) {
 		this.stateBeforeH = stateBeforeH;
@@ -71,7 +72,7 @@ public class InconsistancyHMappingAndConjectureException extends Exception {
 		return stateAfterH;
 	}
 
-	public OutputSequence gethResponse() {
+	public GenericOutputSequence gethResponse() {
 		return hResponse;
 	}
 

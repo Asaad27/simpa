@@ -170,7 +170,7 @@ public class HWGraphGenerator extends GraphGenerator {
 		List<Attribute<?>> attributes = new ArrayList<>();
 		attributes.add(HWStatsEntry.MAX_RECKONED_STATES);
 		attributes.add(HWStatsEntry.MAX_FAKE_STATES);
-		attributes.add(HWStatsEntry.H_LENGTH);
+		attributes.add(HWStatsEntry.H_MAX_LENGTH);
 		attributes.add(HWStatsEntry.W_SIZE);
 		attributes.add(HWStatsEntry.MAX_W_LENGTH);
 		attributes.add(HWStatsEntry.W_TOTAL_LENGTH);
@@ -412,7 +412,7 @@ public class HWGraphGenerator extends GraphGenerator {
 		// ghr.export();
 
 		Graph<Integer, Integer> gh = new Graph<Integer, Integer>(
-				HWStatsEntry.STATE_NUMBER, HWStatsEntry.H_LENGTH);
+				HWStatsEntry.STATE_NUMBER, HWStatsEntry.H_MAX_LENGTH);
 		for (StatsSet statSet : statsSets) {
 			gh.plot(statSet, style);
 		}

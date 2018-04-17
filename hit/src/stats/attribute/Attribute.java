@@ -10,6 +10,7 @@ public class Attribute <T extends Comparable<T>> {
 	public final static Attribute<Integer>	MAX_W_LENGTH = 				new Attribute<Integer>(	"Length of longest W element",					true,	Units.SYMBOLS,		false,	false,	false);
 	public final static Attribute<Float>	AVERAGE_W_LENGTH = 			new Attribute<Float>(	"average length of W element",					true,	Units.SYMBOLS,		false,	false,	true);
 	public final static Attribute<Integer>	H_LENGTH = 					new Attribute<Integer>(	"Length of homing sequence",					true,	Units.SYMBOLS,		false,	false,	false);
+	public final static Attribute<Integer>	H_MAX_LENGTH = 				new Attribute<Integer>(	"Maximum length of homing sequence",			true,	Units.SYMBOLS,		false,	false,	false);
 	public final static Attribute<Integer>	H_ANSWERS_NB =				new Attribute<Integer>(	"number of answers to h",						false,	Units.SEQUENCES,	false,	false,	false);
 	public final static Attribute<Integer>	LOCALIZER_CALL_NB = 		new Attribute<Integer>(	"Number of call to localizer",					false,	Units.FUNCTION_CALL,false,	false,	false);
 	public final static Attribute<Integer>	LOCALIZER_SEQUENCE_LENGTH = new Attribute<Integer>(	"Length of localizer sequence",					true,	Units.SYMBOLS,		false,	false,	false);

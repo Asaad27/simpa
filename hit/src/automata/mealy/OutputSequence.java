@@ -3,9 +3,10 @@ package automata.mealy;
 import java.util.ArrayList;
 import java.util.List;
 
+import automata.mealy.GenericInputSequence.GenericOutputSequence;
 import main.simpa.Options;
 
-public class OutputSequence implements Cloneable {
+public class OutputSequence implements Cloneable, GenericOutputSequence {
 	public List<String> sequence;
 
 	public OutputSequence() {
@@ -138,5 +139,19 @@ public class OutputSequence implements Cloneable {
 	@Override
 	public int hashCode(){
 		return 23 + sequence.hashCode();
+	}
+
+	@Override
+	public <InputT> boolean checkCompatibilityWith(
+			GenericSequence<InputT, String> in) {
+		InputSequence inSeq = (InputSequence) in;
+		if (inSeq.getLength() != getLength())
+			return false;
+		return true;
+	}
+
+	@Override
+	public OutputSequence toFixedOutput() {
+		return this;
 	}
 }

@@ -1,17 +1,17 @@
 package learner.mealy.hW.dataManager;
 
-import automata.mealy.OutputSequence;
+import automata.mealy.GenericInputSequence.GenericOutputSequence;
 import learner.mealy.LmTrace;
 
 public class HZXWSequence {
 	
-	private final OutputSequence hResponse;
+	private final GenericOutputSequence hResponse;
 	private final LmTrace transferSequence;
 	private final LmTrace transition;
 	private final LmTrace wResponse;
 
-	public HZXWSequence(OutputSequence hResponse, LmTrace transferSequence,
-			LmTrace transition, LmTrace wResponse) {
+	public HZXWSequence(GenericOutputSequence hResponse,
+			LmTrace transferSequence, LmTrace transition, LmTrace wResponse) {
 		super();
 		this.hResponse = hResponse;
 		this.transferSequence = transferSequence;
@@ -20,7 +20,7 @@ public class HZXWSequence {
 		assert transition.size()==1;
 	}
 
-	public OutputSequence gethResponse() {
+	public GenericOutputSequence gethResponse() {
 		return hResponse;
 	}
 

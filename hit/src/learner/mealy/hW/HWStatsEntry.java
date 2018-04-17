@@ -19,7 +19,7 @@ public class HWStatsEntry extends StatsEntry {
 	public static final Attribute<Integer>W_TOTAL_LENGTH = Attribute.W_TOTAL_LENGTH;
 	public static final Attribute<Integer>MAX_W_LENGTH = Attribute.MAX_W_LENGTH;
 	public static final Attribute<Float>AVERAGE_W_LENGTH = Attribute.AVERAGE_W_LENGTH;
-	public static final Attribute<Integer>H_LENGTH = Attribute.H_LENGTH;
+	public static final Attribute<Integer> H_MAX_LENGTH = Attribute.H_MAX_LENGTH;
 	public final static Attribute<Integer> H_ANSWERS_NB =	Attribute.H_ANSWERS_NB;
 	public static final Attribute<Integer>LOCALIZER_CALL_NB = Attribute.LOCALIZER_CALL_NB;
 	public static final Attribute<Integer>TRACE_LENGTH = Attribute.TRACE_LENGTH;
@@ -54,7 +54,7 @@ public class HWStatsEntry extends StatsEntry {
 			W_TOTAL_LENGTH,
 			MAX_W_LENGTH,
 			AVERAGE_W_LENGTH,
-			H_LENGTH,
+			H_MAX_LENGTH,
 			H_ANSWERS_NB,
 			LOCALIZER_CALL_NB,
 			TRACE_LENGTH,
@@ -102,7 +102,7 @@ public class HWStatsEntry extends StatsEntry {
 	private int WSize=-1;
 	private int WTotalLength=-1;
 	private int maxWLength=-1;
-	private int hLength=-1;
+	private int hMaxLength = -1;
 	private int hResponses;
 	private int localizeCallNb = 0;
 	private int traceLength = 0;
@@ -139,7 +139,7 @@ public class HWStatsEntry extends StatsEntry {
 		WSize = Integer.parseInt(st.nextToken());
 		WTotalLength = Integer.parseInt(st.nextToken());
 		maxWLength = Integer.parseInt(st.nextToken());
-		hLength = Integer.parseInt(st.nextToken());
+		hMaxLength = Integer.parseInt(st.nextToken());
 		hResponses = Integer.parseInt(st.nextToken());
 		localizeCallNb = Integer.parseInt(st.nextToken());
 		traceLength = Integer.parseInt(st.nextToken());
@@ -244,7 +244,7 @@ public class HWStatsEntry extends StatsEntry {
 			}
 		}
 			hResponses=dataManager.getHResponsesNb();
-			hLength=dataManager.h.getLength();
+		hMaxLength = dataManager.h.getMaxLength();
 	}
 
 	
@@ -272,8 +272,8 @@ public class HWStatsEntry extends StatsEntry {
 			return (T) new Integer(maxWLength);
 		if (a==AVERAGE_W_LENGTH)
 			return (T)(new Float((float)WTotalLength/WSize));
-		if (a==H_LENGTH)
-			return (T) new Integer(hLength);
+		if (a == H_MAX_LENGTH)
+			return (T) new Integer(hMaxLength);
 		if (a==H_ANSWERS_NB)
 			return (T) new Integer(hResponses);
 //		if (a == W1_LENGTH)
@@ -344,7 +344,7 @@ public class HWStatsEntry extends StatsEntry {
 		if (a == W_SIZE || 
 				a == W_TOTAL_LENGTH ||
 				a == MAX_W_LENGTH ||
-				a == H_LENGTH ||
+				a == H_MAX_LENGTH ||
 				a == LOCALIZER_CALL_NB ||
 				a == TRACE_LENGTH ||
 				a == INPUT_SYMBOLS ||

@@ -2,12 +2,51 @@ package automata.mealy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Objects;
 
+import learner.mealy.LmTrace;
 import main.simpa.Options;
 import tools.Utils;
 
-public class InputSequence implements Cloneable {
+public class InputSequence implements Cloneable, GenericInputSequence {
+	public class SequenceIterator implements Iterator {
+		ListIterator<String> parent;
+		OutputSequence response = new OutputSequence();
+
+		protected SequenceIterator() {
+			this.parent = sequence.listIterator();
+		}
+
+		@Override
+		public boolean hasNext() {
+			return parent.hasNext();
+		}
+
+		@Override
+		public String next(String lastOutput) {
+			if (lastOutput != null)
+				response.addOutput(lastOutput);
+			return parent.next();
+		}
+
+		@Override
+		public GenericResponse<String> getResponse(String lastOutput) {
+			return getOutputResponse(lastOutput);
+		}
+
+		@Override
+		public GenericOutputSequence getOutputResponse(String lastOutput) {
+			if (lastOutput != null) {
+				assert response.getLength() + 1 == InputSequence.this
+						.getLength();
+				response.addOutput(lastOutput);
+			}
+			assert response.checkCompatibilityWith(InputSequence.this);
+			return response;
+		}
+	}
+
 	public List<String> sequence;
 
 	public InputSequence() {
@@ -181,4 +220,31 @@ public class InputSequence implements Cloneable {
 	public void prependInput(String input) {
 		sequence.add(0, input);
 	}
+
+	@Override
+	public Iterator inputIterator() {
+		return new SequenceIterator();
+	}
+
+	@Override
+	public automata.mealy.GenericSequence.Iterator<String, String> iterator() {
+		return inputIterator();
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return sequence.isEmpty();
+	}
+
+	@Override
+	public LmTrace buildTrace(GenericOutputSequence outSeq) {
+		assert outSeq.checkCompatibilityWith(this);
+		return new LmTrace(this, outSeq.toFixedOutput());
+	}
+
+	@Override
+	public int getMaxLength() {
+		return getLength();
+	}
+
 }

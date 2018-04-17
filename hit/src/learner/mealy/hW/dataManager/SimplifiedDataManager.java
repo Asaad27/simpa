@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 
+import automata.mealy.GenericInputSequence;
+import automata.mealy.GenericInputSequence.GenericOutputSequence;
 import automata.mealy.InputSequence;
 import automata.mealy.OutputSequence;
 import automata.mealy.Mealy;
@@ -30,7 +32,7 @@ public class SimplifiedDataManager {
 	private LmTrace trace;
 	private LmTrace globalTrace;
 	private final List<InputSequence> W; // Characterization set
-	public final InputSequence h;
+	public final GenericInputSequence h;
 	private final ArrayList<String> I;// Input Symbols
 	private Map<List<OutputSequence>, FullyQualifiedState> Q;// known states
 	private Set<FullyQualifiedState> notFullyKnownStates;// Fully qualified
@@ -40,13 +42,13 @@ public class SimplifiedDataManager {
 	private LmConjecture conjecture;
 	private FullyQualifiedState currentState;
 
-	private Map<OutputSequence, FullyQualifiedState> hResponse2State;
-	private Map<OutputSequence, List<OutputSequence>> hResponse2Wresponses;
+	private Map<GenericOutputSequence, FullyQualifiedState> hResponse2State;
+	private Map<GenericOutputSequence, List<OutputSequence>> hResponse2Wresponses;
 	private HomingSequenceChecker hChecker;
 
 	private Collection<TraceTree> expectedTraces;
 	
-	private Map<OutputSequence, List<HZXWSequence>> hZXWSequences;
+	private Map<GenericOutputSequence, List<HZXWSequence>> hZXWSequences;
 	private List<LocalizedHZXWSequence> readyForReapplyHZXWSequence = new ArrayList<>();
 
 	protected Collection<FullyQualifiedState> identifiedFakeStates=new ArrayList<>();
@@ -58,8 +60,8 @@ public class SimplifiedDataManager {
 		return hResponse2State.keySet().size();
 	}
 
-	public FullyQualifiedState getState(OutputSequence hResponse) {
-		assert (hResponse.getLength() == h.getLength());
+	public FullyQualifiedState getState(GenericOutputSequence hResponse) {
+		assert hResponse.checkCompatibilityWith(h);
 		FullyQualifiedState s = hResponse2State.get(hResponse);
 		if (s == null && W.size() == 0) {
 			s = getFullyQualifiedState(new ArrayList<OutputSequence>());
@@ -68,7 +70,7 @@ public class SimplifiedDataManager {
 	}
 
 	private List<OutputSequence> getOrCreateWResponseAfterHresponse(
-			OutputSequence hR) {
+			GenericOutputSequence hR) {
 		List<OutputSequence> wR = hResponse2Wresponses.get(hR);
 		if (wR != null)
 			return wR;
@@ -78,14 +80,16 @@ public class SimplifiedDataManager {
 
 	}
 
-	public InputSequence getMissingInputSequence(OutputSequence hResponse) {
+	public InputSequence getMissingInputSequence(
+			GenericOutputSequence hResponse) {
 		assert (getState(hResponse) == null);
 		List<OutputSequence> wRs = getOrCreateWResponseAfterHresponse(hResponse);
 		return W.get(wRs.size());
 	}
 
-	public FullyQualifiedState addWresponseAfterH(OutputSequence hResponse,
-			InputSequence w, OutputSequence wResponse) {
+	public FullyQualifiedState addWresponseAfterH(
+			GenericOutputSequence hResponse, InputSequence w,
+			OutputSequence wResponse) {
 		List<OutputSequence> wRs = getOrCreateWResponseAfterHresponse(hResponse);
 		assert (wRs.size() < W.size()) : "all responses already known";
 		assert (w.getLength() == wResponse.getLength());
@@ -111,10 +115,9 @@ public class SimplifiedDataManager {
 		return null;
 	}
 
-
 	public SimplifiedDataManager(MealyDriver driver, List<InputSequence> W,
-			InputSequence h, LmTrace globalTrace,
-			Map<OutputSequence, List<HZXWSequence>> hZXWSequences,
+			GenericInputSequence h, LmTrace globalTrace,
+			Map<GenericOutputSequence, List<HZXWSequence>> hZXWSequences,
 			HomingSequenceChecker hChecker) {
 		this.trace = new LmTrace();
 		this.globalTrace = globalTrace;
@@ -229,10 +232,17 @@ public class SimplifiedDataManager {
 	}
 
 	public OutputSequence apply(InputSequence inputs) {
-		OutputSequence outputs = new OutputSequence();
-		for (String input : inputs.sequence)
-			outputs.addOutput(apply(input));
-		return outputs;
+		return apply((GenericInputSequence) inputs).toFixedOutput();
+	}
+
+	public GenericOutputSequence apply(GenericInputSequence inputs) {
+		GenericInputSequence.Iterator it = inputs.inputIterator();
+		String lastOutput = null;
+		while (it.hasNext()) {
+			String input = it.next(lastOutput);
+			lastOutput = apply(input);
+		}
+		return it.getOutputResponse(lastOutput);
 	}
 
 	public String getK() {
@@ -476,13 +486,13 @@ public class SimplifiedDataManager {
 	public void exportConjecture() {
 		StringBuilder s = new StringBuilder();
 		int node_n = 0;
-		for (Map.Entry<OutputSequence, FullyQualifiedState> e : hResponse2State
+		for (Map.Entry<GenericOutputSequence, FullyQualifiedState> e : hResponse2State
 				.entrySet()) {
 			s.append("\t unknown_" + node_n
 					+ " [shape=none,label=\"homing\",fontcolor=blue];\n");
 			s.append("\t unknown_" + node_n + " -> " + e.getValue()
 					+ " [style=dashed,color=blue,fontcolor=blue,label=\""
-					+ new LmTrace(h, e.getKey()) + "\"]" + "\n");
+					+ h.buildTrace(e.getKey()) + "\"]" + "\n");
 			node_n++;
 		}
 		for (FullyQualifiedState q : Q.values()) {
@@ -510,7 +520,7 @@ public class SimplifiedDataManager {
 	 */
 	public Boolean isCompatibleWithHMapping(State s)
 			throws InconsistancyHMappingAndConjectureException {
-		OutputSequence output = conjecture.apply(h, s);
+		GenericOutputSequence output = conjecture.apply(h, s);
 		State targetState = conjecture.applyGetState(h, s);
 		List<OutputSequence> partialMapping = hResponse2Wresponses.get(output);
 		if (partialMapping != null) {

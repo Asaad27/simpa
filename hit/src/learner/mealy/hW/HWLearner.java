@@ -12,6 +12,8 @@ import java.util.Scanner;
 import java.util.Set;
 
 import automata.State;
+import automata.mealy.GenericInputSequence;
+import automata.mealy.GenericInputSequence.GenericOutputSequence;
 import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
@@ -44,9 +46,9 @@ public class HWLearner extends Learner {
 	protected List<InputSequence> W;
 	private int n;// the maximum number of states
 	private LmTrace fullTrace;
-	private OutputSequence lastDeliberatelyAppliedH = null;
+	private GenericOutputSequence lastDeliberatelyAppliedH = null;
 	private HomingSequenceChecker hChecker = null;
-	private Map<OutputSequence, List<HZXWSequence>> hZXWSequences = new HashMap<>();
+	private Map<GenericOutputSequence, List<HZXWSequence>> hZXWSequences = new HashMap<>();
 
 	public HWLearner(MealyDriver d) {
 		driver = d;
@@ -236,8 +238,11 @@ public class HWLearner extends Learner {
 		LogManager.logConsole("hw : start of learning");
 		long start = System.nanoTime();
 
-		InputSequence h = new InputSequence();
-		hChecker = new HomingSequenceChecker(h);
+		GenericInputSequence h = null;
+		hChecker = null;
+		InputSequence h_ = new InputSequence();
+		hChecker = new HomingSequenceChecker(h_);
+		h = h_;
 		stats = new HWStatsEntry(driver);
 
 		LmTrace counterExampleTrace;
@@ -453,7 +458,7 @@ public class HWLearner extends Learner {
 		// [observed h answer] -> (mapping [final state] -> [start state])
 		// this record for each answer what are the possible final state and how
 		// to reach them.
-		Map<OutputSequence, Map<State, List<State>>> knownResponses = new HashMap<>();
+		Map<GenericOutputSequence, Map<State, List<State>>> knownResponses = new HashMap<>();
 		while (!reachableStates.isEmpty()) {
 			State triedState = reachableStates.poll();
 			if (seenStates.contains(triedState))
@@ -505,7 +510,7 @@ public class HWLearner extends Learner {
 				}
 			}
 			LmConjecture conjecture = dataManager.getConjecture();
-			OutputSequence hResponse = conjecture.apply(dataManager.h,
+			GenericOutputSequence hResponse = conjecture.apply(dataManager.h,
 					triedState);
 			State endState = conjecture.applyGetState(dataManager.h,
 					triedState);
@@ -689,7 +694,7 @@ public class HWLearner extends Learner {
 		return null;
 	}
 
-	public void learn(List<InputSequence> W, InputSequence h) {
+	public void learn(List<InputSequence> W, GenericInputSequence h) {
 		LogManager.logStep(LogManager.STEPOTHER, "Inferring the system");
 		if (Options.LOG_LEVEL!=LogLevel.LOW)
 		LogManager.logConsole("Inferring the system with W=" + W + "and h=" + h);
@@ -759,7 +764,7 @@ public class HWLearner extends Learner {
 				// this is a corner case when h and W are empty.
 				LogManager
 						.logInfo("We are in corner case of implementation because W is empty.");
-				assert h.getLength() == 0;
+				assert h.isEmpty();
 				continue;
 			}
 			assert dataManager.getCurrentState() == null : "we are trying to qualify this state, that should not be already done.";
@@ -851,8 +856,8 @@ public class HWLearner extends Learner {
 		}
 	}
 
-	public void addHZXWSequence(OutputSequence hResponse, LmTrace transfer,
-			LmTrace transition, LmTrace wResponse) {
+	public void addHZXWSequence(GenericOutputSequence hResponse,
+			LmTrace transfer, LmTrace transition, LmTrace wResponse) {
 		List<HZXWSequence> list = hZXWSequences.get(hResponse);
 		if (list == null) {
 			list = new ArrayList<>();
@@ -881,7 +886,7 @@ public class HWLearner extends Learner {
 					+ s + ")");
 			return s;
 		}
-		OutputSequence hResponse;
+		GenericOutputSequence hResponse;
 		do {
 			LogManager.logInfo("Applying h to localize (h=" + dataManager.h
 					+ ")");

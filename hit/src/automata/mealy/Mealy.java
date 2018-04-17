@@ -19,6 +19,7 @@ import java.util.Set;
 import automata.Automata;
 import automata.State;
 import automata.Transition;
+import automata.mealy.GenericInputSequence.GenericOutputSequence;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import main.simpa.Options;
@@ -283,14 +284,20 @@ public class Mealy extends Automata implements Serializable {
 	}
 
 	public OutputSequence apply(InputSequence I, State s) {
-		OutputSequence O = new OutputSequence();
-		for (String i : I.sequence) {
-			MealyTransition t = getTransitionFromWithInput(s, i);
+		return apply((GenericInputSequence) I, s).toFixedOutput();
+	}
+
+	public GenericOutputSequence apply(GenericInputSequence seq, State s) {
+		GenericInputSequence.Iterator it = seq.inputIterator();
+		String lastOut = null;
+		while (it.hasNext()) {
+			String input = it.next(lastOut);
+			MealyTransition t = getTransitionFromWithInput(s, input);
 			assert t != null;
 			s = t.getTo();
-			O.addOutput(t.getOutput());
+			lastOut = t.getOutput();
 		}
-		return O;
+		return it.getOutputResponse(lastOut);
 	}
 
 	/**
@@ -317,11 +324,15 @@ public class Mealy extends Automata implements Serializable {
 		return true;
 	}
 
-	public State applyGetState(InputSequence I, State s) {
-		for (String i : I.sequence) {
-			MealyTransition t = getTransitionFromWithInput(s, i);
+	public State applyGetState(GenericInputSequence seq, State s) {
+		GenericInputSequence.Iterator it = seq.inputIterator();
+		String lastOut = null;
+		while (it.hasNext()) {
+			String input = it.next(lastOut);
+			MealyTransition t = getTransitionFromWithInput(s, input);
 			assert t != null;
 			s = t.getTo();
+			lastOut = t.getOutput();
 		}
 		return s;
 	}
@@ -585,15 +596,18 @@ public class Mealy extends Automata implements Serializable {
 
 	/**
 	 * indicate if the sequence provided is a homing sequence for this automata
-	 * @param h the sequence to test
+	 * 
+	 * @param h
+	 *            the sequence to test
 	 * @return true if it is a homing sequence
 	 */
-	public boolean acceptHomingSequence(InputSequence h){
-		Map<OutputSequence,State> responses=new HashMap<>();
-		for (State s:getStates()){
-			OutputSequence response=apply(h, s);
-			State end=applyGetState(h, s);
-			if (responses.containsKey(response)&&responses.get(response)!=end)
+	public boolean acceptHomingSequence(GenericInputSequence h) {
+		Map<GenericOutputSequence, State> responses = new HashMap<>();
+		for (State s : getStates()) {
+			GenericOutputSequence response = apply(h, s);
+			State end = applyGetState(h, s);
+			if (responses.containsKey(response)
+					&& responses.get(response) != end)
 				return false;
 			responses.put(response, end);
 		}
