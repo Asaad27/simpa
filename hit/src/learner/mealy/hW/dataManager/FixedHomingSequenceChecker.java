@@ -13,14 +13,14 @@ import tools.CompiledSearchGraph;
 import tools.loggers.LogManager;
 
 import learner.mealy.LmTrace;
-import learner.mealy.hW.dataManager.HomingSequenceChecker.Node.Child;
+import learner.mealy.hW.dataManager.FixedHomingSequenceChecker.Node.Child;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
 
 import automata.mealy.InputSequence;
 import automata.mealy.OutputSequence;
 
-public class HomingSequenceChecker {
+public class FixedHomingSequenceChecker extends GenericHomingSequenceChecker {
 	class Node {
 		class Child {
 			public Node n;
@@ -107,7 +107,7 @@ public class HomingSequenceChecker {
 	private LmTrace lastApplied;
 	private CompiledSearchGraph compiledSearchGraph;
 
-	public HomingSequenceChecker(InputSequence h) {
+	public FixedHomingSequenceChecker(InputSequence h) {
 		this.h = h;
 		this.knownResponses = new HashMap<>();
 		this.compiledSearchGraph = new CompiledSearchGraph(h);
@@ -123,7 +123,7 @@ public class HomingSequenceChecker {
 		this.lastApplied = new LmTrace();
 	}
 
-	public void applyInput(String input, String output) {
+	public void apply(String input, String output) {
 		lastApplied.append(input, output);
 
 		Node previousNode = currentNode;
@@ -160,7 +160,7 @@ public class HomingSequenceChecker {
 				LogManager.logInfo("Inconsistency found in homing sequence");
 				exportToDot();
 				}
-			throw new InvalidHException(traceA, traceB, h);
+			throw new FixedHNDException(traceA, traceB, h);
 		}
 		if (hIsObserved && knownOutput == null) {
 			LmTrace hTrace = (lastApplied.subtrace(
@@ -239,5 +239,10 @@ public class HomingSequenceChecker {
 		s.append("\t_current_ [shape=none,fontcolor=red,label=\"current\"]\n");
 		s.append("\t_current_ -> " + getOrCreateNodeName(currentNode, checkerNames) + " [label=\"\",color=red]" + "\n");
 		LogManager.logDot(s.toString(), "homingChecker");
+	}
+
+	@Override
+	public InputSequence getH() {
+		return h;
 	}
 }

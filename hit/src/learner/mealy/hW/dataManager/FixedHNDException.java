@@ -3,14 +3,14 @@ package learner.mealy.hW.dataManager;
 import automata.mealy.InputSequence;
 import learner.mealy.LmTrace;
 
-public class InvalidHException extends RuntimeException {
+public class FixedHNDException extends GenericHNDException {
 
 	private static final long serialVersionUID = 3270985693866307108L;
 	private LmTrace traceA;
 	private LmTrace traceB;
 	private InputSequence h;
 
-	public InvalidHException(LmTrace traceA, LmTrace traceB, InputSequence h) {
+	public FixedHNDException(LmTrace traceA, LmTrace traceB, InputSequence h) {
 		assert traceA.getInputsProjection()
 				.equals(traceB.getInputsProjection());
 		assert h.getLength() == 0 || traceA.getInputsProjection().startsWith(h);

@@ -44,7 +44,7 @@ public class SimplifiedDataManager {
 
 	private Map<GenericOutputSequence, FullyQualifiedState> hResponse2State;
 	private Map<GenericOutputSequence, List<OutputSequence>> hResponse2Wresponses;
-	private HomingSequenceChecker hChecker;
+	private GenericHomingSequenceChecker hChecker;
 
 	private Collection<TraceTree> expectedTraces;
 	
@@ -118,7 +118,7 @@ public class SimplifiedDataManager {
 	public SimplifiedDataManager(MealyDriver driver, List<InputSequence> W,
 			GenericInputSequence h, LmTrace globalTrace,
 			Map<GenericOutputSequence, List<HZXWSequence>> hZXWSequences,
-			HomingSequenceChecker hChecker) {
+			GenericHomingSequenceChecker hChecker) {
 		this.trace = new LmTrace();
 		this.globalTrace = globalTrace;
 		this.W = W;
@@ -134,7 +134,7 @@ public class SimplifiedDataManager {
 		hResponse2Wresponses = new HashMap<>();
 		currentState = null;
 		expectedTraces = new ArrayList<>();
-		assert hChecker.h.equals(h);
+		assert hChecker.getH().equals(h);
 		this.hChecker = hChecker;
 	}
 	
@@ -144,13 +144,13 @@ public class SimplifiedDataManager {
 	}
 	
 	public String walkWithoutCheck(String input, String output,
-			List<InvalidHException> hExceptions) {
+			List<GenericHNDException> hExceptions) {
 		extendTrace(input, output);
 		String expectedOutput = null;
 		// check for Non-Determinism after homing sequence
 		try {
-			hChecker.applyInput(input, output);
-		} catch (InvalidHException e) {
+			hChecker.apply(input, output);
+		} catch (GenericHNDException e) {
 			if (hExceptions != null)
 				hExceptions.add(e);
 		}
@@ -166,7 +166,7 @@ public class SimplifiedDataManager {
 	}
 
 	public OutputSequence walkWithoutCheck(LmTrace seq,
-			List<InvalidHException> hExceptions) {
+			List<GenericHNDException> hExceptions) {
 		OutputSequence outputs = new OutputSequence();
 		for (int i = 0; i < seq.size(); i++)
 			outputs.addOutput(walkWithoutCheck(seq.getInput(i),
@@ -181,7 +181,7 @@ public class SimplifiedDataManager {
 		String output = driver.execute(input);
 		extendTrace(input, output);
 		// check for Non-Determinism after homing sequence
-		hChecker.applyInput(input, output);
+		hChecker.apply(input, output);
 
 		// checking the compatibility with K
 		if (currentState != null) {

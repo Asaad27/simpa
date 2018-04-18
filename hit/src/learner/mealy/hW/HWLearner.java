@@ -25,11 +25,11 @@ import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import learner.mealy.hW.dataManager.ConjectureNotConnexException;
 import learner.mealy.hW.dataManager.FullyQualifiedState;
+import learner.mealy.hW.dataManager.GenericHomingSequenceChecker;
 import learner.mealy.hW.dataManager.HZXWSequence;
-import learner.mealy.hW.dataManager.HomingSequenceChecker;
 import learner.mealy.hW.dataManager.InconsistancyHMappingAndConjectureException;
 import learner.mealy.hW.dataManager.InconsistancyWithConjectureAtEndOfTraceException;
-import learner.mealy.hW.dataManager.InvalidHException;
+import learner.mealy.hW.dataManager.GenericHNDException;
 import learner.mealy.hW.dataManager.LocalizedHZXWSequence;
 import learner.mealy.hW.dataManager.SimplifiedDataManager;
 import learner.mealy.localizerBased.LocalizerBasedLearner;
@@ -47,7 +47,7 @@ public class HWLearner extends Learner {
 	private int n;// the maximum number of states
 	private LmTrace fullTrace;
 	private GenericOutputSequence lastDeliberatelyAppliedH = null;
-	private HomingSequenceChecker hChecker = null;
+	private GenericHomingSequenceChecker hChecker = null;
 	private Map<GenericOutputSequence, List<HZXWSequence>> hZXWSequences = new HashMap<>();
 
 	public HWLearner(MealyDriver d) {
@@ -61,7 +61,8 @@ public class HWLearner extends Learner {
 	 * @return the trace applied on driver or null if no counter example is
 	 *         found
 	 */
-	public LmTrace getCounterExemple(List<InvalidHException> hExceptions) {
+	public LmTrace getCounterExemple(
+			List<GenericHNDException> hExceptions) {
 		int startSize = dataManager.traceSize();
 		long startTime = System.nanoTime();
 		LmTrace returnedCE = null;
@@ -85,7 +86,7 @@ public class HWLearner extends Learner {
 	}
 
 	public LmTrace getRandomCounterExemple(
-			List<InvalidHException> hExceptions) {
+			List<GenericHNDException> hExceptions) {
 		if (driver instanceof TransparentMealyDriver) {
 			TransparentMealyDriver d = (TransparentMealyDriver) driver;
 			Options.MAX_CE_LENGTH = d.getAutomata().getStateCount()
@@ -192,7 +193,7 @@ public class HWLearner extends Learner {
 		}
 	}
 
-	private InputSequence proceedHException(InvalidHException e) {
+	private GenericInputSequence proceedHException(GenericHNDException e) {
 		stats.increaseHInconsitencies();
 		if (Options.LOG_LEVEL != LogLevel.LOW) {
 			LogManager.logInfo(
@@ -201,20 +202,24 @@ public class HWLearner extends Learner {
 					"Non-determinism found (due to homming sequence) : " + e);
 		}
 
-		InputSequence h = e.getNewH();
+		GenericInputSequence h = e.getNewH();
 		hZXWSequences = new HashMap<>();
 		LogManager.logInfo("h is now " + h);
-		hChecker = new HomingSequenceChecker(h);
+		hChecker = GenericHomingSequenceChecker.getChecker(h);
 		if (Options.ADD_H_IN_W) {
+			if (Options.ADAPTIVE_H)
+				throw new RuntimeException(
+						"not implemented : add h in W and adaptive h are incompatible at this time");
+			InputSequence hFixed = (InputSequence) h;
 			boolean hIsInW = false;
 			for (InputSequence w : W) {
-				if (w.startsWith(h)) {
+				if (w.startsWith(hFixed)) {
 					hIsInW = true;
 					break;
 				}
 			}
 			if (!hIsInW)
-				addOrExtendInW(h, W);
+				addOrExtendInW(hFixed, W);
 		}
 		return h;
 	}
@@ -239,10 +244,11 @@ public class HWLearner extends Learner {
 		long start = System.nanoTime();
 
 		GenericInputSequence h = null;
-		hChecker = null;
-		InputSequence h_ = new InputSequence();
-		hChecker = new HomingSequenceChecker(h_);
-		h = h_;
+		if (!Options.ADAPTIVE_H)
+			h = new InputSequence();
+		else
+			throw new RuntimeException("not implemented");
+		hChecker = GenericHomingSequenceChecker.getChecker(h);
 		stats = new HWStatsEntry(driver);
 
 		LmTrace counterExampleTrace;
@@ -265,7 +271,7 @@ public class HWLearner extends Learner {
 					throw e;
 				}
 				checkInconsistencyHMapping();
-			} catch (InvalidHException e) {
+			} catch (GenericHNDException e) {
 				h = proceedHException(e);
 				inconsistencyFound = true;
 			} catch (ConjectureNotConnexException e) {
@@ -307,7 +313,7 @@ public class HWLearner extends Learner {
 				}
 			}
 
-			List<InvalidHException> hExceptions = new ArrayList<>();
+			List<GenericHNDException> hExceptions = new ArrayList<>();
 			if (!inconsistencyFound && !virtualCounterExample) {
 				LogManager.logInfo("asking for a counter example");
 				counterExampleTrace = getCounterExemple(hExceptions);

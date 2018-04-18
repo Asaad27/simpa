@@ -446,9 +446,11 @@ public class SIMPA {
 			"Reuse HZXW");
 	private static BooleanOption HW_WITH_KNOWN_W = new BooleanOption(
 			"--hW-with-known-W", "precompute a W using a transparent driver");
+	private static BooleanOption ADAPTIVE_H = new BooleanOption("--adaptive-h",
+			"use adaptive homing sequence");
 	private static Option<?>[] hWOptions = new Option<?>[] { ADD_H_IN_W,
 			TRY_CE_FROM_TRACE, CHECK_INCONSISTENCY_H_MAPPING, REUSE_HZXW,
-			MAX_CE_LENGTH, HW_WITH_KNOWN_W };
+			MAX_CE_LENGTH, HW_WITH_KNOWN_W, ADAPTIVE_H };
 
 	// RS Options
 	private static BooleanOption RS_WITH_UNKNOWN_H = new BooleanOption(
@@ -634,6 +636,7 @@ public class SIMPA {
 		Options.TRY_TRACE_AS_CE = TRY_CE_FROM_TRACE.getValue();
 		Options.REUSE_HZXW=REUSE_HZXW.getValue();
 		Options.HW_WITH_KNOWN_W = HW_WITH_KNOWN_W.getValue();
+		Options.ADAPTIVE_H = ADAPTIVE_H.getValue();
 
 		Options.RS_WITH_UNKNOWN_H = RS_WITH_UNKNOWN_H.getValue();
 
