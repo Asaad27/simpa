@@ -84,7 +84,12 @@ public class AdaptiveSearchGraph<InputT, OutputT> {
 			childPositions.add(seq);
 			for (AdaptiveStructure<InputT, OutputT> pos : currentPositions) {
 				if (!pos.isFinal() && in.equals(pos.getInput())) {
-					childPositions.add(pos.getChild(out));
+					boolean isNew = pos.hasChild(out);
+					AdaptiveStructure<InputT, OutputT> posChild = pos
+							.getChild(out);
+					childPositions.add(posChild);
+					if (isNew)
+						seqPositions.add(posChild);
 				}
 			}
 			return getNodeOrCreate(childPositions);
@@ -108,6 +113,7 @@ public class AdaptiveSearchGraph<InputT, OutputT> {
 	 * @return a hash.
 	 */
 	protected int hash(Set<AdaptiveStructure<InputT, OutputT>> positions) {
+		assert seqPositions.containsAll(positions);
 		int i = 1;
 		int hash = 0;
 		for (AdaptiveStructure<InputT, OutputT> position : seqPositions) {

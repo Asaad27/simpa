@@ -104,6 +104,22 @@ public abstract class AdaptiveStructure<InputT, OutputT> {
 	}
 
 	/**
+	 * Indicate if a non-leaf node already have a child for the specified
+	 * output. This can be used to know if {@link #getChild(Object)} will return
+	 * an existing or a new node.
+	 * 
+	 * @param output
+	 *            the output to test
+	 * @return true if this (sub-)sequence already have a child for the given
+	 *         output.
+	 */
+	public boolean hasChild(OutputT output) {
+		assert !isFinal();
+		assert checkCompatibility(input, output);
+		return children.get(output) != null;
+	}
+
+	/**
 	 * should create a node of the same type as this.
 	 * 
 	 * @return
