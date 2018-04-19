@@ -96,6 +96,11 @@ public class HWGraphGenerator extends GraphGenerator {
 	static Restriction withoutHZXWRestriction = new EqualsRestriction<>(
 			HWStatsEntry.REUSE_HZXW, false);
 
+	static Restriction fixedHomingSequenceRestriction = new EqualsRestriction<>(
+			HWStatsEntry.USE_ADAPTIVE_H, false);
+	static Restriction adaptiveHomingSequenceRestriction = new EqualsRestriction<>(
+			HWStatsEntry.USE_ADAPTIVE_H, true);
+
 	{
 		randomCounterRestriction.setTitle("counter automata");
 		fileRestriction.setTitle("from file");
@@ -117,6 +122,11 @@ public class HWGraphGenerator extends GraphGenerator {
 
 		check3rdRestriction.setTitle("checking 3rd inconsistencies");
 		noCheck3rdRestriction.setTitle("not checking 3rd inconsistencies");
+
+		fixedHomingSequenceRestriction
+				.setTitle("using non-adaptive homing sequence");
+		adaptiveHomingSequenceRestriction
+				.setTitle("using adaptive homing sequence");
 
 	}
 

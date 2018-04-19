@@ -46,6 +46,7 @@ public class HWStatsEntry extends StatsEntry {
 	public static final Attribute<Boolean>CHECK_3rd_INCONSISTENCY =	Attribute.CHECK_3rd_INCONSISTENCY;
 	public static final Attribute<Boolean>REUSE_HZXW =				Attribute.REUSE_HZXW;
 	public static final Attribute<Boolean>PRECOMPUTED_W =			Attribute.PRECOMPUTED_W;
+	public static final Attribute<Boolean>USE_ADAPTIVE_H = 			Attribute.USE_ADAPTIVE_H;
 	public static final Attribute<Float> ORACLE_TRACE_PERCENTAGE =	Attribute.ORACLE_TRACE_PERCENTAGE;
 
 	
@@ -81,6 +82,7 @@ public class HWStatsEntry extends StatsEntry {
 			CHECK_3rd_INCONSISTENCY,
 			REUSE_HZXW,
 			PRECOMPUTED_W,
+			USE_ADAPTIVE_H,
 	};
 	
 	public static String getCSVHeader_s(){
@@ -129,6 +131,7 @@ public class HWStatsEntry extends StatsEntry {
 	private boolean check_3rd_inconsistency=false;
 	private boolean reuse_hzxw = false;
 	private boolean precomputedW = false;
+	private boolean useAdaptiveH = false;
 
 	/**
 	 * rebuild a HWStats object from a CSV line
@@ -166,6 +169,7 @@ public class HWStatsEntry extends StatsEntry {
 		check_3rd_inconsistency = Boolean.parseBoolean(st.nextToken());
 		reuse_hzxw = Boolean.parseBoolean(st.nextToken());
 		precomputedW = Boolean.parseBoolean(st.nextToken());
+		useAdaptiveH = Boolean.parseBoolean(st.nextToken());
 		
 	}
 
@@ -178,6 +182,7 @@ public class HWStatsEntry extends StatsEntry {
 		this.seed=Options.SEED;
 		this.reuse_hzxw = Options.REUSE_HZXW;
 		this.precomputedW = Options.HW_WITH_KNOWN_W;
+		this.useAdaptiveH = Options.ADAPTIVE_H;
 	}
 
 //	protected void setLocalizeSequenceLength(int length){
@@ -334,6 +339,8 @@ public class HWStatsEntry extends StatsEntry {
 				return (T) new Boolean(reuse_hzxw);
 		if (a == PRECOMPUTED_W)
 			return (T) new Boolean(precomputedW);
+		if (a == USE_ADAPTIVE_H)
+			return (T) new Boolean(useAdaptiveH);
 		if (a == ORACLE_TRACE_PERCENTAGE)
 			return (T) new Float(100. * oracleTraceLength / traceLength);
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");

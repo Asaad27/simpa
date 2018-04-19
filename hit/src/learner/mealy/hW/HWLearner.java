@@ -12,6 +12,7 @@ import java.util.Scanner;
 import java.util.Set;
 
 import automata.State;
+import automata.mealy.AdaptiveSymbolSequence;
 import automata.mealy.GenericInputSequence;
 import automata.mealy.GenericInputSequence.GenericOutputSequence;
 import automata.mealy.InputSequence;
@@ -23,6 +24,7 @@ import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
+import learner.mealy.hW.dataManager.AdaptiveHomingSequenceChecker;
 import learner.mealy.hW.dataManager.ConjectureNotConnexException;
 import learner.mealy.hW.dataManager.FullyQualifiedState;
 import learner.mealy.hW.dataManager.GenericHomingSequenceChecker;
@@ -203,9 +205,16 @@ public class HWLearner extends Learner {
 		}
 
 		GenericInputSequence h = e.getNewH();
-		hZXWSequences = new HashMap<>();
-		LogManager.logInfo("h is now " + h);
-		hChecker = GenericHomingSequenceChecker.getChecker(h);
+		if (e instanceof AdaptiveHomingSequenceChecker.AdaptiveHNDException) {
+			AdaptiveHomingSequenceChecker.AdaptiveHNDException adaptiveE = (AdaptiveHomingSequenceChecker.AdaptiveHNDException) e;
+			adaptiveE.updateH();
+			adaptiveE.getNewH().exportToDot();
+			hChecker = GenericHomingSequenceChecker.getChecker(h);//TODO keep the same checker
+		} else {
+			hZXWSequences = new HashMap<>();
+			LogManager.logInfo("h is now " + h);
+			hChecker = GenericHomingSequenceChecker.getChecker(h);
+		}
 		if (Options.ADD_H_IN_W) {
 			if (Options.ADAPTIVE_H)
 				throw new RuntimeException(
@@ -247,7 +256,7 @@ public class HWLearner extends Learner {
 		if (!Options.ADAPTIVE_H)
 			h = new InputSequence();
 		else
-			throw new RuntimeException("not implemented");
+			h = new AdaptiveSymbolSequence();
 		hChecker = GenericHomingSequenceChecker.getChecker(h);
 		stats = new HWStatsEntry(driver);
 
