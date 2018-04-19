@@ -11,7 +11,6 @@ import java.util.Stack;
 
 import automata.mealy.AdaptiveSymbolSequence;
 import automata.mealy.GenericInputSequence;
-import automata.mealy.InputSequence;
 import learner.mealy.LmTrace;
 import learner.mealy.hW.dataManager.AdaptiveHomingSequenceChecker.InconsistencyGraph.Inconsistency;
 import learner.mealy.hW.dataManager.AdaptiveHomingSequenceChecker.InconsistencyGraph.Node.Child;
@@ -88,6 +87,7 @@ public class AdaptiveHomingSequenceChecker
 		 * @return true if an inconsistency was found
 		 */
 		Inconsistency apply(boolean hFound, String input, String output) {
+			sequenceApplied = true;
 			if (!currentNode.hasChild(input)) {
 				Node next;
 				if (hFound)
@@ -111,8 +111,10 @@ public class AdaptiveHomingSequenceChecker
 						ancestors.push(ancestorNode);
 						ancestorNode = ancestorNode.father;
 					}
+					assert ancestorNode == endOfHNode;
 					while (!ancestors.isEmpty()) {
 						ancestorNode = ancestors.pop();
+						assert ancestorNode != endOfHNode;
 						inconsistency.commonTrace.append(ancestorNode.input,
 								ancestorNode.father
 										.getChild(ancestorNode.input).output);
@@ -238,6 +240,9 @@ public class AdaptiveHomingSequenceChecker
 			assert hResponse.isFinal();
 			assert firstTrace.getInputsProjection()
 					.equals(secondTrace.getInputsProjection());
+			assert firstTrace.getInputsProjection()
+					.startsWith(hResponse.getFullSequence()
+							.buildTrace(hResponse).getInputsProjection());
 			this.hResponse = hResponse;
 			this.firstTrace = firstTrace;
 			this.secondTrace = secondTrace;
@@ -294,6 +299,7 @@ public class AdaptiveHomingSequenceChecker
 
 		public void updateH() {
 			for (HInconsistency inc : inconsistencies) {
+				assert inc.hResponse.isAnswerTo(h);
 				inc.hResponse.extend(inc.firstTrace);
 				inc.hResponse.extend(inc.secondTrace);
 			}
