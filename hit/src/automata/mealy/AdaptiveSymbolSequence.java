@@ -68,10 +68,11 @@ public class AdaptiveSymbolSequence extends AdaptiveStructure<String, String>
 		assert outSeq.checkCompatibilityWith(this);
 		AdaptiveSymbolSequence outNode = (AdaptiveSymbolSequence) outSeq;
 		assert outNode.isFinal();
+		assert isRoot() : "trace from sub sequence is not implemented";
 		OutputSequence outputSeq = new OutputSequence();
-		outputSeq.sequence.addAll(getOutputsList());
+		outputSeq.sequence.addAll(outNode.getOutputsList());
 		InputSequence inputSeq = new InputSequence();
-		inputSeq.sequence.addAll(getInputsList());
+		inputSeq.sequence.addAll(outNode.getInputsList());
 		return new LmTrace(inputSeq, outputSeq);
 	}
 }
