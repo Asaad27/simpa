@@ -12,15 +12,15 @@ import learner.mealy.LmTrace;
 public interface GenericInputSequence extends GenericSequence<String, String> {
 	public interface Iterator extends GenericSequence.Iterator<String, String> {
 		/**
-		 * @param lastOutput
-		 *            same as {@link #getResponse(String)}
+		 * {@inheritDoc}
+		 * 
 		 * @return a {@link GenericInputSequence}
-		 * @see GenericSequence.Iterator#getResponse(Object)
 		 */
-		GenericOutputSequence getOutputResponse(String lastOutput);
+		GenericOutputSequence getResponse();
 	}
 
-	public interface GenericOutputSequence extends GenericResponse<String> {
+	public interface GenericOutputSequence
+			extends GenericResponse<String, String> {
 
 		/**
 		 * get the sequence of output symbols.

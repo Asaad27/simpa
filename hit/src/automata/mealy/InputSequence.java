@@ -19,29 +19,29 @@ public class InputSequence implements Cloneable, GenericInputSequence {
 		}
 
 		@Override
+		public void setPreviousOutput(String previousOutput) {
+			if (parent.previousIndex() != response.getLength())
+				throw new InvalidCallException(
+						"some previous outputs were not providen");
+			response.addOutput(previousOutput);
+
+		}
+
+		@Override
 		public boolean hasNext() {
 			return parent.hasNext();
 		}
 
 		@Override
-		public String next(String lastOutput) {
-			if (lastOutput != null)
-				response.addOutput(lastOutput);
+		public String next() {
 			return parent.next();
 		}
 
 		@Override
-		public GenericResponse<String> getResponse(String lastOutput) {
-			return getOutputResponse(lastOutput);
-		}
-
-		@Override
-		public GenericOutputSequence getOutputResponse(String lastOutput) {
-			if (lastOutput != null) {
-				assert response.getLength() + 1 == InputSequence.this
-						.getLength();
-				response.addOutput(lastOutput);
-			}
+		public OutputSequence getResponse() {
+			if (response.getLength() != InputSequence.this.getLength())
+				throw new InvalidCallException(
+						"some outputs were not providen");
 			assert response.checkCompatibilityWith(InputSequence.this);
 			return response;
 		}
@@ -129,8 +129,6 @@ public class InputSequence implements Cloneable, GenericInputSequence {
 		return true;
 	}
 
-	
-	
 	public String getFirstSymbol() {
 		return sequence.get(0);
 	}

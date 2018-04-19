@@ -237,12 +237,11 @@ public class SimplifiedDataManager {
 
 	public GenericOutputSequence apply(GenericInputSequence inputs) {
 		GenericInputSequence.Iterator it = inputs.inputIterator();
-		String lastOutput = null;
 		while (it.hasNext()) {
-			String input = it.next(lastOutput);
-			lastOutput = apply(input);
+			String input = it.next();
+			it.setPreviousOutput(apply(input));
 		}
-		return it.getOutputResponse(lastOutput);
+		return it.getResponse();
 	}
 
 	public String getK() {

@@ -289,15 +289,14 @@ public class Mealy extends Automata implements Serializable {
 
 	public GenericOutputSequence apply(GenericInputSequence seq, State s) {
 		GenericInputSequence.Iterator it = seq.inputIterator();
-		String lastOut = null;
 		while (it.hasNext()) {
-			String input = it.next(lastOut);
+			String input = it.next();
 			MealyTransition t = getTransitionFromWithInput(s, input);
 			assert t != null;
 			s = t.getTo();
-			lastOut = t.getOutput();
+			it.setPreviousOutput(t.getOutput());
 		}
-		return it.getOutputResponse(lastOut);
+		return it.getResponse();
 	}
 
 	/**
@@ -326,13 +325,12 @@ public class Mealy extends Automata implements Serializable {
 
 	public State applyGetState(GenericInputSequence seq, State s) {
 		GenericInputSequence.Iterator it = seq.inputIterator();
-		String lastOut = null;
 		while (it.hasNext()) {
-			String input = it.next(lastOut);
+			String input = it.next();
 			MealyTransition t = getTransitionFromWithInput(s, input);
 			assert t != null;
 			s = t.getTo();
-			lastOut = t.getOutput();
+			it.setPreviousOutput(t.getOutput());
 		}
 		return s;
 	}

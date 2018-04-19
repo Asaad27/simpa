@@ -142,8 +142,8 @@ public class OutputSequence implements Cloneable, GenericOutputSequence {
 	}
 
 	@Override
-	public <InputT> boolean checkCompatibilityWith(
-			GenericSequence<InputT, String> in) {
+	public boolean checkCompatibilityWith(GenericSequence<String, String> in) {
+		assert in instanceof InputSequence;
 		InputSequence inSeq = (InputSequence) in;
 		if (inSeq.getLength() != getLength())
 			return false;
