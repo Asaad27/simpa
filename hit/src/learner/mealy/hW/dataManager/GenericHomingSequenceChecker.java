@@ -17,6 +17,9 @@ public abstract class GenericHomingSequenceChecker {
 			GenericInputSequence h) {
 		if (h instanceof InputSequence)
 			return new FixedHomingSequenceChecker((InputSequence) h);
+		if (h instanceof AdaptiveSymbolSequence)
+			return new AdaptiveHomingSequenceChecker(
+					(AdaptiveSymbolSequence) h);
 		throw new RuntimeException("others types of sequence not implemented");
 	}
 
