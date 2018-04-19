@@ -75,4 +75,18 @@ public class AdaptiveSymbolSequence extends AdaptiveStructure<String, String>
 		inputSeq.sequence.addAll(outNode.getInputsList());
 		return new LmTrace(inputSeq, outputSeq);
 	}
+
+	@Override
+	public AdaptiveSymbolSequence getFullSequence() {
+		return (AdaptiveSymbolSequence) super.getFullSequence();
+	}
+
+	@Override
+	public String toString() {
+		if (isFinal() && isRoot())
+			return "epsilon";
+		if (isFinal())
+			return getFullSequence().buildTrace(this).toString();
+		return super.toString();
+	}
 }

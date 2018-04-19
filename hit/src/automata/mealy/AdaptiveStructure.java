@@ -115,6 +115,15 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 	}
 
 	/**
+	 * Get the complete sequence containing this part.
+	 * 
+	 * @return
+	 */
+	public AdaptiveStructure<InputT, OutputT> getFullSequence() {
+		return root;
+	}
+
+	/**
 	 * get the parent of this node or null if this is the root.
 	 * 
 	 * @return the parent of this node.
@@ -315,6 +324,29 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 		assert in instanceof AdaptiveStructure<?, ?>;
 		AdaptiveStructure<InputT, OutputT> in_ = (AdaptiveStructure<InputT, OutputT>) in;
 		return isAnswerTo(in_);
+	}
+
+	public void toString(StringBuilder s) {
+		if (isFinal())
+			s.append("leaf");
+		else {
+			s.append(input);
+			s.append(": [");
+			for (AdaptiveStructure<InputT, OutputT> child : children.values()) {
+				s.append(child.getFromOutput());
+				s.append(" → ");
+				s.append(child);
+				s.append(",");
+			}
+			s.append("]");
+		}
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder s = new StringBuilder();
+		toString(s);
+		return s.toString();
 	}
 
 	/// Iterable/Iterator functions ///

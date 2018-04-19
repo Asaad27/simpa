@@ -255,6 +255,14 @@ public class AdaptiveHomingSequenceChecker
 					inconsistency.secondOutput);
 		}
 
+		@Override
+		public String toString() {
+			return "sequence «"
+					+ hResponse.getFullSequence().buildTrace(hResponse)
+					+ "» is not homing : traces seen after this homing are «"
+					+ firstTrace + "» and «" + secondTrace + "»";
+		}
+
 	}
 
 	static public class AdaptiveHNDException extends GenericHNDException {
