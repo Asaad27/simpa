@@ -10,6 +10,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Stack;
 
 import main.simpa.Options;
 import tools.GraphViz;
@@ -29,7 +31,9 @@ import tools.loggers.LogManager;
  * 
  * @author Nicolas BREMOND
  */
-public abstract class AdaptiveStructure<InputT, OutputT> {
+public abstract class AdaptiveStructure<InputT, OutputT>
+		implements GenericSequence<InputT, OutputT>,
+		GenericSequence.GenericResponse<InputT, OutputT> {
 
 	InputT input = null;
 	AdaptiveStructure<InputT, OutputT> father = null;
@@ -52,6 +56,21 @@ public abstract class AdaptiveStructure<InputT, OutputT> {
 	 */
 	public boolean isFinal() {
 		return input == null;
+	}
+
+	/**
+	 * Indicate if this object represents the complete sequence instead of a
+	 * sequence from a partial answer.
+	 * 
+	 * @return {@code true} if this object represent the complete tree
+	 */
+	public boolean isRoot() {
+		return this == root;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return this == root && isFinal();
 	}
 
 	/**
@@ -81,6 +100,27 @@ public abstract class AdaptiveStructure<InputT, OutputT> {
 	public InputT getInput() {
 		assert !isFinal();
 		return input;
+	}
+
+	/**
+	 * get the output leading to this node
+	 * 
+	 * @return the output s.t. {@code getFather().getChild(output)} returns this
+	 *         node.
+	 */
+	public OutputT getFromOutput() {
+		assert !isRoot();
+		assert father.getChild(output) == this;
+		return output;
+	}
+
+	/**
+	 * get the parent of this node or null if this is the root.
+	 * 
+	 * @return the parent of this node.
+	 */
+	public AdaptiveStructure<InputT, OutputT> getFather() {
+		return father;
 	}
 
 	/**
@@ -117,6 +157,44 @@ public abstract class AdaptiveStructure<InputT, OutputT> {
 		assert !isFinal();
 		assert checkCompatibility(input, output);
 		return children.get(output) != null;
+	}
+
+	/**
+	 * Get the list of inputs for nodes from root to this one (if not final).
+	 * 
+	 * @return the list of inputs applied to get this response.
+	 */
+	public List<? extends InputT> getInputsList() {
+		List<InputT> inputs = new ArrayList<>();
+		Stack<? extends AdaptiveStructure<InputT, OutputT>> nodes = getStackFromRoot();
+		AdaptiveStructure<InputT, OutputT> current = nodes.pop();
+		while (current != this) {
+			inputs.add(current.getInput());
+			current = nodes.pop();
+		}
+		assert nodes.isEmpty();
+		if (!isFinal()) {
+			inputs.add(getInput());
+		}
+		return inputs;
+	}
+
+	/**
+	 * Get the list of outputs for node from root to this one.
+	 * 
+	 * @return the list of outputs composing this answer.
+	 */
+	public List<? extends OutputT> getOutputsList() {
+		List<OutputT> outputs = new ArrayList<>();
+		Stack<? extends AdaptiveStructure<InputT, OutputT>> nodes = getStackFromRoot();
+		AdaptiveStructure<InputT, OutputT> current = nodes.pop();
+		// first node is root and doesn't have an output assigned, so it is
+		// discarded
+		while (!nodes.isEmpty()) {
+			current = nodes.pop();
+			outputs.add(current.getFromOutput());
+		}
+		return outputs;
 	}
 
 	/**
@@ -169,6 +247,22 @@ public abstract class AdaptiveStructure<InputT, OutputT> {
 	}
 
 	/**
+	 * Get the nodes from root to this one, root is on top of the stack and this
+	 * at bottom.
+	 * 
+	 * @return nodes from root to this one.
+	 */
+	public Stack<? extends AdaptiveStructure<InputT, OutputT>> getStackFromRoot() {
+		Stack<AdaptiveStructure<InputT, OutputT>> nodes = new Stack<>();
+		AdaptiveStructure<InputT, OutputT> current = this;
+		while (current != null) {
+			nodes.push(current);
+			current = current.father;
+		}
+		return nodes;
+	}
+
+	/**
 	 * check if the output is compatible with the input.
 	 * 
 	 * @param inputT
@@ -199,6 +293,76 @@ public abstract class AdaptiveStructure<InputT, OutputT> {
 		return all;
 	}
 
+	@Override
+	public int getMaxLength() {
+		assert isRoot() : "documentation do not define result for a sub sequence";
+		int depth = 0;
+		List<AdaptiveStructure<InputT, OutputT>> currentLevel = new ArrayList<>();
+		currentLevel.add(root);
+		while (!currentLevel.isEmpty()) {
+			List<AdaptiveStructure<InputT, OutputT>> nextLevel = new ArrayList<>();
+			for (AdaptiveStructure<InputT, OutputT> node : currentLevel) {
+				nextLevel.addAll(node.children.values());
+			}
+			currentLevel = nextLevel;
+			depth++;
+		}
+		return depth - 1;
+	}
+
+	@Override
+	public boolean checkCompatibilityWith(GenericSequence<InputT, OutputT> in) {
+		assert in instanceof AdaptiveStructure<?, ?>;
+		AdaptiveStructure<InputT, OutputT> in_ = (AdaptiveStructure<InputT, OutputT>) in;
+		return isAnswerTo(in_);
+	}
+
+	/// Iterable/Iterator functions ///
+	public class Iterator implements GenericSequence.Iterator<InputT, OutputT> {
+		AdaptiveStructure<InputT, OutputT> current = root;
+		boolean isReady = true;
+
+		@Override
+		public boolean hasNext() {
+			if (!isReady)
+				throw new InvalidCallException();
+			return !current.isFinal();
+		}
+
+		@Override
+		public InputT next() {
+
+			isReady = false;
+			if (current.isFinal()) {
+				throw new NoSuchElementException();
+			}
+			return current.getInput();
+		}
+
+		@Override
+		public void setPreviousOutput(OutputT previousOutput) {
+			if (isReady)
+				throw new InvalidCallException(
+						"two consecutive call to 'setPreviousOutput'");
+			isReady = true;
+			if (!hasNext())
+				throw new InvalidCallException("no more output expected");
+			current = current.getChild(previousOutput);
+		}
+
+		@Override
+		public AdaptiveStructure<InputT, OutputT> getResponse() {
+			assert !hasNext();
+			return current;
+		}
+	}
+
+	@Override
+	public Iterator iterator() {
+		return new Iterator();
+	}
+
+	/// DOT functions ///
 	protected static long dotNodeNumber = 0;
 	private String dotName = null;
 
@@ -263,10 +427,6 @@ public abstract class AdaptiveStructure<InputT, OutputT> {
 			AdaptiveStructure<InputT, OutputT> child) throws IOException {
 		writer.write(getDotName() + " -> " + child.getDotName() + "[label="
 				+ GraphViz.id2DotAuto(child.output.toString()) + "];");
-	}
-
-	public boolean isRoot() {
-		return this == root;
 	}
 
 }

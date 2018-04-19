@@ -169,8 +169,8 @@ public class AdaptiveSearchGraph<InputT, OutputT> {
 	 *            the output observed
 	 * @return the collection of leaves which are found by the last trace.
 	 */
-	public Collection<AdaptiveStructure<InputT, OutputT>> apply(InputT in,
-			OutputT out) {
+	public Collection<? extends AdaptiveStructure<InputT, OutputT>> apply(
+			InputT in, OutputT out) {
 		currentNode = currentNode.getChild(in, out);
 		return currentNode.getLeaves();
 	}

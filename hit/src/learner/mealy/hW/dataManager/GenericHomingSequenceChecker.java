@@ -1,5 +1,6 @@
 package learner.mealy.hW.dataManager;
 
+import automata.mealy.AdaptiveSymbolSequence;
 import automata.mealy.GenericInputSequence;
 import automata.mealy.InputSequence;
 
