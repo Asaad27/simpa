@@ -29,6 +29,8 @@ public class AdaptiveSearchGraph<InputT, OutputT> {
 		private Map<InputT, Map<OutputT, Node>> children = new HashMap<>();
 
 		Node(Set<AdaptiveStructure<InputT, OutputT>> currentPositions) {
+			assert currentPositions
+					.contains(seq) : "root of tree can always be found";
 			this.currentPositions = currentPositions;
 			this.hash = hash(currentPositions);
 		}
@@ -122,6 +124,7 @@ public class AdaptiveSearchGraph<InputT, OutputT> {
 		assert seq.isRoot();
 		seqPositions = new ArrayList<>(seq.getAllNodes());
 		Set<AdaptiveStructure<InputT, OutputT>> initialSet = new HashSet<>();
+		initialSet.add(seq);
 		currentNode = getNodeOrCreate(initialSet);
 	}
 
