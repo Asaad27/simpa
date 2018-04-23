@@ -42,6 +42,17 @@ public class AdaptiveSymbolSequence extends AdaptiveStructure<String, String>
 				trace.getOutputsProjection().sequence);
 	}
 
+	@Override
+	public boolean hasPrefix(LmTrace possiblePrefix) {
+		return hasPrefix(possiblePrefix.getInputsProjection().sequence,
+				possiblePrefix.getOutputsProjection().sequence);
+	}
+
+	@Override
+	public void extendsWith(LmTrace newSeq) {
+		extend(newSeq);
+	}
+
 	class InputIterator extends AdaptiveStructure<String, String>.Iterator
 			implements GenericInputSequence.Iterator {
 		@Override

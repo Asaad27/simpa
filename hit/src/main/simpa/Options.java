@@ -71,6 +71,7 @@ public class Options {
 	public static boolean REUSE_HZXW = false;
 	public static boolean HW_WITH_KNOWN_W = false;
 	public static boolean ADAPTIVE_H = false;
+	public static boolean ADAPTIVE_W_SEQUENCES = false;
 
 	public static boolean INTERACTIVE = false; //For algorithms which can prompt user for counter example or chosen sequences
 	

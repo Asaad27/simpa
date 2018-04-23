@@ -1,9 +1,8 @@
 package learner.mealy.hW.dataManager;
 
 import automata.State;
+import automata.mealy.GenericInputSequence;
 import automata.mealy.GenericInputSequence.GenericOutputSequence;
-import automata.mealy.InputSequence;
-import automata.mealy.OutputSequence;
 
 public class InconsistancyHMappingAndConjectureException extends Exception {
 	private static final long serialVersionUID = 7967922441884871530L;
@@ -12,14 +11,16 @@ public class InconsistancyHMappingAndConjectureException extends Exception {
 	private State stateAfterH;
 	private GenericOutputSequence hResponse;
 	private FullyQualifiedState mappedTarget;
-	private InputSequence distinctionSequence;
-	private OutputSequence targetResponse;
-	private OutputSequence traceResponse;
+	private GenericInputSequence distinctionSequence;
+	private GenericOutputSequence targetResponse;
+	private GenericOutputSequence traceResponse;
 
 	public InconsistancyHMappingAndConjectureException(State stateBeforeH,
 			State stateAfterH, GenericOutputSequence hResponse,
-			FullyQualifiedState mappedTarget, InputSequence distinctionSequence,
-			OutputSequence targetResponse, OutputSequence traceResponse) {
+			FullyQualifiedState mappedTarget,
+			GenericInputSequence distinctionSequence,
+			GenericOutputSequence targetResponse,
+			GenericOutputSequence traceResponse) {
 		this.stateBeforeH = stateBeforeH;
 		this.stateAfterH = stateAfterH;
 		this.hResponse = hResponse;
@@ -80,15 +81,15 @@ public class InconsistancyHMappingAndConjectureException extends Exception {
 		return mappedTarget;
 	}
 
-	public InputSequence getDistinctionSequence() {
+	public GenericInputSequence getDistinctionSequence() {
 		return distinctionSequence;
 	}
 
-	public OutputSequence getTargetResponse() {
+	public GenericOutputSequence getTargetResponse() {
 		return targetResponse;
 	}
 
-	public OutputSequence getTraceResponse() {
+	public GenericOutputSequence getTraceResponse() {
 		return traceResponse;
 	}
 }

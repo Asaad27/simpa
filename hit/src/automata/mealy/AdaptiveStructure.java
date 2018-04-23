@@ -169,6 +169,47 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 	}
 
 	/**
+	 *
+	 * indicate whether a sequence of input/output exists in this structure.
+	 * 
+	 * @param inputs
+	 *            the list of inputs
+	 * @param outputs
+	 *            the list of outputs, can be one symbol shorter than inputs
+	 *            because last symbol is optional
+	 * @return true if the sequence of inputs exists in this structure. Can
+	 *         return true even if the last output is specified and the
+	 *         corresponding node do not exists.
+	 */
+	public boolean hasPrefix(List<InputT> inputs, List<OutputT> outputs) {
+		assert isRoot();
+		assert inputs.size() == outputs.size()
+				|| inputs.size() == outputs.size() + 1;
+		AdaptiveStructure<InputT, OutputT> current = this;
+		int i = 0;
+		while (i < inputs.size()) {
+			if (current.isFinal()) {// lists are longer than this response
+				return false;
+			} else {
+				if (!inputs.get(i).equals(current.input))
+					return false;
+			}
+			if (outputs.size() > i) {
+				current = current.getChild(outputs.get(i));
+			} else {
+				if (i == inputs.size() - 1)// last node do not exists,but we
+											// still consider that lists are
+											// prefix of this node.
+					return true;
+				current = null;
+			}
+
+			i++;
+		}
+		return true;
+	}
+
+	/**
 	 * Get the list of inputs for nodes from root to this one (if not final).
 	 * 
 	 * @return the list of inputs applied to get this response.

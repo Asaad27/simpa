@@ -7,9 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import tools.loggers.LogManager;
-
-import automata.mealy.InputSequence;
-import automata.mealy.OutputSequence;
+import automata.mealy.GenericInputSequence;
+import automata.mealy.GenericInputSequence.GenericOutputSequence;
 
 /**
  * This class aim to replace the K set.
@@ -17,19 +16,21 @@ import automata.mealy.OutputSequence;
 public class PartiallyKnownTrace {
 	private final FullyQualifiedState start;
 	private final LmTrace transition; //this is probably in I \cup W. Read algorithm carefully to be sure 
-	private List<OutputSequence> WResponses; //a partial footprint of the state  \in WxO
-	private List<InputSequence> unknownPrints;
+	private List<GenericOutputSequence> WResponses; // a partial footprint of
+													// the state \in WxO
+	private List<GenericInputSequence> unknownPrints;
 	
-	public PartiallyKnownTrace(FullyQualifiedState start, LmTrace transition, List<InputSequence> W){
+	public PartiallyKnownTrace(FullyQualifiedState start, LmTrace transition,
+			List<GenericInputSequence> W) {
 		this.start = start;
 		this.transition = transition;
-		unknownPrints = new ArrayList<InputSequence>(W);
-		WResponses = new ArrayList<OutputSequence>();
+		unknownPrints = new ArrayList<>(W);
+		WResponses = new ArrayList<>();
 		for (int i =0; i < W.size(); i++)//allocate all the array
 			WResponses.add(null);
 	}
 	
-	protected List<InputSequence> getUnknownPrints(){
+	protected List<GenericInputSequence> getUnknownPrints() {
 		return unknownPrints;
 	}
 	
@@ -38,9 +39,35 @@ public class PartiallyKnownTrace {
 	 * @param print must be in W to bring information, So supposed to be in W
 	 * @return false if the print was already known
 	 */
-	protected boolean addPrint(LmTrace print){
-		assert SimplifiedDataManager.instance.getW().contains(print.getInputsProjection());
-		if (!unknownPrints.remove(print.getInputsProjection())){ //the print wasn't in W or has been already removed
+	protected boolean addPrint(final LmTrace print) {
+		assert (new Object() {
+			public boolean test() {
+				for (GenericInputSequence w : SimplifiedDataManager.instance
+						.getW()) {
+					if (w.hasPrefix(print) && print.startsWith(w))
+						return true;
+				}
+				return (SimplifiedDataManager.instance.getW().size() == 0
+						&& print.size() == 0);
+			}
+		}).test() : "print is not a response to an element of W";// TODO should
+																	// be
+																	// rewrite
+																	// when
+																	// setting
+																	// up
+																	// adaptive
+																	// set
+		boolean removed = false;
+		for (GenericInputSequence unknownPrint : unknownPrints) {
+			if (print.startsWith(unknownPrint)) {
+				assert (unknownPrint.hasPrefix(print));
+				unknownPrints.remove(unknownPrint);
+				removed = true;
+				break;
+			}
+		}
+		if (!removed) { // the print wasn't in W or has been already removed
 			assert false;// this was used in localizerBased approach, but for hW
 							// we are not supposed to try to add two time the
 							// same trace
@@ -72,7 +99,8 @@ public class PartiallyKnownTrace {
 		StringBuilder s = new StringBuilder();
 		for (int i = 0 ; i < SimplifiedDataManager.instance.getW().size(); i++){
 			if (WResponses.get(i) != null){
-				LmTrace t = new LmTrace(SimplifiedDataManager.instance.getW().get(i),WResponses.get(i));
+				LmTrace t = SimplifiedDataManager.instance.getW().get(i)
+						.buildTrace(WResponses.get(i));
 				s.append("(" + start + ", " + transition + ", " + t + "),");
 			}
 		}

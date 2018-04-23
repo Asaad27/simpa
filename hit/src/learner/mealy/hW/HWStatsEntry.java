@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import automata.mealy.InputSequence;
+import automata.mealy.GenericInputSequence;
 import automata.mealy.MealyTransition;
 import drivers.mealy.MealyDriver;
 import learner.mealy.LmConjecture;
@@ -241,8 +241,8 @@ public class HWStatsEntry extends StatsEntry {
 		WSize=dataManager.getW().size();
 		WTotalLength=0;
 		maxWLength=0;
-		for (InputSequence w:dataManager.getW()){
-			int length=w.getLength();
+		for (GenericInputSequence w : dataManager.getW()) {
+			int length = w.getMaxLength();
 			WTotalLength+=length;
 			if (length>maxWLength){
 				maxWLength=length;

@@ -45,4 +45,23 @@ public interface GenericInputSequence extends GenericSequence<String, String> {
 	 *         the given output.
 	 */
 	LmTrace buildTrace(GenericOutputSequence outSeq);
+
+	/**
+	 * indicate if a trace is a prefix of this sequence.
+	 * 
+	 * @param possiblePrefix
+	 *            the trace to test
+	 * @return true if the trace match the start of a possible execution of this
+	 *         sequence
+	 */
+	boolean hasPrefix(LmTrace possiblePrefix);
+
+	/**
+	 * Extends this sequence to let {@code newSeq} be a possible execution of
+	 * this sequence.
+	 * 
+	 * @param newSeq
+	 *            the trace use to extends this sequence.
+	 */
+	void extendsWith(LmTrace newSeq);
 }

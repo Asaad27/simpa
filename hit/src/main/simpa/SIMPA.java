@@ -448,9 +448,11 @@ public class SIMPA {
 			"--hW-with-known-W", "precompute a W using a transparent driver");
 	private static BooleanOption ADAPTIVE_H = new BooleanOption("--adaptive-h",
 			"use adaptive homing sequence");
+	private static BooleanOption ADAPTIVE_W_SEQ = new BooleanOption(
+			"--adaptive-w-seq", "use adaptive w sequences");
 	private static Option<?>[] hWOptions = new Option<?>[] { ADD_H_IN_W,
 			TRY_CE_FROM_TRACE, CHECK_INCONSISTENCY_H_MAPPING, REUSE_HZXW,
-			MAX_CE_LENGTH, HW_WITH_KNOWN_W, ADAPTIVE_H };
+			MAX_CE_LENGTH, HW_WITH_KNOWN_W, ADAPTIVE_H, ADAPTIVE_W_SEQ };
 
 	// RS Options
 	private static BooleanOption RS_WITH_UNKNOWN_H = new BooleanOption(
@@ -637,7 +639,7 @@ public class SIMPA {
 		Options.REUSE_HZXW=REUSE_HZXW.getValue();
 		Options.HW_WITH_KNOWN_W = HW_WITH_KNOWN_W.getValue();
 		Options.ADAPTIVE_H = ADAPTIVE_H.getValue();
-
+		Options.ADAPTIVE_W_SEQUENCES = ADAPTIVE_W_SEQ.getValue();
 		Options.RS_WITH_UNKNOWN_H = RS_WITH_UNKNOWN_H.getValue();
 
 		Options.GENERICDRIVER = GENERIC_DRIVER.getValue();

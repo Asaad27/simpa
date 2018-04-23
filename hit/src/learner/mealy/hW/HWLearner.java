@@ -45,7 +45,7 @@ public class HWLearner extends Learner {
 	private MealyDriver driver;
 	private SimplifiedDataManager dataManager;
 	private HWStatsEntry stats;
-	protected List<InputSequence> W;
+	protected List<GenericInputSequence> W;
 	private int n;// the maximum number of states
 	private LmTrace fullTrace;
 	private GenericOutputSequence lastDeliberatelyAppliedH = null;
@@ -138,6 +138,46 @@ public class HWLearner extends Learner {
 		LogManager.logInfo("W-set extended with " + newW);
 		W.add(newW);
 	}
+
+	/**
+	 * Add a new sequence in a W-set. If an element of W is a prefix of new
+	 * sequence, it will be extended to the new sequence.
+	 * 
+	 * @param newW
+	 *            The sequence to add in W. This is not allowed to be a prefix
+	 *            of an existing sequence in W
+	 * @param W
+	 *            The set to extend
+	 */
+	private void addOrExtendInW(LmTrace newW, List<GenericInputSequence> W) {
+		boolean sequenceExtended = false;
+		for (GenericInputSequence w : W) {
+			assert (!w.hasPrefix(newW));
+			if (newW.startsWith(w)) {
+				sequenceExtended = true;
+				w.extendsWith(newW);
+				break;// because W is only extended with this method, there is
+						// at most one prefix of newW in W (otherwise, one
+						// prefix of newW in W is also a prefix of the other
+						// prefix of newW in W, which is not possible by
+						// construction of W)
+			}
+		}
+		LogManager.logInfo("W-set extended with " + newW);
+		if (!sequenceExtended) {
+			GenericInputSequence newSeq = null;
+			if (Options.ADAPTIVE_W_SEQUENCES) {
+				newSeq = new AdaptiveSymbolSequence();
+			} else {
+				newSeq = new InputSequence();
+			}
+			newSeq.extendsWith(newW);
+			assert newSeq.hasPrefix(newW);
+			assert newW.startsWith(newSeq);
+			W.add(newSeq);
+		}
+	}
+
 	public LmTrace getShortestCounterExemple(boolean applyOndriver) {
 		if (driver instanceof TransparentMealyDriver) {
 			TransparentMealyDriver d = (TransparentMealyDriver) driver;
@@ -219,16 +259,25 @@ public class HWLearner extends Learner {
 			if (Options.ADAPTIVE_H)
 				throw new RuntimeException(
 						"not implemented : add h in W and adaptive h are incompatible at this time");
+			if (Options.ADAPTIVE_W_SEQUENCES)
+				throw new RuntimeException(
+						"not implemented : add h in W and adaptive w sequences are incompatible at this time");
 			InputSequence hFixed = (InputSequence) h;
 			boolean hIsInW = false;
-			for (InputSequence w : W) {
-				if (w.startsWith(hFixed)) {
+			for (GenericInputSequence w : W) {
+				InputSequence wFixed = (InputSequence) w;
+				if (wFixed.startsWith(hFixed)) {
 					hIsInW = true;
 					break;
 				}
 			}
-			if (!hIsInW)
-				addOrExtendInW(hFixed, W);
+			if (!hIsInW) {
+				int traceLength = fullTrace.size();
+				LmTrace hTrace = fullTrace.subtrace(
+						traceLength - hFixed.getLength(), traceLength);
+				assert hTrace.getInputsProjection().equals(hFixed);
+				addOrExtendInW(hTrace, W);
+			}
 		}
 		return h;
 	}
@@ -243,10 +292,11 @@ public class HWLearner extends Learner {
 		Runtime runtime = Runtime.getRuntime();
 		runtime.gc();
 
-		List<InputSequence> W = new ArrayList<InputSequence>();
+		List<GenericInputSequence> W = new ArrayList<>();
 		W.add(new InputSequence());
 		if (Options.HW_WITH_KNOWN_W) {
-			W = LocalizerBasedLearner.computeCharacterizationSet(driver);
+			W = new ArrayList<GenericInputSequence>(
+					LocalizerBasedLearner.computeCharacterizationSet(driver));
 		}
 
 		LogManager.logConsole("hw : start of learning");
@@ -307,9 +357,8 @@ public class HWLearner extends Learner {
 					virtualCounterExample = true;
 					// we have to check if counterExempleTrace has a sufficient
 					// length for suffix1by1
-					for (InputSequence w : W) {
-						if (w.startsWith(
-								counterExampleTrace.getInputsProjection())) {
+					for (GenericInputSequence w : W) {
+						if (w.hasPrefix(counterExampleTrace)) {
 							if (Options.LOG_LEVEL != LogLevel.LOW) {
 								LogManager.logInfo(
 										"Counter example is already in W. Forgetting it");
@@ -345,33 +394,34 @@ public class HWLearner extends Learner {
 						.logInfo("geting smallest suffix in counter example which is not in W and not a prefix of a W element");
 				int traceSize = dataManager.traceSize();
 				int l = 0;
-				InputSequence newW;
+				LmTrace newW;
 				boolean newWIsPrefixInW;
 				do {
 					InputSequence counterExample = counterExampleTrace
 							.getInputsProjection();
+					int counterExampleLength = counterExampleTrace.size();
 					l++;
 					if (l <= counterExample.getLength()) {
-						newW = counterExample.getIthSuffix(l);
+						newW = counterExampleTrace.subtrace(counterExampleLength-l, counterExampleLength);
 					} else {
 						if (virtualCounterExample)
 							throw new RuntimeException(
 									"virtual counter example is too short");
 						newW = dataManager.getSubtrace(
-								traceSize - l + counterExample.getLength(),
-								traceSize).getInputsProjection();
-						newW.addInputSequence(counterExample);
+								traceSize - l + counterExampleLength,
+								traceSize);
+						newW.append(counterExampleTrace);
 					}
-					assert (newW.getLength() == l);
+					assert (newW.size() == l);
 					newWIsPrefixInW = false;
-					for (InputSequence w : W) {
-						if (w.startsWith(newW)) {
+					for (GenericInputSequence w : W) {
+						if (w.hasPrefix(newW)) {
 							newWIsPrefixInW = true;
 							break;
 						}
 
 					}
-				} while (newWIsPrefixInW || W.contains(newW));
+				} while (newWIsPrefixInW);
 				if (driver instanceof TransparentMealyDriver
 						&& ((TransparentMealyDriver) driver).getAutomata()
 								.acceptCharacterizationSet(W)) {
@@ -488,7 +538,7 @@ public class HWLearner extends Learner {
 				String INC_NAME = "3rd inconsistency";
 				if (Options.LOG_LEVEL != LogLevel.LOW)
 					LogManager.logInfo("Inconsistency found :" + e);
-				InputSequence distinctionW = e.getDistinctionSequence();
+				GenericInputSequence distinctionW = e.getDistinctionSequence();
 				if (distinctionW == null) {
 					LogManager.logWarning(
 							"inconsistency can not be used because the state reached after homing sequence ("
@@ -602,7 +652,7 @@ public class HWLearner extends Learner {
 							+ ". Now we try to use this inconsistency");
 		}
 
-		List<InputSequence> distinctionSequences = new ArrayList<>();
+		List<GenericInputSequence> distinctionSequences = new ArrayList<>();
 		distinctionSequences.addAll(W);
 		// for the case were aEnd and bEnd have the same characterizing
 		// transitions, we try to find a custom distinction sequence. This can
@@ -614,7 +664,7 @@ public class HWLearner extends Learner {
 			distinctionSequences.add(distinctionSequence);
 		}
 		boolean statesAreEquivalents = true;
-		for (InputSequence w : distinctionSequences) {
+		for (GenericInputSequence w : distinctionSequences) {
 			if (!conjecture.apply(w, aEnd).equals(conjecture.apply(w, bEnd))) {
 				statesAreEquivalents = false;
 				if (Options.LOG_LEVEL != LogLevel.LOW) {
@@ -709,7 +759,7 @@ public class HWLearner extends Learner {
 		return null;
 	}
 
-	public void learn(List<InputSequence> W, GenericInputSequence h) {
+	public void learn(List<GenericInputSequence> W, GenericInputSequence h) {
 		LogManager.logStep(LogManager.STEPOTHER, "Inferring the system");
 		if (Options.LOG_LEVEL!=LogLevel.LOW)
 		LogManager.logConsole("Inferring the system with W=" + W + "and h=" + h);
@@ -717,7 +767,7 @@ public class HWLearner extends Learner {
 
 		this.W = W;
 		StringBuilder logW = new StringBuilder("Using characterization set : [");
-		for (InputSequence w : this.W) {
+		for (GenericInputSequence w : this.W) {
 			logW.append(w + ", ");
 		}
 		logW.append("]");
@@ -786,15 +836,15 @@ public class HWLearner extends Learner {
 
 			assert dataManager.getConjecture().getTransitionFromWithInput(
 					lastKnownQ.getState(), x) == null;
-			List<InputSequence> allowed_W = dataManager.getwNotInK(lastKnownQ,
-					sigma);
-			InputSequence w = new InputSequence();
+			List<GenericInputSequence> allowed_W = dataManager
+					.getwNotInK(lastKnownQ, sigma);
+			GenericInputSequence w = new InputSequence();
 			if (W.size() != 0)
 				w = allowed_W.get(0); // here we CHOOSE to take the first.
 			if (Options.LOG_LEVEL != Options.LogLevel.LOW)
 				LogManager.logInfo("We choose w = " + w + " in " + allowed_W);
-			OutputSequence wResponse = dataManager.apply(w);
-			LmTrace wTrace = new LmTrace(w, wResponse);
+			GenericOutputSequence wResponse = dataManager.apply(w);
+			LmTrace wTrace = w.buildTrace(wResponse);
 			if (Options.LOG_LEVEL != Options.LogLevel.LOW)
 				LogManager.logInfo("We found that "
 						+ lastKnownQ
@@ -908,12 +958,12 @@ public class HWLearner extends Learner {
 			lastDeliberatelyAppliedH = hResponse;
 			s = dataManager.getState(hResponse);
 			if (s == null) {
-				InputSequence missingW = dataManager
+				GenericInputSequence missingW = dataManager
 						.getMissingInputSequence(hResponse);
 				LogManager
 						.logInfo("We don't know were we are. We apply sequence "
 								+ missingW + " from W-set");
-				OutputSequence wResponse = dataManager.apply(missingW);
+				GenericOutputSequence wResponse = dataManager.apply(missingW);
 				dataManager.addWresponseAfterH(hResponse, missingW, wResponse);
 			}
 

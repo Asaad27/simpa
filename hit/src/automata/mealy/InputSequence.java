@@ -155,6 +155,21 @@ public class InputSequence implements Cloneable, GenericInputSequence {
 	}
 
 	@Override
+	public boolean hasPrefix(LmTrace possiblePrefix) {
+		if (possiblePrefix.size() == 0)
+			return true;
+		return startsWith(possiblePrefix.getInputsProjection());
+	}
+
+	@Override
+	public void extendsWith(LmTrace newSeq) {
+		assert newSeq.startsWith(this);
+		InputSequence other = newSeq.getInputsProjection();
+		while (getLength() < other.getLength())
+			addInput(other.sequence.get(getLength()));
+	}
+
+	@Override
 	public String toString() {
 		StringBuilder s = new StringBuilder();
 		if (sequence.isEmpty())

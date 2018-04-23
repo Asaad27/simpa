@@ -15,12 +15,15 @@ import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import main.simpa.Options;
 import automata.State;
+import automata.mealy.GenericInputSequence;
+import automata.mealy.GenericInputSequence.GenericOutputSequence;
 import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
 
 public class FullyQualifiedState{
-	private final List<OutputSequence> WResponses;//used to identify the State
+	private final List<GenericOutputSequence> WResponses;// used to identify the
+															// State
 	// TODO V should be a mapping from String to FullyKnownTrace (or can be
 	// removed because it will duplicate T (which already duplicate the
 	// conjecture))
@@ -78,7 +81,8 @@ public class FullyQualifiedState{
 		}
 	}
 
-	protected FullyQualifiedState(List<OutputSequence> WResponses, Collection<String> inputSymbols, State state){
+	protected FullyQualifiedState(List<GenericOutputSequence> WResponses,
+			Collection<String> inputSymbols, State state) {
 		this.WResponses = WResponses;
 		this.state = state;
 		R_ = new HashSet<String>(inputSymbols);
@@ -90,7 +94,8 @@ public class FullyQualifiedState{
 			SimplifiedDataManager.instance.identifiedFakeStates.add(this);
 		expectedTraces=new TraceTree();
 		for (int i=0;i<WResponses.size();i++){
-			LmTrace trace=new LmTrace(SimplifiedDataManager.instance.getW().get(i), WResponses.get(i));
+			LmTrace trace = SimplifiedDataManager.instance.getW().get(i)
+					.buildTrace(WResponses.get(i));
 			expectedTraces.addTrace(trace);
 		}
 	}
@@ -228,7 +233,7 @@ public class FullyQualifiedState{
 	/**
 	 * @see mealy.noReset.dataManager.SimplifiedDataManager.getwNotInK
 	 */
-	protected List<InputSequence> getwNotInK(LmTrace transition){
+	protected List<GenericInputSequence> getwNotInK(LmTrace transition) {
 		assert !V.containsKey(transition);
 		PartiallyKnownTrace k = K.get(transition.getInput(0));
 		if (k == null)
@@ -269,7 +274,7 @@ public class FullyQualifiedState{
 		return K.values();
 	}
 
-	public List<OutputSequence> getWResponses() {
+	public List<GenericOutputSequence> getWResponses() {
 		return WResponses;
 	}
 }

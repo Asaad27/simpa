@@ -617,12 +617,13 @@ public class Mealy extends Automata implements Serializable {
 	 * @param W the W-set to test
 	 * @return true if it is a characterization set for this automata. Note that if the automata is not minimal (i.e. two states are equivalents) this will always return false.
 	 */
-	public boolean acceptCharacterizationSet(List<InputSequence> W) {
-		Set<List<OutputSequence>> responses = new HashSet<>();
+	public boolean acceptCharacterizationSet(
+			List<? extends GenericInputSequence> W) {
+		Set<List<GenericOutputSequence>> responses = new HashSet<>();
 		for (State s : getStates()) {
-			List<OutputSequence> WResponses = new ArrayList<>();
-			for (InputSequence inputSeq : W) {
-				OutputSequence response = apply(inputSeq, s);
+			List<GenericOutputSequence> WResponses = new ArrayList<>();
+			for (GenericInputSequence inputSeq : W) {
+				GenericOutputSequence response = apply(inputSeq, s);
 				WResponses.add(response);
 			}
 			if (responses.contains(WResponses))

@@ -1,6 +1,8 @@
 package learner.mealy;
 
 import java.util.ArrayList;
+
+import automata.mealy.GenericInputSequence;
 import automata.mealy.InputSequence;
 import automata.mealy.OutputSequence;
 import main.simpa.Options;
@@ -77,6 +79,31 @@ public class LmTrace {
 					|| !outputs.sequence.get(pos + i).equals(other.outputs.sequence.get(i))) {
 				return false;
 			}
+		}
+		return true;
+	}
+
+	/**
+	 * Iterate over the given sequence and check whether the inputs applied are
+	 * the same as the ones in this trace.
+	 * 
+	 * Behavior is undefined if this trace has same inputs but is shorter than
+	 * (i.e. is a prefix of) the given sequence.
+	 * 
+	 * @param seq
+	 *            the input sequence to check
+	 * @return false if the inputs in {@code seq} differs from this trace.
+	 */
+	public boolean startsWith(GenericInputSequence seq) {
+		GenericInputSequence.Iterator it = seq.inputIterator();
+		int pos = 0;
+		while (it.hasNext()) {
+			assert (pos < size()) : "undifed behavior. can be modified to return true or false";
+			String input = it.next();
+			if (!input.equals(getInput(pos)))
+				return false;
+			it.setPreviousOutput(getOutput(pos));
+			pos++;
 		}
 		return true;
 	}
