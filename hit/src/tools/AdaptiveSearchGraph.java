@@ -32,6 +32,14 @@ public class AdaptiveSearchGraph<InputT, OutputT> {
 			assert currentPositions
 					.contains(seq) : "root of tree can always be found";
 			this.currentPositions = currentPositions;
+			for (AdaptiveStructure<InputT, OutputT> pos : currentPositions) {
+				if (pos.isFinal()) {
+					// leaves can be added at any moment without notification
+					if (!seqPositions.contains(pos)) {
+						seqPositions.add(pos);
+					}
+				}
+			}
 			this.hash = hash(currentPositions);
 		}
 
@@ -74,6 +82,8 @@ public class AdaptiveSearchGraph<InputT, OutputT> {
 			if (child == null) {
 				child = computeChild(in, out);
 				byOutput.put(out, child);
+			} else {
+				assert child.equals(computeChild(in, out));
 			}
 			assert nodes.get(child) == child;
 			return child;
