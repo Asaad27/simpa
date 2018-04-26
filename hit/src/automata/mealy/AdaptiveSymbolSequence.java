@@ -3,7 +3,11 @@
  */
 package automata.mealy;
 
+import java.io.IOException;
+import java.io.Writer;
+
 import learner.mealy.LmTrace;
+import tools.GraphViz;
 
 /**
  * @author Nicolas BREMOND
@@ -112,5 +116,15 @@ public class AdaptiveSymbolSequence extends AdaptiveStructure<String, String>
 		if (isFinal())
 			return getFullSequence().buildTrace(this).toString();
 		return super.toString();
+	}
+
+	@Override
+	protected void dot_appendNode(Writer writer) throws IOException {
+		if (input != null) {
+			super.dot_appendNode(writer);
+		} else {
+			writer.write(getDotName() + "[label="
+					+ GraphViz.id2DotAuto("end of sequence") + "];\n");
+		}
 	}
 }

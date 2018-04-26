@@ -11,6 +11,7 @@ import automata.mealy.AdaptiveSymbolSequence;
 import automata.mealy.GenericInputSequence;
 import automata.mealy.GenericInputSequence.GenericOutputSequence;
 import learner.mealy.LmTrace;
+import tools.GraphViz;
 
 public class TotallyAdaptiveW extends
 		AdaptiveDistinctionStruct<AdaptiveSymbolSequence, AdaptiveSymbolSequence>
@@ -218,7 +219,9 @@ public class TotallyAdaptiveW extends
 		if (input != null) {
 			input.dot_appendAll(writer);
 		} else {
-			writer.write(getDotName() + "[label=\"\"];\n");
+			writer.write(getDotName() + "[label="
+					+ GraphViz.id2DotAuto("characterization\ncomplete")
+					+ "];\n");
 		}
 	}
 
@@ -227,8 +230,15 @@ public class TotallyAdaptiveW extends
 			AdaptiveStructure<AdaptiveSymbolSequence, AdaptiveSymbolSequence> child)
 			throws IOException {
 		assert this.getClass().isInstance(child);
-		writer.write(child.getFromOutput().getDotName() + " -> "
-				+ child.getDotName() + "[label=\"reset\",color=red];\n");
+		if (child.isFinal()) {
+			writer.write(child.getFromOutput().getDotName() + " -> "
+					+ child.getDotName() + "[label=" + GraphViz.id2DotAuto("")
+					+ ",color=red];\n");
+		} else {
+			writer.write(child.getFromOutput().getDotName() + " -> "
+					+ child.getDotName() + "[label="
+					+ GraphViz.id2DotAuto("new sequence") + ",color=red];\n");
+		}
 	}
 
 	@Override
