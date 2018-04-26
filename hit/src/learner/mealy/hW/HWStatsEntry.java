@@ -49,6 +49,7 @@ public class HWStatsEntry extends StatsEntry {
 	public static final Attribute<Boolean>PRECOMPUTED_W =			Attribute.PRECOMPUTED_W;
 	public static final Attribute<Boolean>USE_ADAPTIVE_H = 			Attribute.USE_ADAPTIVE_H;
 	public static final Attribute<Boolean>USE_ADAPTIVE_W = 			Attribute.USE_ADAPTIVE_W;
+	public static final Attribute<Float> AVG_NB_TRIED_W =			Attribute.AVG_NB_TRIED_W;
 	public static final Attribute<Float> ORACLE_TRACE_PERCENTAGE =	Attribute.ORACLE_TRACE_PERCENTAGE;
 
 	
@@ -136,6 +137,7 @@ public class HWStatsEntry extends StatsEntry {
 	private boolean precomputedW = false;
 	private boolean useAdaptiveH = false;
 	private boolean useAdaptiveW = false;
+	private float avgNbTriedWSuffixes = -1;
 
 	/**
 	 * rebuild a HWStats object from a CSV line
@@ -175,6 +177,7 @@ public class HWStatsEntry extends StatsEntry {
 		precomputedW = Boolean.parseBoolean(st.nextToken());
 		useAdaptiveH = Boolean.parseBoolean(st.nextToken());
 		useAdaptiveW = Boolean.parseBoolean(st.nextToken());
+		avgNbTriedWSuffixes = Float.parseFloat(st.nextToken());
 		
 	}
 
@@ -359,6 +362,8 @@ public class HWStatsEntry extends StatsEntry {
 				return (T) new Boolean(useAdaptiveW);
 		if (a == ORACLE_TRACE_PERCENTAGE)
 			return (T) new Float(100. * oracleTraceLength / traceLength);
+		if (a == AVG_NB_TRIED_W)
+			return (T) new Float(avgNbTriedWSuffixes);
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 
 	}
@@ -388,7 +393,7 @@ public class HWStatsEntry extends StatsEntry {
 		if (a == SEED)
 			return ((Long) get(a)).floatValue();
 		if (a == DURATION || a == AVERAGE_W_LENGTH || a == ORACLE_DURATION
-				|| a == ORACLE_TRACE_PERCENTAGE)
+				|| a == ORACLE_TRACE_PERCENTAGE || a == AVG_NB_TRIED_W)
 			return (Float) get(a);
 		throw new RuntimeException(a.getName() + " is not available or cannot be cast to float");
 
@@ -419,4 +424,7 @@ public class HWStatsEntry extends StatsEntry {
 		check_3rd_inconsistency = b;
 	}
 
+	public void setAvgTriedWSuffixes(float f) {
+		avgNbTriedWSuffixes = f;
+	}
 }

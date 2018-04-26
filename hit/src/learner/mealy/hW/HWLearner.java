@@ -285,6 +285,9 @@ public class HWLearner extends Learner {
 		LmTrace counterExampleTrace;
 		boolean inconsistencyFound;
 
+		int wRefinenmentNb = 0;
+		int nbOfTriedWSuffixes = 0;
+
 		do {
 			stats.updateMemory((int) (runtime.totalMemory() - runtime
 					.freeMemory()));
@@ -405,8 +408,10 @@ public class HWLearner extends Learner {
 					} else {
 						LogManager.logInfo(currentState.getWResponses(),
 								" already contain trace ", endOfTrace);
+						nbOfTriedWSuffixes++;
 					}
 				}
+				wRefinenmentNb++;
 				if (!WExtended) {
 					throw new RuntimeException("W not extended");
 				}
@@ -426,6 +431,7 @@ public class HWLearner extends Learner {
 		float duration = (float) (System.nanoTime() - start) / 1000000000;
 		LogManager.logConsole("hw : end of learning : " + duration + "s");
 		stats.setDuration(duration);
+		stats.setAvgTriedWSuffixes((float)nbOfTriedWSuffixes/wRefinenmentNb);
 		stats.setSearchCEInTrace(Options.TRY_TRACE_AS_CE ? "simple" : "none");
 		stats.setAddHInW(Options.ADD_H_IN_W);
 		stats.setCheck3rdInconsistency(

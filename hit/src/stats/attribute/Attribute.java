@@ -51,6 +51,7 @@ public class Attribute <T extends Comparable<T>> {
 	public final static Attribute<Integer>	FAILED_PROBALISTIC_SEARCH=	new Attribute<Integer>(	"number of failed probalistic search",			false,	Units.FUNCTION_CALL,false,	false,	false);
 	public final static Attribute<Integer>	SUCCEEDED_PROBALISTIC_SEARCH=new Attribute<Integer>("number of succeeded probalistic search",		false,	Units.FUNCTION_CALL,false,	false,	false);
 	public final static Attribute<Float>	ORACLE_TRACE_PERCENTAGE=	new Attribute<Float>(	"percentage of trace used by oracle",			true,	Units.PERCENT,		false,	false,	true);
+	public final static Attribute<Float>	AVG_NB_TRIED_W =			new Attribute<Float>(	"average number of prefixes of W tried",		true,	Units.SEQUENCES,	false,	false,	false);
 	
 	private String name;
 	private Units units;
