@@ -37,8 +37,9 @@ public class AdaptiveSymbolSequence extends AdaptiveStructure<String, String>
 		return (AdaptiveSymbolSequence) super.getChild(output);
 	}
 
-	public void extend(LmTrace trace) {
-		extend(trace.getInputsProjection().sequence,
+	public AdaptiveSymbolSequence extend(LmTrace trace) {
+		return (AdaptiveSymbolSequence) extend(
+				trace.getInputsProjection().sequence,
 				trace.getOutputsProjection().sequence);
 	}
 
@@ -46,6 +47,18 @@ public class AdaptiveSymbolSequence extends AdaptiveStructure<String, String>
 	public boolean hasPrefix(LmTrace possiblePrefix) {
 		return hasPrefix(possiblePrefix.getInputsProjection().sequence,
 				possiblePrefix.getOutputsProjection().sequence);
+	}
+
+	@Override
+	public boolean hasAnswer(LmTrace possibleAnswer) {
+		return hasAnswer(possibleAnswer.getInputsProjection().sequence,
+				possibleAnswer.getOutputsProjection().sequence);
+	}
+
+	public AdaptiveSymbolSequence getAnswer(LmTrace possibleAnswer) {
+		return (AdaptiveSymbolSequence) getAnswer(
+				possibleAnswer.getInputsProjection().sequence,
+				possibleAnswer.getOutputsProjection().sequence);
 	}
 
 	@Override

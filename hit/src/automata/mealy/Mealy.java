@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,8 @@ import automata.Automata;
 import automata.State;
 import automata.Transition;
 import automata.mealy.GenericInputSequence.GenericOutputSequence;
+import automata.mealy.distinctionStruct.Characterization;
+import automata.mealy.distinctionStruct.DistinctionStruct;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import main.simpa.Options;
@@ -613,22 +616,34 @@ public class Mealy extends Automata implements Serializable {
 	}
 
 	/**
-	 * indicate if the set of sequence provided is a characterization set for this automata.
-	 * @param W the W-set to test
-	 * @return true if it is a characterization set for this automata. Note that if the automata is not minimal (i.e. two states are equivalents) this will always return false.
+	 * indicate if the set of sequence provided is a characterization set for
+	 * this automata.
+	 * 
+	 * @param W
+	 *            the W-set to test
+	 * @return true if the given set can distinguish any pair of states of this
+	 *         automata. Note that if the automata is not minimal (i.e. two
+	 *         states are equivalents) this will always return false.
 	 */
 	public boolean acceptCharacterizationSet(
-			List<? extends GenericInputSequence> W) {
-		Set<List<GenericOutputSequence>> responses = new HashSet<>();
+			DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W) {
+		Set<Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence>> responses = new HashSet<>();
 		for (State s : getStates()) {
-			List<GenericOutputSequence> WResponses = new ArrayList<>();
-			for (GenericInputSequence inputSeq : W) {
+			Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> characterization = W
+					.getEmptyCharacterization();
+			Iterator<? extends GenericInputSequence> it = characterization
+					.unknownPrints().iterator();
+			while (it.hasNext()) {
+				GenericInputSequence inputSeq = it.next();
 				GenericOutputSequence response = apply(inputSeq, s);
-				WResponses.add(response);
+				characterization.addPrint(inputSeq,response);
+
 			}
-			if (responses.contains(WResponses))
+			assert characterization
+					.isComplete() : "error in iterator implementation";
+			if (responses.contains(characterization))
 				return false;
-			responses.add(WResponses);
+			responses.add(characterization);
 		}
 		return true;
 	}

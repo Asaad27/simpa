@@ -20,10 +20,10 @@ import automata.mealy.GenericInputSequence.GenericOutputSequence;
 import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
+import automata.mealy.distinctionStruct.Characterization;
 
 public class FullyQualifiedState{
-	private final List<GenericOutputSequence> WResponses;// used to identify the
-															// State
+	private final Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> WResponses;
 	// TODO V should be a mapping from String to FullyKnownTrace (or can be
 	// removed because it will duplicate T (which already duplicate the
 	// conjecture))
@@ -81,7 +81,8 @@ public class FullyQualifiedState{
 		}
 	}
 
-	protected FullyQualifiedState(List<GenericOutputSequence> WResponses,
+	protected FullyQualifiedState(
+			Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> WResponses,
 			Collection<String> inputSymbols, State state) {
 		this.WResponses = WResponses;
 		this.state = state;
@@ -93,19 +94,13 @@ public class FullyQualifiedState{
 		if (driverStates!=null && driverStates.size()==0)
 			SimplifiedDataManager.instance.identifiedFakeStates.add(this);
 		expectedTraces=new TraceTree();
-		for (int i=0;i<WResponses.size();i++){
-			LmTrace trace = SimplifiedDataManager.instance.getW().get(i)
-					.buildTrace(WResponses.get(i));
+		for (LmTrace trace : WResponses.knownResponses()) {
 			expectedTraces.addTrace(trace);
 		}
 	}
 	
 	public Boolean equals(FullyQualifiedState other){
 		return WResponses.equals(other.WResponses);
-	}
-	
-	public Boolean equals(ArrayList<ArrayList<String>> WResponses){
-		return this.WResponses.equals(WResponses);
 	}
 
 	public TraceTree getExpectedTraces() {
@@ -225,19 +220,21 @@ public class FullyQualifiedState{
 		return T.get(input);
 	}
 	
-	protected boolean addPartiallyKnownTrace(LmTrace transition, LmTrace print) {
+	protected void addPartiallyKnownTrace(LmTrace transition, LmTrace print) {
 		PartiallyKnownTrace k = getKEntry(transition);
-		return k.addPrint(print);
+		k.addPrint(print);
 	}
 	
 	/**
 	 * @see mealy.noReset.dataManager.SimplifiedDataManager.getwNotInK
 	 */
-	protected List<GenericInputSequence> getwNotInK(LmTrace transition) {
+	protected List<? extends GenericInputSequence> getwNotInK(
+			LmTrace transition) {
 		assert !V.containsKey(transition);
 		PartiallyKnownTrace k = K.get(transition.getInput(0));
 		if (k == null)
-			return SimplifiedDataManager.instance.getW();
+			return SimplifiedDataManager.instance.getW()
+					.getEmptyCharacterization().getUnknownPrints();
 		return k.getUnknownPrints();
 	}
 
@@ -274,7 +271,7 @@ public class FullyQualifiedState{
 		return K.values();
 	}
 
-	public List<GenericOutputSequence> getWResponses() {
+	public Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> getWResponses() {
 		return WResponses;
 	}
 }

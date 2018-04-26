@@ -57,6 +57,21 @@ public interface GenericInputSequence extends GenericSequence<String, String> {
 	boolean hasPrefix(LmTrace possiblePrefix);
 
 	/**
+	 * Indicate whether a trace is a possible answer to this sequence. This is
+	 * semantically equivalent to {@code this.hasPrefix(possibleAnswer)} and
+	 * iterating over this sequence with {@code possibleAnswer} leads to end of
+	 * this sequence.
+	 * 
+	 * @param possibleAnswer
+	 *            the trace to test
+	 * @return true if iterating over this sequence using outputs from
+	 *         {@code posibleAnswer} give the same inputs than
+	 *         {@code possibleAnswer} and the end of this sequence and trace are
+	 *         reached simultaneously.
+	 */
+	boolean hasAnswer(LmTrace possibleAnswer);
+
+	/**
 	 * Extends this sequence to let {@code newSeq} be a possible execution of
 	 * this sequence.
 	 * 

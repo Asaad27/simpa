@@ -4,8 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import automata.mealy.GenericInputSequence;
+import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
+import automata.mealy.distinctionStruct.TotallyFixedW;
 import drivers.mealy.MealyDriver;
 import learner.mealy.LmConjecture;
 import learner.mealy.hW.dataManager.SimplifiedDataManager;
@@ -47,6 +48,7 @@ public class HWStatsEntry extends StatsEntry {
 	public static final Attribute<Boolean>REUSE_HZXW =				Attribute.REUSE_HZXW;
 	public static final Attribute<Boolean>PRECOMPUTED_W =			Attribute.PRECOMPUTED_W;
 	public static final Attribute<Boolean>USE_ADAPTIVE_H = 			Attribute.USE_ADAPTIVE_H;
+	public static final Attribute<Boolean>USE_ADAPTIVE_W = 			Attribute.USE_ADAPTIVE_W;
 	public static final Attribute<Float> ORACLE_TRACE_PERCENTAGE =	Attribute.ORACLE_TRACE_PERCENTAGE;
 
 	
@@ -83,6 +85,7 @@ public class HWStatsEntry extends StatsEntry {
 			REUSE_HZXW,
 			PRECOMPUTED_W,
 			USE_ADAPTIVE_H,
+			USE_ADAPTIVE_W,
 	};
 	
 	public static String getCSVHeader_s(){
@@ -132,6 +135,7 @@ public class HWStatsEntry extends StatsEntry {
 	private boolean reuse_hzxw = false;
 	private boolean precomputedW = false;
 	private boolean useAdaptiveH = false;
+	private boolean useAdaptiveW = false;
 
 	/**
 	 * rebuild a HWStats object from a CSV line
@@ -170,6 +174,7 @@ public class HWStatsEntry extends StatsEntry {
 		reuse_hzxw = Boolean.parseBoolean(st.nextToken());
 		precomputedW = Boolean.parseBoolean(st.nextToken());
 		useAdaptiveH = Boolean.parseBoolean(st.nextToken());
+		useAdaptiveW = Boolean.parseBoolean(st.nextToken());
 		
 	}
 
@@ -183,6 +188,7 @@ public class HWStatsEntry extends StatsEntry {
 		this.reuse_hzxw = Options.REUSE_HZXW;
 		this.precomputedW = Options.HW_WITH_KNOWN_W;
 		this.useAdaptiveH = Options.ADAPTIVE_H;
+		this.useAdaptiveW = Options.ADAPTIVE_W_SEQUENCES;
 	}
 
 //	protected void setLocalizeSequenceLength(int length){
@@ -236,19 +242,27 @@ public class HWStatsEntry extends StatsEntry {
 		updateMaxFakeStates(dataManager.getIdentifiedFakeStates().size());
 		increaseTraceLength(dataManager.traceSize());
 	}	
+
 	protected void finalUpdate(SimplifiedDataManager dataManager) {
 		updateWithConjecture(dataManager.getConjecture());
-		WSize=dataManager.getW().size();
-		WTotalLength=0;
-		maxWLength=0;
-		for (GenericInputSequence w : dataManager.getW()) {
-			int length = w.getMaxLength();
-			WTotalLength+=length;
-			if (length>maxWLength){
-				maxWLength=length;
+		if (Options.ADAPTIVE_W_SEQUENCES) {
+			WSize = -1;
+			WTotalLength = -1;
+			maxWLength = -1;
+		} else {
+			TotallyFixedW W = (TotallyFixedW) dataManager.getW();
+			WSize = W.size();
+			WTotalLength = 0;
+			maxWLength = 0;
+			for (InputSequence w : W) {
+				int length = w.getMaxLength();
+				WTotalLength += length;
+				if (length > maxWLength) {
+					maxWLength = length;
+				}
 			}
 		}
-			hResponses=dataManager.getHResponsesNb();
+		hResponses = dataManager.getHResponsesNb();
 		hMaxLength = dataManager.h.getMaxLength();
 	}
 
@@ -341,6 +355,8 @@ public class HWStatsEntry extends StatsEntry {
 			return (T) new Boolean(precomputedW);
 		if (a == USE_ADAPTIVE_H)
 			return (T) new Boolean(useAdaptiveH);
+		if (a == USE_ADAPTIVE_W)
+				return (T) new Boolean(useAdaptiveW);
 		if (a == ORACLE_TRACE_PERCENTAGE)
 			return (T) new Float(100. * oracleTraceLength / traceLength);
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");

@@ -162,6 +162,11 @@ public class InputSequence implements Cloneable, GenericInputSequence {
 	}
 
 	@Override
+	public boolean hasAnswer(LmTrace possibleAnswer) {
+		return possibleAnswer.getInputsProjection().equals(this);
+	}
+
+	@Override
 	public void extendsWith(LmTrace newSeq) {
 		assert newSeq.startsWith(this);
 		InputSequence other = newSeq.getInputsProjection();

@@ -35,12 +35,12 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 		implements GenericSequence<InputT, OutputT>,
 		GenericSequence.GenericResponse<InputT, OutputT> {
 
-	InputT input = null;
-	AdaptiveStructure<InputT, OutputT> father = null;
-	AdaptiveStructure<InputT, OutputT> root;
-	OutputT output = null; // output leading to this node. null if father is
-							// null.
-	Map<OutputT, AdaptiveStructure<InputT, OutputT>> children = new HashMap<>();
+	protected InputT input = null;
+	protected AdaptiveStructure<InputT, OutputT> father = null;
+	protected AdaptiveStructure<InputT, OutputT> root;
+	protected OutputT output = null; // output leading to this node. null if
+										// father is null.
+	protected Map<OutputT, AdaptiveStructure<InputT, OutputT>> children = new HashMap<>();
 
 	public AdaptiveStructure() {
 		root = this;
@@ -132,6 +132,12 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 		return father;
 	}
 
+	protected void invalidateChild(AdaptiveStructure<InputT, OutputT> child) {
+		assert !child.isRoot();
+		assert getChild(child.getFromOutput()) == child;
+		children.remove(child.getFromOutput());
+	}
+
 	/**
 	 * get a child a create one if none exists
 	 * 
@@ -210,6 +216,80 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 	}
 
 	/**
+	 *
+	 * indicate whether a sequence of input/output exists in this structure and
+	 * leads to the end of this structure (no more input to apply after those
+	 * inputs/outputs).
+	 * 
+	 * @param inputs
+	 *            the list of inputs
+	 * @param outputs
+	 *            the list of outputs, must have the same length as inputs
+	 * @return true if the sequence of inputs exists in this structure and lead
+	 *         to a leaf. Can return true even if the node corresponding to last
+	 *         output does not exists. If lists are continues after discovering
+	 *         the leaf, the false is returned
+	 */
+	public boolean hasAnswer(List<InputT> inputs, List<OutputT> outputs) {
+		assert isRoot();
+		assert inputs.size() == outputs.size();
+		AdaptiveStructure<InputT, OutputT> current = this;
+		int i = 0;
+		while (i < inputs.size()) {
+			if (current.isFinal()) {// lists are longer than this response
+				return false;
+			} else {
+				if (!inputs.get(i).equals(current.input))
+					return false;
+			}
+			if (i == inputs.size() - 1 && !current.hasChild(outputs.get(i))) {
+				// last node do not exists, but we consider that we found an
+				// answer because the node created by a call to getChild would
+				// be a leaf.
+				return true;
+			}
+
+			current = current.getChild(outputs.get(i));
+
+			i++;
+		}
+		return current.isFinal();
+	}
+
+	/**
+	 * Get the answer in this structure to a given sequence of input/output.
+	 * 
+	 * @param inputs
+	 *            the list of inputs. can be null to avoid checking
+	 * @param outputs
+	 *            the list of outputs, must have the same length as inputs
+	 * @return null if the list of inputs is provided and does not match the
+	 *         inputs expected or if the sequences are longer than expected.
+	 *         Otherwise, returns
+	 *         {@code this.getChild(outputs[0]).getChild(outputs[1]) ...}. If
+	 *         sequences are too short, the returned node will not be a leaf.
+	 */
+	public AdaptiveStructure<InputT, OutputT> getAnswer(List<InputT> inputs,
+			List<OutputT> outputs) {
+		assert isRoot();
+		assert inputs.size() == outputs.size();
+		AdaptiveStructure<InputT, OutputT> current = this;
+		int i = 0;
+		while (i < outputs.size()) {
+			if (current.isFinal()) {// lists are longer than this response
+				return null;
+			} else {
+				if (inputs != null && !inputs.get(i).equals(current.input))
+					return null;
+			}
+			current = current.getChild(outputs.get(i));
+
+			i++;
+		}
+		return current;
+	}
+
+	/**
 	 * Get the list of inputs for nodes from root to this one (if not final).
 	 * 
 	 * @return the list of inputs applied to get this response.
@@ -260,7 +340,7 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 	 * @param input
 	 *            the input which will extend this leaf.
 	 */
-	private void extend_local(InputT input) {
+	protected final void extend_local(InputT input) {
 		assert isFinal();
 		this.input = input;
 	}
@@ -274,8 +354,11 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 	 *            the outputs indicating which child node should be extended.
 	 *            There should be as much output as input or one output less
 	 *            (the last one is not needed).
+	 * @return the response created if the last output is specified or null if
+	 *         the last output is unspecified.
 	 */
-	public void extend(List<InputT> inputs, List<OutputT> outputs) {
+	public AdaptiveStructure<InputT, OutputT> extend(List<InputT> inputs,
+			List<OutputT> outputs) {
 		assert inputs.size() == outputs.size()
 				|| inputs.size() == outputs.size() + 1;
 		int i = 0;
@@ -293,7 +376,7 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 				current = null;
 			i++;
 		}
-
+		return current;
 	}
 
 	/**
@@ -367,7 +450,7 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 		return isAnswerTo(in_);
 	}
 
-	public void toString(StringBuilder s) {
+	public StringBuilder toString(StringBuilder s) {
 		if (isFinal())
 			s.append("leaf");
 		else {
@@ -381,6 +464,7 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 			}
 			s.append("]");
 		}
+		return s;
 	}
 
 	@Override
@@ -439,7 +523,7 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 	protected static long dotNodeNumber = 0;
 	private String dotName = null;
 
-	protected String getDotName() {
+	public String getDotName() {
 		if (dotName == null)
 			dotName = "node" + dotNodeNumber++;
 		return dotName;
@@ -479,7 +563,7 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 		}
 	}
 
-	protected void dot_appendAll(Writer writer) throws IOException {
+	public void dot_appendAll(Writer writer) throws IOException {
 		dot_appendNode(writer);
 		for (AdaptiveStructure<InputT, OutputT> child : children.values()) {
 			dot_appendChild(writer, child);
@@ -493,13 +577,13 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 			label = input.toString();
 		}
 		writer.write(
-				getDotName() + "[label=" + GraphViz.id2DotAuto(label) + "];");
+				getDotName() + "[label=" + GraphViz.id2DotAuto(label) + "];\n");
 	}
 
 	protected void dot_appendChild(Writer writer,
 			AdaptiveStructure<InputT, OutputT> child) throws IOException {
 		writer.write(getDotName() + " -> " + child.getDotName() + "[label="
-				+ GraphViz.id2DotAuto(child.output.toString()) + "];");
+				+ GraphViz.id2DotAuto(child.output.toString()) + "];\n");
 	}
 
 }
