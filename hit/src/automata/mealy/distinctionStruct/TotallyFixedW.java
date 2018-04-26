@@ -20,6 +20,10 @@ public class TotallyFixedW extends ArrayList<InputSequence>
 			implements Characterization<InputSequence, OutputSequence> {
 		List<OutputSequence> WResponses;
 
+		public FixedCharacterization() {
+			WResponses = new ArrayList<>(TotallyFixedW.this.size());
+		}
+
 		@Override
 		public boolean acceptNextPrint(LmTrace print) {
 			// start with heuristics checking to save time :
@@ -57,17 +61,20 @@ public class TotallyFixedW extends ArrayList<InputSequence>
 			if (TotallyFixedW.this.size() == WResponses.size() + 1
 					&& TotallyFixedW.this.get(WResponses.size()).equals(w)) {
 				WResponses.add(wResponse);
+				return;
 			}
 			// complete checking for adding
 			for (int i = 0; i < TotallyFixedW.this.size(); i++) {
 				if (TotallyFixedW.this.get(i).equals(w)
-						&& (WResponses.size() < i || WResponses.get(i) == null))
+						&& (WResponses.size() <= i
+								|| WResponses.get(i) == null)) {
 					for (int j = WResponses.size(); j < i; j++)
 						WResponses.add(null);
-				WResponses.add(wResponse);
+					WResponses.add(wResponse);
+					return;
+				}
 			}
 			throw new RuntimeException("invalid print");
-
 		}
 
 		@Override
@@ -170,6 +177,20 @@ public class TotallyFixedW extends ArrayList<InputSequence>
 			return false;
 		}
 
+		@Override
+		public boolean equals(Object o) {
+			assert o instanceof FixedCharacterization;
+			return equals((FixedCharacterization) o);
+		}
+
+		public boolean equals(FixedCharacterization o) {
+			return WResponses.equals(o.WResponses);
+		}
+
+		@Override
+		public int hashCode() {
+			return WResponses.hashCode();
+		}
 	}
 
 	@Override
@@ -183,10 +204,12 @@ public class TotallyFixedW extends ArrayList<InputSequence>
 			LmTrace newSeq) {
 		assert characterization.isComplete()
 				&& !characterization.contains(newSeq);
+		boolean extended = false;
 		for (InputSequence w : this) {
 			assert !w.hasPrefix(newSeq);
 			if (newSeq.startsWith(w) || w.getLength() == 0) {
 				set(indexOf(w), newSeq.getInputsProjection());
+				extended = true;
 				LogManager.logInfo("removing " + w
 						+ " from W-set because it's a prefix of new inputSequence");
 				break;// because W is only extended with this method, there is
@@ -196,10 +219,16 @@ public class TotallyFixedW extends ArrayList<InputSequence>
 						// construction of W)
 			}
 		}
+		if (!extended)
+			add(newSeq.getInputsProjection());
 	}
 
 	@Override
 	public StringBuilder toString(StringBuilder s) {
+		if (isEmpty()) {
+			s.append("empty set");
+			return s;
+		}
 		s.append("[");
 		for (InputSequence seq : this) {
 			s.append(seq);
@@ -210,4 +239,8 @@ public class TotallyFixedW extends ArrayList<InputSequence>
 		return s;
 	}
 
+	@Override
+	public String toString() {
+		return toString(new StringBuilder()).toString();
+	}
 }
