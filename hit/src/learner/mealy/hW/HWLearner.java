@@ -663,8 +663,8 @@ public class HWLearner extends Learner {
 	 * This function search a sub-trace which is incompatible with any state of
 	 * conjecture.
 	 * 
-	 * @return a sub-trace which is a not accepted by any state of the driver or
-	 *         null if such sequence is not found
+	 * @return a sub-trace which is a not accepted by any state of the
+	 *         conjecture or null if such sequence is not found
 	 */
 	private LmTrace searchCEInTrace() {
 		LmConjecture conjecture = dataManager.getConjecture();
@@ -790,8 +790,7 @@ public class HWLearner extends Learner {
 					sigma);
 			InputSequence w = new InputSequence();
 			if (W.size() != 0)
-				w = allowed_W.get(0); // here we CHOOSE to take the
-										// first.
+				w = allowed_W.get(0); // here we CHOOSE to take the first.
 			if (Options.LOG_LEVEL != Options.LogLevel.LOW)
 				LogManager.logInfo("We choose w = " + w + " in " + allowed_W);
 			OutputSequence wResponse = dataManager.apply(w);
