@@ -57,8 +57,9 @@ public class TotallyFixedW extends ArrayList<InputSequence>
 		}
 
 		public void addPrint(InputSequence w, OutputSequence wResponse) {
+			assert w.hasAnswer(new LmTrace(w, wResponse));
 			// heuristic add
-			if (TotallyFixedW.this.size() == WResponses.size() + 1
+			if (TotallyFixedW.this.size() > WResponses.size()
 					&& TotallyFixedW.this.get(WResponses.size()).equals(w)) {
 				WResponses.add(wResponse);
 				return;
@@ -68,9 +69,9 @@ public class TotallyFixedW extends ArrayList<InputSequence>
 				if (TotallyFixedW.this.get(i).equals(w)
 						&& (WResponses.size() <= i
 								|| WResponses.get(i) == null)) {
-					for (int j = WResponses.size(); j < i; j++)
+					for (int j = WResponses.size(); j <= i; j++)
 						WResponses.add(null);
-					WResponses.add(wResponse);
+					WResponses.set(i, wResponse);
 					return;
 				}
 			}
@@ -91,19 +92,19 @@ public class TotallyFixedW extends ArrayList<InputSequence>
 						pos++;
 					}
 					return false;
-
 				}
 
 				@Override
 				public LmTrace next() {
 					if (!hasNext())
 						throw new NoSuchElementException();
+					assert TotallyFixedW.this.get(pos).getLength() == WResponses
+							.get(pos).getLength();
 					LmTrace trace = new LmTrace(TotallyFixedW.this.get(pos),
 							WResponses.get(pos));
 					pos++;
 					return trace;
 				}
-
 			}
 
 			return new Iterable<LmTrace>() {
