@@ -35,6 +35,7 @@ import learner.mealy.hW.dataManager.FullyQualifiedState;
 import learner.mealy.hW.dataManager.GenericHomingSequenceChecker;
 import learner.mealy.hW.dataManager.HZXWSequence;
 import learner.mealy.hW.dataManager.InconsistancyHMappingAndConjectureException;
+import learner.mealy.hW.dataManager.InconsistancyWhileMergingExpectedTracesException;
 import learner.mealy.hW.dataManager.InconsistancyWithConjectureAtEndOfTraceException;
 import learner.mealy.hW.dataManager.GenericHNDException;
 import learner.mealy.hW.dataManager.LocalizedHZXWSequence;
@@ -56,6 +57,8 @@ public class HWLearner extends Learner {
 	private int lastDeliberatelyAppliedHEndPos;
 	private GenericHomingSequenceChecker hChecker = null;
 	private Map<GenericOutputSequence, List<HZXWSequence>> hZXWSequences = new HashMap<>();
+	int wRefinenmentNb = 0;
+	int nbOfTriedWSuffixes = 0;
 
 	public HWLearner(MealyDriver d) {
 		driver = d;
@@ -285,9 +288,6 @@ public class HWLearner extends Learner {
 		LmTrace counterExampleTrace;
 		boolean inconsistencyFound;
 
-		int wRefinenmentNb = 0;
-		int nbOfTriedWSuffixes = 0;
-
 		do {
 			stats.updateMemory((int) (runtime.totalMemory() - runtime
 					.freeMemory()));
@@ -323,6 +323,14 @@ public class HWLearner extends Learner {
 					LogManager.logConsole("Non-determinism found : " + e);
 				}
 				counterExampleTrace = new LmTrace();
+				inconsistencyFound = true;
+			} catch (InconsistancyWhileMergingExpectedTracesException e) {
+				stats.increaseWInconsistencies();
+				if (Options.LOG_LEVEL != LogLevel.LOW) {
+					LogManager.logInfo("Non-determinism found : " + e);
+					LogManager.logConsole("Non-determinism found : " + e);
+				}
+				extendsW(e.getStates(), e.getTrace(), 0);
 				inconsistencyFound = true;
 			}
 
@@ -392,30 +400,12 @@ public class HWLearner extends Learner {
 				for (int i = firstStatePos; i < fullTrace.size() - 1; i++) {
 					FullyKnownTrace transition = currentState
 							.getKnownTransition(fullTrace.getInput(i));
-					assert transition != null;
+					if (transition == null)
+						break;
 					currentState = transition.getEnd();
 					states.add(currentState);
 				}
-				boolean WExtended = false;
-				for (int i = fullTrace.size() - 1; i >= firstStatePos; i--) {
-					currentState = states.get(i - firstStatePos);
-					LmTrace endOfTrace = fullTrace.subtrace(i,
-							fullTrace.size());
-					if (!currentState.getWResponses().contains(endOfTrace)) {
-						W.refine(currentState.getWResponses(), endOfTrace);
-						WExtended = true;
-						break;
-					} else {
-						LogManager.logInfo(currentState.getWResponses(),
-								" already contain trace ", endOfTrace);
-						nbOfTriedWSuffixes++;
-					}
-				}
-				wRefinenmentNb++;
-				if (!WExtended) {
-					throw new RuntimeException("W not extended");
-				}
-
+				extendsW(states, fullTrace, firstStatePos);
 			}
 			stats.increaseWithDataManager(dataManager);
 			if (hExceptions.size() > 0) {
@@ -494,6 +484,53 @@ public class HWLearner extends Learner {
 			}
 		}
 
+	}
+
+	/**
+	 * Extends W-set according to a list of characterizations which will be
+	 * extended by suffixes of trace.
+	 * 
+	 * There might be different ways of increasing W. Current implementation
+	 * take the shortest suffix of {@code trace} which is not already in the
+	 * given characterization.
+	 * 
+	 * @param states
+	 *            the states used to know which characterization should be
+	 *            extended.
+	 * @param trace
+	 *            the trace in which suffixes are taken
+	 * @param firstPosInTrace
+	 *            an offset in trace. the suffix starting at
+	 *            {@code firstPosInTrace} will be added in characterization of
+	 *            {@code states[0]} (if no shortest suffix is used).
+	 */
+	private void extendsW(List<FullyQualifiedState> states, LmTrace trace,
+			int firstPosInTrace) {
+		boolean WExtended = false;
+		assert states.get(0) != null;
+		for (int i = states.size() - 1; i >= 0; i--) {
+			FullyQualifiedState currentState = states.get(i);
+			if (currentState == null)
+				continue;
+			LmTrace endOfTrace = trace.subtrace(firstPosInTrace + i,
+					trace.size());
+			if (!currentState.getWResponses().contains(endOfTrace)) {
+				W.refine(currentState.getWResponses(), endOfTrace);
+				WExtended = true;
+				break;
+			} else {
+				int traceSize = endOfTrace.size();
+				LogManager.logInfo("state ", currentState, " characterized by ",
+						currentState.getWResponses(), " already contain trace ",
+						endOfTrace.subtrace(0, traceSize - 1)," ",
+						endOfTrace.getInput(traceSize - 1), "/?");
+				nbOfTriedWSuffixes++;
+			}
+		}
+		wRefinenmentNb++;
+		if (!WExtended) {
+			throw new RuntimeException("W not extended");
+		}
 	}
 
 	private void checkInconsistencyHMapping() {

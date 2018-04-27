@@ -208,9 +208,8 @@ public class SimplifiedDataManager {
 				continue;
 			String expectedOutput = traceTree.getOutput(input);
 			if (expectedOutput != null && !expectedOutput.equals(output))
-				LogManager.logWarning("ignored ND : "
-						+ new InconsistancyWithConjectureAtEndOfTraceException(
-								input, expectedOutput, traceTree, output));
+				throw new InconsistancyWithConjectureAtEndOfTraceException(
+						input, expectedOutput, traceTree, output);
 			nextExpectedTraces.add(traceTree.getSubTreeRO(input));
 		}
 		expectedTraces = nextExpectedTraces;

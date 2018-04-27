@@ -155,33 +155,50 @@ public class FullyQualifiedState{
 		InputSequence inputs = v.getTrace().getInputsProjection();
 		OutputSequence outputs = v.getTrace().getOutputsProjection();
 		if (expectedTraces.contains(inputs)) {
-			if (!expectedTraces.getOutput(inputs).equals(outputs))
-				// this is not supposed to happen because this trace should have
-				// been checked before
-				LogManager.logWarning(""+ new RuntimeException("third type of inconsistancy"));
+			assert expectedTraces.getOutput(inputs).equals(
+					outputs) : "this trace should have been checked before";
 			TraceTree subTree = expectedTraces.pollTree(v.getTrace()
 					.getInputsProjection());
-			v.getEnd().addExpectedTraces(subTree);
+			InconsistancyWhileMergingExpectedTracesException inconsistency = v
+					.getEnd().addExpectedTraces(subTree);
+			if (inconsistency != null) {
+				inconsistency.setLastState(this);
+				throw inconsistency;
+			}
 		}
 		//clean K ?
 		return true;
 	}
 	
-	public void addExpectedTraces(TraceTree newTraces){
+	public InconsistancyWhileMergingExpectedTracesException addExpectedTraces(
+			TraceTree newTraces) {
 		if (newTraces==null)
-			return;
+			return null;
 		for (FullyKnownTrace v:V.values()){
 			InputSequence inSeq=v.getTrace().getInputsProjection();
-			OutputSequence outseq=v.getTrace().getOutputsProjection();
+			OutputSequence outSeq = v.getTrace().getOutputsProjection();
 			OutputSequence traceOut=newTraces.getOutput(inSeq);
-			if (traceOut!=null&&!outseq.equals(traceOut))
-				LogManager.logWarning("ignored ND : "+ new InconsistancyWhileMergingExpectedTracesException(newTraces, v));
+			assert traceOut != null || v.getTrace()
+					.size() == 1 : "there might be prefixes of v.getTrace() in expectedTraces which are not checked";
+			if (traceOut != null && !outSeq.equals(traceOut)) {
+				return new InconsistancyWhileMergingExpectedTracesException(
+						this, inSeq, outSeq, traceOut);
+			}
 			TraceTree subtree=newTraces.pollTree(inSeq);
-			v.getEnd().addExpectedTraces(subtree);
+			InconsistancyWhileMergingExpectedTracesException inconsistency = v
+					.getEnd().addExpectedTraces(subtree);
+			if (inconsistency != null) {
+				inconsistency.addPreviousState(this, inSeq, outSeq);
+				return inconsistency;
+			}
 		}
-		if (!expectedTraces.add(newTraces)) {
-			LogManager.logWarning("ignored ND : "+ new InconsistancyWhileMergingExpectedTracesException(newTraces, expectedTraces));
+		InconsistancyWhileMergingExpectedTracesException inconsistency = expectedTraces
+				.add(newTraces);
+		if (inconsistency != null) {
+			inconsistency.setLastState(this);
+			return inconsistency;
 		}
+		return null;
 	}
 	
 	/**

@@ -51,13 +51,13 @@ public class TraceTree {
 	 * add other tree to this tree (other tree is not modified)
 	 * 
 	 * @param other
-	 * @return true if everything was OK, false if an inconsistency was found
-	 *         Note : we might also return the inputSequence leading to
-	 *         inconsistency.
+	 * @return null if everything was OK, or ONE inconsistency (even if several
+	 *         exists for the given operation)
 	 */
-	public boolean add(TraceTree other) {
+	public InconsistancyWhileMergingExpectedTracesException add(
+			TraceTree other) {
 		if (other == null)
-			return true;
+			return null;
 		for (String input : other.outputs.keySet()) {
 			String otherOutput = other.outputs.get(input);
 			String thisOutput = outputs.get(input);
@@ -68,17 +68,22 @@ public class TraceTree {
 				this.children.put(input, otherChild);
 			} else {
 				if (!thisOutput.equals(otherOutput))
-					return false;
+					return new InconsistancyWhileMergingExpectedTracesException(
+							input, thisOutput, otherOutput);
 				TraceTree thisChild = children.get(input);
 				if (thisChild == null) {
 					children.put(input, otherChild);
 				} else {
-					if (!thisChild.add(otherChild))
-						return false;
+					InconsistancyWhileMergingExpectedTracesException inconsistency = thisChild
+							.add(otherChild);
+					if (inconsistency != null) {
+						inconsistency.addPreviousState(null, input, thisOutput);
+						return inconsistency;
+					}
 				}
 			}
 		}
-		return true;
+		return null;
 	}
 
 	/**
@@ -195,14 +200,6 @@ public class TraceTree {
 	 */
 	public TraceTree getSubTreeRO(String input) {
 		return children.get(input);
-	}
-
-	public boolean merge(TraceTree other) {
-		if (!add(other))
-			return false;
-		other.children = this.children;
-		other.outputs = this.outputs;
-		return true;
 	}
 
 	public void addSequencesToList(List<LmTrace> results, LmTrace prefix) {
