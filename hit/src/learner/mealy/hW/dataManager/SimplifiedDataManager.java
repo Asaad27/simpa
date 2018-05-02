@@ -277,6 +277,7 @@ public class SimplifiedDataManager {
 			LmTrace transition, final LmTrace print) {
 		assert transition.size() > 0;
 		start.addPartiallyKnownTrace(transition, print);
+		readyForReapplyHZXWSequence.addAll(start.pollSequencesNeededInW());
 	}
 
 	protected void addFullyKnownTrace(FullyKnownTrace v) {

@@ -29,7 +29,11 @@ public class PartiallyKnownTrace {
 	protected List<? extends GenericInputSequence> getUnknownPrints() {
 		return WResponses.getUnknownPrints();
 	}
-	
+
+	protected Iterable<? extends GenericInputSequence> unknownPrints() {
+		return WResponses.unknownPrints();
+	}
+
 	protected void addPrint(final LmTrace print) {
 		assert WResponses.acceptNextPrint(print);
 

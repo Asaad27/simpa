@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.HashMap;
 import java.util.Collection;
 
@@ -34,30 +35,79 @@ public class FullyQualifiedState{
 	private final State state;
 	
 	private TraceTree expectedTraces;
-	private Map<String, List<LocalizedHZXWSequence>> pendingHZXWSequences = new HashMap<>();
-	
+	private Map<String, List<LocalizedHZXWSequence>> toLocalizeHZXWSequences = new HashMap<>();
+	private  List<LocalizedHZXWSequence>notYetInWSequences=new LinkedList<>();
+
 	private List<State> driverStates;
 	
 	public List<LocalizedHZXWSequence> getPendingSequences(String input) {
-		List<LocalizedHZXWSequence> list = pendingHZXWSequences.get(input);
+		List<LocalizedHZXWSequence> list = toLocalizeHZXWSequences.get(input);
 		if (list == null) {
 			list = new ArrayList<>();
-			pendingHZXWSequences.put(input, list);
-
+			toLocalizeHZXWSequences.put(input, list);
 		}
 		return list;
 	}
 
 	/**
+	 * Get dictionary elements which can be reused to characterize states at end
+	 * of transition.This method has most interest with adaptive W-set because a
+	 * sequence can be useles at one time and will be needed later to complete
+	 * characterization of a state. The elements returned are removed from
+	 * storage of this states and will not be returned on another call.
+	 * 
+	 * @return the elements which will bring information to characterize the
+	 *         state after one transition.
+	 */
+	List<LocalizedHZXWSequence> pollSequencesNeededInW() {
+		List<LocalizedHZXWSequence> result = new ArrayList<>();
+		Iterator<LocalizedHZXWSequence> it = notYetInWSequences.iterator();
+		while (it.hasNext()) {
+			LocalizedHZXWSequence seq = it.next();
+			if (hZXWSequenceIsInNeededW(seq)) {
+				result.add(seq);
+				it.remove();
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * indicate whether a hzxw sequence can be reused to characterize a state at
+	 * the end of a transition.
+	 * 
+	 * @param localizedSeq
+	 *            the sequence to test
+	 * @return true if the sequence can help to characterize a state.
+	 */
+	private boolean hZXWSequenceIsInNeededW(
+			LocalizedHZXWSequence localizedSeq) {
+		assert localizedSeq.endOfTransferState == this;
+		LmTrace transition = localizedSeq.sequence.getTransition();
+		if (V.containsKey(transition))
+			return false;
+		PartiallyKnownTrace k = getKEntry(transition);
+		for (GenericInputSequence print : k.unknownPrints()) {
+			if (print.hasAnswer(localizedSeq.sequence.getwResponse())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Place a localized sequence as far as possible in the graph, according to
 	 * the transfer sequence. If we reach the state at the end of transfer
-	 * sequence, the sequence is not recorded in the graph, the
-	 * {@link LocalizedHZXWSequence#endOfTransferState} of sequence is set and
-	 * <code>true</code> is returned.
+	 * sequence, the {@link LocalizedHZXWSequence#endOfTransferState
+	 * endOfTransferState} of sequence is set and {@code true} is returned if
+	 * the print of the sequence can be use to refine characterization of state
+	 * at end of transition.
 	 * 
 	 * @param sequence
 	 *            the localized sequence to place.
-	 * @return true if the transfer sequence ends in this state, else otherwise.
+	 * @return true if the transfer sequence ends in this state and the
+	 *         wResponse can improve characterization of state at end of
+	 *         transition, false otherwise.
 	 */
 	public boolean addLocalizedHZXWSequence(LocalizedHZXWSequence sequence) {
 		assert sequence.transferPosition <= sequence.sequence
@@ -66,7 +116,12 @@ public class FullyQualifiedState{
 		if (sequence.transferPosition == sequence.sequence.getTransferSequence()
 				.size()) {
 			sequence.endOfTransferState = this;
-			return true;
+			if (hZXWSequenceIsInNeededW(sequence)) {
+				return true;
+			} else {
+				notYetInWSequences.add(sequence);
+				return false;
+			}
 		} else {
 			String input = sequence.sequence.getTransferSequence()
 					.getInput(sequence.transferPosition);

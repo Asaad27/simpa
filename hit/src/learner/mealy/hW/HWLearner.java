@@ -933,40 +933,29 @@ public class HWLearner extends Learner {
 					LogManager.logWarning("cannot reuse trace "
 							+ localizedSeq.sequence
 							+ " because it is not consistent with partially known traces");
+				//TODO handle this ND
 				continue;
 			}
-			if (dataManager.getwNotInK(initialState, transition)
-					.contains(localizedSeq.sequence.getwResponse()
-							.getInputsProjection())) {
-				if (Options.LOG_LEVEL != LogLevel.LOW)
-					LogManager
-							.logInfo("reusing trace " + localizedSeq.sequence);
-				LmTrace wResponse = localizedSeq.sequence.getwResponse();
-				LmTrace expectedTrace = new LmTrace();
-				expectedTrace.append(transition);
-				expectedTrace.append(wResponse);
-				InconsistancyWhileMergingExpectedTracesException inc = initialState
-						.addExpectedTrace(expectedTrace);
-				if (inc != null) {
-					inc.addPreviousState(
-							dataManager.getState(
-									localizedSeq.sequence.gethResponse()),
-							localizedSeq.sequence.getTransferSequence()
-									.getInputsProjection(),
-							localizedSeq.sequence.getTransferSequence()
-									.getOutputsProjection());
-					throw inc;
-				}
-				dataManager.addPartiallyKnownTrace(initialState, transition,
-						wResponse);
-			} else {// in current implementation this works. Be careful with the
-					// implementation of adaptative sequences because some
-					// traces should be kept for later.
-				if (Options.LOG_LEVEL != LogLevel.LOW)
-					LogManager.logInfo("we cannot reuse trace "
-							+ localizedSeq.sequence
-							+ " because dataManager is not asking trace for this w");
+			if (Options.LOG_LEVEL != LogLevel.LOW)
+				LogManager.logInfo("reusing trace " + localizedSeq.sequence);
+			LmTrace wResponse = localizedSeq.sequence.getwResponse();
+			LmTrace expectedTrace = new LmTrace();
+			expectedTrace.append(transition);
+			expectedTrace.append(wResponse);
+			InconsistancyWhileMergingExpectedTracesException inc = initialState
+					.addExpectedTrace(expectedTrace);
+			if (inc != null) {
+				inc.addPreviousState(
+						dataManager
+								.getState(localizedSeq.sequence.gethResponse()),
+						localizedSeq.sequence.getTransferSequence()
+								.getInputsProjection(),
+						localizedSeq.sequence.getTransferSequence()
+								.getOutputsProjection());
+				throw inc;
 			}
+			dataManager.addPartiallyKnownTrace(initialState, transition,
+					wResponse);
 		}
 	}
 
