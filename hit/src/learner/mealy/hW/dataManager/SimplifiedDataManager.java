@@ -299,6 +299,7 @@ public class SimplifiedDataManager {
 	public void setCurrentState(FullyQualifiedState currentState) {
 		assert (this.currentState == null || currentState == this.currentState);
 		this.currentState = currentState;
+		expectedTraces.add(currentState.getExpectedTraces());
 	}
 
 	public int traceSize() {
