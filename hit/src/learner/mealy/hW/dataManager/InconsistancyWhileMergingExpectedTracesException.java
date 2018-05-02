@@ -64,7 +64,7 @@ public class InconsistancyWhileMergingExpectedTracesException extends
 		orderedStates = null;
 	}
 
-	void addPreviousState(FullyQualifiedState state, InputSequence inSeq,
+	public void addPreviousState(FullyQualifiedState state, InputSequence inSeq,
 			OutputSequence outSeq) {
 		assert inSeq.getLength() == outSeq.getLength();
 		assert inSeq.getLength() > 0;

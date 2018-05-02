@@ -174,7 +174,14 @@ public class FullyQualifiedState{
 		//clean K ?
 		return true;
 	}
-	
+
+	public InconsistancyWhileMergingExpectedTracesException addExpectedTrace(
+			LmTrace trace) {
+		TraceTree t = new TraceTree();
+		t.addTrace(trace);
+		return addExpectedTraces(t);
+	}
+
 	public InconsistancyWhileMergingExpectedTracesException addExpectedTraces(
 			TraceTree newTraces) {
 		if (newTraces==null)

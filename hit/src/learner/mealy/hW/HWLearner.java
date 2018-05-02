@@ -941,8 +941,24 @@ public class HWLearner extends Learner {
 				if (Options.LOG_LEVEL != LogLevel.LOW)
 					LogManager
 							.logInfo("reusing trace " + localizedSeq.sequence);
+				LmTrace wResponse = localizedSeq.sequence.getwResponse();
+				LmTrace expectedTrace = new LmTrace();
+				expectedTrace.append(transition);
+				expectedTrace.append(wResponse);
+				InconsistancyWhileMergingExpectedTracesException inc = initialState
+						.addExpectedTrace(expectedTrace);
+				if (inc != null) {
+					inc.addPreviousState(
+							dataManager.getState(
+									localizedSeq.sequence.gethResponse()),
+							localizedSeq.sequence.getTransferSequence()
+									.getInputsProjection(),
+							localizedSeq.sequence.getTransferSequence()
+									.getOutputsProjection());
+					throw inc;
+				}
 				dataManager.addPartiallyKnownTrace(initialState, transition,
-						localizedSeq.sequence.getwResponse());
+						wResponse);
 			} else {// in current implementation this works. Be careful with the
 					// implementation of adaptative sequences because some
 					// traces should be kept for later.
