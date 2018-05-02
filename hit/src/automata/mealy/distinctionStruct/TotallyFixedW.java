@@ -192,6 +192,28 @@ public class TotallyFixedW extends ArrayList<InputSequence>
 		public int hashCode() {
 			return WResponses.hashCode();
 		}
+
+		@Override
+		public String toString() {
+			int i = 0;
+			StringBuilder s = new StringBuilder();
+			s.append("[");
+			for (InputSequence inSeq : TotallyFixedW.this) {
+				if (WResponses.size() <= i || WResponses.get(i) == null) {
+					s.append(inSeq);
+					s.append("/not executed yet");
+				} else {
+					s.append(inSeq.buildTrace(WResponses.get(i)));
+				}
+				s.append(", ");
+				i++;
+			}
+			if (i != 0) {
+				s.setLength(s.length() - 2);
+			}
+			s.append("]");
+			return s.toString();
+		}
 	}
 
 	@Override

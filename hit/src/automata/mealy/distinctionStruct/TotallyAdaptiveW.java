@@ -5,6 +5,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Stack;
 
 import automata.mealy.AdaptiveStructure;
 import automata.mealy.AdaptiveSymbolSequence;
@@ -188,6 +189,26 @@ public class TotallyAdaptiveW extends
 			assert characterizationPos.root == o.characterizationPos.root;
 			return characterizationPos == o.characterizationPos;
 		}
+
+		@Override
+		public String toString() {
+			Stack<TotallyAdaptiveW> stack = characterizationPos
+					.getStackFromRoot();
+			TotallyAdaptiveW current = stack.pop();
+			List<Object> traces = new ArrayList<>();
+			while (!current.isFinal()) {
+				if (!stack.isEmpty()) {
+					TotallyAdaptiveW next = stack.pop();
+					traces.add(current.input.buildTrace(next.getFromOutput()));
+					current = next;
+				} else {
+					// partial characterization
+					traces.add(current.input);
+					break;
+				}
+			}
+			return traces.toString();
+		}
 	}
 
 	public TotallyAdaptiveW() {
@@ -197,6 +218,12 @@ public class TotallyAdaptiveW extends
 	@Override
 	protected AdaptiveStructure<AdaptiveSymbolSequence, AdaptiveSymbolSequence> createNewNode() {
 		return new TotallyAdaptiveW();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Stack<TotallyAdaptiveW> getStackFromRoot() {
+		return (Stack<TotallyAdaptiveW>) super.getStackFromRoot();
 	}
 
 	@Override
