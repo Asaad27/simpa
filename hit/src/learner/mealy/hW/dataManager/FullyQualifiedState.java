@@ -245,6 +245,11 @@ public class FullyQualifiedState{
 	protected void addPartiallyKnownTrace(LmTrace transition, LmTrace print) {
 		PartiallyKnownTrace k = getKEntry(transition);
 		k.addPrint(print);
+		LmTrace trace = new LmTrace();
+		trace.append(transition);
+		trace.append(print);
+		boolean result = expectedTraces.addTrace(trace);
+		assert (result);
 	}
 	
 	/**
