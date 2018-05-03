@@ -853,8 +853,11 @@ public class HWLearner extends Learner {
 			FullyQualifiedState lastKnownQ = null;
 			FullyQualifiedState q = localize(dataManager);
 			if (Options.REUSE_HZXW) {
-				proceedReadyHZXW(
-						dataManager.getAndResetReadyForReapplyHZXWSequence());
+				List<LocalizedHZXWSequence> sequences;
+				while (!(sequences = dataManager
+						.getAndResetReadyForReapplyHZXWSequence()).isEmpty()) {
+					proceedReadyHZXW(sequences);
+				}
 			}
 			if (dataManager.isFullyKnown())
 				break;
@@ -908,8 +911,11 @@ public class HWLearner extends Learner {
 			if (Options.REUSE_HZXW) {
 				addHZXWSequence(lastDeliberatelyAppliedH,
 						new LmTrace(alpha, alphaResponse), sigma, wTrace);
-				proceedReadyHZXW(
-						dataManager.getAndResetReadyForReapplyHZXWSequence());
+				List<LocalizedHZXWSequence> sequences;
+				while (!(sequences = dataManager
+						.getAndResetReadyForReapplyHZXWSequence()).isEmpty()) {
+					proceedReadyHZXW(sequences);
+				}
 			}
 			if (dataManager.getCurrentState() == null) {
 				 localize(dataManager);
@@ -996,7 +1002,11 @@ public class HWLearner extends Learner {
 			list = new ArrayList<>();
 			hZXWSequences.put(hResponse, list);
 		}
-		list.add(new HZXWSequence(hResponse, transfer, transition, wResponse));
+		HZXWSequence newSeq = new HZXWSequence(hResponse, transfer, transition,
+				wResponse);
+		assert !list.contains(
+				newSeq) : "one sequence from dictionary wasn't reused";
+		list.add(newSeq);
 	}
 
 	public LmConjecture createConjecture() {

@@ -8,4 +8,17 @@ public class LocalizedHZXWSequence {
 	public LocalizedHZXWSequence(HZXWSequence sequence) {
 		this.sequence = sequence;
 	}
+
+	public boolean equals(Object o) {
+		if (o instanceof LocalizedHZXWSequence)
+			return equals((LocalizedHZXWSequence) o);
+		return false;
+	}
+
+	public boolean equals(LocalizedHZXWSequence o) {
+		assert endOfTransferState == null
+				|| endOfTransferState.equals(o.endOfTransferState);
+		return sequence.equals(o.sequence)
+				&& (transferPosition == o.transferPosition);
+	}
 }

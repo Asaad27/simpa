@@ -40,5 +40,19 @@ public class HZXWSequence {
 		return "[h=" + hResponse + ", transfer=" + transferSequence
 				+ ", transition=" + transition + ", w=" + wResponse+"]";
 	}
-}
 
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o instanceof HZXWSequence)
+			return equals((HZXWSequence) o);
+		return false;
+	}
+
+	public boolean equals(HZXWSequence o) {
+		return hResponse.equals(o.hResponse)
+				&& transferSequence.equals(o.transferSequence)
+				&& transition.equals(o.transition)
+				&& wResponse.equals(o.wResponse);
+	}
+}

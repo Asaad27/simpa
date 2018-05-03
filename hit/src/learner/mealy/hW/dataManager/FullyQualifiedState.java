@@ -160,6 +160,7 @@ public class FullyQualifiedState{
 			if (hZXWSequenceIsInNeededW(sequence)) {
 				return true;
 			} else {
+				assert !notYetInWSequences.contains(sequence);
 				notYetInWSequences.add(sequence);
 				return false;
 			}
