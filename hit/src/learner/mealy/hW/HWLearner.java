@@ -936,8 +936,7 @@ public class HWLearner extends Learner {
 				//TODO handle this ND
 				continue;
 			}
-			if (Options.LOG_LEVEL != LogLevel.LOW)
-				LogManager.logInfo("reusing trace " + localizedSeq.sequence);
+
 			LmTrace wResponse = localizedSeq.sequence.getwResponse();
 			LmTrace expectedTrace = new LmTrace();
 			expectedTrace.append(transition);
@@ -952,10 +951,23 @@ public class HWLearner extends Learner {
 								.getInputsProjection(),
 						localizedSeq.sequence.getTransferSequence()
 								.getOutputsProjection());
+				if (Options.LOG_LEVEL != LogLevel.LOW)
+					LogManager.logInfo("trace ", localizedSeq.sequence,
+							" from dictionary is inconsistent with others observations");
 				throw inc;
 			}
-			dataManager.addPartiallyKnownTrace(initialState, transition,
-					wResponse);
+			if (initialState.hZXWSequenceIsInNeededW(localizedSeq)) {
+				if (Options.LOG_LEVEL != LogLevel.LOW)
+					LogManager
+							.logInfo("reusing trace " + localizedSeq.sequence);
+				dataManager.addPartiallyKnownTrace(initialState, transition,
+						wResponse);
+			} else {
+				assert initialState.kPrintIsKnown(transition, wResponse);
+				LogManager.logInfo("Can not reuse trace ",
+						localizedSeq.sequence,
+						" because the response to this w is already known");
+			}
 		}
 	}
 

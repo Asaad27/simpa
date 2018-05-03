@@ -80,10 +80,11 @@ public class FullyQualifiedState{
 	 *            the sequence to test
 	 * @return true if the sequence can help to characterize a state.
 	 */
-	private boolean hZXWSequenceIsInNeededW(
+	public boolean hZXWSequenceIsInNeededW(
 			LocalizedHZXWSequence localizedSeq) {
 		assert localizedSeq.endOfTransferState == this;
 		LmTrace transition = localizedSeq.sequence.getTransition();
+		assert transition.size() == 1 : "not implemented";
 		if (V.containsKey(transition))
 			return false;
 		PartiallyKnownTrace k = getKEntry(transition);
@@ -91,6 +92,32 @@ public class FullyQualifiedState{
 			if (print.hasAnswer(localizedSeq.sequence.getwResponse())) {
 				return true;
 			}
+		}
+		return false;
+	}
+
+	/**
+	 * indicate if a response to a w sequence is already known for a state at
+	 * the end of a transition from this state.
+	 * 
+	 * @param transition
+	 *            the transition after which we should check for the w.
+	 * @param wResponse
+	 *            a trace obtained from one w.
+	 * @return true if the trace transition.wResponse was observed and recorded
+	 *         from this state.
+	 */
+	public boolean kPrintIsKnown(LmTrace transition, LmTrace wResponse) {
+		assert transition.size() == 1 : "not implemented";
+		FullyKnownTrace t = getKnownTransition(transition.getInput(0));
+		Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> charac;
+		if (t != null)
+			charac = getWResponses();
+		else
+			charac = getKEntry(transition).getCharacterization();
+		for (LmTrace trace : charac.knownResponses()) {
+			if (wResponse.equals(trace))
+				return true;
 		}
 		return false;
 	}

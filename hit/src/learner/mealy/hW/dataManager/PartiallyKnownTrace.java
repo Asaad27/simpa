@@ -34,6 +34,16 @@ public class PartiallyKnownTrace {
 		return WResponses.unknownPrints();
 	}
 
+	/**
+	 * get the characterization. The characterization returned shouldn't be
+	 * modified.
+	 * 
+	 * @return the characterization of state at end of transition.
+	 */
+	Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> getCharacterization() {
+		return WResponses;
+	}
+
 	protected void addPrint(final LmTrace print) {
 		assert WResponses.acceptNextPrint(print);
 
