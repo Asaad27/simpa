@@ -52,12 +52,13 @@ public class FullyQualifiedState{
 	/**
 	 * Get dictionary elements which can be reused to characterize states at end
 	 * of transition.This method has most interest with adaptive W-set because a
-	 * sequence can be useles at one time and will be needed later to complete
+	 * sequence can be useless at one time and will be needed later to complete
 	 * characterization of a state. The elements returned are removed from
-	 * storage of this states and will not be returned on another call.
+	 * storage of this state and will not be returned on another call.
 	 * 
 	 * @return the elements which will bring information to characterize the
-	 *         state after one transition.
+	 *         state after one transition or which can create a W-ND.
+	 * @see #hZXWSequenceIsInNeededW(LocalizedHZXWSequence)
 	 */
 	List<LocalizedHZXWSequence> pollSequencesNeededInW() {
 		List<LocalizedHZXWSequence> result = new ArrayList<>();
@@ -128,13 +129,14 @@ public class FullyQualifiedState{
 	 * sequence, the {@link LocalizedHZXWSequence#endOfTransferState
 	 * endOfTransferState} of sequence is set and {@code true} is returned if
 	 * the print of the sequence can be use to refine characterization of state
-	 * at end of transition.
+	 * at end of transition or if the sequence creates a W-ND.
 	 * 
 	 * @param sequence
 	 *            the localized sequence to place.
 	 * @return true if the transfer sequence ends in this state and the
 	 *         wResponse can improve characterization of state at end of
-	 *         transition, false otherwise.
+	 *         transition or if the sequence is inconsistent with this state,
+	 *         false otherwise.
 	 */
 	public boolean addLocalizedHZXWSequence(LocalizedHZXWSequence sequence) {
 		assert sequence.transferPosition <= sequence.sequence
@@ -143,6 +145,13 @@ public class FullyQualifiedState{
 		if (sequence.transferPosition == sequence.sequence.getTransferSequence()
 				.size()) {
 			sequence.endOfTransferState = this;
+			LmTrace transition = sequence.sequence.getTransition();
+			assert transition.size() == 1 : "not implemented";
+			String knownTransitionOutput = getExpectedKOutput(
+					transition.getInput(0));
+			if (knownTransitionOutput != null
+					&& !knownTransitionOutput.equals(transition.getOutput(0)))
+				return true;
 			if (hZXWSequenceIsInNeededW(sequence)) {
 				return true;
 			} else {
@@ -157,6 +166,11 @@ public class FullyQualifiedState{
 				getPendingSequences(input).add(sequence);
 				return false;
 			} else {
+				String output = sequence.sequence.getTransferSequence()
+						.getOutput(sequence.transferPosition);
+				if (!output.equals(t.getTrace().getOutput(0))) {
+					return true;
+				}
 				sequence.transferPosition++;
 				return t.getEnd().addLocalizedHZXWSequence(sequence);
 			}

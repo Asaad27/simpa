@@ -928,6 +928,12 @@ public class HWLearner extends Learner {
 		for (LocalizedHZXWSequence localizedSeq : readyForReapplyHZXWSequence) {
 			LmTrace transition = localizedSeq.sequence.getTransition();
 			FullyQualifiedState initialState = localizedSeq.endOfTransferState;
+			if (initialState == null) {
+				LogManager.logWarning("there is an inconsistency with trace "
+						+ localizedSeq.sequence + " whic is not handled yet");
+				//TODO handle the ND.
+				return;
+			}
 			if (initialState
 					.getKnownTransition(transition.getInput(0)) != null) {
 				if (Options.LOG_LEVEL != LogLevel.LOW)

@@ -60,6 +60,8 @@ public class InconsistancyWhileMergingExpectedTracesException extends
 	}
 
 	void setLastState(FullyQualifiedState state) {
+		assert reversedStates.get(reversedStates.size() - 1) == null
+				|| reversedStates.get(reversedStates.size() - 1) == state;
 		reversedStates.set(reversedStates.size() - 1, state);
 		orderedStates = null;
 	}
@@ -67,7 +69,10 @@ public class InconsistancyWhileMergingExpectedTracesException extends
 	public void addPreviousState(FullyQualifiedState state, InputSequence inSeq,
 			OutputSequence outSeq) {
 		assert inSeq.getLength() == outSeq.getLength();
-		assert inSeq.getLength() > 0;
+		if (inSeq.getLength() == 0) {
+			setLastState(state);
+			return;
+		}
 		for (int i = inSeq.getLength() - 1; i > 0; i--) {
 			addPreviousState(null, inSeq.sequence.get(i),
 					outSeq.sequence.get(i));
