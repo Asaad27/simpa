@@ -101,6 +101,11 @@ public class HWGraphGenerator extends GraphGenerator {
 	static Restriction adaptiveHomingSequenceRestriction = new EqualsRestriction<>(
 			HWStatsEntry.USE_ADAPTIVE_H, true);
 
+	static Restriction fixedWRestriction = new EqualsRestriction<>(
+			HWStatsEntry.USE_ADAPTIVE_W, false);
+	static Restriction adaptiveWRestriction = new EqualsRestriction<>(
+			HWStatsEntry.USE_ADAPTIVE_W, true);
+
 	{
 		randomCounterRestriction.setTitle("counter automata");
 		fileRestriction.setTitle("from file");
@@ -127,6 +132,9 @@ public class HWGraphGenerator extends GraphGenerator {
 				.setTitle("using non-adaptive homing sequence");
 		adaptiveHomingSequenceRestriction
 				.setTitle("using adaptive homing sequence");
+
+		fixedWRestriction.setTitle("using non-adaptive W-set");
+		adaptiveWRestriction.setTitle("using adaptive W-set");
 
 	}
 
@@ -181,9 +189,8 @@ public class HWGraphGenerator extends GraphGenerator {
 		attributes.add(HWStatsEntry.MAX_RECKONED_STATES);
 		attributes.add(HWStatsEntry.MAX_FAKE_STATES);
 		attributes.add(HWStatsEntry.H_MAX_LENGTH);
-		attributes.add(HWStatsEntry.W_SIZE);
-		attributes.add(HWStatsEntry.MAX_W_LENGTH);
-		attributes.add(HWStatsEntry.W_TOTAL_LENGTH);
+		attributes.add(HWStatsEntry.MAX_W_SIZE);
+		attributes.add(HWStatsEntry.MAX_W_TOTAL_LENGTH);
 		attributes.add(HWStatsEntry.TRACE_LENGTH);
 
 		System.out.print("occurences\t" + sort.getName());
@@ -327,7 +334,7 @@ public class HWGraphGenerator extends GraphGenerator {
 		}
 
 		Graph<Integer, Integer> gWt = new Graph<Integer, Integer>(
-				HWStatsEntry.STATE_NUMBER, HWStatsEntry.W_TOTAL_LENGTH);
+				HWStatsEntry.STATE_NUMBER, HWStatsEntry.MAX_W_TOTAL_LENGTH);
 		for (StatsSet statSet : statsSets) {
 			gWt.plot(statSet, style);
 		}
@@ -335,7 +342,7 @@ public class HWGraphGenerator extends GraphGenerator {
 		// gWt.export();
 
 		Graph<Integer, Integer> gW = new Graph<Integer, Integer>(
-				HWStatsEntry.STATE_NUMBER, HWStatsEntry.W_SIZE);
+				HWStatsEntry.STATE_NUMBER, HWStatsEntry.MAX_W_SIZE);
 		for (StatsSet statSet : statsSets) {
 			gW.plot(statSet, style);
 		}
@@ -343,7 +350,7 @@ public class HWGraphGenerator extends GraphGenerator {
 		// gW.export();
 
 		Graph<Integer, Float> gw = new Graph<Integer, Float>(
-				HWStatsEntry.STATE_NUMBER, HWStatsEntry.AVERAGE_W_LENGTH);
+				HWStatsEntry.STATE_NUMBER, HWStatsEntry.AVERAGE_W_SIZE);
 		for (StatsSet statSet : statsSets) {
 			gw.plot(statSet, style);
 		}
@@ -732,7 +739,7 @@ public class HWGraphGenerator extends GraphGenerator {
 		traceLength.export();
 
 		Graph<T_ABS, Integer> w = new Graph<T_ABS, Integer>(abs,
-				HWStatsEntry.W_SIZE);
+				HWStatsEntry.MAX_W_SIZE);
 		for (PlotItem item : heuristics) {
 			item.plotOn(w);
 		}
@@ -843,7 +850,7 @@ public class HWGraphGenerator extends GraphGenerator {
 		traceLength.export();
 
 		Graph<T_ABS, Integer> w = new Graph<T_ABS, Integer>(abs,
-				HWStatsEntry.W_SIZE);
+				HWStatsEntry.MAX_W_SIZE);
 		for (StatsSet statSet : setsToPlot) {
 			w.plot(statSet, defaultStyle);
 		}

@@ -6,8 +6,11 @@ public class Attribute <T extends Comparable<T>> {
 
 	public final static Attribute<Integer>	W_SIZE = 					new Attribute<Integer>(	"Size of W",									true,	Units.SEQUENCES,	false,	false,	false);
 	public final static Attribute<Integer>	W_TOTAL_LENGTH = 			new Attribute<Integer>(	"sum of length of W sequences",					true,	Units.SYMBOLS,		false,	false,	false);
+	public final static Attribute<Integer>	MAX_W_TOTAL_LENGTH = 		new Attribute<Integer>(	"Maximum number of input in one characterization",true,	Units.SYMBOLS,		false,	false,	false);
 	public final static Attribute<Integer>	W1_LENGTH = 				new Attribute<Integer>(	"Length of first W element",					true,	Units.SYMBOLS,		false,	false,	false);
 	public final static Attribute<Integer>	MAX_W_LENGTH = 				new Attribute<Integer>(	"Length of longest W element",					true,	Units.SYMBOLS,		false,	false,	false);
+	public final static Attribute<Integer>	MAX_W_SIZE = 				new Attribute<Integer>(	"Maximum number of sequence in one characterization",true,Units.SEQUENCES,	false,	false,	false);
+	public final static Attribute<Float>	AVERAGE_W_SIZE = 			new Attribute<Float>(	"Average number of sequence in one characterization",true,Units.SEQUENCES,	false,	false,	false);
 	public final static Attribute<Float>	AVERAGE_W_LENGTH = 			new Attribute<Float>(	"average length of W element",					true,	Units.SYMBOLS,		false,	false,	true);
 	public final static Attribute<Integer>	H_LENGTH = 					new Attribute<Integer>(	"Length of homing sequence",					true,	Units.SYMBOLS,		false,	false,	false);
 	public final static Attribute<Integer>	H_MAX_LENGTH = 				new Attribute<Integer>(	"Maximum length of homing sequence",			true,	Units.SYMBOLS,		false,	false,	false);

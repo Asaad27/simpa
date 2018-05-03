@@ -4,11 +4,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
-import automata.mealy.distinctionStruct.TotallyFixedW;
 import drivers.mealy.MealyDriver;
 import learner.mealy.LmConjecture;
+import learner.mealy.LmTrace;
+import learner.mealy.hW.dataManager.FullyQualifiedState;
 import learner.mealy.hW.dataManager.SimplifiedDataManager;
 import main.simpa.Options;
 import stats.GraphGenerator;
@@ -16,10 +16,9 @@ import stats.StatsEntry;
 import stats.attribute.Attribute;
 
 public class HWStatsEntry extends StatsEntry {
-	public static final Attribute<Integer>W_SIZE = Attribute.W_SIZE;
-	public static final Attribute<Integer>W_TOTAL_LENGTH = Attribute.W_TOTAL_LENGTH;
-	public static final Attribute<Integer>MAX_W_LENGTH = Attribute.MAX_W_LENGTH;
-	public static final Attribute<Float>AVERAGE_W_LENGTH = Attribute.AVERAGE_W_LENGTH;
+	public static final Attribute<Integer>MAX_W_TOTAL_LENGTH = 		Attribute.MAX_W_TOTAL_LENGTH;
+	public static final Attribute<Float>AVERAGE_W_SIZE = 			Attribute.AVERAGE_W_SIZE;
+	public static final Attribute<Integer>MAX_W_SIZE = 				Attribute.MAX_W_SIZE;
 	public static final Attribute<Integer> H_MAX_LENGTH = Attribute.H_MAX_LENGTH;
 	public final static Attribute<Integer> H_ANSWERS_NB =	Attribute.H_ANSWERS_NB;
 	public static final Attribute<Integer>LOCALIZER_CALL_NB = Attribute.LOCALIZER_CALL_NB;
@@ -54,10 +53,9 @@ public class HWStatsEntry extends StatsEntry {
 
 	
 	private static Attribute<?>[] attributes = new Attribute<?>[]{
-			W_SIZE,
-			W_TOTAL_LENGTH,
-			MAX_W_LENGTH,
-			AVERAGE_W_LENGTH,
+			MAX_W_TOTAL_LENGTH,
+			AVERAGE_W_SIZE,
+			MAX_W_SIZE,
 			H_MAX_LENGTH,
 			H_ANSWERS_NB,
 			LOCALIZER_CALL_NB,
@@ -105,9 +103,9 @@ public class HWStatsEntry extends StatsEntry {
 		return attributes;
 	}
 
-	private int WSize=-1;
-	private int WTotalLength=-1;
-	private int maxWLength=-1;
+	private int maxWTotalLength = -1;
+	private float avgWSize = -1;
+	private int maxWSize = -1;
 	private int hMaxLength = -1;
 	private int hResponses;
 	private int localizeCallNb = 0;
@@ -145,9 +143,9 @@ public class HWStatsEntry extends StatsEntry {
 	 */
 	public HWStatsEntry(String line){
 		StringTokenizer st = new StringTokenizer(line, ",");
-		WSize = Integer.parseInt(st.nextToken());
-		WTotalLength = Integer.parseInt(st.nextToken());
-		maxWLength = Integer.parseInt(st.nextToken());
+		maxWTotalLength = Integer.parseInt(st.nextToken());
+		avgWSize = Float.parseFloat(st.nextToken());
+		maxWSize = Integer.parseInt(st.nextToken());
 		hMaxLength = Integer.parseInt(st.nextToken());
 		hResponses = Integer.parseInt(st.nextToken());
 		localizeCallNb = Integer.parseInt(st.nextToken());
@@ -248,23 +246,26 @@ public class HWStatsEntry extends StatsEntry {
 
 	protected void finalUpdate(SimplifiedDataManager dataManager) {
 		updateWithConjecture(dataManager.getConjecture());
-		if (Options.ADAPTIVE_W_SEQUENCES) {
-			WSize = -1;
-			WTotalLength = -1;
-			maxWLength = -1;
-		} else {
-			TotallyFixedW W = (TotallyFixedW) dataManager.getW();
-			WSize = W.size();
-			WTotalLength = 0;
-			maxWLength = 0;
-			for (InputSequence w : W) {
-				int length = w.getMaxLength();
-				WTotalLength += length;
-				if (length > maxWLength) {
-					maxWLength = length;
-				}
+		maxWTotalLength = 0;
+		maxWSize = 0;
+		int sumWSize = 0;
+		int statesNb = 0;
+		for (FullyQualifiedState q : dataManager.getStates()) {
+			statesNb++;
+			int WTotalLength = 0;
+			int WSize = 0;
+			for (LmTrace seq : q.getWResponses().knownResponses()) {
+				WTotalLength += seq.size();
+				WSize += 1;
 			}
+			if (WSize > maxWSize)
+				maxWSize = WSize;
+			sumWSize += WSize;
+			if (WTotalLength > maxWTotalLength)
+				maxWTotalLength = WTotalLength;
 		}
+		avgWSize = sumWSize / statesNb;
+
 		hResponses = dataManager.getHResponsesNb();
 		hMaxLength = dataManager.h.getMaxLength();
 	}
@@ -286,14 +287,12 @@ public class HWStatsEntry extends StatsEntry {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends Comparable<T>> T get(Attribute<T> a) {
-		if (a == W_SIZE)
-			return (T) new Integer(WSize);
-		if (a==W_TOTAL_LENGTH)
-			return (T) new Integer(WTotalLength);
-		if (a==MAX_W_LENGTH)
-			return (T) new Integer(maxWLength);
-		if (a==AVERAGE_W_LENGTH)
-			return (T)(new Float((float)WTotalLength/WSize));
+		if (a == MAX_W_TOTAL_LENGTH)
+			return (T) new Integer(maxWTotalLength);
+		if (a == MAX_W_SIZE)
+			return (T) new Integer(maxWSize);
+		if (a == AVERAGE_W_SIZE)
+			return (T) new Float(avgWSize);
 		if (a == H_MAX_LENGTH)
 			return (T) new Integer(hMaxLength);
 		if (a==H_ANSWERS_NB)
@@ -369,9 +368,8 @@ public class HWStatsEntry extends StatsEntry {
 	}
 
 	public <T extends Comparable<T>> Float getFloatValue(Attribute<T> a) {
-		if (a == W_SIZE || 
-				a == W_TOTAL_LENGTH ||
-				a == MAX_W_LENGTH ||
+		if (a == MAX_W_TOTAL_LENGTH || 
+				a == MAX_W_SIZE ||
 				a == H_MAX_LENGTH ||
 				a == LOCALIZER_CALL_NB ||
 				a == TRACE_LENGTH ||
@@ -392,7 +390,7 @@ public class HWStatsEntry extends StatsEntry {
 			return ((Integer) get(a)).floatValue();
 		if (a == SEED)
 			return ((Long) get(a)).floatValue();
-		if (a == DURATION || a == AVERAGE_W_LENGTH || a == ORACLE_DURATION
+		if (a == DURATION || a == ORACLE_DURATION || a == AVERAGE_W_SIZE
 				|| a == ORACLE_TRACE_PERCENTAGE || a == AVG_NB_TRIED_W)
 			return (Float) get(a);
 		throw new RuntimeException(a.getName() + " is not available or cannot be cast to float");
