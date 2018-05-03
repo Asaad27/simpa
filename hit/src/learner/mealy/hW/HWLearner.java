@@ -47,6 +47,13 @@ import tools.Utils;
 import tools.loggers.LogManager;
 
 public class HWLearner extends Learner {
+	private static class CanNotExtendWException extends RuntimeException {
+		private static final long serialVersionUID = -7523569929856877603L;
+
+		public CanNotExtendWException() {
+			super("W-set cannot be extended");
+		}
+	}
 	private MealyDriver driver;
 	private SimplifiedDataManager dataManager;
 	private HWStatsEntry stats;
@@ -405,7 +412,12 @@ public class HWLearner extends Learner {
 					currentState = transition.getEnd();
 					states.add(currentState);
 				}
-				extendsW(states, fullTrace, firstStatePos);
+				try {
+					extendsW(states, fullTrace, firstStatePos);
+				} catch (CanNotExtendWException e) {
+					if (hExceptions.size() == 0)
+						throw e;
+				}
 			}
 			stats.increaseWithDataManager(dataManager);
 			if (hExceptions.size() > 0) {
@@ -505,7 +517,7 @@ public class HWLearner extends Learner {
 	 *            {@code states[0]} (if no shortest suffix is used).
 	 */
 	private void extendsW(List<FullyQualifiedState> states, LmTrace trace,
-			int firstPosInTrace) {
+			int firstPosInTrace) throws CanNotExtendWException {
 		boolean WExtended = false;
 		assert states.get(0) != null;
 		for (int i = states.size() - 1; i >= 0; i--) {
@@ -529,7 +541,7 @@ public class HWLearner extends Learner {
 		}
 		wRefinenmentNb++;
 		if (!WExtended) {
-			throw new RuntimeException("W not extended");
+			throw new CanNotExtendWException();
 		}
 	}
 
