@@ -86,7 +86,7 @@ public class FullyQualifiedState{
 		assert localizedSeq.endOfTransferState == this;
 		LmTrace transition = localizedSeq.sequence.getTransition();
 		assert transition.size() == 1 : "not implemented";
-		if (V.containsKey(transition))
+		if (getKnownTransition(transition.getInput(0)) != null)
 			return false;
 		PartiallyKnownTrace k = getKEntry(transition);
 		for (GenericInputSequence print : k.unknownPrints()) {
@@ -151,6 +151,11 @@ public class FullyQualifiedState{
 					transition.getInput(0));
 			if (knownTransitionOutput != null
 					&& !knownTransitionOutput.equals(transition.getOutput(0)))
+				return true;
+			String expectedTracesOutput = expectedTraces
+					.getOutput(transition.getInput(0));
+			if (expectedTracesOutput != null
+					&& !transition.getOutput(0).equals(expectedTracesOutput))
 				return true;
 			if (hZXWSequenceIsInNeededW(sequence)) {
 				return true;
@@ -326,6 +331,13 @@ public class FullyQualifiedState{
 		assert transition.size()==1;
 		PartiallyKnownTrace k = K.get(transition.getInput(0));
 		if (k == null){
+			assert getKnownTransition(transition.getInput(
+					0)) == null : "do not create a partially known trace if a transition already exists";
+			assert getExpectedTraces()
+					.getOutput(transition.getInputsProjection()) == null
+					|| getExpectedTraces()
+							.getOutput(transition.getInputsProjection())
+							.equals(transition.getOutputsProjection());
 			k = new PartiallyKnownTrace(this, transition, SimplifiedDataManager.instance.getW());
 			K.put(transition.getInput(0), k);
 		}
@@ -341,7 +353,9 @@ public class FullyQualifiedState{
 		return k.getTransition().getOutput(0);
 	}
 
-	public FullyKnownTrace getKnownTransition(String input){
+	public FullyKnownTrace getKnownTransition(String input) {
+		assert T.get(input) == null
+				|| V.get(T.get(input).getTrace()).equals(T.get(input));
 		return T.get(input);
 	}
 	
