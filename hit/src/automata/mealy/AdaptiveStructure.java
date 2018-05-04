@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Stack;
 
@@ -150,12 +151,32 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 		AdaptiveStructure<InputT, OutputT> child = children.get(output);
 		if (child == null) {
 			child = createNewNode();
-			child.father = this;
-			child.output = output;
-			child.root = this.root;
-			children.put(output, child);
+			addChild(output, child);
 		}
 		return child;
+	}
+
+	/**
+	 * add a child to the current node.
+	 * 
+	 * @param output
+	 *            the output leading to the child
+	 * @param child
+	 *            the child to add. It is allowed to add either a leaf or a
+	 *            complete tree but not a subtree.
+	 */
+	protected void addChild(OutputT output,
+			AdaptiveStructure<InputT, OutputT> child) {
+		assert !children.containsKey(output);
+		children.put(output, child);
+		assert child.output == null;
+		child.output = output;
+		for (AdaptiveStructure<InputT, OutputT> node : child.getAllNodes()) {
+			assert node.root == child : "child is supposed to be an entire tree";
+			node.root = root;
+		}
+		assert child.father == null;
+		child.father = this;
 	}
 
 	/**
@@ -335,6 +356,18 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 	protected abstract AdaptiveStructure<InputT, OutputT> createNewNode();
 
 	/**
+	 * should clone only one node and its input/outputs without adding children.
+	 * 
+	 * @param clonedOutputs
+	 *            the map to record the new objects representing outputs. It is
+	 *            allowed to store more data in this map (not only output but
+	 *            also other things).
+	 * @return a clone of this node.
+	 */
+	protected abstract AdaptiveStructure<InputT, OutputT> clone_local(
+			Map<OutputT, OutputT> clonedOutputs);
+
+	/**
 	 * Extend a leaf with a new input
 	 * 
 	 * @param input
@@ -448,6 +481,38 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 		assert in instanceof AdaptiveStructure<?, ?>;
 		AdaptiveStructure<InputT, OutputT> in_ = (AdaptiveStructure<InputT, OutputT>) in;
 		return isAnswerTo(in_);
+	}
+
+	/**
+	 * clone a tree or a sub-tree.
+	 * 
+	 * @param clonedChildren
+	 *            a map to store new objects representing each node of the tree.
+	 * @return a completed tree which behave like this (sub-)tree.
+	 */
+	public final <T extends AdaptiveStructure<InputT, OutputT>> T clone(
+			Map<T, T> clonedChildren) {
+		Map<OutputT, OutputT> clonedOutputs = new HashMap<>();
+		@SuppressWarnings("unchecked")
+		T result = (T) clone_local(clonedOutputs);
+		for (Entry<OutputT, AdaptiveStructure<InputT, OutputT>> e : children
+				.entrySet()) {
+			AdaptiveStructure<InputT, OutputT> child = e.getValue();
+			AdaptiveStructure<InputT, OutputT> newChild = child
+					.clone(clonedChildren);
+			OutputT newOutput = clonedOutputs.get(e.getKey());
+			assert newOutput != null;
+			result.addChild(newOutput, newChild);
+			assert newChild.root != null && newChild.root == result.root;
+			assert newChild.father == result;
+			assert newChild.input != null || child.input == null;
+			assert newChild.children.size() == child.children.size();
+		}
+		@SuppressWarnings("unchecked")
+		T thisT = (T) this;
+		if (clonedChildren != null)
+			clonedChildren.put(thisT, result);
+		return result;
 	}
 
 	public StringBuilder toString(StringBuilder s) {

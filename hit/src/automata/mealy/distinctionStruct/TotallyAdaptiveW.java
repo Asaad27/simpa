@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Stack;
 
@@ -162,12 +163,12 @@ public class TotallyAdaptiveW extends
 		}
 
 		/**
-		 * forgot the last input applied. This can break iterators given by
+		 * indicate that this characterization is not valid anymore and
+		 * shouldn't be used. This can break iterators given by
 		 * {@link #knownResponses()} and {@link #unknownPrints()}
 		 */
-		public void invalidateLastResponse() {
-			characterizationPos = (TotallyAdaptiveW) characterizationPos.father;
-			assert characterizationPos != null;
+		public void invalidate() {
+			characterizationPos = null;
 		}
 
 		@Override
@@ -218,6 +219,15 @@ public class TotallyAdaptiveW extends
 	@Override
 	protected AdaptiveStructure<AdaptiveSymbolSequence, AdaptiveSymbolSequence> createNewNode() {
 		return new TotallyAdaptiveW();
+	}
+
+	@Override
+	protected TotallyAdaptiveW clone_local(
+			Map<AdaptiveSymbolSequence, AdaptiveSymbolSequence> clonedOutputs) {
+		TotallyAdaptiveW result = new TotallyAdaptiveW();
+		if (input != null)
+			result.input = input.clone(clonedOutputs);
+		return result;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -283,28 +293,32 @@ public class TotallyAdaptiveW extends
 		assert !genericCharacterization.contains(newSeq);
 		AdaptiveCharacterization characterization = (AdaptiveCharacterization) genericCharacterization;
 		TotallyAdaptiveW characterizationPos = characterization.characterizationPos;
-		// if tree is empty, insert new sequence at root.
-		if (characterizationPos.isRoot()) {
-			assert isEmpty() && characterizationPos == this;
+		TotallyAdaptiveW afterPrefix = null;
+		while (!characterizationPos.isRoot()) {
+			AdaptiveSymbolSequence inputSeq = characterizationPos.father
+					.getInput();
+			if (newSeq.startsWith(inputSeq)) {
+				assert afterPrefix == null : "as for non-adaptive W, only one prefix should be found.";
+				afterPrefix = characterizationPos;
+			}
+			characterizationPos = (TotallyAdaptiveW) characterizationPos.father;
+		}
+		if (afterPrefix != null) {
+			TotallyAdaptiveW askingPrefix = (TotallyAdaptiveW) afterPrefix
+					.getFather();
+			AdaptiveSymbolSequence inputSeq = askingPrefix.getInput();
+			inputSeq.extend(newSeq);
+			AdaptiveSymbolSequence outputSeq = inputSeq.getAnswer(newSeq);
+			askingPrefix.addChild(outputSeq, afterPrefix.clone(null));
+			askingPrefix.invalidateChild(afterPrefix);
+			characterization.invalidate();
+		} else {
+			// otherwise add new input at the end of the tree
+			characterizationPos = characterization.characterizationPos;
 			AdaptiveSymbolSequence adaptiveSeq = new AdaptiveSymbolSequence();
 			AdaptiveSymbolSequence output = adaptiveSeq.extend(newSeq);
 			characterizationPos.extend_local(adaptiveSeq);
 			characterizationPos.getChild(output);
-			return;
 		}
-		// if last input in tree is a prefix of newSeq, let's extends this input
-		TotallyAdaptiveW characterizationFather = (TotallyAdaptiveW) characterizationPos.father;
-		AdaptiveSymbolSequence lastInput = characterizationFather.getInput();
-		if (newSeq.startsWith(lastInput)) {
-			lastInput.extend(newSeq);
-			characterizationFather.invalidateChild(characterizationPos);
-			characterization.invalidateLastResponse();
-			return;
-		}
-		// otherwise add new input at the end of the tree
-		AdaptiveSymbolSequence adaptiveSeq = new AdaptiveSymbolSequence();
-		AdaptiveSymbolSequence output = adaptiveSeq.extend(newSeq);
-		characterizationPos.extend_local(adaptiveSeq);
-		characterizationPos.getChild(output);
 	}
 }

@@ -5,6 +5,7 @@ package automata.mealy;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Map;
 
 import learner.mealy.LmTrace;
 import tools.GraphViz;
@@ -24,6 +25,18 @@ public class AdaptiveSymbolSequence extends AdaptiveStructure<String, String>
 	@Override
 	protected AdaptiveStructure<String, String> createNewNode() {
 		return new AdaptiveSymbolSequence();
+	}
+
+	@Override
+	protected AdaptiveSymbolSequence clone_local(
+			Map<String, String> clonedOutputs) {
+		AdaptiveSymbolSequence result = new AdaptiveSymbolSequence();
+		result.input = input;// String are immutable and can be shared
+		for (String key : children.keySet()) {
+			clonedOutputs.put(key, key);// String are immutable and can be
+										// shared between trees.
+		}
+		return result;
 	}
 
 	@Override
