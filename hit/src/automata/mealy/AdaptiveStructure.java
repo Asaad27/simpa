@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.Stack;
 
 import main.simpa.Options;
@@ -41,7 +42,7 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 	protected AdaptiveStructure<InputT, OutputT> root;
 	protected OutputT output = null; // output leading to this node. null if
 										// father is null.
-	protected Map<OutputT, AdaptiveStructure<InputT, OutputT>> children = new HashMap<>();
+	private Map<OutputT, AdaptiveStructure<InputT, OutputT>> children = new HashMap<>();
 
 	public AdaptiveStructure() {
 		root = this;
@@ -101,6 +102,15 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 	public InputT getInput() {
 		assert !isFinal();
 		return input;
+	}
+
+	/**
+	 * Get the outputs labeling the children.
+	 * 
+	 * @return the set of outputs labeling the children
+	 */
+	protected Set<OutputT> getKnownOutputs() {
+		return children.keySet();
 	}
 
 	/**

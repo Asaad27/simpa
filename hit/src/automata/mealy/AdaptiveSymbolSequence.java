@@ -32,7 +32,7 @@ public class AdaptiveSymbolSequence extends AdaptiveStructure<String, String>
 			Map<String, String> clonedOutputs) {
 		AdaptiveSymbolSequence result = new AdaptiveSymbolSequence();
 		result.input = input;// String are immutable and can be shared
-		for (String key : children.keySet()) {
+		for (String key : getKnownOutputs()) {
 			clonedOutputs.put(key, key);// String are immutable and can be
 										// shared between trees.
 		}
