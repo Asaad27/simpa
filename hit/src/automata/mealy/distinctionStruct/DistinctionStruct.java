@@ -62,4 +62,6 @@ public interface DistinctionStruct<InputSeq extends GenericInputSequence, Output
 
 	@Override
 	public String toString();
+
+	public DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> clone();
 }

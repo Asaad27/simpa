@@ -121,6 +121,7 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 	 */
 	public OutputT getFromOutput() {
 		assert !isRoot();
+		assert output != null;
 		assert father.getChild(output) == this;
 		return output;
 	}
@@ -160,7 +161,7 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 		assert checkCompatibility(input, output);
 		AdaptiveStructure<InputT, OutputT> child = children.get(output);
 		if (child == null) {
-			child = createNewNode();
+			child = createNewChild(output);
 			addChild(output, child);
 		}
 		return child;
@@ -177,6 +178,7 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 	 */
 	protected void addChild(OutputT output,
 			AdaptiveStructure<InputT, OutputT> child) {
+		assert child.getClass() == getClass();
 		assert !children.containsKey(output);
 		children.put(output, child);
 		assert child.output == null;
@@ -359,11 +361,16 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 	}
 
 	/**
-	 * should create a node of the same type as this.
+	 * should create a node of the same type as this. This node will be used as
+	 * a child of current node.
 	 * 
-	 * @return
+	 * @param output
+	 *            the output which will label the new child.
+	 * 
+	 * @return a fresh node which can be added as a child of this.
 	 */
-	protected abstract AdaptiveStructure<InputT, OutputT> createNewNode();
+	protected abstract AdaptiveStructure<InputT, OutputT> createNewChild(
+			OutputT output);
 
 	/**
 	 * should clone only one node and its input/outputs without adding children.

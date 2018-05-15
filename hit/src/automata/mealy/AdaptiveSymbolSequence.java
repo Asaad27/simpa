@@ -22,15 +22,19 @@ public class AdaptiveSymbolSequence extends AdaptiveStructure<String, String>
 		super();
 	}
 
+	protected AdaptiveSymbolSequence createEmptyNode() {
+		return new AdaptiveSymbolSequence();
+	}
+
 	@Override
-	protected AdaptiveStructure<String, String> createNewNode() {
+	protected AdaptiveStructure<String, String> createNewChild(String ouput) {
 		return new AdaptiveSymbolSequence();
 	}
 
 	@Override
 	protected AdaptiveSymbolSequence clone_local(
 			Map<String, String> clonedOutputs) {
-		AdaptiveSymbolSequence result = new AdaptiveSymbolSequence();
+		AdaptiveSymbolSequence result = createEmptyNode();
 		result.input = input;// String are immutable and can be shared
 		for (String key : getKnownOutputs()) {
 			clonedOutputs.put(key, key);// String are immutable and can be

@@ -527,6 +527,9 @@ public class HWLearner extends Learner {
 			LmTrace endOfTrace = trace.subtrace(firstPosInTrace + i,
 					trace.size());
 			if (!currentState.getWResponses().contains(endOfTrace)) {
+				LogManager.logInfo("characterization ",
+						currentState.getWResponses(),
+						" will be extended with sequence ", endOfTrace);
 				W.refine(currentState.getWResponses(), endOfTrace);
 				WExtended = true;
 				break;
@@ -816,7 +819,7 @@ public class HWLearner extends Learner {
 		if (Options.LOG_LEVEL == LogLevel.ALL
 				&& driver instanceof TransparentMealyDriver) {
 			TransparentMealyDriver tDriver = (TransparentMealyDriver) driver;
-			if (tDriver.getAutomata().acceptCharacterizationSet(W)) {
+			if (tDriver.getAutomata().acceptCharacterizationSet(W.clone())) {
 				logW.append(" (which is a W-set for the driver)");
 			} else {
 				logW.append(" (which is not a W-set for the driver)");

@@ -7,16 +7,101 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Stack;
+import tools.loggers.LogManager;
 
 import automata.mealy.AdaptiveStructure;
 import automata.mealy.AdaptiveSymbolSequence;
 import automata.mealy.GenericInputSequence;
 import automata.mealy.GenericInputSequence.GenericOutputSequence;
+import automata.mealy.InputSequence;
+import automata.mealy.OutputSequence;
 import learner.mealy.LmTrace;
+import main.simpa.Options;
+import main.simpa.Options.LogLevel;
 import tools.GraphViz;
 
+/**
+ * class AdaptiveSymbolSequenceForW extends the class AdaptiveSymbolSequence and
+ * add fields which can be used by the class TotallyAdaptiveW to store data in
+ * this level of adaptive structure.
+ * 
+ * @author Nicolas BREMOND
+ */
+class AdaptiveSymbolSequenceForW extends AdaptiveSymbolSequence {
+	private TotallyAdaptiveW treeToClone = null;
+
+	/**
+	 * get a sub-part of a W-Tree which should be copied as a child when a new
+	 * input is discovered.
+	 * 
+	 * @return the first tree found in this node its ancestors or null if no
+	 *         tree can be found.
+	 */
+	public TotallyAdaptiveW getTreeToClone() {
+		AdaptiveSymbolSequenceForW current = this;
+		while (current != null) {
+			if (current.treeToClone != null)
+				return current.treeToClone;
+			current = (AdaptiveSymbolSequenceForW) current.getFather();
+		}
+		return null;
+	}
+
+	/**
+	 * set the tree to clone when a new input if discovered after this node.
+	 * 
+	 * @param tree
+	 */
+	void setTreeToClone(TotallyAdaptiveW tree) {
+		assert treeToClone == null;
+		treeToClone = tree;
+	}
+
+	@Override
+	protected AdaptiveSymbolSequenceForW createEmptyNode() {
+		return new AdaptiveSymbolSequenceForW();
+	}
+
+	@Override
+	protected AdaptiveSymbolSequenceForW createNewChild(String o) {
+		return new AdaptiveSymbolSequenceForW();
+	}
+
+	@Override
+	public AdaptiveSymbolSequenceForW extend(LmTrace trace) {
+		return (AdaptiveSymbolSequenceForW) super.extend(trace);
+	}
+
+	@Override
+	public AdaptiveSymbolSequenceForW getAnswer(LmTrace possibleAnswer) {
+		return (AdaptiveSymbolSequenceForW) super.getAnswer(possibleAnswer);
+	}
+
+	@Override
+	protected AdaptiveSymbolSequence clone_local(
+			Map<String, String> clonedOutputs) {
+		AdaptiveSymbolSequenceForW result = (AdaptiveSymbolSequenceForW) super.clone_local(
+				clonedOutputs);
+		result.treeToClone = treeToClone;
+		return result;
+	}
+
+	@Override
+	protected void dot_appendNode(Writer writer) throws IOException {
+		super.dot_appendNode(writer);
+		if (treeToClone != null) {
+			treeToClone.dot_appendAll(writer);
+			writer.write(getDotName() + " -> " + treeToClone.getDotName()
+					+ "[color=red,style=dashed,fontcolor=grey,label="
+					+ GraphViz.id2DotAuto("other output (clone tree)")
+					+ "];\n");
+		}
+
+	}
+}
+
 public class TotallyAdaptiveW extends
-		AdaptiveDistinctionStruct<AdaptiveSymbolSequence, AdaptiveSymbolSequence>
+		AdaptiveDistinctionStruct<AdaptiveSymbolSequenceForW, AdaptiveSymbolSequenceForW>
 		implements
 		DistinctionStruct<AdaptiveSymbolSequence, AdaptiveSymbolSequence> {
 
@@ -44,12 +129,12 @@ public class TotallyAdaptiveW extends
 		@Override
 		public void addPrint(GenericInputSequence w,
 				GenericOutputSequence wResponse) {
-			addPrint((AdaptiveSymbolSequence) w,
-					(AdaptiveSymbolSequence) wResponse);
+			addPrint((AdaptiveSymbolSequenceForW) w,
+					(AdaptiveSymbolSequenceForW) wResponse);
 		}
 
-		public void addPrint(AdaptiveSymbolSequence w,
-				AdaptiveSymbolSequence wResponse) {
+		public void addPrint(AdaptiveSymbolSequenceForW w,
+				AdaptiveSymbolSequenceForW wResponse) {
 			assert !characterizationPos.isFinal();
 			assert w == characterizationPos.input;
 			assert wResponse.isAnswerTo(w);
@@ -217,17 +302,32 @@ public class TotallyAdaptiveW extends
 	}
 
 	@Override
-	protected AdaptiveStructure<AdaptiveSymbolSequence, AdaptiveSymbolSequence> createNewNode() {
-		return new TotallyAdaptiveW();
+	protected TotallyAdaptiveW createNewChild(
+			AdaptiveSymbolSequenceForW output) {
+		TotallyAdaptiveW toClone = output.getTreeToClone();
+		if (toClone == null)
+			return new TotallyAdaptiveW();
+		assert !output.isRoot();
+		if (Options.LOG_LEVEL == LogLevel.ALL)
+			LogManager.logInfo(
+					"In adaptive W : cloning a previously used tree to create the child for output ",
+					output.getFromOutput(), " in characterization ",
+					new AdaptiveCharacterization(this));
+		return toClone.clone(null);
 	}
 
 	@Override
 	protected TotallyAdaptiveW clone_local(
-			Map<AdaptiveSymbolSequence, AdaptiveSymbolSequence> clonedOutputs) {
+			Map<AdaptiveSymbolSequenceForW, AdaptiveSymbolSequenceForW> clonedOutputs) {
 		TotallyAdaptiveW result = new TotallyAdaptiveW();
 		if (input != null)
 			result.input = input.clone(clonedOutputs);
 		return result;
+	}
+
+	@Override
+	public TotallyAdaptiveW clone() {
+		return (TotallyAdaptiveW) clone(null);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -237,8 +337,8 @@ public class TotallyAdaptiveW extends
 	}
 
 	@Override
-	protected boolean checkCompatibility(AdaptiveSymbolSequence input,
-			AdaptiveSymbolSequence output) {
+	protected boolean checkCompatibility(AdaptiveSymbolSequenceForW input,
+			AdaptiveSymbolSequenceForW output) {
 		if (!output.isAnswerTo(input))
 			return false;
 		return true;
@@ -264,7 +364,7 @@ public class TotallyAdaptiveW extends
 
 	@Override
 	protected void dot_appendChild(Writer writer,
-			AdaptiveStructure<AdaptiveSymbolSequence, AdaptiveSymbolSequence> child)
+			AdaptiveStructure<AdaptiveSymbolSequenceForW, AdaptiveSymbolSequenceForW> child)
 			throws IOException {
 		assert this.getClass().isInstance(child);
 		if (child.isFinal()) {
@@ -304,19 +404,22 @@ public class TotallyAdaptiveW extends
 			characterizationPos = (TotallyAdaptiveW) characterizationPos.father;
 		}
 		if (afterPrefix != null) {
+			if (!afterPrefix.isFinal())
+				afterPrefix.output.setTreeToClone(afterPrefix);
 			TotallyAdaptiveW askingPrefix = (TotallyAdaptiveW) afterPrefix
 					.getFather();
-			AdaptiveSymbolSequence inputSeq = askingPrefix.getInput();
-			inputSeq.extend(newSeq);
-			AdaptiveSymbolSequence outputSeq = inputSeq.getAnswer(newSeq);
-			askingPrefix.addChild(outputSeq, afterPrefix.clone(null));
+			AdaptiveSymbolSequenceForW inputSeq = askingPrefix.getInput();
+			InputSequence newIn = newSeq.getInputsProjection();
+			OutputSequence newOut = newSeq.getOutputsProjection();
+			inputSeq.extend(newIn.sequence,
+					newOut.sequence.subList(0, newSeq.size() - 1));
 			askingPrefix.invalidateChild(afterPrefix);
 			characterization.invalidate();
 		} else {
 			// otherwise add new input at the end of the tree
 			characterizationPos = characterization.characterizationPos;
-			AdaptiveSymbolSequence adaptiveSeq = new AdaptiveSymbolSequence();
-			AdaptiveSymbolSequence output = adaptiveSeq.extend(newSeq);
+			AdaptiveSymbolSequenceForW adaptiveSeq = new AdaptiveSymbolSequenceForW();
+			AdaptiveSymbolSequenceForW output = adaptiveSeq.extend(newSeq);
 			characterizationPos.extend_local(adaptiveSeq);
 			characterizationPos.getChild(output);
 		}

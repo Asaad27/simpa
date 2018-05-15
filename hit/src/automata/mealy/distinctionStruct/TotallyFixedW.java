@@ -266,4 +266,10 @@ public class TotallyFixedW extends ArrayList<InputSequence>
 	public String toString() {
 		return toString(new StringBuilder()).toString();
 	}
+	
+	@Override
+	public TotallyFixedW clone(){
+		TotallyFixedW clone=(TotallyFixedW) super.clone();
+		return clone;
+	}
 }
