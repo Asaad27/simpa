@@ -40,8 +40,10 @@ import learner.mealy.hW.dataManager.InconsistancyWithConjectureAtEndOfTraceExcep
 import learner.mealy.hW.dataManager.GenericHNDException;
 import learner.mealy.hW.dataManager.LocalizedHZXWSequence;
 import learner.mealy.hW.dataManager.SimplifiedDataManager;
+import learner.mealy.hW.dataManager.TraceTree;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
+import tools.CompiledSearchGraph;
 import tools.Utils;
 
 import tools.loggers.LogManager;
@@ -342,6 +344,8 @@ public class HWLearner extends Learner {
 			}
 
 			if (!inconsistencyFound && Options.TRY_TRACE_AS_CE) {
+				inconsistencyFound = searchAndProceedCeInTrace();
+/*
 				counterExampleTrace = searchCEInTrace();
 				if (counterExampleTrace != null) {
 					virtualCounterExample = true;
@@ -349,7 +353,6 @@ public class HWLearner extends Learner {
 					// length for suffix1by1
 					
 					throw new RuntimeException("not implemented : a known characterization is needed");
-/*
 					for (GenericInputSequence w : W) {
 						if (w.hasPrefix(counterExampleTrace)) {
 							if (Options.LOG_LEVEL != LogLevel.LOW) {
@@ -361,8 +364,8 @@ public class HWLearner extends Learner {
 							break;
 						}
 					}
-*/
 				}
+				 */
 			}
 
 			List<GenericHNDException> hExceptions = new ArrayList<>();
@@ -520,6 +523,7 @@ public class HWLearner extends Learner {
 			int firstPosInTrace) throws CanNotExtendWException {
 		boolean WExtended = false;
 		assert states.get(0) != null;
+		assert states.size() + firstPosInTrace <= trace.size();
 		for (int i = states.size() - 1; i >= 0; i--) {
 			FullyQualifiedState currentState = states.get(i);
 			if (currentState == null)
@@ -752,6 +756,82 @@ public class HWLearner extends Learner {
 				LogManager.logInfo(
 						"conjecture is not connex and we don't have a path to try the other state if we apply h and a distinction sequence.");
 		}
+	}
+
+	private boolean searchAndProceedCeInTrace() {
+		LogManager.logInfo("Searching counter-example in trace.");
+		if (Options.ADAPTIVE_H)
+			throw new RuntimeException("not implemented");
+		InputSequence h = (InputSequence) dataManager.h;
+		CompiledSearchGraph hFinder = new CompiledSearchGraph(h);
+		FullyQualifiedState currentState = null;
+		TraceTree expectedTraces = null;
+		List<FullyQualifiedState> states = null;
+		int startPos = -1;
+		for (int i = 0; i < fullTrace.size(); i++) {
+			String input = fullTrace.getInput(i);
+			String output = fullTrace.getOutput(i);
+
+			String conjectureOutput = null;
+			if (currentState != null) {
+				FullyKnownTrace t = currentState.getKnownTransition(input);
+				if (t == null) {
+					expectedTraces = currentState.getExpectedTraces();
+					currentState = null;
+				} else {
+					currentState = t.getEnd();
+					conjectureOutput = t.getTrace().getOutput(0);
+				}
+			} else if (expectedTraces != null) {
+				conjectureOutput = expectedTraces.getOutput(input);
+				expectedTraces = expectedTraces.getSubTreeRO(input);
+			}
+			if (conjectureOutput != null && !conjectureOutput.equals(output)) {
+				LmTrace trace = fullTrace.subtrace(startPos, i + 1);
+				try {
+					LogManager.logInfo("After transition ", startPos - 1,
+							", h was applied and we can identify the state reached (",
+							states.get(0), "). The trace ", trace,
+							" observed from transition ", startPos,
+							" to transition ", i,
+							" is not compatible with state ", states.get(0),
+							" in conjecture.");
+					extendsW(states, trace, 0);
+					LogManager.logInfo("W extended using trace as CE");
+					return true;
+				} catch (CanNotExtendWException e) {
+					LogManager.logInfo(
+							"this part of trace cannot be used to refine W. Let's search another sequence");
+					currentState = null;
+					expectedTraces = null;
+				}
+			}
+
+			hFinder.apply(input);
+			if (hFinder.isAcceptingWord()) {
+				LmTrace hAnswer = fullTrace.subtrace(i + 1 - h.getLength(),
+						i + 1);
+				FullyQualifiedState stateAfterH = dataManager
+						.getState(hAnswer.getOutputsProjection());
+				if (stateAfterH != null) {
+					assert currentState == null
+							|| currentState == stateAfterH : "h is not homing for conjecture";
+					if (currentState == null) {
+						if (expectedTraces == null) {
+							startPos = i + 1;
+							states = new ArrayList<>();
+						}
+						currentState = stateAfterH;
+					}
+				}
+			}
+
+			if (currentState != null || expectedTraces != null) {
+				states.add(currentState);
+			}
+		}
+		LogManager.logInfo("no counter-example found in trace");
+		return false;
 	}
 
 	/**
