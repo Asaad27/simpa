@@ -54,6 +54,7 @@ public class SimplifiedDataManager {
 	private Collection<TraceTree> expectedTraces;
 	
 	private Map<GenericOutputSequence, List<HZXWSequence>> hZXWSequences;
+	private Map<GenericOutputSequence, List<LmTrace>> hWSequences;
 	private List<LocalizedHZXWSequence> readyForReapplyHZXWSequence = new ArrayList<>();
 
 	protected Collection<FullyQualifiedState> identifiedFakeStates=new ArrayList<>();
@@ -67,6 +68,10 @@ public class SimplifiedDataManager {
 
 	public FullyQualifiedState getState(GenericOutputSequence hResponse) {
 		assert hResponse.checkCompatibilityWith(h);
+		getOrCreateWResponseAfterHresponse(hResponse);// create an empty
+														// characterization and
+														// possibly fill it from
+														// dictionary.
 		FullyQualifiedState s = hResponse2State.get(hResponse);
 		if (s == null && W.isEmpty()) {
 			s = getFullyQualifiedState(W.getEmptyCharacterization());
@@ -78,12 +83,45 @@ public class SimplifiedDataManager {
 			GenericOutputSequence hR) {
 		Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> wR = hResponse2Wresponses
 				.get(hR);
-		if (wR != null)
-			return wR;
-		wR = W.getEmptyCharacterization();
-		hResponse2Wresponses.put(hR, wR);
+		if (wR == null) {
+			wR = W.getEmptyCharacterization();
+			hResponse2Wresponses.put(hR, wR);
+			extendsAsMuchAsPossible(wR, hR);
+		}
 		return wR;
+	}
 
+	/**
+	 * use as much sequences as possible in dictionary to improve the
+	 * characterization
+	 * 
+	 * @param wR
+	 *            the characterization to improve.
+	 * @param hResponse
+	 *            the response to homing sequence leading to this
+	 *            characterization
+	 * @return the number of sequences used
+	 */
+	private int extendsAsMuchAsPossible(
+			Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> wR,
+			GenericOutputSequence hResponse) {
+		List<LmTrace> traces=hWSequences.get(hResponse);
+		if (traces == null)
+			return 0;
+		int usedSequences = 0;
+		boolean extended;
+		do {
+			extended = false;
+			for (LmTrace t : traces) {
+				if (wR.acceptNextPrint(t)) {
+					wR.addPrint(t);
+					extended = true;
+					usedSequences++;
+				}
+			}
+		} while (extended);
+		checkForCompletnessAfterH(hResponse);
+		return usedSequences;
 	}
 
 	public GenericInputSequence getMissingInputSequence(
@@ -103,6 +141,25 @@ public class SimplifiedDataManager {
 		assert (wResponse.checkCompatibilityWith(w));
 		assert wRs.getUnknownPrints().contains(w);
 		wRs.addPrint(w, wResponse);
+		extendsAsMuchAsPossible(wRs, hResponse);
+		FullyQualifiedState q=getState(hResponse);
+		if (q!=null)return q;
+		return checkForCompletnessAfterH(hResponse);
+	}
+
+	/**
+	 * Check if the state reached after one answer to homing sequence is
+	 * completely characterized and if so, record this state in H mapping.
+	 * 
+	 * @param hResponse
+	 *            the answer to h which might be characterized
+	 * @return the state characterized if characterization is complete
+	 **/
+	FullyQualifiedState checkForCompletnessAfterH(
+			GenericOutputSequence hResponse) {
+		assert hResponse2State.get(hResponse) == null;
+		Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> wRs = hResponse2Wresponses
+				.get(hResponse);
 		if (wRs.isComplete()) {
 			FullyQualifiedState q = getFullyQualifiedState(wRs);
 			hResponse2State.put(hResponse, q);
@@ -127,6 +184,7 @@ public class SimplifiedDataManager {
 			DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W,
 			GenericInputSequence h, LmTrace globalTrace,
 			Map<GenericOutputSequence, List<HZXWSequence>> hZXWSequences,
+			Map<GenericOutputSequence, List<LmTrace>> hWSequences,
 			GenericHomingSequenceChecker hChecker) {
 		this.trace = new LmTrace();
 		this.globalTrace = globalTrace;
@@ -135,6 +193,7 @@ public class SimplifiedDataManager {
 		this.I = new ArrayList<String>(driver.getInputSymbols());
 		this.driver = driver;
 		this.hZXWSequences = hZXWSequences;
+		this.hWSequences = hWSequences;
 		Q = new HashMap<>();
 		notFullyKnownStates = new HashSet<FullyQualifiedState>();
 		conjecture = new LmConjecture(driver);

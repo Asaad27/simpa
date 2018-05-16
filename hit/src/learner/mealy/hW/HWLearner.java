@@ -66,6 +66,7 @@ public class HWLearner extends Learner {
 	private int lastDeliberatelyAppliedHEndPos;
 	private GenericHomingSequenceChecker hChecker = null;
 	private Map<GenericOutputSequence, List<HZXWSequence>> hZXWSequences = new HashMap<>();
+	private Map<GenericOutputSequence, List<LmTrace>> hWSequences = new HashMap<>();
 	int wRefinenmentNb = 0;
 	int nbOfTriedWSuffixes = 0;
 
@@ -230,6 +231,7 @@ public class HWLearner extends Learner {
 			hChecker = GenericHomingSequenceChecker.getChecker(h);//TODO keep the same checker
 		} else {
 			hZXWSequences = new HashMap<>();
+			hWSequences = new HashMap<>();
 			LogManager.logInfo("h is now " + h);
 			hChecker = GenericHomingSequenceChecker.getChecker(h);
 		}
@@ -921,7 +923,7 @@ public class HWLearner extends Learner {
 
 
 		dataManager = new SimplifiedDataManager(driver, this.W, h, fullTrace,
-				hZXWSequences, hChecker);
+				hZXWSequences, hWSequences, hChecker);
 
 		// start of the algorithm
 		do {
@@ -1128,6 +1130,13 @@ public class HWLearner extends Learner {
 								+ missingW + " from W-set");
 				GenericOutputSequence wResponse = dataManager.apply(missingW);
 				dataManager.addWresponseAfterH(hResponse, missingW, wResponse);
+				List<LmTrace> wObserved = hWSequences.get(hResponse);
+				if (wObserved == null) {
+					wObserved = new ArrayList<>();
+					hWSequences.put(hResponse, wObserved);
+				}
+				assert !wObserved.contains(missingW.buildTrace(wResponse));
+				wObserved.add(missingW.buildTrace(wResponse));
 			}
 
 		} while (s == null);
