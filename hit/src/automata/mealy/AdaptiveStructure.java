@@ -43,6 +43,7 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 	protected OutputT output = null; // output leading to this node. null if
 										// father is null.
 	private Map<OutputT, AdaptiveStructure<InputT, OutputT>> children = new HashMap<>();
+	private int hashCode = 0;
 
 	public AdaptiveStructure() {
 		root = this;
@@ -530,6 +531,22 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 		if (clonedChildren != null)
 			clonedChildren.put(thisT, result);
 		return result;
+	}
+
+	@Override
+	public int hashCode() {
+		if (hashCode == 0) {
+			if (isRoot()) {
+				if (isFinal())
+					hashCode = 1;
+				else
+					hashCode = getInput().hashCode();
+			} else {
+				hashCode = father.hashCode() * getFromOutput().hashCode()
+						+ father.getInput().hashCode();
+			}
+		}
+		return hashCode;
 	}
 
 	public StringBuilder toString(StringBuilder s) {
