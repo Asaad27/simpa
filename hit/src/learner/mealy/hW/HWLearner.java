@@ -46,7 +46,7 @@ public class HWLearner extends Learner {
 	private LmTrace fullTrace;
 	private OutputSequence lastDeliberatelyAppliedH = null;
 	private HomingSequenceChecker hChecker = null;
-	Map<OutputSequence, List<HZXWSequence>> hZXWSequences = new HashMap<>();
+	private Map<OutputSequence, List<HZXWSequence>> hZXWSequences = new HashMap<>();
 
 	public HWLearner(MealyDriver d) {
 		driver = d;
