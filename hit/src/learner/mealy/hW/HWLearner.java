@@ -43,7 +43,6 @@ import learner.mealy.hW.dataManager.SimplifiedDataManager;
 import learner.mealy.hW.dataManager.TraceTree;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
-import tools.CompiledSearchGraph;
 import tools.Utils;
 
 import tools.loggers.LogManager;
@@ -346,7 +345,7 @@ public class HWLearner extends Learner {
 			}
 
 			if (!inconsistencyFound && Options.TRY_TRACE_AS_CE) {
-				inconsistencyFound = searchAndProceedCeInTrace();
+				inconsistencyFound = searchAndProceedCEInTrace();
 /*
 				counterExampleTrace = searchCEInTrace();
 				if (counterExampleTrace != null) {
@@ -760,19 +759,17 @@ public class HWLearner extends Learner {
 		}
 	}
 
-	private boolean searchAndProceedCeInTrace() {
+	private boolean searchAndProceedCEInTrace() {
 		LogManager.logInfo("Searching counter-example in trace.");
-		if (Options.ADAPTIVE_H)
-			throw new RuntimeException("not implemented");
-		InputSequence h = (InputSequence) dataManager.h;
-		CompiledSearchGraph hFinder = new CompiledSearchGraph(h);
 		FullyQualifiedState currentState = null;
 		TraceTree expectedTraces = null;
-		List<FullyQualifiedState> states = null;
+		List<FullyQualifiedState> statesHistory = null;
+		Set<FullyQualifiedState> compatibleStates = new HashSet<>(
+				dataManager.getStates());
 		int startPos = -1;
 		for (int i = 0; i < fullTrace.size(); i++) {
 			String input = fullTrace.getInput(i);
-			String output = fullTrace.getOutput(i);
+			String traceOutput = fullTrace.getOutput(i);
 
 			String conjectureOutput = null;
 			if (currentState != null) {
@@ -788,17 +785,19 @@ public class HWLearner extends Learner {
 				conjectureOutput = expectedTraces.getOutput(input);
 				expectedTraces = expectedTraces.getSubTreeRO(input);
 			}
-			if (conjectureOutput != null && !conjectureOutput.equals(output)) {
+			boolean extendWfailed = false;
+			if (conjectureOutput != null
+					&& !conjectureOutput.equals(traceOutput)) {
 				LmTrace trace = fullTrace.subtrace(startPos, i + 1);
 				try {
 					LogManager.logInfo("After transition ", startPos - 1,
 							", h was applied and we can identify the state reached (",
-							states.get(0), "). The trace ", trace,
+							statesHistory.get(0), "). The trace ", trace,
 							" observed from transition ", startPos,
 							" to transition ", i,
-							" is not compatible with state ", states.get(0),
-							" in conjecture.");
-					extendsW(states, trace, 0);
+							" is not compatible with state ",
+							statesHistory.get(0), " in conjecture.");
+					extendsW(statesHistory, trace, 0);
 					LogManager.logInfo("W extended using trace as CE");
 					return true;
 				} catch (CanNotExtendWException e) {
@@ -806,84 +805,51 @@ public class HWLearner extends Learner {
 							"this part of trace cannot be used to refine W. Let's search another sequence");
 					currentState = null;
 					expectedTraces = null;
+					extendWfailed = true;
 				}
 			}
 
-			hFinder.apply(input);
-			if (hFinder.isAcceptingWord()) {
-				LmTrace hAnswer = fullTrace.subtrace(i + 1 - h.getLength(),
-						i + 1);
-				FullyQualifiedState stateAfterH = dataManager
-						.getState(hAnswer.getOutputsProjection());
-				if (stateAfterH != null) {
+			Set<FullyQualifiedState> newCompatibles = new HashSet<>(
+					compatibleStates.size());
+			for (FullyQualifiedState s : compatibleStates) {
+				FullyKnownTrace t = s.getKnownTransition(input);
+				if (t == null) {
+					newCompatibles = new HashSet<>(dataManager.getStates());
+					break;
+				} else {
+					if (t.getTrace().getOutput(0).equals(traceOutput))
+						newCompatibles.add(t.getEnd());
+				}
+			}
+			if (newCompatibles.size() == 1) {
+				FullyQualifiedState onlyCompatibleState = newCompatibles
+						.iterator().next();
+				if (onlyCompatibleState != null) {
 					assert currentState == null
-							|| currentState == stateAfterH : "h is not homing for conjecture";
+							|| currentState == onlyCompatibleState;
 					if (currentState == null) {
 						if (expectedTraces == null) {
 							startPos = i + 1;
-							states = new ArrayList<>();
+							statesHistory = new ArrayList<>();
 						}
-						currentState = stateAfterH;
+						currentState = onlyCompatibleState;
 					}
 				}
 			}
+			if (newCompatibles.isEmpty()) {
+				if (!extendWfailed)
+					LogManager.logInfo(
+							"There is no state compatible with the trace. This is a W-ND but we don't know were to add sequence in the distinction structure");
+				newCompatibles = new HashSet<>(dataManager.getStates());
+			}
+			compatibleStates = newCompatibles;
 
 			if (currentState != null || expectedTraces != null) {
-				states.add(currentState);
+				statesHistory.add(currentState);
 			}
 		}
 		LogManager.logInfo("no counter-example found in trace");
 		return false;
-	}
-
-	/**
-	 * This function search a sub-trace which is incompatible with any state of
-	 * conjecture.
-	 * 
-	 * @return a sub-trace which is a not accepted by any state of the
-	 *         conjecture or null if such sequence is not found
-	 */
-	private LmTrace searchCEInTrace() {
-		LmConjecture conjecture = dataManager.getConjecture();
-		if (Options.LOG_LEVEL != LogLevel.LOW)
-			LogManager.logInfo(
-					"trying to apply trace since very start of learning to any state");
-		// try to apply fullTrace on any state of conjecture to detect
-		// inconsistency.
-		Set<State> compatibleStates = new HashSet<>(conjecture.getStates());
-		int i = 0;
-		int start = 0;// the start of counter example : reinitialized on unknown
-						// transition.
-		while (i < fullTrace.size()) {
-			Set<State> newcompatibles = new HashSet<>(compatibleStates.size());
-			for (State s : compatibleStates) {
-				MealyTransition t = conjecture.getTransitionFromWithInput(s,
-						fullTrace.getInput(i));
-				if (t == null) {
-					newcompatibles = new HashSet<>(conjecture.getStates());
-					start = i + 1;
-					break;
-				}
-				if (t.getOutput().equals(fullTrace.getOutput(i)))
-					newcompatibles.add(t.getTo());
-			}
-			if (newcompatibles.isEmpty()) {
-				if (Options.LOG_LEVEL != LogLevel.LOW)
-					LogManager.logInfo("The trace from position " + start
-							+ " to " + i
-							+ " cannot be applied on any state of conjecture."
-							+ "We will try to use it as a counter example.");
-
-				return fullTrace.subtrace(start, i + 1);
-			}
-			compatibleStates = newcompatibles;
-			i++;
-		}
-		if (Options.LOG_LEVEL != LogLevel.LOW)
-			LogManager.logInfo(
-					"The trace from start of learning can be applied on at leat one state");
-
-		return null;
 	}
 
 	public void learn(
