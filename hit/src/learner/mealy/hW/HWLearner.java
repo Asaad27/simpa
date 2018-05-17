@@ -989,7 +989,7 @@ public class HWLearner extends Learner {
 				LogManager.logWarning("there is an inconsistency with trace "
 						+ localizedSeq.sequence + " whic is not handled yet");
 				//TODO handle the ND.
-				return;
+				continue;
 			}
 			if (initialState
 					.getKnownTransition(transition.getInput(0)) != null) {
