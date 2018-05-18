@@ -314,6 +314,10 @@ public class AdaptiveHomingSequenceChecker
 	public AdaptiveHomingSequenceChecker(AdaptiveSymbolSequence h) {
 		this.h = h;
 		this.hFinder = new AdaptiveSearchGraph<>(h);
+		if (h.isEmpty()) {
+			InconsistencyGraph g = getGraphOrCreate(h);
+			g.currentNode = g.endOfHNode;
+		}
 	}
 
 	public void apply(String input, String output) {
