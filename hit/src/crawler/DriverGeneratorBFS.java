@@ -218,6 +218,8 @@ public class DriverGeneratorBFS extends DriverGenerator {
 					currentOutput = sendInputChain(currentInput, false);
 				} catch (IOException ex) {
 					inputs.remove(currentInput);
+					System.out.println("error while getting page "
+							+ currentInput + " : " + ex);
 					continue;
 				}
 				if (currentOutput == null) {
