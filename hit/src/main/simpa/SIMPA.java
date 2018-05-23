@@ -60,6 +60,8 @@ abstract class Option<T> {
 	}
 
 	public void parse(String[] args, ArrayList<Boolean> used) {
+		if (haveBeenParsed())
+			return;
 		preCheck(args, used);
 		parseInternal(args, used);
 		postCheck(args);
