@@ -116,11 +116,10 @@ public class ZStatsEntry extends StatsEntry {
 	}
 
 	public void finalUpdate(LmConjecture conjecture, float duration,
-			int traceLength, int resets, int lastOracleLength) {
+			int traceLength, int resets) {
 		updateWithConjecture(conjecture);
 		this.duration = duration;
-		this.traceLength = traceLength - lastOracleLength;
-		this.oracleTraceLength -= lastOracleLength;
+		this.traceLength = traceLength;
 		this.resetNb = resets;
 	}
 

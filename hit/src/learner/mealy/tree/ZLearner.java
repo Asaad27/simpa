@@ -171,6 +171,7 @@ public class ZLearner extends Learner {
 		long start_time = System.nanoTime();
 		InputSequence ce;
 		int lastOracleLength = 0;
+		int lastOracleResets = 0;
 
 		// 1. Build-quotient(A, I, Z, {€}) returning U and K = (Q, q0, I, O, hK)
 		LmConjecture Z_Q = buildQuotient(z);
@@ -182,15 +183,19 @@ public class ZLearner extends Learner {
 		do {
 			long oracleStart = System.nanoTime();
 			int traceLength = driver.numberOfAtomicRequest;
+			int resetNb = driver.numberOfRequest;
 			LmTrace ceTrace = driver.getCounterExample(Z_Q);
 			float oracleDuration = (float) ((System.nanoTime() - oracleStart)
 					/ 1000000000.);
-			if (ceTrace != null)
-				ce = ceTrace.getInputsProjection();
-			else
-				ce = null;
 			lastOracleLength = driver.numberOfAtomicRequest - traceLength;
-			stats.increaseOracleCallNb(lastOracleLength, oracleDuration);
+			lastOracleResets = resetNb - driver.numberOfRequest;
+			if (ceTrace != null) {
+				ce = ceTrace.getInputsProjection();
+				stats.increaseOracleCallNb(lastOracleLength, oracleDuration);
+			} else {
+				ce = null;
+				stats.increaseOracleCallNb(0, 0);
+			}
 			if (ce != null) {
 				LogManager.logInfo("Adding the counter example to tree");
 
@@ -207,8 +212,8 @@ public class ZLearner extends Learner {
 		float duration = (float) ((System.nanoTime() - start_time)
 				/ 1000000000.);
 		stats.finalUpdate(createConjecture(), duration,
-				driver.numberOfAtomicRequest, driver.numberOfRequest,
-				lastOracleLength);
+				driver.numberOfAtomicRequest - lastOracleLength,
+				driver.numberOfRequest - lastOracleResets);
 		System.out.println();
 		int maxLength = Options.MAX_CE_LENGTH;
 		int maxResets = Options.MAX_CE_RESETS;
