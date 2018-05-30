@@ -36,7 +36,7 @@ public class KnownTracesTree {
 			} else {
 				if (!currentNode.output.equals(trace.getOutput(i))) {
 					throw new InconsistencyException(trace.subtrace(0, i + 1),
-							trace.getOutput(i));
+							currentNode.output);
 				}
 			}
 			current = currentNode.childTree;
