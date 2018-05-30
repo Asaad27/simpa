@@ -24,6 +24,7 @@ class StateDriver extends MealyDriver {
 	private boolean resetDone;
 	protected boolean paused;
 	private String prefix;
+	private int globalTraceLengthBeforeLastCE = 0;
 
 	/**
 	 * should be invoke only if we are in  the initial state of this driver (i.e reset() has no effect)
@@ -92,6 +93,7 @@ class StateDriver extends MealyDriver {
 
 	@Override
 	public LmTrace getRandomCounterExemple(Mealy c) {
+		globalTraceLengthBeforeLastCE = realDriver.numberOfAtomicRequest;
 		learner.stats.counterExampleCalled();
 		return super.getRandomCounterExemple(c);
 	}
@@ -100,6 +102,7 @@ class StateDriver extends MealyDriver {
 	public InputSequence getShortestCounterExemple(Mealy m){
 		LogManager.logInfo("reset the driver in order to get the initial state");
 		reset();
+		globalTraceLengthBeforeLastCE = realDriver.numberOfAtomicRequest;
 		learner.stats.counterExampleCalled();
 		return realDriver.getShortestCounterExemple(null,m,m.getInitialState());
 	}
@@ -170,5 +173,9 @@ class StateDriver extends MealyDriver {
 
 	public boolean isAfterReset() {
 		return resetDone;
+	}
+
+	public int getGlobalTraceLengthBeforeLastCE() {
+		return globalTraceLengthBeforeLastCE;
 	}
 }

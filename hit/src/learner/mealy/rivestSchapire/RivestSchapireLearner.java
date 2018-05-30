@@ -78,7 +78,9 @@ public class RivestSchapireLearner extends Learner {
 			}
 		} while (!hIsCorrect);
 		stats.setDuration(((float) (System.nanoTime() - start)) / 1000000000);
-		stats.setTraceLength(driver.numberOfAtomicRequest);
+		assert finishedLearner.getGlobalTraceLengthBeforeLastCE() != 0;
+		stats.setTraceLength(
+				finishedLearner.getGlobalTraceLengthBeforeLastCE());
 		stats.setLearnerNumber(drivers.size());
 		if (Options.LOG_LEVEL == LogLevel.ALL)
 			createConjecture().exportToDot();
