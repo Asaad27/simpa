@@ -7,6 +7,7 @@ import automata.mealy.Mealy;
 import automata.mealy.OutputSequence;
 import drivers.mealy.MealyDriver;
 import learner.Learner;
+import learner.mealy.LmTrace;
 import learner.mealy.table.LmLearner;
 import tools.loggers.LogManager;
 
@@ -89,9 +90,17 @@ class StateDriver extends MealyDriver {
 		return realDriver.getInputSymbols();
 	}
 
+	@Override
+	public LmTrace getRandomCounterExemple(Mealy c) {
+		learner.stats.counterExampleCalled();
+		return super.getRandomCounterExemple(c);
+	}
+
+	@Override
 	public InputSequence getShortestCounterExemple(Mealy m){
 		LogManager.logInfo("reset the driver in order to get the initial state");
 		reset();
+		learner.stats.counterExampleCalled();
 		return realDriver.getShortestCounterExemple(null,m,m.getInitialState());
 	}
 

@@ -32,6 +32,7 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 	public static final Attribute<Integer> FAILED_PROBABILISTIC_SEARCH = Attribute.FAILED_PROBALISTIC_SEARCH;
 	public static final Attribute<Integer> SUCCEEDED_PROBALISTIC_SEARCH = Attribute.SUCCEEDED_PROBALISTIC_SEARCH;
 	public final static Attribute<String> ORACLE_USED = Attribute.ORACLE_USED;
+	public static final Attribute<Integer> ASKED_CE = Attribute.ASKED_COUNTER_EXAMPLE;
 
 	private static Attribute<?>[] attributes = new Attribute<?>[]{
 		RESET_CALL_NB,
@@ -49,6 +50,7 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 		FAILED_PROBABILISTIC_SEARCH,
 		SUCCEEDED_PROBALISTIC_SEARCH,
 		ORACLE_USED,
+		ASKED_CE,
 	};
 
 	public static String getCSVHeader_s(){
@@ -82,6 +84,7 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 	private int failedProbalisticSearch = 0;
 	private int succeededProbabilisticSearch = 0;
 	private String oracleUsed;
+	private int askedCE = 0;
 
 	/**
 	 * rebuild a HWStats object from a CSV line
@@ -104,6 +107,7 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 		failedProbalisticSearch = Integer.parseUnsignedInt(st.nextToken());
 		succeededProbabilisticSearch = Integer.parseUnsignedInt(st.nextToken());
 		oracleUsed = st.nextToken();
+		askedCE = Integer.parseUnsignedInt(st.nextToken());
 	}
 
 	public RivestSchapireStatsEntry(MealyDriver d, boolean hIsGiven) {
@@ -174,6 +178,8 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 			return (T) new Integer(succeededProbabilisticSearch);
 		if (a == ORACLE_USED)
 			return (T) oracleUsed;
+		if (a == ASKED_CE)
+			return (T) new Integer(askedCE);
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 
 	}
@@ -189,6 +195,7 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 				a == LOOP_RATIO ||
 				a == FAILED_PROBABILISTIC_SEARCH ||
 				a == SUCCEEDED_PROBALISTIC_SEARCH ||
+				a == ASKED_CE ||
 				a == MEMORY)
 			return ((Integer) get(a)).floatValue();
 		if (a == DURATION)
@@ -319,6 +326,10 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 	}
 	public void increaseSucceededProbabilisticSearch(){
 		succeededProbabilisticSearch++;
+	}
+
+	public void counterExampleCalled() {
+		askedCE++;
 	}
 
 }
