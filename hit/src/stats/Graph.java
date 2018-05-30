@@ -465,8 +465,15 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 			return;
 		}
 		if (exportForLatex) {
+			int pxCmRatio = 100;
+			Integer height = imageHeight;
+			Integer width = imageWidth;
 			exportForLatex = false;
+			imageHeight = (height != null) ? height * pxCmRatio : null;
+			imageWidth = (width != null) ? width * pxCmRatio : null;
 			export();
+			imageHeight = height;
+			imageWidth = width;
 			exportForLatex = true;
 		}
 
