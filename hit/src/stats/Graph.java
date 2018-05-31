@@ -171,6 +171,10 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 	private Double maxAbs = null;
 	private Double minOrd = null;
 	private Double maxOrd = null;
+	private Number xTics = null;
+	private Number[] xTicsValues=null;
+	private Number yTics = null;
+	private Number[] yTicsValues=null;
 	private List<Attribute<?>> dataDescriptionfields = null;
 	private Set<LineStyle> linesStyles = new HashSet<LineStyle>();
 
@@ -446,6 +450,37 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		minOrd = (min == null) ? null : min.doubleValue();
 		maxOrd = (max == null) ? null : max.doubleValue();
 	}
+	public void setXTics(Number between) {
+		xTics = between;
+	}
+
+	/**
+	 * set the tics values for X axis. if the tics were already defined by
+	 * {@link #setXTics(Number)}, those tics will be added to the others.
+	 * 
+	 * @param values
+	 *            the values to be displayed on X axis
+	 */
+	public void setXTics(Number[] values) {
+		xTicsValues = values;
+	}
+
+	public void setYTics(Number between) {
+		yTics = between;
+	}
+
+	/**
+	 * set the tics values for Y axis. if the tics were already defined by
+	 * {@link #setYTics(Number)}, those tics will be added to the others.
+	 * 
+	 * @param values
+	 *            the values to be displayed on Y axis
+	 */
+	public void setYTics(Number[] values) {
+		yTicsValues = values;
+	}
+
+
 
 	/**
 	 * Sets the style of plotting to use when it is not specified in plotLine
@@ -544,6 +579,32 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 
 		r.append("set xrange [" + ((minAbs == null) ? "" : minAbs) + ":" + ((maxAbs == null) ? "" : maxAbs) + "]\n");
 		r.append("set yrange [" + ((minOrd == null) ? "" : minOrd) + ":" + ((maxOrd == null) ? "" : maxOrd) + "]\n");
+		if (xTics != null)
+			r.append("set xtics " + xTics + "\n");
+		if (xTicsValues != null) {
+			r.append("set xtics ");
+			if (xTics != null)
+				r.append("add ");
+			r.append("(");
+			if (xTicsValues.length > 0)
+				r.append(xTicsValues[0]);
+			for (int i = 1; i < xTicsValues.length; i++)
+				r.append(", " + xTicsValues[i]);
+			r.append(")\n");
+		}
+		if (yTics != null)
+			r.append("set ytics " + yTics + "\n");
+		if (yTicsValues != null) {
+			r.append("set ytics ");
+			if (yTics != null)
+				r.append("add ");
+			r.append("(");
+			if (yTicsValues.length > 0)
+				r.append(yTicsValues[0]);
+			for (int i = 1; i < yTicsValues.length; i++)
+				r.append(", " + yTicsValues[i]);
+			r.append(")\n");
+		}
 
 		for (LineStyle ls : linesStyles)
 			r.append("set style line " + ls.index + " " + ls.plotLine + "\n");
