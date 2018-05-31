@@ -124,7 +124,7 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 
 		public String toGnuplotLine() {
 			return "set key"
-					+ (outside ? " outside right tmargin"
+					+ (outside ? " tmargin right"
 							: (" inside"
 									+ (hPosition == null ? ""
 											: (" " + hPosition.gnuplot))
@@ -155,8 +155,8 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 	private static boolean forcePoints = false; // set this to true in order to
 												// plot points for each graph
 
-	private Attribute<T_ABS> abs;
-	private Attribute<T_ORD> ord;
+	protected final Attribute<T_ABS> abs;
+	protected final Attribute<T_ORD> ord;
 	private KeyParameters keyParameters = new KeyParameters();
 	private PlotStyle defaultStyle = PlotStyle.POINTS;
 	private StatsSet stats;
@@ -516,6 +516,9 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 
 		if (exportForLatex) {
 			r.append("set terminal epslatex ");
+			if (imageHeight != null && imageWidth != null) {
+				r.append(" size " + imageWidth + "cm," + imageHeight + "cm");
+			}
 			r.append("\n");
 		} else {
 			r.append("set terminal svg ");
@@ -715,7 +718,8 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 			List<T_ABS> keys = new ArrayList<T_ABS>(sorted.keySet());
 			Collections.sort(keys);
 			for (T_ABS key : keys) {
-				tempWriter.write(key + " " + sorted.get(key).attributeAVG(ord) + "\n");
+				tempWriter.write(getForDatafile(key) + " "
+						+ sorted.get(key).attributeAVG(ord) + "\n");
 			}
 
 		}
@@ -738,7 +742,8 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 			List<T_ABS> keys = new ArrayList<T_ABS>(sorted.keySet());
 			Collections.sort(keys);
 			for (T_ABS key : keys) {
-				tempWriter.write(key + " " + sorted.get(key).attributeMedian(ord) + "\n");
+				tempWriter.write(getForDatafile(key) + " "
+						+ sorted.get(key).attributeMedian(ord) + "\n");
 			}
 		}
 			break;

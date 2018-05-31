@@ -35,6 +35,16 @@ public class StatsSet {
 		title=o.title;
 	}
 
+	public StatsSet(StatsSet o, Restriction r) {
+		this(o);
+		restrict(r);
+	}
+
+	public StatsSet(StatsSet o, Restriction[] r) {
+		this(o);
+		restrict(r);
+	}
+
 	public StatsSet(File f){
 		this();
 		if (! f.getName().endsWith(".csv"))
@@ -90,7 +100,13 @@ public class StatsSet {
 				return;
 		restrictedStats.add(s);
 	}
-	
+
+	public void add(StatsSet s) {
+		for (StatsEntry e : s.getStats()) {
+			add(e);
+		}
+	}
+
 	public void restrict(Restriction[] rs){
 		for (Restriction r : rs)
 			restrict(r);
