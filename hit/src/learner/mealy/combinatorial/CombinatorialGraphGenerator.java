@@ -169,6 +169,9 @@ public class CombinatorialGraphGenerator extends GraphGenerator {
 		for (int i = 0; i < s3withoutCut.size(); i++)
 			s3both.add(s3withoutCut.get(i));
 
+		if (s3both.size() == 0)
+			return;
+
 		Graph<Integer, Integer> g3 = new Graph<Integer, Integer>(CombinatorialStatsEntry.INPUT_SYMBOLS,
 				CombinatorialStatsEntry.NODES_NB);
 		g3.plot(s3withCut, Graph.PlotStyle.MEDIAN, "with pruning");

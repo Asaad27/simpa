@@ -178,6 +178,7 @@ public class ZStatsEntry extends StatsEntry {
 				a == STATE_NUMBER ||
 				a == LOOP_RATIO ||
 				a == ASKED_COUNTER_EXAMPLE||
+				a == RESET_NB ||
 				a == ORACLE_TRACE_LENGTH)
 			return ((Integer) get(a)).floatValue();
 		if (a == SEED)

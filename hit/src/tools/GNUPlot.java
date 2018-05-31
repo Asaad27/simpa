@@ -20,6 +20,9 @@ public class GNUPlot{
 	                    new InputStreamReader(p.getErrorStream()));
 	            String line = null;
 	            while ((line = reader.readLine()) != null) {
+					if (line.matches(
+							"Warning: empty x range \\[[0-9.]+:[0-9.]+\\], adjusting to \\[[0-9.]+:[0-9.]+\\]"))
+						continue;
 	                System.out.println(line);
 	            }
 	            reader.close();
