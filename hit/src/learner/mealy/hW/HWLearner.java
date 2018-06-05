@@ -41,6 +41,7 @@ import learner.mealy.hW.dataManager.GenericHNDException;
 import learner.mealy.hW.dataManager.LocalizedHZXWSequence;
 import learner.mealy.hW.dataManager.SimplifiedDataManager;
 import learner.mealy.hW.dataManager.TraceTree;
+import learner.mealy.localizerBased.LocalizerBasedLearner;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
 import tools.Utils;
@@ -285,10 +286,11 @@ public class HWLearner extends Learner {
 			W = new TotallyFixedW();
 		W.refine(W.getEmptyCharacterization(), new LmTrace());
 		if (Options.HW_WITH_KNOWN_W) {
-			throw new RuntimeException(
-					"To be implemented; removed when set up adaptive sequences.");
-			// W = new ArrayList<GenericInputSequence>(
-			// LocalizerBasedLearner.computeCharacterizationSet(driver));
+			if (Options.ADAPTIVE_W_SEQUENCES)
+				throw new RuntimeException(
+						"To be implemented, only available for preset W");
+			W = new TotallyFixedW(
+					LocalizerBasedLearner.computeCharacterizationSet(driver));
 		}
 
 		LogManager.logConsole("hw : start of learning");

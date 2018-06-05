@@ -216,6 +216,13 @@ public class TotallyFixedW extends ArrayList<InputSequence>
 		}
 	}
 
+	public TotallyFixedW() {
+	}
+
+	public TotallyFixedW(List<InputSequence> sequences) {
+		super(sequences);
+	}
+
 	@Override
 	public FixedCharacterization getEmptyCharacterization() {
 		return new FixedCharacterization();
