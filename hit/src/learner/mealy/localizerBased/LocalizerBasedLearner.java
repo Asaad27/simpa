@@ -1,11 +1,13 @@
 package learner.mealy.localizerBased;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import automata.State;
@@ -50,6 +52,8 @@ public class LocalizerBasedLearner extends Learner {
 			}
 			W.sort(new InputSequenceComparator());
 		}
+		if (W.size() > 2)
+			throw new RuntimeException("W-set too large");
 		learn(W);
 	}
 
@@ -486,16 +490,142 @@ public class LocalizerBasedLearner extends Learner {
 			TransparentMealyDriver driver) {
 		LogManager.logStep(LogManager.STEPOTHER,
 				"computing characterization set");
+		System.out.print("computing characterization set\r");
 		Mealy automata = driver.getAutomata();
+		assert (automata != null);
+		
+		// control if we should compute the W-set in the old way or in order to
+		// find a W-set of size 2.
+		// Note that searching a W-set of size 2 can be very long for some
+		// automata
+		boolean findShortestWSet = false;
+		
+		if (findShortestWSet) {
+			List<InputSequence> toTry = new ArrayList<InputSequence>();
+			InputSequence shortestTried = new InputSequence();
+			toTry.add(new InputSequence());
+			InputSequence current = new InputSequence();
+			assert shortestTried != null;
+			while (shortestTried.getLength() <= automata.getStateCount()) {
+				// System.out.print("Current : "+current+"\r");
+				shortestTried = null;
+
+				List<State> s1s = new ArrayList<>();
+				List<State> s2s = new ArrayList<>();
+				List<State> allStates = automata.getStates();
+				for (int i = 0; i < allStates.size(); i++) {
+					State s1 = allStates.get(i);
+					for (int j = i + 1; j < allStates.size(); j++) {
+						State s2 = allStates.get(j);
+						if (automata.apply(current, s1)
+								.equals(automata.apply(current, s2))) {
+							s1s.add(s1);
+							s2s.add(s2);
+						}
+					}
+				}
+
+				Collections.shuffle(toTry, new Random(Utils.randLong()));
+				for (InputSequence currentTry : toTry) {
+					if (shortestTried == null)
+						shortestTried = currentTry;
+					else if (shortestTried.getLength() > currentTry.getLength())
+						shortestTried = currentTry;
+					boolean isWSet = true;
+					for (int i = 0; i < s1s.size(); i++) {
+						State s1 = s1s.get(i);
+						State s2 = s2s.get(i);
+						if (automata.apply(currentTry, s1)
+								.equals(automata.apply(currentTry, s2))) {
+							isWSet = false;
+							break;
+						}
+					}
+					if (isWSet) {
+						int i = 0;
+						// search shortest prefix of first element
+						while (i <= current.getLength()) {
+							isWSet = true;
+							InputSequence prefix = current.getIthPreffix(i);
+							System.out.println(
+									"trying " + currentTry + " and " + prefix);
+							for (State s1 : automata.getStates()) {
+								for (State s2 : automata.getStates()) {
+									if (s1 == s2)
+										continue;
+									if (automata.apply(currentTry, s1).equals(
+											automata.apply(currentTry, s2))
+											&& automata.apply(prefix, s1)
+													.equals(automata.apply(
+															prefix, s2))) {
+										isWSet = false;
+									}
+								}
+							}
+							if (isWSet) {
+								List<InputSequence> W = new ArrayList<>();
+								W.add(prefix);
+								W.add(currentTry);
+								System.out.println("W-set is " + W);
+								return W;
+							}
+							i++;
+						}
+						throw new RuntimeException("implem error");
+					}
+				}
+
+				List<InputSequence> nextToTry = new ArrayList<InputSequence>();
+				for (InputSequence currentTry : toTry) {
+					if (!currentTry.equals(shortestTried))
+						nextToTry.add(currentTry);
+				}
+				toTry = nextToTry;
+
+				List<String> inputs = new ArrayList<>();
+				inputs.addAll(driver.getInputSymbols());
+				Collections.shuffle(inputs, new Random(Utils.randLong()));
+				List<State> randomizedStates = automata.getStates();
+				Collections.shuffle(randomizedStates,
+						new Random(Utils.randLong()));
+				for (int i = 0; i < randomizedStates.size(); i++) {
+					State s1 = randomizedStates.get(i);
+					for (int j = i + 1; j < randomizedStates.size(); j++) {
+						State s2 = randomizedStates.get(j);
+						State s_1 = automata.applyGetState(current, s1);
+						State s_2 = automata.applyGetState(current, s2);
+						InputSequence suffix = null;
+						if (s_1 != s_2)
+							suffix = automata.getDistinctionSequence(s_1, s_2);
+						if (suffix != null) {
+							InputSequence neww = new InputSequence();
+							neww.addInputSequence(current);
+							neww.addInputSequence(suffix);
+							if (!toTry.contains(neww))
+								toTry.add(neww);
+
+						}
+					}
+				}
+				current = shortestTried;
+			}
+			throw new RuntimeException("cannot compute W-set");
+		}
+
 		List<InputSequence> W = new ArrayList<InputSequence>();
 		List<State> distinguishedStates = new ArrayList<State>();
+		List<State> randomizedStates = automata.getStates();
+		Collections.shuffle(randomizedStates, new Random(Utils.randLong()));
 		for (State s1 : automata.getStates()) {
 			if (Options.LOG_LEVEL != Options.LogLevel.LOW)
 				LogManager.logInfo("adding state " + s1);
+			Collections.shuffle(distinguishedStates,
+					new Random(Utils.randLong()));
 			for (State s2 : distinguishedStates) {
 				boolean haveSameOutputs = true;
 				for (InputSequence w : W) {
-					if (!apply(w, automata, s1).equals(apply(w, automata, s2))) {
+					if (!apply(w, automata, s1)
+							.equals(apply(w, automata, s2))) {
 						haveSameOutputs = false;
 					}
 				}
@@ -503,6 +633,8 @@ public class LocalizerBasedLearner extends Learner {
 					if (Options.LOG_LEVEL != Options.LogLevel.LOW)
 						LogManager.logInfo(s1 + " and " + s2
 								+ " have the same outputs for W=" + W);
+					List<String> inputs = driver.getInputSymbols();
+					Collections.shuffle(inputs, new Random(Utils.randLong()));
 					addDistinctionSequence(automata, driver.getInputSymbols(),
 							s1, s2, W);
 					if (Options.LOG_LEVEL == Options.LogLevel.ALL)
@@ -541,6 +673,12 @@ public class LocalizerBasedLearner extends Learner {
 				}
 			}
 		}
+		if (automata.getDistinctionSequence(s1, s2) == null) {
+			throw new RuntimeException(
+					"unable to distinguish two states for W set (with getDistinctionSequence from Mealy)");
+		}
+		if (W.size() >= 2)
+			throw new RuntimeException("W-set too large");
 		// then we try to compute a w from scratch
 		LinkedList<InputSequence> testW = new LinkedList<InputSequence>();
 		for (String i : inputSymbols)
