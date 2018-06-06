@@ -172,6 +172,9 @@ public class CombinatorialGraphGenerator extends GraphGenerator {
 		if (s3both.size() == 0)
 			return;
 
+		if (s3both.size() == 0)
+			return;
+
 		Graph<Integer, Integer> g3 = new Graph<Integer, Integer>(CombinatorialStatsEntry.INPUT_SYMBOLS,
 				CombinatorialStatsEntry.NODES_NB);
 		g3.plot(s3withCut, Graph.PlotStyle.MEDIAN, "with pruning");

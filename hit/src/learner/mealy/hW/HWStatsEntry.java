@@ -85,6 +85,7 @@ public class HWStatsEntry extends StatsEntry {
 			PRECOMPUTED_W,
 			USE_ADAPTIVE_H,
 			USE_ADAPTIVE_W,
+			AVG_NB_TRIED_W,
 	};
 	
 	public static String getCSVHeader_s(){
