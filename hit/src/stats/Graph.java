@@ -118,11 +118,18 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 			this.hPosition = hPosition;
 		}
 
+		public void disable() {
+			isEnabled = false;
+		}
+
 		private VerticalPosition vPosition;
 		private HorizontalPosition hPosition;
 		private boolean outside = false;
+		private boolean isEnabled = true;
 
 		public String toGnuplotLine() {
+			if (!isEnabled)
+				return "set key off\n";
 			return "set key"
 					+ (outside ? " tmargin right"
 							: (" inside"
