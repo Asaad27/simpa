@@ -7,6 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -212,11 +213,12 @@ public class RandomMealy extends Mealy implements Serializable {
 			// starting from states in notReachedFromStart
 			State reached = target;
 			while (reached != null && notReachedFromStart.contains(reached)) {
-				List<MealyTransition> transitions = getTransitionFrom(reached);
+				Collection<MealyTransition> transitions = getTransitionFrom(
+						reached);
 				assert (transitions.size() == 1);
 				reachedFromStartAndNotComplete.add(reached);
 				notReachedFromStart.remove(reached);
-				reached = transitions.get(0).getTo();
+				reached = transitions.iterator().next().getTo();
 			}
 
 		}

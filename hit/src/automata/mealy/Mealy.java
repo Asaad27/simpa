@@ -34,7 +34,7 @@ import tools.loggers.LogManager;
 public class Mealy extends Automata implements Serializable {
 	private static final long serialVersionUID = 3590635279837551088L;
 
-	protected Map<Integer, MealyTransition> transitions;
+	protected Map<State, Map<String, MealyTransition>> transitions;
 
 	public final static String OMEGA = "omega|symbol";
 	public final static String EPSILON = "espilon|symbol";
@@ -99,55 +99,61 @@ public class Mealy extends Automata implements Serializable {
 
 	public Mealy(String name) {
 		super(name);
-		transitions = new HashMap<Integer, MealyTransition>();
+		transitions = new HashMap<>();
 	}
 
+	/**
+	 * try to add a transition in the automata
+	 * 
+	 * @param t
+	 *            the transition to add
+	 * @return true if the transition was added, false if there was already a
+	 *         transition from the same state with the same input
+	 */
 	public Boolean addTransition(MealyTransition t) {
-		if (!transitions.containsKey(t.hashCode())) {
-			super.transitions.add(t);
-			transitions.put(t.hashCode(), t);
-			return true;
+		super.transitions.add(t);
+		Map<String, MealyTransition> fromState = transitions.get(t.getFrom());
+		if (fromState == null) {
+			fromState = new HashMap<>();
+			transitions.put(t.getFrom(), fromState);
 		}
-		assert transitions.get(t.hashCode()).equals(t) : "stored " + transitions.get(t.hashCode()) + " and new " + t
-				+ " have same hash " + t.hashCode();
-		return false;
+		if (fromState.containsKey(t.getInput()))
+			return false;
+		fromState.put(t.getInput(), t);
+		return true;
 	}
 	public void removeTransition(MealyTransition t){
-		MealyTransition existant=transitions.get(t.hashCode());
+		MealyTransition existant = getTransitionFromWithInput(t.getFrom(),
+				t.getInput());
 		assert t.equals(existant);
-		transitions.remove(t.hashCode());
+		transitions.get(t.getFrom()).remove(t.getInput());
 		super.transitions.remove(existant);
 	}
 
 	public Collection<MealyTransition> getTransitions() {
-		return transitions.values();
+		Collection<MealyTransition> res = new ArrayList<MealyTransition>();
+		for (Map<String, MealyTransition> map : transitions.values())
+			res.addAll(map.values());
+		return res;
 	}
 
 	public int getTransitionCount() {
 		return transitions.size();
 	}
 
-	public List<MealyTransition> getTransitionFrom(State s) {
-		return getTransitionFrom(s, true);
-	}
-
-	public List<MealyTransition> getTransitionFrom(State s, boolean loop) {
-		List<MealyTransition> res = new ArrayList<MealyTransition>();
-		for (MealyTransition t : transitions.values()) {
-			if (t.getFrom().equals(s)) {
-				if (t.getTo().equals(s)) {
-					if (loop)
-						res.add(t);
-				} else
-					res.add(t);
-			}
-		}
-		return res;
+	public Collection<MealyTransition> getTransitionFrom(State s) {
+		Map<String, MealyTransition> map = transitions.get(s);
+		if (map != null)
+			return map.values();
+		return new LinkedList<MealyTransition>();
 	}
 
 	public MealyTransition getTransitionFromWithInput(State s, String input) {
 		assert states.contains(s);
-		return transitions.get((s + input).hashCode());
+		Map<String, MealyTransition> map = transitions.get(s);
+		if (map != null)
+			return map.get(input);
+		return null;
 	}
 
 	public MealyTransition getTransitionFromWithInput(State s, String input, boolean loop) {

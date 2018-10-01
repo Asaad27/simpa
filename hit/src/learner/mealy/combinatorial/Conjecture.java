@@ -25,7 +25,7 @@ public class Conjecture extends LmConjecture{
 		super(c.driver);
 		driver = c.driver;
 		states = c.states;
-		transitions = new HashMap<Integer, MealyTransition>(c.transitions);
+		transitions = new HashMap<>(c.transitions);
 		for (MealyTransition t : c.getTransitions())
 			addTransition((Transition) t);//TODO this is not pretty, How to access to Automata.transition ?
 	}
