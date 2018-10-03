@@ -10,7 +10,7 @@
 # configurations and then launch this script in a loop until all stats are
 # inferred.
 
-simpa_dir="$$(dirname "$0")/../"
+simpa_dir="$(dirname "$0")/../"
 csv_dir="$simpa_dir/hit/stats/CSV/"
 skipConfigFile="/tmp/skipConfigs"
 
@@ -57,6 +57,8 @@ useAdaptiveW=false
 #can be use to make stats in two time, but you can just ignore this
 skipConfigs=$([ -e "$skipConfigFile" ] && echo true || echo false)
 skipConfigs="true"
+
+scriptTime="$(stat -c %Y $0)"
 
 #those without W-set
 while read driver
@@ -597,6 +599,12 @@ echo "starting inferences"
 echo
 for line in "${wantedconfig[@]}"
 do
+    if [ "$(stat -c %Y $0)" != "$scriptTime" ]
+    then
+        echo -e "${GREEN}script was modified, aborting$RESET"
+        sleep 5
+        break
+    fi
     count=$(getNb $line)
     learner="$(echo "$line" | cut -d' ' -f1)"
     states="$(echo "$line" | cut -d' ' -f2)"
