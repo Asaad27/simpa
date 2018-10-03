@@ -18,6 +18,9 @@ import tools.antlr4.DotMealy.DotMealyBaseListener;
 import tools.antlr4.DotMealy.DotMealyParser;
 
 public class DotAntlrListener extends DotMealyBaseListener {
+	private Map<String, String> allInputs = new HashMap<>();
+	private Map<String, String> allOutputs = new HashMap<>();
+
 	public class ParseException extends RuntimeException {
 		private static final long serialVersionUID = 3326922575373002881L;
 
@@ -321,6 +324,14 @@ public class DotAntlrListener extends DotMealyBaseListener {
 					edgeInput = edgeInput.substring(0, edgeInput.length() - 1);
 				if (edgeOutput.startsWith(" "))
 					edgeOutput = edgeOutput.substring(1);
+				// now check if the string already exist to share the same
+				// object in order to accelerate comparison
+				if (!allInputs.containsKey(edgeInput))
+					allInputs.put(edgeInput, edgeInput);
+				if (!allOutputs.containsKey(edgeOutput))
+					allOutputs.put(edgeOutput, edgeOutput);
+				edgeInput = allInputs.get(edgeInput);
+				edgeOutput = allOutputs.get(edgeOutput);
 			} else
 				throw new ParseException("label must be 'input'/'output'");
 		}
