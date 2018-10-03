@@ -272,7 +272,7 @@ public class HWLearner extends Learner {
 	public void learn() {
 		if (driver instanceof TransparentMealyDriver) {
 			TransparentMealyDriver d = (TransparentMealyDriver) driver;
-			if ((!d.getAutomata().isConnex()))
+			if ((!d.getAutomata().isConnex(true)))
 				throw new RuntimeException("driver must be strongly connected");
 		}
 		fullTrace = new LmTrace();

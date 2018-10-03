@@ -70,6 +70,10 @@ public class Automata implements Serializable {
 	}
 
 	public boolean isConnex() {
+		return isConnex(false);
+	}
+
+	public boolean isConnex(boolean verbose) {
 		if (transitions.size() == 0)
 			return states.size() == 0;
 		HashSet<State> reachingAllState = new HashSet<State>();
@@ -99,9 +103,48 @@ public class Automata implements Serializable {
 			}
 			if (reachingAll)
 				continue;
-			for (State s2 : states){
-				if (!crossed.contains(s2))
+			for (State s2 : states) {
+				if (!crossed.contains(s2)) {
+					if (verbose) {
+						assert !crossed.isEmpty();
+						HashSet<State> farestReached = new HashSet<State>();
+						farestReached.add(s);
+						HashSet<State> prevFarestReached = null;
+						do {
+							prevFarestReached = farestReached;
+							farestReached = new HashSet<>();
+							for (State s3 : prevFarestReached)
+								for (Transition t : transitions)
+									if (t.getFrom() == s3)
+										farestReached.add(t.getTo());
+						} while (!farestReached.equals(prevFarestReached));
+
+						HashSet<State> farestLeading = new HashSet<>();
+						farestLeading.add(s2);
+						HashSet<State> prevFarestLeading = null;
+						do {
+							prevFarestLeading = farestLeading;
+							farestLeading = new HashSet<>();
+							for (State s3 : prevFarestLeading)
+								for (Transition t : transitions)
+									if (t.getTo() == s3) {
+										assert !crossed.contains(t.getFrom());
+										farestLeading.add(t.getFrom());
+									}
+							if (farestLeading.isEmpty())
+								farestLeading = prevFarestLeading;
+						} while (!farestLeading.containsAll(prevFarestLeading));
+						assert !farestLeading.isEmpty() && !farestReached
+								.isEmpty() : "the sets are not empty at start and thus, there is at least one transition from this set";
+						System.out.println("state " + s2
+								+ " is not reacheable from state " + s);
+						System.out.println("A longer path is : state "
+								+ farestLeading.iterator().next()
+								+ " is not reachable from state "
+								+ farestReached.iterator().next());
+					}
 					return false;
+				}
 			}
 			reachingAllState.add(s);
 		}
