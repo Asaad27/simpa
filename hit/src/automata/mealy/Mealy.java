@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.Writer;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -412,6 +413,39 @@ public class Mealy extends Automata implements Serializable {
 
 		DotParser dotParser = new DotParser();
 		return dotParser.getAutomaton(file);
+	}
+
+	/**
+	 * download and parse a dot file. If the file is already cached, then the
+	 * local file is reused.
+	 * 
+	 * @param url
+	 *            the URL of the file to download
+	 * @return the automata written in the file.
+	 * @see {@link #importFromDot(File)}
+	 */
+	public static Mealy importFromUrl(URL url) throws IOException {
+		File file = tools.Utils.downloadWithCache(url);
+		assert file.exists();
+		return importFromDot(file);
+	}
+
+	/**
+	 * download and parse a dot file.
+	 * 
+	 * @param url
+	 *            the URL of the file to download
+	 * @param fromCache
+	 *            when true, firstly check if the file was already downloaded
+	 *            and reuse it if possible.
+	 * @return the automata written in the file.
+	 * @see {@link #importFromDot(File)}
+	 */
+	public static Mealy importFromUrl(URL url, boolean fromCache)
+			throws IOException {
+		File file = tools.Utils.downloadFile(url, fromCache);
+		assert file.exists();
+		return importFromDot(file);
 	}
 
 	/**

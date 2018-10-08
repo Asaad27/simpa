@@ -1,5 +1,6 @@
 package tools;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -9,6 +10,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.channels.FileChannel;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -208,6 +211,94 @@ public class Utils {
 				return FileVisitResult.CONTINUE;
 			}
 		});
+	}
+
+	/**
+	 * @see #downloadFile(URL, boolean)
+	 * @param url
+	 *            the URL of the file to download.
+	 * @return the downloaded file.
+	 * @throws IOException
+	 */
+	public static File downloadWithCache(URL url) throws IOException {
+		return downloadFile(url, true);
+	}
+
+	/**
+	 * Download a file from URL or get it from the cache. There is no checking
+	 * for modifications at this time.
+	 * 
+	 * @param url
+	 *            the URL of the file to download.
+	 * @param fromCache
+	 *            indicate if the file should be reused from cache, if already
+	 *            downloaded.
+	 * @return the downloaded file.
+	 * @throws IOException
+	 */
+	public static File downloadFile(URL url, boolean fromCache)
+			throws IOException {
+		File downloadCacheDir = new File(getSIMPACacheDirectory(), "Download");
+		File endFile = new File(downloadCacheDir,
+				url.getHost() + File.separator + url.getFile());
+		if (endFile.exists() && fromCache)
+			return endFile;
+		URLConnection connection = url.openConnection();
+		connection.connect();
+		long size = connection.getContentLengthLong();
+		endFile.getParentFile().mkdirs();
+		System.out.print("Downloading " + url);
+		System.out.flush();
+		java.io.BufferedInputStream in = new java.io.BufferedInputStream(
+				connection.getInputStream());
+		java.io.FileOutputStream fos = new java.io.FileOutputStream(endFile);
+		java.io.BufferedOutputStream bufferedFile = new BufferedOutputStream(
+				fos);
+		byte data[] = new byte[1024];
+		int read;
+		long pos = 0;
+		while ((read = in.read(data, 0, 1024)) >= 0) {
+			pos += read;
+			bufferedFile.write(data, 0, read);
+			System.out.print("\r");
+			if (size != -1) {
+				System.out.print((pos * 100 / size) + "% ");
+			}
+			System.out.print("Downloading " + url);
+			System.out.flush();
+		}
+		System.out.println();
+		bufferedFile.close();
+		in.close();
+
+		return endFile;
+	}
+
+	/**
+	 * Get path of a cache directory. Directory will be created if it does not
+	 * exists.
+	 * 
+	 * @return a directory trying to match a standard cache format.
+	 */
+	public static File getSIMPACacheDirectory() {
+		String system = System.getProperty("deployment.user.cachedir");
+		if (system != null)
+			return new File(system + File.separator + "SIMPA");
+		File nonStandardPath = null;
+		if (isUnix()) {
+			String home = System.getProperty("user.home");
+			if (home != null)
+				nonStandardPath = new File(home + File.separator + ".cache"
+						+ File.separator + "SIMPA");
+		}
+		if (nonStandardPath == null) {
+			nonStandardPath = new File(Options.OUTDIR + "SIMPA-cache");
+		}
+		System.err.println("cannot find standard cache path. Using '"
+				+ nonStandardPath.getAbsolutePath() + "' instead.");
+		nonStandardPath.mkdirs();
+		nonStandardPath.deleteOnExit();
+		return nonStandardPath;
 	}
 
 	public static int randIntBetween(int a, int b) {
