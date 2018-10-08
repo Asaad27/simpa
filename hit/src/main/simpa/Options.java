@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.List;
 
 import automata.mealy.InputSequence;
-import learner.mealy.localizerBased.SplittingTree;
 import tools.Utils;
 import tools.loggers.LogManager;
 
@@ -61,8 +60,7 @@ public class Options {
 	public static boolean FORCE_J48 = false;
 	public static int STATE_NUMBER_BOUND;
 	public static List<InputSequence> CHARACTERIZATION_SET;
-	public static SplittingTree SPLITTING_TREE;
-	
+
 	public static boolean RS_WITH_UNKNOWN_H = false;
 
 	public static boolean ICTSS2015_WITHOUT_SPEEDUP = false;

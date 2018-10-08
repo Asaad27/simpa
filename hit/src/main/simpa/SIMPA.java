@@ -2,8 +2,6 @@ package main.simpa;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -17,10 +15,6 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
-
 import automata.mealy.InputSequence;
 import drivers.Driver;
 import drivers.ExhaustiveGenerator;
@@ -28,7 +22,6 @@ import drivers.efsm.real.GenericDriver;
 import drivers.efsm.real.ScanDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
-import learner.mealy.localizerBased.SplittingTree;
 import main.simpa.Options.LogLevel;
 import stats.GlobalGraphGenerator;
 import stats.GraphGenerator;
@@ -37,9 +30,6 @@ import stats.StatsSet;
 import tools.DotAntlrListener;
 import tools.GraphViz;
 import tools.Utils;
-import tools.antlr4.SplittingTree.SplittingTreeLexer;
-import tools.antlr4.SplittingTree.SplittingTreeParser;
-import tools.antlr4.SplittingTree.SplittingTreeVisitorImpl;
 import tools.loggers.HTMLLogger;
 import tools.loggers.LogManager;
 import tools.loggers.TextLogger;
@@ -181,60 +171,6 @@ class StringOption extends Option<String> {
 				used.set(i, true);
 				value = args[i];
 			}
-	}
-
-}
-
-/** add SplittingTreeOption 12/27/2016 **/
-
-class SplittingTreeOption extends Option<SplittingTree> {
-
-	public SplittingTreeOption(String consoleName, String description, SplittingTree defaultValue) {
-		super(consoleName, description, defaultValue);
-	}
-
-	@Override
-	public void parseInternal(String[] args, ArrayList<Boolean> used) {
-
-		for (int i = 0; i < args.length; i++)
-			if (args[i].equals(consoleName)) {
-				haveBeenParsed = true;
-				used.set(i, true);
-				i++;
-				assert !used.get(i) : "argument already parsed";
-				used.set(i, true);
-				String sTree = args[i];
-				File file = new File(sTree);
-				if (!file.exists()) {
-					try {
-						throw new IOException("'" + file.getAbsolutePath() + "' do not exists");
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-				ANTLRInputStream stream = null;
-				try {
-					stream = new ANTLRInputStream(new FileInputStream(file));
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				SplittingTreeLexer lexer = new SplittingTreeLexer(stream);
-				CommonTokenStream tokens = new CommonTokenStream(lexer);
-				SplittingTreeParser parser = new SplittingTreeParser(tokens);
-				// tell ANTLR to build a parse tree
-				parser.setBuildParseTree(true);
-				ParseTree tree = parser.splitting_tree();
-				SplittingTreeVisitorImpl antlrVisitor = new SplittingTreeVisitorImpl();
-				SplittingTree st = antlrVisitor.visit(tree);
-
-				value = st;
-			}
-
 	}
 
 }
@@ -422,19 +358,11 @@ public class SIMPA {
 			0);
 	private static InputSequenceListOption CHARACTERIZATION_SET = new InputSequenceListOption("--characterizationSeq",
 			"use the given charcacterization sequences", null);
-	/**
-	 * use Splitting Tree input sequence 11/14/2016 LX private static
-	 * InputSequenceListOption SPLITTING_TREE = new
-	 * InputSequenceListOption("--splittingTree","use the given splitting tree
-	 * file", null);
-	 **/
-	private static SplittingTreeOption SPLITTING_TREE = new SplittingTreeOption("--splittingTree",
-			"load the specified splitting tree file", null);
 
 	private static BooleanOption WITHOUT_SPEEDUP = new BooleanOption("--noSpeedUp",
 			"Don't use speedUp (deduction from trace based on state incompatibilities)\nthis is usefull if you don't know the real state number but only the bound.");
 	private static Option<?>[] localizerBasedOptions = new Option<?>[] { STATE_NUMBER_BOUND, CHARACTERIZATION_SET,
-			WITHOUT_SPEEDUP, SPLITTING_TREE };
+			WITHOUT_SPEEDUP };
 
 	// hW options
 	private static BooleanOption ADD_H_IN_W = new BooleanOption("--addHInW",
@@ -544,8 +472,6 @@ public class SIMPA {
 		URLS.setNeeded(false);
 		LOAD_DOT_FILE.setNeeded(false);
 		CHARACTERIZATION_SET.setNeeded(false);
-		// use Splitting Tree input sequence 11/14/2016
-		SPLITTING_TREE.setNeeded(false);
 
 		ArrayList<Boolean> used = new ArrayList<>();
 		for (int j = 0; j < args.length; j++)
@@ -630,8 +556,6 @@ public class SIMPA {
 		Options.INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = INITIAL_INPUT_SYMBOLS_EQUALS_TO_X.getValue();
 
 		Options.CHARACTERIZATION_SET = CHARACTERIZATION_SET.getValue();
-		// add splitting tree option
-		Options.SPLITTING_TREE = SPLITTING_TREE.getValue();
 
 		Options.ICTSS2015_WITHOUT_SPEEDUP = WITHOUT_SPEEDUP.getValue();
 		Options.ADD_H_IN_W = ADD_H_IN_W.getValue();
