@@ -687,4 +687,32 @@ public class Mealy extends Automata implements Serializable {
 		}
 		return true;
 	}
+
+	/**
+	 * A utility function to count the number of different characterizations
+	 * observed for a given W i.e. how many states can be distinguished.
+	 * 
+	 * @param W
+	 *            a distinction structure, adaptive or preset, to distinguish
+	 *            states.
+	 * @return the number of equivalence classes for this W, the minimum is 1
+	 *         and the maximum is the number of states.
+	 */
+	public int countCharacterization(
+			DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W) {
+		Set<Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence>> characterizations = new HashSet<>();
+		;
+		for (State s : getStates()) {
+			Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> characterization = W
+					.getEmptyCharacterization();
+			while (!characterization.isComplete()) {
+				GenericInputSequence is = characterization.getUnknownPrints()
+						.get(0);
+				GenericOutputSequence os = apply(is, s);
+				characterization.addPrint(is.buildTrace(os));
+			}
+			characterizations.add(characterization);
+		}
+		return characterizations.size();
+	}
 }

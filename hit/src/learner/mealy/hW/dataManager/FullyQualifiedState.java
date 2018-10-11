@@ -394,13 +394,17 @@ public class FullyQualifiedState{
 	public String toString(){
 		return state.toString();
 	}
+
 	public String toStringWithMatching() {
 		if (driverStates == null)
 			return state.toString();
 		if (driverStates.isEmpty())
 			return state.toString() + " (not matching any state in driver)";
-		return state.toString() + " (matching states " + driverStates
-				+ " in driver)";
+		if (driverStates.size() < 5)
+			return state.toString() + " (matching states " + driverStates
+					+ " in driver)";
+		return state.toString() + " (matching " + driverStates.size()
+				+ " states in driver : " + driverStates + ")";
 	}
 
 
