@@ -715,4 +715,171 @@ public class Mealy extends Automata implements Serializable {
 		}
 		return characterizations.size();
 	}
+
+	/**
+	 * Make this automaton strongly connected by adding transitions from sinks
+	 * to initials states.
+	 * 
+	 * @param input
+	 *            an input symbol for added transitions. If there are more
+	 *            initial states than sinks, multiple transitions will be added
+	 *            and in this case, input symbol will be numbered.
+	 * @param resetOut
+	 *            output symbol for transitions from sink to initial
+	 * @param loopOut
+	 *            output symbol for looping transitions (added to complete the
+	 *            automaton)
+	 */
+	public void connectStrongly(String input, String resetOut, String loopOut) {
+		if (isConnex())
+			return;
+		List<Set<State>> sinks = new ArrayList<>();
+		List<Set<State>> initials = new ArrayList<>();
+		int sinkNb = 0;
+
+		// Compute a list of all sinks sets
+		Set<State> toTest = new HashSet<State>(states);
+		while (!toTest.isEmpty()) {
+			Set<State> sink = findStronglyConnectedComponent(toTest, false);
+			Set<State> reachingSink = new HashSet<>(sink);
+			boolean doAgain = true;
+			while (doAgain) {
+				doAgain = false;
+				for (State s : states) {
+					if (reachingSink.contains(s))
+						continue;
+					for (Transition transition : getTransitionFrom(s)) {
+						if (reachingSink.contains(transition.getTo()))
+							if (reachingSink.add(transition.getFrom()))
+								doAgain = true;
+
+					}
+				}
+			}
+
+			sinks.add(sink);
+			sinkNb += sink.size();
+			assert !sink.isEmpty();
+			if (toTest == sink)
+				toTest = new HashSet<>();
+			toTest.removeAll(reachingSink);
+			assert !sink.isEmpty();
+		}
+
+		// then compute a list of all initial states set
+		toTest.addAll(states);
+		while (!toTest.isEmpty()) {
+			Set<State> initial = new HashSet<>(toTest);
+			findUnreachableAncestors(initial);
+			assert !initial.isEmpty();
+			LinkedList<State> toRemove = new LinkedList<>(initial);
+			while (!toRemove.isEmpty()) {
+				State s = toRemove.poll();
+				if (!toTest.contains(s))
+					continue;
+				toTest.remove(s);
+				for (MealyTransition t : getTransitionFrom(s)) {
+					if (toTest.contains(t.getTo()))
+						toRemove.add(t.getTo());
+				}
+			}
+		}
+
+		// Now compute the transitions to add
+
+		// The two following list are used to store transitions before adding
+		// them (we can't add directly transitions because we use method
+		// getShortestPath which need a complete automaton)
+		List<State> connectSink = new ArrayList<>();
+		List<State> connectInitial = new ArrayList<>();
+
+		// We connect each sink to an initial leading to next sink (so each sink
+		// will be reachable from any other sink and this connect all isolated
+		// components of the automaton)
+		Set<State> sourceS = sinks.get(sinks.size() - 1);
+		List<Set<State>> unreachedInitial = new LinkedList<>(initials);
+		for (int i = 0; i < sinks.size(); i++) {
+			Set<State> targetS = sinks.get(i);
+			connectSink.add(sourceS.iterator().next());
+
+			State targetI = null;
+			for (Iterator<Set<State>> it = unreachedInitial.iterator(); it
+					.hasNext();) {
+				Set<State> initial = it.next();
+				if (getShortestPath(initial.iterator().next(),
+						targetS.iterator().next()) != null) {
+					targetI = initial.iterator().next();
+					it.remove();
+					break;
+				}
+			}
+			connectInitial.add(targetI);
+			sourceS = targetS;
+		}
+
+		State defaultlInitialState = getInitialState();
+		if (defaultlInitialState == null)
+			defaultlInitialState = initials.iterator().next().iterator().next();
+
+		// Now connect remaining sinks to initials (ensure that all sink has an
+		// escaping transition)
+		for (int i = 0; i < connectInitial.size(); i++) {
+			if (connectInitial.get(i) == null) {
+				State target = null;
+				if (unreachedInitial.isEmpty())
+					target = defaultlInitialState;
+				else
+					target = unreachedInitial.remove(0).iterator().next();
+				connectInitial.set(i, target);
+			}
+		}
+
+		String input_mod = input;
+		int inputNb = 1;
+		if (sinkNb < initials.size()) {
+			// we will need an other input symbol later to finish to connect all
+			// the node.
+			input_mod = input + inputNb;
+		}
+
+		// Add the transitions in automaton (cannot be done sooner because of
+		// use of method getShortestPath
+		Set<State> updatedState = new HashSet<>();
+		for (int i = 0; i < connectSink.size(); i++) {
+			addTransition(new MealyTransition(this, connectSink.get(i),
+					connectInitial.get(i), input_mod, resetOut));
+			updatedState.add(connectSink.get(i));
+		}
+		// At this point, all sink are reachable from the others.
+		// We must now connect all remaining initials
+		do {
+			for (Set<State> sink : sinks) {
+				for (State s : sink) {
+					if (unreachedInitial.isEmpty())
+						break;
+					if (!updatedState.contains(s)) {
+						updatedState.add(s);
+						State target = unreachedInitial.remove(0).iterator()
+								.next();
+						addTransition(new MealyTransition(this, s, target,
+								input_mod, resetOut));
+					}
+				}
+			}
+
+			for (State s : states) {
+				if (updatedState.contains(s))
+					continue;
+				addTransition(
+						new MealyTransition(this, s, s, input_mod, loopOut));
+			}
+
+			// prepare to add transitions with an other input if there is still
+			// some unreachable initial states
+			updatedState.clear();
+			inputNb++;
+			input_mod = input + inputNb;
+		} while (!unreachedInitial.isEmpty());
+		assert isConnex();
+	}
 }

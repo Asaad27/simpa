@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 public class Automata implements Serializable {
 	private static final long serialVersionUID = -8767507358858312705L;
@@ -69,32 +70,60 @@ public class Automata implements Serializable {
 	public void reset(){
 	}
 
-	public boolean isConnex() {
-		return isConnex(false);
+	/**
+	 * find a strongly connected component of an automaton. This can be used to
+	 * check if the automaton is strongly connected.
+	 * 
+	 * @see {@link Automata#findStronglyConnectedComponent(Set, boolean)}
+	 * 
+	 * @return a set of state all reachable from the others (considering a
+	 *         lonely state to be reachable by itself).
+	 */
+	public Set<State> findStronglyConnectedComponent() {
+		return findStronglyConnectedComponent(new HashSet<>(states), false);
 	}
 
-	public boolean isConnex(boolean verbose) {
-		if (transitions.size() == 0)
-			return states.size() == 0;
+	/**
+	 * same as {@link #findStronglyConnectedComponent()} but the search is
+	 * restricted in a sub-part of the graph.
+	 * 
+	 * @param part
+	 *            the sub-part in which we should search for strongly connected
+	 *            component.
+	 * @param stopOnFirst
+	 *            do not compute a strongly connected component, only check if
+	 *            the part is strongly connected (and return {@code null} in the
+	 *            other case).
+	 * @return a set of state all reachable from the others (considering a
+	 *         lonely state to be reachable by itself) or {@code null} if
+	 *         {@codestopOnFirst} is {@code true} and the part is not strongly
+	 *         connected
+	 */
+	public Set<State> findStronglyConnectedComponent(Set<State> part,
+			boolean stopOnFirst) {
 		HashSet<State> reachingAllState = new HashSet<State>();
-		for (State s : states){
+		for (State s : part) {
 			if (reachingAllState.contains(s))
 				continue;
 			LinkedList<Transition> toCheck = new LinkedList<Transition>();
 			HashSet<State> crossed = new HashSet<State>();
+			crossed.add(s);// We consider here that a state is reachable from
+							// itself, even if there is no loop transition (can
+							// be parameterized if needed).
 			for (Transition initialTransition : transitions)
 				if (initialTransition.getFrom() == s)
 					toCheck.add(initialTransition);
 			boolean reachingAll = false;
-			while (!toCheck.isEmpty()){
+			while (!toCheck.isEmpty()) {
 				Transition t = toCheck.poll();
+				assert part.contains(t.getTo());
 				if (reachingAllState.contains(t.getTo())) {
 					reachingAllState.add(t.getFrom());
 					reachingAllState.add(s);
 					reachingAll = true;
 					break;
 				}
-				if (!crossed.contains(t.getTo())){
+				if (!crossed.contains(t.getTo())) {
 					crossed.add(t.getTo());
 					for (Transition t2 : transitions)
 						if (t2.getFrom() == t.getTo())
@@ -103,52 +132,103 @@ public class Automata implements Serializable {
 			}
 			if (reachingAll)
 				continue;
-			for (State s2 : states) {
-				if (!crossed.contains(s2)) {
-					if (verbose) {
-						assert !crossed.isEmpty();
-						HashSet<State> farestReached = new HashSet<State>();
-						farestReached.add(s);
-						HashSet<State> prevFarestReached = null;
-						do {
-							prevFarestReached = farestReached;
-							farestReached = new HashSet<>();
-							for (State s3 : prevFarestReached)
-								for (Transition t : transitions)
-									if (t.getFrom() == s3)
-										farestReached.add(t.getTo());
-						} while (!farestReached.equals(prevFarestReached));
+			if (crossed.size() == part.size()) {
+				assert crossed.equals(part);
+				reachingAllState.add(s);
+				continue;
+			}
+			assert part.containsAll(crossed) && crossed.size() < part.size();
+			if (stopOnFirst)
+				return null;
+			return findStronglyConnectedComponent(crossed, false);
+		}
+		assert !part.isEmpty();
+		return part;
+	}
 
-						HashSet<State> farestLeading = new HashSet<>();
-						farestLeading.add(s2);
-						HashSet<State> prevFarestLeading = null;
-						do {
-							prevFarestLeading = farestLeading;
-							farestLeading = new HashSet<>();
-							for (State s3 : prevFarestLeading)
-								for (Transition t : transitions)
-									if (t.getTo() == s3) {
-										assert !crossed.contains(t.getFrom());
-										farestLeading.add(t.getFrom());
-									}
-							if (farestLeading.isEmpty())
-								farestLeading = prevFarestLeading;
-						} while (!farestLeading.containsAll(prevFarestLeading));
-						assert !farestLeading.isEmpty() && !farestReached
-								.isEmpty() : "the sets are not empty at start and thus, there is at least one transition from this set";
-						System.out.println("state " + s2
-								+ " is not reacheable from state " + s);
-						System.out.println("A longer path is : state "
-								+ farestLeading.iterator().next()
-								+ " is not reachable from state "
-								+ farestReached.iterator().next());
+	/**
+	 * Search a set of ancestors of {@code part} such as any state in set can
+	 * reach any other state (but they can also reach states out of the set) and
+	 * all states outside of the set cannot reach a state in the set.
+	 * 
+	 * @param part
+	 *            a set of states (possibly a sub-set of all automaton states)
+	 *            which will be reduced.
+	 */
+	public void findUnreachableAncestors(Set<State> part) {
+		boolean minimal = false;
+		HashSet<State> reachingAllState = new HashSet<State>();
+		while (!minimal) {
+			minimal = true;
+			for (State s : part) {
+				if (reachingAllState.contains(s))
+					continue;
+				LinkedList<Transition> toCheck = new LinkedList<Transition>();
+				HashSet<State> crossed = new HashSet<State>();
+				crossed.add(s);
+				for (Transition initialTransition : transitions)
+					if (initialTransition.getFrom() == s)
+						toCheck.add(initialTransition);
+				boolean reachingAll = false;
+				while (!toCheck.isEmpty()) {
+					Transition t = toCheck.poll();
+					if (!part.contains(t.getTo()))
+						continue;
+					if (reachingAllState.contains(t.getTo())) {
+						reachingAllState.add(t.getFrom());
+						reachingAll = true;
+						break;
 					}
-					return false;
+					if (!crossed.contains(t.getTo())) {
+						crossed.add(t.getTo());
+						for (Transition t2 : transitions)
+							if (t2.getFrom() == t.getTo())
+								toCheck.add(t2);
+					}
+				}
+				if (crossed.size() == part.size()) {
+					assert crossed.equals(part);
+					reachingAll = true;
+				}
+				if (reachingAll) {
+					reachingAllState.add(s);
+				} else {
+					part.removeAll(crossed);
+					minimal = false;
+					break;
 				}
 			}
-			reachingAllState.add(s);
 		}
-		return true;
+		assert reachingAllState.equals(part);
+	}
+
+	public boolean isConnex() {
+		return isConnex(false);
+	}
+
+	public boolean isConnex(boolean verbose) {
+		if (transitions.size() == 0)
+			return states.size() == 0;
+		if (!verbose)
+			return findStronglyConnectedComponent(new HashSet<>(states),
+					true) != null;
+		Set<State> connexComponent = findStronglyConnectedComponent();
+		if (connexComponent.size() == states.size())
+			return true;
+
+		HashSet<State> initialStates = new HashSet<State>(states);
+		initialStates.removeAll(connexComponent);
+		findUnreachableAncestors(initialStates);
+
+		System.out.println(
+				"A longer path is : state " + initialStates.iterator().next()
+						+ " is not reachable from state "
+						+ connexComponent.iterator().next());
+		System.out.println("In a more generic idea, any state of "
+				+ initialStates + " is not reachable from any state of "
+				+ connexComponent);
+
+		return false;
 	}
 
 	public void invalideateInitialsStates() {
