@@ -4,8 +4,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import automata.State;
+import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
 import drivers.mealy.MealyDriver;
+import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import learner.mealy.hW.dataManager.FullyQualifiedState;
@@ -50,6 +53,9 @@ public class HWStatsEntry extends StatsEntry {
 	public static final Attribute<Boolean>USE_ADAPTIVE_W = 			Attribute.USE_ADAPTIVE_W;
 	public static final Attribute<Float> AVG_NB_TRIED_W =			Attribute.AVG_NB_TRIED_W;
 	public static final Attribute<Float> ORACLE_TRACE_PERCENTAGE =	Attribute.ORACLE_TRACE_PERCENTAGE;
+	public final static Attribute<Integer>RESET_INPUT_APPLIED = 	Attribute.RESET_INPUT_APPLIED;
+	public final static Attribute<Integer>RESET_INPUT_EFFECTIVE = 	Attribute.RESET_INPUT_EFFECTIVE;
+
 
 	
 	private static Attribute<?>[] attributes = new Attribute<?>[]{
@@ -86,6 +92,8 @@ public class HWStatsEntry extends StatsEntry {
 			USE_ADAPTIVE_H,
 			USE_ADAPTIVE_W,
 			AVG_NB_TRIED_W,
+			RESET_INPUT_APPLIED,
+			RESET_INPUT_EFFECTIVE,
 	};
 	
 	public static String getCSVHeader_s(){
@@ -137,6 +145,8 @@ public class HWStatsEntry extends StatsEntry {
 	private boolean useAdaptiveH = false;
 	private boolean useAdaptiveW = false;
 	private float avgNbTriedWSuffixes = -1;
+	private int resetInputApplied = -1;
+	private int resetInputEffective = -1;
 
 	/**
 	 * rebuild a HWStats object from a CSV line
@@ -177,6 +187,8 @@ public class HWStatsEntry extends StatsEntry {
 		useAdaptiveH = Boolean.parseBoolean(st.nextToken());
 		useAdaptiveW = Boolean.parseBoolean(st.nextToken());
 		avgNbTriedWSuffixes = Float.parseFloat(st.nextToken());
+		resetInputApplied = Integer.parseInt(st.nextToken());
+		resetInputEffective = Integer.parseInt(st.nextToken());
 		
 	}
 
@@ -271,6 +283,33 @@ public class HWStatsEntry extends StatsEntry {
 		hMaxLength = dataManager.h.getMaxLength();
 	}
 
+	protected void updateResetApplied(LmTrace fullTrace, MealyDriver d) {
+		assert resetInputApplied == -1;
+		resetInputApplied = 0;
+		Mealy automaton = null;
+		State s = null;
+		if (d instanceof TransparentMealyDriver) {
+			automaton = ((TransparentMealyDriver) d).getAutomata();
+			s = automaton.getInitialState();
+			if (s != null)
+				resetInputEffective = 0;
+		}
+
+		for (String input : fullTrace.getInputsProjection()) {
+			State nextState = null;
+			if (s != null) {
+				nextState = automaton.getTransitionFromWithInput(s, input)
+						.getTo();
+				assert nextState != null;
+			}
+			if (input.equals(Options.INTPUT_SYMBOL_FOR_RESET)) {
+				resetInputApplied++;
+				if (nextState != s)
+					resetInputEffective++;
+			}
+			s = nextState;
+		}
+	}
 	
 	public void updateWithConjecture(LmConjecture conjecture) {
 		statesNumber = conjecture.getStateCount();
@@ -364,6 +403,10 @@ public class HWStatsEntry extends StatsEntry {
 			return (T) new Float(100. * oracleTraceLength / traceLength);
 		if (a == AVG_NB_TRIED_W)
 			return (T) new Float(avgNbTriedWSuffixes);
+		if (a == RESET_INPUT_APPLIED)
+			return (T) new Integer(resetInputApplied);
+		if (a == RESET_INPUT_EFFECTIVE)
+			return (T) new Integer(resetInputEffective);
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 
 	}
@@ -387,6 +430,8 @@ public class HWStatsEntry extends StatsEntry {
 				a == LOOP_RATIO ||
 				a == ASKED_COUNTER_EXAMPLE||
 				a == H_INCONSISTENCY_FOUND ||
+				a == RESET_INPUT_APPLIED ||
+				a == RESET_INPUT_EFFECTIVE ||
 				a == ORACLE_TRACE_LENGTH)
 			return ((Integer) get(a)).floatValue();
 		if (a == SEED)

@@ -25,6 +25,8 @@ public class Options {
 	public static final String SYMBOL_EPSILON = "\u03b5";
 	public static final String SYMBOL_SIGMA = "\u03a3";
 	public static final String SYMBOL_NOT_EQUAL = "\u2260";
+	
+	public static final String INTPUT_SYMBOL_FOR_RESET = "-reset-";
 
 	public static String DIRGRAPH = "out";
 	public static String DIRGRAPHSTATS = "stats" + File.separator + "graphs";
