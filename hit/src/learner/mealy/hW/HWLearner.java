@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -273,12 +272,8 @@ public class HWLearner extends Learner {
 	public void learn() {
 		if (driver instanceof TransparentMealyDriver) {
 			TransparentMealyDriver d = (TransparentMealyDriver) driver;
-			if ((!d.getAutomata().isConnex(true))) {
-				LogManager.logWarning(
-						"transitions will be added to make the automata strongly connected");
-				d.getAutomata().connectStrongly(Options.INTPUT_SYMBOL_FOR_RESET,
-						"-", "-");
-			}
+			if ((!d.getAutomata().isConnex(true)))
+				throw new RuntimeException("driver must be strongly connected");
 		}
 		fullTrace = new LmTrace();
 		Runtime runtime = Runtime.getRuntime();
@@ -459,7 +454,6 @@ public class HWLearner extends Learner {
 	
 		stats.updateMemory((int) (runtime.totalMemory() - runtime.freeMemory()));
 		stats.finalUpdate(dataManager);
-		stats.updateResetApplied(fullTrace, driver);
 
 		if (dataManager.getConjecture().checkOnAllStates(fullTrace) != fullTrace
 				.size()) {
@@ -934,10 +928,8 @@ public class HWLearner extends Learner {
 
 			Set<String> X = dataManager.getxNotInR(lastKnownQ);
 			assert !X.isEmpty();
-			Iterator<String> it = X.iterator();
-			String x = it.next(); // here we CHOOSE to take the first
-			if (it.hasNext() && x.equals(Options.INTPUT_SYMBOL_FOR_RESET))
-				x = it.next();
+			String x = X.iterator().next(); // here we CHOOSE to take the
+											// first
 			LogManager.logInfo("We choose x = " + x + " in " + X);
 			String o = dataManager.apply(x);
 			sigma = new LmTrace(x, o);
