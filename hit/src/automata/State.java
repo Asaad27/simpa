@@ -5,7 +5,7 @@ import java.io.Serializable;
 public class State implements Serializable {
 	private static final long serialVersionUID = 3191363945864393433L;
 
-	private String name;
+	private final String name;
 	private Boolean initial;
 	private Boolean flag;
 
@@ -49,7 +49,7 @@ public class State implements Serializable {
 	}
 
 	public int hashCode() {
-		return name.hashCode() * 7 + initial.hashCode() * 31;
+		return name.hashCode();
 	}
 
 	@Override

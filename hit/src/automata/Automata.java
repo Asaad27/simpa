@@ -231,6 +231,17 @@ public class Automata implements Serializable {
 		return false;
 	}
 
+	/**
+	 * update state s to be an initial state.
+	 * 
+	 * @param s
+	 *            the new initial state
+	 */
+	public void setInitialState(State s) {
+		assert states.contains(s);
+		s.setInitial(true);
+	}
+
 	public void invalideateInitialsStates() {
 		for (State s : states)
 			s.setInitial(false);
