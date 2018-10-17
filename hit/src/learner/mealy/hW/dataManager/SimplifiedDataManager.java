@@ -61,6 +61,8 @@ public class SimplifiedDataManager {
 	private List<LocalizedHZXWSequence> readyForReapplyHZXWSequence = new ArrayList<>();
 
 	protected Collection<FullyQualifiedState> identifiedFakeStates=new ArrayList<>();
+	private Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> initialStateCharacterization;
+	private FullyQualifiedState initialState;
 
 	public Collection<FullyQualifiedState> getIdentifiedFakeStates() {
 		return identifiedFakeStates;
@@ -208,6 +210,12 @@ public class SimplifiedDataManager {
 		expectedTraces = new ArrayList<>();
 		assert hChecker.getH().equals(h);
 		this.hChecker = hChecker;
+		initialStateCharacterization = W.getEmptyCharacterization();
+		getInitialCharacterization();
+		if (initialStateCharacterization.isComplete()) {
+			getFullyQualifiedState(initialStateCharacterization);
+			getInitialCharacterization();
+		}
 	}
 	
 	private void extendTrace(String input, String output){
@@ -321,7 +329,7 @@ public class SimplifiedDataManager {
 		globalTraces.add(traceSinceReset);
 		lastknownState = null;
 		lastknownStatePos = 0;
-		currentState = null;
+		currentState = initialState;
 		hChecker.reset();
 		expectedTraces = new ArrayList<>();
 	}
@@ -387,8 +395,22 @@ public class SimplifiedDataManager {
 	/**
 	 * @return trace since last reset
 	 */
-	public LmTrace gettraceSinceReset() {
+	public LmTrace getTraceSinceReset() {
 		return traceSinceReset;
+	}
+
+	/**
+	 * the initial state of conjecture, if it is known;
+	 */
+	public FullyQualifiedState getInitialState() {
+		assert initialState != null || !getInitialCharacterization()
+				/*
+				 * during debug, notice that if initial characterization is
+				 * complete, initial state will be set by side effect inside
+				 * this assert.
+				 */
+				.isComplete() : "characterization is complete so initial state should be already known";
+		return initialState;
 	}
 
 	/**
@@ -679,33 +701,54 @@ public class SimplifiedDataManager {
 	 * @see #getLastKnownState()
 	 */
 	public int getLastKnownStatePos() {
+		assert initialState != null || lastknownState != null;
 		return lastknownStatePos;
 	}
 
 	/**
 	 * get the last state identified without conjecture (i.e. identified only
-	 * with homing sequence). This state was seen before input at position
-	 * {@link #getLastKnownStatePos()} in trace.
+	 * with homing sequence or reset). This state was seen before input at
+	 * position {@link #getLastKnownStatePos()} in trace.
 	 * 
 	 * @return the last state identified after homing sequence in trace or null
 	 *         if homing sequence wasn't applied.
 	 */
 	public FullyQualifiedState getLastKnownState() {
+		if (lastknownState == null) {
+			assert initialState != null;
+			return initialState;
+		}
 		return lastknownState;
 	}
 
+	/**
+	 * try to characterize initial state with already existing traces. If the
+	 * characterization is complete and if the state already exists, then the
+	 * state is labeled as initial state.
+	 * 
+	 * @return the characterization of initial state, complete or partial.
+	 * @warning The characterization returned is the internal characterization.
+	 *          It can be completed with real element, but not with guessing.
+	 */
 	public Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> getInitialCharacterization() {
-		Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> characterization = W
-				.getEmptyCharacterization();
-		for (GenericInputSequence w : characterization.unknownPrints()) {
+		if (initialState != null)
+			return initialStateCharacterization;
+		for (GenericInputSequence w : initialStateCharacterization
+				.unknownPrints()) {
 			for (LmTrace trace : globalTraces) {
 				GenericOutputSequence wResponse = trace.getOutput(w);
 				if (wResponse != null) {
-					characterization.addPrint(w, wResponse);
+					initialStateCharacterization.addPrint(w, wResponse);
 					break;
 				}
 			}
 		}
-		return characterization;
+		if (hasState(initialStateCharacterization)) {
+			initialState = getFullyQualifiedState(initialStateCharacterization);
+			LogManager.logInfo(
+					"Initial state characterized. this is " + initialState);
+			conjecture.setInitialState(initialState.getState());
+		}
+		return initialStateCharacterization;
 	}
 }

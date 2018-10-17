@@ -77,28 +77,27 @@ public class HWLearner extends Learner {
 			throws CeExposedUnknownStateException {
 		LmTrace ce = null;
 		ce = getCounterExemple(hExceptions);
-		FullyQualifiedState R = null;
 		int resetCe = 0;
 		while (ce == null) {
 			resetCe++;
 			if (resetCe > Options.MAX_CE_RESETS)
 				break;
-			dataManager.reset();
 			Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> characterization = dataManager
 					.getInitialCharacterization();
 			for (GenericInputSequence w : characterization.unknownPrints()) {
+				dataManager.reset();
 				GenericOutputSequence r = dataManager.apply(w);
 				if (Options.LOG_LEVEL != LogLevel.LOW)
 					LogManager.logInfo(
 							"characterizing initial state with sequence ", w);
 				characterization.addPrint(w, r);
-				dataManager.reset();
 			}
 			if (!dataManager.hasState(characterization))
 				throw new CeExposedUnknownStateException(characterization);
-			R = dataManager.getFullyQualifiedState(characterization);
-			LogManager.logInfo("initial state characterized : this is ", R);
-			dataManager.setCurrentState(R);
+			dataManager.getInitialCharacterization();// update initial state in
+														// dataManager
+			dataManager.reset();
+			assert (dataManager.getCurrentState() != null);
 			ce = getCounterExemple(hExceptions);
 		}
 		return ce;
@@ -142,7 +141,8 @@ public class HWLearner extends Learner {
 
 	public LmTrace getRandomCounterExemple(
 			List<GenericHNDException> hExceptions) {
-		if (driver instanceof TransparentMealyDriver) {
+		if (driver instanceof TransparentMealyDriver
+				&& !Options.HW_WITH_RESET) {
 			TransparentMealyDriver d = (TransparentMealyDriver) driver;
 			Options.MAX_CE_LENGTH = d.getAutomata().getStateCount()
 					* d.getInputSymbols().size() * 1000;
@@ -426,7 +426,8 @@ public class HWLearner extends Learner {
 								hExceptions);
 					} catch (CeExposedUnknownStateException e) {
 						dataManager.getFullyQualifiedState(e.characterization);
-						break;
+						dataManager.getInitialCharacterization();
+						continue;
 					}
 				else
 					counterExampleTrace = getCounterExemple(hExceptions);
@@ -465,7 +466,7 @@ public class HWLearner extends Learner {
 																	// after h
 				List<FullyQualifiedState> states = new ArrayList<>();
 				states.add(currentState);
-				LmTrace lastTrace = dataManager.gettraceSinceReset();
+				LmTrace lastTrace = dataManager.getTraceSinceReset();
 				for (int i = firstStatePos; i < lastTrace.size() - 1; i++) {
 					FullyKnownTrace transition = currentState
 							.getKnownTransition(lastTrace.getInput(i));
@@ -827,7 +828,7 @@ public class HWLearner extends Learner {
 				dataManager.getStates());
 		int startPos = -1;
 		// TODO extends search to all traces
-		LmTrace lastTrace = dataManager.gettraceSinceReset();
+		LmTrace lastTrace = dataManager.getTraceSinceReset();
 		for (int i = 0; i < lastTrace.size(); i++) {
 			String input = lastTrace.getInput(i);
 			String traceOutput = lastTrace.getOutput(i);
@@ -952,11 +953,6 @@ public class HWLearner extends Learner {
 		dataManager = new SimplifiedDataManager(driver, this.W, h, fullTraces,
 				hZXWSequences, hWSequences, hChecker);
 
-		Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> Rcharacterization = dataManager
-				.getInitialCharacterization();
-		FullyQualifiedState R = null;
-		if (Rcharacterization.isComplete())
-			R = dataManager.getFullyQualifiedState(Rcharacterization);
 		// start of the algorithm
 		do {
 			Runtime runtime = Runtime.getRuntime();
@@ -989,24 +985,34 @@ public class HWLearner extends Learner {
 				LogManager.logInfo(
 						"Conjecture is not strongly connected and some part are unreachable.");
 				LogManager.logInfo(
-						"Reseting the driver try to go outside of the strongly connected sub-part");
+						"Reseting the driver to try to go outside of the strongly connected sub-part");
 				dataManager.reset();
+				lastDeliberatelyAppliedH = null;
+				FullyQualifiedState R = dataManager.getInitialState();
 				if (R == null) {
+					Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> Rcharacterization = dataManager
+							.getInitialCharacterization();
 					GenericInputSequence w = Rcharacterization.unknownPrints()
 							.iterator().next();
 					GenericOutputSequence wResponse = dataManager.apply(w);
 					Rcharacterization.addPrint(w, wResponse);
 					if (Rcharacterization.isComplete()) {
-						R = dataManager
-								.getFullyQualifiedState(Rcharacterization);
+						dataManager.getFullyQualifiedState(Rcharacterization);
+						dataManager.getInitialCharacterization();
 					}
-					break;// restart h z x w learning
+					continue;// restart h z x w learning
 				}
 				assert R != null;
-				dataManager.setCurrentState(R);
-				alpha = dataManager.getShortestAlpha(R);// might throw an
-														// ConjectureNotConnex
-														// exception again
+				assert dataManager.getCurrentState() != null;
+				try {
+					alpha = dataManager.getShortestAlpha(R);// might throw an
+															// ConjectureNotConnex
+															// exception again
+				} catch (ConjectureNotConnexException e2) {
+					LogManager.logInfo(
+							"Some incomplete states are unreachable from the identified initial state. Stoping here and look for a counter example");
+					throw e;
+				}
 			}
 			OutputSequence alphaResponse = dataManager.apply(alpha);
 			assert dataManager.getCurrentState() != null;
