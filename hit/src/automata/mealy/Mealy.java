@@ -595,6 +595,76 @@ public class Mealy extends Automata implements Serializable {
 		return i;
 	}
 
+	public class compatibilityCheckResult {
+		private boolean isCompatible;
+		private LmTrace simpleDiffTrace = null;
+		private int simpleDiffPos;
+
+		/**
+		 * indicate if an inconsistency was found
+		 * 
+		 * @return true if all trace can be played on this automaton.
+		 */
+		public boolean isCompatible() {
+			return isCompatible;
+		}
+
+		/**
+		 * if the inconsistency comes from a single trace, this method return
+		 * the faulty trace.
+		 * 
+		 * @return a trace which cannot be played on any state of the automaton.
+		 */
+		public LmTrace getSimpleDiffTrace() {
+			return simpleDiffTrace;
+		}
+
+		/**
+		 * if the inconsistency comes from a single trace, this method return
+		 * the position of first element of {@link #getSimpleDiffTrace()} which
+		 * is inconsistent with this automaton.
+		 * 
+		 * @return a position in the trace.
+		 */
+		public int getSimpleDiffPos() {
+			assert simpleDiffTrace != null;
+			return simpleDiffPos;
+		}
+
+		compatibilityCheckResult() {
+			isCompatible = true;
+		}
+
+		void addDiff(LmTrace t, int diff) {
+			isCompatible = false;
+			simpleDiffTrace = t;
+			simpleDiffPos = diff;
+		}
+	}
+
+	/**
+	 * try to find inconsistency between a set of executed traces and this
+	 * automaton.
+	 * 
+	 * @param fullTraces
+	 * @return
+	 */
+	public compatibilityCheckResult checkOnAllStatesWithReset(
+			List<LmTrace> fullTraces) {
+		compatibilityCheckResult r = new compatibilityCheckResult();
+		for (LmTrace t : fullTraces) {
+			int diff = checkOnAllStates(t);
+			if (diff != t.size()) {
+				r.addDiff(t, diff);
+			}
+		}
+		// TODO check compatibility with several traces at the same time :
+		// initial state is the same for all trace thus we can remove some
+		// candidate initial with one trace and remove other candidate with
+		// another trace
+		return r;
+	}
+
 	/**
 	 * @see {@link #checkOnOneState(LmTrace, State)}
 	 */

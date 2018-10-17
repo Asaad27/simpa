@@ -132,6 +132,14 @@ public class AdaptiveHomingSequenceChecker
 		}
 
 		/**
+		 * notify the graph that a reset occurred. Current node is lost until a
+		 * h is applied.
+		 */
+		public void reset() {
+			currentNode = new Node();
+		}
+
+		/**
 		 * Create a new {@link InconsistencyGraph} without any previous
 		 * knowledge.
 		 */
@@ -346,6 +354,13 @@ public class AdaptiveHomingSequenceChecker
 		}
 		if (!inconsistencies.isEmpty())
 			throw new AdaptiveHNDException(h, inconsistencies);
+	}
+
+	public void reset() {
+		for (InconsistencyGraph graph : graphs.values()) {
+			graph.reset();
+			hFinder.reset();
+		}
 	}
 
 	private InconsistencyGraph getGraphOrCreate(AdaptiveSymbolSequence leaf) {

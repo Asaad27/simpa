@@ -139,9 +139,7 @@ public class AdaptiveSearchGraph<InputT, OutputT> {
 		this.seq = seq;
 		assert seq.isRoot();
 		seqPositions = new ArrayList<>(seq.getAllNodes());
-		Set<AdaptiveStructure<InputT, OutputT>> initialSet = new HashSet<>();
-		initialSet.add(seq);
-		currentNode = getNodeOrCreate(initialSet);
+		reset();
 	}
 
 	/**
@@ -183,6 +181,15 @@ public class AdaptiveSearchGraph<InputT, OutputT> {
 			InputT in, OutputT out) {
 		currentNode = currentNode.getChild(in, out);
 		return currentNode.getLeaves();
+	}
+
+	/**
+	 * reset search status in graph as if nothing was applied.
+	 */
+	public void reset() {
+		Set<AdaptiveStructure<InputT, OutputT>> initialSet = new HashSet<>();
+		initialSet.add(seq);
+		currentNode = getNodeOrCreate(initialSet);
 	}
 
 }

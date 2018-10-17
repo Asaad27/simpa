@@ -39,4 +39,10 @@ public abstract class GenericHomingSequenceChecker {
 	 *             different outputs).
 	 */
 	public abstract void apply(String input, String output);
+
+	/**
+	 * notify the checker that a reset was applied. The checker should go back
+	 * in its initial state
+	 */
+	public abstract void reset();
 }

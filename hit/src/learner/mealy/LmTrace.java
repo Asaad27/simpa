@@ -3,6 +3,7 @@ package learner.mealy;
 import java.util.ArrayList;
 
 import automata.mealy.GenericInputSequence;
+import automata.mealy.GenericInputSequence.GenericOutputSequence;
 import automata.mealy.InputSequence;
 import automata.mealy.OutputSequence;
 import main.simpa.Options;
@@ -106,6 +107,31 @@ public class LmTrace {
 			pos++;
 		}
 		return true;
+	}
+
+	/**
+	 * Iterate over the given sequence and check whether the inputs applied are
+	 * the same as the ones in this trace.
+	 * 
+	 * @param seq
+	 *            the input sequence to check
+	 * @return the corresponding output sequence or {@code null} if the input
+	 *         sequence do not match (or is shorter than) inputs projections.
+	 */
+	public GenericOutputSequence getOutput(GenericInputSequence seq) {
+		GenericInputSequence.Iterator it = seq.inputIterator();
+		int pos = 0;
+		while (it.hasNext()) {
+			if (pos >= size())
+				return null;
+			String input = it.next();
+			if (!input.equals(getInput(pos)))
+				return null;
+			it.setPreviousOutput(getOutput(pos));
+			pos++;
+
+		}
+		return it.getResponse();
 	}
 
 	/**

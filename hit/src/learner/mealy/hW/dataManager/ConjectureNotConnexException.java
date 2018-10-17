@@ -3,7 +3,7 @@ package learner.mealy.hW.dataManager;
 import java.util.List;
 import java.util.Set;
 
-public class ConjectureNotConnexException extends RuntimeException {
+public class ConjectureNotConnexException extends Exception {
 
 	private static final long serialVersionUID = 9158571872132308078L;
 	private List<FullyQualifiedState> reachedStates;

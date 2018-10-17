@@ -103,7 +103,7 @@ public class FixedHomingSequenceChecker extends GenericHomingSequenceChecker {
 	protected InputSequence h;
 	private Map<OutputSequence, Node> knownResponses;
 	private Node currentNode;
-	private Node startNode;
+	private final Node startNode;
 	private LmTrace lastApplied;
 	private CompiledSearchGraph compiledSearchGraph;
 
@@ -173,6 +173,11 @@ public class FixedHomingSequenceChecker extends GenericHomingSequenceChecker {
 
 		if (this.currentNode.searchStatus.getNeededTraceLength() == 0)
 			lastApplied = new LmTrace();
+	}
+
+	public void reset() {
+		currentNode = startNode;
+		compiledSearchGraph.setStatus(compiledSearchGraph.getStart());
 	}
 
 	protected Node getState(OutputSequence seq) {

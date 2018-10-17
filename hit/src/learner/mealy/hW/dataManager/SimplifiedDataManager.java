@@ -32,8 +32,9 @@ public class SimplifiedDataManager {
 													// singleton either do
 													// something else
 	private MealyDriver driver;
-	private LmTrace trace;
-	private LmTrace globalTrace;
+	private int numberOfInputsApplied;
+	private List<LmTrace> globalTraces;
+	private LmTrace traceSinceReset;
 	private final DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W; // Characterization
 																										// set
 	public final GenericInputSequence h;
@@ -46,6 +47,8 @@ public class SimplifiedDataManager {
 															// transitions
 	private LmConjecture conjecture;
 	private FullyQualifiedState currentState;
+	private FullyQualifiedState lastknownState = null;
+	private int lastknownStatePos = 0;
 
 	private Map<GenericOutputSequence, FullyQualifiedState> hResponse2State;
 	private Map<GenericOutputSequence, Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence>> hResponse2Wresponses;
@@ -182,12 +185,13 @@ public class SimplifiedDataManager {
 
 	public SimplifiedDataManager(MealyDriver driver,
 			DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W,
-			GenericInputSequence h, LmTrace globalTrace,
+			GenericInputSequence h, List<LmTrace> globalTraces,
 			Map<GenericOutputSequence, List<HZXWSequence>> hZXWSequences,
 			Map<GenericOutputSequence, List<LmTrace>> hWSequences,
 			GenericHomingSequenceChecker hChecker) {
-		this.trace = new LmTrace();
-		this.globalTrace = globalTrace;
+		numberOfInputsApplied = 0;
+		this.globalTraces = globalTraces;
+		traceSinceReset = globalTraces.get(globalTraces.size() - 1);
 		this.W = W;
 		this.h = h;
 		this.I = new ArrayList<String>(driver.getInputSymbols());
@@ -207,8 +211,8 @@ public class SimplifiedDataManager {
 	}
 	
 	private void extendTrace(String input, String output){
-		trace.append(input, output);
-		globalTrace.append(input, output);
+		numberOfInputsApplied++;
+		traceSinceReset.append(input, output);
 	}
 	
 	public String walkWithoutCheck(String input, String output,
@@ -311,6 +315,17 @@ public class SimplifiedDataManager {
 		return it.getResponse();
 	}
 
+	public void reset() {
+		driver.reset();
+		traceSinceReset = new LmTrace();
+		globalTraces.add(traceSinceReset);
+		lastknownState = null;
+		lastknownStatePos = 0;
+		currentState = null;
+		hChecker.reset();
+		expectedTraces = new ArrayList<>();
+	}
+
 	public String getK() {
 		StringBuilder s = new StringBuilder("{");
 		for (FullyQualifiedState q : Q.values()) {
@@ -362,12 +377,18 @@ public class SimplifiedDataManager {
 		expectedTraces.add(currentState.getExpectedTraces());
 	}
 
+	/**
+	 * @return the number of input applied in this dataManager.
+	 */
 	public int traceSize() {
-		return trace.size();
+		return numberOfInputsApplied;
 	}
 
-	public LmTrace getSubtrace(int start, int end) {
-		return trace.subtrace(start, end);
+	/**
+	 * @return trace since last reset
+	 */
+	public LmTrace gettraceSinceReset() {
+		return traceSinceReset;
 	}
 
 	/**
@@ -391,6 +412,21 @@ public class SimplifiedDataManager {
 				+ newState.toStringWithMatching() + " (" + s + ")");
 		Q.put(WResponses, newState);
 		return newState;
+	}
+
+	/**
+	 * check if there is a known state corresponding to the given
+	 * characterization.
+	 * 
+	 * @param wResponses
+	 *            the characterization of wanted state
+	 * @return true if a state has already been created for this
+	 *         characterization.
+	 */
+	public boolean hasState(
+			Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> WResponses) {
+		return Q.containsKey(WResponses);
+
 	}
 
 	public DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> getW() {
@@ -451,8 +487,10 @@ public class SimplifiedDataManager {
 	 * @param s
 	 *            the start state
 	 * @return an empty list if the state himself has unknown outputs
+	 * @throws ConjectureNotConnexException
 	 */
-	public InputSequence getShortestAlpha(FullyQualifiedState s) {
+	public InputSequence getShortestAlpha(FullyQualifiedState s)
+			throws ConjectureNotConnexException {
 		assert s != null;
 		class Node {
 			public InputSequence path;
@@ -518,12 +556,7 @@ public class SimplifiedDataManager {
 		return conjecture;
 	}
 
-	public LmTrace getTrace() {
-		return trace;
-	}
-
 	/**
-	 * 
 	 * @param WResponses
 	 * @return states in driver matching this WResponses (or null if driver is
 	 *         not available)
@@ -626,5 +659,53 @@ public class SimplifiedDataManager {
 		List<LocalizedHZXWSequence> r = readyForReapplyHZXWSequence;
 		readyForReapplyHZXWSequence = new ArrayList<>();
 		return r;
+	}
+
+	/**
+	 * notify the dataManager that we are at the end of an application of homing
+	 * sequence which identified the current state.
+	 * 
+	 * @param s
+	 *            the state identified at end of homing sequence.
+	 */
+	public void endOfH(FullyQualifiedState s) {
+		lastknownState = s;
+		lastknownStatePos = traceSinceReset.size();
+		currentState = s;
+	}
+
+	/**
+	 * 
+	 * @see #getLastKnownState()
+	 */
+	public int getLastKnownStatePos() {
+		return lastknownStatePos;
+	}
+
+	/**
+	 * get the last state identified without conjecture (i.e. identified only
+	 * with homing sequence). This state was seen before input at position
+	 * {@link #getLastKnownStatePos()} in trace.
+	 * 
+	 * @return the last state identified after homing sequence in trace or null
+	 *         if homing sequence wasn't applied.
+	 */
+	public FullyQualifiedState getLastKnownState() {
+		return lastknownState;
+	}
+
+	public Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> getInitialCharacterization() {
+		Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> characterization = W
+				.getEmptyCharacterization();
+		for (GenericInputSequence w : characterization.unknownPrints()) {
+			for (LmTrace trace : globalTraces) {
+				GenericOutputSequence wResponse = trace.getOutput(w);
+				if (wResponse != null) {
+					characterization.addPrint(w, wResponse);
+					break;
+				}
+			}
+		}
+		return characterization;
 	}
 }

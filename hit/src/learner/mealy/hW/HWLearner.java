@@ -61,9 +61,8 @@ public class HWLearner extends Learner {
 	private HWStatsEntry stats;
 	protected DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W;
 	private int n;// the maximum number of states
-	private LmTrace fullTrace;
+	private List<LmTrace> fullTraces;
 	private GenericOutputSequence lastDeliberatelyAppliedH = null;
-	private int lastDeliberatelyAppliedHEndPos;
 	private GenericHomingSequenceChecker hChecker = null;
 	private Map<GenericOutputSequence, List<HZXWSequence>> hZXWSequences = new HashMap<>();
 	private Map<GenericOutputSequence, List<LmTrace>> hWSequences = new HashMap<>();
@@ -72,6 +71,37 @@ public class HWLearner extends Learner {
 
 	public HWLearner(MealyDriver d) {
 		driver = d;
+	}
+
+	public LmTrace getCounterExempleReset(List<GenericHNDException> hExceptions)
+			throws CeExposedUnknownStateException {
+		LmTrace ce = null;
+		ce = getCounterExemple(hExceptions);
+		FullyQualifiedState R = null;
+		int resetCe = 0;
+		while (ce == null) {
+			resetCe++;
+			if (resetCe > Options.MAX_CE_RESETS)
+				break;
+			dataManager.reset();
+			Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> characterization = dataManager
+					.getInitialCharacterization();
+			for (GenericInputSequence w : characterization.unknownPrints()) {
+				GenericOutputSequence r = dataManager.apply(w);
+				if (Options.LOG_LEVEL != LogLevel.LOW)
+					LogManager.logInfo(
+							"characterizing initial state with sequence ", w);
+				characterization.addPrint(w, r);
+				dataManager.reset();
+			}
+			if (!dataManager.hasState(characterization))
+				throw new CeExposedUnknownStateException(characterization);
+			R = dataManager.getFullyQualifiedState(characterization);
+			LogManager.logInfo("initial state characterized : this is ", R);
+			dataManager.setCurrentState(R);
+			ce = getCounterExemple(hExceptions);
+		}
+		return ce;
 	}
 
 	/**
@@ -91,8 +121,13 @@ public class HWLearner extends Learner {
 			returnedCE = getShortestCounterExemple();
 		} else {
 			stats.setOracle("MrBean");
-			LmTrace shortestCe = (driver instanceof TransparentMealyDriver) ? getShortestCounterExemple(false)
-					: new LmTrace();
+			LmTrace shortestCe = (driver instanceof TransparentMealyDriver
+					&& !Options.HW_WITH_RESET /*
+												 * driver needs to be strongly
+												 * connected
+												 */)
+							? getShortestCounterExemple(false)
+							: new LmTrace();
 			returnedCE = (shortestCe == null) ? null
 					: getRandomCounterExemple(hExceptions);// we do not compute
 															// random CE if we
@@ -235,13 +270,15 @@ public class HWLearner extends Learner {
 			LogManager.logInfo("h is now " + h);
 			hChecker = GenericHomingSequenceChecker.getChecker(h);
 		}
-		for (int i = 0; i < fullTrace.size(); i++)
-			try {
-				hChecker.apply(fullTrace.getInput(i),
-						fullTrace.getOutput(i));
-			} catch (GenericHNDException rec) {
-				return proceedHException(rec);
-			}
+		for (LmTrace trace : fullTraces) {
+			hChecker.reset();
+			for (int i = 0; i < trace.size(); i++)
+				try {
+					hChecker.apply(trace.getInput(i), trace.getOutput(i));
+				} catch (GenericHNDException rec) {
+					return proceedHException(rec);
+				}
+		}
 		if (Options.ADD_H_IN_W) {
 			if (Options.ADAPTIVE_H)
 				throw new RuntimeException(
@@ -259,8 +296,9 @@ public class HWLearner extends Learner {
 				}
 			}
 			if (!hIsInW) {
-				int traceLength = fullTrace.size();
-				LmTrace hTrace = fullTrace.subtrace(
+				LmTrace lastTrace = fullTraces.get(fullTraces.size() - 1);
+				int traceLength = lastTrace.size();
+				LmTrace hTrace = lastTrace.subtrace(
 						traceLength - hFixed.getLength(), traceLength);
 				assert hTrace.getInputsProjection().equals(hFixed);
 				addOrExtendInW(hFixed, WFixed);
@@ -272,10 +310,11 @@ public class HWLearner extends Learner {
 	public void learn() {
 		if (driver instanceof TransparentMealyDriver) {
 			TransparentMealyDriver d = (TransparentMealyDriver) driver;
-			if ((!d.getAutomata().isConnex(true)))
+			if ((!d.getAutomata().isConnex(true)) && !Options.HW_WITH_RESET)
 				throw new RuntimeException("driver must be strongly connected");
 		}
-		fullTrace = new LmTrace();
+		fullTraces = new ArrayList<>();
+		fullTraces.add(new LmTrace());
 		Runtime runtime = Runtime.getRuntime();
 		runtime.gc();
 
@@ -381,7 +420,16 @@ public class HWLearner extends Learner {
 			List<GenericHNDException> hExceptions = new ArrayList<>();
 			if (!inconsistencyFound && !virtualCounterExample) {
 				LogManager.logInfo("asking for a counter example");
-				counterExampleTrace = getCounterExemple(hExceptions);
+				if (Options.HW_WITH_RESET)
+					try {
+						counterExampleTrace = getCounterExempleReset(
+								hExceptions);
+					} catch (CeExposedUnknownStateException e) {
+						dataManager.getFullyQualifiedState(e.characterization);
+						break;
+					}
+				else
+					counterExampleTrace = getCounterExemple(hExceptions);
 				if (counterExampleTrace == null)
 					LogManager.logInfo("No counter example found");
 				else {
@@ -409,24 +457,25 @@ public class HWLearner extends Learner {
 							.logWarning("We are adding new element to W but it is already a W-set for this driver");
 				}
 				FullyQualifiedState currentState = dataManager
-						.getState(lastDeliberatelyAppliedH);
-				int firstStatePos = lastDeliberatelyAppliedHEndPos;// pos in
-																	// trace of
+						.getLastKnownState();
+				int firstStatePos = dataManager.getLastKnownStatePos();// pos in
+																		// trace of
 																	// first
 																	// input
 																	// after h
 				List<FullyQualifiedState> states = new ArrayList<>();
 				states.add(currentState);
-				for (int i = firstStatePos; i < fullTrace.size() - 1; i++) {
+				LmTrace lastTrace = dataManager.gettraceSinceReset();
+				for (int i = firstStatePos; i < lastTrace.size() - 1; i++) {
 					FullyKnownTrace transition = currentState
-							.getKnownTransition(fullTrace.getInput(i));
+							.getKnownTransition(lastTrace.getInput(i));
 					if (transition == null)
 						break;
 					currentState = transition.getEnd();
 					states.add(currentState);
 				}
 				try {
-					extendsW(states, fullTrace, firstStatePos);
+					extendsW(states, lastTrace, firstStatePos);
 				} catch (CanNotExtendWException e) {
 					if (hExceptions.size() == 0)
 						throw e;
@@ -455,8 +504,8 @@ public class HWLearner extends Learner {
 		stats.updateMemory((int) (runtime.totalMemory() - runtime.freeMemory()));
 		stats.finalUpdate(dataManager);
 
-		if (dataManager.getConjecture().checkOnAllStates(fullTrace) != fullTrace
-				.size()) {
+		if (!dataManager.getConjecture().checkOnAllStatesWithReset(fullTraces)
+				.isCompatible()) {
 			LogManager.logWarning(
 					"conjecture is false or driver is not strongly connected");
 			System.err.println(
@@ -474,7 +523,8 @@ public class HWLearner extends Learner {
 		// The transition count should be stopped
 		driver.stopLog();
 
-		if (driver instanceof TransparentMealyDriver) {
+		if (driver instanceof TransparentMealyDriver
+				&& !Options.HW_WITH_RESET) {
 			if ((counterExampleTrace = getShortestCounterExemple()) != null) {
 				dataManager.walkWithoutCheck(counterExampleTrace, null);
 				LogManager.logError("another counter example can be found");
@@ -776,9 +826,11 @@ public class HWLearner extends Learner {
 		Set<FullyQualifiedState> compatibleStates = new HashSet<>(
 				dataManager.getStates());
 		int startPos = -1;
-		for (int i = 0; i < fullTrace.size(); i++) {
-			String input = fullTrace.getInput(i);
-			String traceOutput = fullTrace.getOutput(i);
+		// TODO extends search to all traces
+		LmTrace lastTrace = dataManager.gettraceSinceReset();
+		for (int i = 0; i < lastTrace.size(); i++) {
+			String input = lastTrace.getInput(i);
+			String traceOutput = lastTrace.getOutput(i);
 
 			String conjectureOutput = null;
 			if (currentState != null) {
@@ -797,7 +849,7 @@ public class HWLearner extends Learner {
 			boolean extendWfailed = false;
 			if (conjectureOutput != null
 					&& !conjectureOutput.equals(traceOutput)) {
-				LmTrace trace = fullTrace.subtrace(startPos, i + 1);
+				LmTrace trace = lastTrace.subtrace(startPos, i + 1);
 				try {
 					LogManager.logInfo("After transition ", startPos - 1,
 							", h was applied and we can identify the state reached (",
@@ -863,7 +915,7 @@ public class HWLearner extends Learner {
 
 	public void learn(
 			DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W,
-			GenericInputSequence h) {
+			GenericInputSequence h) throws ConjectureNotConnexException {
 		LogManager.logStep(LogManager.STEPOTHER, "Inferring the system");
 		if (Options.LOG_LEVEL!=LogLevel.LOW)
 		LogManager.logConsole("Inferring the system with W=" + W + " and h=" + h);
@@ -897,9 +949,14 @@ public class HWLearner extends Learner {
 								: ""));
 
 
-		dataManager = new SimplifiedDataManager(driver, this.W, h, fullTrace,
+		dataManager = new SimplifiedDataManager(driver, this.W, h, fullTraces,
 				hZXWSequences, hWSequences, hChecker);
 
+		Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> Rcharacterization = dataManager
+				.getInitialCharacterization();
+		FullyQualifiedState R = null;
+		if (Rcharacterization.isComplete())
+			R = dataManager.getFullyQualifiedState(Rcharacterization);
 		// start of the algorithm
 		do {
 			Runtime runtime = Runtime.getRuntime();
@@ -921,7 +978,36 @@ public class HWLearner extends Learner {
 			}
 			if (dataManager.isFullyKnown())
 				break;
-			InputSequence alpha = dataManager.getShortestAlpha(q);
+			InputSequence alpha;
+			try {
+				alpha = dataManager.getShortestAlpha(q);
+			} catch (ConjectureNotConnexException e) {
+				if (!Options.HW_WITH_RESET)
+					throw e;
+
+				// TODO search CE without reset
+				LogManager.logInfo(
+						"Conjecture is not strongly connected and some part are unreachable.");
+				LogManager.logInfo(
+						"Reseting the driver try to go outside of the strongly connected sub-part");
+				dataManager.reset();
+				if (R == null) {
+					GenericInputSequence w = Rcharacterization.unknownPrints()
+							.iterator().next();
+					GenericOutputSequence wResponse = dataManager.apply(w);
+					Rcharacterization.addPrint(w, wResponse);
+					if (Rcharacterization.isComplete()) {
+						R = dataManager
+								.getFullyQualifiedState(Rcharacterization);
+					}
+					break;// restart h z x w learning
+				}
+				assert R != null;
+				dataManager.setCurrentState(R);
+				alpha = dataManager.getShortestAlpha(R);// might throw an
+														// ConjectureNotConnex
+														// exception again
+			}
 			OutputSequence alphaResponse = dataManager.apply(alpha);
 			assert dataManager.getCurrentState() != null;
 			lastKnownQ = dataManager.getCurrentState();
@@ -1094,7 +1180,6 @@ public class HWLearner extends Learner {
 			LogManager.logInfo("Applying h to localize (h=" + dataManager.h
 					+ ")");
 			hResponse = dataManager.apply(dataManager.h);
-			lastDeliberatelyAppliedHEndPos = fullTrace.size();
 			lastDeliberatelyAppliedH = hResponse;
 			s = dataManager.getState(hResponse);
 			if (s == null) {
@@ -1115,11 +1200,10 @@ public class HWLearner extends Learner {
 			}
 
 		} while (s == null);
+		dataManager.endOfH(s);
 
 		LogManager.logInfo("We know that after h, the answer " + hResponse
 				+ " means we arrived in state " + s);
-		dataManager.setCurrentState(s);
-
 		stats.increaseLocalizeCallNb();
 		return s;
 	}
@@ -1305,8 +1389,12 @@ public class HWLearner extends Learner {
 	 * @return true if conjecture is equivalent to reference automata.
 	 */
 	public boolean checkEquivalence(File referenceFile) {
+		if (Options.HW_WITH_RESET)
+			throw new RuntimeException("not implemented");
 		assert dataManager != null;
 		assert W != null;
+		assert fullTraces.size() == 0;
+		LmTrace fullTrace = fullTraces.get(0);
 		Mealy reference;
 		try {
 			reference = Mealy.importFromDot(referenceFile);
