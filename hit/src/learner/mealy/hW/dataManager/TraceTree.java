@@ -222,7 +222,8 @@ public class TraceTree {
 
 	public void exportToDot(StringBuilder builder, String previousName) {
 		for (Map.Entry<String, String> e : outputs.entrySet()) {
-			String childName = previousName + "_" + e.getKey();
+			String childName = previousName + "_"
+					+ e.getKey().replaceAll("[^0-9a-zA-Z_]*", "_");
 			builder.append("\t" + childName + " [label=\"\",color=red];\n");
 			builder.append("\t" + previousName + " -> " + childName
 					+ " [style=dashed,color=red,fontcolor=red,label=\""
