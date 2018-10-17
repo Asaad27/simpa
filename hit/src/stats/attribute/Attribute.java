@@ -51,6 +51,7 @@ public class Attribute <T extends Comparable<T>> {
 	public final static Attribute<Boolean>	RS_WITH_GIVEN_H =			new Attribute<Boolean>(	"homing sequence is known",						false,	Units.BOOLEAN,		false,	true,	false);
 	public final static Attribute<Boolean>	USE_ADAPTIVE_H =			new Attribute<Boolean>(	"using adaptive homing sequence",				false,	Units.BOOLEAN,		false,	true,	false);
 	public final static Attribute<Boolean>	USE_ADAPTIVE_W =			new Attribute<Boolean>(	"using adaptive W-set",							false,	Units.BOOLEAN,		false,	true,	false);
+	public final static Attribute<Boolean>	USE_RESET =					new Attribute<Boolean>(	"using reset for inference",					false,	Units.BOOLEAN,		false,	true,	false);
 	public final static Attribute<Integer>	FAILED_PROBALISTIC_SEARCH=	new Attribute<Integer>(	"number of failed probalistic search",			false,	Units.FUNCTION_CALL,false,	false,	false);
 	public final static Attribute<Integer>	SUCCEEDED_PROBALISTIC_SEARCH=new Attribute<Integer>("number of succeeded probalistic search",		false,	Units.FUNCTION_CALL,false,	false,	false);
 	public final static Attribute<Float>	ORACLE_TRACE_PERCENTAGE=	new Attribute<Float>(	"percentage of trace used by oracle",			true,	Units.PERCENT,		false,	false,	true);

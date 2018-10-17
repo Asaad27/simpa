@@ -380,9 +380,12 @@ public class SIMPA {
 			"use adaptive homing sequence");
 	private static BooleanOption ADAPTIVE_W_SEQ = new BooleanOption(
 			"--adaptive-w-seq", "use adaptive w sequences");
+	private static BooleanOption HW_WITH_RESET = new BooleanOption(
+			"--use-reset", "hW is allowed to use reset");
 	private static Option<?>[] hWOptions = new Option<?>[] { ADD_H_IN_W,
 			TRY_CE_FROM_TRACE, CHECK_INCONSISTENCY_H_MAPPING, REUSE_HZXW,
-			MAX_CE_LENGTH, HW_WITH_KNOWN_W, ADAPTIVE_H, ADAPTIVE_W_SEQ };
+			MAX_CE_LENGTH, MAX_CE_RESETS, HW_WITH_KNOWN_W, ADAPTIVE_H,
+			ADAPTIVE_W_SEQ, HW_WITH_RESET };
 
 	// RS Options
 	private static BooleanOption RS_WITH_UNKNOWN_H = new BooleanOption(
@@ -564,6 +567,7 @@ public class SIMPA {
 		Options.TRY_TRACE_AS_CE = TRY_CE_FROM_TRACE.getValue();
 		Options.REUSE_HZXW=REUSE_HZXW.getValue();
 		Options.HW_WITH_KNOWN_W = HW_WITH_KNOWN_W.getValue();
+		Options.HW_WITH_RESET = HW_WITH_RESET.getValue();
 		Options.ADAPTIVE_H = ADAPTIVE_H.getValue();
 		Options.ADAPTIVE_W_SEQUENCES = ADAPTIVE_W_SEQ.getValue();
 		Options.RS_WITH_UNKNOWN_H = RS_WITH_UNKNOWN_H.getValue();
@@ -616,6 +620,12 @@ public class SIMPA {
 			} catch (Exception e) {
 				LogManager.logError("Warning : Unable to use Weka. Check the buildpath.");
 			}
+		}
+
+		if (HW_INFERENCE.getValue() && !Options.HW_WITH_RESET
+				&& MAX_CE_RESETS.haveBeenParsed) {
+			LogManager.logError(
+					MAX_CE_RESETS + " is not used in hW without reset.");
 		}
 
 		if (GraphViz.check() != 0) {

@@ -48,6 +48,7 @@ public class HWStatsEntry extends StatsEntry {
 	public static final Attribute<Boolean>PRECOMPUTED_W =			Attribute.PRECOMPUTED_W;
 	public static final Attribute<Boolean>USE_ADAPTIVE_H = 			Attribute.USE_ADAPTIVE_H;
 	public static final Attribute<Boolean>USE_ADAPTIVE_W = 			Attribute.USE_ADAPTIVE_W;
+	public static final Attribute<Boolean>USE_RESET =	 			Attribute.USE_RESET;
 	public static final Attribute<Float> AVG_NB_TRIED_W =			Attribute.AVG_NB_TRIED_W;
 	public static final Attribute<Float> ORACLE_TRACE_PERCENTAGE =	Attribute.ORACLE_TRACE_PERCENTAGE;
 
@@ -85,6 +86,7 @@ public class HWStatsEntry extends StatsEntry {
 			PRECOMPUTED_W,
 			USE_ADAPTIVE_H,
 			USE_ADAPTIVE_W,
+			USE_RESET,
 			AVG_NB_TRIED_W,
 	};
 	
@@ -136,6 +138,7 @@ public class HWStatsEntry extends StatsEntry {
 	private boolean precomputedW = false;
 	private boolean useAdaptiveH = false;
 	private boolean useAdaptiveW = false;
+	private boolean useReset = false;
 	private float avgNbTriedWSuffixes = -1;
 
 	/**
@@ -176,6 +179,7 @@ public class HWStatsEntry extends StatsEntry {
 		precomputedW = Boolean.parseBoolean(st.nextToken());
 		useAdaptiveH = Boolean.parseBoolean(st.nextToken());
 		useAdaptiveW = Boolean.parseBoolean(st.nextToken());
+		useReset = Boolean.parseBoolean(st.nextToken());
 		avgNbTriedWSuffixes = Float.parseFloat(st.nextToken());
 		
 	}
@@ -191,6 +195,7 @@ public class HWStatsEntry extends StatsEntry {
 		this.precomputedW = Options.HW_WITH_KNOWN_W;
 		this.useAdaptiveH = Options.ADAPTIVE_H;
 		this.useAdaptiveW = Options.ADAPTIVE_W_SEQUENCES;
+		this.useReset = Options.HW_WITH_RESET;
 	}
 
 //	protected void setLocalizeSequenceLength(int length){
@@ -360,6 +365,8 @@ public class HWStatsEntry extends StatsEntry {
 			return (T) new Boolean(useAdaptiveH);
 		if (a == USE_ADAPTIVE_W)
 				return (T) new Boolean(useAdaptiveW);
+		if (a == USE_RESET)
+				return (T) new Boolean(useReset);
 		if (a == ORACLE_TRACE_PERCENTAGE)
 			return (T) new Float(100. * oracleTraceLength / traceLength);
 		if (a == AVG_NB_TRIED_W)
