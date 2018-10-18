@@ -835,19 +835,58 @@ public class HWLearner extends Learner {
 		}
 	}
 
+	/**
+	 * This method calls
+	 * {@link #searchAndProceedCEInOneTrace(LmTrace, FullyQualifiedState, int)}
+	 * on all traces observed until a counter example is found.
+	 * 
+	 * @return true if one counter example is found, false otherwise
+	 */
 	private boolean searchAndProceedCEInTrace() {
 		LogManager.logInfo("Searching counter-example in trace.");
-		FullyQualifiedState currentState = null;
+		int globalTracePos = 0;
+		for (LmTrace trace : fullTraces) {
+			if (searchAndProceedCEInOneTrace(trace,
+					dataManager.getInitialState(), globalTracePos)) {
+				return true;
+			}
+			globalTracePos += trace.size();
+		}
+		LogManager.logInfo("no counter-example found in trace");
+		return false;
+	}
+
+	/**
+	 * search an inconsistency between a trace and the conjecture.
+	 * 
+	 * @param trace
+	 *            a trace observed from real automaton
+	 * @param currentState
+	 *            the state in conjecture from wich the trace was applied (or
+	 *            {@code null} if unknown)
+	 * @param globalTracePos
+	 *            the position of first transition in global trace (without
+	 *            taking resets in account).This is needed for a proper logging
+	 * @return true if a counter example was found, false otherwise.
+	 */
+	private boolean searchAndProceedCEInOneTrace(LmTrace trace,
+			FullyQualifiedState currentState, int globalTracePos) {
 		TraceTree expectedTraces = null;
-		List<FullyQualifiedState> statesHistory = null;
-		Set<FullyQualifiedState> compatibleStates = new HashSet<>(
-				dataManager.getStates());
+		List<FullyQualifiedState> statesHistory = new ArrayList<>();
+		Set<FullyQualifiedState> compatibleStates;
+
 		int startPos = -1;
-		// TODO extends search to all traces
-		LmTrace lastTrace = dataManager.getTraceSinceReset();
-		for (int i = 0; i < lastTrace.size(); i++) {
-			String input = lastTrace.getInput(i);
-			String traceOutput = lastTrace.getOutput(i);
+		if (currentState == null) {
+			compatibleStates = new HashSet<>(dataManager.getStates());
+		} else {
+			compatibleStates = new HashSet<>();
+			compatibleStates.add(currentState);
+			statesHistory.add(currentState);
+			startPos = 0;
+		}
+		for (int i = 0; i < trace.size(); i++) {
+			String input = trace.getInput(i);
+			String traceOutput = trace.getOutput(i);
 
 			String conjectureOutput = null;
 			if (currentState != null) {
@@ -866,16 +905,21 @@ public class HWLearner extends Learner {
 			boolean extendWfailed = false;
 			if (conjectureOutput != null
 					&& !conjectureOutput.equals(traceOutput)) {
-				LmTrace trace = lastTrace.subtrace(startPos, i + 1);
+				LmTrace ceTrace = trace.subtrace(startPos, i + 1);
+
+				LogManager.logInfo("Before transition ",
+						startPos + globalTracePos,
+						" (" + (startPos == 0 ? "right"
+								: (startPos + " transitions"))
+								+ " after the reset)",
+						", we can identify the state reached (",
+						statesHistory.get(0), "). The trace ", ceTrace,
+						" observed from transition ", startPos + globalTracePos,
+						" to transition ", i + globalTracePos,
+						" is not compatible with state ", statesHistory.get(0),
+						" in conjecture.");
 				try {
-					LogManager.logInfo("After transition ", startPos - 1,
-							", h was applied and we can identify the state reached (",
-							statesHistory.get(0), "). The trace ", trace,
-							" observed from transition ", startPos,
-							" to transition ", i,
-							" is not compatible with state ",
-							statesHistory.get(0), " in conjecture.");
-					extendsW(statesHistory, trace, 0);
+					extendsW(statesHistory, ceTrace, 0);
 					LogManager.logInfo("W extended using trace as CE");
 					return true;
 				} catch (CanNotExtendWException e) {
@@ -902,16 +946,15 @@ public class HWLearner extends Learner {
 			if (newCompatibles.size() == 1) {
 				FullyQualifiedState onlyCompatibleState = newCompatibles
 						.iterator().next();
-				if (onlyCompatibleState != null) {
-					assert currentState == null
-							|| currentState == onlyCompatibleState;
-					if (currentState == null) {
-						if (expectedTraces == null) {
-							startPos = i + 1;
-							statesHistory = new ArrayList<>();
-						}
-						currentState = onlyCompatibleState;
+				assert onlyCompatibleState != null;
+				assert currentState == null
+						|| currentState == onlyCompatibleState;
+				if (currentState == null) {
+					if (expectedTraces == null) {
+						startPos = i + 1;
+						statesHistory.clear();
 					}
+					currentState = onlyCompatibleState;
 				}
 			}
 			if (newCompatibles.isEmpty()) {
@@ -926,7 +969,6 @@ public class HWLearner extends Learner {
 				statesHistory.add(currentState);
 			}
 		}
-		LogManager.logInfo("no counter-example found in trace");
 		return false;
 	}
 
