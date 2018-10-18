@@ -262,14 +262,21 @@ public class HWLearner extends Learner {
 		if (e instanceof AdaptiveHomingSequenceChecker.AdaptiveHNDException) {
 			AdaptiveHomingSequenceChecker.AdaptiveHNDException adaptiveE = (AdaptiveHomingSequenceChecker.AdaptiveHNDException) e;
 			adaptiveE.updateH();
-			adaptiveE.getNewH().exportToDot();
-			hChecker = GenericHomingSequenceChecker.getChecker(h);
+			if (Options.LOG_LEVEL != LogLevel.LOW)
+				adaptiveE.getNewH().exportToDot();
+			List<GenericOutputSequence> responses = new ArrayList<>(
+					hZXWSequences.keySet());
+			for (GenericOutputSequence hresponse : responses) {
+				if (!((AdaptiveSymbolSequence) hresponse).isFinal())
+					hZXWSequences.remove(hresponse);
+			}
 		} else {
-			hZXWSequences = new HashMap<>();
-			hWSequences = new HashMap<>();
+			hZXWSequences.clear();
+			hWSequences.clear();
 			LogManager.logInfo("h is now " + h);
-			hChecker = GenericHomingSequenceChecker.getChecker(h);
 		}
+		hChecker = GenericHomingSequenceChecker.getChecker(h);
+
 		for (LmTrace trace : fullTraces) {
 			hChecker.reset();
 			for (int i = 0; i < trace.size(); i++)
