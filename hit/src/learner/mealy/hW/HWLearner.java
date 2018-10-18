@@ -65,6 +65,7 @@ public class HWLearner extends Learner {
 	private GenericOutputSequence lastDeliberatelyAppliedH = null;
 	private GenericHomingSequenceChecker hChecker = null;
 	private Map<GenericOutputSequence, List<HZXWSequence>> hZXWSequences = new HashMap<>();
+	private List<HZXWSequence> zXWSequences = new ArrayList<>();
 	private Map<GenericOutputSequence, List<LmTrace>> hWSequences = new HashMap<>();
 	int wRefinenmentNb = 0;
 	int nbOfTriedWSuffixes = 0;
@@ -272,6 +273,7 @@ public class HWLearner extends Learner {
 			}
 		} else {
 			hZXWSequences.clear();
+			zXWSequences.clear();
 			hWSequences.clear();
 			LogManager.logInfo("h is now " + h);
 		}
@@ -968,7 +970,8 @@ public class HWLearner extends Learner {
 									: ""));
 
 			dataManager = new SimplifiedDataManager(driver, this.W, h,
-					fullTraces, hZXWSequences, hWSequences, hChecker);
+					fullTraces, hZXWSequences, zXWSequences, hWSequences,
+					hChecker);
 		} else {
 			LogManager.logLine();
 			LogManager.logInfo(
@@ -1083,9 +1086,8 @@ public class HWLearner extends Learner {
 					lastKnownQ.getState(), x) != null
 					|| !dataManager.getwNotInK(lastKnownQ, sigma).contains(w);
 			if (Options.REUSE_HZXW) {
-				if (lastDeliberatelyAppliedH != null)
-					addHZXWSequence(lastDeliberatelyAppliedH,
-							new LmTrace(alpha, alphaResponse), sigma, wTrace);
+				addHZXWSequence(lastDeliberatelyAppliedH,
+						new LmTrace(alpha, alphaResponse), sigma, wTrace);
 				List<LocalizedHZXWSequence> sequences;
 				while (!(sequences = dataManager
 						.getAndResetReadyForReapplyHZXWSequence()).isEmpty()) {
@@ -1143,9 +1145,15 @@ public class HWLearner extends Learner {
 			InconsistancyWhileMergingExpectedTracesException inc = initialState
 					.addExpectedTrace(expectedTrace);
 			if (inc != null) {
-				inc.addPreviousState(
-						dataManager
-								.getState(localizedSeq.sequence.gethResponse()),
+				FullyQualifiedState startState;
+				if (localizedSeq.sequence.gethResponse() == null) {
+					startState = dataManager.getInitialState();
+					// TODO maybe startState can be null ? If this can happen,
+					// what to do ?
+				} else
+					startState = dataManager
+							.getState(localizedSeq.sequence.gethResponse());
+				inc.addPreviousState(startState,
 						localizedSeq.sequence.getTransferSequence()
 								.getInputsProjection(),
 						localizedSeq.sequence.getTransferSequence()
@@ -1172,10 +1180,15 @@ public class HWLearner extends Learner {
 
 	public void addHZXWSequence(GenericOutputSequence hResponse,
 			LmTrace transfer, LmTrace transition, LmTrace wResponse) {
-		List<HZXWSequence> list = hZXWSequences.get(hResponse);
-		if (list == null) {
-			list = new ArrayList<>();
-			hZXWSequences.put(hResponse, list);
+		List<HZXWSequence> list;
+		if (hResponse == null)
+			list = zXWSequences;
+		else {
+			list = hZXWSequences.get(hResponse);
+			if (list == null) {
+				list = new ArrayList<>();
+				hZXWSequences.put(hResponse, list);
+			}
 		}
 		HZXWSequence newSeq = new HZXWSequence(hResponse, transfer, transition,
 				wResponse);

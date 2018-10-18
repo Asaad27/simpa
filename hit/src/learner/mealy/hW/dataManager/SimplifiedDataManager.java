@@ -57,6 +57,7 @@ public class SimplifiedDataManager {
 	private Collection<TraceTree> expectedTraces;
 	
 	private Map<GenericOutputSequence, List<HZXWSequence>> hZXWSequences;
+	private List<HZXWSequence> zXWSequences;
 	private Map<GenericOutputSequence, List<LmTrace>> hWSequences;
 	private List<LocalizedHZXWSequence> readyForReapplyHZXWSequence = new ArrayList<>();
 
@@ -189,6 +190,7 @@ public class SimplifiedDataManager {
 			DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W,
 			GenericInputSequence h, List<LmTrace> globalTraces,
 			Map<GenericOutputSequence, List<HZXWSequence>> hZXWSequences,
+			List<HZXWSequence> zXWSequences,
 			Map<GenericOutputSequence, List<LmTrace>> hWSequences,
 			GenericHomingSequenceChecker hChecker) {
 		numberOfInputsApplied = 0;
@@ -199,6 +201,7 @@ public class SimplifiedDataManager {
 		this.I = new ArrayList<String>(driver.getInputSymbols());
 		this.driver = driver;
 		this.hZXWSequences = hZXWSequences;
+		this.zXWSequences = zXWSequences;
 		this.hWSequences = hWSequences;
 		Q = new HashMap<>();
 		notFullyKnownStates = new HashSet<FullyQualifiedState>();
@@ -748,6 +751,13 @@ public class SimplifiedDataManager {
 			LogManager.logInfo(
 					"Initial state characterized. this is " + initialState);
 			conjecture.setInitialState(initialState.getState());
+			for (HZXWSequence seq : zXWSequences) {
+				LocalizedHZXWSequence localizedSeq = new LocalizedHZXWSequence(
+						seq);
+				if (initialState.addLocalizedHZXWSequence(localizedSeq)) {
+					readyForReapplyHZXWSequence.add(localizedSeq);
+				}
+			}
 		}
 		return initialStateCharacterization;
 	}
