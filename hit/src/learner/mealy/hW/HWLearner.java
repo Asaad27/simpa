@@ -352,6 +352,7 @@ public class HWLearner extends Learner {
 
 		LmTrace counterExampleTrace;
 		boolean inconsistencyFound;
+		boolean stateDiscoveredInCe = false;
 
 		do {
 			stats.updateMemory((int) (runtime.totalMemory() - runtime
@@ -360,11 +361,14 @@ public class HWLearner extends Learner {
 			counterExampleTrace = null;
 			boolean virtualCounterExample = false;
 			inconsistencyFound = false;
-			LogManager.logLine();
-			LogManager.logStep(LogManager.STEPOTHER, "Starting new learning");
+			if (!stateDiscoveredInCe) {
+				LogManager.logLine();
+				LogManager.logStep(LogManager.STEPOTHER,
+						"Starting new learning");
+			}
 			try {
 				try {
-					learn(W, h);
+					learn(W, h, stateDiscoveredInCe);
 				} catch (ConjectureNotConnexException e) {
 					checkInconsistencyHMapping();
 					throw e;
@@ -424,6 +428,7 @@ public class HWLearner extends Learner {
 				 */
 			}
 
+			stateDiscoveredInCe = false;
 			List<GenericHNDException> hExceptions = new ArrayList<>();
 			if (!inconsistencyFound && !virtualCounterExample) {
 				LogManager.logInfo("asking for a counter example");
@@ -434,6 +439,7 @@ public class HWLearner extends Learner {
 					} catch (CeExposedUnknownStateException e) {
 						dataManager.getFullyQualifiedState(e.characterization);
 						dataManager.getInitialCharacterization();
+						stateDiscoveredInCe = true;
 						continue;
 					}
 				else
@@ -498,7 +504,8 @@ public class HWLearner extends Learner {
 				}
 
 			}
-		} while (counterExampleTrace != null || inconsistencyFound);
+		} while (counterExampleTrace != null || inconsistencyFound
+				|| stateDiscoveredInCe);
 
 		float duration = (float) (System.nanoTime() - start) / 1000000000;
 		LogManager.logConsole("hw : end of learning : " + duration + "s");
@@ -923,42 +930,50 @@ public class HWLearner extends Learner {
 
 	public void learn(
 			DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W,
-			GenericInputSequence h) throws ConjectureNotConnexException {
-		LogManager.logStep(LogManager.STEPOTHER, "Inferring the system");
-		if (Options.LOG_LEVEL!=LogLevel.LOW)
-		LogManager.logConsole("Inferring the system with W=" + W + " and h=" + h);
+			GenericInputSequence h, boolean continueLastLearning)
+			throws ConjectureNotConnexException {
+		if (!continueLastLearning) {
+			LogManager.logStep(LogManager.STEPOTHER, "Inferring the system");
+			if (Options.LOG_LEVEL != LogLevel.LOW)
+				LogManager.logConsole(
+						"Inferring the system with W=" + W + " and h=" + h);
 
-
-		this.W = W;
-		StringBuilder logW = new StringBuilder(
-				"Using characterization struct : ");
-		W.toString(logW);
-		if (Options.LOG_LEVEL == LogLevel.ALL
-				&& driver instanceof TransparentMealyDriver) {
-			TransparentMealyDriver tDriver = (TransparentMealyDriver) driver;
-			if (tDriver.getAutomata().acceptCharacterizationSet(W.clone())) {
-				logW.append(" (which is a W-set for the driver)");
-			} else {
-				logW.append(" (which is not a W-set for the driver)");
+			this.W = W;
+			StringBuilder logW = new StringBuilder(
+					"Using characterization struct : ");
+			W.toString(logW);
+			if (Options.LOG_LEVEL == LogLevel.ALL
+					&& driver instanceof TransparentMealyDriver) {
+				TransparentMealyDriver tDriver = (TransparentMealyDriver) driver;
+				if (tDriver.getAutomata()
+						.acceptCharacterizationSet(W.clone())) {
+					logW.append(" (which is a W-set for the driver)");
+				} else {
+					logW.append(" (which is not a W-set for the driver)");
+				}
 			}
-		}
-		if (W instanceof TotallyAdaptiveW
-				&& Options.LOG_LEVEL == LogLevel.ALL) {
-			((TotallyAdaptiveW) W).exportToDot();
-		}
-		LogManager.logInfo(logW.toString());
-		LogManager.logInfo("Using homing sequence «" + h + "»"
-				+ ((Options.LOG_LEVEL == LogLevel.ALL
-						&& driver instanceof TransparentMealyDriver)
-								? (((TransparentMealyDriver) driver)
-										.getAutomata().acceptHomingSequence(h)
-												? " (which is a homming sequence for driver)"
-												: " (which is not a homing sequence for driver)")
-								: ""));
+			if (W instanceof TotallyAdaptiveW
+					&& Options.LOG_LEVEL == LogLevel.ALL) {
+				((TotallyAdaptiveW) W).exportToDot();
+			}
+			LogManager.logInfo(logW.toString());
+			LogManager.logInfo("Using homing sequence «" + h + "»"
+					+ ((Options.LOG_LEVEL == LogLevel.ALL
+							&& driver instanceof TransparentMealyDriver)
+									? (((TransparentMealyDriver) driver)
+											.getAutomata()
+											.acceptHomingSequence(h)
+													? " (which is a homming sequence for driver)"
+													: " (which is not a homing sequence for driver)")
+									: ""));
 
-
-		dataManager = new SimplifiedDataManager(driver, this.W, h, fullTraces,
-				hZXWSequences, hWSequences, hChecker);
+			dataManager = new SimplifiedDataManager(driver, this.W, h,
+					fullTraces, hZXWSequences, hWSequences, hChecker);
+		} else {
+			LogManager.logLine();
+			LogManager.logInfo(
+					"Restarting backbone with previous data structure");
+		}
 
 		// start of the algorithm
 		do {
