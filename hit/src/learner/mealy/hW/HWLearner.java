@@ -1083,8 +1083,9 @@ public class HWLearner extends Learner {
 					lastKnownQ.getState(), x) != null
 					|| !dataManager.getwNotInK(lastKnownQ, sigma).contains(w);
 			if (Options.REUSE_HZXW) {
-				addHZXWSequence(lastDeliberatelyAppliedH,
-						new LmTrace(alpha, alphaResponse), sigma, wTrace);
+				if (lastDeliberatelyAppliedH != null)
+					addHZXWSequence(lastDeliberatelyAppliedH,
+							new LmTrace(alpha, alphaResponse), sigma, wTrace);
 				List<LocalizedHZXWSequence> sequences;
 				while (!(sequences = dataManager
 						.getAndResetReadyForReapplyHZXWSequence()).isEmpty()) {
