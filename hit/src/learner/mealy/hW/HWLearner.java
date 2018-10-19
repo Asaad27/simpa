@@ -900,7 +900,8 @@ public class HWLearner extends Learner {
 					currentState = t.getEnd();
 					conjectureOutput = t.getTrace().getOutput(0);
 				}
-			} else if (expectedTraces != null) {
+			}
+			if (currentState == null && expectedTraces != null) {
 				conjectureOutput = expectedTraces.getOutput(input);
 				expectedTraces = expectedTraces.getSubTreeRO(input);
 			}
