@@ -403,6 +403,8 @@ public class HWLearner extends Learner {
 				}
 				extendsW(e.getStates(), e.getTrace(), 0);
 				inconsistencyFound = true;
+			} catch (InconsistencyBeforeSearchingAdvancedAlphaException e) {
+				inconsistencyFound = true;
 			}
 
 			if (!inconsistencyFound && Options.TRY_TRACE_AS_CE) {
@@ -975,7 +977,8 @@ public class HWLearner extends Learner {
 	public void learn(
 			DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W,
 			GenericInputSequence h, boolean continueLastLearning)
-			throws ConjectureNotConnexException {
+			throws ConjectureNotConnexException,
+			InconsistencyBeforeSearchingAdvancedAlphaException {
 		if (!continueLastLearning) {
 			LogManager.logStep(LogManager.STEPOTHER, "Inferring the system");
 			if (Options.LOG_LEVEL != LogLevel.LOW)
@@ -1047,10 +1050,12 @@ public class HWLearner extends Learner {
 			} catch (ConjectureNotConnexException e) {
 				if (!Options.HW_WITH_RESET)
 					throw e;
-
 				// TODO search CE without reset
 				LogManager.logInfo(
 						"Conjecture is not strongly connected and some part are unreachable.");
+				LogManager.logInfo("first, try to search an inconsistency in trace");
+				if (searchAndProceedCEInTrace())
+					throw new InconsistencyBeforeSearchingAdvancedAlphaException();
 				LogManager.logInfo(
 						"Reseting the driver to try to go outside of the strongly connected sub-part");
 				dataManager.reset();
