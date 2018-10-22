@@ -78,7 +78,7 @@ public class HWLearner extends Learner {
 	public LmTrace getCounterExempleReset(List<GenericHNDException> hExceptions)
 			throws CeExposedUnknownStateException {
 		LmTrace ce = null;
-		ce = getCounterExemple(hExceptions);
+		ce = getCounterExempleNoStats(hExceptions, false);
 		int resetCe = 0;
 		while (ce == null) {
 			resetCe++;
@@ -100,7 +100,7 @@ public class HWLearner extends Learner {
 														// dataManager
 			dataManager.reset();
 			assert (dataManager.getCurrentState() != null);
-			ce = getCounterExemple(hExceptions);
+			ce = getCounterExempleNoStats(hExceptions, false);
 		}
 		return ce;
 	}
@@ -111,17 +111,45 @@ public class HWLearner extends Learner {
 	 * 
 	 * @return the trace applied on driver or null if no counter example is
 	 *         found
+	 * @throws CeExposedUnknownStateException 
 	 */
-	public LmTrace getCounterExemple(
-			List<GenericHNDException> hExceptions) {
+	public LmTrace getCounterExemple(List<GenericHNDException> hExceptions,
+			boolean withReset) throws CeExposedUnknownStateException {
 		int startSize = dataManager.traceSize();
 		long startTime = System.nanoTime();
-		LmTrace returnedCE = null;
 		if (Options.USE_SHORTEST_CE) {
 			stats.setOracle("shortest");
-			returnedCE = getShortestCounterExemple();
 		} else {
 			stats.setOracle("MrBean");
+		}
+		LmTrace returnedCE;
+		CeExposedUnknownStateException exception = null;
+		try {
+			returnedCE = getCounterExempleNoStats(hExceptions, withReset);
+		} catch (CeExposedUnknownStateException e) {
+			assert withReset;
+			exception = e;
+			returnedCE = null;
+		}
+		float duration = (float) (System.nanoTime() - startTime) / 1000000000;
+		stats.increaseOracleCallNb(
+				dataManager.traceSize() - startSize
+						+ ((returnedCE == null) ? 0 : returnedCE.size()),
+				duration);
+		if (exception != null)
+			throw exception;
+		return returnedCE;
+	}
+
+	public LmTrace getCounterExempleNoStats(
+			List<GenericHNDException> hExceptions, boolean withReset)
+			throws CeExposedUnknownStateException {
+		LmTrace returnedCE = null;
+		if (withReset) {
+			returnedCE = getCounterExempleReset(hExceptions);
+		} else if (Options.USE_SHORTEST_CE) {
+			returnedCE = getShortestCounterExemple();
+		} else {
 			LmTrace shortestCe = (driver instanceof TransparentMealyDriver
 					&& !Options.HW_WITH_RESET /*
 												 * driver needs to be strongly
@@ -135,9 +163,6 @@ public class HWLearner extends Learner {
 															// know that there
 															// is no CE
 		}
-		float duration = (float) (System.nanoTime() - startTime) / 1000000000;
-		stats.increaseOracleCallNb(dataManager.traceSize() - startSize
-				+ ((returnedCE == null) ? 0 : returnedCE.size()), duration);
 		return returnedCE;
 	}
 
@@ -451,16 +476,23 @@ public class HWLearner extends Learner {
 				LogManager.logInfo("asking for a counter example");
 				if (Options.HW_WITH_RESET)
 					try {
-						counterExampleTrace = getCounterExempleReset(
-								hExceptions);
+						counterExampleTrace = getCounterExemple(hExceptions,
+								true);
 					} catch (CeExposedUnknownStateException e) {
 						dataManager.getFullyQualifiedState(e.characterization);
 						dataManager.getInitialCharacterization();
 						stateDiscoveredInCe = true;
 						continue;
 					}
-				else
-					counterExampleTrace = getCounterExemple(hExceptions);
+				else {
+					try {
+						counterExampleTrace = getCounterExemple(hExceptions,
+								false);
+					} catch (CeExposedUnknownStateException e) {
+						// this is not supposed to happen
+						throw new RuntimeException(e);
+					}
+				}
 				if (counterExampleTrace == null)
 					LogManager.logInfo("No counter example found");
 				else {
@@ -1082,8 +1114,14 @@ public class HWLearner extends Learner {
 							"This is the first time we try to go outside of this strongly connected component."
 									+ " We ask oracle only one time.");
 					List<GenericHNDException> hExceptions = new ArrayList<>();
-					LmTrace counterExampleTrace = getCounterExemple(
-							hExceptions);
+					LmTrace counterExampleTrace;
+					try {
+						counterExampleTrace = getCounterExemple(hExceptions,
+								false);
+					} catch (CeExposedUnknownStateException e1) {
+						// this is not supposed to happen
+						throw new RuntimeException(e);
+					}
 					if (counterExampleTrace != null)
 						throw new OracleGiveCounterExampleException(
 								counterExampleTrace, hExceptions);
