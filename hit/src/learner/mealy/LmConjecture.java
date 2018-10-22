@@ -2,9 +2,11 @@ package learner.mealy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import automata.State;
 import automata.mealy.InputSequence;
@@ -41,6 +43,97 @@ public class LmConjecture extends automata.mealy.Mealy {
 	}
 
 	/**
+	 * This class stores several information on the result of a search of
+	 * counter example. It stores counter example paths and indicate if a search
+	 * completely checked an automaton.
+	 * 
+	 * @author Nicolas BREMOND
+	 */
+	public class CounterExampleResult {
+		CounterExampleResult(List<State> realStates,
+				List<State> conjectureStates) {
+			super();
+			this.realStates = realStates;
+			this.conjectureStates = conjectureStates;
+		}
+
+		/**
+		 * list of counter examples found from current state.
+		 */
+		private List<InputSequence> noResetCE = new ArrayList<>();
+		/**
+		 * list of counter examples found from initial state.
+		 */
+		private List<InputSequence> fromResetCE = new ArrayList<>();
+		private Set<State> testedRealStates = new HashSet<>();
+		private Set<State> reachedConjectureStates = new HashSet<>();
+		private List<State> realStates;
+		private List<State> conjectureStates;
+
+		void addReachedConjectureState(State s) {
+			reachedConjectureStates.add(s);
+		}
+
+		void addTestedRealState(State realState) {
+			testedRealStates.add(realState);
+		}
+
+		void addNoResetCE(InputSequence counterExample) {
+			noResetCE.add(counterExample);
+		}
+
+		/**
+		 * Indicate if the automaton is exactly equivalent to the reference. For
+		 * a detailed explanation of the result given, see {@link #what()}.
+		 * 
+		 * Notice that this method can return {@code false} for automata with
+		 * unreachable parts even if they were equivalent.
+		 * 
+		 * @return {@code true} if all states of conjecture and reference were
+		 *         checked without finding a counter example, {@code false}
+		 *         otherwise.
+		 * @see #what()
+		 */
+		public boolean isCompletelyEquivalent() {
+			return testedRealStates.containsAll(realStates)
+					&& conjectureStates.containsAll(reachedConjectureStates)
+					&& noResetCE.isEmpty() && fromResetCE.isEmpty();
+		}
+
+		/**
+		 * indicate why an automaton is not completely equivalent.
+		 * 
+		 * @return a string describing what forbid to say that automata are
+		 *         equivalent.
+		 * @see #isCompletelyEquivalent()
+		 */
+		public String what() {
+			if (!noResetCE.isEmpty())
+				return "The current state in conjecture is not equivalent to current state in real autoaton."
+						+ " They can be distinguished with sequence "
+						+ noResetCE.iterator().next();
+			if (!fromResetCE.isEmpty())
+				return "The initial state in conjecture is not equivalent to initial state in real automaton."
+						+ " They can be distinguished with sequence "
+						+ fromResetCE.iterator().next();
+			if (!testedRealStates.containsAll(realStates)) {
+				Set<State> nonTesetd = new HashSet<>(realStates);
+				nonTesetd.removeAll(testedRealStates);
+				return "some states in real automaton where not tested."
+						+ " non tests states are " + nonTesetd + ".";
+			}
+			if (!reachedConjectureStates.containsAll(conjectureStates)) {
+				Set<State> nonReached = new HashSet<>(conjectureStates);
+				nonReached.removeAll(reachedConjectureStates);
+				return "some states in conjecture were never reached during equivalence check."
+						+ " Non reached states are " + nonReached + ".";
+			}
+			assert (isCompletelyEquivalent());
+			return "conjecture is equivalent to real automata";
+		}
+	}
+
+	/**
 	 * get counter examples to distinguish conjecture from another automata.
 	 * 
 	 * suppose that input symbols of conjecture are the same as automata
@@ -52,54 +145,120 @@ public class LmConjecture extends automata.mealy.Mealy {
 	 * the conjecture can have extra states which will not be checked.
 	 * 
 	 * @param conjectureStartingState
-	 *            state to start algorithm in conjecture. Must be equivalent to
-	 *            realStartingState
+	 *            state to start algorithm in conjecture. Should be equivalent
+	 *            to realStartingState
 	 * @param realAutomata
-	 *            the reference automata. Must be strongly connected (or you
-	 *            expose yourself to infinite loop)
+	 *            the reference automata. All states must be reachable from the
+	 *            given starting state, otherwise the checking will be partial.
 	 * @param realStartingState
-	 *            state to start algorithm in reference automata. Must be
+	 *            state to start algorithm in reference automata. Should be
 	 *            equivalent to conjectureStartingState
 	 * @return a list of {@link InputSequence} which will provide different
 	 *         output if applied in conjecture and real automata from the
 	 *         provided starting states. This list include all counter examples
 	 *         which are not containing loops.
 	 */
-	public List<InputSequence> getAllCounterExamples(
+	public List<InputSequence> getAllCounterExamplesWithoutReset(
 			State conjectureStartingState, Mealy realAutomata,
 			State realStartingState) {
 		assert realAutomata.isConnex();
+		CounterExampleResult counterExamples = getAllCounterExamplesReachable(
+				conjectureStartingState, realAutomata, realStartingState);
+		assert counterExamples.testedRealStates
+				.containsAll(realAutomata.getStates());
+		return counterExamples.noResetCE;
+	}
 
+	/**
+	 * Search counter examples from initial state.
+	 * 
+	 * @param realAutomata
+	 *            the reference automaton. Only states reachable from initial
+	 *            state of this automaton will be checked.
+	 * @return a {@link CounterExampleResult} object
+	 */
+	public CounterExampleResult getAllCounterExamplesWithReset(
+			Mealy realAutomata) {
+		assert (getInitialState() != null
+				&& realAutomata.getInitialState() != null);
+
+		CounterExampleResult result = getAllCounterExamplesReachable(
+				getInitialState(), realAutomata,
+				realAutomata.getInitialState());
+		result.fromResetCE = result.noResetCE;
+		result.noResetCE = new ArrayList<>();
+		return result;
+	}
+
+	/**
+	 * Search counter examples both from given states and from initial state (if
+	 * defined in conjecture). It can return a same counter example two times,
+	 * one with a path using after a reset and one with a path from current
+	 * state.
+	 * 
+	 * @param conjectureStartingState
+	 *            the starting state in conjecture. should be equivalent to
+	 *            {@code realStartingState}
+	 * @param realAutomaton
+	 *            the automaton to compare. All states should be reachable
+	 *            either from starting state or from initial state.
+	 * @param realStartingState
+	 *            the starting state in real automaton.
+	 * @return a {@link CounterExampleResult} object
+	 */
+	public CounterExampleResult getAllCounterExamples(
+			State conjectureStartingState, Mealy realAutomaton,
+			State realStartingState) {
+		assert realAutomaton.isConnex() || getInitialState() != null;
+
+		CounterExampleResult result = getAllCounterExamplesReachable(
+				conjectureStartingState, realAutomaton, realStartingState);
+		if (getInitialState() != null) {
+			CounterExampleResult resultFromReset = getAllCounterExamplesWithReset(
+					realAutomaton);
+			result.fromResetCE = resultFromReset.fromResetCE;
+			result.reachedConjectureStates
+					.addAll(resultFromReset.reachedConjectureStates);
+			result.testedRealStates.addAll(resultFromReset.testedRealStates);
+		}
+		return result;
+
+	}
+
+	/**
+	 * Search counter example by testing paths in the reference automaton and
+	 * checking if it produce the same output in conjecture.
+	 * 
+	 * @param conjectureStartingState
+	 *            the starting state in conjecture
+	 * @param realAutomaton
+	 *            the reference automaton
+	 * @param realStartingState
+	 *            the starting state in reference automaton.
+	 * @return a {@link CounterExampleResult} object
+	 */
+	protected CounterExampleResult getAllCounterExamplesReachable(
+			State conjectureStartingState, Mealy realAutomaton,
+			State realStartingState) {
+		CounterExampleResult result = new CounterExampleResult(
+				realAutomaton.getStates(), getStates());
 		LmConjecture conjecture = this;
 		// to each real state, we associate a state in conjecture
 		Map<State, State> realToConjecture = new HashMap<>();
 		// to each real state, we associate a path to reach them
 		Map<State, InputSequence> accesPath = new HashMap<>();
-		List<InputSequence> counterExamples = new ArrayList<>();
 
 		realToConjecture.put(realStartingState, conjectureStartingState);
 		accesPath.put(realStartingState, new InputSequence());
 		LinkedList<State> uncheckedStates = new LinkedList<>();
 
-		for (State realState : realAutomata.getStates()) {
-			uncheckedStates.add(realState);
-			// another way to do this would be to add states in
-			// 'uncheckedStates' each time we add them in 'realToConjecture' but
-			// adding all states also included unreachable states if the real
-			// automata is not strongly connected
-		}
+		uncheckedStates.add(realStartingState);
 
 		while (!uncheckedStates.isEmpty()) {
 			State realState = uncheckedStates.pollFirst();
 			State conjectureState = realToConjecture.get(realState);
-			if (conjectureState == null) {
-				uncheckedStates.add(realState);
-				// note that if real automata is not strongly connected, the
-				// unreachable states will make an infinite loop here
-				continue;
-			}
 			for (String i : inputSymbols) {
-				MealyTransition realTransition = realAutomata
+				MealyTransition realTransition = realAutomaton
 						.getTransitionFromWithInput(realState, i);
 				MealyTransition conjectureTransition = conjecture
 						.getTransitionFromWithInput(conjectureState, i);
@@ -107,6 +266,7 @@ public class LmConjecture extends automata.mealy.Mealy {
 				State conjectureTarget = conjectureTransition.getTo();
 				String realOutput = realTransition.getOutput();
 				String conjectureOutput = conjectureTransition.getOutput();
+				result.addReachedConjectureState(conjectureTarget);
 
 				// first check if transition in both automata provide same
 				// output
@@ -114,7 +274,7 @@ public class LmConjecture extends automata.mealy.Mealy {
 					InputSequence counterExample = accesPath.get(realState)
 							.clone();
 					counterExample.addInput(i);
-					counterExamples.add(counterExample);
+					result.addNoResetCE(counterExample);
 				}
 				// now map the realTarget to a state in conjecture (if not
 				// already done)
@@ -125,6 +285,7 @@ public class LmConjecture extends automata.mealy.Mealy {
 					InputSequence path = accesPath.get(realState).clone();
 					path.addInput(i);
 					accesPath.put(realTarget, path);
+					uncheckedStates.add(realTarget);
 				}
 				// then check if transition in both automata lead in same state
 				if (mappedTarget != conjectureTarget) {
@@ -145,7 +306,7 @@ public class LmConjecture extends automata.mealy.Mealy {
 					// now, we have realTarget which can be reach by to
 					// sequences and this two sequences leads in two different
 					// states in conjecture.
-					OutputSequence realDistinctionOutput = realAutomata
+					OutputSequence realDistinctionOutput = realAutomaton
 							.simulateOutput(realTarget, distinctionSequence);
 					InputSequence counterExample = new InputSequence();
 					if (!conjecture.simulateOutput(mappedTarget,
@@ -164,10 +325,11 @@ public class LmConjecture extends automata.mealy.Mealy {
 						counterExample.addInput(i);
 					}
 					counterExample.addInputSequence(distinctionSequence);
-					counterExamples.add(counterExample);
+					result.addNoResetCE(counterExample);
 				}
 			}
+			result.addTestedRealState(realState);
 		}
-		return counterExamples;
+		return result;
 	}
 }
