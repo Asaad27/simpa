@@ -33,6 +33,7 @@ public class FullyQualifiedState{
 	private Map<String, FullyKnownTrace> T;//Fully known transitions starting from this node
 	private Set<String> R_;//Complementary set of R : unknown transition
 	private final State state;
+	private boolean markedAsSink = false;
 	
 	private TraceTree expectedTraces;
 	private Map<String, List<LocalizedHZXWSequence>> toLocalizeHZXWSequences = new HashMap<>();
@@ -422,5 +423,35 @@ public class FullyQualifiedState{
 
 	public Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> getWResponses() {
 		return WResponses;
+	}
+
+	/**
+	 * Mark this state as a sink state. As it is a sink, all states reachable
+	 * from this one are also in the sink component and thus, they are marked as
+	 * sink too.
+	 * 
+	 * A state can be marked as sink only if it is part of a complete, strongly
+	 * connected component.
+	 */
+	public void markAsSink() {
+		if (markedAsSink)
+			return;
+		assert getUnknowTransitions().isEmpty();
+		markedAsSink = true;
+		for (FullyKnownTrace v : getVerifiedTrace()) {
+			v.getEnd().markAsSink();
+		}
+	}
+
+	/**
+	 * Indicate if a state has been identified as a sink by
+	 * {@link #markAsSink()}. There is no computation in this method to
+	 * calculate if the state is a sink or not.
+	 * 
+	 * @return {@code true} if {@link #markAsSink()} has been called on this
+	 *         state or one of its parent, {@code false} otherwise.
+	 */
+	public boolean isMarkedAsSink() {
+		return markedAsSink;
 	}
 }

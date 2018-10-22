@@ -368,6 +368,7 @@ public class HWLearner extends Learner {
 				LogManager.logStep(LogManager.STEPOTHER,
 						"Starting new learning");
 			}
+			List<GenericHNDException> hExceptions = new ArrayList<>();
 			try {
 				try {
 					learn(W, h, stateDiscoveredInCe);
@@ -405,6 +406,17 @@ public class HWLearner extends Learner {
 				inconsistencyFound = true;
 			} catch (InconsistencyBeforeSearchingAdvancedAlphaException e) {
 				inconsistencyFound = true;
+			} catch (OracleGiveCounterExampleException e) {
+				assert hExceptions.isEmpty();
+				hExceptions = e.gethExceptions();
+				LogManager
+						.logInfo("one counter example found during inference: "
+								+ counterExampleTrace);
+				if (Options.LOG_LEVEL != LogLevel.LOW)
+					LogManager.logConsole(
+							"one counter example found during inference : "
+									+ counterExampleTrace);
+				counterExampleTrace = e.getCounterExampletrace();
 			}
 
 			if (!inconsistencyFound && Options.TRY_TRACE_AS_CE) {
@@ -433,8 +445,8 @@ public class HWLearner extends Learner {
 			}
 
 			stateDiscoveredInCe = false;
-			List<GenericHNDException> hExceptions = new ArrayList<>();
-			if (!inconsistencyFound && !virtualCounterExample) {
+			if (!inconsistencyFound && !virtualCounterExample
+					&& counterExampleTrace == null) {
 				LogManager.logInfo("asking for a counter example");
 				if (Options.HW_WITH_RESET)
 					try {
@@ -979,6 +991,7 @@ public class HWLearner extends Learner {
 			DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W,
 			GenericInputSequence h, boolean continueLastLearning)
 			throws ConjectureNotConnexException,
+			OracleGiveCounterExampleException,
 			InconsistencyBeforeSearchingAdvancedAlphaException {
 		if (!continueLastLearning) {
 			LogManager.logStep(LogManager.STEPOTHER, "Inferring the system");
@@ -1051,12 +1064,23 @@ public class HWLearner extends Learner {
 			} catch (ConjectureNotConnexException e) {
 				if (!Options.HW_WITH_RESET)
 					throw e;
-				// TODO search CE without reset
 				LogManager.logInfo(
 						"Conjecture is not strongly connected and some part are unreachable.");
 				LogManager.logInfo("first, try to search an inconsistency in trace");
 				if (searchAndProceedCEInTrace())
 					throw new InconsistencyBeforeSearchingAdvancedAlphaException();
+				if (!q.isMarkedAsSink()) {
+					LogManager.logInfo(
+							"This is the first time we try to go outside of this strongly connected component."
+									+ " We ask oracle only one time.");
+					List<GenericHNDException> hExceptions = new ArrayList<>();
+					LmTrace counterExampleTrace = getCounterExemple(
+							hExceptions);
+					if (counterExampleTrace != null)
+						throw new OracleGiveCounterExampleException(
+								counterExampleTrace, hExceptions);
+				}
+				q.markAsSink();
 				LogManager.logInfo(
 						"Reseting the driver to try to go outside of the strongly connected sub-part");
 				dataManager.reset();
