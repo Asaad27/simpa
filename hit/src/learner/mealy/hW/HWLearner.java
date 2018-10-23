@@ -162,6 +162,13 @@ public class HWLearner extends Learner {
 															// random CE if we
 															// know that there
 															// is no CE
+			if (shortestCe != null && returnedCE == null) {
+				LogManager
+						.logWarning("Random walk did not exposed counter example"
+										+ " but an exact search exposed the discreapency."
+										+ " One counter exemple is "
+										+ shortestCe);
+			}
 		}
 		return returnedCE;
 	}
@@ -217,6 +224,7 @@ public class HWLearner extends Learner {
 		if (driver instanceof TransparentMealyDriver) {
 			TransparentMealyDriver d = (TransparentMealyDriver) driver;
 			Mealy realAutomata = d.getAutomata();
+			assert realAutomata.isConnex();
 			LmConjecture conjecture = dataManager.getConjecture();
 			State conjectureStartingState = dataManager.getCurrentState()
 					.getState();
@@ -342,7 +350,7 @@ public class HWLearner extends Learner {
 			if ((!d.getAutomata().isConnex(true)) && !Options.HW_WITH_RESET)
 				throw new RuntimeException("driver must be strongly connected");
 		}
-		if (!Options.HW_WITH_RESET) {
+		if (!Options.HW_WITH_RESET && Options.MAX_CE_RESETS != 0) {
 			Options.MAX_CE_LENGTH *= Options.MAX_CE_RESETS;
 			Options.MAX_CE_RESETS = 1;
 		}
@@ -385,7 +393,6 @@ public class HWLearner extends Learner {
 					.freeMemory()));
 
 			counterExampleTrace = null;
-			boolean virtualCounterExample = false;
 			inconsistencyFound = false;
 			if (!stateDiscoveredInCe) {
 				LogManager.logLine();
@@ -469,8 +476,7 @@ public class HWLearner extends Learner {
 			}
 
 			stateDiscoveredInCe = false;
-			if (!inconsistencyFound && !virtualCounterExample
-					&& counterExampleTrace == null) {
+			if (!inconsistencyFound && counterExampleTrace == null) {
 				LogManager.logInfo("asking for a counter example");
 				if (Options.HW_WITH_RESET)
 					try {
@@ -504,13 +510,9 @@ public class HWLearner extends Learner {
 			}
 
 			if (counterExampleTrace != null) {
-				if (!virtualCounterExample)
-					dataManager.walkWithoutCheck(counterExampleTrace,
-							hExceptions);
+				dataManager.walkWithoutCheck(counterExampleTrace, hExceptions);
 				LogManager
 						.logInfo("geting smallest suffix in counter example which is not in W and not a prefix of a W element");
-				if (virtualCounterExample)
-					throw new RuntimeException("not implemented");
 				if (driver instanceof TransparentMealyDriver
 						&& ((TransparentMealyDriver) driver).getAutomata()
 								.acceptCharacterizationSet(W)) {
@@ -572,6 +574,7 @@ public class HWLearner extends Learner {
 					"conjecture is false or driver is not strongly connected");
 			System.err.println(
 					"conjecture is false or driver is not strongly connected");
+			throw new RuntimeException("wrong conjecture");
 		}
 
 		// State initialState=searchInitialState();
