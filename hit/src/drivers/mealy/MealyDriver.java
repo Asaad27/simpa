@@ -179,9 +179,16 @@ public class MealyDriver extends Driver {
 		return ce;
 	}
 
+	private int maxLength(Mealy c) {
+		int conjectureBound = c.getStateCount() * 2 + 20;
+		if (conjectureBound < Options.MAX_CE_LENGTH)
+			return conjectureBound;
+		return Options.MAX_CE_LENGTH;
+	}
+
 	public boolean getRandomCounterExample_noReset(Mealy c, State currentState,LmTrace ce) {
 		boolean found = false;
-		int maxTries = Options.MAX_CE_LENGTH;
+		int maxTries = maxLength(c);
 		List<String> is = getInputSymbols();
 		stopLog();
 		int i = 0;
@@ -215,9 +222,9 @@ public class MealyDriver extends Driver {
 		conjDriver.stopLog();
 		int i = 0;
 		while (i < maxTries && !found) {
-			ce = InputSequence.generate(is, Options.MAX_CE_LENGTH);
+			ce = InputSequence.generate(is, maxLength(c));
 			while (triedCE.contains(ce))
-				ce = InputSequence.generate(is, Options.MAX_CE_LENGTH);
+				ce = InputSequence.generate(is, maxLength(c));
 			triedCE.add(ce);
 			OutputSequence osSystem = new OutputSequence();
 			OutputSequence osConj = new OutputSequence();

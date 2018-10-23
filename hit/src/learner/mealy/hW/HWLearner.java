@@ -168,12 +168,6 @@ public class HWLearner extends Learner {
 
 	public LmTrace getRandomCounterExemple(
 			List<GenericHNDException> hExceptions) {
-		if (driver instanceof TransparentMealyDriver
-				&& !Options.HW_WITH_RESET) {
-			TransparentMealyDriver d = (TransparentMealyDriver) driver;
-			Options.MAX_CE_LENGTH = d.getAutomata().getStateCount()
-					* d.getInputSymbols().size() * 1000;
-		}
 		LmConjecture conjecture = dataManager.getConjecture();
 		State conjectureStartingState = dataManager.getCurrentState()
 				.getState();
@@ -347,6 +341,10 @@ public class HWLearner extends Learner {
 			TransparentMealyDriver d = (TransparentMealyDriver) driver;
 			if ((!d.getAutomata().isConnex(true)) && !Options.HW_WITH_RESET)
 				throw new RuntimeException("driver must be strongly connected");
+		}
+		if (!Options.HW_WITH_RESET) {
+			Options.MAX_CE_LENGTH *= Options.MAX_CE_RESETS;
+			Options.MAX_CE_RESETS = 1;
 		}
 		fullTraces = new ArrayList<>();
 		fullTraces.add(new LmTrace());

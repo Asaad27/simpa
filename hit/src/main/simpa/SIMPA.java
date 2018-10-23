@@ -16,6 +16,7 @@ import java.util.Scanner;
 import java.util.StringTokenizer;
 
 import automata.mealy.InputSequence;
+import automata.mealy.Mealy;
 import drivers.Driver;
 import drivers.ExhaustiveGenerator;
 import drivers.efsm.real.GenericDriver;
@@ -808,6 +809,18 @@ public class SIMPA {
 		driver = loadDriver(Options.SYSTEM);
 		if (driver == null)
 			System.exit(1);
+		if (driver instanceof TransparentMealyDriver) {
+			Mealy automaton = ((TransparentMealyDriver) driver).getAutomata();
+			if (!MAX_CE_LENGTH.haveBeenParsed
+					&& !MAX_CE_RESETS.haveBeenParsed) {
+				Options.MAX_CE_RESETS = driver.getInputSymbols().size() * 5000;
+				Options.MAX_CE_LENGTH = automaton.getStateCount() * 20;
+				LogManager.logInfo("Maximum counter example length set to "
+						+ Options.MAX_CE_LENGTH
+						+ " and maximum counter example reset set to "
+						+ Options.MAX_CE_RESETS + " from topology of driver");
+			}
+		}
 		if (Options.LOCALIZER_BASED_INFERENCE
 				|| (Options.RIVESTSCHAPIREINFERENCE && Options.RS_WITH_UNKNOWN_H)) {
 			if (STATE_NUMBER_BOUND.getValue() > 0)
