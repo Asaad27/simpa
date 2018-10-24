@@ -696,7 +696,7 @@ public class SimplifiedDataManager {
 	public void endOfH(FullyQualifiedState s) {
 		lastknownState = s;
 		lastknownStatePos = traceSinceReset.size();
-		currentState = s;
+		setCurrentState(s);
 	}
 
 	/**

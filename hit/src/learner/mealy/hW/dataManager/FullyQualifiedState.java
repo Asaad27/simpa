@@ -271,6 +271,9 @@ public class FullyQualifiedState{
 			InconsistancyWhileMergingExpectedTracesException inconsistency = v
 					.getEnd().addExpectedTraces(subTree);
 			if (inconsistency != null) {
+				inconsistency.addPreviousState(this,
+						v.getTrace().getInputsProjection(),
+						v.getTrace().getOutputsProjection());
 				throw inconsistency;
 			}
 		}
