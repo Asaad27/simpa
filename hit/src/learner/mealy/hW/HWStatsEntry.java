@@ -141,6 +141,11 @@ public class HWStatsEntry extends StatsEntry {
 	private boolean useReset = false;
 	private float avgNbTriedWSuffixes = -1;
 
+	// the following variable are only used to build stats during inference.
+	private int lastOracleTraceLength = 0;
+	private int lastOracleReset = 0;
+	private float lastOracleDuration = 0;
+
 	/**
 	 * rebuild a HWStats object from a CSV line
 	 * @param line the line to parse
@@ -217,6 +222,8 @@ public class HWStatsEntry extends StatsEntry {
 		askedCE++;
 		oracleTraceLength += traceLength;
 		oracleDuration += duration;
+		lastOracleTraceLength = traceLength;
+		lastOracleDuration = duration;
 	}
 
 	protected void increaseLocalizeCallNb(){
@@ -274,6 +281,10 @@ public class HWStatsEntry extends StatsEntry {
 
 		hResponses = dataManager.getHResponsesNb();
 		hMaxLength = dataManager.h.getMaxLength();
+		traceLength -= lastOracleTraceLength;
+		oracleTraceLength -= lastOracleTraceLength;
+		duration -= lastOracleDuration;
+		oracleDuration -= lastOracleDuration;
 	}
 
 	
