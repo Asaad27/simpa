@@ -50,6 +50,8 @@ public class HWStatsEntry extends StatsEntry {
 	public static final Attribute<Boolean>USE_ADAPTIVE_W = 			Attribute.USE_ADAPTIVE_W;
 	public static final Attribute<Boolean>USE_RESET =	 			Attribute.USE_RESET;
 	public static final Attribute<Float> AVG_NB_TRIED_W =			Attribute.AVG_NB_TRIED_W;
+	public static final Attribute<Integer>RESET_CALL_NB =			Attribute.RESET_CALL_NB;
+	public static final Attribute<Integer>ORACLE_RESET_NB =			Attribute.ORACLE_RESET_NB;
 	public static final Attribute<Float> ORACLE_TRACE_PERCENTAGE =	Attribute.ORACLE_TRACE_PERCENTAGE;
 
 	
@@ -88,6 +90,8 @@ public class HWStatsEntry extends StatsEntry {
 			USE_ADAPTIVE_W,
 			USE_RESET,
 			AVG_NB_TRIED_W,
+			RESET_CALL_NB,
+			ORACLE_RESET_NB,
 	};
 	
 	public static String getCSVHeader_s(){
@@ -140,6 +144,8 @@ public class HWStatsEntry extends StatsEntry {
 	private boolean useAdaptiveW = false;
 	private boolean useReset = false;
 	private float avgNbTriedWSuffixes = -1;
+	private int resetCallNb = 0;
+	private int oracleResetNb = 0;
 
 	// the following variable are only used to build stats during inference.
 	private int lastOracleTraceLength = 0;
@@ -186,6 +192,8 @@ public class HWStatsEntry extends StatsEntry {
 		useAdaptiveW = Boolean.parseBoolean(st.nextToken());
 		useReset = Boolean.parseBoolean(st.nextToken());
 		avgNbTriedWSuffixes = Float.parseFloat(st.nextToken());
+		resetCallNb = Integer.parseInt(st.nextToken());
+		oracleResetNb = Integer.parseInt(st.nextToken());
 		
 	}
 
@@ -218,12 +226,15 @@ public class HWStatsEntry extends StatsEntry {
 		wInconsistencies++;
 	}
 
-	protected void increaseOracleCallNb(int traceLength, float duration) {
+	protected void increaseOracleCallNb(int traceLength, float duration,
+			int resetNb) {
 		askedCE++;
 		oracleTraceLength += traceLength;
 		oracleDuration += duration;
+		oracleResetNb +=resetNb;
 		lastOracleTraceLength = traceLength;
 		lastOracleDuration = duration;
+		lastOracleReset = resetNb;
 	}
 
 	protected void increaseLocalizeCallNb(){
@@ -281,10 +292,13 @@ public class HWStatsEntry extends StatsEntry {
 
 		hResponses = dataManager.getHResponsesNb();
 		hMaxLength = dataManager.h.getMaxLength();
+		resetCallNb = dataManager.getTotalResetNb();
 		traceLength -= lastOracleTraceLength;
 		oracleTraceLength -= lastOracleTraceLength;
 		duration -= lastOracleDuration;
 		oracleDuration -= lastOracleDuration;
+		resetCallNb -= lastOracleReset;
+		oracleResetNb -= lastOracleReset;
 	}
 
 	
@@ -382,6 +396,10 @@ public class HWStatsEntry extends StatsEntry {
 			return (T) new Float(100. * oracleTraceLength / traceLength);
 		if (a == AVG_NB_TRIED_W)
 			return (T) new Float(avgNbTriedWSuffixes);
+		if (a == RESET_CALL_NB)
+			return (T) new Integer(resetCallNb);
+		if (a == ORACLE_RESET_NB)
+			return (T) new Integer(oracleResetNb);
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 
 	}
@@ -405,6 +423,8 @@ public class HWStatsEntry extends StatsEntry {
 				a == LOOP_RATIO ||
 				a == ASKED_COUNTER_EXAMPLE||
 				a == H_INCONSISTENCY_FOUND ||
+				a == RESET_CALL_NB ||
+				a == ORACLE_RESET_NB ||
 				a == ORACLE_TRACE_LENGTH)
 			return ((Integer) get(a)).floatValue();
 		if (a == SEED)

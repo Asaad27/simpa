@@ -761,4 +761,7 @@ public class SimplifiedDataManager {
 		}
 		return initialStateCharacterization;
 	}
+	public int getTotalResetNb() {
+		return globalTraces.size() - 1;
+	}
 }

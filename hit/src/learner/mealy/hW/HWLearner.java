@@ -117,6 +117,7 @@ public class HWLearner extends Learner {
 			boolean withReset) throws CeExposedUnknownStateException {
 		int startSize = dataManager.traceSize();
 		long startTime = System.nanoTime();
+		int startReset = dataManager.getTotalResetNb();
 		if (Options.USE_SHORTEST_CE) {
 			stats.setOracle("shortest");
 		} else {
@@ -135,7 +136,7 @@ public class HWLearner extends Learner {
 		stats.increaseOracleCallNb(
 				dataManager.traceSize() - startSize
 						+ ((returnedCE == null) ? 0 : returnedCE.size()),
-				duration);
+				duration, dataManager.getTotalResetNb() - startReset);
 		if (exception != null)
 			throw exception;
 		return returnedCE;

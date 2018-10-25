@@ -42,6 +42,7 @@ public class Attribute <T extends Comparable<T>> {
 	public final static Attribute<Integer>	SUB_INFERANCE_NB =			new Attribute<Integer>(	"number of sub-inference",						false,	Units.FUNCTION_CALL,false,	false,	false);
 	public final static Attribute<String>	ORACLE_USED =				new Attribute<String>(	"oracle giving counter examples",				false,	Units.NO_UNITS,		false, 	true, 	false);
 	public final static Attribute<Integer>	ORACLE_TRACE_LENGTH = 		new Attribute<Integer>(	"length of trace used by oracle",				true,	Units.SYMBOLS,		true,	false,	false);
+	public final static Attribute<Integer>	ORACLE_RESET_NB = 			new Attribute<Integer>(	"reset used by oracle",							true,	Units.FUNCTION_CALL,true,	false,	false);
 	public final static Attribute<Float>	ORACLE_DURATION = 			new Attribute<Float>(	"duration of oracle",							true,	Units.SECONDS,		false,	false,	false);
 	public final static Attribute<String> 	SEARCH_CE_IN_TRACE =		new Attribute<String>(	"using trace for counter-example",				false,	Units.NO_UNITS,		false, 	true, 	false);
 	public final static Attribute<Boolean>	ADD_H_IN_W =				new Attribute<Boolean>(	"add homing sequence in W-set",					false,	Units.BOOLEAN,		false,	true,	false);
