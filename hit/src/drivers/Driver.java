@@ -52,7 +52,7 @@ public abstract class Driver {
 	public void reset() {
 		if (addtolog) {
 			LogManager.logReset();
-			numberOfRequest++;
 		}
+		numberOfRequest++;
 	}
 }

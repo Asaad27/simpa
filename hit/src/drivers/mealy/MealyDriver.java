@@ -86,8 +86,7 @@ public class MealyDriver extends Driver {
 		assert currentState != null : "is the initial state of driver specified ?";
 		String output = null;
 		if (input.length() > 0) {
-			if (addtolog)
-				numberOfAtomicRequest++;
+			numberOfAtomicRequest++;
 			State before = currentState;
 			MealyTransition currentTrans = automata.getTransitionFromWithInput(currentState, input);
 			if (currentTrans != null) {
@@ -180,7 +179,8 @@ public class MealyDriver extends Driver {
 	}
 
 	private int maxLength(Mealy c) {
-		int conjectureBound = c.getStateCount() * 2 + 20;
+		int conjectureBound = c.getStateCount() * getInputSymbols().size() * 100
+				+ 500;
 		if (conjectureBound < Options.MAX_CE_LENGTH)
 			return conjectureBound;
 		return Options.MAX_CE_LENGTH;
