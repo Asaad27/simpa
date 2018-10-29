@@ -146,7 +146,7 @@ fragment DIGIT
    ;
 
 UNQUOTED_STRING 
-	: LETTER ( LETTER | DIGIT )*
+	: LETTER ( LETTER | DIGIT | '-')*
 	;
 
 DOUBLE_QUOTED_STRING
@@ -162,7 +162,7 @@ HTML_STRING
    ;
    
 fragment LETTER
-   : [a-zA-Z\u0080-\u00FF_]
+   : [a-zA-Z\u0080-\u00FF_.]
    ;
 
 fragment TAG
