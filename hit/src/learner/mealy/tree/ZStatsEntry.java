@@ -27,6 +27,7 @@ public class ZStatsEntry extends StatsEntry {
 	public final static Attribute<Integer> ORACLE_TRACE_LENGTH = Attribute.ORACLE_TRACE_LENGTH;
 	public final static Attribute<Float> ORACLE_DURATION = Attribute.ORACLE_DURATION;
 	public final static Attribute<Integer> RESET_NB = Attribute.RESET_CALL_NB;
+	public final static Attribute<Integer> ORACLE_RESET_NB = Attribute.ORACLE_RESET_NB;
 
 	private static Attribute<?>[] attributes = new Attribute<?>[]{
 			TRACE_LENGTH,
@@ -42,6 +43,7 @@ public class ZStatsEntry extends StatsEntry {
 			ORACLE_TRACE_LENGTH,
 			ORACLE_DURATION,
 			RESET_NB,
+			ORACLE_RESET_NB,
 	};
 	
 	public static String getCSVHeader_s() {
@@ -74,6 +76,7 @@ public class ZStatsEntry extends StatsEntry {
 	private int oracleTraceLength = 0;
 	private float oracleDuration = 0;
 	private int resetNb;
+	private int oracleResetNb = 0;
 
 	/**
 	 * rebuild a StatsEntry object from a CSV line
@@ -96,6 +99,7 @@ public class ZStatsEntry extends StatsEntry {
 		oracleTraceLength = Integer.parseInt(st.nextToken());
 		oracleDuration = Float.parseFloat(st.nextToken());
 		resetNb = Integer.parseInt(st.nextToken());
+		oracleResetNb = Integer.parseInt(st.nextToken());
 
 	}
 
@@ -109,10 +113,12 @@ public class ZStatsEntry extends StatsEntry {
 		oracleUsed = oracle;
 	}
 
-	public void increaseOracleCallNb(int traceLength, float duration) {
+	public void increaseOracleCallNb(int traceLength, int resetNb,
+			float duration) {
 		askedCE++;
 		oracleTraceLength += traceLength;
 		oracleDuration += duration;
+		oracleResetNb += resetNb;
 	}
 
 	public void finalUpdate(LmConjecture conjecture, float duration,
@@ -166,6 +172,8 @@ public class ZStatsEntry extends StatsEntry {
 			return (T) new Float(oracleDuration);
 		if (a == RESET_NB)
 			return (T) new Integer(resetNb);
+		if (a == ORACLE_RESET_NB)
+			return (T) new Integer(oracleResetNb);
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 
 	}
@@ -179,6 +187,7 @@ public class ZStatsEntry extends StatsEntry {
 				a == LOOP_RATIO ||
 				a == ASKED_COUNTER_EXAMPLE||
 				a == RESET_NB ||
+				a == ORACLE_RESET_NB ||
 				a == ORACLE_TRACE_LENGTH)
 			return ((Integer) get(a)).floatValue();
 		if (a == SEED)

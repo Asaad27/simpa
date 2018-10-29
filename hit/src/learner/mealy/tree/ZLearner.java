@@ -188,13 +188,14 @@ public class ZLearner extends Learner {
 			float oracleDuration = (float) ((System.nanoTime() - oracleStart)
 					/ 1000000000.);
 			lastOracleLength = driver.numberOfAtomicRequest - traceLength;
-			lastOracleResets = resetNb - driver.numberOfRequest;
+			lastOracleResets = driver.numberOfRequest - resetNb;
 			if (ceTrace != null) {
 				ce = ceTrace.getInputsProjection();
-				stats.increaseOracleCallNb(lastOracleLength, oracleDuration);
+				stats.increaseOracleCallNb(lastOracleLength, lastOracleResets,
+						oracleDuration);
 			} else {
 				ce = null;
-				stats.increaseOracleCallNb(0, 0);
+				stats.increaseOracleCallNb(0, 0, 0);
 			}
 			if (ce != null) {
 				LogManager.logInfo("Adding the counter example to tree");

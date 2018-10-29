@@ -182,15 +182,15 @@ public class LmLearner extends Learner {
 				float oracleDuration = (float) ((System.nanoTime()
 						- oracleStart) / 1000000000.);
 				lastOracleLength = driver.numberOfAtomicRequest - traceLength;
-				lastOracleResets = resetNb - driver.numberOfRequest;
+				lastOracleResets = driver.numberOfRequest - resetNb;
 				if (ceTrace != null) {
 					handleNewCounterExample(ceTrace);
 					ce = ceTrace.getInputsProjection();
 					stats.increaseOracleCallNb(lastOracleLength,
-							oracleDuration);
+							lastOracleResets, oracleDuration);
 				} else {
 					ce = null;
-					stats.increaseOracleCallNb(0, 0);
+					stats.increaseOracleCallNb(0, 0, 0);
 				}
 			} else
 				LogManager.logInfo("Previous counter example : " + ce
