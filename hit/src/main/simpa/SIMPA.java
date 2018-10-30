@@ -931,6 +931,7 @@ public class SIMPA {
 				}
 				e.printStackTrace();
 				System.err.println("data saved in " + failDir);
+				System.exit(1);
 			} finally {
 				LogManager.clearsLoggers();
 			}
@@ -1155,7 +1156,6 @@ public class SIMPA {
 		System.out.println();
 		System.out.println("Ex: SIMPA drivers.efsm.NSPKDriver --outdir mydir --text");
 		System.out.println();
-		System.exit(0);
 	}
 
 	protected static void printUsage(Option<?>[] options) {
