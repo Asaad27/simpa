@@ -424,4 +424,30 @@ public class TotallyAdaptiveW extends
 			characterizationPos.getChild(output);
 		}
 	}
+
+	/**
+	 * Add a new sequence after the current position in tree.
+	 * 
+	 * @return the freshly created sequence.
+	 */
+	public AdaptiveSymbolSequenceForW createNewSymbolSequence() {
+		AdaptiveSymbolSequenceForW r = new AdaptiveSymbolSequenceForW();
+		extend_local(r);
+		return r;
+	}
+
+	/**
+	 * Create and get the node reached after a response to the input of this
+	 * node. This is similar to {@link #getChild(AdaptiveSymbolSequenceForW)}
+	 * but with an automatic cast.
+	 * 
+	 * @param end_
+	 *            the response to the input of this node.
+	 * @return the node of W reached after the given answer.
+	 */
+	public TotallyAdaptiveW recordEndOfSequence(AdaptiveSymbolSequence end_) {
+		AdaptiveSymbolSequenceForW end = (AdaptiveSymbolSequenceForW) end_;
+		assert end.checkCompatibilityWith(getInput());
+		return (TotallyAdaptiveW) getChild(end);
+	}
 }

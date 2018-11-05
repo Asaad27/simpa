@@ -23,6 +23,9 @@ import automata.mealy.splittingTree.LY_SplittingTreeCalculator.Path;
  * Machines: State Identification and Verification" IEEE TRANSACTIONS ON
  * COMPUTERS, VOL. 43, NO. 3, pp 306-320 MARCH 1994
  * 
+ * The algorithm is modified to build a distinction set when no distinction
+ * sequence exists.
+ * 
  * @author Nicolas BREMOND
  *
  */
@@ -55,6 +58,11 @@ public class LY_SplittingTree {
 	 */
 	InputTypeExtended bestInput = null;
 	/**
+	 * a backup input if best is of type c) but without a path to a leave with
+	 * type a) or b);
+	 */
+	InputTypeExtended bestMergingInput = null;
+	/**
 	 * The list of leaves which have an input of type C leading to this node.
 	 */
 	List<Path> reachedByLeaves = new ArrayList<>();
@@ -82,10 +90,27 @@ public class LY_SplittingTree {
 	 * @author Nicolas BREMOND
 	 */
 	abstract class InputTypeExtended {
+		/**
+		 * 
+		 * @param mergeStates
+		 *            indicate that this input merge at least two states
+		 * 
+		 * @see #mergeStates
+		 */
+		public InputTypeExtended(boolean mergeStates) {
+			this.mergeStates = mergeStates;
+		}
+
 		abstract boolean isValid();
 
 		InputType type;
 		String input;
+		/**
+		 * Indicate that this input will make some states converge. This is not
+		 * a valid input for Lee & Yannakakis but we still use it to build a
+		 * distinction set instead of distinction tree.
+		 */
+		final boolean mergeStates;
 
 		void setInput(String i) {
 			input = i;
@@ -103,6 +128,14 @@ public class LY_SplittingTree {
 			}
 			if (!other.isValid())
 				return true;
+
+			// we might change the two following comparisons to produce more but
+			// shorter sequences instead of less but longer sequences.
+			if (mergeStates && !other.mergeStates)
+				return false;
+			if (!mergeStates && other.mergeStates)
+				return true;
+
 			if (type == other.type)
 				return equalResult;
 			if (type == InputType.C)
@@ -116,6 +149,10 @@ public class LY_SplittingTree {
 	}
 
 	class InvalidInput extends InputTypeExtended {
+		public InvalidInput() {
+			super(true);
+		}
+
 		@Override
 		public boolean isValid() {
 			return false;
@@ -125,7 +162,8 @@ public class LY_SplittingTree {
 
 	class InputA extends InputTypeExtended {
 
-		public InputA() {
+		public InputA(boolean mergeStates) {
+			super(mergeStates);
 			type = InputType.A;
 		}
 
@@ -140,7 +178,9 @@ public class LY_SplittingTree {
 		protected final List<LY_SplittingTree> reachedLeaves;
 		public final String output;
 
-		public InputB(List<LY_SplittingTree> reachedLeaves, String output) {
+		public InputB(List<LY_SplittingTree> reachedLeaves, String output,
+				boolean mergStates) {
+			super(mergStates);
 			type = InputType.B;
 			this.reachedLeaves = Collections.unmodifiableList(reachedLeaves);
 			this.output = output;
@@ -154,7 +194,8 @@ public class LY_SplittingTree {
 	}
 
 	class InputC extends InputTypeExtended {
-		public InputC() {
+		public InputC(boolean mergeStates) {
+			super(mergeStates);
 			type = InputType.C;
 		}
 
@@ -175,11 +216,17 @@ public class LY_SplittingTree {
 	 *            the automaton on which the splitting tree is computed
 	 * @param leaves
 	 *            the other leaves of the tree.
+	 * @param mergeAllowed
+	 *            indicate if an input is allowed to merge states. This is
+	 *            always false in Lee & Yannakakis algorithm, but it must be
+	 *            true to allow the building of a distinction set instead of a
+	 *            distinction sequence.
 	 * @return an extended input type.
 	 */
 	public InputTypeExtended inputIsValid(String input, Mealy automaton,
-			Collection<LY_SplittingTree> leaves) {
+			Collection<LY_SplittingTree> leaves, boolean mergedAllowed) {
 		Map<String, Set<State>> observedTransitions = new HashMap<>();
+		boolean mergeOccured = false;
 		for (State s : distinguishedInitialStates) {
 			MealyTransition t = automaton.getTransitionFromWithInput(s, input);
 			Set<State> reachedStates = observedTransitions.get(t.getOutput());
@@ -187,14 +234,22 @@ public class LY_SplittingTree {
 				reachedStates = new HashSet<>();
 				observedTransitions.put(t.getOutput(), reachedStates);
 			}
-			if (reachedStates.contains(t.getTo()))
-				return new InvalidInput();
-			reachedStates.add(t.getTo());
+			if (reachedStates.contains(t.getTo())) {
+				if (!mergedAllowed)
+					return new InvalidInput();
+				mergeOccured = true;
+			} else
+				reachedStates.add(t.getTo());
 		}
 		if (observedTransitions.size() > 1)
-			return new InputA();
+			return new InputA(mergeOccured);
 		String output = observedTransitions.keySet().iterator().next();
 		Set<State> reachedStates = observedTransitions.get(output);
+		if (reachedStates.size() == 1) {
+			// This input merge all state without distinguishing any of them
+			assert distinguishedInitialStates.size() > 1;
+			return new InvalidInput();
+		}
 		List<LY_SplittingTree> reachedLeaves = new ArrayList<>();
 		for (LY_SplittingTree leaf : leaves) {
 			for (State s : reachedStates) {
@@ -205,14 +260,14 @@ public class LY_SplittingTree {
 			}
 		}
 		if (reachedLeaves.size() > 1)
-			return new InputB(reachedLeaves, output);
+			return new InputB(reachedLeaves, output, mergeOccured);
 		assert reachedLeaves.size() == 1;
 		assert reachedLeaves.get(0).distinguishedInitialStates
 				.size() == distinguishedInitialStates.size();
 		LY_SplittingTree reached = reachedLeaves.get(0);
 		Path path = new Path(this, input, output, reached);
 		reached.reachedByLeaves.add(path);
-		return new InputC();
+		return new InputC(mergeOccured);
 	}
 
 	public Set<LY_SplittingTree> getChildren() {
