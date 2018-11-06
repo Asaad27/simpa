@@ -128,8 +128,12 @@ public class MealyDriver extends Driver {
 		return name;
 	}
 
-	public LmTrace getCounterExample(Automata c) {
-		Mealy m = (Mealy) c;
+	@Override
+	public Object getCounterExample(Automata a) {
+		return getCounterExample((LmConjecture) a);
+	}
+
+	public LmTrace getCounterExample(LmConjecture c) {
 		LogManager.logInfo("Searching counter example");
 		LmTrace ce = null;
 		if (forcedCE != null && !forcedCE.isEmpty()) {
@@ -147,8 +151,8 @@ public class MealyDriver extends Driver {
 			LogManager.logInfo("search theorical CE");
 			InputSequence inputCe = null;
 			try {
-				if (m.isConnex())
-					inputCe = getShortestCounterExemple(m);
+				if (c.isConnex())
+					inputCe = getShortestCounterExemple(c);
 				else
 					throw new UnableToComputeException("automata is not connex");
 			} catch (UnableToComputeException e) {
@@ -167,8 +171,23 @@ public class MealyDriver extends Driver {
 		}
 
 		if (shortestCEFailed && ce == null) {
+			LogManager.logInfo("search CE by using a distinction sequence");
+			reset();
+			List<LmTrace> traces = new ArrayList<>();
+			traces.add(new LmTrace());
+			traces.add(new LmTrace());// record reset in traces
+			boolean found = false;
+			if (Options.USE_DT_CE) {
+				found = getDistinctionTreeBasedCE(c, c.getInitialState(),
+						traces, true);
+			}
+			if (found)
+				ce = traces.get(traces.size() - 1);
+		}
+
+		if (shortestCEFailed && ce == null) {
 			LogManager.logInfo("search random CE");
-			ce = getRandomCounterExemple(m);
+			ce = getRandomCounterExemple(c);
 		}
 
 		if (ce == null)
@@ -207,7 +226,39 @@ public class MealyDriver extends Driver {
 			i++;
 		}
 		startLog();
-		return found ;
+		return found;
+	}
+
+	/**
+	 * Search a counter example by using a distinction tree
+	 * 
+	 * @param c
+	 *            the conjecture to test
+	 * @param curentState
+	 *            the current state in conjecture
+	 * @param traces
+	 *            a list which will be filled with the traces applied on driver.
+	 *            See {@link LY_basedOracle#traces}.
+	 * @param resetAllowed
+	 *            indicate whether the oracle is allowed to do a reset or not
+	 * @return {@code true} if a counter example is found, {@code null} if the
+	 *         oracle was not able to test all the conjecture (missing
+	 *         transitions, unreachable states,…) or {@code false} all
+	 *         transitions were tested but without finding a discrepancy.
+	 */
+	public Boolean getDistinctionTreeBasedCE(LmConjecture c, State curentState,
+			List<LmTrace> traces, boolean resetAllowed) {
+		assert Options.USE_DT_CE;
+		if (!c.isFullyKnown())
+			return null;
+		// TODO extend oracle to incomplete automata
+		LY_basedOracle oracle = new LY_basedOracle(this, c, curentState,
+				traces);
+		oracle.resetAllowed = resetAllowed;
+		stopLog();
+		Boolean found = oracle.searchCE();
+		startLog();
+		return found;
 	}
 	
 	public LmTrace getRandomCounterExemple(Mealy c) {

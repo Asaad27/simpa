@@ -2,9 +2,11 @@ package automata;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class Automata implements Serializable {
@@ -229,6 +231,62 @@ public class Automata implements Serializable {
 				+ connexComponent);
 
 		return false;
+	}
+
+	/**
+	 * Compute a relative depth in the graph for nodes reachable or reaching the
+	 * node start.
+	 * 
+	 * The automaton do not need to be complete.
+	 * 
+	 * @param start
+	 *            a node to start computation. Useful if the graph is not
+	 *            connected. If {@code null}, a random state will be used.
+	 * @return a mapping for each state such that each state of depth d is
+	 *         reachable from a state of depth lowest than d or can reach a
+	 *         state of depth greatest than d
+	 */
+	public Map<State, Integer> computeDepths(State start) {
+		if (start == null)
+			start = getState(0);// any state of the automaton
+		Map<State, Integer> depth = new HashMap<>();
+		depth.put(start, 0);
+		boolean updated;
+		do {
+			updated = false;
+			for (Transition curTransition : transitions) {
+				State fromState = curTransition.getFrom();
+				Integer fromDepth = depth.get(fromState);
+				State destState = curTransition.getTo();
+				Integer destDepth = depth.get(destState);
+				if (fromDepth == null) {
+					if (destDepth != null) {
+						fromDepth = destDepth - 1;
+						depth.put(fromState, fromDepth);
+						updated = true;
+					} else
+						continue;
+				}
+				if (destDepth == null) {
+					depth.put(destState, fromDepth + 1);
+					updated = true;
+					continue;
+				}
+				if (destDepth > fromDepth + 1) {
+					depth.put(destState, fromDepth + 1);
+					updated = true;
+					break;
+				}
+				if (destDepth == fromDepth + 1 || destDepth == fromDepth)
+					continue;
+				if (destDepth < fromDepth + 1) {
+					depth.put(fromState, destDepth);
+					updated = true;
+					break;
+				}
+			}
+		} while (updated);
+		return depth;
 	}
 
 	/**

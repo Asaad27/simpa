@@ -27,6 +27,7 @@ import automata.mealy.distinctionStruct.DistinctionStruct;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import main.simpa.Options;
+import main.simpa.Options.LogLevel;
 import tools.DotParser;
 import tools.GraphViz;
 import tools.Utils;
@@ -951,5 +952,35 @@ public class Mealy extends Automata implements Serializable {
 			input_mod = input + inputNb;
 		} while (!unreachedInitial.isEmpty());
 		assert isConnex();
+	}
+
+	@Override
+	public Map<State, Integer> computeDepths(State start) {
+		return computeDepths(start, Options.LOG_LEVEL == LogLevel.ALL);
+	}
+
+	/**
+	 * Same as {@link Automata#computeDepths(State)} but can export automata as
+	 * a dot file after computing depths.
+	 * 
+	 * @param start
+	 *            node to start computation (can be {@code null})
+	 * @param logToDot
+	 *            force export to a dot file.
+	 */
+	public Map<State, Integer> computeDepths(State start, boolean logToDot) {
+		Map<State, Integer> result = super.computeDepths(start);
+		if (logToDot) {
+			StringBuilder comments = new StringBuilder();
+			for (Entry<State, Integer> entry : result.entrySet()) {
+				comments.append(
+						entry.getKey() + " [label="
+								+ tools.GraphViz.id2DotAuto(entry.getKey()
+										+ "\\nat depth " + entry.getValue())
+								+ "]\n");
+			}
+			exportToDot(comments.toString());
+		}
+		return result;
 	}
 }

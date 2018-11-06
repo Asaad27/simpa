@@ -107,10 +107,8 @@ public class ZStatsEntry extends StatsEntry {
 		this.inputSymbols = d.getInputSymbols().size();
 		this.automata = d.getSystemName();
 		this.seed = Options.SEED;
-	}
+		oracleUsed = (Options.USE_DT_CE ? "distinctionTree + " : "") + "MrBean";
 
-	protected void setOracle(String oracle) {
-		oracleUsed = oracle;
 	}
 
 	public void increaseOracleCallNb(int traceLength, int resetNb,

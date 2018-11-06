@@ -85,6 +85,7 @@ public class Options {
 
 	public static int MAX_CE_LENGTH = 20;
 	public static int MAX_CE_RESETS = 10;
+	public static  boolean USE_DT_CE = false;
 	
 	// Output's options
 

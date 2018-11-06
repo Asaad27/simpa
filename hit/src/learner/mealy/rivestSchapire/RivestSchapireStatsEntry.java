@@ -116,7 +116,11 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 		this.outputSymbols = d.getOutputSymbols().size();
 		this.automata = d.getSystemName();
 		memory = 0;
-		oracleUsed = Options.USE_SHORTEST_CE ? "shortest" : "MrBean";
+		if (Options.USE_SHORTEST_CE)
+			oracleUsed = "shortest";
+		else
+			oracleUsed = (Options.USE_DT_CE ? "distinctionTree + " : "")
+					+ "MrBean";
 	}
 
 	protected void increaseresetCallNb(){

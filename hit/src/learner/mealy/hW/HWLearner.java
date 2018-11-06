@@ -121,12 +121,16 @@ public class HWLearner extends Learner {
 		if (Options.USE_SHORTEST_CE) {
 			stats.setOracle("shortest");
 		} else {
-			stats.setOracle("MrBean");
+			stats.setOracle(
+					(Options.USE_DT_CE ? "distinctionTree + " : "") + "MrBean");
 		}
 		LmTrace returnedCE;
 		CeExposedUnknownStateException exception = null;
 		try {
-			returnedCE = getCounterExempleNoStats(hExceptions, withReset);
+			returnedCE = getDistinguishingSequenceCounterExample(hExceptions,
+					withReset);
+			if (returnedCE == null)
+				returnedCE = getCounterExempleNoStats(hExceptions, withReset);
 		} catch (CeExposedUnknownStateException e) {
 			assert withReset;
 			exception = e;
@@ -177,14 +181,74 @@ public class HWLearner extends Learner {
 	public LmTrace getRandomCounterExemple(
 			List<GenericHNDException> hExceptions) {
 		LmConjecture conjecture = dataManager.getConjecture();
-		State conjectureStartingState = dataManager.getCurrentState()
-				.getState();
-		LmTrace ce = new LmTrace();
-		boolean found = driver.getRandomCounterExample_noReset(conjecture,
-				conjectureStartingState, ce);
-		if (!found)
-			dataManager.walkWithoutCheck(ce, hExceptions);
+
+		LmTrace ce = null;
+			ce = new LmTrace();
+		boolean	found = driver.getRandomCounterExample_noReset(conjecture,
+					dataManager.getCurrentState().getState(), ce);
+			if (!found) {
+				dataManager.walkWithoutCheck(ce, hExceptions);
+				ce = null;
+			}
 		return found ? ce : null;
+	}
+
+	public LmTrace getDistinguishingSequenceCounterExample(
+			List<GenericHNDException> hExceptions, boolean useReset)
+			throws CeExposedUnknownStateException {
+		assert Options.USE_DT_CE;
+		LmTrace ce = null;
+		if (useReset
+				&& !dataManager.getInitialCharacterization().isComplete()) {
+			// first, try without characterizing initial state.
+			List<LmTrace> traces = new ArrayList<>();
+			Boolean found = driver.getDistinctionTreeBasedCE(
+					dataManager.getConjecture(),
+					dataManager.getCurrentState().getState(), traces, false);
+			if (found != null && found)
+				ce = traces.remove(traces.size() - 1);
+			for (int i = 0; i < traces.size(); i++) {
+				dataManager.walkWithoutCheck(traces.get(i), hExceptions);
+				// there is a reset between each trace
+				if (i + 1 < traces.size() || ce != null)
+					dataManager.walkWithoutCheckReset();
+			}
+			if (found != null)// all transitions were tested
+				return ce;
+
+			// if we didn't succeed, characterize the initial state and try with
+			// this knowledge.
+			Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> characterization = dataManager
+					.getInitialCharacterization();
+			for (GenericInputSequence w : characterization.unknownPrints()) {
+				dataManager.reset();
+				GenericOutputSequence r = dataManager.apply(w);
+				if (Options.LOG_LEVEL != LogLevel.LOW)
+					LogManager.logInfo(
+							"characterizing initial state with sequence ", w);
+				characterization.addPrint(w, r);
+			}
+			if (!dataManager.hasState(characterization))
+				throw new CeExposedUnknownStateException(characterization);
+			dataManager.getInitialCharacterization();// update initial state in
+														// dataManager
+			dataManager.reset();
+		}
+		List<LmTrace> traces = new ArrayList<>();
+		Boolean found = driver.getDistinctionTreeBasedCE(
+				dataManager.getConjecture(),
+				dataManager.getCurrentState().getState(), traces, useReset);
+		if (found != null && found) {
+			assert ce == null;
+			ce = traces.remove(traces.size() - 1);
+		}
+		for (int i = 0; i < traces.size(); i++) {
+			dataManager.walkWithoutCheck(traces.get(i), hExceptions);
+			// there is a reset between each trace
+			if (i + 1 < traces.size() || ce != null)
+				dataManager.walkWithoutCheckReset();
+		}
+		return ce;
 	}
 
 	public LmTrace getShortestCounterExemple() {

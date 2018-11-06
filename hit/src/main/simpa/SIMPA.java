@@ -342,14 +342,17 @@ public class SIMPA {
 			"Maximal length of random walk for counter example search", Options.MAX_CE_LENGTH);
 	private static IntegerOption MAX_CE_RESETS = new IntegerOption("--maxceresets",
 			"Maximal number of random walks for counter example search", Options.MAX_CE_RESETS);
+	private static BooleanOption USE_DT_CE = new BooleanOption("--dt-ce",
+			"use distinction tree to make a pseudo-checking sequence when searching a counter-exemple");
 	private static StringOption INITIAL_INPUT_SYMBOLS = new StringOption("-I", "Initial input symbols (a,b,c)",
 			Options.INITIAL_INPUT_SYMBOLS);
 	private static StringOption INITIAL_INPUT_SEQUENCES = new StringOption("-Z",
 			"Initial distinguishing sequences (a-b,a-c,a-c-b))", Options.INITIAL_INPUT_SEQUENCES);
 	private static BooleanOption INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = new BooleanOption("-I=X",
 			"Initial input symbols set to X");
-	private static Option<?>[] ZQOptions = new Option<?>[] { STOP_AT_CE_SEARCH, MAX_CE_LENGTH, MAX_CE_RESETS,
-			INITIAL_INPUT_SYMBOLS, INITIAL_INPUT_SEQUENCES, INITIAL_INPUT_SYMBOLS_EQUALS_TO_X };
+	private static Option<?>[] ZQOptions = new Option<?>[] { STOP_AT_CE_SEARCH,
+			MAX_CE_LENGTH, MAX_CE_RESETS, USE_DT_CE, INITIAL_INPUT_SYMBOLS,
+			INITIAL_INPUT_SEQUENCES, INITIAL_INPUT_SYMBOLS_EQUALS_TO_X };
 
 	// LocalizerBased options
 	private static IntegerOption STATE_NUMBER_BOUND = new IntegerOption("--stateBound",
@@ -385,8 +388,8 @@ public class SIMPA {
 			"--use-reset", "hW is allowed to use reset");
 	private static Option<?>[] hWOptions = new Option<?>[] { ADD_H_IN_W,
 			TRY_CE_FROM_TRACE, CHECK_INCONSISTENCY_H_MAPPING, REUSE_HZXW,
-			MAX_CE_LENGTH, MAX_CE_RESETS, HW_WITH_KNOWN_W, ADAPTIVE_H,
-			ADAPTIVE_W_SEQ, HW_WITH_RESET };
+			MAX_CE_LENGTH, MAX_CE_RESETS, USE_DT_CE, HW_WITH_KNOWN_W,
+			ADAPTIVE_H, ADAPTIVE_W_SEQ, HW_WITH_RESET };
 
 	// RS Options
 	private static BooleanOption RS_WITH_UNKNOWN_H = new BooleanOption(
@@ -555,6 +558,7 @@ public class SIMPA {
 			Options.MAX_CE_LENGTH = MAX_CE_LENGTH.getValue()
 					* MAX_CE_RESETS.getValue();
 		}
+		Options.USE_DT_CE = USE_DT_CE.getValue();
 		Options.INITIAL_INPUT_SYMBOLS = INITIAL_INPUT_SYMBOLS.getValue();
 		Options.INITIAL_INPUT_SEQUENCES = INITIAL_INPUT_SEQUENCES.getValue();
 		Options.INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = INITIAL_INPUT_SYMBOLS_EQUALS_TO_X.getValue();

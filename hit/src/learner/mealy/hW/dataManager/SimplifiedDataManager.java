@@ -256,7 +256,10 @@ public class SimplifiedDataManager {
 					seq.getOutput(i), hExceptions));
 		return outputs;
 	}
-	
+
+	public void walkWithoutCheckReset() {
+		recordReset();
+	}
 
 	public String apply(String input) {
 		if (Options.LOG_LEVEL == Options.LogLevel.ALL)
@@ -328,6 +331,10 @@ public class SimplifiedDataManager {
 
 	public void reset() {
 		driver.reset();
+		recordReset();
+	}
+
+	private void recordReset() {
 		traceSinceReset = new LmTrace();
 		globalTraces.add(traceSinceReset);
 		lastknownState = null;

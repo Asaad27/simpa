@@ -105,7 +105,7 @@ public class TotallyAdaptiveW extends
 		implements
 		DistinctionStruct<AdaptiveSymbolSequence, AdaptiveSymbolSequence> {
 
-	private class AdaptiveCharacterization implements
+	public class AdaptiveCharacterization implements
 			Characterization<AdaptiveSymbolSequence, AdaptiveSymbolSequence> {
 		TotallyAdaptiveW characterizationPos;
 
