@@ -19,7 +19,7 @@ import automata.mealy.GenericInputSequence.Iterator;
 import automata.mealy.distinctionStruct.TotallyAdaptiveW;
 import automata.mealy.distinctionStruct.TotallyAdaptiveW.AdaptiveCharacterization;
 import automata.mealy.splittingTree.LY_SplittingTree;
-import automata.mealy.splittingTree.LY_SplittingTreeCalculator;
+import automata.mealy.splittingTree.smetsersSplittingTree.SplittingTree;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import main.simpa.Options;
@@ -106,9 +106,10 @@ public class LY_basedOracle {
 			currentTrace = traces.get(traces.size() - 1);
 		}
 		inputSymbols = driver.getInputSymbols();
-		TotallyAdaptiveW distinctionTree = new LY_SplittingTreeCalculator(
-				conjecture, driver.getInputSymbols(),
-				Options.LOG_LEVEL == LogLevel.ALL, true).computeW();
+		TotallyAdaptiveW distinctionTree = new SplittingTree(conjecture)
+				.computeW();
+		if (!conjecture.acceptCharacterizationSet(distinctionTree))
+			throw new RuntimeException("invalid tree");
 		if (verbose) {
 			LogManager.logInfo("using distinction tree ", distinctionTree);
 			distinctionTree.exportToDot();
