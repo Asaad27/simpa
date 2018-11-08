@@ -21,6 +21,7 @@ import learner.mealy.tree.ZStatsEntry;
 import main.simpa.Options;
 import stats.Graph.PlotStyle;
 import stats.attribute.Attribute;
+import stats.attribute.ComputedAttribute;
 import stats.attribute.restriction.ClassRestriction;
 import stats.attribute.restriction.EqualsRestriction;
 import stats.attribute.restriction.InSetRestriction;

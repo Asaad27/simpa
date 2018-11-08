@@ -1,6 +1,7 @@
 package stats;
 
 import stats.attribute.Attribute;
+import stats.attribute.ComputedAttribute;
 
 public abstract class StatsEntry {
 
@@ -19,7 +20,21 @@ public abstract class StatsEntry {
 	 * @param a an attribute in {@link StatsEntry#getAttributes()}
 	 * @return the value of the Attribute a.
 	 */
-	public abstract <T extends Comparable<T>> T get(Attribute<T> a);
+	public final <T extends Comparable<T>> T get(Attribute<T> a) {
+		if (a instanceof ComputedAttribute)
+			return ((ComputedAttribute<T>) a).getValue(this);
+		return getStaticAttribute(a);
+	}
+
+	/**
+	 * get the value of a non-computed attribute
+	 * 
+	 * @param a
+	 *            a non-computed attribute
+	 * @return
+	 */
+	public abstract <T extends Comparable<T>> T getStaticAttribute(
+			Attribute<T> a);
 	
 	public <T extends Comparable<T>> Float getFloatValue(Attribute<T> a){
 		throw new RuntimeException();

@@ -147,7 +147,7 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends Comparable<T>> T get(Attribute<T> a) {
+	public <T extends Comparable<T>> T getStaticAttribute(Attribute<T> a) {
 		if (a == RESET_CALL_NB)
 			return (T) new Integer(resetCallNb);
 		if (a == HOMING_SEQUENCE_LENGTH)

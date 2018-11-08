@@ -78,7 +78,7 @@ public class CombinatorialStatsEntry extends StatsEntry {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends Comparable<T>> T get(Attribute<T> a) {
+	public <T extends Comparable<T>> T getStaticAttribute(Attribute<T> a) {
 		if (a == TRACE_LENGTH)
 			return (T) new Integer(traceLength);
 		if (a == INPUT_SYMBOLS)

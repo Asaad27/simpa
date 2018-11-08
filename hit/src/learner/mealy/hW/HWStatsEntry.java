@@ -317,7 +317,7 @@ public class HWStatsEntry extends StatsEntry {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends Comparable<T>> T get(Attribute<T> a) {
+	public <T extends Comparable<T>> T getStaticAttribute(Attribute<T> a) {
 		if (a == MAX_W_TOTAL_LENGTH)
 			return (T) new Integer(maxWTotalLength);
 		if (a == MAX_W_SIZE)

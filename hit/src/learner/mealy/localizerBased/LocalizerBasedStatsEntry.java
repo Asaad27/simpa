@@ -145,7 +145,7 @@ public class LocalizerBasedStatsEntry extends StatsEntry {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends Comparable<T>> T get(Attribute<T> a) {
+	public <T extends Comparable<T>> T getStaticAttribute(Attribute<T> a) {
 		if (a == W_SIZE)
 			return (T) new Integer(WSize);
 		if (a == W1_LENGTH)
