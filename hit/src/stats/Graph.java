@@ -21,7 +21,10 @@ import tools.loggers.LogManager;
 public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_ORD>> {
 	public enum PlotStyle {
 		POINTS("with points"), AVERAGE("with linespoints ps 1.5"), AVERAGE_WITH_EXTREMA("with errorlines"), MEDIAN(
-				"with linespoint ps 1.5"), SMOOTH("with linespoints"),;
+				"with linespoint ps 1.5"), SMOOTH("with linespoints"),
+		BOXPLOT("with boxplot"),
+		CANDLESTICK("with candlesticks whiskerbars"),
+		;
 		public String plotLine;
 
 		private PlotStyle(String plotLine) {
@@ -64,6 +67,8 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 			return "rgb '#" + r_ + g_ + b_ + "' ";
 		}
 	}
+
+	static final Color BLACK = new Color(0, 0, 0);
 
 	public static class PointShape {
 		public final int style;
@@ -250,12 +255,24 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 			case AVERAGE_WITH_EXTREMA:
 				plotLines.append(" using 1:3:4:5:xticlabels(2)");
 				break;
+			case BOXPLOT:
+				plotLines.append(" using (0):3:(0):1:xtic(2)");//TODO xticslabel ?
+				break;
+			case CANDLESTICK:
+				plotLines.append(" using 1:5:5:5:5 with candlesticks lc "
+						+ ((color == null ? BLACK : color).toGnuplotString())
+						+ " notitle,\\\n '' using 1:4:3:7:6:xticlabels(2)");
 			}
 			lineStyle = lineStyle.replace("linespoint", "point");
 			lineStyle = lineStyle.replace("errorlines", "errorbar");
-		}
+		} else if (style == PlotStyle.BOXPLOT)
+			plotLines.append(" using (0):2:(0):1");
+		else if (style == PlotStyle.CANDLESTICK)
+			plotLines.append(" using 1:4:4:4:4 with candlesticks lc "
+					+ ((color == null ? BLACK : color).toGnuplotString())
+					+ " notitle,\\\n '' using 1:3:2:6:5");
 		plotLines.append(" " + lineStyle);
-		if (pointType != null) {
+		if (pointType != null && style != PlotStyle.CANDLESTICK) {
 			plotLines.append(" pt " + pointType.style);
 		}
 		if (color != null) {
@@ -520,6 +537,7 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		}
 
 		StringBuilder r = new StringBuilder();
+		r.append("set style boxplot fraction 1 nooutliers sorted\n");
 
 		if (exportForLatex) {
 			r.append("set terminal epslatex ");
@@ -715,6 +733,7 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		}
 		switch (style) {
 		case POINTS:
+		case BOXPLOT:
 			for (StatsEntry s : stats.getStats()) {
 				tempWriter.write(getForDatafile(s.get(abs)) + " "
 						+ getForDatafile(s.get(ord)) + "\n");
@@ -741,6 +760,23 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 						+ getForDatafile(entrie.attributeAVG(ord)) + " "
 						+ getForDatafile(entrie.attributeMin(ord)) + " "
 						+ getForDatafile(entrie.attributeMax(ord)) + "\n");
+			}
+		}
+			break;
+		case CANDLESTICK: {
+			Map<T_ABS, StatsSet> sorted = stats.sortByAtribute(abs);
+			List<T_ABS> keys = new ArrayList<T_ABS>(sorted.keySet());
+			Collections.sort(keys);
+			for (T_ABS key : keys) {
+				StatsSet entrie = sorted.get(key);
+				tempWriter.write(getForDatafile(key) + " "
+						+ getForDatafile(entrie.attributeMin(ord)) + " "
+						+ getForDatafile(entrie.attributeFirstQuartille(ord))
+						+ " " + getForDatafile(entrie.attributeMedian(ord))
+						+ " "
+						+ getForDatafile(entrie.attributeLastQuartille(ord))
+						+ " " + getForDatafile(entrie.attributeMax(ord))
+						+ "\n");
 			}
 		}
 			break;
@@ -779,8 +815,6 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 				}
 			}
 		}
-			break;
-		default:
 			break;
 		}
 

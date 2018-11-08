@@ -953,8 +953,9 @@ public class SIMPA {
 				StatsSet stats = new StatsSet(statFile);
 				GraphGenerator gen = stats.get(0).getDefaultsGraphGenerator();
 				gen.generate(stats);
-				globalGraph.generate(stats);
+				globalGraph.add(stats);
 			}
+			globalGraph.generate();
 		}
 
 	}

@@ -183,6 +183,26 @@ public class StatsSet {
 		return values.get(restrictedStats.size()/2);
 	}
 
+	public <T extends Comparable<T>> T attributeFirstQuartille(Attribute<T> a) {
+		assert restrictedStats.size() > 0;
+		ArrayList<T> values = new ArrayList<T>(restrictedStats.size());
+		for (int i = 0; i < restrictedStats.size(); i++) {
+			values.add(restrictedStats.get(i).get(a));
+		}
+		Collections.sort(values);
+		return values.get(restrictedStats.size() / 4);
+	}
+
+	public <T extends Comparable<T>> T attributeLastQuartille(Attribute<T> a) {
+		assert restrictedStats.size() > 0;
+		ArrayList<T> values = new ArrayList<T>(restrictedStats.size());
+		for (int i = 0; i < restrictedStats.size(); i++) {
+			values.add(restrictedStats.get(i).get(a));
+		}
+		Collections.sort(values);
+		return values.get(3 * restrictedStats.size() / 4);
+	}
+
 	public int size(){
 		return restrictedStats.size();
 	}

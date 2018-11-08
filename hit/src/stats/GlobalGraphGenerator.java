@@ -38,28 +38,42 @@ public class GlobalGraphGenerator extends GraphGenerator {
 	private StatsSet lm = null;
 	private StatsSet zQ = null;
 
-	@Override
-	public void generate(StatsSet s) {
-		String outdir = Options.OUTDIR;
+	public void add(StatsSet s) {
 		if (s.size() == 0)
 			return;
 		StatsEntry s1 = s.get(0);
 		if (s1 instanceof LocalizerBasedStatsEntry)
 			locW = s;
+		if (s1 instanceof HWStatsEntry)
+			hW__ = s;
 		if (s1 instanceof RivestSchapireStatsEntry)
 			rivestSchapire = s;
 		if (s1 instanceof CutterCombinatorialStatsEntry)
 			combinatorialPruning = s;
+		if (s1 instanceof LmStatsEntry) {
+			lm = s;
+		} else if (s1 instanceof ZStatsEntry)
+			zQ = s;
+	}
 
+	public void generate() {
+		String outdir = Options.OUTDIR;
 		File outFile = new File(outdir + "/../RS_Comb_ICTSS");
 		outFile.mkdir();
 		Options.OUTDIR = outFile.getAbsolutePath();
 		if (rivestSchapire != null && combinatorialPruning != null
-				&& locW != null) {
+				&& locW != null && hW__ != null) {
 			makeRS_Comb_NoReset();
 			generate_ICGI2018();
 		}
+		generate_JSS2018();
 		Options.OUTDIR = outdir;
+	}
+
+	@Override
+	public void generate(StatsSet s) {
+		add(s);
+		generate();
 	}
 
 	private void makeRS_Comb_NoReset() {
@@ -94,6 +108,10 @@ public class GlobalGraphGenerator extends GraphGenerator {
 		g.forceOrdRange(null, 100000);
 		g.setFileName("influence_of_states_number_length");
 		g.export();
+	}
+	
+	private void generate_JSS2018() {
+		if (hW__==null)return;
 	}
 
 	/**
