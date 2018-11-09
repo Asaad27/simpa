@@ -1012,6 +1012,14 @@ public class HWLearner extends Learner {
 	 * @return true if one counter example is found, false otherwise
 	 */
 	private boolean searchAndProceedCEInTrace() {
+		if (Options.HW_WITH_RESET && dataManager.getInitialState() == null) {
+			LogManager.logInfo(
+					"Cannot search CE in trace because the initial state is not in conjecture.",
+					" As the search of counter example in trace is based on states incompatibility,",
+					" we need to know all states of conjecture.",
+					" (Otherwise, the computation of compatible states can lead to an incorrect state.");
+			return false;
+		}
 		LogManager.logInfo("Searching counter-example in trace.");
 		int globalTracePos = 0;
 		for (LmTrace trace : fullTraces) {
