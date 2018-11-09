@@ -75,6 +75,48 @@ public class HWLearner extends Learner {
 		driver = d;
 	}
 
+	/**
+	 * Verify that recorded trace can be produced by the driver (need a
+	 * Transparent driver). This method is for assert and debug.
+	 * 
+	 * @return false if one trace produce a different output when executed on
+	 *         driver.
+	 */
+	public boolean checkTracesAreCompatible() {
+		if (driver instanceof TransparentMealyDriver) {
+			Mealy d = ((TransparentMealyDriver) driver).getAutomata();
+			State initialState = d.getInitialState();
+			for (LmTrace trace : fullTraces) {
+				if (!d.apply(trace.getInputsProjection(), initialState)
+						.equals(trace.getOutputsProjection()))
+					return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * try to check that all executions on driver are recorded in
+	 * {@link #fullTraces}. This method is for assertions and debug.
+	 * 
+	 * @return false if there is an inconsistency between driver and traces
+	 *         recorded.
+	 */
+	public boolean checkTraces() {
+		if (!checkTracesAreCompatible())
+			return false;
+		int totalLength = 0;
+		for (LmTrace trace : fullTraces) {
+			totalLength += trace.size();
+		}
+		if (totalLength != driver.numberOfAtomicRequest)
+			return false;
+		if (fullTraces.size() - 1 != driver.numberOfRequest)
+			return false;
+		return true;
+
+	}
+
 	public LmTrace getCounterExempleReset(List<GenericHNDException> hExceptions)
 			throws CeExposedUnknownStateException {
 		LmTrace ce = null;
@@ -136,6 +178,12 @@ public class HWLearner extends Learner {
 			exception = e;
 			returnedCE = null;
 		}
+		assert checkTracesAreCompatible();
+		assert returnedCE == null || !dataManager.getConjecture()
+				.apply(returnedCE.getInputsProjection(),
+						dataManager.getCurrentState().getState())
+				.equals(returnedCE
+						.getOutputsProjection()) : "ce is not a counter example for conjecture…";
 		float duration = (float) (System.nanoTime() - startTime) / 1000000000;
 		stats.increaseOracleCallNb(
 				dataManager.traceSize() - startSize
@@ -248,6 +296,7 @@ public class HWLearner extends Learner {
 			if (i + 1 < traces.size() || ce != null)
 				dataManager.walkWithoutCheckReset();
 		}
+		assert checkTracesAreCompatible();
 		return ce;
 	}
 
@@ -1099,6 +1148,7 @@ public class HWLearner extends Learner {
 			throws ConjectureNotConnexException,
 			OracleGiveCounterExampleException,
 			InconsistencyBeforeSearchingAdvancedAlphaException {
+		assert checkTraces();
 		if (!continueLastLearning) {
 			LogManager.logStep(LogManager.STEPOTHER, "Inferring the system");
 			if (Options.LOG_LEVEL != LogLevel.LOW)
