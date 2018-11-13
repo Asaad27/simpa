@@ -381,29 +381,6 @@ public class SIMPA {
 	private static Option<?>[] localizerBasedOptions = new Option<?>[] {
 			STATE_NUMBER_BOUND, CHARACTERIZATION_SET, };
 
-	// hW options
-	private static BooleanOption ADD_H_IN_W = new BooleanOption("--addHInW",
-			"add homing sequence in W-set.");
-	private static BooleanOption CHECK_INCONSISTENCY_H_MAPPING = new BooleanOption(
-			"--3rd-inconsistency",
-			"search inconsistencies between mapping and conjecture");
-	private static BooleanOption TRY_CE_FROM_TRACE = new BooleanOption(
-			"--tryTraceCE", "Try to use trace as a counter example.");
-	private static BooleanOption REUSE_HZXW = new BooleanOption("--hzxw",
-			"Reuse HZXW");
-	private static BooleanOption HW_WITH_KNOWN_W = new BooleanOption(
-			"--hW-with-known-W", "precompute a W using a transparent driver");
-	private static BooleanOption ADAPTIVE_H = new BooleanOption("--adaptive-h",
-			"use adaptive homing sequence");
-	private static BooleanOption ADAPTIVE_W_SEQ = new BooleanOption(
-			"--adaptive-w-seq", "use adaptive w sequences");
-	private static BooleanOption HW_WITH_RESET = new BooleanOption(
-			"--use-reset", "hW is allowed to use reset");
-	private static Option<?>[] hWOptions = new Option<?>[] { ADD_H_IN_W,
-			TRY_CE_FROM_TRACE, CHECK_INCONSISTENCY_H_MAPPING, REUSE_HZXW,
-			MAX_CE_LENGTH, MAX_CE_RESETS, USE_DT_CE, HW_WITH_KNOWN_W,
-			ADAPTIVE_H, ADAPTIVE_W_SEQ, HW_WITH_RESET };
-
 	// RS Options
 	private static BooleanOption RS_WITH_UNKNOWN_H = new BooleanOption(
 			"--RS-probabilistic",
@@ -511,9 +488,6 @@ public class SIMPA {
 		if (LOCALIZER_BASED_INFERENCE.getValue()) {
 			parse(args, used, localizerBasedOptions);
 		}
-		if (HW_INFERENCE.getValue()) {
-			parse(args, used, hWOptions);
-		}
 		if (RIVETSCHAPIRE_INFERENCE.getValue()) {
 			parse(args, used, RSOptions);
 		}
@@ -575,15 +549,6 @@ public class SIMPA {
 
 		Options.CHARACTERIZATION_SET = CHARACTERIZATION_SET.getValue();
 
-		Options.ADD_H_IN_W = ADD_H_IN_W.getValue();
-		Options.CHECK_INCONSISTENCY_H_NOT_HOMING = CHECK_INCONSISTENCY_H_MAPPING
-				.getValue();
-		Options.TRY_TRACE_AS_CE = TRY_CE_FROM_TRACE.getValue();
-		Options.REUSE_HZXW=REUSE_HZXW.getValue();
-		Options.HW_WITH_KNOWN_W = HW_WITH_KNOWN_W.getValue();
-		Options.HW_WITH_RESET = HW_WITH_RESET.getValue();
-		Options.ADAPTIVE_H = ADAPTIVE_H.getValue();
-		Options.ADAPTIVE_W_SEQUENCES = ADAPTIVE_W_SEQ.getValue();
 		Options.RS_WITH_UNKNOWN_H = RS_WITH_UNKNOWN_H.getValue();
 
 		Options.GENERICDRIVER = GENERIC_DRIVER.getValue();
@@ -633,12 +598,6 @@ public class SIMPA {
 			} catch (Exception e) {
 				LogManager.logError("Warning : Unable to use Weka. Check the buildpath.");
 			}
-		}
-
-		if (HW_INFERENCE.getValue() && !Options.HW_WITH_RESET
-				&& MAX_CE_RESETS.haveBeenParsed) {
-			LogManager.logError(
-					MAX_CE_RESETS + " is not used in hW without reset.");
 		}
 
 		if (GraphViz.check() != 0) {
@@ -1296,9 +1255,6 @@ public class SIMPA {
 
 		System.out.println("> Algorithm based on localizer (called ICTSS2015/Dubai/'noReset')");
 		printUsage(localizerBasedOptions);
-
-		System.out.println("> Algorithm hW");
-		printUsage(hWOptions);
 
 		System.out.println("> Algorithm Rivest&Schapire");
 		printUsage(RSOptions);

@@ -71,20 +71,17 @@ public class Options {
 
 	public static boolean RS_WITH_UNKNOWN_H = false;
 
-	@Deprecated
-	public static boolean ADD_H_IN_W = false;
-	public static boolean CHECK_INCONSISTENCY_H_NOT_HOMING = false;
-	public static boolean REUSE_HZXW = false;
-	public static boolean HW_WITH_KNOWN_W = false;
-	public static boolean ADAPTIVE_H = false;
-	public static boolean ADAPTIVE_W_SEQUENCES = false;
-	public static boolean HW_WITH_RESET = false;
+	// public static boolean CHECK_INCONSISTENCY_H_NOT_HOMING = false;
+	// public static boolean REUSE_HZXW = false;
+	// public static boolean HW_WITH_KNOWN_W = false;
+	// public static boolean ADAPTIVE_H = false;
+	// public static boolean ADAPTIVE_W_SEQUENCES = false;
+	// public static boolean TRY_TRACE_AS_CE = true;
 
 	public static boolean INTERACTIVE = false; //For algorithms which can prompt user for counter example or chosen sequences
 	
 	// Counterexample options
 	
-	public static boolean TRY_TRACE_AS_CE = true;
 	@Deprecated
 	public static boolean STOP_ON_CE_SEARCH = false;
 	@Deprecated

@@ -198,13 +198,17 @@ public class HWStatsEntry extends StatsEntry {
 		this.inputSymbols = d.getInputSymbols().size();
 		this.automata = d.getSystemName();
 		this.seed=Options.SEED;
-		this.reuse_hzxw = Options.REUSE_HZXW;
-		this.precomputedW = Options.HW_WITH_KNOWN_W;
-		this.useAdaptiveH = Options.ADAPTIVE_H;
-		this.useAdaptiveW = Options.ADAPTIVE_W_SEQUENCES;
-		this.useReset = Options.HW_WITH_RESET;
+		this.reuse_hzxw = options.useDictionary.isEnabled();
+		this.precomputedW = options.usePrecomputedW();
+		this.useAdaptiveH = options.useAdaptiveH();
+		this.useAdaptiveW = options.useAdaptiveW();
+		this.useReset = options.useReset.isEnabled();
 		this.add_h_in_w = options.addHInW.isEnabled();
-		oracle = new StatsEntry_OraclePart(options.oracle);
+		this.searchCEInTrace = options.searchCeInTrace.isEnabled() ? "simple"
+				: "none";
+		this.check_3rd_inconsistency = options.checkInconsistenciesHMapping
+				.isEnabled();
+		oracle = new StatsEntry_OraclePart(options.getOracleOption());
 	}
 
 //	protected void setLocalizeSequenceLength(int length){
@@ -426,14 +430,6 @@ public class HWStatsEntry extends StatsEntry {
 	public void updateMemory(int currentMemory) {
 		if (currentMemory > memory)
 			memory = currentMemory;
-	}
-
-	protected void setSearchCEInTrace(String string) {
-		searchCEInTrace = string;
-	}
-	
-	protected void setCheck3rdInconsistency(boolean b) {
-		check_3rd_inconsistency = b;
 	}
 
 	public void setAvgTriedWSuffixes(float f) {

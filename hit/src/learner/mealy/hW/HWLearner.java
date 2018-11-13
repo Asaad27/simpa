@@ -139,7 +139,8 @@ public class HWLearner extends Learner {
 				.getState();
 		boolean found = false;
 		try {
-			found = driver.getCounterExample(options.oracle, conjecture,
+			found = driver.getCounterExample(options.getOracleOption(),
+					conjecture,
 					conjectureStartingState, appliedSequences, forbidReset,
 					stats.oracle);
 		} finally {
@@ -262,12 +263,10 @@ public class HWLearner extends Learner {
 				}
 		}
 		if (options.addHInW.isEnabled()) {
-			if (Options.ADAPTIVE_H)
-				throw new RuntimeException(
-						"not implemented : add h in W and adaptive h are incompatible at this time");
-			if (Options.ADAPTIVE_W_SEQUENCES)
-				throw new RuntimeException(
-						"not implemented : add h in W and adaptive w sequences are incompatible at this time");
+			assert !options
+					.useAdaptiveH() : "not implemented : add h in W and adaptive h are incompatible at this time";
+			assert !options
+					.useAdaptiveW() : "not implemented : add h in W and adaptive w sequences are incompatible at this time";
 			InputSequence hFixed = (InputSequence) h;
 			TotallyFixedW WFixed = (TotallyFixedW) W;
 			boolean hIsInW = false;
@@ -292,7 +291,8 @@ public class HWLearner extends Learner {
 	public void learn() {
 		if (driver instanceof TransparentMealyDriver) {
 			TransparentMealyDriver d = (TransparentMealyDriver) driver;
-			if ((!d.getAutomata().isConnex(true)) && !Options.HW_WITH_RESET)
+			if ((!d.getAutomata().isConnex(true))
+					&& !options.useReset.isEnabled())
 				throw new RuntimeException("driver must be strongly connected");
 		}
 		fullTraces = new ArrayList<>();
@@ -301,15 +301,14 @@ public class HWLearner extends Learner {
 		runtime.gc();
 
 		DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W;
-		if (Options.ADAPTIVE_W_SEQUENCES)
+		if (options.useAdaptiveW())
 			W = new TotallyAdaptiveW();
 		else
 			W = new TotallyFixedW();
 		W.refine(W.getEmptyCharacterization(), new LmTrace());
-		if (Options.HW_WITH_KNOWN_W) {
-			if (Options.ADAPTIVE_W_SEQUENCES)
-				throw new RuntimeException(
-						"To be implemented, only available for preset W");
+		if (options.usePrecomputedW()) {
+			assert !options
+					.useAdaptiveW() : "To be implemented, only available for preset W at this time";
 			W = new TotallyFixedW(
 					LocalizerBasedLearner.computeCharacterizationSet(driver));
 		}
@@ -318,7 +317,7 @@ public class HWLearner extends Learner {
 		long start = System.nanoTime();
 
 		GenericInputSequence h = null;
-		if (!Options.ADAPTIVE_H)
+		if (!options.useAdaptiveH())
 			h = new InputSequence();
 		else
 			h = new AdaptiveSymbolSequence();
@@ -394,7 +393,7 @@ public class HWLearner extends Learner {
 			// TODO since we apply counterExampleTrace on dataManager after
 			// processing it, it would be nicer to add it just after running it
 			// on driver.
-			if (!inconsistencyFound && Options.TRY_TRACE_AS_CE
+			if (!inconsistencyFound && options.searchCeInTrace.isEnabled()
 					&& counterExampleTrace == null) {
 				inconsistencyFound = searchAndProceedCEInTrace();
 /*
@@ -423,7 +422,7 @@ public class HWLearner extends Learner {
 			stateDiscoveredInCe = false;
 			if (!inconsistencyFound && counterExampleTrace == null) {
 				LogManager.logInfo("asking for a counter example");
-				if (Options.HW_WITH_RESET)
+				if (options.useReset.isEnabled())
 					try {
 						counterExampleTrace = getCounterExemple(hExceptions,
 								false);
@@ -506,9 +505,6 @@ public class HWLearner extends Learner {
 		LogManager.logConsole("hw : end of learning : " + duration + "s");
 		stats.setDuration(duration);
 		stats.setAvgTriedWSuffixes((float)nbOfTriedWSuffixes/wRefinenmentNb);
-		stats.setSearchCEInTrace(Options.TRY_TRACE_AS_CE ? "simple" : "none");
-		stats.setCheck3rdInconsistency(
-				Options.CHECK_INCONSISTENCY_H_NOT_HOMING);
 	
 		stats.updateMemory((int) (runtime.totalMemory() - runtime.freeMemory()));
 		stats.finalUpdate(dataManager);
@@ -534,7 +530,7 @@ public class HWLearner extends Learner {
 		driver.stopLog();
 
 		if (driver instanceof TransparentMealyDriver
-				&& !Options.HW_WITH_RESET) {
+				&& options.useReset.isEnabled()) {
 			if ((counterExampleTrace = getShortestCounterExemple()) != null) {
 				dataManager.walkWithoutCheck(counterExampleTrace, null);
 				LogManager.logError("another counter example can be found");
@@ -631,7 +627,7 @@ public class HWLearner extends Learner {
 	}
 
 	private void checkInconsistencyHMapping() {
-		if (!Options.CHECK_INCONSISTENCY_H_NOT_HOMING)
+		if (!options.checkInconsistenciesHMapping.isEnabled())
 			return;
 		LogManager.logInfo(
 				"Checking for inconsistencies between conjecture and h");
@@ -845,7 +841,8 @@ public class HWLearner extends Learner {
 	 */
 	private boolean searchAndProceedCEInTrace() {
 		assert checkTraces();
-		if (Options.HW_WITH_RESET && dataManager.getInitialState() == null) {
+		if (options.useReset.isEnabled()
+				&& dataManager.getInitialState() == null) {
 			LogManager.logInfo(
 					"Cannot search CE in trace because the initial state is not in conjecture.",
 					" As the search of counter example in trace is based on states incompatibility,",
@@ -1051,7 +1048,7 @@ public class HWLearner extends Learner {
 			LmTrace sigma;
 			FullyQualifiedState lastKnownQ = null;
 			FullyQualifiedState q = localize(dataManager);
-			if (Options.REUSE_HZXW) {
+			if (options.useDictionary.isEnabled()) {
 				List<LocalizedHZXWSequence> sequences;
 				while (!(sequences = dataManager
 						.getAndResetReadyForReapplyHZXWSequence()).isEmpty()) {
@@ -1064,7 +1061,7 @@ public class HWLearner extends Learner {
 			try {
 				alpha = dataManager.getShortestAlpha(q);
 			} catch (ConjectureNotConnexException e) {
-				if (!Options.HW_WITH_RESET)
+				if (!options.useReset.isEnabled())
 					throw e;
 				LogManager.logInfo(
 						"Conjecture is not strongly connected and some part are unreachable.");
@@ -1165,7 +1162,7 @@ public class HWLearner extends Learner {
 			assert dataManager.getConjecture().getTransitionFromWithInput(
 					lastKnownQ.getState(), x) != null
 					|| !dataManager.getwNotInK(lastKnownQ, sigma).contains(w);
-			if (Options.REUSE_HZXW) {
+			if (options.useDictionary.isEnabled()) {
 				addHZXWSequence(lastDeliberatelyAppliedH,
 						new LmTrace(alpha, alphaResponse), sigma, wTrace);
 				List<LocalizedHZXWSequence> sequences;
@@ -1186,7 +1183,7 @@ public class HWLearner extends Learner {
 
 	private void proceedReadyHZXW(
 			List<LocalizedHZXWSequence> readyForReapplyHZXWSequence) {
-		assert Options.REUSE_HZXW;
+		assert options.useDictionary.isEnabled();
 		
 		for (LocalizedHZXWSequence localizedSeq : readyForReapplyHZXWSequence) {
 			LmTrace transition = localizedSeq.sequence.getTransition();
@@ -1370,7 +1367,7 @@ public class HWLearner extends Learner {
 	 * @return true if conjecture is equivalent to reference automata.
 	 */
 	public boolean checkEquivalence(File referenceFile) {
-		if (Options.HW_WITH_RESET)
+		if (options.useReset.isEnabled())
 			throw new RuntimeException("not implemented");
 		assert dataManager != null;
 		assert W != null;
