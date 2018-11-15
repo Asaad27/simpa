@@ -564,7 +564,8 @@ public class HWLearner extends Learner {
 				counterExampleTrace = e.getCounterExampletrace();
 			}
 
-			if (!inconsistencyFound && Options.TRY_TRACE_AS_CE) {
+			if (!inconsistencyFound && Options.TRY_TRACE_AS_CE
+					&& counterExampleTrace == null) {
 				inconsistencyFound = searchAndProceedCEInTrace();
 /*
 				counterExampleTrace = searchCEInTrace();
