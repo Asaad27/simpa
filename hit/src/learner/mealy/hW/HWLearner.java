@@ -1012,6 +1012,7 @@ public class HWLearner extends Learner {
 	 * @return true if one counter example is found, false otherwise
 	 */
 	private boolean searchAndProceedCEInTrace() {
+		assert checkTraces();
 		if (Options.HW_WITH_RESET && dataManager.getInitialState() == null) {
 			LogManager.logInfo(
 					"Cannot search CE in trace because the initial state is not in conjecture.",
@@ -1099,6 +1100,11 @@ public class HWLearner extends Learner {
 				try {
 					extendsW(statesHistory, ceTrace, 0);
 					LogManager.logInfo("W extended using trace as CE");
+					assert !(driver instanceof TransparentMealyDriver)
+							|| !((TransparentMealyDriver) driver).getAutomata()
+									.acceptCharacterizationSet(W)
+							|| !((TransparentMealyDriver) driver).getAutomata()
+									.acceptHomingSequence(dataManager.h);
 					return true;
 				} catch (CanNotExtendWException e) {
 					LogManager.logInfo(
@@ -1231,7 +1237,7 @@ public class HWLearner extends Learner {
 				LogManager.logInfo(
 						"Conjecture is not strongly connected and some part are unreachable.");
 				LogManager.logInfo("first, try to search an inconsistency in trace");
-				if (searchAndProceedCEInTrace())
+				if (dataManager.isFullyKnown() && searchAndProceedCEInTrace())
 					throw new InconsistencyBeforeSearchingAdvancedAlphaException();
 				if (!q.isMarkedAsSink()) {
 					LogManager.logInfo(
