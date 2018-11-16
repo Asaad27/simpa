@@ -5,7 +5,7 @@ import java.util.concurrent.Semaphore;
 import tools.Utils;
 
 import main.simpa.Options;
-
+import main.simpa.Options.LogLevel;
 import drivers.ExhaustiveGenerator;
 
 import automata.mealy.Mealy;
@@ -159,7 +159,8 @@ do {
 		} while (!automaton.isConnex());
 a++;
 }while(((EnumeratedMealy)automaton).seed!=1310113);
-		if (!Options.TEST) automaton.exportToDot();
+		if (Options.getLogLevel() == LogLevel.ALL)
+			automaton.exportToDot();
 		return automaton;
 	}
 }

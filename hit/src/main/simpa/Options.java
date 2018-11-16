@@ -14,6 +14,7 @@ public class Options {
 
 	// Test or not
 
+	@Deprecated
 	public static boolean TEST = false;
 
 	// Unicode characters
@@ -220,7 +221,11 @@ public class Options {
 		LogManager.logInfo("Seed used: " + SEED);
 		LogManager.logInfo("Applicable options:");
 
-		if (TEST) {
+		LogManager.logInfo("STOP_ON_CE_SEARCH = " + STOP_ON_CE_SEARCH);
+		if (!STOP_ON_CE_SEARCH) {
+			LogManager.logInfo("MAX_CE_LENGTH = " + MAX_CE_LENGTH);
+			LogManager.logInfo("MAX_CE_RESETS = " + MAX_CE_RESETS);
+		}
 			LogManager.logInfo("NBTEST = " + NBTEST);
 			LogManager.logInfo("MINSTATES = " + MINSTATES);
 			LogManager.logInfo("MAXSTATES = " + MAXSTATES);
@@ -229,9 +234,6 @@ public class Options {
 			LogManager.logInfo("MAXINPUTSYM = " + MAXINPUTSYM);
 			LogManager.logInfo("MINOUTPUTSYM = " + MINOUTPUTSYM);
 			LogManager.logInfo("MAXOUTPUTSYM = " + MAXOUTPUTSYM);
-			LogManager.logInfo("TEST = " + TEST);
-			LogManager.logInfo("TEST = " + TEST);
-		}
 		// TODO: To be completed with options on choice of algo and EFSM
 		LogManager.logLine();
 	}

@@ -85,7 +85,8 @@ public class CounterMealy extends Mealy implements Serializable {
 		for (State s : m.getStates())
 			if (m.getTransitionFromWithInput(s, inputSymbol) == null)
 				m.addTransition(new MealyTransition(m, s, s, inputSymbol, notInCounterSuffix));
-		if (!Options.TEST) m.exportToDot();
+		if (Options.getLogLevel() == LogLevel.ALL)
+			m.exportToDot();
 		return m;
 	}
 

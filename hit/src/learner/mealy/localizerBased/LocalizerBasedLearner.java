@@ -151,12 +151,12 @@ public class LocalizerBasedLearner extends Learner {
 					sigma,
 					dataManager.getSubtrace(newStatePos,
 							dataManager.traceSize()));
-			if (Options.TEST)
-				dataManager.updateCKVT();
+			assert dataManager
+					.updateCKVT() : "this call was driven by a «test» option which is Deprecated now.";
 			if (dataManager.getC(dataManager.traceSize()) == null) {
 				localize(dataManager, W);
-				if (Options.TEST)
-					dataManager.updateCKVT();
+				assert dataManager
+						.updateCKVT() : "this call was driven by a «test» option which is Deprecated now.";
 			}
 			assert dataManager.updateCKVT();
 		}
@@ -167,7 +167,7 @@ public class LocalizerBasedLearner extends Learner {
 		stats.updateMemory((int) (runtime.totalMemory() - runtime.freeMemory()));
 		stats.setTraceLength(dataManager.traceSize());
 		stats.updateWithConjecture(dataManager.getConjecture());
-		if (Options.getLogLevel() == Options.LogLevel.ALL || Options.TEST)
+		if (Options.getLogLevel() == Options.LogLevel.ALL)
 			LogManager.logConsole(dataManager.readableTrace());
 		dataManager.getConjecture().exportToDot();
 		if (driver instanceof TransparentMealyDriver) {

@@ -82,11 +82,8 @@ public class LogManager {
 	}
 
 	public static void logConsole(String s) {
-		if (!Options.TEST) {
-			System.out.flush();
-			//System.out.println(tfm.format(new Date()) + s);
-			System.out.println(prefix + s);
-		}
+		System.out.println(prefix + s);
+		System.out.flush();
 	}
 
 	public static void logError(String s) {
