@@ -38,6 +38,7 @@ import drivers.efsm.real.ScanDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
 import main.simpa.Options.LogLevel;
+import options.CanNotComputeOptionValueException;
 import options.OptionsGroup;
 import options.automataOptions.AutomataChoice;
 import options.outputOptions.OutputOptions;
@@ -353,10 +354,6 @@ public class SIMPA {
 	// ZQ options
 	private static BooleanOption STOP_AT_CE_SEARCH = new BooleanOption("--stopatce",
 			"Stop inference when a counter exemple is asked");
-	private static IntegerOption MAX_CE_LENGTH = new IntegerOption("--maxcelength",
-			"Maximal length of random walk for counter example search", Options.MAX_CE_LENGTH);
-	private static IntegerOption MAX_CE_RESETS = new IntegerOption("--maxceresets",
-			"Maximal number of random walks for counter example search", Options.MAX_CE_RESETS);
 	private static BooleanOption USE_DT_CE = new BooleanOption("--dt-ce",
 			"use distinction tree to make a pseudo-checking sequence when searching a counter-exemple");
 	private static StringOption INITIAL_INPUT_SYMBOLS = new StringOption("-I", "Initial input symbols (a,b,c)",
@@ -366,7 +363,7 @@ public class SIMPA {
 	private static BooleanOption INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = new BooleanOption("-I=X",
 			"Initial input symbols set to X");
 	private static Option<?>[] ZQOptions = new Option<?>[] { STOP_AT_CE_SEARCH,
-			MAX_CE_LENGTH, MAX_CE_RESETS, USE_DT_CE, INITIAL_INPUT_SYMBOLS,
+			USE_DT_CE, INITIAL_INPUT_SYMBOLS,
 			INITIAL_INPUT_SEQUENCES, INITIAL_INPUT_SYMBOLS_EQUALS_TO_X };
 
 	// LocalizerBased options
@@ -398,7 +395,7 @@ public class SIMPA {
 			Options.SUPPORT_MIN);
 	private static Option<?>[] EFSMOptions = new Option<?>[] { GENERIC_DRIVER,
 			SCAN, REUSE_OP_IFNEEDED, FORCE_J48, WEKA, SUPPORT_MIN,
-			MAX_CE_LENGTH, MAX_CE_RESETS };
+	};
 
 	// TestEFSM options //TODO group with Random generator ?
 	private static IntegerOption MIN_PARAMETER = new IntegerOption("--minparameter",
@@ -533,15 +530,6 @@ public class SIMPA {
 		Options.CUTTERCOMBINATORIALINFERENCE = CUTTER_COMBINATORIAL_INFERENCE.getValue();
 		Options.RIVESTSCHAPIREINFERENCE = RIVETSCHAPIRE_INFERENCE.getValue();
 
-		Options.STOP_ON_CE_SEARCH = STOP_AT_CE_SEARCH.getValue();
-		if (!RIVETSCHAPIRE_INFERENCE.getValue()) {
-			Options.MAX_CE_RESETS = MAX_CE_RESETS.getValue();
-			Options.MAX_CE_LENGTH = MAX_CE_LENGTH.getValue();
-		} else {
-			Options.MAX_CE_RESETS = 1;
-			Options.MAX_CE_LENGTH = MAX_CE_LENGTH.getValue()
-					* MAX_CE_RESETS.getValue();
-		}
 		Options.USE_DT_CE = USE_DT_CE.getValue();
 		Options.INITIAL_INPUT_SYMBOLS = INITIAL_INPUT_SYMBOLS.getValue();
 		Options.INITIAL_INPUT_SEQUENCES = INITIAL_INPUT_SEQUENCES.getValue();
@@ -764,6 +752,9 @@ public class SIMPA {
 			d = automataChoice.mealyDriverChoice.createDriver();
 			try {
 				l = Learner.getLearnerFor(d);
+			} catch (CanNotComputeOptionValueException e) {
+				LogManager.logError("unable to infer with these options");
+				return;
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.exit(1);
@@ -793,18 +784,6 @@ public class SIMPA {
 		driver = loadDriver(Options.SYSTEM);
 		if (driver == null)
 			System.exit(1);
-		if (driver instanceof TransparentMealyDriver) {
-			Mealy automaton = ((TransparentMealyDriver) driver).getAutomata();
-			if (!MAX_CE_LENGTH.haveBeenParsed
-					&& !MAX_CE_RESETS.haveBeenParsed) {
-				Options.MAX_CE_RESETS = driver.getInputSymbols().size() * 5000;
-				Options.MAX_CE_LENGTH = automaton.getStateCount() * 20;
-				LogManager.logInfo("Maximum counter example length set to "
-						+ Options.MAX_CE_LENGTH
-						+ " and maximum counter example reset set to "
-						+ Options.MAX_CE_RESETS + " from topology of driver");
-			}
-		}
 		if (Options.LOCALIZER_BASED_INFERENCE
 				|| (Options.RIVESTSCHAPIREINFERENCE && Options.RS_WITH_UNKNOWN_H)) {
 			if (STATE_NUMBER_BOUND.getValue() > 0)

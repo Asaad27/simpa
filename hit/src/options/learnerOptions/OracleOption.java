@@ -3,12 +3,16 @@ package options.learnerOptions;
 import java.util.ArrayList;
 import java.util.List;
 
+import drivers.mealy.MealyDriver;
+import drivers.mealy.transparent.TransparentMealyDriver;
 import options.BooleanOption;
+import options.CanNotComputeOptionValueException;
 import options.GenericMultiArgChoiceOption;
 import options.IntegerOption;
 import options.MultiArgChoiceOption;
 import options.MultiArgChoiceOptionItem;
 import options.OptionTree;
+import tools.loggers.LogManager;
 
 public class OracleOption extends MultiArgChoiceOption {
 	protected final boolean resetAllowed;
@@ -36,12 +40,12 @@ public class OracleOption extends MultiArgChoiceOption {
 			List<OptionTree> randomWalkOptions = new ArrayList<>();
 			maxTraceLength = new IntegerOption("--maxcelength",
 					"maximum length of one random walk (from a reset if there is a reset or for all the walk)",
-					100);
+					"use a length proportional to the size of driver");
 			randomWalkOptions.add(maxTraceLength);
 			if (resetAllowed) {
 				maxTraceNumber = new IntegerOption("--maxceresets",
 						"maximum number of reset i.e. maximum number of random walk from initial state for oracle.",
-						10);
+						"reset the driver a number of time proprtional to its size");
 				randomWalkOptions.add(maxTraceNumber);
 			}
 			mrBeanOnlyIfExists = new BooleanOption(
@@ -98,4 +102,37 @@ public class OracleOption extends MultiArgChoiceOption {
 		return resetAllowed;
 	}
 
+	/**
+	 * compute parameters which depends of driver and check that options are
+	 * compatible with the selected driver.
+	 * 
+	 * @param driver
+	 *            the SUI
+	 */
+	public void updateWithDriver(MealyDriver driver) {
+		if (mrBean.maxTraceLength.useAutoValue()) {
+			mrBean.maxTraceLength
+					.setValue(driver.getInputSymbols().size() * 5000);
+			LogManager.logInfo("Maximum counter example length set to "
+					+ mrBean.getMaxTraceLength());
+		}
+		if (mrBean.maxTraceNumber != null) {
+			mrBean.maxTraceNumber.clearAutoValueError();
+			if (mrBean.maxTraceNumber.useAutoValue()) {
+				if (driver instanceof TransparentMealyDriver) {
+					TransparentMealyDriver transparent = (TransparentMealyDriver) driver;
+					mrBean.maxTraceNumber
+							.setValue(transparent.getStateCount() * 20);
+				} else {
+					mrBean.maxTraceNumber.setAutoValueError(
+							"the value of this option can not be automatically choosen with last tried driver."
+									+ "Please use a transparent driver or specify a value for this option.");
+					assert resetAllowed : "if reset is not allowed, we should not throw an exception";
+					if (getSelectedItem() == mrBean && !mrBean.onlyIfCEExists())
+						throw new CanNotComputeOptionValueException(
+								"need a transparent driver to choose the length of random walk");
+				}
+			}
+		}
+	}
 }

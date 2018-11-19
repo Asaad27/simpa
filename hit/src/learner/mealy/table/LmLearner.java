@@ -29,6 +29,7 @@ public class LmLearner extends Learner {
 		this.driver = (MealyDriver) driver;
 		this.cTable = new LmControlTable(driver.getInputSymbols());
 		stats = new LmStatsEntry(this.driver, options);
+		options.oracle.updateWithDriver(this.driver);
 	}
 
 	private void completeTable() {

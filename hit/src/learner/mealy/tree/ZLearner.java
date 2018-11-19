@@ -32,6 +32,7 @@ public class ZLearner extends Learner {
 	public ZLearner(Driver driver, ZOptions options) {
 		this.options = options;
 		this.driver = (MealyDriver) driver;
+		options.oracle.updateWithDriver(this.driver);
 
 		// Initialize I and Z with specified options
 		if (Options.INITIAL_INPUT_SYMBOLS.length() > 0)

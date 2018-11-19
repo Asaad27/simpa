@@ -118,6 +118,7 @@ public class HWLearner extends Learner {
 	public HWLearner(MealyDriver d, HWOptions options) {
 		driver = d;
 		this.options = options;
+		options.getOracleOption().updateWithDriver(driver);
 	}
 
 	/**

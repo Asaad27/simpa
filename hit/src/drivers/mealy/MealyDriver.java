@@ -23,6 +23,7 @@ import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
 import drivers.Driver;
+import drivers.mealy.transparent.TransparentMealyDriver;
 
 public class MealyDriver extends Driver {
 	public class UnableToComputeException extends Exception {
@@ -112,6 +113,20 @@ public class MealyDriver extends Driver {
 		}
 		Collections.sort(is);
 		return is;
+	}
+
+	/**
+	 * get the number of states in driver if the driver is transparent.
+	 * 
+	 * @return the number of states in driver or {@code null} if the driver is
+	 *         not transparent.
+	 */
+	public Integer getStateCount() {
+		if (this instanceof TransparentMealyDriver) {
+			return ((TransparentMealyDriver) this).getAutomata()
+					.getStateCount();
+		}
+		return null;
 	}
 
 	public List<String> getOutputSymbols() {
