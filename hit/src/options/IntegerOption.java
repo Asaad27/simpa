@@ -1,10 +1,14 @@
 package options;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
@@ -21,16 +25,92 @@ public class IntegerOption extends OptionTree {
 	Integer maximum;
 	Integer minimum;
 
+	/**
+	 * In the case were autoValue is allowed, this method indicate whether the
+	 * user wants to use the value he set or the auto value.
+	 */
+	public boolean useAutoValue() {
+		if (!autoValueIsAllowed())
+			return false;
+		if (autoValueCheckBox != null)
+			return autoValueCheckBox.isSelected();
+		return useAutoValue;
+	}
+
+	/**
+	 * This field hold the value for {@link #useAutoValue()} when there is no
+	 * graphical component. It is better to use the method
+	 * {@link #useAutoValue()} instead of this field.
+	 */
+	private boolean useAutoValue;
+	/**
+	 * a String describing the use of default value. e.g. "use size of set as
+	 * value for this option". A {@code null} String indicate that this option
+	 * do not provide auto value.
+	 */
+	String autoValueLabel = null;
+
+	/**
+	 * indicate if the user is allowed to not provide a value for this option.
+	 * 
+	 * @return true if this option can not be provided
+	 */
+	protected boolean autoValueIsAllowed() {
+		return autoValueLabel != null;
+	}
+
+	JCheckBox autoValueCheckBox = null;
+
+	AutoValueValidator autoValueValidator;
+
 	private final ArgumentDescriptor argument;
 
-	public IntegerOption(String name, String argument, String description,
-			int defaultValue) {
+	private IntegerOption(String argument, String description) {
 		assert argument.startsWith("-");
 		this.argument = new ArgumentDescriptor(AcceptedValues.ONE, argument,
 				this);
 		this.description = description;
-		setValue(defaultValue);
 		setMinimum(0);
+		autoValueValidator = new AutoValueValidator(this);
+		addValidator(autoValueValidator);
+	}
+
+	/**
+	 * constructs an Integer option without auto value;
+	 * 
+	 * @param argument
+	 *            the CLI argument to set the value this option
+	 * @param description
+	 *            an help String
+	 * @param defaultValue
+	 *            the initial value of this option.
+	 */
+	public IntegerOption(String argument, String description,
+			int defaultValue) {
+		this(argument, description);
+		setValue(defaultValue);
+		useAutoValue = true;
+		assert !autoValueIsAllowed();
+	}
+
+	/**
+	 * constructs an Integer option with auto value allowed (user can leave the
+	 * field undecided and it will be computed later);
+	 * 
+	 * @param argument
+	 *            the CLI argument to set the value this option
+	 * @param description
+	 *            an help String
+	 * @param autoValueLabel
+	 *            a text for {@link #autoValueLabel}.
+	 */
+	public IntegerOption(String argument, String description,
+			String autoValueLabel) {
+		this(argument, description);
+		assert autoValueLabel != null;
+		this.autoValueLabel = autoValueLabel;
+		this.useAutoValue = true;
+		assert autoValueIsAllowed();
 	}
 
 	private final List<OptionTree> subOptions = new ArrayList<>();// Sub options
@@ -60,30 +140,68 @@ public class IntegerOption extends OptionTree {
 			}
 		});
 		labelledSpinner.add(spinner);
-		mainConponent = labelledSpinner;
+		labelledSpinner.add(Box.createGlue());
+		if (autoValueIsAllowed()) {
+			JPanel mainConponent = new JPanel();
+			this.mainConponent = mainConponent;
+			mainConponent
+					.setLayout(new BoxLayout(mainConponent, BoxLayout.Y_AXIS));
+			mainConponent.add(labelledSpinner);
+			JPanel checkBoxComponent = new JPanel();
+			checkBoxComponent.setLayout(
+					new BoxLayout(checkBoxComponent, BoxLayout.X_AXIS));
+			autoValueCheckBox = new JCheckBox(autoValueLabel);
+			autoValueCheckBox.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					if (autoValueCheckBox.isSelected())
+						spinner.setEnabled(false);
+					else {
+						spinner.setEnabled(true);
+						autoValueValidator.clearError();
+					}
+				}
+			});
+			if (useAutoValue) {
+				autoValueCheckBox.setSelected(true);
+				spinner.setEnabled(false);
+			}
+			checkBoxComponent.add(Box.createHorizontalStrut(20));
+			checkBoxComponent.add(autoValueCheckBox);
+			checkBoxComponent.add(Box.createGlue());
+			mainConponent.add(checkBoxComponent);
+		} else
+			mainConponent = labelledSpinner;
 	}
 
 	public void setMaximum(Integer maximum) {
+		this.maximum = maximum;
+		if (value == null)
+			return;
 		assert maximum == null || minimum == null || maximum >= minimum;
 		if (maximum != null && value > maximum)
 			setValue(maximum);
-		this.maximum = maximum;
 		if (mainConponent != null) {
 			spinnerModel.setMaximum(maximum);
 		}
 	}
 
 	public void setMinimum(Integer minimum) {
+		this.minimum = minimum;
+		if (value == null)
+			return;
 		assert maximum == null || minimum == null || maximum >= minimum;
 		if (minimum != null && value < minimum)
 			setValue(minimum);
-		this.minimum = minimum;
 		if (mainConponent != null) {
 			spinnerModel.setMaximum(maximum);
 		}
 	}
 
 	public void setValue(Integer value) {
+		if (value == null)
+			return;
 		if (minimum != null && value < minimum)
 			value = minimum;
 		if (maximum != null && value > maximum)
@@ -124,6 +242,7 @@ public class IntegerOption extends OptionTree {
 					+ arg.values.get(0) + " as an Integer");
 			return false;
 		}
+		useAutoValue = false;
 		return true;
 	}
 
@@ -152,7 +271,41 @@ public class IntegerOption extends OptionTree {
 	}
 
 	public int getValue() {
+		assert autoValueIsAllowed() || value != null;
 		return value;
+	}
+
+	public void setAutoValueError(String string) {
+		autoValueValidator.setError(string);
+		validateSelectedTree();
+	}
+
+	public void clearAutoValueError() {
+		autoValueValidator.clearError();
+		validateSelectedTree();
+	}
+
+}
+
+class AutoValueValidator extends OptionValidator {
+
+	public AutoValueValidator(IntegerOption parent) {
+		super(parent);
+	}
+
+	public void clearError() {
+		setCriticality(CriticalityLevel.NOTHING);
+		setMessage("");
+	}
+
+	public void setError(String string) {
+		setCriticality(CriticalityLevel.WARNING);
+		setMessage(string);
+
+	}
+
+	@Override
+	public void check() {
 	}
 
 }
