@@ -1,5 +1,6 @@
 package options.automataOptions;
 
+import drivers.mealy.FromDotMealyDriver;
 import drivers.mealy.MealyDriver;
 import drivers.mealy.real.SIPDriverIPTel;
 import drivers.mealy.transparent.RandomMealyDriver;
@@ -13,6 +14,7 @@ public class MealyDriverChoice extends DriverChoice<MealyDriver> {
 		addChoice(SIPDriverIpTel);
 		addChoice(new DriverChoiceItem<MealyDriver>(this,
 				RandomMealyDriver.class));
+		addChoice(new FromDotMealyDriver.FromDotChoiceItem(this));
 	}
 
 }
