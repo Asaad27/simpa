@@ -16,7 +16,6 @@ import automata.mealy.AdaptiveSymbolSequence;
 import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.OutputSequence;
-import automata.mealy.distinctionStruct.TotallyAdaptiveW;
 import automata.mealy.splittingTree.LY_SplittingTree.InputA;
 import automata.mealy.splittingTree.LY_SplittingTree.InputB;
 import automata.mealy.splittingTree.LY_SplittingTree.InputType;
@@ -35,22 +34,6 @@ import tools.loggers.LogManager;
  * @author Nicolas BREMOND
  */
 public class LY_SplittingTreeCalculator {
-
-	public class CannotComputeSplittingTreeException extends RuntimeException {
-		private static final long serialVersionUID = 1L;
-
-		public CannotComputeSplittingTreeException(Set<State> s) {
-			super("cannot distinguish states of " + s
-					+ (useMultipleSequences ? ""
-							: " without merging two of them."));
-		}
-
-		public CannotComputeSplittingTreeException(
-				List<LY_SplittingTree> biggestLeaves,
-				List<LY_SplittingTree> refined) {
-			super("cannot find path in implication graph.");
-		}
-	}
 
 	/**
 	 * A path from a leaf with an input of type c) to an other leaf. It is used
@@ -118,15 +101,6 @@ public class LY_SplittingTreeCalculator {
 	private boolean verbose;
 
 	/**
-	 * Allow the splitting tree to merge states. If this occurs, the
-	 * distinguishing sequence will be replaced by an adaptative W.
-	 * 
-	 * This is not in Lee & Yannakakis but in the extension to distinction set
-	 * instead of distinction sequence.
-	 */
-	private boolean useMultipleSequences;
-
-	/**
 	 * Compute a splitting tree. The computed splitting tree can be retrieved
 	 * with {@link #getSplittingTree()}
 	 * 
@@ -140,12 +114,10 @@ public class LY_SplittingTreeCalculator {
 	 * 
 	 */
 	public LY_SplittingTreeCalculator(Mealy automaton,
-			Collection<String> inputs, boolean verbose,
-			boolean useMultipleSequences) {
+			Collection<String> inputs, boolean verbose) {
 		this.automaton = automaton;
 		this.inputs = inputs;
 		this.verbose = verbose;
-		this.useMultipleSequences = useMultipleSequences;
 
 		tree = new LY_SplittingTree(new HashSet<>(automaton.getStates()));
 
@@ -157,15 +129,14 @@ public class LY_SplittingTreeCalculator {
 	}
 
 	/**
-	 * Compute a splitting tree with default verbosity and allowing multiple
-	 * sequences.
+	 * Compute a splitting tree with default verbosity.
 	 * 
-	 * @see #LY_SplittingTreeCalculator(Mealy, Collection, boolean,boolean) for
-	 *      more informations
+	 * @see #LY_SplittingTreeCalculator(Mealy, Collection, boolean) for more
+	 *      informations
 	 */
 	public LY_SplittingTreeCalculator(Mealy automaton,
 			Collection<String> inputs) {
-		this(automaton, inputs, Options.LOG_LEVEL == LogLevel.ALL, true);
+		this(automaton, inputs, Options.LOG_LEVEL == LogLevel.ALL);
 	}
 
 	/**
@@ -186,29 +157,11 @@ public class LY_SplittingTreeCalculator {
 			biggestLeaves = getBiggestLeaves();
 			computeInputs();
 			for (LY_SplittingTree leaf : biggestLeaves) {
-				if (leaf.bestInput.isValid() && !leaf.bestInput.mergeStates
+				if (leaf.bestInput.isValid()
 						&& leaf.bestInput.type == InputType.B)
 					processInputB(leaf);
 			}
-			computeCLeaves(false);
-			if (useMultipleSequences) {
-				for (LY_SplittingTree leaf : biggestLeaves) {
-					if (!refined.contains(leaf)) {
-						leaf.bestInput = leaf.bestMergingInput;
-						if (leaf.bestInput.isValid()) {
-							if (leaf.bestInput.type == InputType.A)
-								processInputA(leaf);
-							if (leaf.bestInput.type == InputType.B)
-								processInputB(leaf);
-						}
-					}
-				}
-				computeCLeaves(true);
-			}
-			if (refined.size() != biggestLeaves.size()) {
-				throw new CannotComputeSplittingTreeException(biggestLeaves,
-						refined);
-			}
+			computeCLeaves();
 			leaves.removeAll(refined);
 			leaves.addAll(newLeaves);
 			refined.clear();
@@ -273,37 +226,31 @@ public class LY_SplittingTreeCalculator {
 		for (LY_SplittingTree leaf : biggestLeaves) {
 			for (String input : inputs) {
 				InputTypeExtended r = leaf.inputIsValid(input, automaton,
-						leaves, useMultipleSequences);
+						leaves);
 				r.setInput(input);
-				if (r.mergeStates && r.isBetterThan(leaf.bestMergingInput))
-					leaf.bestMergingInput = r;
 				if (!r.isBetterThan(leaf.bestInput))
 					continue;
 				leaf.bestInput = r;
-				if (r.isValid() && !r.mergeStates && r.type == InputType.A) {
+				if (r.isValid() && r.type == InputType.A) {
 					processInputA(leaf);
 					break;
 				}
 			}
 			if (!leaf.bestInput.isValid()) {
-				throw new CannotComputeSplittingTreeException(
-						leaf.distinguishedInitialStates);
+				// TODO new Sequence is needed…
+				throw new RuntimeException("cannot compute splitting tree");
 			}
 		}
 	}
 
 	/**
 	 * Search path in the graph to process the input of type c).
-	 * 
-	 * @param useMerge
-	 *            indicate if inputs merging some states are allowed for paths
-	 *            in implication graph or not.
 	 */
-	private void computeCLeaves(boolean useMerge) {
+	private void computeCLeaves() {
 		LinkedList<Path> paths = new LinkedList<>();
 		for (LY_SplittingTree leaf : refined) {
 			paths.addAll(leaf.reachedByLeaves);
-			assert leaf.seenInImplacationGraph == false || useMerge;
+			assert leaf.seenInImplacationGraph == false;
 			leaf.seenInImplacationGraph = true;
 		}
 
@@ -311,14 +258,11 @@ public class LY_SplittingTreeCalculator {
 			Path path = paths.poll();
 			if (path.origin.seenInImplacationGraph)
 				continue;
+			path.origin.seenInImplacationGraph = true;
 			if (path.origin.bestInput.isValid()) {
 				assert path.origin.bestInput.type == InputType.C;
-				if (!path.origin.bestInput.mergeStates || useMerge)
-					processInputC(path);
-				else
-					continue;
+				processInputC(path);
 			}
-			path.origin.seenInImplacationGraph = true;
 			for (Path transition : path.origin.reachedByLeaves) {
 				LmTrace seq = new LmTrace();
 				seq.append(transition.seq);
@@ -328,6 +272,10 @@ public class LY_SplittingTreeCalculator {
 			}
 		}
 
+		if (refined.size() != biggestLeaves.size()) {
+			// TODO new seq …
+			throw new RuntimeException("cannot compute splitting tree");
+		}
 	}
 
 	/**
@@ -465,26 +413,24 @@ public class LY_SplittingTreeCalculator {
 	}
 
 	/**
-	 * Create an adaptive distinction set from the computed splitting tree
+	 * Create a distinction sequence from the computed splitting tree
 	 * 
-	 * @return a distinction set for the given automaton.
+	 * @return a distinction sequence for the given automaton.
 	 */
-	public TotallyAdaptiveW computeW() {
-		TotallyAdaptiveW root = new TotallyAdaptiveW();
+	public AdaptiveSymbolSequence computeDistinctionSequence() {
+		AdaptiveSymbolSequence root = new AdaptiveSymbolSequence();
 		class PartialDistinction {
-			public PartialDistinction(TotallyAdaptiveW wPos,
-					AdaptiveSymbolSequence pos,
+			public PartialDistinction(AdaptiveSymbolSequence pos,
 					Map<State, State> reachedStates) {
 				super();
-				this.wPos = wPos;
-				this.seqPos = pos;
+				this.pos = pos;
 				this.reachedStates = reachedStates;
 			}
 
-			public PartialDistinction(TotallyAdaptiveW root,
-					Collection<State> initialStates) {
+			public PartialDistinction(AdaptiveSymbolSequence root,
+					List<State> initialStates) {
 				super();
-				this.wPos = root;
+				this.pos = root;
 				this.reachedStates = new HashMap<>();
 				for (State s : initialStates) {
 					reachedStates.put(s, s);
@@ -493,27 +439,17 @@ public class LY_SplittingTreeCalculator {
 
 			public boolean checkReached(Mealy automaton) {
 				for (Entry<State, State> entry : reachedStates.entrySet()) {
-					if (automaton.applyGetState(getSeqPos().getFullSequence(),
+					if (automaton.applyGetState(pos.getFullSequence(),
 							entry.getKey()) != entry.getValue())
 						return false;
-					// TODO check wPos
-					if (automaton.apply(seqPos.getFullSequence(),
-							entry.getKey()) != seqPos)
+					if (automaton.apply(pos.getFullSequence(),
+							entry.getKey()) != pos)
 						return false;
 				}
 				return true;
 			}
 
-			AdaptiveSymbolSequence seqPos = null;
-
-			private AdaptiveSymbolSequence getSeqPos() {
-				if (seqPos == null) {
-					seqPos = wPos.createNewSymbolSequence();
-				}
-				return seqPos;
-			}
-
-			TotallyAdaptiveW wPos;
+			AdaptiveSymbolSequence pos;
 			Map<State, State> reachedStates;
 		}
 		LinkedList<PartialDistinction> toRefine = new LinkedList<>();
@@ -521,24 +457,10 @@ public class LY_SplittingTreeCalculator {
 		while (!toRefine.isEmpty()) {
 			PartialDistinction currentBuildingNode = toRefine.poll();
 			assert currentBuildingNode.checkReached(automaton);
-			if (currentBuildingNode.reachedStates.size() == 1) {
-				currentBuildingNode.wPos
-						.recordEndOfSequence(currentBuildingNode.getSeqPos());
+			if (currentBuildingNode.reachedStates.size() == 1)
 				continue;
-			}
-			if (new HashSet<>(currentBuildingNode.reachedStates.values())
-					.size() == 1) {
-				assert useMultipleSequences;
-				// we need to apply a new sequence from initial state
-				currentBuildingNode = new PartialDistinction(
-						currentBuildingNode.wPos.recordEndOfSequence(
-								currentBuildingNode.getSeqPos()),
-						currentBuildingNode.reachedStates.keySet());
-
-			}
 			LY_SplittingTree lowestNode = findLowestNodeContaingSet(
 					currentBuildingNode.reachedStates.values());
-			assert lowestNode.distinguishingInputSeq != null;
 			assert lowestNode.checkReached(automaton);
 			InputSequence inputs = lowestNode.distinguishingInputSeq;
 
@@ -553,17 +475,15 @@ public class LY_SplittingTreeCalculator {
 					}
 				}
 				if (!newReachedStates.isEmpty()) {
-					AdaptiveSymbolSequence newPos = currentBuildingNode
-							.getSeqPos()
+					AdaptiveSymbolSequence newPos = currentBuildingNode.pos
 							.extend(new LmTrace(inputs, child.parentOutput));
 					PartialDistinction newDistinction = new PartialDistinction(
-							currentBuildingNode.wPos, newPos, newReachedStates);
+							newPos, newReachedStates);
 					toRefine.add(newDistinction);
 					assert newDistinction.checkReached(automaton);
 				}
 			}
 		}
-		assert automaton.acceptCharacterizationSet(root);
 		return root;
 	}
 
