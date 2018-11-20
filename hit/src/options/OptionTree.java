@@ -204,6 +204,17 @@ public abstract class OptionTree {
 			List<OptionTree> selectedChildren);
 
 	/**
+	 * get the default value, if defined.
+	 * 
+	 * This method aims to be overridden.
+	 * 
+	 * @return the default value if it is defined, {@code null} otherwise.
+	 */
+	protected ArgumentValue getDefaultValue() {
+		return null;
+	}
+
+	/**
 	 * Get the argument which can switch this option to the current value (i.e.
 	 * calling setValueWithArg(getSelectedArgument()) should have no effect).
 	 * 
@@ -422,7 +433,12 @@ public abstract class OptionTree {
 								+ ") to remove ambiguity");
 				assert (getSelectedChildren() == subTrees.get(0));
 			} else {
-				return false;
+				ArgumentValue defaultValue = getDefaultValue();
+				if (defaultValue == null)
+					return false;
+				else {
+					setValueFromArg(defaultValue);
+				}
 			}
 		}
 

@@ -23,6 +23,10 @@ public class BooleanOption extends OptionTree {
 	private List<OptionTree> subTreeIfTrue = new ArrayList<>();
 	private List<OptionTree> subTreeIfFalse = new ArrayList<>();
 	private Boolean isEnabled = false;
+	/**
+	 * @see #setEnabledByDefault(Boolean)
+	 */
+	private Boolean isEnabledByDefault = null;
 	private String name;
 
 	protected ArgumentDescriptor enableArgumentDescriptor = null;
@@ -122,6 +126,17 @@ public class BooleanOption extends OptionTree {
 		updateSubTreeComponent(getSubTreeTitle());
 	}
 
+	/**
+	 * set the default value when no option is parsed
+	 * 
+	 * @param def
+	 *            {@code true} to set enabled by default, {@code false} to set
+	 *            disabled by default or {@code null} to use no default value.
+	 */
+	public void setEnabledByDefault(Boolean def) {
+		isEnabledByDefault = def;
+	}
+
 	public String getSubTreeTitle() {
 		return "options for " + name
 				+ (isEnabled ? " activated" : " disactivated");
@@ -137,6 +152,15 @@ public class BooleanOption extends OptionTree {
 	protected void setValueFromArg(ArgumentValue arg) {
 		assert isActivatedByArg(arg);
 		setEnabled(arg.getName().equals(enableArgumentDescriptor.name));
+	}
+
+	@Override
+	protected ArgumentValue getDefaultValue() {
+		if (isEnabledByDefault == null)
+			return null;
+		if (isEnabledByDefault)
+			return new ArgumentValue(enableArgumentDescriptor);
+		return new ArgumentValue(disableArgumentDescriptor);
 	}
 
 	@Override
