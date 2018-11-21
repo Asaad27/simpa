@@ -30,7 +30,6 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneLayout;
 
 import automata.mealy.InputSequence;
-import automata.mealy.Mealy;
 import drivers.Driver;
 import drivers.ExhaustiveGenerator;
 import drivers.efsm.real.GenericDriver;
@@ -39,8 +38,10 @@ import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
 import main.simpa.Options.LogLevel;
 import options.CanNotComputeOptionValueException;
+import options.MultiArgChoiceOptionItem;
 import options.OptionsGroup;
 import options.automataOptions.AutomataChoice;
+import options.modeOptions.ModeOption;
 import options.outputOptions.OutputOptions;
 import stats.GlobalGraphGenerator;
 import stats.GraphGenerator;
@@ -691,17 +692,6 @@ public class SIMPA {
 		}
 	}
 
-	public static void launch() throws Exception {
-		check();
-		LogManager.start();
-		Options.LogOptions();
-		driver = loadDriver(Options.SYSTEM);
-		Learner learner = Learner.getLearnerFor(driver);
-		learner.learn();
-		driver.logStats();
-		LogManager.end();
-	}
-
 	private static String makeLaunchLine() {
 		StringBuilder r = new StringBuilder();
 		r.append("java ");
@@ -740,7 +730,34 @@ public class SIMPA {
 		return r.toString();
 	}
 
-	protected static void inferOneTime() {
+	private static boolean runWithOptions() {
+		MultiArgChoiceOptionItem selectedMode = modeOption.getSelectedItem();
+		if (selectedMode == modeOption.simple) {
+			try {
+				inferOneTime();
+			} catch (Exception e) {
+				LogManager.end();
+				System.err.println("Unexpected error");
+				e.printStackTrace(System.err);
+				return false;
+			}
+		} else if (selectedMode == modeOption.stats) {
+			if (!run_stats())
+				return false;
+		}
+		return true;
+	}
+
+	/**
+	 * run one inference. This method do not catch RuntimeException which may
+	 * occur during inference.
+	 * 
+	 * @return {@code false} if an error occurred during one inference,
+	 *         {@code true} if everything went fine.
+	 */
+	private static Learner inferOneTime() {
+		Utils.deleteDir(Options.getArffDir());
+		Utils.deleteDir(Options.getDotDir());
 		if (getOutputsOptions().textLoggerOption.isEnabled())
 			LogManager.addLogger(new TextLogger());
 		if (getOutputsOptions().htmlLoggerOption.isEnabled())
@@ -754,7 +771,7 @@ public class SIMPA {
 				l = Learner.getLearnerFor(d);
 			} catch (CanNotComputeOptionValueException e) {
 				LogManager.logError("unable to infer with these options");
-				return;
+				return null;
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.exit(1);
@@ -768,7 +785,9 @@ public class SIMPA {
 			LogManager.end();
 			LogManager.clearsLoggers();
 		}
+		return l;
 	}
+
 	protected static Learner learnOneTime() throws Exception {
 		if (Options.LOG_TEXT)
 			LogManager.addLogger(new TextLogger());
@@ -821,21 +840,14 @@ public class SIMPA {
 		return learner;
 	}
 
-	protected static void run_stats() {
-		String baseDir = Options.getLogDir().getAbsolutePath();
-		File f = new File(baseDir + File.separator + Options.DIRSTATSCSV);
-		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
-			throw new RuntimeException("Unable to create/write " + f.getName());
-		String statsDir = Utils.makePath(f.getAbsolutePath());
-
-		f = new File(baseDir + File.separator + Options.DIRTEST);
-		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
-			throw new RuntimeException("Unable to create/write " + f.getName());
-		String logDir = Utils.makePath(f.getAbsolutePath());
-
-		if (Options.NBTEST > 0)
-			Utils.cleanDir(new File(logDir));
-		Options.OUTDIR = logDir;
+	/**
+	 * launch several inferences and record results in CSV files
+	 * 
+	 * @return {@code false} if an error occurred during one inference,
+	 *         {@code true} if everything went fine.
+	 */
+	private static boolean run_stats() {
+		assert modeOption.getSelectedItem() == modeOption.stats;
 		System.out.println("[+] Testing " + Options.NBTEST + " automaton");
 		if (getLogLevel() != LogLevel.LOW)
 			throw new RuntimeException();
@@ -845,75 +857,20 @@ public class SIMPA {
 			System.out.println("\t" + i + "/" + Options.NBTEST);
 			Options.SEED = Utils.randLong();
 			Utils.setSeed(Options.SEED);
-			Options.OUTDIR = logDir + File.separator + i + File.separator;
-			Utils.createDir(new File(Options.OUTDIR));
-			try {
-				Learner l = learnOneTime();
-
-				StatsEntry learnerStats = l.getStats();
-
-				File globalStats = new File(statsDir + File.separator + learnerStats.getClass().getName() + ".csv");
-				Writer globalStatsWriter;
-				if (!globalStats.exists()) {
-					globalStats.createNewFile();
-					globalStatsWriter = new BufferedWriter(new FileWriter(globalStats));
-					globalStatsWriter.append(learnerStats.getCSVHeader() + "\n");
-				} else {
-					globalStatsWriter = new BufferedWriter(new FileWriter(globalStats, true));
-				}
-
-				globalStatsWriter.append(learnerStats.toCSV() + "\n");
-				globalStatsWriter.close();
-			} catch (Exception e) {
-				LogManager.end();
-				String failDir = baseDir + File.separator + Options.DIRFAIL;
-				Utils.createDir(new File(failDir));
-				failDir = failDir + File.separator + e.getClass().getSimpleName() + "-" + e.getMessage();
-				if (!Utils.createDir(new File(failDir)))
-					failDir = failDir + File.separator + e.getClass().getSimpleName();
-				Utils.createDir(new File(failDir));
-				failDir = failDir + File.separator + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS").format(new Date());
-				try {
-					Utils.copyDir(Paths.get(Options.OUTDIR), Paths.get(failDir));
-					File readMe = new File(failDir + File.separator + "ReadMe.txt");
-					Writer readMeWriter = new BufferedWriter(new FileWriter(readMe));
-					readMeWriter.write(name + " " + new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date()));
-					readMeWriter.write("\nOne learner during stats throw an exception");
-					readMeWriter.write("\n");
-					e.printStackTrace(new PrintWriter(readMeWriter));
-					readMeWriter.write("\n");
-					readMeWriter.write("\n");
-					readMeWriter.write("\nthe driver was " + Options.SYSTEM);
-					readMeWriter.write("\nthe seed was " + Options.SEED);
-					readMeWriter.write("\nyou can try to do this learning again by running something like '"
-							+ makeLaunchLine() + "'");
-
-					readMeWriter.close();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-					System.exit(1);
-				}
-				e.printStackTrace();
-				System.err.println("data saved in " + failDir);
-				System.exit(1);
-			} finally {
-				LogManager.clearsLoggers();
-			}
-
+			if (!learnAndSaveOneTime())
+				return false;
 		}
 
 		if (MAKE_GRAPH.getValue()) {
 			System.out.println("[+] Make Graph");
-			String baseDirGraph = baseDir + File.separator + Options.DIRGRAPHSTATS + File.separator;
-			new File(baseDirGraph).mkdir();
 			GlobalGraphGenerator globalGraph = new GlobalGraphGenerator();
-			for (File statFile : new File(statsDir).listFiles()) {
-				String statName = statFile.getName().substring(0, statFile.getName().length() - 4);
-				statName = statName.substring(statName.lastIndexOf(".") + 1, statName.length());
+			for (File statFile : Options.getStatsCSVDir().listFiles()) {
+				String statName = statFile.getName().substring(0,
+						statFile.getName().length() - 4);
+				statName = statName.substring(statName.lastIndexOf(".") + 1,
+						statName.length());
 				System.out.println("\tmaking graph for " + statName);
-				Options.OUTDIR = baseDirGraph + File.separator + statName;
-				new File(Options.OUTDIR).mkdir();
-				Utils.cleanDir(new File(Options.OUTDIR));
+				Utils.cleanDir(Options.getStatsGraphDir());
 				StatsSet stats = new StatsSet(statFile);
 				GraphGenerator gen = stats.get(0).getDefaultsGraphGenerator();
 				gen.generate(stats);
@@ -921,7 +878,92 @@ public class SIMPA {
 			}
 			globalGraph.generate();
 		}
+		return true;
+	}
 
+	/**
+	 * Launch one inference and record result in CSV files.
+	 * 
+	 * The normal outputs produced by inference are not stored.
+	 * 
+	 * If an exception is thrown during inference, it will be saved in the
+	 * {@link main.simpa.Options#getFailDir()} directory.
+	 * 
+	 * @return {@code false} if an error occurred during one inference,
+	 *         {@code true} if everything went fine.
+	 */
+	private static boolean learnAndSaveOneTime() {
+
+		try {
+			Options.useTmpLogDir();
+			Learner l = inferOneTime();
+
+			StatsEntry learnerStats = l.getStats();
+
+			File globalStats = new File(
+					Options.getStatsCSVDir() + File.separator
+							+ learnerStats.getClass().getName() + ".csv");
+			Writer globalStatsWriter;
+			if (!globalStats.exists()) {
+				globalStats.createNewFile();
+				globalStatsWriter = new BufferedWriter(
+						new FileWriter(globalStats));
+				globalStatsWriter.append(learnerStats.getCSVHeader() + "\n");
+			} else {
+				globalStatsWriter = new BufferedWriter(
+						new FileWriter(globalStats, true));
+			}
+
+			globalStatsWriter.append(learnerStats.toCSV() + "\n");
+			globalStatsWriter.close();
+		} catch (Exception e) {
+			LogManager.end();
+			File failDir = new File(Options.getFailDir() + File.separator
+					+ e.getClass().getSimpleName() + "-" + e.getMessage());
+			if (!Utils.createDir(failDir))
+				failDir = new File(Options.getFailDir() + File.separator
+						+ e.getClass().getSimpleName());
+			Utils.createDir(failDir);
+			failDir = new File(failDir + File.separator
+					+ new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS")
+							.format(new Date()));
+			System.err.println("An error occurred durring inference :");
+			e.printStackTrace();
+			System.err.println("Saving data in " + failDir);
+			try {
+				Utils.copyDir(Options.getLogDir().toPath(), failDir.toPath());
+				File readMe = new File(failDir + File.separator + "ReadMe.txt");
+				Writer readMeWriter = new BufferedWriter(
+						new FileWriter(readMe));
+				readMeWriter.write(
+						name + " " + new SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
+								.format(new Date()));
+				readMeWriter
+						.write("\nOne learner during stats throw an exception");
+				readMeWriter.write("\n");
+				e.printStackTrace(new PrintWriter(readMeWriter));
+				readMeWriter.write("\n");
+				readMeWriter.write("\n");
+				readMeWriter.write("\nthe driver was " + Options.SYSTEM);
+				readMeWriter.write("\nthe seed was " + Options.SEED);
+				readMeWriter.write(
+						"\nyou can try to do this learning again by running something like '"
+								+ makeLaunchLine() + "'");
+
+				readMeWriter.close();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+			return false;
+		} finally {
+			LogManager.clearsLoggers();
+			try {
+				Options.getDotDir().delete();
+			} catch (Exception e) {
+			}
+			Options.useNormalLogDir();
+		}
+		return true;
 	}
 
 	protected static void run_enum() {
@@ -1049,10 +1091,15 @@ public class SIMPA {
 	}
 
 	public static AutomataChoice automataChoice = new AutomataChoice();
-	private static OutputOptions outputsOptions = new OutputOptions();
+	private static ModeOption modeOption = new ModeOption();
 
 	static OutputOptions getOutputsOptions() {
-		return outputsOptions;
+		if (modeOption.getSelectedItem() == modeOption.simple)
+			return modeOption.simple.outputOptions;
+		if (modeOption.getSelectedItem() == modeOption.stats)
+			return modeOption.stats.outputOptions;
+		assert false;
+		return null;
 	}
 
 	protected static LogLevel getLogLevel() {
@@ -1061,8 +1108,8 @@ public class SIMPA {
 
 	private static OptionsGroup allOptions = new OptionsGroup("all") {
 		{
-			addSubOption(outputsOptions);
 			addSubOption(automataChoice);
+			addSubOption(modeOption);
 			validateSubOptions();
 		}
 	};
@@ -1082,7 +1129,7 @@ public class SIMPA {
 				.setLayout(new BoxLayout(optionsPanel, BoxLayout.PAGE_AXIS));
 		scroll.getViewport().add(optionsPanel);
 		optionsPanel.add(automataChoice.getComponent());
-		optionsPanel.add(outputsOptions.getComponent());
+		optionsPanel.add(modeOption.getComponent());
 		optionsPanel.add(Box.createGlue());
 		pane.add(scroll);
 
@@ -1097,14 +1144,7 @@ public class SIMPA {
 				inferThread = new Thread() {
 					@Override
 					public void run() {
-						try {
-							inferOneTime();
-						} catch (Throwable e) {
-							e.printStackTrace();
-							System.err.println(
-									"error while inferring the system.");
-							throw e;
-						}
+						runWithOptions();
 					}
 				};
 				inferThread.start();
@@ -1189,24 +1229,7 @@ public class SIMPA {
 					usage();
 					System.exit(1);
 				}
-				if (STATS_MODE.getValue()) {
-					run_stats();
-				} else if (ENUMERATE_MODE.getValue()) {
-					run_enum();
-				} else {
-					try {
-						Utils.deleteDir(
-								new File(Options.OUTDIR + Options.DIRGRAPH));
-						Utils.deleteDir(
-								new File(Options.OUTDIR + Options.DIRARFF));
-						learnOneTime();
-					} catch (Exception e) {
-						LogManager.end();
-						System.err.println("Unexpected error");
-						e.printStackTrace(System.err);
-						System.exit(1);
-					}
-				}
+				runWithOptions();
 				System.out.println("[+] End");
 			}
 		}
