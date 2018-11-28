@@ -6,7 +6,7 @@ import drivers.Driver;
 import options.GenericOneArgChoiceOption;
 
 public class DriverChoice<T extends Driver>
-		extends GenericOneArgChoiceOption<DriverChoiceItem<T>> {
+		extends GenericOneArgChoiceOption<DriverChoiceItem<? extends T>> {
 	Class<T> driverBaseType;
 
 	protected DriverChoiceItem<T> extraChoice = null;
@@ -17,10 +17,11 @@ public class DriverChoice<T extends Driver>
 	}
 
 	@Override
-	protected DriverChoiceItem<T> selectExtraChoice(ArgumentValue arg) {
+	protected DriverChoiceItem<? extends T> selectExtraChoice(
+			ArgumentValue arg) {
 		assert arg.values.size() > 0;
 		String className = arg.values.get(0);
-		for (DriverChoiceItem<T> driverChoice : choices) {
+		for (DriverChoiceItem<? extends T> driverChoice : choices) {
 			if (driverChoice.driverClass.getName().equals(className))
 				return driverChoice;
 		}

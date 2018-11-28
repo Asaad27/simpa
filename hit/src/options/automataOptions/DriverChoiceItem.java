@@ -7,13 +7,13 @@ public class DriverChoiceItem<T extends Driver> extends OneArgChoiceOptionItem {
 	Class<? extends T> driverClass;
 
 	public DriverChoiceItem(String displayName, String argument,
-			DriverChoice<T> parent, Class<? extends T> driverClass) {
+			DriverChoice<?> parent, Class<? extends T> driverClass) {
 		super(displayName, argument, parent);
 		this.driverClass = driverClass;
 		assert parent.driverBaseType.isAssignableFrom(driverClass);
 	}
 
-	public DriverChoiceItem(DriverChoice<T> parent,
+	public DriverChoiceItem(DriverChoice<?> parent,
 			Class<? extends T> driverClass) {
 		this(driverClass.getSimpleName(), driverClass.getName(), parent,
 				driverClass);
