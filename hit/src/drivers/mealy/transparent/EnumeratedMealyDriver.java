@@ -1,25 +1,51 @@
 package drivers.mealy.transparent;
 
-import java.util.List;
+import java.util.Iterator;
 
-import main.simpa.Options;
-
-import drivers.ExhaustiveGenerator;
-
-import tools.Utils;
+import drivers.Driver;
+import drivers.EnumeratedDriver;
+import drivers.ExhaustiveGeneratorOption;
 import examples.mealy.EnumeratedMealy;
+import options.automataOptions.DriverChoice;
 
-public class EnumeratedMealyDriver extends TransparentMealyDriver implements ExhaustiveGenerator{
+public class EnumeratedMealyDriver extends TransparentMealyDriver
+		implements EnumeratedDriver {
+	EnumeratedMealy automaton;
 
-	public EnumeratedMealyDriver() {
-		super(EnumeratedMealy.getConnexMealy());
-		Options.SEED=((EnumeratedMealy) automata).getSeed();
-		Utils.setSeed(Options.SEED);
+	EnumeratedMealyDriver(EnumeratedMealy automaton) {
+		super(automaton);
+		this.automaton = automaton;
 	}
 
-	public static List<String> getStatHeaders() {
-		return Utils.createArrayList("States", "Inputs", "Outputs", "ARL",
-				"Requests", "Duration", "Transitions");
+	static public class EnumeratedMealyOption
+			extends ExhaustiveGeneratorOption<EnumeratedMealyDriver> {
+
+		public EnumeratedMealyOption(DriverChoice<? extends Driver> parent) {
+			super(parent, EnumeratedMealyDriver.class);
+		}
+
+		@Override
+		public Iterator<EnumeratedMealyDriver> iterator() {
+			return new Iterator<EnumeratedMealyDriver>() {
+				EnumeratedMealy.ProducerThread generator = new EnumeratedMealy.ProducerThread();
+
+				@Override
+				public boolean hasNext() {
+					return generator.hasNext();
+				}
+
+				@Override
+				public EnumeratedMealyDriver next() {
+					return new EnumeratedMealyDriver(generator.next());
+				}
+
+			};
+		}
+	}
+
+	@Override
+	public long getSeed() {
+		return automaton.getSeed();
 	}
 
 }

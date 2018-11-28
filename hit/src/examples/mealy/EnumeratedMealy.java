@@ -1,39 +1,32 @@
 package examples.mealy;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.concurrent.Semaphore;
-
-import tools.Utils;
-
-import main.simpa.Options;
-import main.simpa.Options.LogLevel;
-import drivers.ExhaustiveGenerator;
 
 import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
+import main.simpa.Options;
+import main.simpa.Options.LogLevel;
+import tools.Utils;
 
-public class EnumeratedMealy extends Mealy implements ExhaustiveGenerator {
+public class EnumeratedMealy extends Mealy {
 	private static final long serialVersionUID = -4011527445498341153L;
 
-	private static Semaphore produced = new Semaphore(0);
-	private static Semaphore waiting = new Semaphore(0);
+	static public class ProducerThread extends Thread
+			implements Iterator<EnumeratedMealy> {
+		private Semaphore produced = new Semaphore(0);
+		private Semaphore waiting = new Semaphore(0);
 
-	private static Mealy lastComputed = null;
-
-	private static ProducerThread producer = new ProducerThread();
-
-	static class ProducerThread extends Thread {
-		private long tried=0;
+		private EnumeratedMealy nextAutomaton = null;
+		private long tried = 0;
 		private int statesNb;
 		private int inputNb;
 		private int outputNb;
 		private String[] inputSymbols;
 		private String[] outputSymbols;
 		private EnumeratedMealy automata;
-		protected boolean allDone=false;
-		
-		private long seed=0;
-		
-
+		protected boolean allDone = false;
 
 		public ProducerThread() {
 			automata = new EnumeratedMealy();
@@ -58,28 +51,30 @@ public class EnumeratedMealy extends Mealy implements ExhaustiveGenerator {
 			for (int i = 0; i < outputNb; i++) {
 				outputSymbols[i] = String.valueOf(o++);
 			}
+			start();
 		}
 
 		public void run() {
 			try {
 				waiting.acquire();
 				addTransitionsFromState(1, 0, 0);
-				allDone=true;
-				lastComputed=null;
-				produced.release();//give back hand to learner to let him notice that all conjectures where tried.
-			System.out.println("\nGenerator made "+tried+" automata");
+				allDone = true;
+				nextAutomaton = null;
+				produced.release();// give back hand to learner to let him
+									// notice that all conjectures where tried.
+				System.out.println("\nGenerator made " + tried + " automata");
 			} catch (InterruptedException e) {
-				System.err.println("generetor interupted before generating all automata");
-				throw new RuntimeException (e);
+				System.err.println(
+						"generetor interupted before generating all automata");
+				throw new RuntimeException(e);
 			}
 		}
 
 		private void addTransitionsFromState(long seedFactor, int currentState,
 				int maxDiscoveredState) throws InterruptedException {
 			if (currentState == statesNb) {
-				if (seed!=0)
-					throw new RuntimeException("invalid seed");
-				lastComputed = automata;//for multi-learner, we need to clone automaton here.
+				nextAutomaton = automata;// for multi-learner, we need to clone
+										// automaton here.
 				tried++;
 				produced.release();
 				waiting.acquire();
@@ -103,9 +98,6 @@ public class EnumeratedMealy extends Mealy implements ExhaustiveGenerator {
 					minState = maxDiscoveredState + 1;
 				long stateSeedFactor = (statesNb - minState) * seedFactor;
 				for (int i = minState; i < statesNb; i++) {
-//					if (seed!=0){
-//						i=seed
-//					}
 					if (i > maxDiscoveredState + 1)
 						break;
 					if (i == maxDiscoveredState + 1)
@@ -132,6 +124,53 @@ public class EnumeratedMealy extends Mealy implements ExhaustiveGenerator {
 				}
 			}
 		}
+
+		/**
+		 * get an automata with a given seed
+		 * 
+		 * @param wantedSeed
+		 * @return
+		 */
+		public EnumeratedMealy getConnexMealy(long wantedSeed) {
+			assert tried == 0;
+			while (hasNext()) {
+				EnumeratedMealy m = next();
+				if (m.seed == wantedSeed)
+					return m;
+			}
+			return null;
+		}
+
+		@Override
+		public boolean hasNext() {
+			if (nextAutomaton != null)
+				return true;
+			do {
+				waiting.release();
+				produced.acquireUninterruptibly();
+				if (allDone)
+					return false;
+			} while (!nextAutomaton.isConnex());
+			if (Options.getLogLevel() == LogLevel.ALL)
+				nextAutomaton.exportToDot();
+			return true;
+		}
+
+		@Override
+		public EnumeratedMealy next() {
+			EnumeratedMealy next = nextAutomaton;
+			nextAutomaton = null;
+			if (next == null) {
+				if (!hasNext())
+					throw new NoSuchElementException();
+				else
+					next = next();
+			}
+			assert next != null;
+			assert nextAutomaton == null;
+			return next;
+		}
+
 	}
 
 	protected long seed = 0;
@@ -144,25 +183,6 @@ public class EnumeratedMealy extends Mealy implements ExhaustiveGenerator {
 		super("Enumerated");
 	}
 
-	static int a=0;
-	static public Mealy getConnexMealy() {
-		if (!producer.isAlive())
-			producer.start();
-		Mealy automaton = null;
-do {
-		do {
-			waiting.release();
-			produced.acquireUninterruptibly();
-			if (producer.allDone)
-				throw new EndOfLoopException();
-			automaton = lastComputed;
-		} while (!automaton.isConnex());
-a++;
-}while(((EnumeratedMealy)automaton).seed!=1310113);
-		if (Options.getLogLevel() == LogLevel.ALL)
-			automaton.exportToDot();
-		return automaton;
-	}
 }
 
 //	class NotCannonicMealyException extends RuntimeException {

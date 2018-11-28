@@ -12,7 +12,6 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +30,7 @@ import javax.swing.ScrollPaneLayout;
 
 import automata.mealy.InputSequence;
 import drivers.Driver;
-import drivers.ExhaustiveGenerator;
+import drivers.ExhaustiveGeneratorOption;
 import drivers.efsm.real.GenericDriver;
 import drivers.efsm.real.ScanDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
@@ -679,10 +678,6 @@ public class SIMPA {
 			} catch (ClassNotFoundException e) {
 				throw new Exception("Unable to find the driver. Please check the system name (" + system + ")");
 			}
-		} catch (ExhaustiveGenerator.TooBigSeedException e) {
-			throw e;
-		} catch (ExhaustiveGenerator.EndOfLoopException e) {
-			throw e;
 		} catch (DotAntlrListener.ParseException e) {
 			throw e;
 		} catch (Exception e) {
@@ -944,7 +939,6 @@ public class SIMPA {
 				e.printStackTrace(new PrintWriter(readMeWriter));
 				readMeWriter.write("\n");
 				readMeWriter.write("\n");
-				readMeWriter.write("\nthe driver was " + Options.SYSTEM);
 				readMeWriter.write("\nthe seed was " + Options.SEED);
 				readMeWriter.write(
 						"\nyou can try to do this learning again by running something like '"
@@ -966,129 +960,32 @@ public class SIMPA {
 		return true;
 	}
 
-	protected static void run_enum() {
-		Class<?> driverClass = null;
-		try {
-			driverClass = Class.forName(Options.SYSTEM);
-		} catch (ClassNotFoundException e2) {
-			System.err.println(e2);
-			System.exit(1);
+	protected static boolean run_enum() {
+		ExhaustiveGeneratorOption<? extends Driver> option;
+
+		if (automataChoice.getSelectedItem() == automataChoice.mealy) {
+			option = automataChoice.mealyDriverChoice.exhaustiveDriver;
+		} else {
+			throw new RuntimeException("not implemented");
 		}
 
-		if (!(ExhaustiveGenerator.class.isAssignableFrom(driverClass))) {
-			System.err.println("The driver " + driverClass.getCanonicalName()
-					+ " does not support enumeration of automaton"
-					+ " (must implements "
-					+ ExhaustiveGenerator.class.getCanonicalName() + ")");
-			System.exit(1);
-		}
-		
-		String baseDir = Options.OUTDIR+File.separator+"enum"+File.separator;
-		File f = new File(baseDir + File.separator + Options.DIRSTATSCSV);
-		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
-			throw new RuntimeException("Unable to create/write " + f.getName());
-		String statsDir = Utils.makePath(f.getAbsolutePath());
-		
-		f = new File(baseDir + File.separator + Options.DIRTEST);
-		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
-			throw new RuntimeException("Unable to create/write " + f.getName());
-		String logDir = Utils.makePath(f.getAbsolutePath());
-		Utils.cleanDir(new File(logDir));
-		Options.OUTDIR = logDir;
-		
-		System.out.println("[+] Testing " + Options.NBTEST + " automaton");
+		// System.out.println("[+] Testing " + Options.NBTEST + " automaton");
 		if (getLogLevel() != LogLevel.LOW)
 			throw new RuntimeException();
 
 		int testedAutomata = 0;
-		boolean seedTooBig = false;
-		for (Options.SEED = 0; !seedTooBig
-				&& (!NB_TEST.haveBeenParsed() || Options.SEED < Options.NBTEST); Options.SEED++) {
+		while (option.hasNext()) {
 			Runtime.getRuntime().gc();
-			System.out
-					.println("\t" + testedAutomata + " // " + Options.SEED);
-			Utils.setSeed(Options.SEED);
-			try {
-				Learner l = learnOneTime();
+			System.out.println("\t" + testedAutomata + " // " + Options.SEED);
+				learnAndSaveOneTime();
 				testedAutomata++;
-				StatsEntry learnerStats = l.getStats();
 
-				File globalStats = new File(statsDir + File.separator
-						+ learnerStats.getClass().getName() + ".csv");
-				Writer globalStatsWriter;
-				if (!globalStats.exists()) {
-					globalStats.createNewFile();
-					globalStatsWriter = new BufferedWriter(new FileWriter(
-							globalStats));
-					globalStatsWriter
-							.append(learnerStats.getCSVHeader() + "\n");
-				} else {
-					globalStatsWriter = new BufferedWriter(new FileWriter(
-							globalStats, true));
-				}
-
-				 globalStatsWriter.append(learnerStats.toCSV() + "\n");
-				 globalStatsWriter.close();
-			} catch (ExhaustiveGenerator.TooBigSeedException e) {
-				System.out.println("\nSeed is too big for this driver");
-				seedTooBig = true;
-			} catch (ExhaustiveGenerator.EndOfLoopException e) {
-				System.out
-						.println("\nAll loops of generating automata are done");
-				seedTooBig = true;
-			} catch (Exception e) {
-				LogManager.end();
-				String failDir = baseDir + File.separator + Options.DIRFAIL
-						+ File.separator + "enum";
-				Utils.createDir(new File(failDir));
-				failDir = failDir + File.separator
-						+ e.getClass().getSimpleName() + "-" + e.getMessage();
-				if (!Utils.createDir(new File(failDir)))
-					failDir = failDir + File.separator
-							+ e.getClass().getSimpleName();
-				Utils.createDir(new File(failDir));
-				failDir = failDir
-						+ File.separator
-						+ new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS")
-								.format(new Date());
-				try {
-					Utils.copyDir(Paths.get(Options.OUTDIR), Paths.get(failDir));
-					File readMe = new File(failDir + File.separator
-							+ "ReadMe.txt");
-					Writer readMeWriter = new BufferedWriter(new FileWriter(
-							readMe));
-					readMeWriter.write(name
-							+ " "
-							+ new SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
-									.format(new Date()));
-					readMeWriter
-							.write("\nOne learner during stats throw an exception");
-					readMeWriter.write("\n");
-					e.printStackTrace(new PrintWriter(readMeWriter));
-					readMeWriter.write("\n");
-					readMeWriter.write("\n");
-					readMeWriter.write("\nthe driver was " + Options.SYSTEM);
-					readMeWriter.write("\nthe seed was " + Options.SEED);
-					readMeWriter
-							.write("\nyou can try to do this learning again by running something like '"
-									+ makeLaunchLine() + "'");
-
-					readMeWriter.close();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-					System.exit(1);
-				}
-				e.printStackTrace();
-				System.err.println("data saved in " + failDir);
-			
-			} finally {
-				LogManager.clearsLoggers();
-			}
 
 		}
 		System.out.println(testedAutomata + " automata tested");
-
+		return true;
 	}
+
 
 	public static AutomataChoice automataChoice = new AutomataChoice();
 	private static ModeOption modeOption = new ModeOption();
