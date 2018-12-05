@@ -43,5 +43,6 @@
 	<classpathentry kind="lib" path="lib/json/jackson-mapper-asl-1.9.11.jar"/>
 	<classpathentry kind="lib" path="lib/jsoup-1.8.2.jar"/>
 	<classpathentry kind="lib" path="lib/antlr-4.5.3-complete.jar"/>
+	<classpathentry kind="lib" path="lib/paho.client.mqttv3-1.1.2.jar" sourcepath="lib/paho.client.mqttv3-1.1.2-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
