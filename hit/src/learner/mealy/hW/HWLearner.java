@@ -157,6 +157,8 @@ public class HWLearner extends Learner {
 	 */
 	public LmTrace getCounterExemple(List<GenericHNDException> hExceptions,
 			boolean withReset) throws CeExposedUnknownStateException {
+		System.out.print("oracle\r");
+		System.out.flush();
 		int startSize = dataManager.traceSize();
 		long startTime = System.nanoTime();
 		int startReset = dataManager.getTotalResetNb();
@@ -166,9 +168,10 @@ public class HWLearner extends Learner {
 			stats.setOracle(
 					(Options.USE_DT_CE ? "distinctionTree + " : "") + "MrBean");
 		}
-		LmTrace returnedCE;
+		LmTrace returnedCE = null;
 		CeExposedUnknownStateException exception = null;
 		try {
+			if (Options.USE_DT_CE)
 			returnedCE = getDistinguishingSequenceCounterExample(hExceptions,
 					withReset);
 			if (returnedCE == null)
@@ -191,6 +194,8 @@ public class HWLearner extends Learner {
 				duration, dataManager.getTotalResetNb() - startReset);
 		if (exception != null)
 			throw exception;
+		System.out.print("      \r");
+		System.out.flush();
 		return returnedCE;
 	}
 
@@ -745,7 +750,8 @@ public class HWLearner extends Learner {
 				LogManager.logInfo("The computed conjecture is not correct");
 			}
 		}
-
+		System.out.println("trace : " + driver.numberOfAtomicRequest);
+		System.out.println("reset : " + driver.numberOfRequest);
 	}
 
 	/**
@@ -804,6 +810,10 @@ public class HWLearner extends Learner {
 			return;
 		LogManager.logInfo(
 				"Checking for inconsistencies between conjecture and h");
+//		if (dataManager.getCurrentState() == null) {
+//			assert Options.HW_WITH_RESET : "when not using reset, current state should be known at this point.";
+//			localize(dataManager);
+//		}
 		LinkedList<State> reachableStates = new LinkedList<>();
 		reachableStates.add(dataManager.getCurrentState().getState());
 		Set<State> seenStates = new HashSet<>();
@@ -1013,7 +1023,12 @@ public class HWLearner extends Learner {
 	 * @return true if one counter example is found, false otherwise
 	 */
 	private boolean searchAndProceedCEInTrace() {
+		System.out.print("search ce in trace\r");
+		System.out.flush();
 		assert checkTraces();
+		if (!checkTraces()) {
+			throw new RuntimeException("implem error traces");
+		}
 		if (Options.HW_WITH_RESET && dataManager.getInitialState() == null) {
 			LogManager.logInfo(
 					"Cannot search CE in trace because the initial state is not in conjecture.",
@@ -1027,11 +1042,15 @@ public class HWLearner extends Learner {
 		for (LmTrace trace : fullTraces) {
 			if (searchAndProceedCEInOneTrace(trace,
 					dataManager.getInitialState(), globalTracePos)) {
+				System.out.print("                  \r");
+				System.out.flush();
 				return true;
 			}
 			globalTracePos += trace.size();
 		}
 		LogManager.logInfo("no counter-example found in trace");
+		System.out.print("                  \r");
+		System.out.flush();
 		return false;
 	}
 
@@ -1098,6 +1117,14 @@ public class HWLearner extends Learner {
 						" to transition ", i + globalTracePos,
 						" is not compatible with state ", statesHistory.get(0),
 						" in conjecture.");
+				if (driver instanceof TransparentMealyDriver) {
+					Mealy d = ((TransparentMealyDriver) driver).getAutomata();
+					if (d.acceptCharacterizationSet(W)
+							&& d.acceptHomingSequence(dataManager.h)) {
+						throw new RuntimeException(
+								"possible infinitie loop while searching CE in trace");
+					}
+				}
 				try {
 					extendsW(statesHistory, ceTrace, 0);
 					LogManager.logInfo("W extended using trace as CE");
@@ -1157,6 +1184,8 @@ public class HWLearner extends Learner {
 		return false;
 	}
 
+	boolean first = true;
+
 	public void learn(
 			DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W,
 			GenericInputSequence h, boolean continueLastLearning)
@@ -1202,6 +1231,7 @@ public class HWLearner extends Learner {
 			dataManager = new SimplifiedDataManager(driver, this.W, h,
 					fullTraces, hZXWSequences, zXWSequences, hWSequences,
 					hChecker);
+
 		} else {
 			LogManager.logLine();
 			LogManager.logInfo(

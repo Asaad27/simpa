@@ -73,19 +73,19 @@ public class LocalizerBasedGraphGenerator extends GraphGenerator {
 			g2w1.forceOrdRange(null, s2w1.attributeMax(LocalizerBasedStatsEntry.TRACE_LENGTH));
 		g2w1.export();
 
-		StatsSet s2w2 = new StatsSet(s2);
-		s2w2.restrict(new EqualsRestriction<Integer>(LocalizerBasedStatsEntry.W_SIZE, 2));
-		Graph<Integer, Integer> g2w2 = new Graph<Integer, Integer>(LocalizerBasedStatsEntry.INPUT_SYMBOLS,
-				LocalizerBasedStatsEntry.TRACE_LENGTH);
-		g2w2.plotGroup(s2w2, LocalizerBasedStatsEntry.W_SIZE, Graph.PlotStyle.MEDIAN);
-		g2w2.setForceOrdLogScale(false);
-		g2w2.setFileName("influence_of_input_symbols_w2");
-		g2w2.forceOrdRange(0, null);
-		g2w2.forceAbsRange(0, null);
-		g2w2.plotFunc("0.04*" + makeMaxTheoricalFunction(s2w2, LocalizerBasedStatsEntry.INPUT_SYMBOLS),
-				"shape of complexity bound (1/25)", LineStyle.BOUND);
-		g2w2.forceOrdRange(null, s2w2.attributeMax(LocalizerBasedStatsEntry.TRACE_LENGTH));
-		g2w2.export();
+//		StatsSet s2w2 = new StatsSet(s2);
+//		s2w2.restrict(new EqualsRestriction<Integer>(LocalizerBasedStatsEntry.W_SIZE, 2));
+//		Graph<Integer, Integer> g2w2 = new Graph<Integer, Integer>(LocalizerBasedStatsEntry.INPUT_SYMBOLS,
+//				LocalizerBasedStatsEntry.TRACE_LENGTH);
+//		g2w2.plotGroup(s2w2, LocalizerBasedStatsEntry.W_SIZE, Graph.PlotStyle.MEDIAN);
+//		g2w2.setForceOrdLogScale(false);
+//		g2w2.setFileName("influence_of_input_symbols_w2");
+//		g2w2.forceOrdRange(0, null);
+//		g2w2.forceAbsRange(0, null);
+//		g2w2.plotFunc("0.04*" + makeMaxTheoricalFunction(s2w2, LocalizerBasedStatsEntry.INPUT_SYMBOLS),
+//				"shape of complexity bound (1/25)", LineStyle.BOUND);
+//		g2w2.forceOrdRange(null, s2w2.attributeMax(LocalizerBasedStatsEntry.TRACE_LENGTH));
+//		g2w2.export();
 
 		// StatsSet s2w3 = new StatsSet(s2);
 		// s2w3.restrict(new

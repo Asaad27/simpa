@@ -256,7 +256,11 @@ public class MealyDriver extends Driver {
 				traces);
 		oracle.resetAllowed = resetAllowed;
 		stopLog();
+		System.out.print("seaching LY CE\r");
+		System.out.flush();
 		Boolean found = oracle.searchCE();
+		System.out.print("               \r");
+		System.out.flush();
 		startLog();
 		return found;
 	}
@@ -266,12 +270,12 @@ public class MealyDriver extends Driver {
 		boolean found = false;
 		InputSequence ce = null;
 
-		int maxTries = Options.MAX_CE_RESETS;
+		long maxTries = Options.MAX_CE_RESETS;
 		List<String> is = getInputSymbols();
 		MealyDriver conjDriver = new MealyDriver(c);
 		stopLog();
 		conjDriver.stopLog();
-		int i = 0;
+		long i = 0;
 		while (i < maxTries && !found) {
 			ce = InputSequence.generate(is, maxLength(c));
 			while (triedCE.contains(ce))

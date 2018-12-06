@@ -395,7 +395,8 @@ public class SIMPA {
 	private static BooleanOption RS_WITH_UNKNOWN_H = new BooleanOption(
 			"--RS-probabilistic",
 			"do not compute a homming sequence to give to RS algorithme. h will be computed by RS itself.");
-	private static Option<?>[] RSOptions = new Option<?>[] {RS_WITH_UNKNOWN_H};
+	private static Option<?>[] RSOptions = new Option<?>[] { RS_WITH_UNKNOWN_H,
+			USE_DT_CE };
 	// EFSM options
 	private static BooleanOption GENERIC_DRIVER = new BooleanOption("--generic", "Use generic driver");
 	private static BooleanOption SCAN = new BooleanOption("--scan", "Use scan driver");
@@ -557,6 +558,7 @@ public class SIMPA {
 			Options.MAX_CE_RESETS = 1;
 			Options.MAX_CE_LENGTH = MAX_CE_LENGTH.getValue()
 					* MAX_CE_RESETS.getValue();
+			//TODO move in R&S
 		}
 		Options.USE_DT_CE = USE_DT_CE.getValue();
 		Options.INITIAL_INPUT_SYMBOLS = INITIAL_INPUT_SYMBOLS.getValue();
@@ -817,7 +819,9 @@ public class SIMPA {
 			Mealy automaton = ((TransparentMealyDriver) driver).getAutomata();
 			if (!MAX_CE_LENGTH.haveBeenParsed
 					&& !MAX_CE_RESETS.haveBeenParsed) {
-				Options.MAX_CE_RESETS = driver.getInputSymbols().size() * 5000;
+				long resets = driver.getInputSymbols().size() * 10000;
+				if (resets>Integer.MAX_VALUE)resets=Integer.MAX_VALUE;
+				Options.MAX_CE_RESETS = (int) resets;
 				Options.MAX_CE_LENGTH = automaton.getStateCount() * 20;
 				LogManager.logInfo("Maximum counter example length set to "
 						+ Options.MAX_CE_LENGTH
@@ -905,6 +909,8 @@ public class SIMPA {
 				globalStatsWriter.append(learnerStats.toCSV() + "\n");
 				globalStatsWriter.close();
 			} catch (Exception e) {
+				if (e.getMessage().equals("W-set too large"))
+						continue;
 				LogManager.end();
 				String failDir = baseDir + File.separator + Options.DIRFAIL;
 				Utils.createDir(new File(failDir));
@@ -935,7 +941,7 @@ public class SIMPA {
 				}
 				e.printStackTrace();
 				System.err.println("data saved in " + failDir);
-				System.exit(1);
+				 System.exit(1);
 			} finally {
 				LogManager.clearsLoggers();
 			}

@@ -20,6 +20,14 @@ public class OneConfigPlotter {
 	private final Color color;
 	private PlotStyle plotStyle;
 
+	public Restriction[] getRestrictions() {
+		return restrictions;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
 	/**
 	 * create one configuration of plot.
 	 * 

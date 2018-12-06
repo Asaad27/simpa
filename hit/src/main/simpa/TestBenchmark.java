@@ -1,0 +1,254 @@
+package main.simpa;
+
+import java.io.IOException;
+import java.net.URL;
+
+import automata.mealy.Mealy;
+
+public class TestBenchmark {
+
+	public static void main(String[] args) throws Exception {
+		// From '"http://automata.cs.ru.nl/BenchmarkBankcard/Mealy'
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkBankcard/4_learnresult_MAESTRO_fix.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkBankcard/ASN_learnresult_MAESTRO_fix.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkBankcard/Rabo_learnresult_MAESTRO_fix.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkBankcard/Volksbank_learnresult_MAESTRO_fix.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkBankcard/10_learnresult_MasterCard_fix.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkBankcard/1_learnresult_MasterCard_fix.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkBankcard/4_learnresult_PIN_fix.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkBankcard/4_learnresult_SecureCode%20Aut_fix.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkBankcard/ASN_learnresult_SecureCode%20Aut_fix.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkBankcard/Rabo_learnresult_SecureCode_Aut_fix.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkBankcard/learnresult_fix.dot"));
+		// From '"http://automata.cs.ru.nl/BenchmarkCircuits/Mealy'
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/bbara_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/bbsse_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/bbsse_with_hidden_states_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/bbsse_with_loops_with_hidden_states_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/bbtas_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/beecount_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/beecount_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/cse_with_hidden_states_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/cse_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/cse_with_loops_with_hidden_states_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/cse_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/dk14_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/dk15_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/dk16_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/dk17_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/dk27_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/dk512_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/donfile_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/dvram_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/ex1_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/ex1_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/ex2_with_hidden_states_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/ex2_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/ex2_with_loops_with_hidden_states_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/ex2_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/ex3_with_hidden_states_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/ex3_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/ex3_with_loops_with_hidden_states_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/ex3_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/ex4_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/ex5_with_hidden_states_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/ex5_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/ex5_with_loops_with_hidden_states_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/ex5_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/ex6_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/ex6_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/ex7_with_hidden_states_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/ex7_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/ex7_with_loops_with_hidden_states_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/ex7_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/fetch_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/keyb_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/keyb_with_hidden_states_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/keyb_with_loops_with_hidden_states_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/lion9_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/lion9_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/lion_with_hidden_states_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/lion_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/lion_with_loops_with_hidden_states_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/lion_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/log_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/mark1_with_hidden_states_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/mark1_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/mark1_with_loops_with_hidden_states_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/mark1_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/mc_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/modulo12_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/nucpwr_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/opus_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/opus_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/planet1_with_hidden_states_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/planet1_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/planet1_with_loops_with_hidden_states_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/planet1_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/planet_with_hidden_states_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/planet_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/planet_with_loops_with_hidden_states_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/planet_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/pma_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/pma_with_sink_minimized.dot"));
+//too big		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/ram_test_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/rie_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/s1488_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/s1488_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/s1494_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/s1494_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/s1_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/s1_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/s1a_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/s1a_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/s208_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/s27_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/s27_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/s298_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/s386_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/s386_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/s420_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/s420_with_sink_minimized.dot"));
+//too big		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/s510_with_loops_minimized.dot"));
+//too big		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/s510_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/s820_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/s820_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/s832_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/s832_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/s8_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/sand_with_hidden_states_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/sand_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/sand_with_loops_with_hidden_states_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/sand_with_sink_minimized.dot"));
+//too big		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/scf_with_hidden_states_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/scf_with_loops_minimized.dot"));
+//too big		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/scf_with_loops_with_hidden_states_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/scf_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/shiftreg_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/styr_with_hidden_states_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/styr_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/styr_with_loops_with_hidden_states_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/styr_with_sink_minimized.dot"));
+//too big		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/sync_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/tav_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/tbk_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/tma_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/tma_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/train11_with_hidden_states_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/train11_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/train11_with_loops_with_hidden_states_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/train11_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/train4_with_hidden_states_with_sink_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/train4_with_loops_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/train4_with_loops_with_hidden_states_minimized.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCircuits/train4_with_sink_minimized.dot"));
+		// From '"http://automata.cs.ru.nl/BenchmarkCoffeeMachine/Mealy'
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkCoffeeMachine/coffeemachine.dot"));
+		// From '"http://automata.cs.ru.nl/BenchmarkEdentifier2/Mealy'
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkEdentifier2/learnresult_new_device-simple_fix.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkEdentifier2/learnresult_new_Rand_500_10-15_MC_fix.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkEdentifier2/learnresult_new_W-method_fix.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkEdentifier2/learnresult_old_device-simple_fix.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkEdentifier2/learnresult_old_500_10-15_fix.dot"));
+		// From '"http://automata.cs.ru.nl/BenchmarkESMcontroller/Mealy'
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkESMcontroller/esm-manual-controller.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkESMcontroller/run1_hyp.135.obf.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkESMcontroller/run2_hyp.89.obf.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkESMcontroller/run3_hyp.101.obf.dot"));
+		// From '"http://automata.cs.ru.nl/BenchmarkFromRhapsodyToDezyne/Mealy'
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkFromRhapsodyToDezyne/model1.dot"));
+		//invalid syntax processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkFromRhapsodyToDezyne/model2.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkFromRhapsodyToDezyne/model3.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkFromRhapsodyToDezyne/model4.dot"));
+		// From '"http://automata.cs.ru.nl/BenchmarkIEC60870-5-104/Mealy'
+		// From '"http://automata.cs.ru.nl/BenchmarkMQTT/Mealy'
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/ActiveMQ__invalid.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/ActiveMQ__non_clean.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/ActiveMQ__simple.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/ActiveMQ__single_client.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/ActiveMQ__two_client_will_retain.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/VerneMQ__invalid.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/VerneMQ__non_clean.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/VerneMQ__simple.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/VerneMQ__single_client.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/VerneMQ__two_client.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/VerneMQ__two_client_same_id.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/VerneMQ__two_client_will_retain.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/emqtt__invalid.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/emqtt__non_clean.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/emqtt__simple.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/emqtt__single_client.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/emqtt__two_client.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/emqtt__two_client_same_id.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/emqtt__two_client_will_retain.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/hbmqtt__invalid.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/hbmqtt__non_clean.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/hbmqtt__simple.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/hbmqtt__single_client.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/hbmqtt__two_client.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/hbmqtt__two_client_will_retain.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/mosquitto__invalid.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/mosquitto__mosquitto.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/mosquitto__non_clean.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/mosquitto__single_client.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/mosquitto__two_client.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/mosquitto__two_client_same_id.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkMQTT/mosquitto__two_client_will_retain.dot"));
+		// From '"http://automata.cs.ru.nl/BenchmarkQUICprotocol/Mealy'
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkQUICprotocol/QUICprotocolwithout0RTT.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkQUICprotocol/QUICprotocolwith0RTT.dot"));
+		// From '"http://automata.cs.ru.nl/BenchmarkSSH/Mealy'
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkSSH/OpenSSH.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkSSH/BitVise.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkSSH/DropBear.dot"));
+		// From '"http://automata.cs.ru.nl/BenchmarkTCP/Mealy'
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTCP/TCP_FreeBSD_Client.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTCP/TCP_FreeBSD_Server.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTCP/TCP_Linux_Client.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTCP/TCP_Linux_Server.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTCP/TCP_Windows8_Client.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTCP/TCP_Windows8_Server.dot"));
+		// From '"http://automata.cs.ru.nl/BenchmarkTLS/Mealy'
+		//invalid syntax processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/JSSE_1.8.0_25_server_regular.dot"));
+		//invalid syntax processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/JSSE_1.8.0_31_server_regular.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/GnuTLS_3.3.12_client_full.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/GnuTLS_3.3.12_client_regular.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/GnuTLS_3.3.12_server_full.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/GnuTLS_3.3.12_server_regular.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/GnuTLS_3.3.8_client_full.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/GnuTLS_3.3.8_client_regular.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/GnuTLS_3.3.8_server_full.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/GnuTLS_3.3.8_server_regular.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/miTLS_0.1.3_server_regular.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/NSS_3.17.4_client_full.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/NSS_3.17.4_client_regular.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/NSS_3.17.4_server_regular.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/OpenSSL_1.0.1g_client_regular.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/OpenSSL_1.0.1g_server_regular.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/OpenSSL_1.0.1j_client_regular.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/OpenSSL_1.0.1j_server_regular.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/OpenSSL_1.0.1l_client_regular.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/OpenSSL_1.0.1l_server_regular.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/OpenSSL_1.0.2_client_full.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/OpenSSL_1.0.2_client_regular.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/OpenSSL_1.0.2_server_regular.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/RSA_BSAFE_C_4.0.4_server_regular.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkTLS/RSA_BSAFE_Java_6.1.1_server_regular.dot"));
+		// From '"http://automata.cs.ru.nl/BenchmarkToyModels/Mealy'
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkToyModels/lee_yannakakis_distinguishable.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkToyModels/lee_yannakakis_non_distinguishable.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkToyModels/naiks.dot"));
+		processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkToyModels/cacm.dot"));
+		// From '"http://automata.cs.ru.nl/BenchmarkX-ray-system-PCS/Mealy'
+		//not complete processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkX-ray-system-PCS/learnresult1.dot"));
+		//not complete processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkX-ray-system-PCS/learnresult2.dot"));
+		//not complete processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkX-ray-system-PCS/learnresult3.dot"));
+		//not complete processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkX-ray-system-PCS/learnresult4.dot"));
+		//not complete processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkX-ray-system-PCS/learnresult5.dot"));
+		//not complete processUrl(new URL("http://automata.cs.ru.nl/automata_pmwiki/uploads/BenchmarkX-ray-system-PCS/learnresult6.dot"));
+
+	}
+	public static void processUrl(URL url) throws IOException {System.out.println("processing "+url);
+		Mealy.importFromUrl(url).connectStrongly("yolo", "reset", "no");
+	}
+}

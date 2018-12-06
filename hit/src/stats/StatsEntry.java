@@ -15,6 +15,13 @@ public abstract class StatsEntry {
 	
 	protected abstract Attribute<?>[] getAttributesIntern();
 
+	public <T extends Comparable<T>> boolean hasAttribute(Attribute<T> a) {
+		for (Attribute<?> at : getAttributesIntern())
+			if (at.equals(a))
+				return true;
+		return false;
+	}
+
 	/**
 	 * get the value of a given attribute
 	 * @param a an attribute in {@link StatsEntry#getAttributes()}
