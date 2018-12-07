@@ -1,16 +1,14 @@
 # SIMPA (Eclipse)
 
-### o PREREQUISITES
+###  PREREQUISITES
 
-	Java Runtime Environment	>= 1.7 		 www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html
-	Eclipse 				   >= Mars      eclipse.org/ide/
-	GraphViz				   >= 2	  	    www.graphviz.org/Download.php
-### o INSTALLATION
+	Java Runtime Environment >= 1.7         www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html
+	Eclipse                  >= Mars        eclipse.org/ide/
+	GraphViz                 >= 2           www.graphviz.org/Download.php
+###  INSTALLATION
 
 - Install Eclipse Plugins, following plugins may be necessary:
   - **Eclox** is a simple doxygen frontend plug-in for eclipse, it is used to generate the documentation from sources. You can install with the Help ==> Eclipse Marketplace
-  - **XText** is needed by ANTLR 4. ***Only version 2.7.3 of Xtext works with ANTLR 4***. The Xtext versions 2.8.0 to 2.10.0 fail. Documentation for installation is at http://www.eclipse.org/Xtext/download.html. Don't forget to uncheck "show only the latest version".
-  - **ANTLR** (ANother Tool for Language Recognition) is used for the compilation of .g4 files containing the grammar to generate a parser. SIMPA use ANTLR to analyse .dot file and import into SIMPA. Install ANTLR 4 IDE, ***Go to Help*** > ***Eclipse Marketplace*** and search for antlr. Choose ***ANTLR 4 IDE*** (make sure it's ANTLR 4 IDE not ANTLR IDE) and click Install. Let the installer finish clicking ok if it prompts and restart Eclipse.
 - You can use the ***Import Wizard*** to  command link import an existing project into workspace.
   - From the main menu bar, select  command link ***File*** > ***Import***.... The Import wizard opens.
   - Select ***General*** > ***Existing Project into Workspace*** and click Next.
@@ -21,9 +19,8 @@
 
 —> If you are getting a problem like (`The method getTextContent() is undefined for the type Node`) in Eclipse, my tested solution would be : ***Java Build Path*** > ***Order and Export***, select **JRE System Library** and move it to Top.
 
-—> For compile all parts of SIMPA (include antlr4 files), or you are getting a problem like "**Invalid External Tool Builder**", we need add .g4 files into builders. Right click on project SIMPA, click ***Properties***, and then click the "***Builders***" in the window. Click "***import...***", add .g4 files, for exemple, add "DotMealy.g4" and "SplittingTree.g4".
 
-### o USAGE
+###  USAGE
 
 	- SIMPA - 07/11/2016
 		Checking environment and options, please specify the driverClass
@@ -98,9 +95,9 @@
 	          --ndvmaxtrans  (1) : Maximum number of states before checking NDV value
 
 
-### o Detailed Instructions for Command Line Arguments in Eclipse
+###  Detailed Instructions for Command Line Arguments in Eclipse
 
-- Right-click on your project **simpa-clean**.
+- Right-click on your project **SIMPA**.
 - Go to **Debug As > Java Application** or **Run As > Java Application**.
 - Find the class *SIMPA (main.simpa)*.
 - Go to **Debug As > Debug Configurations** or **Run As > Run Configurations**, and then click that says **Arguments**.
@@ -119,16 +116,17 @@ There are some examples for **Program Arguments** :
 
 # SIMPA (*command*-line)
 
-### o PREREQUISITES
+###  PREREQUISITES
 
-	Java Runtime Environment	>= 1.7 		 www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html
-	GraphViz				   >= 2	  	    www.graphviz.org/Download.php
-### o INSTALLATION
+	Java Runtime Environment >= 1.7        www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html
+	GraphViz                 >= 2          www.graphviz.org/Download.php
+###  INSTALLATION
 
 - **Unix**
   After your download, On Unix shells, the following definitions are needed (SIMPA variable containing the location where the SIMPA checkout was done) : 
-  	export SIMPA="$HOME/clone-simpa/simpa-clean"
-  	export CLASSPATH=".:$SIMPA/hit/lib/json/jackson-mapper-asl-1.9.11.jar:$SIMPA/hit/lib/json/jackson-core-asl-1.9.11.jar\:$SIMPA/hit/lib/sipunit/namespace-1.0.1.jar:$SIMPA/hit/lib/sipunit/dom-2.3.0-jaxb-1.0.6.jar\:$SIMPA/hit/lib/sipunit/xsdlib-20060615.jar:$SIMPA/hit/lib/sipunit/jaxb-api-1.0.1.jar\:$SIMPA/hit/lib/sipunit/jaxb-libs-1.0.3.jar:$SIMPA/hit/lib/sipunit/isorelax-20030108.jar\:$SIMPA/hit/lib/sipunit/concurrent-1.3.3.jar:$SIMPA/hit/lib/sipunit/nist-sdp-1.0.jar\:$SIMPA/hit/lib/sipunit/log4j-1.2.8.jar:$SIMPA/hit/lib/sipunit/jax-qname-1.1.jar\:$SIMPA/hit/lib/sipunit/xalan-2.6.0.jar:$SIMPA/hit/lib/sipunit/relaxngDatatype-20020414.jar\:$SIMPA/hit/lib/sipunit/jaxb-impl-1.0.3.jar:$SIMPA/hit/lib/sipunit/sipunit-2.0.0.jar\:$SIMPA/hit/lib/sipunit/jain-sip-ri-1.2.164.jar:$SIMPA/hit/lib/sipunit/relaxngDatatype-2011.1.jar\:$SIMPA/hit/lib/sipunit/jaxb-xjc-1.0.7.jar:$SIMPA/hit/lib/sipunit/junit-4.8.2.jar\:$SIMPA/hit/lib/sipunit/stun4j-1.0.MOBICENTS.jar:$SIMPA/hit/lib/sipunit/jain-sip-api-1.2.1.jar\:$SIMPA/hit/lib/sipunit/xml-apis-1.0.b2.jar:$SIMPA/hit/lib/sipunit/xercesImpl-2.6.2.jar\:$SIMPA/hit/lib/weka.jar:$SIMPA/hit/lib/jsoup-1.8.2.jar:$SIMPA/hit/lib/htmlunit/httpmime-4.2.2.jar\:$SIMPA/hit/lib/htmlunit/serializer-2.7.1.jar:$SIMPA/hit/lib/htmlunit/commons-io-2.4.jar\:$SIMPA/hit/lib/htmlunit/htmlunit-core-js-2.11.jar:$SIMPA/hit/lib/htmlunit/htmlunit-2.11.jar\:$SIMPA/hit/lib/htmlunit/httpclient-4.2.2.jar:$SIMPA/hit/lib/htmlunit/xalan-2.7.1.jar\:$SIMPA/hit/lib/htmlunit/sac-1.3.jar:$SIMPA/hit/lib/htmlunit/commons-lang3-3.1.jar\:$SIMPA/hit/lib/htmlunit/cssparser-0.9.8.jar:$SIMPA/hit/lib/htmlunit/xercesImpl-2.10.0.jar\:$SIMPA/hit/lib/htmlunit/xml-apis-1.4.01.jar:$SIMPA/hit/lib/htmlunit/nekohtml-1.9.17.jar\:$SIMPA/hit/lib/htmlunit/httpcore-4.2.2.jar:$SIMPA/hit/lib/htmlunit/commons-codec-1.7.jar\:$SIMPA/hit/lib/htmlunit/commons-logging-1.1.1.jar:$SIMPA/hit/lib/htmlunit/commons-collections-3.2.1.jar\:$SIMPA/hit/lib/antlr-4.5.3-complete.jar:$CLASSPATH"
+  
+    export SIMPA="$HOME/clone-simpa/simpa-clean"
+    export CLASSPATH=".:$SIMPA/hit/lib/json/jackson-mapper-asl-1.9.11.jar:$SIMPA/hit/lib/json/jackson-core-asl-1.9.11.jar\:$SIMPA/hit/lib/sipunit/namespace-1.0.1.jar:$SIMPA/hit/lib/sipunit/dom-2.3.0-jaxb-1.0.6.jar\:$SIMPA/hit/lib/sipunit/xsdlib-20060615.jar:$SIMPA/hit/lib/sipunit/jaxb-api-1.0.1.jar\:$SIMPA/hit/lib/sipunit/jaxb-libs-1.0.3.jar:$SIMPA/hit/lib/sipunit/isorelax-20030108.jar\:$SIMPA/hit/lib/sipunit/concurrent-1.3.3.jar:$SIMPA/hit/lib/sipunit/nist-sdp-1.0.jar\:$SIMPA/hit/lib/sipunit/log4j-1.2.8.jar:$SIMPA/hit/lib/sipunit/jax-qname-1.1.jar\:$SIMPA/hit/lib/sipunit/xalan-2.6.0.jar:$SIMPA/hit/lib/sipunit/relaxngDatatype-20020414.jar\:$SIMPA/hit/lib/sipunit/jaxb-impl-1.0.3.jar:$SIMPA/hit/lib/sipunit/sipunit-2.0.0.jar\:$SIMPA/hit/lib/sipunit/jain-sip-ri-1.2.164.jar:$SIMPA/hit/lib/sipunit/relaxngDatatype-2011.1.jar\:$SIMPA/hit/lib/sipunit/jaxb-xjc-1.0.7.jar:$SIMPA/hit/lib/sipunit/junit-4.8.2.jar\:$SIMPA/hit/lib/sipunit/stun4j-1.0.MOBICENTS.jar:$SIMPA/hit/lib/sipunit/jain-sip-api-1.2.1.jar\:$SIMPA/hit/lib/sipunit/xml-apis-1.0.b2.jar:$SIMPA/hit/lib/sipunit/xercesImpl-2.6.2.jar\:$SIMPA/hit/lib/weka.jar:$SIMPA/hit/lib/jsoup-1.8.2.jar:$SIMPA/hit/lib/htmlunit/httpmime-4.2.2.jar\:$SIMPA/hit/lib/htmlunit/serializer-2.7.1.jar:$SIMPA/hit/lib/htmlunit/commons-io-2.4.jar\:$SIMPA/hit/lib/htmlunit/htmlunit-core-js-2.11.jar:$SIMPA/hit/lib/htmlunit/htmlunit-2.11.jar\:$SIMPA/hit/lib/htmlunit/httpclient-4.2.2.jar:$SIMPA/hit/lib/htmlunit/xalan-2.7.1.jar\:$SIMPA/hit/lib/htmlunit/sac-1.3.jar:$SIMPA/hit/lib/htmlunit/commons-lang3-3.1.jar\:$SIMPA/hit/lib/htmlunit/cssparser-0.9.8.jar:$SIMPA/hit/lib/htmlunit/xercesImpl-2.10.0.jar\:$SIMPA/hit/lib/htmlunit/xml-apis-1.4.01.jar:$SIMPA/hit/lib/htmlunit/nekohtml-1.9.17.jar\:$SIMPA/hit/lib/htmlunit/httpcore-4.2.2.jar:$SIMPA/hit/lib/htmlunit/commons-codec-1.7.jar\:$SIMPA/hit/lib/htmlunit/commons-logging-1.1.1.jar:$SIMPA/hit/lib/htmlunit/commons-collections-3.2.1.jar\:$SIMPA/hit/lib/antlr-4.5.3-complete.jar:$CLASSPATH"
 
 - **Cygwin**
 
@@ -141,8 +139,8 @@ There are some examples for **Program Arguments** :
 
 - **Compilation**
 
-  	cd $SIMPA/hit/src
-  	javac -g -d ../bin  */*.java */*/*.java */*/*/*.java */*/*/*/*.java */*/*/*/*/*.java
+    cd $SIMPA/hit/src
+    javac -g -d ../bin  */*.java */*/*.java */*/*/*.java */*/*/*/*.java */*/*/*/*/*.java
 
 - **Run examples**
 
@@ -150,14 +148,15 @@ There are some examples for **Program Arguments** :
 
   - Launching the executable file in its directory
 
-    	cd $SIMPA/hit/bin
-    	rm -f out/*
-    	java main.simpa.SIMPA drivers.mealy.SFM11StefenDriver --lm --html --text
+     cd $SIMPA/hit/bin
+     rm -f out/*
+     java main.simpa.SIMPA drivers.mealy.SFM11StefenDriver --lm --html --text
 
   - Launching the executable file from another directory
-    	export CLASSPATH="$SIMPA/hit/bin:$CLASSPATH"
-    	rm -f out/*
-    	java main.simpa.SIMPA drivers.mealy.SFM11StefenDriver --lm --html --text
+ 
+     export CLASSPATH="$SIMPA/hit/bin:$CLASSPATH"
+     rm -f out/*
+     java main.simpa.SIMPA drivers.mealy.SFM11StefenDriver --lm --html --text
 
   - Output
 
