@@ -68,7 +68,6 @@ public class LiLearner extends Learner {
 	}
 	
 	/* TODO séparer inputs de colonne et inputs de ligne */
-	@SuppressWarnings("unchecked")
 	private void fillTablesForRow(LiControlTableRow ctr, LiDataTableRow dtr) {
 		ParameterizedInputSequence query = ctr.getPIS();
 		query.removeEmptyInput();
@@ -325,7 +324,6 @@ public class LiLearner extends Learner {
 		return modifiedTables;
 	}
 
-	@SuppressWarnings("unchecked")
 	private void handleNBP(NBP nbp) {
 		//Iterates over every line of the table
 		final List<LiControlTableRow> allRows = cTable.getAllRows();

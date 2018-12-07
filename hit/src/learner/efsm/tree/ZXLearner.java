@@ -148,7 +148,6 @@ public class ZXLearner extends Learner {
 
 	public void learn() {
 		LogManager.logConsole("Inferring the system");
-		InputSequence ce;
 
 		// 1. Build-quotient(A, I, Z, {€}) returning U and K = (Q, q0, I, O, hK)
 		LmConjecture Z_Q = buildQuotient(z);

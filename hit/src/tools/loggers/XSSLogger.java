@@ -15,13 +15,11 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import main.simpa.Options;
-import main.simpa.SIMPA;
 
 public class XSSLogger {
 
 	private File file;
 	private File dir;
-	private DateFormat timeFormat;
 	private DateFormat dateFormat;
 	private DateFormat filenameFormat;
 	private Writer writer;
@@ -31,7 +29,6 @@ public class XSSLogger {
 		lineReturn = System.getProperty("line.separator");
 		dir = new File(Options.OUTDIR + "log/xss");
 		filenameFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS");
-		timeFormat = new SimpleDateFormat("[HH:mm:ss:SSS] ");
 		dateFormat = new SimpleDateFormat("MM/dd/yyyy");
 		try {
 			if (!dir.isDirectory()) {

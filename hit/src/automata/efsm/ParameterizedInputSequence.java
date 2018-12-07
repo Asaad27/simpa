@@ -79,7 +79,7 @@ public class ParameterizedInputSequence implements Cloneable, Serializable {
 
 	public ParameterizedInputSequence removeEmptyInput() {
 		if (sequence.get(0).isEpsilonSymbol()){
-			ParameterizedInput remove = sequence.remove(0);
+			sequence.remove(0);
 		}
 		return this;
 	}
@@ -159,7 +159,7 @@ public class ParameterizedInputSequence implements Cloneable, Serializable {
 	 * @return 
 	 */
 	public List<String> getSymbolSequence(){
-		List list = new ArrayList();
+		List<String> list = new ArrayList<>();
 		for (ParameterizedInput pi : sequence) {
 			list.add(pi.getInputSymbol());
 		}

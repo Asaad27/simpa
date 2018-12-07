@@ -84,7 +84,6 @@ public abstract class DriverGenerator {
 	protected ArrayList<WebTransition> transitions = null;
 	protected static Configuration config = null;
 
-	@SuppressWarnings("deprecation")
 	public DriverGenerator(String configFileName) throws JsonParseException,
 			JsonMappingException, IOException {
 		ObjectMapper mapper = new ObjectMapper();

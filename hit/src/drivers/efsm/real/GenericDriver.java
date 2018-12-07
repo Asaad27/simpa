@@ -59,7 +59,6 @@ public class GenericDriver extends LowWebDriver {
 	private final String NO_PARAM_NAME = "noparam";
 	private final String NO_PARAM_VALUE = Parameter.PARAMETER_NO_VALUE;
 	
-	@SuppressWarnings("deprecation")
 	public GenericDriver(String xml) throws IOException {
 		inputs = new ArrayList<>();
 		outputs = new ArrayList<>();
@@ -462,7 +461,7 @@ public class GenericDriver extends LowWebDriver {
 
 	@Override
 	public List<String> getInputSymbols() {
-		return new ArrayList(inputSymbols.values());
+		return new ArrayList<>(inputSymbols.values());
 	}
 
 	@Override
