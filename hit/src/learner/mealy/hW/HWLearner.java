@@ -344,6 +344,7 @@ public class HWLearner extends Learner {
 			try {
 				try {
 					learn(W, h, stateDiscoveredInCe);
+					assert checkTraces();
 				} catch (ConjectureNotConnexException e) {
 					checkInconsistencyHMapping();
 					throw e;
@@ -499,6 +500,7 @@ public class HWLearner extends Learner {
 				}
 
 			}
+			assert checkTraces();
 		} while (counterExampleTrace != null || inconsistencyFound
 				|| stateDiscoveredInCe);
 
