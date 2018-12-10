@@ -41,16 +41,20 @@ public class MQTT extends RealDriver {
 		// c1.addClose();
 		// }
 
+		MQTTClient c3 = new MQTTClient();
+		addClient(c3);
 		c1.name = "C1";
 		c2.name = "C2";
+		c3.name = "C3";
 		c1.addConnect();
 		c2.addConnect();
 		c1.addPublishOperation(topic, "simple", false);
 		c1.addPublishOperation(topic, "retained", true);
 		c2.addSubscribeOperation(topic);
-		// c2.addUnsubscribeOperation(topic);
+		c2.addUnsubscribeOperation(topic);
 		// c1.addSubscribeOperation(topic);
-		c2.addDeleteRetained(topic);
+		c3.addDeleteRetained(topic);
+		c3.addConnect();
 	}
 
 	public void addClient(MQTTClient c) {
