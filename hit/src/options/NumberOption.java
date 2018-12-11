@@ -262,8 +262,10 @@ public abstract class NumberOption<T extends Number & Comparable<T>>
 	}
 
 	@Override
-	protected String getSelectedArgument() {
-		return argument.name + "=" + value;
+	protected ArgumentValue getSelectedArgument() {
+		ArgumentValue argValue = new ArgumentValue(argument);
+		argValue.addValue(value.toString());
+		return argValue;
 	}
 
 	@Override

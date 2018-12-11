@@ -272,13 +272,9 @@ public abstract class OptionTree {
 	 * Get the argument which can switch this option to the current value (i.e.
 	 * calling setValueWithArg(getSelectedArgument()) should have no effect).
 	 * 
-	 * This function is used when no argument can set the value of this option
-	 * but an argument is used by a sub-option and can be used to guess the
-	 * value of this option.
-	 * 
 	 * @return the argument which bring this option in the current state
 	 */
-	protected abstract String getSelectedArgument();
+	protected abstract ArgumentValue getSelectedArgument();
 
 	/**
 	 * Indicate that an argument is accepted by one option in this tree. This is

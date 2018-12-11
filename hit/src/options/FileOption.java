@@ -229,8 +229,10 @@ public class FileOption extends OptionTree {
 	}
 
 	@Override
-	protected String getSelectedArgument() {
-		return argument.name + "=" + selectedFile.getPath();
+	protected ArgumentValue getSelectedArgument() {
+		ArgumentValue argValue = new ArgumentValue(argument);
+		argValue.addValue(selectedFile.getPath());
+		return argValue;
 	}
 
 	@Override

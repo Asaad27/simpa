@@ -61,7 +61,7 @@ public class OptionsGroup extends OptionTree {
 	}
 
 	@Override
-	protected String getSelectedArgument() {
+	protected ArgumentValue getSelectedArgument() {
 		return null;
 	}
 

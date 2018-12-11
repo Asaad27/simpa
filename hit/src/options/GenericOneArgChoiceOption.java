@@ -90,8 +90,10 @@ public class GenericOneArgChoiceOption<T extends OneArgChoiceOptionItem>
 	}
 
 	@Override
-	protected String getSelectedArgument() {
-		return argumentDescriptor.name + "=" + getSelectedItem().argValue;
+	protected ArgumentValue getSelectedArgument() {
+		ArgumentValue argValue = new ArgumentValue(argumentDescriptor);
+		argValue.addValue(getSelectedItem().argValue);
+		return argValue;
 	}
 
 	@Override

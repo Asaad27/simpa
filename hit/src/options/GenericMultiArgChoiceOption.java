@@ -48,8 +48,8 @@ public class GenericMultiArgChoiceOption<T extends MultiArgChoiceOptionItem>
 	}
 
 	@Override
-	protected String getSelectedArgument() {
-		return getSelectedItem().argument.name;
+	protected ArgumentValue getSelectedArgument() {
+		return new ArgumentValue(getSelectedItem().argument);
 	}
 
 	@Override

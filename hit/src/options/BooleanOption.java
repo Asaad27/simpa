@@ -166,9 +166,9 @@ public class BooleanOption extends OptionTree {
 	}
 
 	@Override
-	public String getSelectedArgument() {
-		return isEnabled ? enableArgumentDescriptor.name
-				: disableArgumentDescriptor.name;
+	public ArgumentValue getSelectedArgument() {
+		return new ArgumentValue(isEnabled ? enableArgumentDescriptor
+				: disableArgumentDescriptor);
 	}
 
 	@Override
