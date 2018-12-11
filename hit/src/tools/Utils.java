@@ -513,6 +513,61 @@ public class Utils {
 		return s;
 	}
 
+	/**
+	 * change a list of string into a single string where all elements are
+	 * separated with spaces (and spaces in elements are escaped)
+	 * 
+	 * @param arguments a non-empty list of string
+	 * @return a string which can be transformed into {@code arguments} using
+	 *         {@link #stringToList(String)}
+	 */
+	public static String listToString(List<String> arguments) {
+		assert !arguments.isEmpty();
+		StringBuilder s = new StringBuilder();
+		for (int i = 0; i < arguments.size(); i++) {
+			String arg = arguments.get(i);
+			s.append(arg.replaceAll("\\\\", "\\\\\\\\").replaceAll(" ",
+					"\\\\ "));
+			if (i + 1 != arguments.size())
+				s.append(" ");
+		}
+		return s.toString();
+	}
+
+	/**
+	 * split a string into a list of string using spaces as separators. escaped
+	 * space are transformed into normal spaces.
+	 * 
+	 * @param args a string to split.
+	 * @return a list of string which can be concatenated again using
+	 *         {@link #listToString(List)}
+	 */
+	public static List<String> stringToList(String args) {
+		List<String> r = new ArrayList<>();
+		boolean backslashSeen = false;
+		StringBuilder currentArg = new StringBuilder();
+		for (char c : args.toCharArray()) {
+			if (backslashSeen) {
+				assert c == ' '
+						|| c == '\\' : "only '\\' and ' ' characters can be escaped at this level";
+				currentArg.append(c);
+				backslashSeen = false;
+			} else if (c == '\\') {
+				backslashSeen = true;
+			} else if (c == ' ') {
+				r.add(currentArg.toString());
+				currentArg = new StringBuilder();
+			} else {
+				currentArg.append(c);
+				backslashSeen = false;
+			}
+
+		}
+		r.add(currentArg.toString());
+		return r;
+	}
+
+
 	public static String fileContentOf(String filename) {
 		String content = "";
 		try {
