@@ -567,6 +567,28 @@ public class Utils {
 		return r;
 	}
 
+	/**
+	 * write a string to a file (remove old content).
+	 * 
+	 * @param file    the file to write in
+	 * @param content the string to write in the file
+	 * @return {@code true} if the writing went well, {@code false} if an error
+	 *         occurred.
+	 */
+	public static boolean setFileContent(File file, String content) {
+		try {
+			if (file.exists())
+				file.delete();
+			FileOutputStream stream = new FileOutputStream(file);
+			stream.write(content.getBytes());
+			stream.close();
+			return true;
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 
 	public static String fileContentOf(String filename) {
 		String content = "";

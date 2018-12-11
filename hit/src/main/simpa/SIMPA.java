@@ -1,6 +1,7 @@
 package main.simpa;
 
 import java.awt.Container;
+import java.awt.Font;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,6 +9,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Writer;
@@ -24,8 +26,10 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.ScrollPaneLayout;
 
 import automata.mealy.InputSequence;
@@ -687,6 +691,11 @@ public class SIMPA {
 		}
 	}
 
+	/**
+	 * a file to store options used during last launch of SIMPA
+	 */
+	static File lastOptionsFile;
+
 	private static String makeLaunchLine() {
 		StringBuilder r = new StringBuilder();
 		r.append("java ");
@@ -1029,12 +1038,28 @@ public class SIMPA {
 		optionsPanel.add(modeOption.getComponent());
 		optionsPanel.add(Box.createGlue());
 		pane.add(scroll);
+		JPanel CLIPanel = new JPanel();
+		CLIPanel.setLayout(new BoxLayout(CLIPanel, BoxLayout.LINE_AXIS));
+		CLIPanel.add(new JLabel("arguments to launch this in CLI : "));
+		final JTextArea argLabel = new JTextArea();
+		argLabel.setFont(Font.getFont(Font.MONOSPACED));
+		argLabel.setLineWrap(true);
+		argLabel.setWrapStyleWord(true);
+		argLabel.setEditable(false);
+		argLabel.setSize(20, 5);
+		CLIPanel.add(argLabel);
+
+		CLIPanel.add(Box.createGlue());
+		pane.add(CLIPanel);
 
 		final JButton startButton = new JButton("start inference");
 		startButton.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				Utils.setFileContent(lastOptionsFile,
+						allOptions.buildBackCLILine());
+				argLabel.setText(allOptions.buildBackCLILine());
 				frame.setEnabled(false);
 				startButton.setEnabled(false);
 				assert (inferThread == null || !inferThread.isAlive());
@@ -1070,6 +1095,19 @@ public class SIMPA {
 
 	public static void main(String[] args) {
 		if (args.length == 0) {
+			lastOptionsFile = new File(
+					Utils.getSIMPACacheDirectory().getAbsolutePath()
+							+ File.separator + "lastOptions");
+			String lastOptions = "";
+			if (lastOptionsFile.exists())
+				lastOptions = Utils
+						.fileContentOf(lastOptionsFile.getAbsolutePath());
+			PrintStream nullStream = new PrintStream(new OutputStream() {
+				@Override
+				public void write(int b) throws IOException {
+				}
+			});
+			allOptions.parseArguments(lastOptions, nullStream);
 			javax.swing.SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
 					try {
