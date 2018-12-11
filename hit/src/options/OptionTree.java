@@ -5,6 +5,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
 import options.OptionValidator.CriticalityLevel;
+import tools.Utils;
 
 /**
  * 
@@ -80,6 +82,34 @@ public abstract class OptionTree {
 
 		public String toString() {
 			return getName();
+		}
+
+		/**
+		 * get the list of CLI argument needed to build this object
+		 * 
+		 * @return the list of argument needed to build this object.
+		 * @see #asCLI(List)
+		 */
+		public List<String> asCLI() {
+			List<String> r = new ArrayList<>();
+			asCLI(r);
+			return r;
+		}
+
+		/**
+		 * add the CLI arguments needed to build back this object to the
+		 * provided List
+		 * 
+		 * @param buildList the list were arguments are added
+		 * @see #asCLI()
+		 */
+		public void asCLI(List<String> buildList) {
+			if (descriptor.acceptedValues == ArgumentDescriptor.AcceptedValues.NONE)
+				buildList.add(descriptor.name);
+			else
+				for (String value : values) {
+					buildList.add(descriptor.name + '=' + value);
+				}
 		}
 
 	}
@@ -213,12 +243,30 @@ public abstract class OptionTree {
 	}
 
 	/**
-	 * Get the list of children activated by the current value of this option.
+	 * Get the list of immediate children activated by the current value of this
+	 * option.
 	 * 
 	 * @return the list of children activated by the current value of this
 	 *         option.
 	 */
 	protected abstract List<OptionTree> getSelectedChildren();
+
+	/**
+	 * Get the list of (grand)*children currently activated.
+	 * 
+	 * @return the list of all children which are currently activated.
+	 */
+	protected List<OptionTree> getAllSelectedChildren() {
+		List<OptionTree> r = new ArrayList<>();
+		LinkedList<OptionTree> toProcess = new LinkedList<>();
+		toProcess.addAll(getSelectedChildren());
+		while (!toProcess.isEmpty()) {
+			OptionTree current = toProcess.poll();
+			r.add(current);
+			toProcess.addAll(current.getSelectedChildren());
+		}
+		return r;
+	}
 
 	/**
 	 * Indicate if an argument can be parsed to select value of this option
@@ -314,6 +362,38 @@ public abstract class OptionTree {
 	}
 
 	/**
+	 * build a string which can be used to call back SIMPA in CLI with the
+	 * current values;
+	 * 
+	 * @return a single string were argument are separated with spaces (spaces
+	 *         in arguments are escaped).
+	 */
+	public String buildBackCLILine() {
+		List<OptionTree> options = getAllSelectedChildren();
+		List<String> arguments = new ArrayList<>();
+		for (OptionTree option : options) {
+			ArgumentValue arg = option.getSelectedArgument();
+			assert arg != null || option instanceof OptionsGroup;
+			if (arg != null)
+				arg.asCLI(arguments);
+		}
+		return Utils.listToString(arguments);
+	}
+
+	/**
+	 * same as {@link #parseArguments(List, PrintStream)} but take arguments as
+	 * a space separated single string.
+	 * 
+	 * @param args               the string to parse
+	 * @param parsingErrorStream a stream to output errors
+	 * @return false if the parsing cannot be achieved
+	 * @see #parseArguments(List, PrintStream) parseArguments for more details.
+	 */
+	public boolean parseArguments(String args, PrintStream parsingErrorStream) {
+		return parseArguments(Utils.stringToList(args), parsingErrorStream);
+	}
+
+	/**
 	 * Try to define the value of this tree and subTrees from a list of
 	 * arguments. This function can be called before starting the graphical
 	 * interface and thus the parsing should do as many work as possible and not
@@ -324,15 +404,15 @@ public abstract class OptionTree {
 	 * {@link parseArgumentsInternal} which will transpose ArgumentValue in the
 	 * OptionTree
 	 * 
-	 * @param args
-	 *            the list of arguments.
-	 * @param parsingErrorStream
-	 *            a stream on which errors should be written (typically
-	 *            System.out when the graphical user interface will let the user
-	 *            repair her/his mistakes and System.err when errors are fatal).
+	 * @param args               the list of arguments.
+	 * @param parsingErrorStream a stream on which errors should be written
+	 *                           (typically System.out when the graphical user
+	 *                           interface will let the user repair her/his
+	 *                           mistakes and System.err when errors are fatal).
 	 * @return <code>false</code> if the parsing cannot be achieved,
 	 *         <code>true</code> if the option tree is defined from arguments,
 	 *         even if there was minor mistakes.
+	 * @see #parseArguments(String, PrintStream)
 	 */
 	public boolean parseArguments(List<String> args,
 			PrintStream parsingErrorStream) {
