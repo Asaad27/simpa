@@ -2,7 +2,7 @@
 
 ###  PREREQUISITES
 
-	Java Runtime Environment >= 1.7         www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html
+	Java Runtime Environment >= 1.8         www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html
 	Eclipse                  >= Mars        eclipse.org/ide/
 	GraphViz                 >= 2           www.graphviz.org/Download.php
 ###  INSTALLATION
@@ -118,7 +118,7 @@ There are some examples for **Program Arguments** :
 
 ###  PREREQUISITES
 
-	Java Runtime Environment >= 1.7        www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html
+	Java Runtime Environment >= 1.8        www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html
 	GraphViz                 >= 2          www.graphviz.org/Download.php
 ###  INSTALLATION
 
