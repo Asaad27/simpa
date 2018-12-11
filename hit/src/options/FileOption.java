@@ -216,9 +216,9 @@ public class FileOption extends OptionTree {
 	protected boolean setValueFromArg(ArgumentValue arg,
 			PrintStream parsingErrorStream) {
 		assert isActivatedByArg(arg);
-		if (arg.values.size() == 0)
+		if (arg.getValues().size() == 0)
 			return false;
-		setSelectedFile(new File(arg.values.get(0)));
+		setSelectedFile(new File(arg.getValues().get(0)));
 		return true;
 	}
 

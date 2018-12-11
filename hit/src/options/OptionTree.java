@@ -3,6 +3,7 @@ package options;
 import java.awt.Component;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,12 +53,22 @@ public abstract class OptionTree {
 	}
 
 	static protected class ArgumentValue {
-		public List<String> values = new ArrayList<>();
+		private List<String> values = new ArrayList<>();
 		ArgumentDescriptor descriptor; // descriptor is hidden at this time
 										// because in creation of list of
 										// ArgumentsValues, we use Descriptors
 										// which may not have the same
 										// parentOption
+
+		public void addValue(String value) {
+			assert descriptor.acceptedValues!=ArgumentDescriptor.AcceptedValues.NONE;
+			values.add(value);
+			assert values.size()==1 || descriptor.acceptedValues==ArgumentDescriptor.AcceptedValues.SEVERAL;
+		}
+
+		public List<String> getValues() {
+			return Collections.unmodifiableList(values);
+		}
 
 		public ArgumentValue(ArgumentDescriptor descriptor) {
 			this.descriptor = descriptor;

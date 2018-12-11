@@ -230,10 +230,10 @@ public abstract class NumberOption<T extends Number & Comparable<T>>
 	protected boolean setValueFromArg(ArgumentValue arg,
 			PrintStream parsingErrorStream) {
 		assert isActivatedByArg(arg);
-		if (arg.values.size() == 0)
+		if (arg.getValues().size() == 0)
 			return false;
 		try {
-			T parsed = parse(arg.values.get(0));
+			T parsed = parse(arg.getValues().get(0));
 			setValue(parsed);
 			if (value != parsed) {
 				parsingErrorStream.println(
@@ -242,7 +242,7 @@ public abstract class NumberOption<T extends Number & Comparable<T>>
 			}
 		} catch (NumberFormatException e) {
 			parsingErrorStream.println("error : unable to parse "
-					+ arg.values.get(0) + " as an Integer");
+					+ arg.getValues().get(0) + " as an Integer");
 			return false;
 		}
 		useAutoValue = false;

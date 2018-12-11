@@ -21,8 +21,8 @@ public class DriverChoice<T extends Driver>
 	@Override
 	protected DriverChoiceItem<? extends T> selectExtraChoice(
 			ArgumentValue arg) {
-		assert arg.values.size() > 0;
-		String className = arg.values.get(0);
+		assert arg.getValues().size() > 0;
+		String className = arg.getValues().get(0);
 		for (DriverChoiceItem<? extends T> driverChoice : choices) {
 			if (driverChoice.driverClass.getName().equals(className))
 				return driverChoice;

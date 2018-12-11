@@ -49,18 +49,18 @@ public class GenericOneArgChoiceOption<T extends OneArgChoiceOptionItem>
 	protected boolean setValueFromArg(ArgumentValue arg,
 			PrintStream parsingErrorStream) {
 		assert argumentDescriptor.acceptedValues == AcceptedValues.ONE;
-		if (arg.values.size() == 0) {
+		if (arg.getValues().size() == 0) {
 			parsingErrorStream
 					.println("Error : argument " + argumentDescriptor.name
 							+ " is expecting one value but none is provided.");
 			return false;
 		}
-		if (arg.values.size() > 1)
+		if (arg.getValues().size() > 1)
 			parsingErrorStream.println("Warning : argument "
 					+ argumentDescriptor.name
 					+ " is expecting only one value but more than one are provided."
 					+ " Only the first is used.");
-		String value = arg.values.get(0);
+		String value = arg.getValues().get(0);
 		T selectedChoice = null;
 		for (T choice : choices) {
 			if (choice.argValue.equals(value))
@@ -85,7 +85,7 @@ public class GenericOneArgChoiceOption<T extends OneArgChoiceOptionItem>
 		if (defaultItem == null)
 			return null;
 		ArgumentValue arg = new ArgumentValue(argumentDescriptor);
-		arg.values.add(defaultItem.argValue);
+		arg.addValue(defaultItem.argValue);
 		return arg;
 	}
 
