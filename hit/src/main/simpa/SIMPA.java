@@ -2,6 +2,8 @@ package main.simpa;
 
 import java.awt.Container;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -1027,7 +1029,13 @@ public class SIMPA {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		Container pane = frame.getContentPane();
 
-		pane.setLayout(new BoxLayout(pane, BoxLayout.PAGE_AXIS));
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.gridx = 0;
+		constraints.gridy = GridBagConstraints.RELATIVE;
+		constraints.gridwidth = 2;
+		constraints.anchor = GridBagConstraints.LINE_START;
+		constraints.weightx = 1;
+		pane.setLayout(new GridBagLayout());
 		JScrollPane scroll = new JScrollPane();
 		scroll.setLayout(new ScrollPaneLayout());
 		JPanel optionsPanel = new JPanel();
@@ -1037,20 +1045,28 @@ public class SIMPA {
 		optionsPanel.add(automataChoice.getComponent());
 		optionsPanel.add(modeOption.getComponent());
 		optionsPanel.add(Box.createGlue());
-		pane.add(scroll);
-		JPanel CLIPanel = new JPanel();
-		CLIPanel.setLayout(new BoxLayout(CLIPanel, BoxLayout.LINE_AXIS));
-		CLIPanel.add(new JLabel("arguments to launch this in CLI : "));
+		constraints.fill = GridBagConstraints.BOTH;
+		constraints.weighty = 1;
+		pane.add(scroll, constraints);
+		constraints.weighty = 0;
+		GridBagConstraints CLIconstraints = new GridBagConstraints();
+		CLIconstraints.gridy = GridBagConstraints.RELATIVE;
+		CLIconstraints.gridx = 0;
+		CLIconstraints.fill = GridBagConstraints.NONE;
+		CLIconstraints.weightx = 0;
+		CLIconstraints.weighty = 0;
+		CLIconstraints.anchor = GridBagConstraints.LINE_START;
+		pane.add(new JLabel("arguments to launch this in CLI : "),
+				CLIconstraints);
 		final JTextArea argLabel = new JTextArea();
 		argLabel.setFont(Font.getFont(Font.MONOSPACED));
 		argLabel.setLineWrap(true);
 		argLabel.setWrapStyleWord(true);
 		argLabel.setEditable(false);
-		argLabel.setSize(20, 5);
-		CLIPanel.add(argLabel);
-
-		CLIPanel.add(Box.createGlue());
-		pane.add(CLIPanel);
+		CLIconstraints.gridx = 1;
+		CLIconstraints.weightx = 1;
+		CLIconstraints.fill = GridBagConstraints.HORIZONTAL;
+		pane.add(argLabel, CLIconstraints);
 
 		final JButton startButton = new JButton("start inference");
 		startButton.addActionListener(new ActionListener() {
@@ -1082,7 +1098,7 @@ public class SIMPA {
 			}
 
 		});
-		pane.add(startButton);
+		pane.add(startButton, constraints);
 
 		// Display the window.
 		frame.pack();
