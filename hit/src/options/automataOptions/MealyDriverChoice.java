@@ -4,6 +4,7 @@ import drivers.ExhaustiveGeneratorOption;
 import drivers.mealy.FromDotMealyDriver;
 import drivers.mealy.MealyDriver;
 import drivers.mealy.real.SIPDriverIPTel;
+import drivers.mealy.real.mqtt.MQTTDriverOption;
 import drivers.mealy.transparent.EnumeratedMealyDriver.EnumeratedMealyOption;
 import drivers.mealy.transparent.RandomMealyDriver;
 import drivers.mealy.transparent.TransparentFromDotMealyDriver;
@@ -24,6 +25,7 @@ public class MealyDriverChoice extends DriverChoice<MealyDriver> {
 		addChoice(new FromDotMealyDriver.FromDotChoiceItem(this));
 		addChoice(new TransparentFromDotMealyDriver.FromDotChoiceItem(this));
 		addChoice(exhaustiveDriver);
+		addChoice(new MQTTDriverOption(this));
 	}
 
 }

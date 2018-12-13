@@ -57,6 +57,13 @@ public class MQTT extends RealDriver {
 		c3.addConnect();
 	}
 
+	public MQTT(List<ClientDescriptor> clientsDescriptors) {
+		super("MQTT");
+		for (ClientDescriptor desc : clientsDescriptors) {
+			addClient(new MQTTClient(desc));
+		}
+	}
+
 	public void addClient(MQTTClient c) {
 		clients.add(c);
 	}
@@ -132,7 +139,6 @@ public class MQTT extends RealDriver {
 			}
 		}
 	}
-
 
 	@Override
 	public void stopLog() {

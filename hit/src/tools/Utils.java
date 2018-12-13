@@ -472,14 +472,35 @@ public class Utils {
 	 *         {@link #stringToList(String)}
 	 */
 	public static String listToString(List<String> arguments) {
+		return listToString(arguments, ' ', '\\');
+	}
+
+	/**
+	 * change a list of string into a single string where all elements are
+	 * separated with one special char (special chars in elements are escaped)
+	 * 
+	 * @param arguments a non-empty list of string
+	 * @param sep       the special char to separate elements
+	 * @param escape    the char to escape special char. Cannot be the same as
+	 *                  separating char
+	 * @return a string which can be transformed into {@code arguments} using
+	 *         {@link #stringToList(String, char, char)} with the same separator
+	 *         and escape chars
+	 */
+	public static String listToString(List<String> arguments, char sep,
+			char escape) {
 		assert !arguments.isEmpty();
+		assert sep != escape;
 		StringBuilder s = new StringBuilder();
 		for (int i = 0; i < arguments.size(); i++) {
 			String arg = arguments.get(i);
-			s.append(arg.replaceAll("\\\\", "\\\\\\\\").replaceAll(" ",
-					"\\\\ "));
+			for (char c : arg.toCharArray()) {
+				if (c == sep || c == escape)
+					s.append(escape);
+				s.append(c);
+			}
 			if (i + 1 != arguments.size())
-				s.append(" ");
+				s.append(sep);
 		}
 		return s.toString();
 	}
@@ -493,23 +514,39 @@ public class Utils {
 	 *         {@link #listToString(List)}
 	 */
 	public static List<String> stringToList(String args) {
+		return stringToList(args, ' ', '\\');
+	}
+
+	/**
+	 * split a string into a list of string using special char as separators.
+	 * escaped special chars are un-escaped.
+	 * 
+	 * @param args   a string to split.
+	 * @param sep    the special char to separate elements
+	 * @param escape the char to escape special char. Cannot be the same as
+	 *               separating char
+	 * @return a list of string which can be concatenated again using
+	 *         {@link #listToString(List)}
+	 */
+	public static List<String> stringToList(String args, char sep,
+			char escape) {
 		List<String> r = new ArrayList<>();
-		boolean backslashSeen = false;
+		boolean escapeSeen = false;
 		StringBuilder currentArg = new StringBuilder();
 		for (char c : args.toCharArray()) {
-			if (backslashSeen) {
-				assert c == ' '
-						|| c == '\\' : "only '\\' and ' ' characters can be escaped at this level";
+			if (escapeSeen) {
+				assert c == sep || c == escape : "only '" + sep + "' and '"
+						+ escape + "' characters can be escaped at this level";
 				currentArg.append(c);
-				backslashSeen = false;
-			} else if (c == '\\') {
-				backslashSeen = true;
-			} else if (c == ' ') {
+				escapeSeen = false;
+			} else if (c == escape) {
+				escapeSeen = true;
+			} else if (c == sep) {
 				r.add(currentArg.toString());
 				currentArg = new StringBuilder();
 			} else {
 				currentArg.append(c);
-				backslashSeen = false;
+				escapeSeen = false;
 			}
 
 		}

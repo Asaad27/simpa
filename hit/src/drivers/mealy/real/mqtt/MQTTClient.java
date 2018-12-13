@@ -13,6 +13,38 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
+/**
+ * a class representing the options for building one {@link MQTTClient}.
+ * 
+ * @author Nicolas BREMOND
+ *
+ */
+class ClientDescriptor {
+	boolean connect = false;
+	boolean disconnect = false;
+	Boolean close = false;
+
+	class Publish {
+		String topic;
+		String message;
+		Boolean retain;
+	}
+
+	List<Publish> publish = new ArrayList<>();
+	List<String> deleteRetain = new ArrayList<>();
+
+	List<String> subscribe = new ArrayList<>();
+	List<String> unsubscribe = new ArrayList<>();
+
+}
+
+/**
+ * a class representing one MQTT client. this class will perform actions on the
+ * broker
+ * 
+ * @author Nicolas BREMOND
+ *
+ */
 public class MQTTClient {
 
 	String prefix = "";
@@ -238,7 +270,6 @@ public class MQTTClient {
 
 	MqttClient sampleClient;
 
-
 	private List<MQTTOperation> operations = new ArrayList<>();
 
 	public List<MQTTOperation> getOperations() {
@@ -264,6 +295,10 @@ public class MQTTClient {
 
 	public void addConnect() {
 		operations.add(new Connect());
+	}
+
+	public void addDisconnect() {
+		operations.add(new Disconnect());
 	}
 
 	public void addClose() {
@@ -308,7 +343,25 @@ public class MQTTClient {
 
 	public MQTTClient() {
 		createClient();
-		operations.add(new Disconnect());
+		addDisconnect();
+	}
+
+	public MQTTClient(ClientDescriptor desc) {
+		createClient();
+		if (desc.connect)
+			addConnect();
+		if (desc.disconnect)
+			addDisconnect();
+		if (desc.close)
+			addClose();
+		for (ClientDescriptor.Publish p : desc.publish)
+			addPublishOperation(p.topic, p.message, p.retain);
+		for (String topic : desc.deleteRetain)
+			addDeleteRetained(topic);
+		for (String topic : desc.subscribe)
+			addSubscribeOperation(topic);
+		for (String topic : desc.unsubscribe)
+			addUnsubscribeOperation(topic);
 	}
 
 	LinkedList<String> received = new LinkedList<>();
