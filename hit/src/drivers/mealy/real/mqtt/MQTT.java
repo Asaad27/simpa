@@ -10,12 +10,21 @@ import tools.loggers.LogManager;
 
 public class MQTT extends RealDriver {
 
+	/**
+	 * the broker to infer
+	 */
+	String broker = "tcp://localhost:1883";
+	/**
+	 * the timeout during which messages are waited from broker.
+	 */
+	int timeout_ms = 500;
+
 	public MQTT() {
 		super("MQTT");
 
 		String topic = "top";
-		MQTTClient c1 = new MQTTClient();
-		MQTTClient c2 = new MQTTClient();
+		MQTTClient c1 = new MQTTClient(this);
+		MQTTClient c2 = new MQTTClient(this);
 		addClient(c1);
 		addClient(c2);
 
@@ -41,7 +50,7 @@ public class MQTT extends RealDriver {
 		// c1.addClose();
 		// }
 
-		MQTTClient c3 = new MQTTClient();
+		MQTTClient c3 = new MQTTClient(this);
 		addClient(c3);
 		c1.name = "C1";
 		c2.name = "C2";
@@ -57,11 +66,16 @@ public class MQTT extends RealDriver {
 		c3.addConnect();
 	}
 
-	public MQTT(List<ClientDescriptor> clientsDescriptors) {
+	public MQTT(String broker, List<ClientDescriptor> clientsDescriptors) {
 		super("MQTT");
+		this.broker = broker;
 		for (ClientDescriptor desc : clientsDescriptors) {
-			addClient(new MQTTClient(desc));
+			addClient(new MQTTClient(this, desc));
 		}
+	}
+
+	void setTimeout_ms(int t) {
+		timeout_ms = t;
 	}
 
 	public void addClient(MQTTClient c) {
@@ -157,7 +171,7 @@ public class MQTT extends RealDriver {
 		numberOfAtomicRequest++;
 		String output = execute_intern(input);
 		try {
-			Thread.sleep(100);
+			Thread.sleep(timeout_ms);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

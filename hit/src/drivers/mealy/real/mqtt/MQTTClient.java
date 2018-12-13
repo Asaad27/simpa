@@ -47,6 +47,7 @@ class ClientDescriptor {
  */
 public class MQTTClient {
 
+	final MQTT driver;
 	String prefix = "";
 	String name = null;
 
@@ -264,7 +265,6 @@ public class MQTTClient {
 	}
 
 	int qos = 2;
-	String broker = "tcp://localhost:1883";
 	String clientId = "JavaSample";
 	MemoryPersistence persistence = new MemoryPersistence();
 
@@ -316,7 +316,7 @@ public class MQTTClient {
 
 	public void createClient() {
 		try {
-			sampleClient = new MqttClient(broker, clientId + clientNb++,
+			sampleClient = new MqttClient(driver.broker, clientId + clientNb++,
 					persistence);
 		} catch (MqttException e) {
 			throw new RuntimeException(e);
@@ -341,12 +341,14 @@ public class MQTTClient {
 		});
 	}
 
-	public MQTTClient() {
+	public MQTTClient(MQTT driver) {
 		createClient();
 		addDisconnect();
+		this.driver = driver;
 	}
 
-	public MQTTClient(ClientDescriptor desc) {
+	public MQTTClient(MQTT driver, ClientDescriptor desc) {
+		this.driver = driver;
 		createClient();
 		if (desc.connect)
 			addConnect();

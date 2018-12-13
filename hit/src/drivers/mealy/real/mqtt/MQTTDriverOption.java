@@ -17,7 +17,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import drivers.mealy.real.mqtt.ClientDescriptor.Publish;
+import options.IntegerOption;
 import options.ListOption;
+import options.TextOption;
 import options.automataOptions.DriverChoice;
 import options.automataOptions.DriverChoiceItem;
 import tools.Utils;
@@ -324,59 +326,6 @@ class ClientsOption extends ListOption<ClientDescriptor> {
 			}
 
 		}.build(), c);
-
-//		
-//		abstract class RemoveButton extends JButton {
-//			public RemoveButton(String value, JPanel parent, String action) {
-//				super("Remove " + buildFunc(action, value));
-//				addActionListener(new ActionListener() {
-//
-//					@Override
-//					public void actionPerformed(ActionEvent e) {
-//						remove(value);
-//						parent.remove(RemoveButton.this);
-//						parent.revalidate();
-//					}
-//				});
-//				parent.add(this);
-//				parent.revalidate();
-//			}
-//
-//			abstract void remove(String value);
-//		}
-//		{
-//			class SubscribeRemoveButton extends RemoveButton {
-//
-//				public SubscribeRemoveButton(String value, JPanel parent) {
-//					super(value, parent, "subscribe");
-//				}
-//
-//				@Override
-//				void remove(String value) {
-//					desc.subscribe.remove(value);
-//				}
-//
-//			}
-//			JPanel subscribePane = new JPanel();
-//			subscribePane.add(new JLabel("add subscribe on topic"));
-//			JTextField topicField = new JTextField("topic");
-//			subscribePane.add(topicField);
-//			JButton button = new JButton("add");
-//			button.addActionListener(new ActionListener() {
-//
-//				@Override
-//				public void actionPerformed(ActionEvent e) {
-//					desc.subscribe.add(topicField.getText());
-//					new SubscribeRemoveButton(topicField.getText(),
-//							subscribePane);
-//				}
-//			});
-//			subscribePane.add(button);
-//			for (String topic : desc.subscribe)
-//				new SubscribeRemoveButton(topic, subscribePane);
-//			pane.add(subscribePane, c);
-//		}
-
 		return pane;
 	}
 
@@ -398,16 +347,26 @@ class ClientsOption extends ListOption<ClientDescriptor> {
 public class MQTTDriverOption extends DriverChoiceItem<MQTT> {
 
 	ClientsOption clients;
+	TextOption brokerAddress;
+	IntegerOption timeout;
 
 	public MQTTDriverOption(DriverChoice<?> parent) {
 		super("MQTT Driver", "mqttDriver", parent, MQTT.class);
 		clients = new ClientsOption();
+		brokerAddress = new TextOption("--mqtt-broker", "tcp://localhost:1883",
+				"broker address", "the broker to infer");
+		timeout = new IntegerOption("--mqtt-timeout",
+				"timeout to decide quiescence output (ms)", 500);
+		subTrees.add(brokerAddress);
+		subTrees.add(timeout);
 		subTrees.add(clients);
 	}
 
 	@Override
 	public MQTT createDriver() {
-		return new MQTT(clients.getValues());
+		MQTT driver = new MQTT(brokerAddress.getText(), clients.getValues());
+		driver.setTimeout_ms(timeout.getValue());
+		return driver;
 	}
 
 }
