@@ -90,7 +90,7 @@ public abstract class NumberOption<T extends Number & Comparable<T>>
 		this(argument, description);
 		assert defaultValue != null;
 		setValue(defaultValue);
-		useAutoValue = true;
+		useAutoValue = false;
 		assert !autoValueIsAllowed();
 	}
 
@@ -156,10 +156,16 @@ public abstract class NumberOption<T extends Number & Comparable<T>>
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					if (autoValueCheckBox.isSelected())
+					if (autoValueCheckBox.isSelected()) {
 						spinner.setEnabled(false);
-					else {
+						useAutoValue = true;
+					} else {
 						spinner.setEnabled(true);
+						useAutoValue = false;
+						if (value == null)
+							value = toType(spinnerModel.getNumber());
+						else
+							setValue(value);
 						autoValueValidator.clearError();
 					}
 				}
@@ -232,6 +238,10 @@ public abstract class NumberOption<T extends Number & Comparable<T>>
 		assert isActivatedByArg(arg);
 		if (arg.getValues().size() == 0)
 			return false;
+		if (autoValueIsAllowed() && arg.getValues().get(0).equals("auto")) {
+			useAutoValue = true;
+			return true;
+		}
 		try {
 			T parsed = parse(arg.getValues().get(0));
 			setValue(parsed);
@@ -264,7 +274,10 @@ public abstract class NumberOption<T extends Number & Comparable<T>>
 	@Override
 	protected ArgumentValue getSelectedArgument() {
 		ArgumentValue argValue = new ArgumentValue(argument);
-		argValue.addValue(value.toString());
+		if (useAutoValue())
+			argValue.addValue("auto");
+		else
+			argValue.addValue(value.toString());
 		return argValue;
 	}
 
