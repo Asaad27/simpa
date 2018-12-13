@@ -1117,7 +1117,7 @@ public class SIMPA {
 			String lastOptions = "";
 			if (lastOptionsFile.exists())
 				lastOptions = Utils
-						.fileContentOf(lastOptionsFile.getAbsolutePath());
+						.fileContentOf(lastOptionsFile);
 			PrintStream nullStream = new PrintStream(new OutputStream() {
 				@Override
 				public void write(int b) throws IOException {

@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -570,8 +571,10 @@ public class Utils {
 	/**
 	 * write a string to a file (remove old content).
 	 * 
-	 * @param file    the file to write in
-	 * @param content the string to write in the file
+	 * @param file
+	 *            the file to write in
+	 * @param content
+	 *            the string to write in the file
 	 * @return {@code true} if the writing went well, {@code false} if an error
 	 *         occurred.
 	 */
@@ -590,19 +593,14 @@ public class Utils {
 		return false;
 	}
 
-	public static String fileContentOf(String filename) {
-		String content = "";
+	public static String fileContentOf(File f) {
+		byte[] encoded;
 		try {
-
-			BufferedReader br = new BufferedReader(new FileReader(filename));
-			String strLine = "";
-			while ((strLine = br.readLine()) != null) {
-				content += strLine + "\n";
-			}
-			br.close();
-		} catch (Exception e) {
+			encoded = Files.readAllBytes(f.toPath());
+		} catch (IOException e) {
+			return null;
 		}
-		return content;
+		return new String(encoded, Charset.defaultCharset());
 	}
 
 	public static String randString() {
