@@ -64,7 +64,7 @@ public abstract class NumberOption<T extends Number & Comparable<T>>
 
 	AutoValueValidator<T> autoValueValidator;
 
-	private final ArgumentDescriptor argument;
+	protected final ArgumentDescriptor argument;
 
 	private NumberOption(String argument, String description) {
 		assert argument.startsWith("-");
