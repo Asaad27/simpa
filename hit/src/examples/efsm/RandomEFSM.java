@@ -14,19 +14,21 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import main.simpa.Options;
-import tools.Utils;
-import tools.loggers.LogManager;
 import automata.State;
 import automata.efsm.EFSM;
 import automata.efsm.EFSMTransition;
 import automata.efsm.GeneratedOutputFunction;
 import automata.efsm.Parameter;
 import drivers.efsm.EFSMDriver.Types;
+import main.simpa.Options;
+import options.RandomOption;
+import tools.StandaloneRandom;
+import tools.loggers.LogManager;
 
 public class RandomEFSM extends EFSM implements Serializable {
 	private static final long serialVersionUID = -4610287835922347376L;
 
+	RandomOption rand = new StandaloneRandom();
 	private List<String> inputSymbols = null;
 	private List<String> outputSymbols = null;
 	private Map<String, Integer> arity = null;
@@ -37,17 +39,17 @@ public class RandomEFSM extends EFSM implements Serializable {
 		int nbSym = 0;
 		arity = new HashMap<String, Integer>();
 		inputSymbols = new ArrayList<String>();
-		nbSym = Utils.randIntBetween(Options.MININPUTSYM, Options.MAXINPUTSYM);
+		nbSym = rand.randIntBetween(Options.MININPUTSYM, Options.MAXINPUTSYM);
 		for (int i = 0; i < nbSym; i++) {
 			inputSymbols.add("in" + i);
-			arity.put("in" + i, Utils.randIntBetween(Options.MINPARAMETER,
+			arity.put("in" + i, rand.randIntBetween(Options.MINPARAMETER,
 					Options.MAXPARAMETER));
 		}
 		outputSymbols = new ArrayList<String>();
-		nbSym = Utils.randIntBetween(Options.MININPUTSYM, Options.MAXINPUTSYM);
+		nbSym = rand.randIntBetween(Options.MININPUTSYM, Options.MAXINPUTSYM);
 		for (int i = 0; i < nbSym; i++) {
 			outputSymbols.add("out" + i);
-			arity.put("out" + i, Utils.randIntBetween(Options.MINPARAMETER,
+			arity.put("out" + i, rand.randIntBetween(Options.MINPARAMETER,
 					Options.MAXPARAMETER));
 		}
 		LogManager.logSymbolsParameters(arity);
@@ -120,10 +122,10 @@ public class RandomEFSM extends EFSM implements Serializable {
 
 	private void createSimpleGuards() {
 		for (EFSMTransition t : transitions) {
-			if (Utils.randBoolWithPercent(Options.SIMPLEGUARDPERCENT)) {
+			if (rand.randBoolWithPercent(Options.SIMPLEGUARDPERCENT)) {
 				LogManager.logInfo("Creating EQUALSTOVALUE guard for state "
 						+ t.getFrom() + " with input " + t.getInput());
-				ArrayList<Parameter> newParameters = t.randomizeGuard();
+				ArrayList<Parameter> newParameters = t.randomizeGuard(rand);
 				simpleCount++;
 				List<ArrayList<Parameter>> existingParameters = dpv.get(t
 						.getInput());
@@ -163,19 +165,19 @@ public class RandomEFSM extends EFSM implements Serializable {
 		int nbNdv = 0;
 		for (EFSMTransition t : transitions) {
 			if (isCleanForGenerateGuard(t)
-					&& Utils.randBoolWithPercent(Options.NDVGUARDPERCENT * 2)) {
+					&& rand.randBoolWithPercent(Options.NDVGUARDPERCENT * 2)) {
 				State gen = goRandomStepsFrom(
-						Utils.randIntBetween(Options.NDVMINTRANSTOCHECK,
+						rand.randIntBetween(Options.NDVMINTRANSTOCHECK,
 								Options.NDVMAXTRANSTOCHECK) - 1, t.getTo());
-				EFSMTransition check = Utils.randIn(getTransitionFrom(gen,
+				EFSMTransition check = rand.randIn(getTransitionFrom(gen,
 						false));
 				if (isCleanForCheckingGuard(check)) {
 					LogManager.logInfo("State " + t.getFrom()
 							+ " generates a Ndv" + nbNdv);
-					t.generateNdv(nbNdv);
+					t.generateNdv(nbNdv, rand);
 					LogManager.logInfo("State " + gen + " will check Ndv"
 							+ nbNdv);
-					check.checkNdv(nbNdv);
+					check.checkNdv(nbNdv, rand);
 					nbNdv++;
 					ndvCount++;
 				}
@@ -191,7 +193,7 @@ public class RandomEFSM extends EFSM implements Serializable {
 				if (t.getFrom().equals(tmp) && !t.getTo().equals(tmp))
 					l.add(t);
 			}
-			tmp = l.get(Utils.randInt(l.size())).getTo();
+			tmp = l.get(rand.randInt(l.size())).getTo();
 			l.clear();
 			nbSteps--;
 		}
@@ -241,7 +243,7 @@ public class RandomEFSM extends EFSM implements Serializable {
 							.getOutput()))
 						remainingOutputSymbols.remove(group.get(i).getOutput());
 					else {
-						String newOutputSymbol = Utils
+						String newOutputSymbol = rand
 								.randIn(remainingOutputSymbols);
 						if (newOutputSymbol == null) {
 							group.get(i).getGuard().alwaysFalse();
@@ -277,7 +279,7 @@ public class RandomEFSM extends EFSM implements Serializable {
 		while (unreachables.size() > 0) {
 
 			State s = unreachables.iterator().next();
-			State from = Utils.randIn(reachables);
+			State from = rand.randIn(reachables);
 
 			// List with the number of outgoing transition from state "from" for
 			// each input symbol
@@ -345,10 +347,10 @@ public class RandomEFSM extends EFSM implements Serializable {
 			Set<State> others = new HashSet<State>();
 			others.addAll(states);
 			others.remove(s);
-			State to = Utils.randIn(others);
+			State to = rand.randIn(others);
 			if (to != null) {
-				String in = Utils.randIn(inputSymbols);
-				String out = Utils.randIn(outputSymbols);
+				String in = rand.randIn(inputSymbols);
+				String out = rand.randIn(outputSymbols);
 				addTransition(new EFSMTransition(this, s, to, in, out,
 						new GeneratedOutputFunction(arity.get(in),
 								arity.get(out))));
@@ -398,18 +400,18 @@ public class RandomEFSM extends EFSM implements Serializable {
 			previous.clear();
 			nbTrans = 0;
 			for (State s2 : states) {
-				if (Utils.randBoolWithPercent(Options.TRANSITIONPERCENT
+				if (rand.randBoolWithPercent(Options.TRANSITIONPERCENT
 						/ states.size())
 						&& nbTrans < 2) {
 					boolean added = false;
 					nbTrans++;
 					while (!added) {
-						in = Utils.randIn(inputSymbols);
+						in = rand.randIn(inputSymbols);
 						List<String> outExists = getOutputForThisInput(s1, in);
 						if (outExists.size() == outputSymbols.size())
 							continue;
 						do
-							out = Utils.randIn(outputSymbols);
+							out = rand.randIn(outputSymbols);
 						while (previous.contains(in + "|" + out));
 						addTransition(new EFSMTransition(this, s1, s2, in, out,
 								new GeneratedOutputFunction(arity.get(in),
@@ -423,7 +425,7 @@ public class RandomEFSM extends EFSM implements Serializable {
 	}
 
 	private void createStates() {
-		int nbStates = Utils.randIntBetween(Options.MINSTATES,
+		int nbStates = rand.randIntBetween(Options.MINSTATES,
 				Options.MAXSTATES);
 		for (int i = 0; i < nbStates; i++)
 			addState(i == 0);

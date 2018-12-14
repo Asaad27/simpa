@@ -4,9 +4,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import main.simpa.Options;
-import tools.Utils;
 import drivers.efsm.EFSMDriver.Types;
+import main.simpa.Options;
+import options.RandomOption;
+import tools.StandaloneRandom;
 
 public class GeneratedOutputFunction implements IOutputFunction, Serializable {
 	private static final long serialVersionUID = 2354232336322191833L;
@@ -40,7 +41,7 @@ public class GeneratedOutputFunction implements IOutputFunction, Serializable {
 			List<Parameter> param = new ArrayList<Parameter>();
 			for (int i = 0; i < nbOutputParams; i++) {
 				if (!isNdv.get(i).equals("")) {
-					String ndvVal = String.valueOf(Utils
+					String ndvVal = String.valueOf(new StandaloneRandom()
 							.randIntBetween(Options.DOMAINSIZE * 100,
 									Options.DOMAINSIZE * 1000));
 					param.add(new Parameter(ndvVal, Types.NUMERIC));
@@ -55,8 +56,8 @@ public class GeneratedOutputFunction implements IOutputFunction, Serializable {
 		return null;
 	}
 
-	public void generateNdv(int nbNdv) {
-		isNdv.set(Utils.randInt(nbOutputParams), "ndv" + nbNdv);
+	public void generateNdv(int nbNdv, RandomOption rand) {
+		isNdv.set(rand.randInt(nbOutputParams), "ndv" + nbNdv);
 	}
 
 	public String toString() {

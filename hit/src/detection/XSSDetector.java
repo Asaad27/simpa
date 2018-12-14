@@ -1,20 +1,27 @@
 package detection;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+
 import automata.efsm.Parameter;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedInputSequence;
 import automata.efsm.ParameterizedOutput;
 import drivers.efsm.real.GenericDriver;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 import learner.efsm.table.LiDataTableItem;
-import org.apache.commons.lang3.StringUtils;
-import tools.Utils;
+import options.RandomOption;
+import tools.StandaloneRandom;
 import tools.loggers.LogManager;
-import detection.Reflection;
 
 public class XSSDetector {
+
+	/**
+	 * @TODO should be put in an option tree.
+	 */
+	RandomOption rand = new StandaloneRandom();
 
 	/**
 	 * Parameters values that are not used to seach reflections
@@ -171,7 +178,7 @@ public class XSSDetector {
 				potentialReflection.hasBeenTested = true;
 			}
 			//Generate a random alpha numeric string to test the reflection again
-			String randomString = Utils.randAlphaNumString(10);
+			String randomString = rand.randAlphaNumString(10);
 
 			//retrieve the input parameter that is to be reflected
 			List<ParameterizedInput> sequence = potentialReflection.path;
@@ -258,8 +265,8 @@ public class XSSDetector {
 
 
 			for (int indexPayload = 0; indexPayload < payloads.length; indexPayload++) {
-				String startPattern = Utils.randAlphaNumString(4);
-				String endPattern = Utils.randAlphaNumString(4);
+				String startPattern = rand.randAlphaNumString(4);
+				String endPattern = rand.randAlphaNumString(4);
 				String xssPayload = payloads[indexPayload];
 				String expectedReflection = payloadsExpectedResults[indexPayload];
 				StringBuilder completePayload = new StringBuilder(startPattern);

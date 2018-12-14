@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import main.simpa.Options;
-import tools.Utils;
+import options.RandomOption;
 
 public class Relation implements Serializable {
 
@@ -22,15 +22,15 @@ public class Relation implements Serializable {
 	private int nbInputParam;
 	private Map<String, String> memory = null;
 
-	public Relation(int nbInputParam) {
+	public Relation(int nbInputParam, RandomOption rand) {
 		this.nbInputParam = nbInputParam;
 
 		type = RelationType.EQUALSTOVALUE;
 
 		switch (type) {
 		case EQUALSTOVALUE:
-			op1 = Utils.randInt(nbInputParam);
-			op2i = Utils.randInt(Options.DOMAINSIZE);
+			op1 = rand.randInt(nbInputParam);
+			op2i = rand.randInt(Options.DOMAINSIZE);
 			break;
 		case NDVCHECK:
 			break;
@@ -39,10 +39,11 @@ public class Relation implements Serializable {
 		}
 	}
 
-	public void ndvCheck(int nbNdv, Map<String, String> memory) {
+	public void ndvCheck(int nbNdv, Map<String, String> memory,
+			RandomOption rand) {
 		this.memory = memory;
 		type = RelationType.NDVCHECK;
-		op1 = Utils.randInt(nbInputParam);
+		op1 = rand.randInt(nbInputParam);
 		op2s = "ndv" + nbNdv;
 	}
 

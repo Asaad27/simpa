@@ -6,11 +6,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.TreeMap;
 
-import learner.efsm.table.LiDataTableItem;
-import main.simpa.Options;
 import automata.State;
 import automata.Transition;
 import drivers.efsm.EFSMDriver.Types;
+import learner.efsm.table.LiDataTableItem;
+import main.simpa.Options;
+import options.RandomOption;
 
 public class EFSMTransition extends Transition {
 	private static final long serialVersionUID = -7379789456013157473L;
@@ -193,25 +194,25 @@ public class EFSMTransition extends Transition {
 		return null;
 	}
 
-	public ArrayList<Parameter> randomizeGuard() {
+	public ArrayList<Parameter> randomizeGuard(RandomOption rand) {
 		if (outputFunction instanceof GeneratedOutputFunction) {
 			return ((GeneratedOutputFunction) outputFunction).getGuard()
-					.randomize();
+					.randomize(rand);
 		}
 		return null;
 	}
 
-	public void generateNdv(int nbNdv) {
+	public void generateNdv(int nbNdv, RandomOption rand) {
 		if (outputFunction instanceof GeneratedOutputFunction) {
-			((GeneratedOutputFunction) outputFunction).generateNdv(nbNdv);
+			((GeneratedOutputFunction) outputFunction).generateNdv(nbNdv, rand);
 			generateNdv = true;
 		}
 	}
 
-	public void checkNdv(int nbNdv) {
+	public void checkNdv(int nbNdv, RandomOption rand) {
 		if (outputFunction instanceof GeneratedOutputFunction) {
 			((GeneratedOutputFunction) outputFunction).getGuard().checkNdv(
-					nbNdv);
+					nbNdv, rand);
 		}
 	}
 }
