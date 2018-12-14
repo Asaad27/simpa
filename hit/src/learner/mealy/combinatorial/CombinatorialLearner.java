@@ -22,9 +22,10 @@ import learner.mealy.combinatorial.node.ArrayTreeNodeWithoutConjecture;
 import learner.mealy.combinatorial.node.TreeNode;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
+import options.RandomOption;
 import stats.StatsEntry;
 import tools.GraphViz;
-import tools.Utils;
+import tools.StandaloneRandom;
 import tools.loggers.LogManager;
 
 
@@ -187,6 +188,7 @@ public class CombinatorialLearner extends Learner {
 	 * @return true if a counterExemple was found, false if the conjecture seems to be equivalent to the automata.
 	 */
 	private boolean applyCounterExample(Conjecture c, State currentState){
+		RandomOption rand = new StandaloneRandom();// TODO create options
 		LogManager.logInfo("searching counter Example");
 		if (driver instanceof TransparentMealyDriver){
 			Mealy original = ((TransparentMealyDriver) driver).getAutomata();
@@ -199,7 +201,7 @@ public class CombinatorialLearner extends Learner {
 		}
 		int maxTry = driver.getInputSymbols().size() * c.getStateCount() * 20;//TODO find a better way to choose this number ?
 		for (int i = 0; i < maxTry; i++){
-			String input = Utils.randIn(driver.getInputSymbols());
+			String input = rand.randIn(driver.getInputSymbols());
 			String driverOutput = apply(input,false);
 			MealyTransition t = c.getTransitionFromWithInput(currentState, input);
 			String conjectureOutput = t.getOutput();

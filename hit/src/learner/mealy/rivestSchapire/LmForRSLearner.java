@@ -5,22 +5,23 @@ import java.util.List;
 
 import automata.mealy.InputSequence;
 import automata.mealy.OutputSequence;
-
-import tools.Utils;
-import tools.loggers.LogManager;
-
 import learner.mealy.LmTrace;
 import learner.mealy.table.LmControlTableRow;
 import learner.mealy.table.LmLearner;
 import learner.mealy.table.LmOptions;
+import options.RandomOption;
+import tools.loggers.LogManager;
 
 public class LmForRSLearner extends LmLearner {
+	private final RandomOption rand;
 	StateDriver driver;
 	KnownTracesTree knownTraces = new KnownTracesTree();
 
-	public LmForRSLearner(StateDriver driver, LmOptions options) {
+	public LmForRSLearner(StateDriver driver, LmOptions options,
+			RandomOption rand) {
 		super(driver, options);
 		this.driver = driver;
+		this.rand = rand;
 	}
 
 	@Override
@@ -41,8 +42,8 @@ public class LmForRSLearner extends LmLearner {
 		}
 		if (differentRows.size() > driver.learner.n) {
 			while (true) {
-				int i = Utils.randInt(differentRows.size());
-				int j = Utils.randInt(differentRows.size() - 1);
+				int i = rand.randInt(differentRows.size());
+				int j = rand.randInt(differentRows.size() - 1);
 				if (j >= i)
 					j++;
 				LmControlTableRow rowI = cTable.getRowInS(i);
@@ -51,7 +52,7 @@ public class LmForRSLearner extends LmLearner {
 				for (int k = 0; k < rowI.getColumnCount(); k++) {
 					if (!rowI.getColumn(k).getOutputSymbol()
 							.equals(rowJ.getColumn(k).getOutputSymbol())) {
-						InputSequence seq = ((Utils.randInt(2) == 0) ? rowI
+						InputSequence seq = ((rand.randInt(2) == 0) ? rowI
 								: rowJ).getIS();
 						seq.addInputSequence(cTable.getColSuffix(k));
 						RivestSchapireStatsEntry stats = driver.learner.stats;

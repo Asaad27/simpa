@@ -23,9 +23,9 @@ import learner.mealy.LmTrace;
 import learner.mealy.localizerBased.dataManager.DataManager;
 import learner.mealy.localizerBased.dataManager.FullyQualifiedState;
 import main.simpa.Options;
+import options.RandomOption;
 import tools.AdenilsoSimaoTool;
-import tools.Utils;
-
+import tools.StandaloneRandom;
 import tools.loggers.LogManager;
 
 public class LocalizerBasedLearner extends Learner {
@@ -329,7 +329,8 @@ public class LocalizerBasedLearner extends Learner {
 							// dataManager is not up to date;
 		driver.stopLog();
 		for (int j = 0; j < max_try; j++) {
-			int rand = Utils.randInt(driver.getInputSymbols().size());
+			int rand = new StandaloneRandom()
+					.randInt(driver.getInputSymbols().size());
 			String input = driver.getInputSymbols().get(rand);
 			if (!driver.execute(input).equals(generatedDriver.execute(input)))
 				return false;
@@ -489,7 +490,7 @@ public class LocalizerBasedLearner extends Learner {
 	}
 
 	private static List<InputSequence> computeCharacterizationSet(
-			TransparentMealyDriver driver) {
+			RandomOption rand, TransparentMealyDriver driver) {
 		LogManager.logStep(LogManager.STEPOTHER,
 				"computing characterization set");
 		System.out.print("computing characterization set\r");
@@ -527,7 +528,7 @@ public class LocalizerBasedLearner extends Learner {
 					}
 				}
 
-				Collections.shuffle(toTry, new Random(Utils.randLong()));
+				Collections.shuffle(toTry, new Random(rand.randLong()));
 				for (InputSequence currentTry : toTry) {
 					if (shortestTried == null)
 						shortestTried = currentTry;
@@ -586,10 +587,10 @@ public class LocalizerBasedLearner extends Learner {
 
 				List<String> inputs = new ArrayList<>();
 				inputs.addAll(driver.getInputSymbols());
-				Collections.shuffle(inputs, new Random(Utils.randLong()));
+				Collections.shuffle(inputs, new Random(rand.randLong()));
 				List<State> randomizedStates = automata.getStates();
 				Collections.shuffle(randomizedStates,
-						new Random(Utils.randLong()));
+						new Random(rand.randLong()));
 				for (int i = 0; i < randomizedStates.size(); i++) {
 					State s1 = randomizedStates.get(i);
 					for (int j = i + 1; j < randomizedStates.size(); j++) {
@@ -617,12 +618,12 @@ public class LocalizerBasedLearner extends Learner {
 		List<InputSequence> W = new ArrayList<InputSequence>();
 		List<State> distinguishedStates = new ArrayList<State>();
 		List<State> randomizedStates = automata.getStates();
-		Collections.shuffle(randomizedStates, new Random(Utils.randLong()));
+		Collections.shuffle(randomizedStates, new Random(rand.randLong()));
 		for (State s1 : automata.getStates()) {
 			if (Options.getLogLevel() != Options.LogLevel.LOW)
 				LogManager.logInfo("adding state " + s1);
 			Collections.shuffle(distinguishedStates,
-					new Random(Utils.randLong()));
+					new Random(rand.randLong()));
 			for (State s2 : distinguishedStates) {
 				boolean haveSameOutputs = true;
 				for (InputSequence w : W) {
@@ -636,7 +637,7 @@ public class LocalizerBasedLearner extends Learner {
 						LogManager.logInfo(s1 + " and " + s2
 								+ " have the same outputs for W=" + W);
 					List<String> inputs = driver.getInputSymbols();
-					Collections.shuffle(inputs, new Random(Utils.randLong()));
+					Collections.shuffle(inputs, new Random(rand.randLong()));
 					addDistinctionSequence(automata, driver.getInputSymbols(),
 							s1, s2, W);
 					if (Options.getLogLevel() == Options.LogLevel.ALL)

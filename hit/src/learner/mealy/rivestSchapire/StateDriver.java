@@ -49,7 +49,8 @@ class StateDriver extends MealyDriver {
 		resetDone = true;
 		stateLearner = (learner.hIsGiven)
 				? new LmLearner(this, learner.options.lmOptions)
-				: new LmForRSLearner(this, learner.options.lmOptions);
+				: new LmForRSLearner(this, learner.options.lmOptions,
+						learner.options.seedForProbabilistic);
 		paused = true;
 		class R implements Runnable{
 			private Learner learner;
