@@ -573,7 +573,9 @@ public abstract class OptionTree {
 			args.remove(activatingArg);
 			if (!setValueFromArg(activatingArg, parsingErrorStream))
 				parseError = true;
-		} else if (getSortedChildren().size() != 1) {
+		}
+		if ((activatingArg == null || parseError)
+				&& getSortedChildren().size() != 1) {
 			// this option is not activated, but maybe a sub option can be
 			// activated to choose which subTree to select
 			List<List<OptionTree>> subTrees = getSortedChildren();
@@ -599,7 +601,7 @@ public abstract class OptionTree {
 			} else {
 				ArgumentValue defaultValue = getDefaultValue();
 				if (defaultValue == null)
-					return false;
+					parseError = true;
 				else {
 					boolean r = setValueFromArg(defaultValue,
 							parsingErrorStream);
