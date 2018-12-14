@@ -63,9 +63,10 @@ public abstract class OptionTree {
 										// parentOption
 
 		public void addValue(String value) {
-			assert descriptor.acceptedValues!=ArgumentDescriptor.AcceptedValues.NONE;
+			assert descriptor.acceptedValues != ArgumentDescriptor.AcceptedValues.NONE;
 			values.add(value);
-			assert values.size()==1 || descriptor.acceptedValues==ArgumentDescriptor.AcceptedValues.SEVERAL;
+			assert values.size() == 1
+					|| descriptor.acceptedValues == ArgumentDescriptor.AcceptedValues.SEVERAL;
 		}
 
 		public List<String> getValues() {
@@ -100,7 +101,8 @@ public abstract class OptionTree {
 		 * add the CLI arguments needed to build back this object to the
 		 * provided List
 		 * 
-		 * @param buildList the list were arguments are added
+		 * @param buildList
+		 *            the list were arguments are added
 		 * @see #asCLI()
 		 */
 		public void asCLI(List<String> buildList) {
@@ -384,8 +386,10 @@ public abstract class OptionTree {
 	 * same as {@link #parseArguments(List, PrintStream)} but take arguments as
 	 * a space separated single string.
 	 * 
-	 * @param args               the string to parse
-	 * @param parsingErrorStream a stream to output errors
+	 * @param args
+	 *            the string to parse
+	 * @param parsingErrorStream
+	 *            a stream to output errors
 	 * @return false if the parsing cannot be achieved
 	 * @see #parseArguments(List, PrintStream) parseArguments for more details.
 	 */
@@ -404,11 +408,12 @@ public abstract class OptionTree {
 	 * {@link parseArgumentsInternal} which will transpose ArgumentValue in the
 	 * OptionTree
 	 * 
-	 * @param args               the list of arguments.
-	 * @param parsingErrorStream a stream on which errors should be written
-	 *                           (typically System.out when the graphical user
-	 *                           interface will let the user repair her/his
-	 *                           mistakes and System.err when errors are fatal).
+	 * @param args
+	 *            the list of arguments.
+	 * @param parsingErrorStream
+	 *            a stream on which errors should be written (typically
+	 *            System.out when the graphical user interface will let the user
+	 *            repair her/his mistakes and System.err when errors are fatal).
 	 * @return <code>false</code> if the parsing cannot be achieved,
 	 *         <code>true</code> if the option tree is defined from arguments,
 	 *         even if there was minor mistakes.
