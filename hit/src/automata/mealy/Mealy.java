@@ -971,6 +971,8 @@ public class Mealy extends Automata implements Serializable {
 	public Map<State, Integer> computeDepths(State start, boolean logToDot) {
 		Map<State, Integer> result = super.computeDepths(start);
 		if (logToDot) {
+			LogManager.logInfo(
+					"A relative depth is associated to all nodes of the automaton : ");
 			StringBuilder comments = new StringBuilder();
 			for (Entry<State, Integer> entry : result.entrySet()) {
 				comments.append(

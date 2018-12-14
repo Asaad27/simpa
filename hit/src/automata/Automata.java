@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import tools.loggers.LogManager;
+
 public class Automata implements Serializable {
 	private static final long serialVersionUID = -8767507358858312705L;
 
@@ -215,18 +217,20 @@ public class Automata implements Serializable {
 			return findStronglyConnectedComponent(new HashSet<>(states),
 					true) != null;
 		Set<State> connexComponent = findStronglyConnectedComponent();
-		if (connexComponent.size() == states.size())
+		if (connexComponent.size() == states.size()) {
+			LogManager.logInfo("Automaton " + this + " is strongly connected.");
 			return true;
+		}
 
 		HashSet<State> initialStates = new HashSet<State>(states);
 		initialStates.removeAll(connexComponent);
 		findUnreachableAncestors(initialStates);
 
-		System.out.println(
-				"A longer path is : state " + initialStates.iterator().next()
-						+ " is not reachable from state "
-						+ connexComponent.iterator().next());
-		System.out.println("In a more generic idea, any state of "
+		LogManager.logInfo("Automaton " + this + " is not strongly connected : "
+				+ "there is no path from " + connexComponent.iterator().next()
+				+ " to " + initialStates.iterator().next());
+		if (initialStates.size() > 1 || connexComponent.size() > 1)
+			LogManager.logInfo("In a more generic idea, any state of "
 				+ initialStates + " is not reachable from any state of "
 				+ connexComponent);
 

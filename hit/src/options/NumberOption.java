@@ -144,7 +144,7 @@ public abstract class NumberOption<T extends Number & Comparable<T>>
 		labelledSpinner.add(Box.createGlue());
 		if (autoValueIsAllowed()) {
 			JPanel mainConponent = new JPanel();
-			this.mainConponent = mainConponent;
+			this.mainComponent = mainConponent;
 			mainConponent
 					.setLayout(new BoxLayout(mainConponent, BoxLayout.Y_AXIS));
 			mainConponent.add(labelledSpinner);
@@ -179,7 +179,7 @@ public abstract class NumberOption<T extends Number & Comparable<T>>
 			checkBoxComponent.add(Box.createGlue());
 			mainConponent.add(checkBoxComponent);
 		} else
-			mainConponent = labelledSpinner;
+			mainComponent = labelledSpinner;
 	}
 
 	public void setMaximum(T maximum) {
@@ -190,7 +190,7 @@ public abstract class NumberOption<T extends Number & Comparable<T>>
 				|| maximum.compareTo(minimum) >= 0;
 		if (maximum != null && value.compareTo(maximum) > 0)
 			setValue(maximum);
-		if (mainConponent != null) {
+		if (mainComponent != null) {
 			spinnerModel.setMaximum(maximum);
 		}
 	}
@@ -203,7 +203,7 @@ public abstract class NumberOption<T extends Number & Comparable<T>>
 				|| maximum.compareTo(minimum) >= 0;
 		if (minimum != null && value.compareTo(minimum) < 0)
 			setValue(minimum);
-		if (mainConponent != null) {
+		if (mainComponent != null) {
 			spinnerModel.setMaximum(maximum);
 		}
 	}

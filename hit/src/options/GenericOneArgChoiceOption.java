@@ -71,8 +71,8 @@ public class GenericOneArgChoiceOption<T extends OneArgChoiceOptionItem>
 		}
 		if (selectedChoice == null) {
 			parsingErrorStream
-					.print("Error : value '" + value + "' of argument "
-							+ argumentDescriptor.name + " cannot be parsed");
+					.println("Error : value '" + value + "' of argument "
+							+ argumentDescriptor.name + " cannot be parsed.");
 			return false;
 		}
 		selectChoice(selectedChoice);

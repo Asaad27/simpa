@@ -147,12 +147,14 @@ public class DotAntlrListener extends DotMealyBaseListener {
 			if (firstStateDefined != null) {
 				startNode = firstStateDefined;
 				System.err
-						.println("warning : using first state defined as initial state of the automaton");
+						.println(
+								"Warning : using first state defined as initial state of the automaton.");
 			} else {
 				startNode = firstStateUsed;
 				assert firstStateUsed != null;
 				System.err
-						.println("warning : using first state used as initial state of the automaton");
+						.println(
+								"Warning : using state of first transition as initial state of the automaton.");
 			}
 			System.out.println(startNode);
 		}

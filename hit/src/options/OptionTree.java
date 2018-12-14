@@ -119,7 +119,7 @@ public abstract class OptionTree {
 	private List<List<OptionTree>> sortedChildren = new ArrayList<>();
 	private List<OptionTree> children = new ArrayList<>();
 	private List<OptionValidator> validators = new ArrayList<>();
-	protected Component mainConponent = null;
+	protected Component mainComponent = null;
 	private JPanel mainContainer = null;
 	protected JPanel subTreeContainer = null;
 	private JPanel validationContainer = null;
@@ -142,8 +142,8 @@ public abstract class OptionTree {
 
 			mainContainer.add(topContainer);
 			createMainComponent();
-			if (mainConponent != null)
-				topContainer.add(mainConponent);
+			if (mainComponent != null)
+				topContainer.add(mainComponent);
 			topContainer.add(validationContainer);
 			topContainer.add(Box.createGlue());
 			mainContainer.setLayout(

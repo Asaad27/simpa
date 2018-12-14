@@ -29,7 +29,7 @@ public abstract class ListOption<T> extends OptionTree {
 	private List<T> values = new ArrayList<>();
 
 	JButton addButton = null;
-	JPanel mainConponent = null;
+	JPanel mainComponent = null;
 	private GridBagConstraints constraints;
 
 	public ListOption(String argument) {
@@ -76,8 +76,8 @@ public abstract class ListOption<T> extends OptionTree {
 	 */
 	protected void addValue(T v) {
 		values.add(v);
-		if (mainConponent != null) {
-			mainConponent.remove(addButton);
+		if (mainComponent != null) {
+			mainComponent.remove(addButton);
 
 			Component valueComp = createComponentFromValue(v);
 			JButton removeButton = new JButton("remove");
@@ -85,9 +85,9 @@ public abstract class ListOption<T> extends OptionTree {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					values.remove(v);
-					mainConponent.remove(valueComp);
-					mainConponent.remove(removeButton);
-					mainConponent.revalidate();
+					mainComponent.remove(valueComp);
+					mainComponent.remove(removeButton);
+					mainComponent.revalidate();
 				}
 
 			});
@@ -95,30 +95,30 @@ public abstract class ListOption<T> extends OptionTree {
 			constraints.gridy = GridBagConstraints.RELATIVE;
 			constraints.gridx = 0;
 			constraints.fill = GridBagConstraints.VERTICAL;
-			mainConponent.add(removeButton, constraints);
+			mainComponent.add(removeButton, constraints);
 			constraints.fill = new GridBagConstraints().fill;
 
 			constraints.gridx = 1;
 			constraints.anchor = GridBagConstraints.LINE_START;
-			mainConponent.add(valueComp, constraints);
+			mainComponent.add(valueComp, constraints);
 			constraints.anchor = new GridBagConstraints().anchor;
 
 			constraints.gridx = 0;
 			constraints.gridwidth = 2;
-			mainConponent.add(addButton, constraints);
-			mainConponent.revalidate();
+			mainComponent.add(addButton, constraints);
+			mainComponent.revalidate();
 		}
 	}
 
 	@Override
 	protected void createMainComponent() {
-		mainConponent = new JPanel();
+		mainComponent = new JPanel();
 		constraints = new GridBagConstraints();
-		super.mainConponent = mainConponent;
-		mainConponent.setLayout(new GridBagLayout());
+		super.mainComponent = mainComponent;
+		mainComponent.setLayout(new GridBagLayout());
 		String title = getOptionTitle();
 		if (title != null)
-			mainConponent.setBorder(BorderFactory.createTitledBorder(title));
+			mainComponent.setBorder(BorderFactory.createTitledBorder(title));
 
 		addButton = new JButton(getAddButtonText());
 		addButton.addActionListener(new ActionListener() {
@@ -129,7 +129,7 @@ public abstract class ListOption<T> extends OptionTree {
 			}
 
 		});
-		mainConponent.add(addButton);
+		mainComponent.add(addButton);
 
 		List<T> _values = new ArrayList<>(values);
 		values.clear();

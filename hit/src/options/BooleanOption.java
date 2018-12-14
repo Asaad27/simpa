@@ -136,7 +136,7 @@ public class BooleanOption extends OptionTree {
 
 			}
 		});
-		mainConponent = checkBox;
+		mainComponent = checkBox;
 
 		setEnabled(isEnabled);
 	}
@@ -148,7 +148,7 @@ public class BooleanOption extends OptionTree {
 	 *            the value to set.
 	 */
 	public void setEnabled(Boolean checked) {
-		if (mainConponent != null) {
+		if (mainComponent != null) {
 			assert checkBox != null;
 			if (checkBox.isSelected() != checked)
 				checkBox.setSelected(checked);

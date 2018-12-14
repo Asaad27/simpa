@@ -289,7 +289,8 @@ public class CutterCombinatorialLearner extends Learner {
 
 		if (options.interactive.isEnabled()) {
 			System.out.println("what do you want to apply ? \n\tenter «auto» to use default sequence '"+
-					cuttingSequence+"'\n\t'a,b,c' for the sequence a, b, c\n\t«empty» to use old algorithm (Shortest unknown transition or shortest counter exemple)");
+							cuttingSequence
+							+ "'\n\t'a,b,c' for the sequence a, b, c\n\t«empty» to use old algorithm (Shortest unknown transition or shortest counter example)");
 
 			String answer = input.next();
 			System.out.println("understood «"+answer+"»");

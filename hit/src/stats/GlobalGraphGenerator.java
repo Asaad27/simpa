@@ -1095,7 +1095,7 @@ public class GlobalGraphGenerator extends GraphGenerator {
 			g.forceAbsRange(null, 200);
 			g.setForceOrdLogScale(true);
 			g.setForceAbsLogScale(false);
-			g.setFileName(filePrefix + "counter_exemple_comparaison");
+			g.setFileName(filePrefix + "counter_example_comparaison");
 			g.export();
 		}
 		{

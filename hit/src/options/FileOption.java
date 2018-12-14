@@ -140,7 +140,7 @@ public class FileOption extends OptionTree {
 
 	public void setSuffix(String suffix) {
 		pathSufix = suffix;
-		if (mainConponent != null) {
+		if (mainComponent != null) {
 			if (suffix.equals(""))
 				suffixLabel.setText("");
 			else if (suffix.startsWith(File.separator))
@@ -194,14 +194,14 @@ public class FileOption extends OptionTree {
 		});
 		panel.add(button);
 
-		mainConponent = panel;
+		mainComponent = panel;
 		setSelectedFile(selectedFile);
 		setSuffix(pathSufix);
 	}
 
 	private void setSelectedFile(File file) {
 		selectedFile = file;
-		if (mainConponent != null) {
+		if (mainComponent != null) {
 			if (fileChooser.getSelectedFile() == null
 					|| !fileChooser.getSelectedFile().equals(file)) {
 				fileChooser.setSelectedFile(file);

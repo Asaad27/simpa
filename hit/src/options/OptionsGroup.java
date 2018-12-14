@@ -33,7 +33,7 @@ public class OptionsGroup extends OptionTree {
 
 	@Override
 	protected void createMainComponent() {
-		mainConponent = null;
+		mainComponent = null;
 		updateSubTreeComponent("options related to " + groupName);
 	}
 

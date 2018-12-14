@@ -320,7 +320,7 @@ public class MealyDriver extends Driver {
 				if (counterExamples.isEmpty()) {
 					return false;
 				} else {
-					LogManager.logInfo("a counter example exixst (e.g. "
+					LogManager.logInfo("a counter example exist (e.g. "
 							+ counterExamples.get(0)
 							+ "). Doing random walk until a CE is found");
 					if (resetIsAllowed) {
@@ -404,7 +404,7 @@ public class MealyDriver extends Driver {
 					"there is no more counter example. user were not asked about one");
 		}
 		InputSequence counterExample = new InputSequence();
-		LogManager.logInfo("asking for counter exemple");
+		LogManager.logInfo("asking for counter example");
 		Scanner input = new Scanner(System.in);
 		if (counterExamples != null) {
 			StringBuilder s = new StringBuilder();

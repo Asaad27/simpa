@@ -18,7 +18,7 @@ public class LockerMealy extends Mealy {
 	public enum OnError{
 		RESET,
 		STAY_IN_PLACE,
-		GO_BACK,//go one state back on stay in reset state
+		GO_BACK, // go one state back or stay in reset state
 		RANDOM_BACK,//go to a random previous state
 	}
 	public enum OutputPolicy{

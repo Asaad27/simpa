@@ -33,7 +33,7 @@ public abstract class GenericChoiceOption<T extends ChoiceOptionItem>
 	 * @warning must be called in constructor, like {@link addSortedChildren}.
 	 */
 	protected void addChoice(T choice) {
-		assert mainConponent == null;
+		assert mainComponent == null;
 		choices.add(choice);
 		addSortedChildren(choice.subTrees);
 		if (selectedItem == null) {
@@ -54,7 +54,7 @@ public abstract class GenericChoiceOption<T extends ChoiceOptionItem>
 				selectChoice(choiceCombo.getSelectedIndex());
 			}
 		});
-		mainConponent = choiceCombo;
+		mainComponent = choiceCombo;
 		selectChoice(selectedItem);
 	}
 

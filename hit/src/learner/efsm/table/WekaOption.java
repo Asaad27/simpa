@@ -65,7 +65,7 @@ public class WekaOption extends BooleanOption {
 		}
 		JLabel label = new JLabel(
 				"weka is not available (" + getAvailabilityMessage() + ").");
-		mainConponent = label;
+		mainComponent = label;
 	}
 
 	@Override

@@ -144,7 +144,7 @@ public class LmConjecture extends automata.mealy.Mealy {
 	 * conjecture)
 	 * 
 	 * This method is implemented by walking in real automata and checking if we
-	 * can associate a state of conjecture to each real state. This mean that
+	 * can associate a state of conjecture to each real state. This means that
 	 * the conjecture can have extra states which will not be checked.
 	 * 
 	 * The conjecture can be not minimal and in this case, a warning might be
@@ -161,7 +161,7 @@ public class LmConjecture extends automata.mealy.Mealy {
 	 *            state to start algorithm in reference automata. Should be
 	 *            equivalent to conjectureStartingState
 	 * @param stopOnFirst
-	 *            if {@code false}, The list including all counter examples
+	 *            if {@code false}, the list including all counter examples
 	 *            which are not containing loop will be returned. If
 	 *            {@code true}, at most one counter example will be returned
 	 *            (the first of the list). Note that the first is not always the
@@ -264,8 +264,8 @@ public class LmConjecture extends automata.mealy.Mealy {
 	 * @param stopOnFirst
 	 *            if <code>false</code>, The list including all counter examples
 	 *            which are not containing loop will be returned. If
-	 *            <code>true>,at most one counter example will be returned (the
-	 *            first of the list). Note that the first is not always the
+	 *            <code>true</code>,at most one counter example will be returned
+	 *            (the first of the list). Note that the first is not always the
 	 *            shortest.
 	 * @return a {@link CounterExampleResult} object
 	 */

@@ -74,7 +74,7 @@ public class OracleOption extends MultiArgChoiceOption {
 				randomWalkOptions.add(maxTraceNumber);
 			}
 			mrBeanOnlyIfExists = new BooleanOption(
-					"check existance of counter example before calling MrBean",
+					"check existence of counter example before calling MrBean",
 					"exhaustive-before-MrBean",
 					"First do an exhaustive check to see if a counter example exists and if it exists do a random walk to find it",
 					new ArrayList<OptionTree>(), randomWalkOptions, false) {

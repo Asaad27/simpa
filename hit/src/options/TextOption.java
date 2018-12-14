@@ -101,7 +101,7 @@ public class TextOption extends OptionTree {
 	protected void createMainComponent() {
 		field = new JTextField(50);
 		JPanel pane = new JPanel(new GridBagLayout());
-		mainConponent = pane;
+		mainComponent = pane;
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridy = 0;
 		c.gridx = GridBagConstraints.RELATIVE;
