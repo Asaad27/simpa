@@ -14,13 +14,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import main.simpa.Options;
-import main.simpa.Options.LogLevel;
-import tools.Utils;
-import tools.loggers.LogManager;
 import automata.State;
 import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
+import main.simpa.Options;
+import main.simpa.Options.LogLevel;
+import options.RandomOption;
+import tools.Utils;
+import tools.loggers.LogManager;
 
 public class RandomMealy extends Mealy implements Serializable {
 	private static final long serialVersionUID = -4610287835922377376L;
@@ -31,7 +32,7 @@ public class RandomMealy extends Mealy implements Serializable {
 
 	private List<String> inputSymbols = null;
 	private List<String> outputSymbols = null;
-	private long seed = 0;
+	private final RandomOption rand;
 	private OUTPUT_STYLE outputStyle;
 
 	public static String replaceCharAt(String s, int pos, char c) {
@@ -44,14 +45,14 @@ public class RandomMealy extends Mealy implements Serializable {
 		int nbSym = 0;
 		String s = "a";
 		inputSymbols = new ArrayList<String>();
-		nbSym = Utils.randIntBetween(Options.MININPUTSYM, Options.MAXINPUTSYM);
+		nbSym = rand.randIntBetween(Options.MININPUTSYM, Options.MAXINPUTSYM);
 		for (int i = 0; i < nbSym; i++) {
 			inputSymbols.add(s);
 			s = Utils.nextSymbols(s);
 		}
 		int o = 0;
 		outputSymbols = new ArrayList<String>();
-		nbSym = Utils.randIntBetween(Options.MINOUTPUTSYM, Options.MAXOUTPUTSYM);
+		nbSym = rand.randIntBetween(Options.MINOUTPUTSYM, Options.MAXOUTPUTSYM);
 		for (int i = 0; i < nbSym; i++) {
 			outputSymbols.add(String.valueOf(o++));
 		}
@@ -64,11 +65,11 @@ public class RandomMealy extends Mealy implements Serializable {
 			switch (outputStyle) {
 			case RANDOM:
 				for (String i : inputSymbols) {
-					localOutputs.put(i, Utils.randIn(outputSymbols));
+					localOutputs.put(i, rand.randIn(outputSymbols));
 				}
 				break;
 			case ONE_DIFF_PER_STATE:
-				String diff = Utils.randIn(inputSymbols);
+				String diff = rand.randIn(inputSymbols);
 				if (Options.getLogLevel() != LogLevel.LOW)
 					LogManager.logInfo("Changing output for state " + s
 							+ " is " + diff);
@@ -82,12 +83,12 @@ public class RandomMealy extends Mealy implements Serializable {
 		return outputs;
 	}
 
-	public RandomMealy() {
-		this(false, OUTPUT_STYLE.RANDOM);
+	public RandomMealy(RandomOption rand) {
+		this(rand, false, OUTPUT_STYLE.RANDOM);
 	}
 
-	public RandomMealy(boolean forceConnex) {
-		this(forceConnex, OUTPUT_STYLE.RANDOM);
+	public RandomMealy(RandomOption rand, boolean forceConnex) {
+		this(rand, forceConnex, OUTPUT_STYLE.RANDOM);
 	}
 
 	private static String getOutputStyleName(OUTPUT_STYLE outputStyle) {
@@ -101,12 +102,14 @@ public class RandomMealy extends Mealy implements Serializable {
 		}
 	}
 
-	public RandomMealy(boolean forceConnex, OUTPUT_STYLE outputStyle) {
+	public RandomMealy(RandomOption rand, boolean forceConnex,
+			OUTPUT_STYLE outputStyle) {
 		super((forceConnex ? "ConnexRandom(" : ("Random("
 				+ Options.TRANSITIONPERCENT + ";"))
 				+ getOutputStyleName(outputStyle) + ")");
+		this.rand = rand;
+		assert rand.getRand() != null;
 		LogManager.logStep(LogManager.STEPOTHER, "Generating random Mealy");
-		seed = Utils.randLong();
 		this.outputStyle = outputStyle;
 		generateSymbols();
 		createStates();
@@ -118,10 +121,6 @@ public class RandomMealy extends Mealy implements Serializable {
 			exportToDot();
 	}
 	
-	public long getSeed(){
-		return seed;
-	}
-
 	public static void serialize(RandomMealy o) {
 		FileOutputStream fos = null;
 		ObjectOutputStream oos = null;
@@ -160,9 +159,9 @@ public class RandomMealy extends Mealy implements Serializable {
 		for (State s1 : states) {
 			for (String is : inputSymbols) {
 				String output = outputs.get(s1).get(is);
-				if (Utils.randBoolWithPercent(Options.TRANSITIONPERCENT)) {
+				if (rand.randBoolWithPercent(Options.TRANSITIONPERCENT)) {
 					addTransition(new MealyTransition(this, s1,
-							Utils.randIn(states), is, output));
+							rand.randIn(states), is, output));
 				} else {
 					addTransition(new MealyTransition(this, s1, s1, is, output));
 				}
@@ -188,9 +187,9 @@ public class RandomMealy extends Mealy implements Serializable {
 
 		for (State s : states) {
 			if (s != initial) {
-				String input = Utils.randIn(inputSymbols);
+				String input = rand.randIn(inputSymbols);
 				String output = outputs.get(s).get(input);
-				State target = Utils.randIn(reachingStart);
+				State target = rand.randIn(reachingStart);
 				addTransition(new MealyTransition(this, s, target, input,
 						output));
 				reachingStart.add(s);
@@ -200,10 +199,10 @@ public class RandomMealy extends Mealy implements Serializable {
 		assert (reachingStart.containsAll(states));
 
 		while (!notReachedFromStart.isEmpty()) {
-			State s = Utils.randIn(reachedFromStartAndNotComplete);
-			String input = Utils.randIn(remainingInputs.get(s));
+			State s = rand.randIn(reachedFromStartAndNotComplete);
+			String input = rand.randIn(remainingInputs.get(s));
 			String output = outputs.get(s).get(input);
-			State target = Utils.randIn(notReachedFromStart);
+			State target = rand.randIn(notReachedFromStart);
 			addTransition(new MealyTransition(this, s, target, input, output));
 
 			Set<String> remaining = remainingInputs.get(s);
@@ -227,26 +226,27 @@ public class RandomMealy extends Mealy implements Serializable {
 		for (State s1 : states) {
 			for (String is : remainingInputs.get(s1)) {
 				addTransition(new MealyTransition(this, s1,
-						Utils.randIn(states), is, outputs.get(s1).get(is)));
+						rand.randIn(states), is, outputs.get(s1).get(is)));
 			}
 		}
 	}
 
 	private void createStates() {
-		int nbStates = Utils.randIntBetween(Options.MINSTATES,
+		int nbStates = rand.randIntBetween(Options.MINSTATES,
 				Options.MAXSTATES);
 		for (int i = 0; i < nbStates; i++)
 			addState(i == 0);
 		LogManager.logInfo("Number of states : " + nbStates);
 	}
 
-	public static RandomMealy getConnexRandomMealy() {
-		return getConnexRandomMealy(OUTPUT_STYLE.RANDOM);
+	public static RandomMealy getConnexRandomMealy(RandomOption rand) {
+		return getConnexRandomMealy(rand, OUTPUT_STYLE.RANDOM);
 	}
 
-	public static RandomMealy getConnexRandomMealy(OUTPUT_STYLE outputStyle) {
+	public static RandomMealy getConnexRandomMealy(RandomOption rand,
+			OUTPUT_STYLE outputStyle) {
 
-		RandomMealy automata = new RandomMealy(true, outputStyle);
+		RandomMealy automata = new RandomMealy(rand, true, outputStyle);
 
 		return automata;
 	}

@@ -45,6 +45,7 @@ import learner.mealy.hW.dataManager.TraceTree;
 import learner.mealy.localizerBased.LocalizerBasedLearner;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
+import tools.StandaloneRandom;
 import tools.Utils;
 
 import tools.loggers.LogManager;
@@ -1342,7 +1343,8 @@ public class HWLearner extends Learner {
 							// dataManager is not up to date;
 		driver.stopLog();
 		for (int j = 0; j < max_try; j++) {
-			int rand = Utils.randInt(driver.getInputSymbols().size());
+			int rand = new StandaloneRandom()
+					.randInt(driver.getInputSymbols().size());
 			String input = driver.getInputSymbols().get(rand);
 			if (!driver.execute(input)
 					.equals(dataManager.walkWithoutCheck(input, null, null)))
@@ -1384,7 +1386,8 @@ public class HWLearner extends Learner {
 		}
 		LmConjecture conjecture = dataManager.getConjecture();
 		InputSequence randomEquivalenceI = InputSequence
-				.generate(driver.getInputSymbols(), fullTrace.size()*10);
+				.generate(driver.getInputSymbols(), fullTrace.size() * 10,
+						new StandaloneRandom());
 		MealyDriver d;
 		if (driver instanceof TransparentMealyDriver) {
 			d = new TransparentMealyDriver(

@@ -12,6 +12,7 @@ import options.IntegerOption;
 import options.MultiArgChoiceOption;
 import options.MultiArgChoiceOptionItem;
 import options.OptionTree;
+import options.RandomOption;
 import tools.loggers.LogManager;
 
 public class OracleOption extends MultiArgChoiceOption {
@@ -33,10 +34,14 @@ public class OracleOption extends MultiArgChoiceOption {
 		BooleanOption mrBeanOnlyIfExists;
 		IntegerOption maxTraceLength;
 		IntegerOption maxTraceNumber;// null if reset is not allowed
+		public final RandomOption random;
 
 		public MrBeanOptionItem(GenericMultiArgChoiceOption<?> parent) {
 			super("ask MrBean to find a counter example (random walk)",
 					"--mrBean", parent);
+			random = new RandomOption("--oracleSeed",
+					"seed to initialize random for random walks");
+			subTrees.add(random);
 			List<OptionTree> randomWalkOptions = new ArrayList<>();
 			maxTraceLength = new IntegerOption("--maxcelength",
 					"maximum length of one random walk (from a reset if there is a reset or for all the walk)",

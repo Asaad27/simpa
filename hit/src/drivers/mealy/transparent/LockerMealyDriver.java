@@ -14,7 +14,8 @@ public class LockerMealyDriver extends TransparentMealyDriver {
 				new InputSequence("a").addInput("b").addInput("a"),
 				OnError.RANDOM_BACK,
 				OutputPolicy.UNLOCK_ONLY,
-				new ArrayList<String>(Arrays.asList(new String[]{"other"}))
+				new ArrayList<String>(Arrays.asList(new String[] { "other" })),
+				null
 				));
 		automata.exportToDot();
 	}

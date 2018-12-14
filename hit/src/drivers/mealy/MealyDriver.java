@@ -13,6 +13,7 @@ import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
+import options.RandomOption;
 import options.learnerOptions.OracleOption;
 import stats.StatsEntry_OraclePart;
 import tools.Utils;
@@ -331,7 +332,8 @@ public class MealyDriver extends Driver {
 						do {
 							LmTrace trace = new LmTrace();
 							counterExampleIsFound = doRandomWalk(conjecture,
-									conjectureState, trace, maxLength);
+									conjectureState, trace, maxLength,
+									options.mrBean.random);
 							reset();
 							appliedSequences.add(trace);
 							// here is a difficult point : a short length is
@@ -345,7 +347,8 @@ public class MealyDriver extends Driver {
 					} else {
 						assert this.automata.isConnex();
 						LmTrace trace = new LmTrace();
-						doRandomWalk(conjecture, conjectureState, trace, -1);
+						doRandomWalk(conjecture, conjectureState, trace, -1,
+								options.mrBean.random);
 						appliedSequences.add(trace);
 						return true;
 					}
@@ -355,7 +358,8 @@ public class MealyDriver extends Driver {
 					LmTrace trace = new LmTrace();
 					boolean counterExampleIsFound = doRandomWalk(conjecture,
 							conjectureState, trace,
-							options.mrBean.getMaxTraceLength());
+							options.mrBean.getMaxTraceLength(),
+							options.mrBean.random);
 					appliedSequences.add(trace);
 					if (counterExampleIsFound)
 						return true;
@@ -434,13 +438,13 @@ public class MealyDriver extends Driver {
 	}
 
 	private boolean doRandomWalk(LmConjecture conjecture, State conjectureState,
-			LmTrace trace, int maxLength) {
+			LmTrace trace, int maxLength, RandomOption rand) {
 		if (Options.getLogLevel().compareTo(LogLevel.ALL) >= 0)
 			LogManager.logInfo("Starting a random walk");
 		int tried = 0;
 		List<String> is = getInputSymbols();
 		while (maxLength < 0 || tried < maxLength) {
-			String input = Utils.randIn(is);
+			String input = rand.randIn(is);
 			String output = execute(input);
 			trace.append(input, output);
 			MealyTransition transition = conjecture

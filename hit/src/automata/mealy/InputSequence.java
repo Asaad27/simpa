@@ -7,7 +7,7 @@ import java.util.Objects;
 
 import learner.mealy.LmTrace;
 import main.simpa.Options;
-import tools.Utils;
+import options.RandomOption;
 
 public class InputSequence implements Cloneable, GenericInputSequence {
 	public class SequenceIterator implements Iterator {
@@ -227,10 +227,11 @@ public class InputSequence implements Cloneable, GenericInputSequence {
 	 *            the wanted length of sequence.
 	 * @return a sequence made of inputs randomly chosen.
 	 */
-	public static InputSequence generate(List<String> is, int length) {
+	public static InputSequence generate(List<String> is, int length,
+			RandomOption rand) {
 		InputSequence seq = new InputSequence();
 		for (int i = 0; i < length; i++) {
-			seq.addInput(Utils.randIn(is));
+			seq.addInput(rand.randIn(is));
 		}
 		return seq;
 	}

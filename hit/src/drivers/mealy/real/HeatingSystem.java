@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.util.List;
 
 import automata.mealy.InputSequence;
+import tools.StandaloneRandom;
 import tools.Utils;
 import tools.loggers.LogManager;
 
@@ -61,7 +62,8 @@ public class HeatingSystem extends RealDriver {
 			if (!process.isAlive()) {
 				if (doRandomWalkOnKilled) {
 					InputSequence randomSequence = InputSequence.generate(
-							getInputSymbols(), 10 * numberOfAtomicRequest);
+							getInputSymbols(), 10 * numberOfAtomicRequest,
+							new StandaloneRandom());
 					HeatingSystem other = new HeatingSystem();
 					other.doRandomWalkOnKilled = false;
 					try {

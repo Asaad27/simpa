@@ -6,7 +6,8 @@ import examples.mealy.LockerMealy.OutputPolicy;
 
 public class EasyRandomLockerMealyDriver extends TransparentMealyDriver {
 	public EasyRandomLockerMealyDriver(){
-		super(LockerMealy.getRandomLockerMealy(OnError.STAY_IN_PLACE, OutputPolicy.UNLOCK_GOOD_BAD));
+		super(LockerMealy.getRandomLockerMealy(OnError.STAY_IN_PLACE,
+				OutputPolicy.UNLOCK_GOOD_BAD, null));
 		automata.exportToDot();
 	}
 }

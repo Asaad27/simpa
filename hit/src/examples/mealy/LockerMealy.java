@@ -8,6 +8,7 @@ import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
 import main.simpa.Options;
+import options.RandomOption;
 import tools.Utils;
 import tools.loggers.LogManager;
 
@@ -24,7 +25,20 @@ public class LockerMealy extends Mealy {
 		UNLOCK_ONLY,
 		UNLOCK_GOOD_BAD,
 	}
-	public LockerMealy(InputSequence unlock, OnError onError, OutputPolicy outputPolicy, List<String> inputSym){
+
+	public LockerMealy(InputSequence unlock, OnError onError,
+			OutputPolicy outputPolicy, List<String> inputSym, RandomOption rand// when
+																				// switching
+																				// to
+																				// options,
+																				// rand
+																				// should
+																				// be
+																				// a
+																				// sub-option
+																				// of
+																				// RANDOM_BACK
+	) {
 		super("Locker("+onError+";"+outputPolicy+")");
 		LogManager.logInfo("Generate LockerMealy");
 		for (String s : unlock.sequence)
@@ -55,7 +69,9 @@ public class LockerMealy extends Mealy {
 						s2 = states.get((i == 0 ) ? 0 : i-1);
 						break;
 					case RANDOM_BACK:
-						s2 = states.get(Utils.randInt(i+1));//rand include adding loop transition
+						s2 = states.get(rand.randInt(i + 1));// rand include
+																// adding loop
+																// transition
 					}
 				}
 
@@ -84,18 +100,21 @@ public class LockerMealy extends Mealy {
 		}
 	}
 	
-	public static LockerMealy getRandomLockerMealy(OnError onError, OutputPolicy outputPolicy){
+	public static LockerMealy getRandomLockerMealy(OnError onError,
+			OutputPolicy outputPolicy, RandomOption rand) {
 		List<String> inputs = new ArrayList<>();
 		String s = "a";
-		int inputs_nb = Utils.randIntBetween(Options.MININPUTSYM, Options.MAXINPUTSYM);
+		int inputs_nb = rand.randIntBetween(Options.MININPUTSYM,
+				Options.MAXINPUTSYM);
 		for (int i = 0; i< inputs_nb; i++){
 			inputs.add(s);
-			s= Utils.nextSymbols(s);
+			s = Utils.nextSymbols(s);
 		}
-		int lockerLength = Utils.randIntBetween(Options.MINSTATES, Options.MAXSTATES);
+		int lockerLength = rand.randIntBetween(Options.MINSTATES,
+				Options.MAXSTATES);
 		InputSequence unlock = new InputSequence();
 		for (int i = 0; i < lockerLength; i++)
-			unlock.addInput(Utils.randIn(inputs));
-		return new LockerMealy(unlock, onError, outputPolicy, inputs);
+			unlock.addInput(rand.randIn(inputs));
+		return new LockerMealy(unlock, onError, outputPolicy, inputs, rand);
 	}
 }
