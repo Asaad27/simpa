@@ -39,6 +39,13 @@ public class RandomOption extends LongOption {
 				.logInfo("Seed for " + argument.name + " set to " + getSeed());
 	}
 
+	@Override
+	protected ArgumentValue getDebugArgument() {
+		ArgumentValue argValue = new ArgumentValue(argument);
+		argValue.addValue(value.toString());
+		return argValue;
+	}
+
 	/**
 	 * get the seed used at the last call to {@link #init()}.
 	 * 

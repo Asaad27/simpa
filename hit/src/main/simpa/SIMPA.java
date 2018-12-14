@@ -694,6 +694,7 @@ public class SIMPA {
 	 */
 	static File lastOptionsFile;
 
+	@Deprecated
 	private static String makeLaunchLine() {
 		StringBuilder r = new StringBuilder();
 		r.append("java ");
@@ -759,10 +760,17 @@ public class SIMPA {
 		if (getOutputsOptions().htmlLoggerOption.isEnabled())
 			LogManager.addLogger(new HTMLLogger());
 		LogManager.start();
+		LogManager.logInfo("starting inference with options "
+				+ allOptions.buildBackCLILine(false));
 		for (OptionTree option : allOptions.getAllSelectedChildren()) {
 			if (option instanceof RandomOption)
 				((RandomOption) option).init();
 		}
+		if (argLabel != null) {
+			argLabel.setText(allOptions.buildBackCLILine(true));
+		}
+		System.out.println("you can start inference again using "
+				+ allOptions.buildBackCLILine(true));
 		Driver d = null;
 		Learner l = null;
 		if (automataChoice.getSelectedItem() == automataChoice.mealy) {
@@ -956,7 +964,7 @@ public class SIMPA {
 				readMeWriter.write("\n");
 				readMeWriter.write(
 						"\nyou can try to do this learning again by running something like '"
-								+ makeLaunchLine() + "'");
+								+ allOptions.buildBackCLILine(true) + "'");
 
 				readMeWriter.close();
 			} catch (IOException e1) {
@@ -1025,6 +1033,11 @@ public class SIMPA {
 		}
 	};
 	static Thread inferThread = null;
+	/**
+	 * The label to display the CLI line. Must be filled after computing the
+	 * seeds options.
+	 */
+	static JTextArea argLabel = null;
 
 	private static void createAndShowGUI() {
 		final JFrame frame = new JFrame(
@@ -1061,7 +1074,7 @@ public class SIMPA {
 		CLIconstraints.anchor = GridBagConstraints.LINE_START;
 		pane.add(new JLabel("arguments to launch this in CLI : "),
 				CLIconstraints);
-		final JTextArea argLabel = new JTextArea();
+		argLabel = new JTextArea();
 		argLabel.setFont(Font.getFont(Font.MONOSPACED));
 		argLabel.setLineWrap(true);
 		argLabel.setWrapStyleWord(true);
@@ -1077,8 +1090,7 @@ public class SIMPA {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Utils.setFileContent(lastOptionsFile,
-						allOptions.buildBackCLILine());
-				argLabel.setText(allOptions.buildBackCLILine());
+						allOptions.buildBackCLILine(false));
 				frame.setEnabled(false);
 				startButton.setEnabled(false);
 				assert (inferThread == null || !inferThread.isAlive());

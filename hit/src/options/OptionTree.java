@@ -327,6 +327,18 @@ public abstract class OptionTree {
 	protected abstract ArgumentValue getSelectedArgument();
 
 	/**
+	 * Get argument which can help the user to debug this configuration. It
+	 * should be the same as {@link #getSelectedArgument()} most of the time but
+	 * can be changed for some options, typically log option and random options
+	 * 
+	 * @return the argument which can bring this option in a state which produce
+	 *         the same processing.
+	 */
+	protected ArgumentValue getDebugArgument() {
+		return getSelectedArgument();
+	}
+
+	/**
 	 * Indicate that an argument is accepted by one option in this tree. This is
 	 * an extension of {@link isActivatedByArg} to the whole tree.
 	 * 
@@ -367,14 +379,24 @@ public abstract class OptionTree {
 	 * build a string which can be used to call back SIMPA in CLI with the
 	 * current values;
 	 * 
+	 * @param forDebug
+	 *            {@code true} to launch the same configuration for debug or
+	 *            {@code false} to launch a similar configuration. The main
+	 *            differences are the storage of seeds (see
+	 *            {@link #getSelectedArgument()} and
+	 *            {@link #getDebugArgument()}.
 	 * @return a single string were argument are separated with spaces (spaces
 	 *         in arguments are escaped).
 	 */
-	public String buildBackCLILine() {
+	public String buildBackCLILine(boolean forDebug) {
 		List<OptionTree> options = getAllSelectedChildren();
 		List<String> arguments = new ArrayList<>();
 		for (OptionTree option : options) {
-			ArgumentValue arg = option.getSelectedArgument();
+			ArgumentValue arg;
+			if (forDebug)
+				arg = option.getDebugArgument();
+			else
+				arg = option.getSelectedArgument();
 			assert arg != null || option instanceof OptionsGroup;
 			if (arg != null)
 				arg.asCLI(arguments);
