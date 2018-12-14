@@ -312,9 +312,9 @@ public class DriverGeneratorDFS extends DriverGenerator {
 				} else {
 					String newValue = null;
 					if (values.size() > 1) {
-						newValue = Utils.randIn(values);
+						newValue = rand.randIn(values);
 					} else {
-						newValue = Utils.randString();
+						newValue = rand.randString();
 					}
 					data.add(key, newValue);
 				}
@@ -342,7 +342,8 @@ public class DriverGeneratorDFS extends DriverGenerator {
 			String link = in.getAddress() + "?";
 			if (!in.getParams().isEmpty()) {
 				for (String name : in.getParams().keySet()) {
-					link += name + "=" + Utils.randIn(in.getParams().get(name)) + "&";
+					link += name + "=" + rand.randIn(in.getParams().get(name))
+							+ "&";
 				}
 			}
 			HtmlPage page;

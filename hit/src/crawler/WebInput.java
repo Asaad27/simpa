@@ -7,9 +7,13 @@ import java.util.TreeMap;
 
 import org.jsoup.nodes.Element;
 
+import tools.StandaloneRandom;
 import tools.Utils;
 
 import com.gargoylesoftware.htmlunit.HttpMethod;
+
+import options.RandomOption;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
@@ -232,10 +236,11 @@ public class WebInput implements Cloneable {
 		String addr = this.address + "?";
 		for (String key : params.keySet()) {
 			if (randomized) {
+				RandomOption rand = new StandaloneRandom();
 				if (params.get(key).size() > 1) {
-					addr += key + "=" + Utils.randIn(params.get(key)) + "&";
+					addr += key + "=" + rand.randIn(params.get(key)) + "&";
 				} else {
-					addr += key + "=" + Utils.randString() + "&";
+					addr += key + "=" + rand.randString() + "&";
 				}
 			} else {
 				for (String value : params.get(key)) {

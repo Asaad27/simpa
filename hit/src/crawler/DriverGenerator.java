@@ -46,12 +46,16 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.util.Cookie;
 
 import main.drivergen.Options;
+import options.RandomOption;
 import tools.GraphViz;
 import tools.HTTPData;
+import tools.StandaloneRandom;
 import tools.Utils;
 import tools.loggers.LogManager;
 
 public abstract class DriverGenerator {
+
+	RandomOption rand = new StandaloneRandom();
 
 	protected WebClient client = null;
 	/**
@@ -315,7 +319,7 @@ public abstract class DriverGenerator {
 				// TODO
 				String providedValue;
 				if (formValues.get(key) == null || formValues.get(key).isEmpty()) {
-					providedValue = Utils.randString();
+					providedValue = rand.randString();
 					comments.add("No values for "
 							+ key
 							+ ", random string used. You may need to provide useful value.");
@@ -415,7 +419,7 @@ public abstract class DriverGenerator {
 						// ... and multiple values are present in this input ...
 						if (values.size() > 1) {
 							// ... a random value from those present is used.
-							newValue = Utils.randIn(values);
+							newValue = rand.randIn(values);
 							// ... and no value is present in the input ...
 						} else {
 							// ... a random string is used.
@@ -424,7 +428,7 @@ public abstract class DriverGenerator {
 										+ key
 										+ ", random string used. Please provide one value.");
 							}
-							newValue = Utils.randString();
+							newValue = rand.randString();
 						}
 						//... and the user provided one or multiple values ...
 					} else {

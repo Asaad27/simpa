@@ -617,7 +617,7 @@ public class DriverGeneratorBFS extends DriverGenerator {
 		for (String key : params.keySet()) {
 			List<String> values = params.get(key);
 			if (values.isEmpty()) {
-				values.add(Utils.randString());
+				values.add(rand.randString());
 				comments.add("checkInputParameters() : No values for " + key + ", "
 						+ "random string used. You may need to provide useful value.");
 
