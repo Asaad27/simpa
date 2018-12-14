@@ -2,15 +2,16 @@ package main.simpa;
 
 import java.io.File;
 import java.util.List;
+import java.util.Random;
 
 import automata.mealy.InputSequence;
-import tools.Utils;
 import tools.loggers.LogManager;
 
 public class Options {
 
 	// General seed for SIMPA (generation of automata and algo)
-	public static long SEED = Utils.randLong();
+	@Deprecated
+	public static long SEED = new Random().nextLong();
 
 	// Test or not
 

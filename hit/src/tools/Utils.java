@@ -23,8 +23,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.Set;
 import java.util.StringTokenizer;
 
 import automata.efsm.Parameter;
@@ -33,13 +31,9 @@ import main.simpa.Options;
 import tools.loggers.LogManager;
 
 public class Utils {
-	// Use Random instead of SecureRandom,
-	// because for simulation needs, we do not need a crypto-strong generator.
-	// Instead, we need good control of the seed.
-	private static Random rand = new Random();
-	
-	public static void setSeed(long seed){
-		rand.setSeed(seed);
+	@Deprecated
+	public static void setSeed(long seed) {
+		StandaloneRandom.setSeed(seed);
 	}
 
 	public static boolean isWindows() {
@@ -148,10 +142,6 @@ public class Utils {
 
 	}
 
-	public static boolean randBoolWithPercent(int p) {
-		return rand.nextInt(100) < p;
-	}
-	
 	public static List<HTTPData> generateCombinationOfSet(HashMap<String, ArrayList<String>> data){
 		List<HTTPData> comb = new ArrayList<HTTPData>();
 		List<String> nameList = new ArrayList<String>();
@@ -302,24 +292,6 @@ public class Utils {
 		return nonStandardPath;
 	}
 
-	public static int randIntBetween(int a, int b) {
-		if (a == b)
-			return a;
-		else if (a > b) {
-			a -= b;
-			b += a;
-			a = b - a;
-		}
-		return rand.nextInt(b - a + 1) + a;
-	}
-
-	public static <T> T randIn(List<T> l) {
-		if (l.isEmpty())
-			return null;
-		else
-			return l.get(rand.nextInt(l.size()));
-	}
-
 	public static String filter(Object s) {
 		return s.toString().replaceAll(Options.SYMBOL_AND, "&")
 				.replaceAll(Options.SYMBOL_NOT_EQUAL, "!=")
@@ -333,29 +305,6 @@ public class Utils {
 		for (int i = 1; i < l.size(); i++)
 			res += sep + filter(l.get(i).toString());
 		return res;
-	}
-
-	public static <T> T randIn(T l[]) {
-		if (l.length == 0)
-			return null;
-		else
-			return l[rand.nextInt(l.length)];
-	}
-	
-	public static long randLong() {
-		return rand.nextLong();
-	}
-
-	public static int randInt(int max) {
-		return rand.nextInt(max);
-	}
-
-	@SuppressWarnings("unchecked")
-	public static <T> T randIn(Set<T> l) {
-		if (l.size() > 0)
-			return (T) l.toArray()[rand.nextInt(l.size())];
-		else
-			return null;
 	}
 
 	public static void browse(File log) {
@@ -602,21 +551,6 @@ public class Utils {
 		}
 		return new String(encoded, Charset.defaultCharset());
 	}
-
-	public static String randString() {
-		return "random" + Utils.randInt(1000);
-	}
-	
-	public static String randAlphaNumString(int size) {
-		String charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-		StringBuilder randomString = new StringBuilder();
-		for (int i = 0; i < size; i++) {
-			int index = rand.nextInt(charset.length());
-			randomString.append(charset.charAt(index));
-		};
-		return randomString.toString();
-	}
-	
 
 	public static int minimum(int a, int b, int c) {
 		return Math.min(Math.min(a, b), c);

@@ -18,6 +18,11 @@ import options.RandomOption;
 public class StandaloneRandom extends RandomOption {
 	static Random seedProvider = null;
 
+	static void setSeed(long s) {
+		new StandaloneRandom();
+		seedProvider.setSeed(s);
+	}
+
 	public StandaloneRandom() {
 		super("--standaloneRand", "standalone random");
 		if (seedProvider == null) {
