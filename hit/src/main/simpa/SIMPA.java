@@ -44,7 +44,9 @@ import learner.Learner;
 import main.simpa.Options.LogLevel;
 import options.CanNotComputeOptionValueException;
 import options.MultiArgChoiceOptionItem;
+import options.OptionTree;
 import options.OptionsGroup;
+import options.RandomOption;
 import options.automataOptions.AutomataChoice;
 import options.modeOptions.ModeOption;
 import options.outputOptions.OutputOptions;
@@ -54,6 +56,7 @@ import stats.StatsEntry;
 import stats.StatsSet;
 import tools.DotAntlrListener;
 import tools.GraphViz;
+import tools.StandaloneRandom;
 import tools.Utils;
 import tools.loggers.HTMLLogger;
 import tools.loggers.LogManager;
@@ -327,12 +330,12 @@ public class SIMPA {
 
 	// General Options
 	private static HelpOption help = new HelpOption();
-	private static LongOption SEED = new LongOption("--seed", "Use NN as seed for random generator", null);
 	private static StringOption LOAD_DOT_FILE = new StringOption("--loadDotFile",
 			"load the specified dot file\n use with drivers.mealy.FromDotMealyDriver", null);
 	private static BooleanOption INTERACTIVE = new BooleanOption("--interactive",
 			"algorithms may ask user to choose a sequence, a counter example or something else");
-	private static Option<?>[] generalOptions = new Option<?>[] { help, SEED, LOAD_DOT_FILE, INTERACTIVE };
+	private static Option<?>[] generalOptions = new Option<?>[] { help,
+			LOAD_DOT_FILE, INTERACTIVE };
 
 	// output options
 	private static BooleanOption LOG_HTML = new BooleanOption("--html", "Use HTML logger");
@@ -462,10 +465,10 @@ public class SIMPA {
 			o.parse(args, used);
 	}
 
+	@Deprecated
 	private static void parseArguments(String[] args) {
 		LogManager.logConsole("Checking environment and options");
 
-		SEED.setNeeded(false);
 		URLS.setNeeded(false);
 		LOAD_DOT_FILE.setNeeded(false);
 		CHARACTERIZATION_SET.setNeeded(false);
@@ -475,8 +478,6 @@ public class SIMPA {
 			used.add(false);
 
 		parse(args, used, generalOptions);
-		Options.SEED = (SEED.getValue() != null) ? SEED.getValue() : Utils.randLong();
-		Utils.setSeed(Options.SEED);
 
 		parse(args, used, outputOptions);
 		parse(args, used, inferenceChoiceOptions);
@@ -625,11 +626,6 @@ public class SIMPA {
 						"you cannot use interactive mode for stats (that may induce wrong values for duration when user wait)");
 				System.exit(1);
 			}
-			if (SEED.getValue() != null) {
-				System.err.println(
-						"you cannot impose seed for stats (that may duplicate results and make wrong average)");
-				System.exit(1);
-			}
 			if (ENUMERATE_MODE.getValue()){
 				System.err.println("stats are not compatible with enumerate mode yet.");
 				System.exit(1);
@@ -712,10 +708,6 @@ public class SIMPA {
 						i++;
 				}
 			}
-			if (arg.equals(SEED.getConsoleName())) {
-				i++;
-				keepArg = false;
-			}
 			if (arg.equals(LOG_HTML.getConsoleName()))
 				keepArg = false;
 			if (arg.equals(LOG_TEXT.getConsoleName()))
@@ -731,8 +723,6 @@ public class SIMPA {
 		}
 		r.append(LOG_HTML.getConsoleName() + " ");
 		r.append(LOG_TEXT.getConsoleName() + " ");
-		r.append(SEED.getConsoleName() + " ");
-		r.append(Options.SEED + " ");
 		return r.toString();
 	}
 
@@ -769,6 +759,10 @@ public class SIMPA {
 		if (getOutputsOptions().htmlLoggerOption.isEnabled())
 			LogManager.addLogger(new HTMLLogger());
 		LogManager.start();
+		for (OptionTree option : allOptions.getAllSelectedChildren()) {
+			if (option instanceof RandomOption)
+				((RandomOption) option).init();
+		}
 		Driver d = null;
 		Learner l = null;
 		if (automataChoice.getSelectedItem() == automataChoice.mealy) {
@@ -794,6 +788,7 @@ public class SIMPA {
 		return l;
 	}
 
+	@Deprecated
 	protected static Learner learnOneTime() throws Exception {
 		if (Options.LOG_TEXT)
 			LogManager.addLogger(new TextLogger());
@@ -819,7 +814,8 @@ public class SIMPA {
 					if (STATE_NUMBER_BOUND.getValue() == 0)
 						Options.STATE_NUMBER_BOUND = nb_states;
 					else
-						Options.STATE_NUMBER_BOUND = Utils.randIntBetween(nb_states,
+						Options.STATE_NUMBER_BOUND = new StandaloneRandom()
+								.randIntBetween(nb_states,
 								nb_states - STATE_NUMBER_BOUND.getValue());
 				} else {
 					if (STATE_NUMBER_BOUND.haveBeenParsed())
@@ -859,10 +855,18 @@ public class SIMPA {
 			throw new RuntimeException();
 
 		for (int i = 1; i <= Options.NBTEST; i++) {
+			for (OptionTree option : allOptions.getAllSelectedChildren())
+				if (option instanceof RandomOption
+						&& !((RandomOption) option).useAutoValue()) {
+					System.err.println(
+							"running stats with forced seeds can produce invalid results.");
+					System.err.println(
+							"If you're sure to want to do this, you must disable this warning in code…");
+					return false;
+				}
+
 			Runtime.getRuntime().gc();
 			System.out.println("\t" + i + "/" + Options.NBTEST);
-			Options.SEED = Utils.randLong();
-			Utils.setSeed(Options.SEED);
 			if (!learnAndSaveOneTime())
 				return false;
 		}
@@ -950,7 +954,6 @@ public class SIMPA {
 				e.printStackTrace(new PrintWriter(readMeWriter));
 				readMeWriter.write("\n");
 				readMeWriter.write("\n");
-				readMeWriter.write("\nthe seed was " + Options.SEED);
 				readMeWriter.write(
 						"\nyou can try to do this learning again by running something like '"
 								+ makeLaunchLine() + "'");
@@ -987,7 +990,7 @@ public class SIMPA {
 		int testedAutomata = 0;
 		while (option.hasNext()) {
 			Runtime.getRuntime().gc();
-			System.out.println("\t" + testedAutomata + " // " + Options.SEED);
+			System.out.println("\t" + testedAutomata);
 				learnAndSaveOneTime();
 				testedAutomata++;
 

@@ -258,7 +258,7 @@ public abstract class OptionTree {
 	 * 
 	 * @return the list of all children which are currently activated.
 	 */
-	protected List<OptionTree> getAllSelectedChildren() {
+	public List<OptionTree> getAllSelectedChildren() {
 		List<OptionTree> r = new ArrayList<>();
 		LinkedList<OptionTree> toProcess = new LinkedList<>();
 		toProcess.addAll(getSelectedChildren());
