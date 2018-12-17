@@ -1,7 +1,9 @@
 package drivers.mealy.real.mqtt;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -137,6 +139,18 @@ public class MQTT extends RealDriver {
 			}
 		}
 
+		// create the list of duplicates client names
+		List<String> clientsNames = new ArrayList<>(clients.size());
+		for (MQTTClient client : clients) {
+			if (client.name != null)
+				clientsNames.add(client.name);
+		}
+		for (String name : new HashSet<String>(clientsNames)) {
+			if (clientsNames.indexOf(name) == clientsNames.lastIndexOf(name)) {
+				clientsNames.remove(name);
+			}
+		}
+
 		// create input of high level
 		operations = new HashMap<>();
 		for (int i = 0; i < clients.size(); i++) {
@@ -144,8 +158,16 @@ public class MQTT extends RealDriver {
 			if (clients.size() > 1) {
 				client.prefix = "C" + i + "::";
 			}
-			if (client.name != null)
+			if (client.name != null) {
 				client.prefix = client.name + "::";
+				if (clientsNames.contains(client.name)) {
+					List<String> names = new ArrayList<>(clientsNames);
+					names.retainAll(Arrays.asList(client.name));
+					client.prefix = client.name + '(' + names.size() + ")::";
+					clientsNames.remove(client.name);
+				}
+			}
+			client.createClient();
 			for (MQTTOperation operation : client.getOperations()) {
 				String input = client.prefix + operation.getInput();
 				assert !operations.containsKey(input);

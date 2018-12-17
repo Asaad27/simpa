@@ -5,6 +5,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,6 +82,18 @@ class ClientsOption extends ListOption<ClientDescriptor> {
 	protected ClientDescriptor fromString(String s,
 			PrintStream parsingErrorStream) {
 		ClientDescriptor desc = new ClientDescriptor();
+		List<String> split = Utils.stringToList(s, ':', '\\');
+		if (split.size() == 1) {
+			s = split.get(0);
+		} else if (split.size() == 2) {
+			desc.id = split.get(0);
+			s = split.get(1);
+		} else {
+			parsingErrorStream.println("error while parsing '" + s
+					+ "', invalid syntax, too many ':'.");
+			return null;
+		}
+
 		List<String> elements = Utils.stringToList(s, '|', '\\');
 		for (String e : elements) {
 			if (e.equals(CONNECT))
@@ -143,7 +157,12 @@ class ClientsOption extends ListOption<ClientDescriptor> {
 			elements.add(buildFunc(SUBSCRIBE, topic));
 		for (String topic : desc.unsubscribe)
 			elements.add(buildFunc(UNSUBSCRIBE, topic));
-		return Utils.listToString(elements, '|', '\\');
+		String inputs = Utils.listToString(elements, '|', '\\');
+		elements.clear();
+		if (!desc.id.isEmpty())
+			elements.add(desc.id);
+		elements.add(inputs);
+		return Utils.listToString(elements, ':', '\\');
 	}
 
 	@Override
@@ -156,6 +175,33 @@ class ClientsOption extends ListOption<ClientDescriptor> {
 		JPanel pane = new JPanel();
 		GridBagConstraints c = new GridBagConstraints();
 		pane.setLayout(new GridBagLayout());
+
+		JTextField clientId = new JTextField(desc.id, 23);
+		clientId.addFocusListener(new FocusListener() {
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				desc.id = clientId.getText();
+			}
+
+			@Override
+			public void focusGained(FocusEvent e) {
+			}
+		});
+		clientId.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				desc.id = clientId.getText();
+			}
+		});
+
+		pane.add(new JLabel("client id :"));
+		c.gridwidth = 2;
+		c.anchor = GridBagConstraints.LINE_START;
+		pane.add(clientId, c);
+		c.gridwidth = 1;
+		c.gridy = 1;
 
 		JCheckBox connect = new JCheckBox("'connect' input");
 		connect.setSelected(desc.connect);

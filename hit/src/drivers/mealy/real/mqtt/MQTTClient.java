@@ -20,6 +20,11 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
  *
  */
 class ClientDescriptor {
+	/**
+	 * The id to use when connecting to the broker. Will be automatically filled
+	 * if empty.
+	 */
+	String id = "";
 	boolean connect = false;
 	boolean disconnect = false;
 	Boolean close = false;
@@ -265,7 +270,11 @@ public class MQTTClient {
 	}
 
 	int qos = 2;
-	String clientId = "JavaSample";
+	/**
+	 * The id used to connect to the broker. If empty, a number will be
+	 * generated.
+	 */
+	String clientId = "";
 	MemoryPersistence persistence = new MemoryPersistence();
 
 	MqttClient sampleClient;
@@ -312,12 +321,13 @@ public class MQTTClient {
 		operations.add(c);
 	}
 
-	static int clientNb = 0;
+	static private int clientIdNb = 0;
 
 	public void createClient() {
+		if (clientId.isEmpty())
+			clientId = "client" + clientIdNb++;
 		try {
-			sampleClient = new MqttClient(driver.broker, clientId + clientNb++,
-					persistence);
+			sampleClient = new MqttClient(driver.broker, clientId, persistence);
 		} catch (MqttException e) {
 			throw new RuntimeException(e);
 		}
@@ -342,14 +352,16 @@ public class MQTTClient {
 	}
 
 	public MQTTClient(MQTT driver) {
-		createClient();
 		addDisconnect();
 		this.driver = driver;
 	}
 
 	public MQTTClient(MQTT driver, ClientDescriptor desc) {
 		this.driver = driver;
-		createClient();
+		if (!desc.id.isEmpty()) {
+			clientId = desc.id;
+			name = desc.id;
+		}
 		if (desc.connect)
 			addConnect();
 		if (desc.disconnect)
