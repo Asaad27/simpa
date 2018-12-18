@@ -3,6 +3,7 @@ package options.automataOptions;
 import java.util.ArrayList;
 import java.util.List;
 
+import drivers.mealy.MealyDriverChoice;
 import options.MultiArgChoiceOption;
 import options.MultiArgChoiceOptionItem;
 import options.OptionTree;

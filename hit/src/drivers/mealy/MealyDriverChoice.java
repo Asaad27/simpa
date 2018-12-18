@@ -1,8 +1,6 @@
-package options.automataOptions;
+package drivers.mealy;
 
 import drivers.ExhaustiveGeneratorOption;
-import drivers.mealy.FromDotMealyDriver;
-import drivers.mealy.MealyDriver;
 import drivers.mealy.real.SIPDriverIPTel;
 import drivers.mealy.real.mqtt.MQTTDriverOption;
 import drivers.mealy.transparent.EnumeratedMealyDriver.EnumeratedMealyOption;
