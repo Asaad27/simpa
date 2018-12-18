@@ -35,6 +35,7 @@ class ClientDescriptor {
 		Boolean retain;
 	}
 
+	List<Publish> connectWithWill = new ArrayList<>();
 	List<Publish> publish = new ArrayList<>();
 	List<String> deleteRetain = new ArrayList<>();
 
@@ -368,6 +369,8 @@ public class MQTTClient {
 			addDisconnect();
 		if (desc.close)
 			addClose();
+		for (ClientDescriptor.Publish p : desc.connectWithWill)
+			addConnectWithWill(p.topic, p.message, p.retain);
 		for (ClientDescriptor.Publish p : desc.publish)
 			addPublishOperation(p.topic, p.message, p.retain);
 		for (String topic : desc.deleteRetain)

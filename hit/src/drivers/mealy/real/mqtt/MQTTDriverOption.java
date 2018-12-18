@@ -33,6 +33,7 @@ class ClientsOption extends ListOption<ClientDescriptor> {
 	}
 
 	static final String CONNECT = "connect";
+	static final String CONNECT_WITH_WILL = "connectWithWill";
 	static final String DISCONNECT = "disconnect";
 	static final String CLOSE = "closeTCP";
 	static final String PUBLISH = "publish";
@@ -102,7 +103,17 @@ class ClientsOption extends ListOption<ClientDescriptor> {
 				desc.disconnect = true;
 			else if (e.equals(CLOSE))
 				desc.close = true;
-			else if (e.startsWith(PUBLISH)) {
+			else if (e.startsWith(CONNECT_WITH_WILL)) {
+				List<String> args = getArgs(e, CONNECT_WITH_WILL, 3,
+						parsingErrorStream);
+				if (args == null)
+					return null;
+				ClientDescriptor.Publish p = desc.new Publish();
+				p.topic = args.get(0);
+				p.message = args.get(1);
+				p.retain = Boolean.parseBoolean(args.get(2));
+				desc.connectWithWill.add(p);
+			} else if (e.startsWith(PUBLISH)) {
 				List<String> args = getArgs(e, PUBLISH, 3, parsingErrorStream);
 				if (args == null)
 					return null;
@@ -146,6 +157,11 @@ class ClientsOption extends ListOption<ClientDescriptor> {
 			elements.add(DISCONNECT);
 		if (desc.close)
 			elements.add(CLOSE);
+		for (Publish p : desc.connectWithWill) {
+			String e = buildFunc(CONNECT_WITH_WILL, p.topic, p.message,
+					p.retain.toString());
+			elements.add(e);
+		}
 		for (Publish p : desc.publish) {
 			String e = buildFunc(PUBLISH, p.topic, p.message,
 					p.retain.toString());
@@ -203,7 +219,7 @@ class ClientsOption extends ListOption<ClientDescriptor> {
 		c.gridwidth = 1;
 		c.gridy = 1;
 
-		JCheckBox connect = new JCheckBox("'connect' input");
+		JCheckBox connect = new JCheckBox("simple 'connect' input");
 		connect.setSelected(desc.connect);
 		connect.addActionListener(new ActionListener() {
 
@@ -333,26 +349,25 @@ class ClientsOption extends ListOption<ClientDescriptor> {
 
 		}
 
-		pane.add(new StringList(desc.subscribe, "add 'subscribe' for topic",
-				SUBSCRIBE).build(), c);
-		pane.add(new StringList(desc.unsubscribe, "add 'unsubscribe' for topic",
-				UNSUBSCRIBE).build(), c);
-		pane.add(new StringList(desc.deleteRetain,
-				"add 'delete message retained' on topic", DELETE_RETAINED)
-						.build(),
-				c);
-		pane.add(new ElementList<Publish>(desc.publish) {
+		class PublishList extends ElementList<Publish> {
 			private static final long serialVersionUID = 1L;
 			JTextField topic;
 			JTextField message;
 			JCheckBox retain;
+			String inputName;
+
+			public PublishList(List<Publish> elements, String inputName) {
+				super(elements);
+				this.inputName = inputName;
+			}
 
 			@Override
 			List<Component> getFields() {
 				topic = new JTextField("topic", 10);
 				message = new JTextField("message", 20);
 				retain = new JCheckBox("retain");
-				return Arrays.asList(new JLabel("create 'publish' on topic"),
+				return Arrays.asList(
+						new JLabel("create '" + inputName + "' on topic"),
 						topic, new JLabel("with message"), message, retain);
 			}
 
@@ -367,11 +382,22 @@ class ClientsOption extends ListOption<ClientDescriptor> {
 
 			@Override
 			String getText(Publish el) {
-				return buildFunc(PUBLISH, el.topic, el.message,
+				return buildFunc(inputName, el.topic, el.message,
 						el.retain ? "retained" : "not retained");
 			}
+		}
 
-		}.build(), c);
+		pane.add(new PublishList(desc.connectWithWill, CONNECT_WITH_WILL)
+				.build(), c);
+		pane.add(new StringList(desc.subscribe, "add 'subscribe' for topic",
+				SUBSCRIBE).build(), c);
+		pane.add(new StringList(desc.unsubscribe, "add 'unsubscribe' for topic",
+				UNSUBSCRIBE).build(), c);
+		pane.add(new StringList(desc.deleteRetain,
+				"add 'delete message retained' on topic", DELETE_RETAINED)
+						.build(),
+				c);
+		pane.add(new PublishList(desc.publish, PUBLISH).build(), c);
 		return pane;
 	}
 
