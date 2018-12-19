@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import automata.RandomAutomataOptions;
 import automata.State;
 import automata.efsm.EFSM;
 import automata.efsm.EFSMTransition;
@@ -21,51 +22,112 @@ import automata.efsm.GeneratedOutputFunction;
 import automata.efsm.Parameter;
 import drivers.efsm.EFSMDriver.Types;
 import main.simpa.Options;
+import options.IntegerOption;
+import options.PercentageOption;
 import options.RandomOption;
-import tools.StandaloneRandom;
 import tools.loggers.LogManager;
 
 public class RandomEFSM extends EFSM implements Serializable {
 	private static final long serialVersionUID = -4610287835922347376L;
 
-	RandomOption rand = new StandaloneRandom();
+	/**
+	 * A class to handles options needed to build a {@link RandomEFSM}
+	 * 
+	 * @TODO implement a min max option such that min cannot be greater than
+	 *       max.
+	 * @author Nicolas BREMOND
+	 *
+	 */
+	public static class RandomEFSMOption extends RandomAutomataOptions {
+		private final IntegerOption minParam = new IntegerOption(
+				"--minimum-parameter-nb",
+				"minimum number of parameter to generate for each symbol", 1);
+		private final IntegerOption maxParam = new IntegerOption(
+				"--maximum-parameter-nb",
+				"maximum number of parameter to generate for each symbol", 1);
+		final IntegerOption domainSize = new IntegerOption("--domain-size",
+				"Size of the parameter's domain", 10);
+		final PercentageOption simpleGuardPercent = new PercentageOption(
+				"--simpleguard", "% of simple guard transitions", 25);
+		final PercentageOption ndvGuardPercent = new PercentageOption(
+				"--ndvguard", "% of generating NDV by transitions", 25);
+		private final IntegerOption ndvMinTransToCheck = new IntegerOption(
+				"--ndvmintrans",
+				"Minimum number of states before checking NDV value", 1);
+		private final IntegerOption ndvMaxTransToCheck = new IntegerOption(
+				"--ndvmaxtrans",
+				"Maximum number of states before checking NDV value", 1);
+
+		public RandomEFSMOption() {
+			addSubOption(minParam);
+			addSubOption(maxParam);
+			addSubOption(domainSize);
+		}
+
+		/**
+		 * generate a number of parameters for one input/output.
+		 * 
+		 * @return how many parameters should be created for one input or
+		 *         output.
+		 */
+		public int generateParamNumber() {
+			if (minParam.getValue() >= maxParam.getValue()) {
+				assert false : "min/max must be implemented";
+				return maxParam.getValue();
+			}
+			return getRand().randIntBetween(minParam.getValue(),
+					maxParam.getValue());
+		}
+
+		public int generateTransToCheck() {
+			return getRand().randIntBetween(ndvMinTransToCheck.getValue(),
+					ndvMaxTransToCheck.getValue());
+		}
+
+	}
+
+	RandomOption rand;
 	private List<String> inputSymbols = null;
 	private List<String> outputSymbols = null;
 	private Map<String, Integer> arity = null;
 	private HashMap<String, List<ArrayList<Parameter>>> dpv = null;
 	private int simpleCount = 0, ndvCount = 0;
 
-	private void generateSymbols() {
+	private void generateSymbols(RandomEFSMOption options) {
 		int nbSym = 0;
 		arity = new HashMap<String, Integer>();
 		inputSymbols = new ArrayList<String>();
-		nbSym = rand.randIntBetween(Options.MININPUTSYM, Options.MAXINPUTSYM);
+		nbSym = options.getInputsNumber();
 		for (int i = 0; i < nbSym; i++) {
 			inputSymbols.add("in" + i);
-			arity.put("in" + i, rand.randIntBetween(Options.MINPARAMETER,
-					Options.MAXPARAMETER));
+			arity.put("in" + i, options.generateParamNumber());
 		}
 		outputSymbols = new ArrayList<String>();
-		nbSym = rand.randIntBetween(Options.MININPUTSYM, Options.MAXINPUTSYM);
+		nbSym = options.getOutputsNumber();
 		for (int i = 0; i < nbSym; i++) {
 			outputSymbols.add("out" + i);
-			arity.put("out" + i, rand.randIntBetween(Options.MINPARAMETER,
-					Options.MAXPARAMETER));
+			arity.put("out" + i, options.generateParamNumber());
 		}
 		LogManager.logSymbolsParameters(arity);
 	}
 
+	@Deprecated
 	public RandomEFSM() {
+		this(new RandomEFSMOption());
+	}
+
+	public RandomEFSM(RandomEFSMOption options) {
 		super("Random");
+		rand = options.getRand();
 		LogManager.logStep(LogManager.STEPOTHER, "Generating random EFSM");
-		generateSymbols();
-		createStates();
+		generateSymbols(options);
+		createStates(options);
 		createTransitions();
 		fixUnreachableStates();
 		fixDeadEndStates();
-		createDefaultParameterValues();
-		createSimpleGuards();
-		createNdvGuards();
+		createDefaultParameterValues(options);
+		createSimpleGuards(options);
+		createNdvGuards(options);
 		makeItDetermnistic();
 		makeItObservable();
 		exportToDot();
@@ -106,26 +168,29 @@ public class RandomEFSM extends EFSM implements Serializable {
 		return (RandomEFSM) o;
 	}
 
-	private void createDefaultParameterValues() {
+	private void createDefaultParameterValues(RandomEFSMOption options) {
 		dpv = new HashMap<String, List<ArrayList<Parameter>>>();
 		for (String symb : inputSymbols) {
 			ArrayList<ArrayList<Parameter>> l = new ArrayList<ArrayList<Parameter>>();
 			ArrayList<Parameter> ll = new ArrayList<Parameter>();
 			for (int i = 0; i < arity.get(symb); i++) {
-				ll.add(new Parameter(String.valueOf(Options.DOMAINSIZE * 10
-						+ (i + 1)), Types.NUMERIC));
+				ll.add(new Parameter(
+						String.valueOf(
+								options.domainSize.getValue() * 10 + (i + 1)),
+						Types.NUMERIC));
 			}
 			l.add(ll);
 			dpv.put(symb, l);
 		}
 	}
 
-	private void createSimpleGuards() {
+	private void createSimpleGuards(RandomEFSMOption options) {
 		for (EFSMTransition t : transitions) {
-			if (rand.randBoolWithPercent(Options.SIMPLEGUARDPERCENT)) {
+			if (rand.randBoolWithPercent(options.simpleGuardPercent)) {
 				LogManager.logInfo("Creating EQUALSTOVALUE guard for state "
 						+ t.getFrom() + " with input " + t.getInput());
-				ArrayList<Parameter> newParameters = t.randomizeGuard(rand);
+				ArrayList<Parameter> newParameters = t.randomizeGuard(rand,
+						options.domainSize.getValue());
 				simpleCount++;
 				List<ArrayList<Parameter>> existingParameters = dpv.get(t
 						.getInput());
@@ -161,14 +226,15 @@ public class RandomEFSM extends EFSM implements Serializable {
 				&& (getTransitionTo(t.getFrom(), false).size() == 1);
 	}
 
-	private void createNdvGuards() {
+	private void createNdvGuards(RandomEFSMOption options) {
 		int nbNdv = 0;
 		for (EFSMTransition t : transitions) {
-			if (isCleanForGenerateGuard(t)
-					&& rand.randBoolWithPercent(Options.NDVGUARDPERCENT * 2)) {
+			if (isCleanForGenerateGuard(t) && rand.randBoolWithPercent(
+					options.ndvGuardPercent.getIntValue() * 2
+			// FIXME why do we use percentage * 2 ?
+			)) {
 				State gen = goRandomStepsFrom(
-						rand.randIntBetween(Options.NDVMINTRANSTOCHECK,
-								Options.NDVMAXTRANSTOCHECK) - 1, t.getTo());
+						options.generateTransToCheck() - 1, t.getTo());
 				EFSMTransition check = rand.randIn(getTransitionFrom(gen,
 						false));
 				if (isCleanForCheckingGuard(check)) {
@@ -177,7 +243,7 @@ public class RandomEFSM extends EFSM implements Serializable {
 					t.generateNdv(nbNdv, rand);
 					LogManager.logInfo("State " + gen + " will check Ndv"
 							+ nbNdv);
-					check.checkNdv(nbNdv, rand);
+					check.checkNdv(nbNdv, rand, options.domainSize.getValue());
 					nbNdv++;
 					ndvCount++;
 				}
@@ -424,9 +490,8 @@ public class RandomEFSM extends EFSM implements Serializable {
 		}
 	}
 
-	private void createStates() {
-		int nbStates = rand.randIntBetween(Options.MINSTATES,
-				Options.MAXSTATES);
+	private void createStates(RandomEFSMOption options) {
+		int nbStates = options.getStatesNumber();
 		for (int i = 0; i < nbStates; i++)
 			addState(i == 0);
 		LogManager.logInfo("Number of states : " + nbStates);

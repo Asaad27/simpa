@@ -194,10 +194,11 @@ public class EFSMTransition extends Transition {
 		return null;
 	}
 
-	public ArrayList<Parameter> randomizeGuard(RandomOption rand) {
+	public ArrayList<Parameter> randomizeGuard(RandomOption rand,
+			int domainSize) {
 		if (outputFunction instanceof GeneratedOutputFunction) {
 			return ((GeneratedOutputFunction) outputFunction).getGuard()
-					.randomize(rand);
+					.randomize(rand, domainSize);
 		}
 		return null;
 	}
@@ -209,10 +210,10 @@ public class EFSMTransition extends Transition {
 		}
 	}
 
-	public void checkNdv(int nbNdv, RandomOption rand) {
+	public void checkNdv(int nbNdv, RandomOption rand, int domainSize) {
 		if (outputFunction instanceof GeneratedOutputFunction) {
-			((GeneratedOutputFunction) outputFunction).getGuard().checkNdv(
-					nbNdv, rand);
+			((GeneratedOutputFunction) outputFunction).getGuard()
+					.checkNdv(nbNdv, rand, domainSize);
 		}
 	}
 }

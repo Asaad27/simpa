@@ -207,12 +207,19 @@ public class Options {
 	public static int MAXOUTPUTSYM = 5;
 
 	// EFSM
+	@Deprecated
 	public static int MINPARAMETER = 1;
+	@Deprecated
 	public static int MAXPARAMETER = 1;
+	@Deprecated
 	public static int DOMAINSIZE = 10;
+	@Deprecated
 	public static int SIMPLEGUARDPERCENT = 25;
+	@Deprecated
 	public static int NDVGUARDPERCENT = 25;
+	@Deprecated
 	public static int NDVMINTRANSTOCHECK = 1;
+	@Deprecated
 	public static int NDVMAXTRANSTOCHECK = 1;
 
 	public enum LogLevel {

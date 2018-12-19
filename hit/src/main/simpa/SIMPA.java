@@ -393,23 +393,6 @@ public class SIMPA {
 			SCAN, REUSE_OP_IFNEEDED, FORCE_J48, WEKA, SUPPORT_MIN,
 	};
 
-	// TestEFSM options //TODO group with Random generator ?
-	private static IntegerOption MIN_PARAMETER = new IntegerOption("--minparameter",
-			"Minimal number of parameter by symbol", Options.MINPARAMETER);
-	private static IntegerOption MAX_PARAMETER = new IntegerOption("--maxparameter",
-			"Maximal number of parameter by symbol", Options.MAXPARAMETER);
-	private static IntegerOption DOMAIN_SIZE = new IntegerOption("--domainsize", "Size of the parameter's domain",
-			Options.DOMAINSIZE);
-	private static IntegerOption SIMPLE_GUARD_PERCENT = new IntegerOption("--simpleguard",
-			"% of simple guard by transitions", Options.SIMPLEGUARDPERCENT);
-	private static IntegerOption NDV_GUARD_PERCENT = new IntegerOption("--ndvguard",
-			"% of generating NDV by transitions", Options.NDVGUARDPERCENT);
-	private static IntegerOption NDV_MIN_TRANS = new IntegerOption("--ndvmintrans",
-			"Minimum number of states before checking NDV value", Options.NDVMINTRANSTOCHECK);
-	private static IntegerOption NDV_MAX_TRANS = new IntegerOption("--ndvmaxtrans",
-			"Maximum number of states before checking NDV value", Options.NDVMAXTRANSTOCHECK);
-	private static Option<?>[] testEFSMOptions = new Option<?>[] { MIN_PARAMETER, MAX_PARAMETER, DOMAIN_SIZE,
-			SIMPLE_GUARD_PERCENT, NDV_GUARD_PERCENT, NDV_MIN_TRANS, NDV_MAX_TRANS };
 
 	// Random driver options
 	private static IntegerOption MIN_STATE = new IntegerOption("--minstates",
@@ -514,14 +497,6 @@ public class SIMPA {
 		Options.FORCE_J48 = FORCE_J48.getValue();
 		Options.WEKA = WEKA.getValue();
 		Options.SUPPORT_MIN = SUPPORT_MIN.getValue();
-
-		Options.MINPARAMETER = MIN_PARAMETER.getValue();
-		Options.MAXPARAMETER = MAX_PARAMETER.getValue();
-		Options.DOMAINSIZE = DOMAIN_SIZE.getValue();
-		Options.SIMPLEGUARDPERCENT = SIMPLE_GUARD_PERCENT.getValue();
-		Options.NDVGUARDPERCENT = NDV_GUARD_PERCENT.getValue();
-		Options.NDVMINTRANSTOCHECK = NDV_MIN_TRANS.getValue();
-		Options.NDVMAXTRANSTOCHECK = NDV_MAX_TRANS.getValue();
 
 		Options.MINSTATES = MIN_STATE.getValue();
 		Options.MAXSTATES = MAX_STATE.getValue();

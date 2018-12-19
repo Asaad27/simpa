@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import drivers.efsm.EFSMDriver.Types;
-import main.simpa.Options;
 import options.RandomOption;
 
 public class Guard implements Serializable, Cloneable {
@@ -95,17 +94,17 @@ public class Guard implements Serializable, Cloneable {
 		return res;
 	}
 
-	public ArrayList<Parameter> randomize(RandomOption rand) {
+	public ArrayList<Parameter> randomize(RandomOption rand, int domainSize) {
 		alwaysFalse = false;
 		alwaysTrue = false;
 		rels.clear();
 
-		rels.add(new Relation(nbInputParam, rand));
+		rels.add(new Relation(nbInputParam, rand, domainSize));
 
 		ArrayList<Parameter> ll = new ArrayList<Parameter>();
 		for (int i = 0; i < nbInputParam; i++) {
-			ll.add(new Parameter(String.valueOf(Options.DOMAINSIZE * 10
-					+ (i + 1)), Types.NUMERIC));
+			ll.add(new Parameter(String.valueOf(domainSize * 10 + (i + 1)),
+					Types.NUMERIC));
 		}
 
 		for (Relation r : rels) {
@@ -122,11 +121,11 @@ public class Guard implements Serializable, Cloneable {
 		return ll;
 	}
 
-	public void checkNdv(int nbNdv, RandomOption rand) {
+	public void checkNdv(int nbNdv, RandomOption rand, int domainSize) {
 		alwaysFalse = false;
 		alwaysTrue = false;
 		rels.clear();
-		Relation r = new Relation(nbInputParam, rand);
+		Relation r = new Relation(nbInputParam, rand, domainSize);
 
 		r.ndvCheck(nbNdv, memory, rand);
 		rels.add(r);
