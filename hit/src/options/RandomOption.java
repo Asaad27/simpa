@@ -67,6 +67,10 @@ public class RandomOption extends LongOption {
 		setMaximum(Long.MAX_VALUE);
 	}
 
+	public boolean randBoolWithPercent(PercentageOption percent) {
+		return randBoolWithPercent(percent.getIntValue());
+	}
+
 	// the following method were taken from tools.Utils
 
 	public boolean randBoolWithPercent(int p) {
