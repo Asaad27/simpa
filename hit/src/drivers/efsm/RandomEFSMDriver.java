@@ -5,11 +5,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 
-import tools.Utils;
 import automata.efsm.Parameter;
 import examples.efsm.RandomEFSM;
+import examples.efsm.RandomEFSM.RandomEFSMOption;
+import options.automataOptions.DriverChoice;
+import options.automataOptions.DriverChoiceItem;
+import tools.Utils;
 
 public class RandomEFSMDriver extends EFSMDriver {
+	public static class RandomDriveroption
+			extends DriverChoiceItem<EFSMDriver> {
+		RandomEFSMOption automatonOptions = new RandomEFSMOption();
+
+		public RandomDriveroption(DriverChoice<?> parent) {
+			super(parent, RandomEFSMDriver.class);
+			subTrees.addAll(automatonOptions.getOptions());
+		}
+
+		@Override
+		public EFSMDriver createDriver() {
+			RandomEFSM automaton = new RandomEFSM(automatonOptions);
+			return new RandomEFSMDriver(automaton);
+		}
+
+	}
 
 	private HashMap<String, List<ArrayList<Parameter>>> dpv = null;
 	private TreeMap<String, List<String>> pn = null;

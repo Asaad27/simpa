@@ -693,8 +693,6 @@ public abstract class OptionTree {
 						// be equals
 						seen = true;
 						assert brothersArg.acceptedValues == newArg.acceptedValues;
-						assert brothersArg.parentOption
-								.getClass() == newArg.parentOption.getClass();
 					}
 
 				}

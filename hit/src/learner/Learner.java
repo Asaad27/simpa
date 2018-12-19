@@ -3,7 +3,6 @@ package learner;
 import options.ChoiceOptionItem;
 import options.automataOptions.AutomataChoice;
 import options.learnerOptions.MealyLearnerChoice;
-import learner.efsm.table.LiLearner;
 import learner.mealy.rivestSchapire.RivestSchapireLearner;
 import learner.mealy.table.LmLearner;
 import learner.mealy.tree.ZLearner;
@@ -60,7 +59,8 @@ public abstract class Learner {
 			throw new RuntimeException("not implemented yet");
 			// return new ZLearner(driver);
 		} else if (selectedAutomataChoice == automataChoice.efsm) {
-			return new LiLearner(driver);
+			return automataChoice.efsmLearnerChoice.getSelectedItem()
+					.getLearner(driver);
 		} else if (selectedAutomataChoice == automataChoice.mealy) {
 			MealyLearnerChoice learnerChoice = automataChoice.mealyLearnerChoice;
 			ChoiceOptionItem selectedLearnerChoice = learnerChoice
@@ -86,7 +86,8 @@ public abstract class Learner {
 				return null;
 			}
 		} else {
-			throw new RuntimeException("there is no driver to use");
+			assert false : "unhandled value for automata choice option";
+			return null;
 		}
 	}
 }
