@@ -45,6 +45,7 @@ public class HWStatsEntry extends StatsEntry {
 	public final static Attribute<Float>  ORACLE_DURATION = 		Attribute.ORACLE_DURATION;
 	public final static Attribute<String> SEARCH_CE_IN_TRACE =		Attribute.SEARCH_CE_IN_TRACE;
 	public static final Attribute<Boolean>ADD_H_IN_W = 				Attribute.ADD_H_IN_W;
+	public static final Attribute<Boolean> ADD_I_IN_W = Attribute.ADD_I_IN_W;
 	public static final Attribute<Boolean>CHECK_3rd_INCONSISTENCY =	Attribute.CHECK_3rd_INCONSISTENCY;
 	public static final Attribute<Boolean>REUSE_HZXW =				Attribute.REUSE_HZXW;
 	public static final Attribute<Boolean>PRECOMPUTED_W =			Attribute.PRECOMPUTED_W;
@@ -89,6 +90,7 @@ public class HWStatsEntry extends StatsEntry {
 			CHECK_3rd_INCONSISTENCY,
 			REUSE_HZXW,
 			PRECOMPUTED_W,
+			ADD_I_IN_W,
 			USE_ADAPTIVE_H,
 			USE_ADAPTIVE_W,
 			USE_RESET,
@@ -139,6 +141,7 @@ public class HWStatsEntry extends StatsEntry {
 	private boolean check_3rd_inconsistency=false;
 	private boolean reuse_hzxw = false;
 	private boolean precomputedW = false;
+	private boolean add_I_in_W = false;
 	private boolean useAdaptiveH = false;
 	private boolean useAdaptiveW = false;
 	private boolean useReset = false;
@@ -183,6 +186,7 @@ public class HWStatsEntry extends StatsEntry {
 		check_3rd_inconsistency = Boolean.parseBoolean(st.nextToken());
 		reuse_hzxw = Boolean.parseBoolean(st.nextToken());
 		precomputedW = Boolean.parseBoolean(st.nextToken());
+		add_I_in_W = Boolean.parseBoolean(st.nextToken());
 		useAdaptiveH = Boolean.parseBoolean(st.nextToken());
 		useAdaptiveW = Boolean.parseBoolean(st.nextToken());
 		useReset = Boolean.parseBoolean(st.nextToken());
@@ -205,6 +209,7 @@ public class HWStatsEntry extends StatsEntry {
 		this.useAdaptiveW = options.useAdaptiveW();
 		this.useReset = options.useReset.isEnabled();
 		this.add_h_in_w = options.addHInW.isEnabled();
+		this.add_I_in_W = options.addIInW();
 		this.searchCEInTrace = options.searchCeInTrace.isEnabled() ? "simple"
 				: "none";
 		this.check_3rd_inconsistency = options.checkInconsistenciesHMapping
@@ -369,6 +374,8 @@ public class HWStatsEntry extends StatsEntry {
 				return (T) new Boolean(reuse_hzxw);
 		if (a == PRECOMPUTED_W)
 			return (T) new Boolean(precomputedW);
+		if (a == ADD_I_IN_W)
+			return (T) new Boolean(add_I_in_W);
 		if (a == USE_ADAPTIVE_H)
 			return (T) new Boolean(useAdaptiveH);
 		if (a == USE_ADAPTIVE_W)

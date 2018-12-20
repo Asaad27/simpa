@@ -20,6 +20,7 @@ import automata.mealy.distinctionStruct.DistinctionStruct;
 import automata.mealy.distinctionStruct.TotallyAdaptiveW;
 import automata.mealy.distinctionStruct.TotallyFixedW;
 import automata.mealy.multiTrace.SimpleMultiTrace;
+import automata.mealy.splittingTree.smetsersSplittingTree.SplittingTree;
 import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
@@ -297,17 +298,34 @@ public class HWLearner extends Learner {
 		runtime.gc();
 
 		DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W;
-		if (options.useAdaptiveW())
+		if (options.useAdaptiveW()) {
 			W = new TotallyAdaptiveW();
-		else
-			W = new TotallyFixedW();
-		W.refine(W.getEmptyCharacterization(), new LmTrace());
-		if (options.usePrecomputedW()) {
-			assert !options
-					.useAdaptiveW() : "To be implemented, only available for preset W at this time";
-			W = new TotallyFixedW(
-					LocalizerBasedLearner.computeCharacterizationSet(driver));
+			W.refine(W.getEmptyCharacterization(), new LmTrace());
+			if (options.usePrecomputedW()) {
+				if (!(driver instanceof TransparentMealyDriver))
+					throw new RuntimeException(
+							"driver must be transparent to compute adaptive W");
+				TransparentMealyDriver transparent = (TransparentMealyDriver) driver;
+				SplittingTree tree = new SplittingTree(
+						transparent.getAutomata(),
+						transparent.getInputSymbols());
+				W = tree.computeW();
+			}
+			assert !options.addIInW();
+		} else {
+			TotallyFixedW W_fixed = new TotallyFixedW();
+			W = W_fixed;
+			if (options.usePrecomputedW()) {
+				W = new TotallyFixedW(LocalizerBasedLearner
+						.computeCharacterizationSet(driver));
+			}
+			if (options.addIInW()) {
+				for (String input : driver.getInputSymbols())
+					W_fixed.add(new InputSequence(input));
+			}
 		}
+		if (W.isEmpty())
+			W.refine(W.getEmptyCharacterization(), new LmTrace());
 
 		LogManager.logConsole("hw : start of learning");
 		long start = System.nanoTime();

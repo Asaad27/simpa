@@ -17,6 +17,7 @@ public class HWOptions extends MultiArgChoiceOptionItem {
 	public final BooleanOption checkInconsistenciesHMapping;
 	public final BooleanOption useDictionary;
 	private final BooleanOption usePrecomputedW;
+	private final BooleanOption addIInW;
 	private final BooleanOption useAdaptiveH;
 	private final BooleanOption useAdaptiveW;
 
@@ -31,12 +32,16 @@ public class HWOptions extends MultiArgChoiceOptionItem {
 		return !addHInW.isEnabled() && useAdaptiveH.isEnabled();
 	}
 
+	public boolean addIInW() {
+		return !useAdaptiveW() && addIInW.isEnabled();
+	}
+
 	public boolean useAdaptiveW() {
 		return !addHInW.isEnabled() && useAdaptiveW.isEnabled();
 	}
 
 	public boolean usePrecomputedW() {
-		return !useAdaptiveW() && usePrecomputedW.isEnabled();
+		return usePrecomputedW.isEnabled();
 	}
 
 	private final OracleOption oracleWhenUsingReset;
@@ -52,15 +57,17 @@ public class HWOptions extends MultiArgChoiceOptionItem {
 				"try to execute the traces observed on conjecture to see if it makes a counter example");
 		useDictionary = new BooleanOption("use dictionary", "use-dictionary",
 				"record the sequences of form 'h z x w' and 'h w' to avoid re-executing them on the SUI");
-		usePrecomputedW = new BooleanOption("use given W-set", "with-given-W",
-				"compute a W-set before starting inference. This needs a transparent driver. (Computation of adaptive W is not available yet)");
+		usePrecomputedW = new BooleanOption("use a computed W-set",
+				"with-given-W",
+				"compute a W-set before starting inference. This needs a transparent driver.");
+		addIInW = new BooleanOption("add input symbols in W", "add-I-in-W",
+				"before starting inference, all inputs symbols of SUI are added to W");
 		useAdaptiveH = new BooleanOption("use adaptive homing sequence",
 				"adaptive-h",
 				"use an adaptive homing sequence instead of a preset sequence");
 		useAdaptiveW = new BooleanOption("use adaptive W-tree", "adaptive-w",
 				"use an adaptive W-tree instead of a preset W-set",
-				new ArrayList<OptionTree>(),
-				Arrays.asList((OptionTree) usePrecomputedW));
+				new ArrayList<OptionTree>(), Arrays.asList(addIInW));
 		addHInW = new BooleanOption("heuristic add h in W", "add-h-in-W", "",
 				new ArrayList<OptionTree>(), Arrays.asList(
 						(OptionTree) useAdaptiveH, (OptionTree) useAdaptiveW));
@@ -73,6 +80,7 @@ public class HWOptions extends MultiArgChoiceOptionItem {
 				Arrays.asList((OptionTree) oracleWhenUsingReset),
 				Arrays.asList((OptionTree) oracleWhithoutReset));
 		subTrees.add(useReset);
+		subTrees.add(usePrecomputedW);
 		subTrees.add(addHInW);
 		subTrees.add(useDictionary);
 		subTrees.add(checkInconsistenciesHMapping);
