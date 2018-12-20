@@ -140,7 +140,8 @@ public class Mealy extends Automata implements Serializable {
 	}
 
 	public int getTransitionCount() {
-		return transitions.size();
+		// TODO optimize
+		return getTransitions().size();
 	}
 
 	public Collection<MealyTransition> getTransitionFrom(State s) {

@@ -318,7 +318,7 @@ public class HWStatsEntry extends StatsEntry {
 //		if (a == LOCALIZER_SEQUENCE_LENGTH)
 //			return (T) new Integer(localizeSequenceLength);
 		if (a == TRACE_LENGTH)
-			return (T) new Integer(traceLength - oracle.getLastTraceLength());
+			return (T) new Integer(traceLength);
 		if (a == INPUT_SYMBOLS)
 			return (T) new Integer(inputSymbols);
 		if (a == OUTPUT_SYMBOLS)
@@ -334,7 +334,7 @@ public class HWStatsEntry extends StatsEntry {
 		if (a == AUTOMATA)
 			return (T) automata;
 		if (a == DURATION)
-			return (T) new Float(duration - oracle.getLastDuration());
+			return (T) new Float(duration);
 		if (a == MEMORY)
 			return (T) new Integer(memory);
 		if (a == MIN_TRACE_LENGTH)
@@ -356,7 +356,7 @@ public class HWStatsEntry extends StatsEntry {
 		if (a == ORACLE_USED)
 			return (T) oracle.getName();
 		if (a == ORACLE_TRACE_LENGTH)
-			return (T) new Integer(oracle.getLastTraceLength());
+			return (T) new Integer(oracle.getTraceLength());
 		if (a == ORACLE_DURATION)
 			return (T) new Float(oracle.getDuration());
 		if (a == SEARCH_CE_IN_TRACE)
@@ -377,7 +377,7 @@ public class HWStatsEntry extends StatsEntry {
 				return (T) new Boolean(useReset);
 		if (a == ORACLE_TRACE_PERCENTAGE)
 			return (T) new Float(
-					100. * oracle.getLastTraceLength() / traceLength);
+					100. * oracle.getTraceLength() / traceLength);
 		if (a == AVG_NB_TRIED_W)
 			return (T) new Float(avgNbTriedWSuffixes);
 		if (a == RESET_CALL_NB)
