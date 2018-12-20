@@ -6,6 +6,9 @@ import drivers.mealy.MealyDriver;
 import drivers.mealy.real.SIPDriverIPTel;
 import drivers.mealy.transparent.EnumeratedMealyDriver.EnumeratedMealyOption;
 import drivers.mealy.transparent.RandomMealyDriver;
+import drivers.mealy.transparent.TransparentFromDotMealyDriver;
+import options.automataOptions.DriverChoice;
+import options.automataOptions.DriverChoiceItem;
 
 public class MealyDriverChoice extends DriverChoice<MealyDriver> {
 	DriverChoiceItem<MealyDriver> SIPDriverIpTel = new DriverChoiceItem<MealyDriver>(
@@ -19,6 +22,7 @@ public class MealyDriverChoice extends DriverChoice<MealyDriver> {
 		addChoice(new DriverChoiceItem<MealyDriver>(this,
 				RandomMealyDriver.class));
 		addChoice(new FromDotMealyDriver.FromDotChoiceItem(this));
+		addChoice(new TransparentFromDotMealyDriver.FromDotChoiceItem(this));
 		addChoice(exhaustiveDriver);
 	}
 
