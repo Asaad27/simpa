@@ -1084,8 +1084,9 @@ public class SIMPA {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Utils.setFileContent(lastOptionsFile,
-						allOptions.buildBackCLILine(false));
+				if (lastOptionsFile != null)
+					Utils.setFileContent(lastOptionsFile,
+							allOptions.buildBackCLILine(false));
 				frame.setEnabled(false);
 				startButton.setEnabled(false);
 				assert (inferThread == null || !inferThread.isAlive());
