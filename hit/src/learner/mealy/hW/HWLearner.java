@@ -46,7 +46,6 @@ import learner.mealy.localizerBased.LocalizerBasedLearner;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
 import tools.StandaloneRandom;
-import tools.Utils;
 
 import tools.loggers.LogManager;
 
