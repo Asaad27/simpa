@@ -445,14 +445,13 @@ public class SIMPA {
 			MAX_INPUT_SYM, MIN_OUTPUT_SYM, MAX_OUTPUT_SYM, TRANSITION_PERCENT };
 
 	// stats options
-	private static IntegerOption NB_TEST = new IntegerOption("--nbtest", "number of execution of the algorithm",
-			Options.NBTEST);
 	private static BooleanOption MAKE_GRAPH = new BooleanOption("--makeGraph", "create graph based on csv files");
 	private static BooleanOption STATS_MODE = new BooleanOption("--stats",
 			"enable stats mode\n - save results to csv\n - disable some feature");
 	private static BooleanOption ENUMERATE_MODE = new BooleanOption("--enumerate",
 			"generate automata with an interval of seeds");
-	private static Option<?>[] statsOptions = new Option<?>[] { NB_TEST, MAKE_GRAPH, STATS_MODE, ENUMERATE_MODE };
+	private static Option<?>[] statsOptions = new Option<?>[] { MAKE_GRAPH,
+			STATS_MODE, ENUMERATE_MODE };
 
 	// Other options undocumented //TODO sort and explain them.
 	private static StringListOption URLS = new StringListOption("--urls", "??? TODO", "url1", "url2", Options.URLS);
@@ -514,10 +513,6 @@ public class SIMPA {
 				unusedArgs++;
 				Options.SYSTEM = args[j];
 			}
-		if (unusedArgs < 1 && NB_TEST.getValue() > 0) {
-			System.err.println("please specify the driverClass");
-			usage();
-		}
 		if (unusedArgs > 1) {
 			System.err.println("please specify only one driverClass");
 			usage();
@@ -567,8 +562,6 @@ public class SIMPA {
 		Options.MINOUTPUTSYM = MIN_OUTPUT_SYM.getValue();
 		Options.MAXOUTPUTSYM = MAX_OUTPUT_SYM.getValue();
 		Options.TRANSITIONPERCENT = TRANSITION_PERCENT.getValue();
-
-		Options.NBTEST = NB_TEST.getValue();
 
 		Options.XSS_DETECTION = XSS_DETECTION.getValue();
 		Options.URLS = URLS.getValue();
@@ -858,11 +851,12 @@ public class SIMPA {
 	 */
 	private static boolean run_stats() {
 		assert modeOption.getSelectedItem() == modeOption.stats;
-		System.out.println("[+] Testing " + Options.NBTEST + " automaton");
+		int nbTests = modeOption.stats.inferenceNb.getValue();
+		System.out.println("[+] Testing " + nbTests + " automaton");
 		if (getLogLevel() != LogLevel.LOW)
 			throw new RuntimeException();
 
-		for (int i = 1; i <= Options.NBTEST; i++) {
+		for (int i = 1; i <= nbTests; i++) {
 			for (OptionTree option : allOptions.getAllSelectedChildren())
 				if (option instanceof RandomOption
 						&& !((RandomOption) option).useAutoValue()) {
@@ -874,7 +868,7 @@ public class SIMPA {
 				}
 
 			Runtime.getRuntime().gc();
-			System.out.println("\t" + i + "/" + Options.NBTEST);
+			System.out.println("\t" + i + "/" + nbTests);
 			if (!learnAndSaveOneTime())
 				return false;
 		}
@@ -923,6 +917,7 @@ public class SIMPA {
 							+ learnerStats.getClass().getName() + ".csv");
 			Writer globalStatsWriter;
 			if (!globalStats.exists()) {
+				globalStats.getParentFile().mkdirs();
 				globalStats.createNewFile();
 				globalStatsWriter = new BufferedWriter(
 						new FileWriter(globalStats));

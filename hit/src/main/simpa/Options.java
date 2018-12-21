@@ -194,6 +194,7 @@ public class Options {
 	// SIMPATest's options
 	public static int RETEST = -1;
 
+	@Deprecated
 	public static int NBTEST = 1;
 	public static int MINSTATES = 5;
 	public static int MAXSTATES = 5;
