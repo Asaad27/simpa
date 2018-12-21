@@ -917,6 +917,11 @@ public class HWLearner extends Learner {
 			boolean extendWfailed = false;
 			if (conjectureOutput != null
 					&& !conjectureOutput.equals(traceOutput)) {
+				assert !(driver instanceof TransparentMealyDriver)
+						|| !((TransparentMealyDriver) driver).getAutomata()
+								.acceptCharacterizationSet(W)
+						|| !((TransparentMealyDriver) driver).getAutomata()
+								.acceptHomingSequence(dataManager.h);
 				LmTrace ceTrace = trace.subtrace(startPos, i + 1);
 
 				LogManager.logInfo("Before transition ",
@@ -933,11 +938,6 @@ public class HWLearner extends Learner {
 				try {
 					extendsW(statesHistory, ceTrace, 0);
 					LogManager.logInfo("W extended using trace as CE");
-					assert !(driver instanceof TransparentMealyDriver)
-							|| !((TransparentMealyDriver) driver).getAutomata()
-									.acceptCharacterizationSet(W)
-							|| !((TransparentMealyDriver) driver).getAutomata()
-									.acceptHomingSequence(dataManager.h);
 					return true;
 				} catch (CanNotExtendWException e) {
 					LogManager.logInfo(
