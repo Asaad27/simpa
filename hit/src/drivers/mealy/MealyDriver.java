@@ -173,6 +173,7 @@ public class MealyDriver extends Driver {
 			StatsEntry_OraclePart oracleStats)
 			throws CeExposedUnknownStateException {
 		int startSize = numberOfAtomicRequest;
+		int startReset = numberOfRequest;
 		long startTime = System.nanoTime();
 		boolean result;
 		try {
@@ -183,6 +184,7 @@ public class MealyDriver extends Driver {
 					/ 1000000000;
 			oracleStats.addOracleCall(numberOfAtomicRequest - startSize,
 					duration);
+			assert startReset + appliedSequences.size() - 1 == numberOfRequest;
 		}
 		return result;
 	}
@@ -289,9 +291,10 @@ public class MealyDriver extends Driver {
 				counterExamples = conjecture.getCounterExamples(conjectureState,
 						this.automata, getCurrentState(), true);
 			}
-			if (counterExamples.isEmpty())
+			if (counterExamples.isEmpty()) {
+				appliedSequences.add(new LmTrace());
 				return false;
-			else {
+			} else {
 				InputSequence ceIn = counterExamples.get(0);
 				OutputSequence ceOut = execute(ceIn);
 				appliedSequences.add(new LmTrace(ceIn, ceOut));
@@ -316,9 +319,10 @@ public class MealyDriver extends Driver {
 							conjectureState, this.automata, getCurrentState(),
 							true);
 				}
-				if (counterExamples.isEmpty())
+				if (counterExamples.isEmpty()) {
+					appliedSequences.add(new LmTrace());
 					return false;
-				else {
+				} else {
 					LogManager.logInfo("a counter example exixst (e.g. "
 							+ counterExamples.get(0)
 							+ "). Doing random walk until a CE is found");
@@ -334,8 +338,8 @@ public class MealyDriver extends Driver {
 							counterExampleIsFound = doRandomWalk(conjecture,
 									conjectureState, trace, maxLength,
 									options.mrBean.random);
-							reset();
 							appliedSequences.add(trace);
+							reset();
 							// here is a difficult point : a short length is
 							// good if the automaton is not connex and the
 							// counter-example is near the start but a long
@@ -356,11 +360,14 @@ public class MealyDriver extends Driver {
 			} else {
 				for (int i = 0; i < options.mrBean.getMaxTraceNumber(); i++) {
 					LmTrace trace = new LmTrace();
+					appliedSequences.add(trace);
+					if (i != 0)
+						reset();// according to specification, there is a reset
+								// BETWEEN the sequences
 					boolean counterExampleIsFound = doRandomWalk(conjecture,
 							conjectureState, trace,
 							options.mrBean.getMaxTraceLength(),
 							options.mrBean.random);
-					appliedSequences.add(trace);
 					if (counterExampleIsFound)
 						return true;
 				}

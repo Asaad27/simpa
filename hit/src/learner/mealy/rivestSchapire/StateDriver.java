@@ -89,6 +89,7 @@ class StateDriver extends MealyDriver {
 
 	public String execute(String i){
 		resetDone = false;
+		numberOfAtomicRequest++;
 		return realDriver.execute(i);
 	}
 
@@ -112,6 +113,7 @@ class StateDriver extends MealyDriver {
 			LogManager.logInfo("    already in state after " + homingSequenceResponse);
 			return;
 		}
+		numberOfRequest++;
 		paused = true;
 		learner.resetCall();
 		learner.lock.unlock();//We let the next thread or main thread take the hand.
@@ -137,6 +139,7 @@ class StateDriver extends MealyDriver {
 			List<LmTrace> appliedSequences, Boolean forbidReset,
 			StatsEntry_OraclePart oracleStats)
 			throws CeExposedUnknownStateException {
+		globalTraceLengthBeforeLastCE = realDriver.numberOfAtomicRequest;
 		learner.stats.counterExampleCalled();
 		return super.getCounterExample(options, conjecture,
 				conjectureStartingState, appliedSequences, forbidReset,
