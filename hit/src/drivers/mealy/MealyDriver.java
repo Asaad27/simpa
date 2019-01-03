@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
+import automata.mealy.GenericInputSequence;
+import automata.mealy.GenericInputSequence.GenericOutputSequence;
+import automata.mealy.GenericInputSequence.Iterator;
 import learner.mealy.CeExposedUnknownStateException;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
@@ -75,6 +78,15 @@ public class MealyDriver extends Driver {
 
 	protected List<InputSequence> getForcedCE() {
 		return null;
+	}
+
+	public GenericOutputSequence execute(GenericInputSequence in) {
+		Iterator it = in.inputIterator();
+		while (it.hasNext()) {
+			String outSymbol = execute(it.next());
+			it.setPreviousOutput(outSymbol);
+		}
+		return it.getResponse();
 	}
 
 	public OutputSequence execute(InputSequence in){
