@@ -33,8 +33,9 @@ public class HWConjecture extends LmConjecture {
 		Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> characterization = dataManager
 				.getInitialCharacterization();
 		for (GenericInputSequence w : characterization.unknownPrints()) {
-			dataManager.reset();
-			GenericOutputSequence r = dataManager.apply(w);
+			driver.reset();
+			GenericOutputSequence r = driver.execute(w);
+			appliedSequences.add(w.buildTrace(r));
 			if (Options.getLogLevel() != LogLevel.LOW)
 				LogManager.logInfo(
 						"characterizing initial state with sequence ", w);
@@ -44,8 +45,7 @@ public class HWConjecture extends LmConjecture {
 			throw new CeExposedUnknownStateException(characterization);
 		dataManager.getInitialCharacterization();// update initial state in
 													// dataManager
-		dataManager.reset();
-		assert (dataManager.getCurrentState() != null);
-		return dataManager.getCurrentState().getState();
+		assert (dataManager.getInitialState() != null);
+		return dataManager.getInitialState().getState();
 	}
 }

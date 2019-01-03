@@ -1079,7 +1079,7 @@ public class HWLearner extends Learner {
 					LmTrace counterExampleTrace;
 					try {
 						counterExampleTrace = getCounterExemple(hExceptions,
-								false);
+								true);
 					} catch (CeExposedUnknownStateException e1) {
 						// this is not supposed to happen
 						throw new RuntimeException(e);

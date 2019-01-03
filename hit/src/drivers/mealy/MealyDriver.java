@@ -278,12 +278,14 @@ public class MealyDriver extends Driver {
 				if (result)
 					return true;
 			}
+			else {
+				appliedSequences.add(new LmTrace());
+			}
 			// we need to reset to let some oracle start from initial state
 			// (e.g. the search of shortest counter-example needs to be in a
 			// state were all others states are reachable).
 			conjectureState = conjecture.searchInitialState(appliedSequences);
 			reset();
-			appliedSequences.add(new LmTrace());
 		}
 
 		assert conjectureState != null;
@@ -370,7 +372,10 @@ public class MealyDriver extends Driver {
 					}
 				}
 			} else {
-				for (int i = 0; i < options.mrBean.getMaxTraceNumber(); i++) {
+				int maxTraceNumber = options.mrBean.getMaxTraceNumber();
+				if (!resetIsAllowed)
+					maxTraceNumber = 1;
+				for (int i = 0; i < maxTraceNumber; i++) {
 					LmTrace trace = new LmTrace();
 					appliedSequences.add(trace);
 					if (i != 0)
