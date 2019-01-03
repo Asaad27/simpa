@@ -17,6 +17,7 @@ import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
 import drivers.Driver;
 import drivers.efsm.real.ScanDriver;
+import drivers.mealy.MealyDriver;
 
 public class ZXLearner extends Learner {
 	private ScanDriver driver;
@@ -325,7 +326,12 @@ public class ZXLearner extends Learner {
 		LogManager.logInfo("Building conjecture");
 		//LogManager.logObservationTree(u);
 
-		LmConjecture c = new LmConjecture(driver);
+		// The next call will throw an exception (ScanDriver cannot be cast to
+		// MealyDriver). It was introduced by Nicolas because LmConjecture
+		// extends Mealy an thus, it should have a MealyDriver. The next call is
+		// considered invalid because a ScanDriver (which extends EFSM) should
+		// not have a Mealy conjecture.
+		LmConjecture c = new LmConjecture((MealyDriver) (Driver) driver);
 
 		for (int i = 0; i < states.size(); i++)
 			c.addState(new State("S" + i, i == 0));

@@ -6,7 +6,7 @@ import automata.State;
 import automata.mealy.GenericInputSequence;
 import automata.mealy.GenericInputSequence.GenericOutputSequence;
 import automata.mealy.distinctionStruct.Characterization;
-import drivers.Driver;
+import drivers.mealy.MealyDriver;
 import learner.mealy.CeExposedUnknownStateException;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
@@ -19,7 +19,7 @@ public class HWConjecture extends LmConjecture {
 
 	final SimplifiedDataManager dataManager;
 
-	public HWConjecture(Driver d, SimplifiedDataManager dm) {
+	public HWConjecture(MealyDriver d, SimplifiedDataManager dm) {
 		super(d);
 		dataManager = dm;
 	}

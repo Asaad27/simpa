@@ -13,17 +13,19 @@ import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
-import drivers.Driver;
+import drivers.mealy.MealyDriver;
 import tools.loggers.LogManager;
 
 
 public class LmConjecture extends automata.mealy.Mealy {
 	private static final long serialVersionUID = -6920082057724492261L;
 	private List<String> inputSymbols;
+	protected MealyDriver driver;
 
-	public LmConjecture(Driver d) {
+	public LmConjecture(MealyDriver d) {
 		super(d.getSystemName());
 		this.inputSymbols = d.getInputSymbols();
+		driver = d;
 	}
 
 	public List<String> getInputSymbols() {
