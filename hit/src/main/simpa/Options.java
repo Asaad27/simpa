@@ -147,7 +147,8 @@ public class Options {
 
 	public static File getStatsGraphDir() {
 		File dir = new File(
-				getOutDir().getAbsoluteFile() + File.separator + "stats");
+				getOutDir().getAbsoluteFile() + File.separator + "stats"
+						+ File.separator + "graphs");
 		return dir;
 	}
 

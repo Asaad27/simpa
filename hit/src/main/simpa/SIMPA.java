@@ -809,8 +809,8 @@ public class SIMPA {
 			if (!learnAndSaveOneTime())
 				return false;
 		}
-
-		if (MAKE_GRAPH.getValue()) {
+		boolean makeGraphs = true;// TODO
+		if (makeGraphs) {
 			System.out.println("[+] Make Graph");
 			GlobalGraphGenerator globalGraph = new GlobalGraphGenerator();
 			for (File statFile : Options.getStatsCSVDir().listFiles()) {

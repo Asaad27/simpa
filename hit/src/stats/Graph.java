@@ -576,6 +576,7 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 			if (i<classUsed.size()-1)
 				totalFileName.append("_");
 		}
+		totalFileName.append(File.separator);
 		if (fileName == null)
 			totalFileName.append(name + "(" + stats.hashCode() + ")");
 		else
@@ -584,6 +585,7 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 			totalFileName.append(".tex");
 		} else
 			totalFileName.append(".svg");
+		new File(totalFileName.toString()).getParentFile().mkdirs();
 
 		r.append("set output \"" + totalFileName + "\"\n");
 

@@ -192,9 +192,11 @@ public class GlobalGraphGenerator extends GraphGenerator {
 			set.add(new StatsSet(locW, statesRestriction));
 			set.add(new StatsSet(hW__, statesRestriction));
 			set.add(new StatsSet(rivestSchapire, statesRestriction));
-			set.add(new StatsSet(lm, statesRestriction));
-			set.add(new StatsSet(zQ,
-					new RangeRestriction<>(Attribute.STATE_NUMBER, 0, 130)));
+			if (lm != null)
+				set.add(new StatsSet(lm, statesRestriction));
+			if (zQ != null)
+				set.add(new StatsSet(zQ, new RangeRestriction<>(
+						Attribute.STATE_NUMBER, 0, 130)));
 
 			set.restrict(new EqualsRestriction<String>(Attribute.AUTOMATA,
 					new RandomMealyDriver().getSystemName()));
@@ -238,9 +240,11 @@ public class GlobalGraphGenerator extends GraphGenerator {
 			set.add(new StatsSet(hW__, statesRestriction));
 			set.add(new StatsSet(rivestSchapire,
 					new RangeRestriction<>(Attribute.STATE_NUMBER, 0, 40)));
-			set.add(new StatsSet(lm, statesRestriction));
-			set.add(new StatsSet(zQ,
-					new RangeRestriction<>(Attribute.STATE_NUMBER, 0, 55)));
+			if (lm != null)
+				set.add(new StatsSet(lm, statesRestriction));
+			if (zQ != null)
+				set.add(new StatsSet(zQ,
+						new RangeRestriction<>(Attribute.STATE_NUMBER, 0, 55)));
 
 			set.restrict(new EqualsRestriction<String>(Attribute.AUTOMATA,
 					new RandomOneOutputDiffMealyDriver().getSystemName()));
@@ -282,9 +286,11 @@ public class GlobalGraphGenerator extends GraphGenerator {
 					Attribute.STATE_NUMBER, keptStates);
 			set.add(new StatsSet(hW__, statesRestriction));
 			set.add(new StatsSet(rivestSchapire, statesRestriction));
-			set.add(new StatsSet(lm, statesRestriction));
-			set.add(new StatsSet(zQ,
-					new RangeRestriction<>(Attribute.STATE_NUMBER, 0, 130)));
+			if (lm != null)
+				set.add(new StatsSet(lm, statesRestriction));
+			if (zQ != null)
+				set.add(new StatsSet(zQ, new RangeRestriction<>(
+						Attribute.STATE_NUMBER, 0, 130)));
 
 			set.restrict(new EqualsRestriction<String>(Attribute.AUTOMATA,
 					new RandomMealyDriver().getSystemName()));
@@ -323,8 +329,10 @@ public class GlobalGraphGenerator extends GraphGenerator {
 			set.add(combinatorialPruning);
 			set.add(new StatsSet(rivestSchapire));
 			set.add(locW);
-			set.add(new StatsSet(lm));
-			set.add(new StatsSet(zQ));
+			if (lm != null)
+				set.add(new StatsSet(lm));
+			if (zQ != null)
+				set.add(new StatsSet(zQ));
 
 			set.restrict(new EqualsRestriction<String>(Attribute.AUTOMATA,
 					new RandomMealyDriver().getSystemName()));
@@ -363,6 +371,8 @@ public class GlobalGraphGenerator extends GraphGenerator {
 		all.getStats().addAll(locW.getStats());
 		all.getStats().addAll(hW__.getStats());
 		all.getStats().addAll(rivestSchapire.getStats());
+		if (lm != null)
+			all.getStats().addAll(lm.getStats());
 		all.restrict(new Restriction() {
 			{
 				setTitle("from dot file");
