@@ -20,7 +20,6 @@ package main.simpa;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Random;
-
 import tools.loggers.LogManager;
 
 public class Options {
