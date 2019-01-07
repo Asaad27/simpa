@@ -24,6 +24,9 @@ import automata.Transition;
 import automata.mealy.GenericInputSequence.GenericOutputSequence;
 import automata.mealy.distinctionStruct.Characterization;
 import automata.mealy.distinctionStruct.DistinctionStruct;
+import automata.mealy.distinctionStruct.TotallyAdaptiveW;
+import automata.mealy.distinctionStruct.TotallyAdaptiveW.AdaptiveCharacterization;
+import automata.mealy.splittingTree.smetsersSplittingTree.SplittingTree;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import main.simpa.Options;
@@ -979,5 +982,55 @@ public class Mealy extends Automata implements Serializable {
 			exportToDot(comments.toString());
 		}
 		return result;
+	}
+
+	/**
+	 * check if conjecture is compatible with this automata.
+	 * 
+	 * @param conj
+	 *            the conjecture to test.
+	 * @return {@code false} if a discrepancy is found between conjecture and
+	 *         this automata, {@code true } if no discrepancy is found.
+	 */
+	public boolean searchConjectureError(LmConjecture conj) {
+		if (conj.getInitialState() != null && getInitialState() != null) {
+			if (conj.getCounterExamplesWithReset(this, true)
+					.isCompletelyEquivalent())
+				return false;
+		} else {
+			assert isConnex(false);
+			State thisState = getState(0);
+			TotallyAdaptiveW W = new SplittingTree(this,
+					conj.getInputSymbols()).computeW();
+			AdaptiveCharacterization thisStateCharac = W
+					.getEmptyCharacterization();
+			while (!thisStateCharac.isComplete()) {
+				AdaptiveSymbolSequence w = thisStateCharac.getUnknownPrints()
+						.get(0);
+				thisStateCharac.addPrint(w, apply(w, thisState));
+			}
+			State conjState = null;
+			for (State conjTestState : conj.getStates()) {
+				AdaptiveCharacterization conjStateCharac = W
+						.getEmptyCharacterization();
+				while (!conjStateCharac.isComplete()) {
+					AdaptiveSymbolSequence w = conjStateCharac
+							.getUnknownPrints().get(0);
+					conjStateCharac.addPrint(w, conj.apply(w, conjTestState));
+				}
+				if (conjStateCharac.equals(thisStateCharac)) {
+					conjState = conjTestState;
+					break;
+				}
+			}
+			if (conjState == null) {
+				return false;
+			} else {
+				if (conj.getCounterExamples(conjState, this, thisState, true)
+						.size() != 0)
+					return false;
+			}
+		}
+		return true;
 	}
 }
