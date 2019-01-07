@@ -1,6 +1,7 @@
 package main.simpa;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Random;
 
@@ -191,6 +192,40 @@ public class Options {
 	public static File getFailDir() {
 		File dir = new File(
 				getOutDir().getAbsoluteFile() + File.separator + "fail");
+		return dir;
+	}
+
+	/**
+	 * Get the directory where articles are stored. This is used to directly
+	 * export result in article working directory. Current implementation is a
+	 * really simple one it should be improved to let users personalize their
+	 * location of articles
+	 * 
+	 * @param articleID
+	 *            an identifier for the article to look at.
+	 * @return a directory in home called "shared_articles" if it exists or a
+	 *         sub-directory in the Graph output directory.
+	 * @TODO let this directory be configurable through a configuration user
+	 *       file.
+	 */
+	public static Path getArticleDir(String articleID) {
+		// fall-back directory :
+		Path baseDir = getStatsGraphDir().toPath().resolve("articles");
+
+		// try to find a directory called "shared_articles" in home
+		String home = System.getProperty("user.home");
+		if (home != null) {
+			Path inHome = new File(home + File.separator + "shared_articles")
+					.toPath();
+			if (inHome.toFile().exists())
+				baseDir = inHome;
+		}
+
+		// articleID is only a sub-directory in baseDir at this time. A
+		// database-like might be implemented later to enable specific directory
+		// per article
+		Path dir = baseDir.resolve(articleID);
+		dir.toFile().mkdirs();
 		return dir;
 	}
 
