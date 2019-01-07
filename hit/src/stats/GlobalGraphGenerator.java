@@ -3,10 +3,15 @@ package stats;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import drivers.mealy.transparent.RandomMealyDriver;
 import drivers.mealy.transparent.RandomOneOutputDiffMealyDriver;
@@ -17,14 +22,25 @@ import learner.mealy.localizerBased.LocalizerBasedStatsEntry;
 import learner.mealy.rivestSchapire.RivestSchapireStatsEntry;
 import learner.mealy.table.LmStatsEntry;
 import learner.mealy.tree.ZStatsEntry;
+import main.simpa.Options;
 import stats.Graph.PlotStyle;
 import stats.attribute.Attribute;
 import stats.attribute.ComputedAttribute;
 import stats.attribute.restriction.ClassRestriction;
 import stats.attribute.restriction.EqualsRestriction;
+import stats.attribute.restriction.HasAttributeRestriction;
 import stats.attribute.restriction.InSetRestriction;
 import stats.attribute.restriction.RangeRestriction;
 import stats.attribute.restriction.Restriction;
+import stats.externalData.Article_2018JARStatEntry;
+import stats.table.Table;
+import stats.table.TableColumn;
+import stats.table.TableOutputFormat;
+import stats.table.TableRow;
+import stats.table.usual.AutomataRow;
+import stats.table.usual.ResetCostComparisonCol;
+import stats.table.usual.TraceLengthCol;
+import stats.table.usual.TransitionCol;
 
 /**
  * This class aim to make graphs with data of multiple kind of inferences
@@ -62,6 +78,8 @@ public class GlobalGraphGenerator extends GraphGenerator {
 			generate_ICGI2018();
 		}
 		generate_JSS2018();
+		generate_SANER19();
+		generate_AMOST2019();
 	}
 
 	@Override
@@ -71,8 +89,10 @@ public class GlobalGraphGenerator extends GraphGenerator {
 	}
 
 	private void makeRS_Comb_NoReset() {
-		assert rivestSchapire != null && combinatorialPruning != null && locW != null;
-		Graph<Integer, Integer> g = new Graph<>(Attribute.STATE_NUMBER, Attribute.TRACE_LENGTH);
+		assert rivestSchapire != null && combinatorialPruning != null
+				&& locW != null;
+		Graph<Integer, Integer> g = new Graph<>(Attribute.STATE_NUMBER,
+				Attribute.TRACE_LENGTH);
 		StatsSet NRw1 = new StatsSet(locW);
 		NRw1.restrict(new EqualsRestriction<>(Attribute.W_SIZE, 1));
 		StatsSet NRw2 = new StatsSet(locW);
@@ -80,20 +100,23 @@ public class GlobalGraphGenerator extends GraphGenerator {
 		StatsSet RS = new StatsSet(rivestSchapire);
 		StatsSet comb = new StatsSet(combinatorialPruning);
 
-		Restriction automaRestriction = new EqualsRestriction<String>(Attribute.AUTOMATA,
-				new RandomMealyDriver().getSystemName());
-		Restriction inputsRestriction = new EqualsRestriction<>(Attribute.INPUT_SYMBOLS, 5);
-		Restriction outputsRestriction = new EqualsRestriction<>(Attribute.OUTPUT_SYMBOLS, 5);
+		Restriction automaRestriction = new EqualsRestriction<String>(
+				Attribute.AUTOMATA, new RandomMealyDriver().getSystemName());
+		Restriction inputsRestriction = new EqualsRestriction<>(
+				Attribute.INPUT_SYMBOLS, 5);
+		Restriction outputsRestriction = new EqualsRestriction<>(
+				Attribute.OUTPUT_SYMBOLS, 5);
 
-		Restriction[] restrictions = new Restriction[] { automaRestriction, inputsRestriction, outputsRestriction };
+		Restriction[] restrictions = new Restriction[] { automaRestriction,
+				inputsRestriction, outputsRestriction };
 
 		NRw1.restrict(restrictions);
 		NRw2.restrict(restrictions);
 		RS.restrict(restrictions);
 		comb.restrict(restrictions);
 
-		g.setDataDescriptionFields(
-				new Attribute[] { Attribute.INPUT_SYMBOLS, Attribute.OUTPUT_SYMBOLS, Attribute.AUTOMATA });
+		g.setDataDescriptionFields(new Attribute[] { Attribute.INPUT_SYMBOLS,
+				Attribute.OUTPUT_SYMBOLS, Attribute.AUTOMATA });
 		g.plot(NRw1, PlotStyle.MEDIAN, "ICTSS2015, p=1");
 		g.plot(NRw2, PlotStyle.MEDIAN, "ICTSS2015, p=2");
 		g.plot(RS, PlotStyle.MEDIAN, "\\\\\\\\algRS*");
@@ -103,9 +126,762 @@ public class GlobalGraphGenerator extends GraphGenerator {
 		g.setFileName("influence_of_states_number_length");
 		g.export();
 	}
-	
+
+	private void generate_AMOST2019() {
+		if (hW__ == null)
+			return;
+		StatsSet set = new StatsSet();
+		set.add(hW__);
+		if (lm != null)
+			set.add(lm);
+
+		set.add(Article_2018JARStatEntry.getSet());
+
+		List<TableRow> rows = new ArrayList<>();
+		rows.add(new AutomataRow("MQTT EMQTT",
+				"dot_file(BenchmarkMQTT_emqtt__two_client_will_retain)"));
+		rows.add(new AutomataRow("MQTT VerneMQ",
+				"dot_file(BenchmarkMQTT_VerneMQ__two_client_will_retain)"));
+		rows.add(new AutomataRow("MQTT Mosquitto",
+				"dot_file(BenchmarkMQTT_mosquitto__two_client_will_retain)"));
+		rows.add(new AutomataRow("MQTT HBMQTT",
+				"dot_file(BenchmarkMQTT_hbmqtt__two_client_will_retain)"));
+		List<Restriction> hWBaseRestrictions = Arrays.asList(
+				new ClassRestriction<>(HWStatsEntry.class),
+				new EqualsRestriction<>(Attribute.REUSE_HZXW, true),
+				new EqualsRestriction<>(Attribute.CHECK_3rd_INCONSISTENCY,
+						true),
+				new EqualsRestriction<>(Attribute.SEARCH_CE_IN_TRACE,
+						"simple"));
+		List<TableColumn> columns = new ArrayList<>();
+		{
+			{
+				List<Restriction> hWAdaptiveWithW = new ArrayList<>(
+						hWBaseRestrictions);
+				hWAdaptiveWithW.addAll(Arrays.asList(
+						new EqualsRestriction<>(Attribute.USE_ADAPTIVE_W, true),
+						new EqualsRestriction<>(Attribute.USE_ADAPTIVE_H, true),
+						new EqualsRestriction<>(Attribute.PRECOMPUTED_W,
+								true)));
+
+				TraceLengthCol col = new TraceLengthCol(
+						"hW adaptive \nwith perfect W", true,
+						hWAdaptiveWithW.toArray(new Restriction[0]));
+				col.dispOracle = true;
+				columns.add(col);
+			}
+			{
+				List<Restriction> hWAdaptiveWithoutW = new ArrayList<>(
+						hWBaseRestrictions);
+				hWAdaptiveWithoutW.addAll(Arrays.asList(
+						new EqualsRestriction<>(Attribute.USE_ADAPTIVE_W, true),
+						new EqualsRestriction<>(Attribute.USE_ADAPTIVE_H, true),
+						new EqualsRestriction<>(Attribute.PRECOMPUTED_W,
+								false)));
+
+				TraceLengthCol col = new TraceLengthCol(
+						"hW adaptive \nwith empty W", true,
+						hWAdaptiveWithoutW.toArray(new Restriction[0]));
+				col.dispOracle = true;
+				columns.add(col);
+			}
+			{
+				List<Restriction> hWpresetWithoutW = new ArrayList<>(
+						hWBaseRestrictions);
+				hWpresetWithoutW.addAll(Arrays.asList(
+						new EqualsRestriction<>(Attribute.USE_ADAPTIVE_W,
+								false),
+						new EqualsRestriction<>(Attribute.USE_ADAPTIVE_H,
+								false),
+						new EqualsRestriction<>(Attribute.ADD_I_IN_W, false),
+						new EqualsRestriction<>(Attribute.PRECOMPUTED_W,
+								false)));
+
+				TraceLengthCol col = new TraceLengthCol(
+						"hW preset \n with empty W", true,
+						hWpresetWithoutW.toArray(new Restriction[0]));
+				col.dispOracle = true;
+				columns.add(col);
+			}
+			{
+				TraceLengthCol col = new TraceLengthCol(
+						"L from article graz, mutation", true,
+						new Restriction[] {
+								new ClassRestriction<>(
+										Article_2018JARStatEntry.class),
+								new EqualsRestriction<>(Attribute.ORACLE_USED,
+										Article_2018JARStatEntry.mutationOracle) }) {
+					@Override
+					public String getFormatedTitle(TableOutputFormat format) {
+						if (format == TableOutputFormat.LATEX)
+							return "\\shortstack{$L^*$ LearnLib \\\\ \\relax with mutation oracle \\\\ \\relax (\\#reset)}";
+						return super.getFormatedTitle(format);
+					}
+				};
+				columns.add(col);
+			}
+			Table table = new Table(
+					Options.getArticleDir("AMOST2019").resolve("figures")
+							.resolve("table_MQTT").toFile(),
+					set, columns, rows);
+			table.topCell = "Systems";
+			table.export(TableOutputFormat.LATEX);
+		}
+	}
+
 	private void generate_JSS2018() {
-		if (hW__==null)return;
+		if (hW__ == null)
+			return;
+		StatsSet allStats = new StatsSet();
+		if (zQ == null)
+			return;
+		if (rivestSchapire == null)
+			return;
+		if (locW == null)
+			return;
+		if (lm == null)
+			return;
+		allStats.add(zQ);
+		allStats.add(hW__);
+		allStats.add(rivestSchapire);
+		allStats.add(locW);
+		allStats.add(lm);
+
+		allStats.restrict(new Restriction() {
+
+			@Override
+			public boolean contains(StatsEntry s) {
+				if (s.get(Attribute.AUTOMATA)
+						.startsWith("dot_file(BenchmarkCircuit"))
+					return false;
+				if (s.get(Attribute.AUTOMATA)
+						.startsWith("dot_file(BenchmarkToyModels"))
+					return false;
+				if (s.get(Attribute.AUTOMATA)
+						.startsWith("dot_file(BenchmarkQUICprotoco"))
+					return false;
+				if (s.get(Attribute.AUTOMATA)
+						.startsWith("dot_file(BenchmarkCoffee"))
+					return false;
+				return true;
+			}
+		});
+
+		String filePrefix = "JSS2018_";
+		Restriction[] hWMrBeanRestrictions = new Restriction[] {
+				new ClassRestriction<>(HWStatsEntry.class),
+				// new EqualsRestriction<>(Attribute.ADD_H_IN_W, false),
+				// new EqualsRestriction<>(HWStatsEntry.USE_ADAPTIVE_W, true),
+				// new EqualsRestriction<>(HWStatsEntry.USE_ADAPTIVE_H, true),
+				// new EqualsRestriction<>(HWStatsEntry.REUSE_HZXW, true),
+				// new EqualsRestriction<>(HWStatsEntry.CHECK_3rd_INCONSISTENCY,
+				// true),
+				// new EqualsRestriction<>(HWStatsEntry.SEARCH_CE_IN_TRACE,
+				// "simple"),
+				// new EqualsRestriction<>(HWStatsEntry.PRECOMPUTED_W, false),
+				new EqualsRestriction<>(HWStatsEntry.ORACLE_USED, "MrBean") };
+		OneConfigPlotter hWMrBeanPlotter = new OneConfigPlotter(
+				hWMrBeanRestrictions, Graph.PointShape.FILLED_TRIANGLE_DOWN,
+				new Graph.Color(255, 200, 50), "hW MrBean");
+
+		OneConfigPlotter hW_LY_plotter = new OneConfigPlotter(
+				new Restriction[] { new ClassRestriction<>(HWStatsEntry.class),
+						new EqualsRestriction<>(HWStatsEntry.ORACLE_USED,
+								"distinctionTree + MrBean") },
+				Graph.PointShape.EMPTY_TRIANGLE_DOWN,
+				new Graph.Color(0, 200, 50), "LY");
+		OneConfigPlotter RS_plotter = new OneConfigPlotter(new Restriction[] {
+				new ClassRestriction<>(RivestSchapireStatsEntry.class),
+
+		}, Graph.PointShape.EMPTY_SQUARE, new Graph.Color(255, 0, 0),
+				"Rivest&schapire");
+
+		PlotStyle defaultStyle = PlotStyle.CANDLESTICK;
+		hWMrBeanPlotter.setPlotStyle(defaultStyle);
+		hW_LY_plotter.setPlotStyle(defaultStyle);
+		RS_plotter.setPlotStyle(defaultStyle);
+		{
+			Graph<String, Integer> g = new Graph<>(Attribute.AUTOMATA,
+					Attribute.ORACLE_TRACE_LENGTH);
+			g.setForArticle(true);
+			// g.setSize(width, noKeyHeight);
+			g.setTitle("");
+			// g.getKeyParameters().disable();
+			// g.setDataDescriptionFields(description);
+			hWMrBeanPlotter.plotOn(g, allStats);
+			hW_LY_plotter.plotOn(g, allStats);
+			// g.forceAbsRange(0, 150);
+			// g.setXTics(50);
+			g.setForceOrdLogScale(true);
+			// g.forceOrdRange(null, 200000);
+			// g.setYTics(50000);
+			g.setForceAbsLogScale(false);
+			g.setFileName(filePrefix + "test");
+			g.export();
+		}
+		{
+			Graph<Integer, Integer> g = new Graph<>(
+					ComputedAttribute.TRANSITION_COUNT, Attribute.TRACE_LENGTH);
+			g.setForArticle(true);
+			// g.setSize(width, noKeyHeight);
+			g.setTitle("");
+			// g.getKeyParameters().disable();
+			g.setDataDescriptionFields(new Attribute<?>[] {});
+			hWMrBeanPlotter.plotOn(g, allStats);
+			hW_LY_plotter.plotOn(g, allStats);
+			RS_plotter.plotOn(g, allStats);
+			// g.forceAbsRange(0, 150);
+			// g.setXTics(50);
+			g.setForceOrdLogScale(true);
+			// g.forceOrdRange(null, 200000);
+			// g.setYTics(50000);
+			g.setForceAbsLogScale(true);
+			g.setFileName(filePrefix + "test2");
+			g.export();
+		}
+
+		{
+
+			StatsSet baseStats = new StatsSet(allStats);
+			baseStats.restrict(new Restriction() {
+				{
+					setTitle("from dot file");
+				}
+
+				@Override
+				public boolean contains(StatsEntry s) {
+					return s.get(HWStatsEntry.AUTOMATA).startsWith("dot_file");
+				}
+			});
+			List<TableRow> rows = new ArrayList<>();
+			rows.add(new AutomataRow("MQTT ActiveMQ two client retain",
+					"dot_file(BenchmarkMQTT_ActiveMQ__two_client_will_retain)"));
+			rows.add(new AutomataRow("FromRhapsodyToDezyne 1",
+					"dot_file(BenchmarkFromRhapsodyToDezyne_model1)"));
+			rows.add(new AutomataRow("FromRhapsodyToDezyne 3",
+					"dot_file(BenchmarkFromRhapsodyToDezyne_model3)"));
+			SortedMap<Integer, List<String>> bySize = new TreeMap<>();
+			Map<String, TableRow> automaticRows = new HashMap<>();
+			for (StatsEntry e : new StatsSet(baseStats, new Restriction[] {
+					new ClassRestriction<>(HWStatsEntry.class),
+					new EqualsRestriction<>(Attribute.USE_RESET, false), })
+							.getStats()) {
+				String name = e.get(Attribute.AUTOMATA);
+				if (!automaticRows.containsKey(name)) {
+					String dispName = dot_to_short_name(name);
+
+					automaticRows.put(name, new AutomataRow(dispName, name));
+
+					Integer size = e.get(Attribute.STATE_NUMBER)
+							* e.get(Attribute.INPUT_SYMBOLS);
+					List<String> thisSize = bySize.get(size);
+					if (thisSize == null) {
+						thisSize = new ArrayList<>();
+						bySize.put(size, thisSize);
+					}
+					thisSize.add(name);
+				}
+			}
+
+			List<Restriction> hWBaseRestrictions = Arrays.asList(
+					new ClassRestriction<>(HWStatsEntry.class),
+					new EqualsRestriction<>(Attribute.USE_ADAPTIVE_W, false),
+					new EqualsRestriction<>(Attribute.USE_ADAPTIVE_H, false),
+
+					new EqualsRestriction<>(Attribute.REUSE_HZXW, true),
+					new EqualsRestriction<>(Attribute.CHECK_3rd_INCONSISTENCY,
+							true),
+					new EqualsRestriction<>(Attribute.SEARCH_CE_IN_TRACE,
+							"simple"));
+
+			rows = new ArrayList<>(automaticRows.values());
+			rows = new ArrayList<>();
+			for (List<String> entry : bySize.values()) {
+				Collections.sort(entry);
+				for (String fileName : entry) {
+					rows.add(automaticRows.get(fileName));
+				}
+			}
+			List<TableColumn> columns = new ArrayList<>();
+			{
+				columns.add(new TransitionCol());
+				columns.add(new TraceLengthCol("LocW", false,
+						new Restriction[] {
+								new ClassRestriction<>(
+										LocalizerBasedStatsEntry.class),
+								new EqualsRestriction<>(Attribute.W_SIZE,
+										2), }));
+				List<Restriction> hWWithW = new ArrayList<>(hWBaseRestrictions);
+				hWWithW.addAll(Arrays.asList(
+						new EqualsRestriction<>(Attribute.MAX_W_SIZE, 2),
+						new EqualsRestriction<>(Attribute.PRECOMPUTED_W,
+								true)));
+
+				columns.add(new TraceLengthCol("hW with known W", false,
+						hWWithW.toArray(new Restriction[0])) {
+					@Override
+					public String getRawTitle() {
+						return super.title + "(#oracle)";
+					}
+
+					@Override // columns.add(new TableColumn() {
+					//
+					// @Override
+					// String getTitle() {
+					// return "theorical complexity";
+					// }
+					//
+					// @Override
+					// StatsSet restrict(StatsSet set) {
+					// return set;
+					// }
+					//
+					// @Override
+					// String getData(StatsSet stats) {
+					// Integer inputs = stats
+					// .attributeMax(Attribute.INPUT_SYMBOLS);
+					// Float states = stats.attributeMax(Attribute.STATE_NUMBER)
+					// .floatValue();
+					// return "" + (int) (inputs * 75 * Math.pow(states, 1.28));
+					// }
+					// });
+
+					public String getRawData(StatsSet stats) {
+						return super.getRawData(stats) + "(" + stats
+								.attributeAVG(Attribute.ASKED_COUNTER_EXAMPLE)
+								+ ")";
+					}
+				});
+				new Table(
+						Options.getArticleDir("JSS2018").resolve("figures")
+								.resolve("benchmarkLocW").toFile(),
+						baseStats, columns, rows)
+								.export(TableOutputFormat.LATEX);
+				;
+			}
+			columns.clear();
+
+			columns.add(new TransitionCol());
+			List<Restriction> hWUnknownW = new ArrayList<>(hWBaseRestrictions);
+			hWUnknownW.add(
+					new EqualsRestriction<>(Attribute.PRECOMPUTED_W, false));
+			ArrayList<Restriction> hWUnknownWNoReset = new ArrayList<>(
+					hWUnknownW);
+			hWUnknownWNoReset
+					.add(new EqualsRestriction<>(Attribute.USE_RESET, false));
+
+			TraceLengthCol hWCol = new TraceLengthCol("hW", false,
+					hWUnknownWNoReset.toArray(new Restriction[0]));
+			columns.add(hWCol);
+			columns.add(new TraceLengthCol("RS", false, new Restriction[] {
+					new ClassRestriction<>(RivestSchapireStatsEntry.class),
+					new EqualsRestriction<>(Attribute.RS_WITH_GIVEN_H, false),
+
+			}));
+			TraceLengthCol lmCol = new TraceLengthCol("Lm", true,
+					new Restriction[] {
+							new ClassRestriction<>(LmStatsEntry.class), });
+			columns.add(lmCol);
+
+			columns.add(null);
+			columns.add(new ResetCostComparisonCol(lmCol, hWCol));
+
+			StatsSet MrBean = new StatsSet(baseStats,
+					new HasAttributeRestriction<>(Attribute.ORACLE_USED,
+							"MrBean"));
+			new Table(
+					Options.getArticleDir("JSS2018").resolve("figures")
+							.resolve("benchmarkStrongMrBean").toFile(),
+					MrBean, columns, rows).export(TableOutputFormat.LATEX);
+			StatsSet DS = new StatsSet(baseStats, new HasAttributeRestriction<>(
+					Attribute.ORACLE_USED, "distinctionTree + MrBean"));
+			new Table(
+					Options.getArticleDir("JSS2018").resolve("figures")
+							.resolve("benchmarkStrongDS").toFile(),
+					DS, columns, rows).export(TableOutputFormat.LATEX);
+
+			// now proceed not strongly connected
+
+			Set<String> stonglyConnectd = new HashSet<>(automaticRows.keySet());
+
+			bySize.clear();
+			automaticRows.clear();
+			for (StatsEntry e : new StatsSet(baseStats,
+					new Restriction[] {
+							new ClassRestriction<>(HWStatsEntry.class), })
+									.getStats()) {
+				String name = e.get(Attribute.AUTOMATA);
+				if (stonglyConnectd.contains(name))
+					continue;
+				if (!automaticRows.containsKey(name)) {
+					String dispName = dot_to_short_name(name);
+
+					automaticRows.put(name, new AutomataRow(dispName, name));
+
+					Integer size = e.get(Attribute.STATE_NUMBER)
+							* e.get(Attribute.INPUT_SYMBOLS);
+					List<String> thisSize = bySize.get(size);
+					if (thisSize == null) {
+						thisSize = new ArrayList<>();
+						bySize.put(size, thisSize);
+					}
+					thisSize.add(name);
+				}
+			}
+			rows.clear();
+			for (List<String> entry : bySize.values()) {
+				Collections.sort(entry);
+				for (String fileName : entry) {
+					rows.add(automaticRows.get(fileName));
+				}
+			}
+			columns.clear();
+			columns.add(new TransitionCol());
+
+			ArrayList<Restriction> hWUnknownWReset = new ArrayList<>(
+					hWUnknownW);
+			hWCol = new TraceLengthCol("hW", true,
+					hWUnknownWReset.toArray(new Restriction[0]));
+			columns.add(hWCol);
+			hWCol.dispOracle = true;
+			lmCol.dispOracle = true;
+			columns.add(lmCol);
+			columns.add(new ResetCostComparisonCol(lmCol, hWCol));
+
+			new Table(
+					Options.getArticleDir("JSS2018").resolve("figures")
+							.resolve("benchmarkResetMrBean").toFile(),
+					MrBean, columns, rows).export(TableOutputFormat.LATEX);
+			new Table(
+					Options.getArticleDir("JSS2018").resolve("figures")
+							.resolve("benchmarkResetDS").toFile(),
+					DS, columns, rows).export(TableOutputFormat.LATEX);
+		}
+	}
+
+	public static String dot_to_short_name(String name) {
+		HashMap<String, String> filesNames = new HashMap<>();
+
+		filesNames.put("dot_file(TCP_Windows8_Server__connected)",
+				"TCP W8 server");
+		filesNames.put("dot_file(bankcard_4_learnresult_SecureCode)",
+				"4_learnresult_SecureCode");
+		filesNames.put("dot_file(bankcard_ASN_learnresult_SecureCode)",
+				"ASN_learnresult_SecureCode");
+		filesNames.put(
+				"dot_file(BenchmarkEdentifier2_learnresult_new_device-simple_fix)",
+				"Edentifier2 new device");
+		filesNames.put(
+				"dot_file(BenchmarkEdentifier2_learnresult_old_device-simple_fix)",
+				"Edentifier2 old device");
+		filesNames.put("dot_file(BenchmarkMQTT_unknown)", "unknown");
+		filesNames.put("dot_file(BenchmarkMQTT_unknown1)", "unknown1");
+		filesNames.put("dot_file(BenchmarkMQTT_ActiveMQ__invalid)",
+				"ActiveMQ invalid");
+		filesNames.put("dot_file(BenchmarkMQTT_ActiveMQ__non_clean)",
+				"ActiveMQ non_clean");
+		filesNames.put(
+				"dot_file(BenchmarkMQTT_mosquitto__two_client_will_retain)",
+				"mqtt 2 client ret.");
+		filesNames.put("dot_file(BenchmarkMQTT_analyse)", "analyse");
+		filesNames.put("dot_file(BenchmarkMQTT_mosquitto__two_client_same_id)",
+				"mqtt 2 client 1 id");
+		filesNames.put("dot_file(BenchmarkMQTT_mosquitto__two_client)",
+				"mqtt two_client");
+		filesNames.put("dot_file(BenchmarkMQTT_mosquitto__single_client)",
+				"mqtt single_client");
+		filesNames.put("dot_file(BenchmarkMQTT_mosquitto__non_clean)",
+				"mqtt non_clean");
+		filesNames.put("dot_file(BenchmarkMQTT_mosquitto__mosquitto)",
+				"mqtt mqtt");
+		filesNames.put("dot_file(BenchmarkMQTT_mosquitto__invalid)",
+				"mqtt invalid");
+		filesNames.put("dot_file(BenchmarkMQTT_emqtt__two_client_same_id)",
+				"emqtt 2 client 1 id");
+		filesNames.put("dot_file(BenchmarkMQTT_emqtt__two_client)",
+				"emqtt 2 client");
+		filesNames.put("dot_file(BenchmarkMQTT_emqtt__single_client)",
+				"emqtt 1 client");
+		filesNames.put("dot_file(BenchmarkMQTT_emqtt__simple)", "emqtt simple");
+		filesNames.put("dot_file(BenchmarkMQTT_emqtt__non_clean)",
+				"emqtt non_clean");
+		filesNames.put("dot_file(BenchmarkMQTT_emqtt__invalid)",
+				"emqtt invalid");
+		filesNames.put("dot_file(BenchmarkMQTT_VerneMQ__two_client_same_id)",
+				"VerneMQ 2 client 1 id");
+		filesNames.put("dot_file(BenchmarkMQTT_VerneMQ__two_client)",
+				"VerneMQ 2 client");
+		filesNames.put("dot_file(BenchmarkMQTT_VerneMQ__single_client)",
+				"VerneMQ 1 client");
+		filesNames.put("dot_file(BenchmarkMQTT_VerneMQ__simple)",
+				"VerneMQ simple");
+		filesNames.put("dot_file(BenchmarkMQTT_VerneMQ__non_clean)",
+				"VerneMQ non_clean");
+		filesNames.put("dot_file(BenchmarkMQTT_VerneMQ__invalid)",
+				"VerneMQ invalid");
+		filesNames.put(
+				"dot_file(BenchmarkMQTT_ActiveMQ__two_client_will_retain)",
+				"ActiveMQ 2 client ret.");
+		filesNames.put(
+				"dot_file(BenchmarkMQTT_VerneMQ__two_client_will_retain)",
+				"VerneMQ 2 client ret.");
+		filesNames.put("dot_file(tcp_TCP_FreeBSD_Server)",
+				"TCP_FreeBSD_Server");
+		filesNames.put("dot_file(tcp_TCP_Linux_Client)", "TCP_Linux_Client");
+		filesNames.put("dot_file(tcp_TCP_Linux_Server)", "TCP_Linux_Server");
+		filesNames.put("dot_file(tcp_TCP_Windows8_Client)",
+				"TCP_Windows8_Client");
+		filesNames.put("dot_file(tcp_TCP_Windows8_Server)",
+				"TCP_Windows8_Server");
+		filesNames.put("dot_file(tls_GnuTLS_3.3.8_server_regular)",
+				"GnuTLS_3.3.8_server_regular");
+		filesNames.put("dot_file(tls_miTLS_0.1.3_server_regular)",
+				"miTLS_0.1.3_server_regular");
+		filesNames.put("dot_file(tls_NSS_3.17.4_client_full)",
+				"NSS_3.17.4_client_full");
+		filesNames.put("dot_file(tls_NSS_3.17.4_client_regular)",
+				"NSS_3.17.4_client_regular");
+		filesNames.put("dot_file(tls_NSS_3.17.4_server_regular)",
+				"NSS_3.17.4_server_regular");
+		filesNames.put("dot_file(tls_OpenSSL_1.0.1g_client_regular)",
+				"OpenSSL_1.0.1g_client_regular");
+		filesNames.put("dot_file(tls_OpenSSL_1.0.1g_server_regular)",
+				"OpenSSL_1.0.1g_server_regular");
+		filesNames.put("dot_file(tls_OpenSSL_1.0.1j_client_regular)",
+				"OpenSSL_1.0.1j_client_regular");
+		filesNames.put("dot_file(tls_OpenSSL_1.0.1j_server_regular)",
+				"OpenSSL_1.0.1j_server_regular");
+		filesNames.put("dot_file(tls_OpenSSL_1.0.1l_client_regular)",
+				"OpenSSL_1.0.1l_client_regular");
+		filesNames.put("dot_file(tls_OpenSSL_1.0.1l_server_regular)",
+				"OpenSSL_1.0.1l_server_regular");
+		filesNames.put("dot_file(tls_OpenSSL_1.0.2_client_full)",
+				"OpenSSL_1.0.2_client_full");
+		filesNames.put("dot_file(tls_OpenSSL_1.0.2_client_regular)",
+				"OpenSSL_1.0.2_client_regular");
+		filesNames.put("dot_file(tls_OpenSSL_1.0.2_server_regular)",
+				"OpenSSL_1.0.2_server_regular");
+		filesNames.put("dot_file(tls_RSA_BSAFE_C_4.0.4_server_regular)",
+				"RSA_BSAFE_C_4.0.4_server_regular");
+		filesNames.put("dot_file(tls_RSA_BSAFE_Java_6.1.1_server_regular)",
+				"RSA_BSAFE_Java_6.1.1_server_regular");
+		filesNames.put("dot_file(tls_JSSE_1.8.0_25_server_regular)",
+				"JSSE_1.8.0_25_server_regular");
+		filesNames.put("dot_file(tls_JSSE_1.8.0_31_server_regular)",
+				"JSSE_1.8.0_31_server_regular");
+		filesNames.put("dot_file(tls_GnuTLS_3.3.12_client_full)",
+				"GnuTLS_3.3.12_client_full");
+		filesNames.put("dot_file(tls_GnuTLS_3.3.12_client_regular)",
+				"GnuTLS_3.3.12_client_regular");
+		filesNames.put("dot_file(tls_GnuTLS_3.3.12_server_full)",
+				"GnuTLS_3.3.12_server_full");
+		filesNames.put("dot_file(tls_GnuTLS_3.3.12_server_regular)",
+				"GnuTLS_3.3.12_server_regular");
+		filesNames.put("dot_file(tls_GnuTLS_3.3.8_client_full)",
+				"GnuTLS_3.3.8_client_full");
+		filesNames.put("dot_file(tls_GnuTLS_3.3.8_client_regular)",
+				"GnuTLS_3.3.8_client_regular");
+		filesNames.put("dot_file(tls_GnuTLS_3.3.8_server_full)",
+				"GnuTLS_3.3.8_server_full");
+		String dispName = name.substring(18, name.length() - 1);
+		dispName = dispName.replaceAll("FromRhapsodyToDezyne_",
+				"Rhapsody-Dezyne ");
+		if (dispName.startsWith("Bankcard"))
+			dispName = dispName.replaceAll("learnresult", "");
+		dispName = dispName.replaceAll("TLS_GnuTLS", "GnuTLS");
+		dispName = dispName.replaceAll("TLS_OpenSSL", "OpenSSL");
+		dispName = dispName.replaceAll("TLS_RSA", "RSA");
+		dispName = dispName.replaceAll("MQTT_VerneMQ__", "VerneMQ ");
+		dispName = dispName.replaceAll("MQTT_ActiveMQ__", "ActiveMQ ");
+		dispName = dispName.replaceAll("MQTT_emqtt__", "emqtt ");
+		dispName = dispName.replaceAll("MQTT_mosquitto__", "Mosquitto ");
+		dispName = dispName.replaceAll("Edentifier2_learnresult_",
+				"Edentifier2 ");
+		dispName = dispName.replaceAll("-simple_fix", "");
+		dispName = dispName.replaceAll("will_retain", "ret.");
+		dispName = dispName.replaceAll("same_id", "1 id");
+		dispName = dispName.replaceAll("two_client", "2 client");
+		dispName = dispName.replaceAll("model3", "3");
+		dispName = dispName.replaceAll("_", " ");
+		return dispName;
+	}
+
+	private void generate_SANER19() {
+		if (hW__ == null)
+			return;
+		final StatsSet allStats = new StatsSet();
+		if (zQ != null)
+			allStats.add(zQ);
+		allStats.add(hW__);
+		if (rivestSchapire != null)
+			allStats.add(rivestSchapire);
+		if (locW != null)
+			allStats.add(locW);
+		if (lm != null)
+			allStats.add(lm);
+
+		allStats.restrict(new Restriction() {
+			String kept = "dot_file(BenchmarkBankcard_Volksbank_learnresult_MAESTRO_fix)\r\n"
+					+ "dot_file(BenchmarkTCP_TCP_Windows8_Client)\r\n"
+					+ "dot_file(BenchmarkBankcard_1_learnresult_MasterCard_fix)\r\n"
+					+ "dot_file(BenchmarkMQTT_mosquitto__two_client_will_retain)\r\n"
+					+ "dot_file(BenchmarkTLS_OpenSSL_1.0.1g_client_regular)\r\n"
+					+ "dot_file(BenchmarkTLS_OpenSSL_1.0.1g_server_regular)\r\n"
+					+ "dot_file(BenchmarkSSH_DropBear)\r\n"
+					+ "dot_file(BenchmarkCircuits_bbara_minimized)\r\n"
+					+ "dot_file(BenchmarkTLS_OpenSSL_1.0.2_client_full)\r\n"
+					+ "dot_file(BenchmarkMQTT_emqtt__two_client_will_retain)\r\n"
+					+ "";
+
+			@Override
+			public boolean contains(StatsEntry s) {
+				String automata = s.get(Attribute.AUTOMATA);
+
+				return kept.contains(automata);
+			}
+		});
+
+		{
+			StatsSet baseStats = new StatsSet(allStats);
+			baseStats.restrict(new Restriction() {
+
+				@Override
+				public boolean contains(StatsEntry s) {
+					if (!s.hasAttribute(Attribute.ORACLE_USED))
+						return true;
+					return s.get(Attribute.ORACLE_USED).equals("MrBean");
+				}
+			});
+			List<TableRow> rows = new ArrayList<>();
+			rows.add(new AutomataRow("MQTT ActiveMQ two client retain",
+					"dot_file(BenchmarkMQTT_ActiveMQ__two_client_will_retain)"));
+			rows.add(new AutomataRow("FromRhapsodyToDezyne 1",
+					"dot_file(BenchmarkFromRhapsodyToDezyne_model1)"));
+			rows.add(new AutomataRow("FromRhapsodyToDezyne 3",
+					"dot_file(BenchmarkFromRhapsodyToDezyne_model3)"));
+			SortedMap<Integer, List<String>> bySize = new TreeMap<>();
+			Map<String, TableRow> automaticRows = new HashMap<>();
+			for (StatsEntry e : new StatsSet(baseStats, new Restriction[] {
+					new ClassRestriction<>(HWStatsEntry.class),
+					// new EqualsRestriction<>(Attribute.USE_RESET, false),
+			}).getStats()) {
+				String name = e.get(Attribute.AUTOMATA);
+				if (!automaticRows.containsKey(name)) {
+					String dispName = dot_to_short_name(name);
+
+					automaticRows.put(name, new AutomataRow(dispName, name));
+
+					Integer size = e.get(Attribute.STATE_NUMBER)
+							* e.get(Attribute.INPUT_SYMBOLS);
+					List<String> thisSize = bySize.get(size);
+					if (thisSize == null) {
+						thisSize = new ArrayList<>();
+						bySize.put(size, thisSize);
+					}
+					thisSize.add(name);
+				}
+			}
+
+			List<Restriction> hWBaseRestrictions = Arrays.asList(
+					new ClassRestriction<>(HWStatsEntry.class),
+					new EqualsRestriction<>(Attribute.USE_ADAPTIVE_W, false),
+					new EqualsRestriction<>(Attribute.USE_ADAPTIVE_H, false),
+
+					new EqualsRestriction<>(Attribute.REUSE_HZXW, true),
+					new EqualsRestriction<>(Attribute.CHECK_3rd_INCONSISTENCY,
+							true),
+					new EqualsRestriction<>(Attribute.SEARCH_CE_IN_TRACE,
+							"simple"));
+
+			rows = new ArrayList<>(automaticRows.values());
+			rows = new ArrayList<>();
+			for (List<String> entry : bySize.values()) {
+				Collections.sort(entry);
+				for (String fileName : entry) {
+					rows.add(automaticRows.get(fileName));
+				}
+			}
+			List<TableColumn> columns = new ArrayList<>();
+			{
+				columns.add(new TraceLengthCol("LocW", false,
+						new Restriction[] {
+								new ClassRestriction<>(
+										LocalizerBasedStatsEntry.class),
+								new EqualsRestriction<>(Attribute.W_SIZE,
+										2), }));
+				List<Restriction> hWWithW = new ArrayList<>(hWBaseRestrictions);
+				hWWithW.addAll(Arrays.asList(
+						new EqualsRestriction<>(Attribute.MAX_W_SIZE, 2),
+						new EqualsRestriction<>(Attribute.PRECOMPUTED_W,
+								true)));
+
+			}
+
+			List<Restriction> hWUnknownW = new ArrayList<>(hWBaseRestrictions);
+			hWUnknownW.add(
+					new EqualsRestriction<>(Attribute.PRECOMPUTED_W, false));
+			ArrayList<Restriction> hWUnknownWNoReset = new ArrayList<>(
+					hWUnknownW);
+			hWUnknownWNoReset
+					.add(new EqualsRestriction<>(Attribute.USE_RESET, false));
+
+			TraceLengthCol hWCol = new TraceLengthCol("hW", false,
+					hWUnknownWNoReset.toArray(new Restriction[0]));
+			columns.add(new TraceLengthCol("RS", false,
+					new Restriction[] {
+							new ClassRestriction<>(
+									RivestSchapireStatsEntry.class),
+							new EqualsRestriction<>(Attribute.RS_WITH_GIVEN_H,
+									false), }));
+			columns.add(hWCol);
+			TraceLengthCol lmCol = new TraceLengthCol("Lm", true,
+					new Restriction[] {
+							new ClassRestriction<>(LmStatsEntry.class), });
+
+			TraceLengthCol zqCol = new TraceLengthCol("ZQ", true,
+					new Restriction[] {
+							new ClassRestriction<>(ZStatsEntry.class), });
+
+			ArrayList<Restriction> hWUnknownWReset = new ArrayList<>(
+					hWUnknownW);
+			hWUnknownWReset
+					.add(new EqualsRestriction<>(Attribute.USE_RESET, true));
+			hWUnknownWReset.add(new Restriction() {
+				@Override
+				public boolean contains(StatsEntry s) {
+					return !s.get(Attribute.AUTOMATA).contains("bbara");
+				}
+
+			});
+			hWCol = new TraceLengthCol("hW", true,
+					hWUnknownWReset.toArray(new Restriction[0]));
+			columns.add(hWCol);
+			hWCol.dispOracle = true;
+			lmCol.dispOracle = true;
+			zqCol.dispOracle = true;
+			columns.add(lmCol);
+			columns.add(zqCol);
+			columns.add(new TransitionCol() {
+				@Override
+				public String getRawTitle() {
+					return "#transitions";
+				}
+
+				@Override
+				public String getFormatedTitle(TableOutputFormat format) {
+					if (format == TableOutputFormat.LATEX)
+						return "\\#transitions";
+					return super.getFormatedTitle(format);
+				}
+			});
+
+			Table table = new Table(
+					Options.getArticleDir("SANER19").resolve("figures")
+							.resolve("benchmark").toFile(),
+					baseStats, columns, rows);
+			table.setRotateHeader(null);
+			table.export(TableOutputFormat.LATEX);
+		}
 	}
 
 	/**
@@ -166,7 +942,7 @@ public class GlobalGraphGenerator extends GraphGenerator {
 				new ClassRestriction<>(LmStatsEntry.class), };
 		OneConfigPlotter Lm_ploter = new OneConfigPlotter(Lm_Restrictions,
 				Graph.PointShape.TIMES_CROSS, new Graph.Color(0, 150, 0), "Lm");
-		
+
 		PlotStyle style = PlotStyle.AVERAGE;
 		hW_adaptive_ploter.setPlotStyle(style);
 		hW_preset_ploter.setPlotStyle(style);
@@ -448,141 +1224,495 @@ public class GlobalGraphGenerator extends GraphGenerator {
 		sets.add(new LearnerSet(hW_knownW,
 				"\\parbox[t]{2cm}{hW with a\\\\provided $W$-set}"));
 
-		HashMap<String, String> filesNames = new HashMap<>();
+		HashMap<String, String> filesNames = new HashMap<String, String>() {
+			private static final long serialVersionUID = 1L;
 
-		filesNames.put("dot_file(TCP_Windows8_Server__connected)",
-				"TCP W8 server");
-		filesNames.put("dot_file(bankcard_4_learnresult_SecureCode)",
-				"4_learnresult_SecureCode");
-		filesNames.put("dot_file(bankcard_ASN_learnresult_SecureCode)",
-				"ASN_learnresult_SecureCode");
+			public String put(String dot, String name) {
+				String shortName = name;
+				if (shortName.length() > 40)
+					shortName = name.substring(0, 35);
+				return super.put(dot, shortName);
+			}
+
+		};
+
+		filesNames.put("dot_file(BenchmarkFromRhapsodyToDezyne_model3)",
+				"model3");
+		filesNames.put("dot_file(BenchmarkFromRhapsodyToDezyne_model1)",
+				"model1");
+		filesNames.put("dot_file(BenchmarkFromRhapsodyToDezyne_model2)",
+				"model2");
+		filesNames.put("dot_file(BenchmarkFromRhapsodyToDezyne_model4)",
+				"model4");
 		filesNames.put(
-				"dot_file(edentifier2_learnresult_new_device-simple_fix)",
-				"Edentifier2 new device");
+				"dot_file(BenchmarkMQTT_VerneMQ__two_client_will_retain)",
+				"VerneMQ__two_client_will_retain");
+		filesNames.put("dot_file(BenchmarkMQTT_hbmqtt__simple)",
+				"hbmqtt__simple");
+		filesNames.put("dot_file(BenchmarkMQTT_VerneMQ__single_client)",
+				"VerneMQ__single_client");
+		filesNames.put("dot_file(BenchmarkMQTT_hbmqtt__invalid)",
+				"hbmqtt__invalid");
+		filesNames.put("dot_file(BenchmarkMQTT_VerneMQ__non_clean)",
+				"VerneMQ__non_clean");
+		filesNames.put("dot_file(BenchmarkMQTT_ActiveMQ__non_clean)",
+				"ActiveMQ__non_clean");
+		filesNames.put("dot_file(BenchmarkMQTT_ActiveMQ__invalid)",
+				"ActiveMQ__invalid");
+		filesNames.put("dot_file(BenchmarkMQTT_VerneMQ__simple)",
+				"VerneMQ__simple");
+		filesNames.put("dot_file(BenchmarkMQTT_VerneMQ__invalid)",
+				"VerneMQ__invalid");
+		filesNames.put("dot_file(BenchmarkMQTT_VerneMQ__two_client_same_id)",
+				"VerneMQ__two_client_same_id");
 		filesNames.put(
-				"dot_file(edentifier2_learnresult_old_device-simple_fix)",
-				"Edentifier2 old device");
-		filesNames.put("dot_file(mqtt_unknown)", "unknown");
-		filesNames.put("dot_file(mqtt_unknown1)", "unknown1");
-		filesNames.put("dot_file(mqtt_ActiveMQ__invalid)", "ActiveMQ invalid");
-		filesNames.put("dot_file(mqtt_ActiveMQ__non_clean)",
-				"ActiveMQ non_clean");
-		filesNames.put("dot_file(mqtt_mosquitto__two_client_will_retain)",
-				"mqtt 2 client ret.");
-		filesNames.put("dot_file(mqtt_analyse)", "analyse");
-		filesNames.put("dot_file(mqtt_mosquitto__two_client_same_id)",
-				"mqtt 2 client 1 id");
-		filesNames.put("dot_file(mqtt_mosquitto__two_client)",
-				"mqtt two_client");
-		filesNames.put("dot_file(mqtt_mosquitto__single_client)",
-				"mqtt single_client");
-		filesNames.put("dot_file(mqtt_mosquitto__non_clean)", "mqtt non_clean");
-		filesNames.put("dot_file(mqtt_mosquitto__mosquitto)", "mqtt mqtt");
-		filesNames.put("dot_file(mqtt_mosquitto__invalid)", "mqtt invalid");
-		filesNames.put("dot_file(mqtt_emqtt__two_client_same_id)",
-				"emqtt 2 client 1 id");
-		filesNames.put("dot_file(mqtt_emqtt__two_client)", "emqtt 2 client");
-		filesNames.put("dot_file(mqtt_emqtt__single_client)", "emqtt 1 client");
-		filesNames.put("dot_file(mqtt_emqtt__simple)", "emqtt simple");
-		filesNames.put("dot_file(mqtt_emqtt__non_clean)", "emqtt non_clean");
-		filesNames.put("dot_file(mqtt_emqtt__invalid)", "emqtt invalid");
-		filesNames.put("dot_file(mqtt_VerneMQ__two_client_same_id)",
-				"VerneMQ 2 client 1 id");
-		filesNames.put("dot_file(mqtt_VerneMQ__two_client)",
-				"VerneMQ 2 client");
-		filesNames.put("dot_file(mqtt_VerneMQ__single_client)",
-				"VerneMQ 1 client");
-		filesNames.put("dot_file(mqtt_VerneMQ__simple)", "VerneMQ simple");
-		filesNames.put("dot_file(mqtt_VerneMQ__non_clean)",
-				"VerneMQ non_clean");
-		filesNames.put("dot_file(mqtt_VerneMQ__invalid)", "VerneMQ invalid");
-		filesNames.put("dot_file(mqtt_ActiveMQ__two_client_will_retain)",
-				"ActiveMQ 2 client ret.");
-		filesNames.put("dot_file(mqtt_VerneMQ__two_client_will_retain)",
-				"VerneMQ 2 client ret.");
-		filesNames.put("dot_file(tcp_TCP_FreeBSD_Server)",
-				"TCP_FreeBSD_Server");
-		filesNames.put("dot_file(tcp_TCP_Linux_Client)", "TCP_Linux_Client");
-		filesNames.put("dot_file(tcp_TCP_Linux_Server)", "TCP_Linux_Server");
-		filesNames.put("dot_file(tcp_TCP_Windows8_Client)",
-				"TCP_Windows8_Client");
-		filesNames.put("dot_file(tcp_TCP_Windows8_Server)",
-				"TCP_Windows8_Server");
-		filesNames.put("dot_file(tls_GnuTLS_3.3.8_server_regular)",
+				"dot_file(BenchmarkMQTT_ActiveMQ__two_client_will_retain)",
+				"ActiveMQ__two_client_will_retain");
+		filesNames.put("dot_file(BenchmarkMQTT_emqtt__simple)",
+				"emqtt__simple");
+		filesNames.put("dot_file(BenchmarkMQTT_mosquitto__invalid)",
+				"mosquitto__invalid");
+		filesNames.put("dot_file(BenchmarkMQTT_emqtt__invalid)",
+				"emqtt__invalid");
+		filesNames.put("dot_file(BenchmarkMQTT_mosquitto__mosquitto)",
+				"mosquitto__mosquitto");
+		filesNames.put("dot_file(BenchmarkMQTT_hbmqtt__two_client)",
+				"hbmqtt__two_client");
+		filesNames.put("dot_file(BenchmarkMQTT_hbmqtt__two_client_will_retain)",
+				"hbmqtt__two_client_will_retain");
+		filesNames.put("dot_file(BenchmarkMQTT_emqtt__single_client)",
+				"emqtt__single_client");
+		filesNames.put("dot_file(BenchmarkMQTT_mosquitto__single_client)",
+				"mosquitto__single_client");
+		filesNames.put("dot_file(BenchmarkMQTT_VerneMQ__two_client)",
+				"VerneMQ__two_client");
+		filesNames.put("dot_file(BenchmarkMQTT_emqtt__two_client)",
+				"emqtt__two_client");
+		filesNames.put("dot_file(BenchmarkMQTT_ActiveMQ__single_client)",
+				"ActiveMQ__single_client");
+		filesNames.put("dot_file(BenchmarkMQTT_emqtt__two_client_will_retain)",
+				"emqtt__two_client_will_retain");
+		filesNames.put("dot_file(BenchmarkMQTT_emqtt__two_client_same_id)",
+				"emqtt__two_client_same_id");
+		filesNames.put("dot_file(BenchmarkMQTT_ActiveMQ__simple)",
+				"ActiveMQ__simple");
+		filesNames.put("dot_file(BenchmarkMQTT_mosquitto__two_client_same_id)",
+				"mosquitto__two_client_same_id");
+		filesNames.put("dot_file(BenchmarkMQTT_hbmqtt__single_client)",
+				"hbmqtt__single_client");
+		filesNames.put(
+				"dot_file(BenchmarkMQTT_mosquitto__two_client_will_retain)",
+				"mosquitto__two_client_will_retain");
+		filesNames.put("dot_file(BenchmarkMQTT_mosquitto__non_clean)",
+				"mosquitto__non_clean");
+		filesNames.put("dot_file(BenchmarkMQTT_hbmqtt__non_clean)",
+				"hbmqtt__non_clean");
+		filesNames.put("dot_file(BenchmarkMQTT_mosquitto__two_client)",
+				"mosquitto__two_client");
+		filesNames.put("dot_file(BenchmarkMQTT_emqtt__non_clean)",
+				"emqtt__non_clean");
+		filesNames.put(
+				"dot_file(BenchmarkEdentifier2_learnresult_new_W-method_fix)",
+				"learnresult_new_W-method_fix");
+		filesNames.put(
+				"dot_file(BenchmarkEdentifier2_learnresult_new_device-simple_fix)",
+				"learnresult_new_device-simple_fix");
+		filesNames.put(
+				"dot_file(BenchmarkEdentifier2_learnresult_new_Rand_500_10-15_MC_fix)",
+				"learnresult_new_Rand_500_10-15_MC_fix");
+		filesNames.put(
+				"dot_file(BenchmarkEdentifier2_learnresult_old_device-simple_fix)",
+				"learnresult_old_device-simple_fix");
+		filesNames.put(
+				"dot_file(BenchmarkEdentifier2_learnresult_old_500_10-15_fix)",
+				"learnresult_old_500_10-15_fix");
+		filesNames.put("dot_file(BenchmarkCoffeeMachine_coffeemachine)",
+				"coffeemachine");
+		filesNames.put("dot_file(BenchmarkSSH_DropBear)", "DropBear");
+		filesNames.put("dot_file(BenchmarkSSH_BitVise)", "BitVise");
+		filesNames.put("dot_file(BenchmarkSSH_OpenSSH)", "OpenSSH");
+		filesNames.put(
+				"dot_file(BenchmarkToyModels_lee_yannakakis_non_distinguishable)",
+				"lee_yannakakis_non_distinguishable");
+		filesNames.put("dot_file(BenchmarkToyModels_cacm)", "cacm");
+		filesNames.put(
+				"dot_file(BenchmarkToyModels_lee_yannakakis_distinguishable)",
+				"lee_yannakakis_distinguishable");
+		filesNames.put("dot_file(BenchmarkToyModels_naiks)", "naiks");
+		filesNames.put(
+				"dot_file(BenchmarkBankcard_ASN_learnresult_MAESTRO_fix)",
+				"ASN_learnresult_MAESTRO_fix");
+		filesNames.put("dot_file(BenchmarkBankcard_4_learnresult_PIN_fix)",
+				"4_learnresult_PIN_fix");
+		filesNames.put("dot_file(BenchmarkBankcard_4_learnresult_MAESTRO_fix)",
+				"4_learnresult_MAESTRO_fix");
+		filesNames.put(
+				"dot_file(BenchmarkBankcard_Rabo_learnresult_MAESTRO_fix)",
+				"Rabo_learnresult_MAESTRO_fix");
+		filesNames.put(
+				"dot_file(BenchmarkBankcard_Volksbank_learnresult_MAESTRO_fix)",
+				"Volksbank_learnresult_MAESTRO_fix");
+		filesNames.put("dot_file(BenchmarkBankcard_learnresult_fix)",
+				"learnresult_fix");
+		filesNames.put(
+				"dot_file(BenchmarkBankcard_4_learnresult_SecureCode_20Aut_fix)",
+				"4_learnresult_SecureCode%20Aut_fix");
+		filesNames.put(
+				"dot_file(BenchmarkBankcard_ASN_learnresult_SecureCode_20Aut_fix)",
+				"ASN_learnresult_SecureCode%20Aut_fix");
+		filesNames.put(
+				"dot_file(BenchmarkBankcard_Rabo_learnresult_SecureCode_Aut_fix)",
+				"Rabo_learnresult_SecureCode_Aut_fix");
+		filesNames.put(
+				"dot_file(BenchmarkBankcard_10_learnresult_MasterCard_fix)",
+				"10_learnresult_MasterCard_fix");
+		filesNames.put(
+				"dot_file(BenchmarkBankcard_1_learnresult_MasterCard_fix)",
+				"1_learnresult_MasterCard_fix");
+		filesNames.put("dot_file(BenchmarkTLS_GnuTLS_3.3.8_server_regular)",
 				"GnuTLS_3.3.8_server_regular");
-		filesNames.put("dot_file(tls_miTLS_0.1.3_server_regular)",
-				"miTLS_0.1.3_server_regular");
-		filesNames.put("dot_file(tls_NSS_3.17.4_client_full)",
-				"NSS_3.17.4_client_full");
-		filesNames.put("dot_file(tls_NSS_3.17.4_client_regular)",
-				"NSS_3.17.4_client_regular");
-		filesNames.put("dot_file(tls_NSS_3.17.4_server_regular)",
-				"NSS_3.17.4_server_regular");
-		filesNames.put("dot_file(tls_OpenSSL_1.0.1g_client_regular)",
+		filesNames.put("dot_file(BenchmarkTLS_OpenSSL_1.0.1g_client_regular)",
 				"OpenSSL_1.0.1g_client_regular");
-		filesNames.put("dot_file(tls_OpenSSL_1.0.1g_server_regular)",
-				"OpenSSL_1.0.1g_server_regular");
-		filesNames.put("dot_file(tls_OpenSSL_1.0.1j_client_regular)",
-				"OpenSSL_1.0.1j_client_regular");
-		filesNames.put("dot_file(tls_OpenSSL_1.0.1j_server_regular)",
-				"OpenSSL_1.0.1j_server_regular");
-		filesNames.put("dot_file(tls_OpenSSL_1.0.1l_client_regular)",
-				"OpenSSL_1.0.1l_client_regular");
-		filesNames.put("dot_file(tls_OpenSSL_1.0.1l_server_regular)",
-				"OpenSSL_1.0.1l_server_regular");
-		filesNames.put("dot_file(tls_OpenSSL_1.0.2_client_full)",
-				"OpenSSL_1.0.2_client_full");
-		filesNames.put("dot_file(tls_OpenSSL_1.0.2_client_regular)",
-				"OpenSSL_1.0.2_client_regular");
-		filesNames.put("dot_file(tls_OpenSSL_1.0.2_server_regular)",
-				"OpenSSL_1.0.2_server_regular");
-		filesNames.put("dot_file(tls_RSA_BSAFE_C_4.0.4_server_regular)",
-				"RSA_BSAFE_C_4.0.4_server_regular");
-		filesNames.put("dot_file(tls_RSA_BSAFE_Java_6.1.1_server_regular)",
-				"RSA_BSAFE_Java_6.1.1_server_regular");
-		filesNames.put("dot_file(tls_JSSE_1.8.0_25_server_regular)",
-				"JSSE_1.8.0_25_server_regular");
-		filesNames.put("dot_file(tls_JSSE_1.8.0_31_server_regular)",
-				"JSSE_1.8.0_31_server_regular");
-		filesNames.put("dot_file(tls_GnuTLS_3.3.12_client_full)",
-				"GnuTLS_3.3.12_client_full");
-		filesNames.put("dot_file(tls_GnuTLS_3.3.12_client_regular)",
-				"GnuTLS_3.3.12_client_regular");
-		filesNames.put("dot_file(tls_GnuTLS_3.3.12_server_full)",
-				"GnuTLS_3.3.12_server_full");
-		filesNames.put("dot_file(tls_GnuTLS_3.3.12_server_regular)",
-				"GnuTLS_3.3.12_server_regular");
-		filesNames.put("dot_file(tls_GnuTLS_3.3.8_client_full)",
+		filesNames.put("dot_file(BenchmarkTLS_GnuTLS_3.3.8_client_full)",
 				"GnuTLS_3.3.8_client_full");
-		filesNames.put("dot_file(tls_GnuTLS_3.3.8_client_regular)",
+		filesNames.put("dot_file(BenchmarkTLS_GnuTLS_3.3.8_client_regular)",
 				"GnuTLS_3.3.8_client_regular");
-		filesNames.put("dot_file(tls_GnuTLS_3.3.8_server_full)",
+		filesNames.put(
+				"dot_file(BenchmarkTLS_RSA_BSAFE_C_4.0.4_server_regular)",
+				"RSA_BSAFE_C_4.0.4_server_regular");
+		filesNames.put("dot_file(BenchmarkTLS_GnuTLS_3.3.12_server_full)",
+				"GnuTLS_3.3.12_server_full");
+		filesNames.put("dot_file(BenchmarkTLS_GnuTLS_3.3.8_server_full)",
 				"GnuTLS_3.3.8_server_full");
-		filesNames.put("dot_file(toyModels_naiks)", "naiks");
-		filesNames.put("dot_file(toyModels_lee_yannakakis_distinguishable)",
-				"L.Yannakakis 6 states");
-		filesNames.put("dot_file(toyModels_lee_yannakakis_non_distinguishable)",
-				"L.Yannakakis 3 states");
+		filesNames.put("dot_file(BenchmarkTLS_OpenSSL_1.0.1l_server_regular)",
+				"OpenSSL_1.0.1l_server_regular");
+		filesNames.put("dot_file(BenchmarkTLS_JSSE_1.8.0_25_server_regular)",
+				"JSSE_1.8.0_25_server_regular");
+		filesNames.put("dot_file(BenchmarkTLS_OpenSSL_1.0.1l_client_regular)",
+				"OpenSSL_1.0.1l_client_regular");
+		filesNames.put("dot_file(BenchmarkTLS_OpenSSL_1.0.1j_client_regular)",
+				"OpenSSL_1.0.1j_client_regular");
+		filesNames.put("dot_file(BenchmarkTLS_GnuTLS_3.3.12_client_full)",
+				"GnuTLS_3.3.12_client_full");
+		filesNames.put("dot_file(BenchmarkTLS_miTLS_0.1.3_server_regular)",
+				"miTLS_0.1.3_server_regular");
+		filesNames.put("dot_file(BenchmarkTLS_NSS_3.17.4_client_regular)",
+				"NSS_3.17.4_client_regular");
+		filesNames.put("dot_file(BenchmarkTLS_OpenSSL_1.0.1j_server_regular)",
+				"OpenSSL_1.0.1j_server_regular");
+		filesNames.put("dot_file(BenchmarkTLS_GnuTLS_3.3.12_server_regular)",
+				"GnuTLS_3.3.12_server_regular");
+		filesNames.put("dot_file(BenchmarkTLS_OpenSSL_1.0.2_client_full)",
+				"OpenSSL_1.0.2_client_full");
+		filesNames.put("dot_file(BenchmarkTLS_JSSE_1.8.0_31_server_regular)",
+				"JSSE_1.8.0_31_server_regular");
+		filesNames.put("dot_file(BenchmarkTLS_GnuTLS_3.3.12_client_regular)",
+				"GnuTLS_3.3.12_client_regular");
+		filesNames.put("dot_file(BenchmarkTLS_OpenSSL_1.0.1g_server_regular)",
+				"OpenSSL_1.0.1g_server_regular");
+		filesNames.put("dot_file(BenchmarkTLS_NSS_3.17.4_server_regular)",
+				"NSS_3.17.4_server_regular");
+		filesNames.put("dot_file(BenchmarkTLS_OpenSSL_1.0.2_client_regular)",
+				"OpenSSL_1.0.2_client_regular");
+		filesNames.put("dot_file(BenchmarkTLS_NSS_3.17.4_client_full)",
+				"NSS_3.17.4_client_full");
 		filesNames.put(
-				"dot_file(out_dot_file(edentifier2_learnresult_old_device-simple_fix)_inf)",
-				"dot_file(edentifier2_learnresult_old_device-simple_fix)_inf");
+				"dot_file(BenchmarkTLS_RSA_BSAFE_Java_6.1.1_server_regular)",
+				"RSA_BSAFE_Java_6.1.1_server_regular");
+		filesNames.put("dot_file(BenchmarkTLS_OpenSSL_1.0.2_server_regular)",
+				"OpenSSL_1.0.2_server_regular");
 		filesNames.put(
-				"dot_file(out_dot_file(edentifier2_learnresult_old_device-simple_fix)_inf)",
-				"dot_file(edentifier2_learnresult_old_device-simple_fix)_inf");
+				"dot_file(BenchmarkCircuits_lion_with_hidden_states_with_sink_minimized)",
+				"lion_with_hidden_states_with_sink_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_dvram_minimized)",
+				"dvram_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_tav_minimized)",
+				"tav_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_s1_with_sink_minimized)",
+				"s1_with_sink_minimized");
 		filesNames.put(
-				"dot_file(out_dot_file(edentifier2_learnresult_old_device-simple_fix)_inf)",
-				"dot_file(edentifier2_learnresult_old_device-simple_fix)_inf");
+				"dot_file(BenchmarkCircuits_planet1_with_sink_minimized)",
+				"planet1_with_sink_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_dk16_minimized)",
+				"dk16_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_styr_with_loops_minimized)",
+				"styr_with_loops_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_lion9_with_sink_minimized)",
+				"lion9_with_sink_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_shiftreg_minimized)",
+				"shiftreg_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_planet1_with_hidden_states_with_sink_minimized)",
+				"planet1_with_hidden_states_with_sink_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_styr_with_loops_with_hidden_states_minimized)",
+				"styr_with_loops_with_hidden_states_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_train4_with_loops_minimized)",
+				"train4_with_loops_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_planet1_with_loops_minimized)",
+				"planet1_with_loops_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_dk15_minimized)",
+				"dk15_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_lion9_with_loops_minimized)",
+				"lion9_with_loops_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_ex5_with_sink_minimized)",
+				"ex5_with_sink_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_styr_with_sink_minimized)",
+				"styr_with_sink_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_planet_with_loops_minimized)",
+				"planet_with_loops_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_s386_with_sink_minimized)",
+				"s386_with_sink_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_ex2_with_loops_with_hidden_states_minimized)",
+				"ex2_with_loops_with_hidden_states_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_train4_with_sink_minimized)",
+				"train4_with_sink_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_pma_with_sink_minimized)",
+				"pma_with_sink_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_bbtas_minimized)",
+				"bbtas_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_keyb_minimized)",
+				"keyb_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_ex3_with_loops_minimized)",
+				"ex3_with_loops_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_train11_with_loops_with_hidden_states_minimized)",
+				"train11_with_loops_with_hidden_states_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_s1a_with_sink_minimized)",
+				"s1a_with_sink_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_ex5_with_loops_with_hidden_states_minimized)",
+				"ex5_with_loops_with_hidden_states_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_rie_minimized)",
+				"rie_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_planet_with_sink_minimized)",
+				"planet_with_sink_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_s1494_with_sink_minimized)",
+				"s1494_with_sink_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_bbsse_with_hidden_states_with_sink_minimized)",
+				"bbsse_with_hidden_states_with_sink_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_modulo12_minimized)",
+				"modulo12_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_beecount_with_sink_minimized)",
+				"beecount_with_sink_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_ex7_with_loops_with_hidden_states_minimized)",
+				"ex7_with_loops_with_hidden_states_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_pma_with_loops_minimized)",
+				"pma_with_loops_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_mark1_with_loops_minimized)",
+				"mark1_with_loops_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_ex3_with_sink_minimized)",
+				"ex3_with_sink_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_dk17_minimized)",
+				"dk17_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_s420_with_sink_minimized)",
+				"s420_with_sink_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_ex7_with_hidden_states_with_sink_minimized)",
+				"ex7_with_hidden_states_with_sink_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_bbsse_minimized)",
+				"bbsse_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_s820_with_loops_minimized)",
+				"s820_with_loops_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_beecount_with_loops_minimized)",
+				"beecount_with_loops_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_s1_with_loops_minimized)",
+				"s1_with_loops_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_dk27_minimized)",
+				"dk27_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_dk14_minimized)",
+				"dk14_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_ex7_with_loops_minimized)",
+				"ex7_with_loops_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_donfile_minimized)",
+				"donfile_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_s420_with_loops_minimized)",
+				"s420_with_loops_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_bbara_minimized)",
+				"bbara_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_planet_with_loops_with_hidden_states_minimized)",
+				"planet_with_loops_with_hidden_states_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_ex3_with_hidden_states_with_sink_minimized)",
+				"ex3_with_hidden_states_with_sink_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_lion_with_loops_with_hidden_states_minimized)",
+				"lion_with_loops_with_hidden_states_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_ex1_with_sink_minimized)",
+				"ex1_with_sink_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_keyb_with_loops_with_hidden_states_minimized)",
+				"keyb_with_loops_with_hidden_states_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_mark1_with_loops_with_hidden_states_minimized)",
+				"mark1_with_loops_with_hidden_states_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_s27_with_sink_minimized)",
+				"s27_with_sink_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_ex7_with_sink_minimized)",
+				"ex7_with_sink_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_s1488_with_loops_minimized)",
+				"s1488_with_loops_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_bbsse_with_loops_with_hidden_states_minimized)",
+				"bbsse_with_loops_with_hidden_states_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_cse_with_loops_minimized)",
+				"cse_with_loops_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_train4_with_hidden_states_with_sink_minimized)",
+				"train4_with_hidden_states_with_sink_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_ex5_with_hidden_states_with_sink_minimized)",
+				"ex5_with_hidden_states_with_sink_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_lion_with_loops_minimized)",
+				"lion_with_loops_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_ex6_with_sink_minimized)",
+				"ex6_with_sink_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_train4_with_loops_with_hidden_states_minimized)",
+				"train4_with_loops_with_hidden_states_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_cse_with_loops_with_hidden_states_minimized)",
+				"cse_with_loops_with_hidden_states_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_mc_minimized)",
+				"mc_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_opus_with_loops_minimized)",
+				"opus_with_loops_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_ex2_with_loops_minimized)",
+				"ex2_with_loops_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_lion_with_sink_minimized)",
+				"lion_with_sink_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_tma_with_sink_minimized)",
+				"tma_with_sink_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_opus_with_sink_minimized)",
+				"opus_with_sink_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_planet_with_hidden_states_with_sink_minimized)",
+				"planet_with_hidden_states_with_sink_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_s27_with_loops_minimized)",
+				"s27_with_loops_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_s1488_with_sink_minimized)",
+				"s1488_with_sink_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_s298_minimized)",
+				"s298_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_tma_with_loops_minimized)",
+				"tma_with_loops_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_ex2_with_sink_minimized)",
+				"ex2_with_sink_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_ex1_with_loops_minimized)",
+				"ex1_with_loops_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_s820_with_sink_minimized)",
+				"s820_with_sink_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_ex2_with_hidden_states_with_sink_minimized)",
+				"ex2_with_hidden_states_with_sink_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_ex3_with_loops_with_hidden_states_minimized)",
+				"ex3_with_loops_with_hidden_states_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_keyb_with_hidden_states_with_sink_minimized)",
+				"keyb_with_hidden_states_with_sink_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_train11_with_loops_minimized)",
+				"train11_with_loops_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_s1494_with_loops_minimized)",
+				"s1494_with_loops_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_log_minimized)",
+				"log_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_ex5_with_loops_minimized)",
+				"ex5_with_loops_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_s8_minimized)",
+				"s8_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_dk512_minimized)",
+				"dk512_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_s208_minimized)",
+				"s208_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_s1a_with_loops_minimized)",
+				"s1a_with_loops_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_train11_with_hidden_states_with_sink_minimized)",
+				"train11_with_hidden_states_with_sink_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_s386_with_loops_minimized)",
+				"s386_with_loops_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_mark1_with_sink_minimized)",
+				"mark1_with_sink_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_ex4_minimized)",
+				"ex4_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_fetch_minimized)",
+				"fetch_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_planet1_with_loops_with_hidden_states_mi//					if (filesNames.containsKey(name))\r\n"
+						+ "//						dispName = filesNames.get(name);\r\n"
+						+ "nimized)",
+				"planet1_with_loops_with_hidden_states_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_mark1_with_hidden_states_with_sink_minimized)",
+				"mark1_with_hidden_states_with_sink_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_cse_with_hidden_states_with_sink_minimized)",
+				"cse_with_hidden_states_with_sink_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_tbk_minimized)",
+				"tbk_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_train11_with_sink_minimized)",
+				"train11_with_sink_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkCircuits_styr_with_hidden_states_with_sink_minimized)",
+				"styr_with_hidden_states_with_sink_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_cse_with_sink_minimized)",
+				"cse_with_sink_minimized");
+		filesNames.put("dot_file(BenchmarkCircuits_ex6_with_loops_minimized)",
+				"ex6_with_loops_minimized");
+		filesNames.put(
+				"dot_file(BenchmarkQUICprotocol_QUICprotocolwithout0RTT)",
+				"QUICprotocolwithout0RTT");
+		filesNames.put("dot_file(BenchmarkQUICprotocol_QUICprotocolwith0RTT)",
+				"QUICprotocolwith0RTT");
+		filesNames.put("dot_file(BenchmarkTCP_TCP_Windows8_Server)",
+				"TCP_Windows8_Server");
+		filesNames.put("dot_file(BenchmarkTCP_TCP_FreeBSD_Client)",
+				"TCP_FreeBSD_Client");
+		filesNames.put("dot_file(BenchmarkTCP_TCP_Linux_Server)",
+				"TCP_Linux_Server");
+		filesNames.put("dot_file(BenchmarkTCP_TCP_Windows8_Client)",
+				"TCP_Windows8_Client");
+		filesNames.put("dot_file(BenchmarkTCP_TCP_Linux_Client)",
+				"TCP_Linux_Client");
+		filesNames.put("dot_file(BenchmarkTCP_TCP_FreeBSD_Server)",
+				"TCP_FreeBSD_Server");
+		filesNames.put("dot_file(BenchmarkX-ray-system-PCS_learnresult5)",
+				"learnresult5");
+		filesNames.put("dot_file(BenchmarkX-ray-system-PCS_learnresult6)",
+				"learnresult6");
+		filesNames.put("dot_file(BenchmarkX-ray-system-PCS_learnresult2)",
+				"learnresult2");
+		filesNames.put("dot_file(BenchmarkX-ray-system-PCS_learnresult4)",
+				"learnresult4");
+		filesNames.put("dot_file(BenchmarkX-ray-system-PCS_learnresult1)",
+				"learnresult1");
+		filesNames.put("dot_file(BenchmarkX-ray-system-PCS_learnresult3)",
+				"learnresult3");
 
 		Set<String> toIgnore = new HashSet<>();
+		toIgnore.add("dot_file(g)");
+		toIgnore.add("dot_file(unamed dot graph)");
 		toIgnore.add("dot_file(out_dot_file(benchmark_heating_system)_inf");
 		toIgnore.add("dot_file(benchmark_heating_system)");
 		toIgnore.add("dot_file(benchmark_heating_system)");
 		toIgnore.add("dot_file(toyModels_naiks)");
 		toIgnore.add("dot_file(toyModels_lee_yannakakis_distinguishable)");
 		toIgnore.add("dot_file(toyModels_lee_yannakakis_non_distinguishable)");
+		// toIgnore.add("dot_file(BenchmarkFromRhapsodyToDezyne_model3)");
 
 		PrintStream out = System.out;
-		
 
 		List<String> sortedNames = new ArrayList<>();
 		List<Integer> sizes = new ArrayList<>();
@@ -597,12 +1727,69 @@ public class GlobalGraphGenerator extends GraphGenerator {
 			sizes.add(i, size);
 			sortedNames.add(i, name);
 		}
-		
-		// traceLength table
 
+		// JSS traceLength table
+
+		StatsSet hW_Old = new StatsSet(hW__);
+		hW_Old.restrict(
+				new EqualsRestriction<Boolean>(Attribute.REUSE_HZXW, true));
+		hW_Old.restrict(new EqualsRestriction<Boolean>(
+				Attribute.CHECK_3rd_INCONSISTENCY, true));
+		hW_Old.restrict(new EqualsRestriction<String>(
+				Attribute.SEARCH_CE_IN_TRACE, "simple"));
+		hW_Old.restrict(
+				new EqualsRestriction<Boolean>(Attribute.ADD_H_IN_W, true));
+
+		hW_Old.restrict(
+				new EqualsRestriction<>(HWStatsEntry.USE_ADAPTIVE_H, false));
+		hW_Old.restrict(
+				new EqualsRestriction<>(HWStatsEntry.USE_ADAPTIVE_W, false));
+		StatsSet hWWithGivenW = new StatsSet(hW_Old);
+		hW_Old.restrict(
+				new EqualsRestriction<>(HWStatsEntry.PRECOMPUTED_W, false));
+		hW_Old.restrict(new EqualsRestriction<>(HWStatsEntry.ORACLE_USED,
+				"distinctionTree + MrBean"));
+		StatsSet hWReset = new StatsSet(hW_Old);
+		StatsSet hWNoReset = new StatsSet(hW_Old);
+		hWReset.restrict(new EqualsRestriction<>(HWStatsEntry.USE_RESET, true));
+		hWNoReset.restrict(
+				new EqualsRestriction<>(HWStatsEntry.USE_RESET, false));
+		hWWithGivenW.restrict(
+				new EqualsRestriction<>(HWStatsEntry.PRECOMPUTED_W, true));
+		hWReset.restrict(new EqualsRestriction<>(HWStatsEntry.ORACLE_USED,
+				"distinctionTree + MrBean"));
+		hWNoReset.restrict(new EqualsRestriction<>(HWStatsEntry.ORACLE_USED,
+				"distinctionTree + MrBean"));
+
+		sets = new ArrayList<>();
+
+		// sets.add(new LearnerSet(hW_adaptive, "\\parbox[t]{2cm}{hW
+		// with\\\\adaptive}"));
+//		sets.add(new LearnerSet(rivestSchapire, "Rivest&Schapire"));
+		// sets.add(new LearnerSet(hW_Old, "hW"));
+		LearnerSet hWNoResetSet = new LearnerSet(hWNoReset, "hW without reset");
+		sets.add(hWNoResetSet);
+		LearnerSet hWWithResetSet = new LearnerSet(hWReset,
+				"hW with reset (#resets if used)");
+		sets.add(hWWithResetSet);
+
+		if (lm != null)
+			sets.add(new LearnerSet(lm, "Lm (#resets)"));
+		if (zQ != null)
+			sets.add(new LearnerSet(zQ, "Z-Quotient (\\#resets)"));
+
+		sets.add(null);
+
+		LearnerSet locWSet = new LearnerSet(locW, "LocW");
+		sets.add(locWSet);
+		LearnerSet hWWithGivenWSet = new LearnerSet(hWWithGivenW,
+				"hW with precomputed W");
+		sets.add(hWWithGivenWSet);
+//		sets.add(new LearnerSet(hW_knownW,
+//				"\\parbox[t]{2cm}{hW with a\\\\provided $W$-set}"));
 		try {
 			out = new PrintStream(
-					"/tmp/benchmarkTableTraceLength.tex");
+					Options.OUTDIR + "/ICGIbenchmarkTableTraceLength.tex");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			out = System.out;
@@ -656,7 +1843,8 @@ public class GlobalGraphGenerator extends GraphGenerator {
 					float traceLength = automaton
 							.attributeAVG(Attribute.TRACE_LENGTH);
 					out.print(" & " + (int) traceLength);
-					if (automaton.get(0) instanceof ZStatsEntry) {
+					if (automaton.get(0) instanceof ZStatsEntry
+							|| automaton.get(0) instanceof HWStatsEntry) {
 
 						float resets = automaton
 								.attributeAVG(Attribute.RESET_CALL_NB);
@@ -664,7 +1852,7 @@ public class GlobalGraphGenerator extends GraphGenerator {
 						out.print(" (" + (int) resets + ")");
 					}
 					if (nb < 150)
-						out.print(" (draft " + nb + ")");
+						out.print(" \tiny{(draft " + nb + ")}");
 				}
 			}
 			out.println("\\\\");
@@ -672,6 +1860,295 @@ public class GlobalGraphGenerator extends GraphGenerator {
 		out.println("\\hline");
 		out.println("\\end{tabular}");
 
+		// JSS table
+		try {
+			out = new PrintStream(
+					Options.OUTDIR + "/benchmarkTableTraceLength.tex");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			out = System.out;
+		}
+		out.println();
+		out.print("\\begin{tabular}{|l|l|");
+		for (LearnerSet s : sets) {
+			if (s != null)
+				out.print("l|");
+			else
+				out.print('|');
+		}
+		out.println("}");
+		out.println("\\hline");
+
+		out.print("automata & \\rotatebox{75}{$|Q|\\times |I|$ }");
+
+		for (LearnerSet s : sets) {
+			if (s != null)
+				out.print(" & \\rotatebox{75}{" + s.title + "}");
+		}
+		out.println("\\\\");
+		out.println("\\hline");
+
+		for (String name : sortedNames) {
+			if (toIgnore.contains(name)) {
+				System.out.println("ignoring " + name);
+				continue;
+			}
+			String title = filesNames.get(name);
+			if (title == null) {
+				System.err.println("name unknown : " + name);
+				continue;
+			}
+			out.print(title.replaceAll("_", "\\\\_"));
+			StatsSet automaton = new StatsSet(all);
+			automaton.restrict(
+					new EqualsRestriction<String>(Attribute.AUTOMATA, name));
+			out.print(" & " + (automaton.get(0).get(Attribute.STATE_NUMBER)
+					* automaton.get(0).get(Attribute.INPUT_SYMBOLS)));
+			for (LearnerSet s : sets) {
+				if (s == null)
+					continue;
+				automaton = new StatsSet(s.set);
+				automaton.restrict(new EqualsRestriction<String>(
+						Attribute.AUTOMATA, name));
+				int nb = automaton.size();
+				if (nb == 0)
+					out.print("& -");
+				else {
+					float traceLength = automaton
+							.attributeAVG(Attribute.TRACE_LENGTH);
+					out.print(" & " + (int) traceLength);
+					if (automaton.get(0) instanceof ZStatsEntry
+							|| automaton.get(0) instanceof HWStatsEntry
+									&& automaton.attributeMax(
+											Attribute.RESET_CALL_NB) != 0) {
+
+						float resets = automaton
+								.attributeAVG(Attribute.RESET_CALL_NB);
+
+						out.print(" (" + (int) resets + ")");
+					}
+					if (nb < 40)
+						out.print("{\\tiny (" + nb + " tried)}");
+				}
+			}
+			out.println("\\\\");
+		}
+		out.println("\\hline");
+		out.println("\\end{tabular}");
+
+		// JSS table HTML
+		try {
+			out = new PrintStream(
+					Options.OUTDIR + "/benchmarkTableTraceLength.html");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			out = System.out;
+		}
+		out.println("<!DOCTYPE html>");
+		out.println("<head>");
+		out.println(
+				"<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />");
+		out.println("<style>");
+		out.println("table, th, td {\r\n" + "    border: 1px solid black;\r\n"
+				+ "    border-collapse: collapse;\r\n" + "}");
+		out.println("table tr:nth-child(even) {\r\n"
+				+ "    background-color: #eee;\r\n" + "}");
+		out.println("table tr:nth-child(odd) {\r\n"
+				+ "    background-color: #fff;\r\n" + "}");
+		out.println("table tr:hover{" + "background-color:#ddd;" + "}");
+		out.println(".spacer{" + "border-style:none;" + "width:1px;" + "}");
+		out.println("</style>");
+		out.println("</head>");
+		out.print(
+				"<table style='border: 1px solid black; border-collapse: collapse;'>");
+
+		out.println("<tr>");
+		out.print("<th>automata</th><th>|Q| × |I|</th>");
+		for (LearnerSet s : sets) {
+			if (s != null)
+				out.print(" <th>" + s.title + "</th>");
+			else
+				out.print("<th class='spacer'></th>");
+		}
+		out.println("</tr>");
+
+		for (String name : sortedNames) {
+			if (toIgnore.contains(name)) {
+				System.out.println("ignoring " + name);
+				continue;
+			}
+			String title = filesNames.get(name);
+			if (title == null) {
+				System.err.println("name unknown : " + name);
+				continue;
+			}
+			StatsSet lmSet = new StatsSet(lm);
+			lmSet.restrict(new EqualsRestriction<>(Attribute.AUTOMATA, name));
+			int lmResetNoOracle = (int) (lmSet
+					.attributeAVG(Attribute.RESET_CALL_NB)
+					- lmSet.attributeAVG(Attribute.ORACLE_RESET_NB));
+			int lmTraceNoOracle = (int) (lmSet
+					.attributeAVG(Attribute.TRACE_LENGTH)
+					- lmSet.attributeAVG(Attribute.ORACLE_TRACE_LENGTH));
+			int lmOracleCall = (int) lmSet
+					.attributeAVG(Attribute.ASKED_COUNTER_EXAMPLE);
+			out.println("<tr>");
+			out.print("<td>" + title.replaceAll("_", "_") + "</td>");
+			StatsSet automaton = new StatsSet(all);
+			automaton.restrict(
+					new EqualsRestriction<String>(Attribute.AUTOMATA, name));
+			int stateNb = automaton.get(0).get(Attribute.STATE_NUMBER);
+			int inputNb = automaton.get(0).get(Attribute.INPUT_SYMBOLS);
+			out.print("<td>");
+			if (!automaton.attributeMax(Attribute.STATE_NUMBER)
+					.equals(automaton.attributeMin(Attribute.STATE_NUMBER))) {
+				out.print("invalid state");
+				int min = automaton.attributeMin(Attribute.STATE_NUMBER);
+				out.print(automaton.attributeMin(Attribute.STATE_NUMBER) + "-"
+						+ automaton.attributeMax(Attribute.STATE_NUMBER));
+				StatsSet s = new StatsSet(automaton);
+				s.restrict(
+						new EqualsRestriction<>(Attribute.STATE_NUMBER, min));
+//				 out.print("<br/>"+s.get(0).getClass());
+//				 out.print("<br/>"+s.get(0).toCSV());
+				out.print("<br/>");
+			}
+			out.print(stateNb * inputNb);
+			out.print("</td>");
+			for (LearnerSet s : sets) {
+				if (s == null) {
+					out.print("<td class='spacer'></td>");
+					continue;
+				}
+				out.print("<td>");
+				automaton = new StatsSet(s.set);
+				automaton.restrict(new EqualsRestriction<String>(
+						Attribute.AUTOMATA, name));
+				int nb = automaton.size();
+				if (nb == 0)
+					out.print("-");
+				else {
+					float oracleTraceLength;
+					if (s != locWSet)
+						oracleTraceLength = automaton
+								.attributeAVG(Attribute.ORACLE_TRACE_LENGTH);
+					else
+						oracleTraceLength = 0;
+
+					float traceLengthNoOracle = automaton.attributeAVG(
+							Attribute.TRACE_LENGTH) - oracleTraceLength;
+					float resetsNoOracle = (float) -100000000000000000000000000.;
+					if (automaton.get(0) instanceof ZStatsEntry
+							|| automaton.get(0) instanceof HWStatsEntry) {
+						resetsNoOracle = automaton
+								.attributeAVG(Attribute.RESET_CALL_NB)
+								- automaton.attributeAVG(
+										Attribute.ORACLE_RESET_NB);
+					}
+
+					String styleTraceLength = "";
+					String resetRatioString = "";
+					if (automaton.get(0) instanceof HWStatsEntry
+							&& s != hWWithGivenWSet) {
+						float resetRatio = (traceLengthNoOracle
+								- lmTraceNoOracle)
+								/ (lmResetNoOracle - resetsNoOracle);
+						if (traceLengthNoOracle > lmTraceNoOracle) {
+							styleTraceLength = "background-color:orange;";
+
+							StatsSet RS = new StatsSet(rivestSchapire);
+							RS.restrict(new EqualsRestriction<String>(
+									Attribute.AUTOMATA, name));
+							if (RS.size() > 0) {
+//								float rsLength = RS
+//										.attributeAVG(Attribute.TRACE_LENGTH);
+//								if (traceLengthNoOracle < rsLength)
+//									styleTraceLength = "background-color:orange";
+							}
+							if (resetRatio < 0) {
+								styleTraceLength = "background-color:red;";
+								resetRatioString = " (can not win even with a costly reset)";
+							} else if (resetRatio > 1) {
+								String ratioString = String.format("%.2g",
+										resetRatio);
+								resetRatioString = " (win if reset ≥ "
+										+ ratioString + " input)";
+							} else {
+								resetRatioString = " (win if reset is not cheaper than an input)";
+								styleTraceLength = "background-color:lightgreen;";
+							}
+						} else
+							styleTraceLength = "background-color:lightgreen;";
+					}
+					out.print("<span style='" + styleTraceLength + "'>"
+							+ (int) traceLengthNoOracle);
+					out.print(resetRatioString);
+					out.print("</span>");
+					int oracleNumber;
+					if (s != locWSet)
+						oracleNumber = (int) automaton
+								.attributeAVG(Attribute.ASKED_COUNTER_EXAMPLE);
+					else
+						oracleNumber = 0;
+					String oracleNumberStyle = "";
+					if (oracleNumber > lmOracleCall)
+						oracleNumberStyle = "border:solid 2px red;";
+					if (oracleNumber < lmOracleCall)
+						oracleNumberStyle = "border:solid 2px green;";
+					if ((s != hWWithGivenWSet || oracleTraceLength != 0
+							|| oracleNumber != 1) && s != locWSet)
+						out.print(" [+" + (int) oracleTraceLength
+								+ " by <span style='" + oracleNumberStyle + "'>"
+								+ oracleNumber + " oracle</span>]");
+
+					if (automaton.get(0) instanceof ZStatsEntry
+							|| automaton.get(0) instanceof HWStatsEntry
+									&& automaton.attributeMax(
+											Attribute.RESET_CALL_NB) != 0) {
+
+						resetsNoOracle = automaton
+								.attributeAVG(Attribute.RESET_CALL_NB)
+								- automaton.attributeAVG(
+										Attribute.ORACLE_RESET_NB);
+						String styleReset = "";
+//						if (resetsNoOracle < lmResetNoOracle * 2 / 10
+						// && automaton.get(0) instanceof HWStatsEntry) {
+						// styleReset = "background-color:lightgreen;";
+						// }
+						// if (resets > lmReset *8/10 && automaton.get(0)
+						// instanceof HWStatsEntry) {
+						// styleReset = "background-color:orange;";
+						// }
+						if (resetsNoOracle > lmResetNoOracle + 1) {
+							styleReset = "background-color:red;";
+						}
+
+						out.print(" (<span style='" + styleReset + "'>"
+								+ (int) resetsNoOracle);
+						out.print("</span>");
+						float oracleReset = automaton
+								.attributeAVG(Attribute.ORACLE_RESET_NB);
+						out.print(" [+" + (int) oracleReset + "])");
+					}
+
+					if (nb < 40)
+						out.print("<span style='color:grey;'>(" + nb
+								+ " tried)</span>");
+				}
+				out.println("</td>");
+			}
+			out.println("</tr>");
+		}
+
+		out.println("<tr>");
+		out.print("<th>automata</th><th>|Q| × |I|</th>");
+		for (LearnerSet s : sets) {
+			if (s != null)
+				out.print(" <th>" + s.title + "</th>");
+			else
+				out.print("<th class='spacer'></th>");
+		}
+		out.println("</tr>");
 	}
 
 	private int getSortForTable(StatsSet s) {
