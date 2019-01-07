@@ -533,7 +533,7 @@ public class HWLearner extends Learner {
 		driver.stopLog();
 
 		if (driver instanceof TransparentMealyDriver
-				&& options.useReset.isEnabled()) {
+				&& !options.useReset.isEnabled()) {
 			if ((counterExampleTrace = getShortestCounterExemple()) != null) {
 				dataManager.walkWithoutCheck(counterExampleTrace, null);
 				LogManager.logError("another counter example can be found");
