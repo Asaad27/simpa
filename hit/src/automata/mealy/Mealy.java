@@ -956,7 +956,7 @@ public class Mealy extends Automata implements Serializable {
 
 	@Override
 	public Map<State, Integer> computeDepths(State start) {
-		return computeDepths(start, Options.LOG_LEVEL == LogLevel.ALL);
+		return computeDepths(start, Options.getLogLevel() == LogLevel.ALL);
 	}
 
 	/**

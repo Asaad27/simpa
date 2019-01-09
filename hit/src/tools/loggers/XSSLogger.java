@@ -44,10 +44,9 @@ public class XSSLogger {
 
 	public void logStart() {
 		try {
-			String filename = (new File(Options.SYSTEM)).getName();
-			file = new File(dir, filenameFormat.format(new Date()) + "_" + filename + ".txt");
+			file = new File(dir, filenameFormat.format(new Date()) + ".txt");
 			writer = new BufferedWriter(new FileWriter(file));
-			writer.write(dateFormat.format(new Date()) + " - " + Options.SYSTEM + lineReturn
+			writer.write(dateFormat.format(new Date()) + lineReturn
 					+ "XSS analysis results" + lineReturn + lineReturn);
 			writer.flush();
 		} catch (IOException ex) {

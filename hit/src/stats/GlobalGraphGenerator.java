@@ -1789,7 +1789,8 @@ public class GlobalGraphGenerator extends GraphGenerator {
 //				"\\parbox[t]{2cm}{hW with a\\\\provided $W$-set}"));
 		try {
 			out = new PrintStream(
-					Options.OUTDIR + "/ICGIbenchmarkTableTraceLength.tex");
+					Options.getStatsGraphDir()
+							+ "/ICGI2018/benchmarkTableTraceLength.tex");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			out = System.out;
@@ -1863,7 +1864,8 @@ public class GlobalGraphGenerator extends GraphGenerator {
 		// JSS table
 		try {
 			out = new PrintStream(
-					Options.OUTDIR + "/benchmarkTableTraceLength.tex");
+					Options.getStatsGraphDir()
+							+ "/ICGI2018/benchmarkTableTraceLength.tex");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			out = System.out;
@@ -1939,7 +1941,8 @@ public class GlobalGraphGenerator extends GraphGenerator {
 		// JSS table HTML
 		try {
 			out = new PrintStream(
-					Options.OUTDIR + "/benchmarkTableTraceLength.html");
+					Options.getStatsGraphDir()
+							+ "/ICGI2018/benchmarkTableTraceLength.html");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			out = System.out;

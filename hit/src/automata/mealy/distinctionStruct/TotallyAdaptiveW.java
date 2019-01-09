@@ -308,7 +308,7 @@ public class TotallyAdaptiveW extends
 		if (toClone == null)
 			return new TotallyAdaptiveW();
 		assert !output.isRoot();
-		if (Options.LOG_LEVEL == LogLevel.ALL)
+		if (Options.getLogLevel() == LogLevel.ALL)
 			LogManager.logInfo(
 					"In adaptive W : cloning a previously used tree to create the child for output ",
 					output.getFromOutput(), " in characterization ",

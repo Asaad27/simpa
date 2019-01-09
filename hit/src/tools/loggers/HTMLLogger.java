@@ -187,22 +187,13 @@ public class HTMLLogger implements ILogger {
 	@Override
 	public void logStart() {
 		try {
-			String suffix;
-			if (Options.GENERICDRIVER) {
-				File tmp = new File(Options.SYSTEM);
-				suffix = tmp.getName();
-			} else {
-				suffix = Options.SYSTEM;
-			}
 			file = new File(dir.getAbsolutePath() + File.separator
-					+ filenameFm.format(new Date()) + "_" + suffix
-					+ ".html");
+					+ filenameFm.format(new Date()) + ".html");
 			writer = new BufferedWriter(new FileWriter(file));
 			writer.flush();
 			writer.write("<html>\n");
 			writer.write("<head>\n");
-			writer.write("<title>" + SIMPA.name + " - "
-					+ dfm.format(new Date()) + " - " + Options.SYSTEM
+			writer.write("<title>" + SIMPA.name + " - " + dfm.format(new Date())
 					+ "</title>\n");
 			writer.write("<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />\n");
 			writer.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + new File("log").getAbsolutePath()
@@ -214,8 +205,7 @@ public class HTMLLogger implements ILogger {
 			writer.write("</head>\n");
 			writer.write("<body>\n");
 			writer.write("<div id=\"info\">\n");
-			writer.write(SIMPA.name + " - " + dfm.format(new Date()) + " - "
-					+ Options.SYSTEM);
+			writer.write(SIMPA.name + " - " + dfm.format(new Date()));
 			writer.write("</div>\n");
 			writer.write("<div id=\"controls\">\n" +
 					"<p>Show tables: <input type=\"checkbox\" id=\"showTables\" onclick=\"table_event(this)\" /></p>\n" +

@@ -243,20 +243,12 @@ public class TextLogger implements ILogger {
 
 	@Override
 	public void logStart() {
-		String suffix;
-		if (Options.GENERICDRIVER) {
-			File tmp = new File(Options.SYSTEM);
-			suffix = tmp.getName();
-		} else {
-			suffix = Options.SYSTEM;
-		}
 		try {
 			file = new File(dir.getAbsolutePath() + File.separator
-					+ filenameFm.format(new Date()) + "_" + suffix
-					+ ".txt");
+					+ filenameFm.format(new Date()) + ".txt");
 			writer = new BufferedWriter(new FileWriter(file));
-			writer.write(SIMPA.name + " - " + dfm.format(new Date()) + " - "
-					+ Options.SYSTEM + ret + ret);
+			writer.write(
+					SIMPA.name + " - " + dfm.format(new Date()) + ret + ret);
 			writer.flush();
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -404,7 +404,7 @@ public class DataManager {
 			s.append(new LmTrace(W.get(i),WResponses.get(i)) + ", ");
 		}
 		logRecursivity("New state discovered : " + newState + " (" + s + ")");
-		if (Options.LOG_LEVEL != LogLevel.LOW)
+		if (Options.getLogLevel() != LogLevel.LOW)
 			LogManager.logConsole(
 					"New state discovered : " + newState + " (" + s + ")\r");
 		Q.put(WResponses,newState);

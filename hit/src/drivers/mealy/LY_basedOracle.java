@@ -76,7 +76,7 @@ public class LY_basedOracle {
 	MultiTrace traces;
 	final MealyDriver driver;
 	final List<String> inputSymbols;
-	public boolean verbose = Options.LOG_LEVEL == LogLevel.ALL;
+	public boolean verbose = Options.getLogLevel() == LogLevel.ALL;
 	/**
 	 * allow the use of reset to go to untested transitions.
 	 */

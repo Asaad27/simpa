@@ -283,7 +283,7 @@ public class Utils {
 						+ File.separator + "SIMPA");
 		}
 		if (nonStandardPath == null) {
-			nonStandardPath = new File(Options.OUTDIR + "SIMPA-cache");
+			nonStandardPath = new File("SIMPA-cache");
 		}
 		System.err.println("cannot find standard cache path. Using '"
 				+ nonStandardPath.getAbsolutePath() + "' instead.");

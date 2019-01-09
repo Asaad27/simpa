@@ -136,7 +136,7 @@ public class LY_SplittingTreeCalculator {
 	 */
 	public LY_SplittingTreeCalculator(Mealy automaton,
 			Collection<String> inputs) {
-		this(automaton, inputs, Options.LOG_LEVEL == LogLevel.ALL);
+		this(automaton, inputs, Options.getLogLevel() == LogLevel.ALL);
 	}
 
 	/**

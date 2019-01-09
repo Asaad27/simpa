@@ -570,9 +570,6 @@ public class SIMPA {
 			}
 		}
 
-		if (Options.NBTEST < 0)
-			throw new RuntimeException("Number of test >= 0 needed");
-
 		if (Options.MINSTATES < 1)
 			throw new RuntimeException("Minimal number of states >= 1 needed");
 		if (Options.MAXSTATES < Options.MINSTATES)
