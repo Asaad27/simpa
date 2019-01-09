@@ -80,17 +80,17 @@ public class CombinatorialStatsEntry extends StatsEntry {
 	@Override
 	public <T extends Comparable<T>> T getStaticAttribute(Attribute<T> a) {
 		if (a == TRACE_LENGTH)
-			return (T) new Integer(traceLength);
+			return (T) Integer.valueOf(traceLength);
 		if (a == INPUT_SYMBOLS)
-			return (T) new Integer(inputSymbols);
+			return (T) Integer.valueOf(inputSymbols);
 		if (a == OUTPUT_SYMBOLS)
-			return (T) new Integer(outputSymbols);
+			return (T) Integer.valueOf(outputSymbols);
 		if (a == STATE_NUMBER)
-			return (T) new Integer(state_number);
+			return (T) Integer.valueOf(state_number);
 		if (a == DURATION)
-			return (T) new Float(duration);
+			return (T) Float.valueOf(duration);
 		if (a == NODES_NB)
-			return (T) new Integer(nodesNB);
+			return (T) Integer.valueOf(nodesNB);
 		if (a == AUTOMATA)
 			return (T) automata;
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");

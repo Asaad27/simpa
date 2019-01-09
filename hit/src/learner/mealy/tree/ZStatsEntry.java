@@ -7,7 +7,6 @@ import java.util.StringTokenizer;
 import automata.mealy.MealyTransition;
 import drivers.mealy.MealyDriver;
 import learner.mealy.LmConjecture;
-import main.simpa.Options;
 import options.RandomOption;
 import options.learnerOptions.OracleOption;
 import stats.GraphGenerator;
@@ -75,7 +74,6 @@ public class ZStatsEntry extends StatsEntry {
 	private float duration;
 	private long seed;
 	private int resetNb;
-	private int oracleResetNb = 0;
 
 	private final StatsEntry_OraclePart oracle;
 
@@ -158,33 +156,33 @@ public class ZStatsEntry extends StatsEntry {
 	@Override
 	public <T extends Comparable<T>> T getStaticAttribute(Attribute<T> a) {
 		if (a == TRACE_LENGTH)
-			return (T) new Integer(traceLength);
+			return (T) Integer.valueOf(traceLength);
 		if (a == INPUT_SYMBOLS)
-			return (T) new Integer(inputSymbols);
+			return (T) Integer.valueOf(inputSymbols);
 		if (a == OUTPUT_SYMBOLS)
-			return (T) new Integer(outputSymbols);
+			return (T) Integer.valueOf(outputSymbols);
 		if (a == STATE_NUMBER)
-			return (T) new Integer(statesNumber);
+			return (T) Integer.valueOf(statesNumber);
 		if (a == LOOP_RATIO)
-			return (T) new Integer(loopTransitionPercentage);
+			return (T) Integer.valueOf(loopTransitionPercentage);
 		if (a == AUTOMATA)
 			return (T) automata;
 		if (a == DURATION)
-			return (T) new Float(duration);
+			return (T) Float.valueOf(duration);
 		if (a == SEED)
-			return (T) new Long(seed);
+			return (T) Long.valueOf(seed);
 		if (a == ASKED_COUNTER_EXAMPLE)
-			return (T) new Integer(getOracle().getAskedCE());
+			return (T) Integer.valueOf(getOracle().getAskedCE());
 		if (a == ORACLE_USED)
 			return (T) getOracle().getName();
 		if (a == ORACLE_TRACE_LENGTH)
-			return (T) new Integer(getOracle().getTraceLength());
+			return (T) Integer.valueOf(getOracle().getTraceLength());
 		if (a == ORACLE_DURATION)
-			return (T) new Float(getOracle().getDuration());
+			return (T) Float.valueOf(getOracle().getDuration());
 		if (a == RESET_NB)
-			return (T) new Integer(resetNb);
+			return (T) Integer.valueOf(resetNb);
 		if (a == ORACLE_RESET_NB)
-			return (T) new Integer(oracle.getResetNb());
+			return (T) Integer.valueOf(oracle.getResetNb());
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 
 	}

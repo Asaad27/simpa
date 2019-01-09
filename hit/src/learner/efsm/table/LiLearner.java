@@ -425,7 +425,7 @@ public class LiLearner extends Learner {
 			//Store the state in which the automata was before executing the PI
 			LiDataTableItem dti = new LiDataTableItem(
 					pis.getLastParameters(),
-					(TreeMap<String, List<Parameter>>) automataState.clone(),
+					new TreeMap<>(automataState),
 					pos.getLastParameters(),
 					pos.getLastSymbol());
 			updateDataTable(dti, pis);

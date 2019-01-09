@@ -18,7 +18,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import tools.HTTPData;
-import tools.Utils;
 import tools.loggers.LogManager;
 
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
@@ -36,6 +35,7 @@ import java.util.logging.Logger;
  * @deprecated
  * @see DriverGeneratorBFS
  */
+@Deprecated
 public class DriverGeneratorDFS extends DriverGenerator {
 
 	/**

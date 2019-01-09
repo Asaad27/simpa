@@ -236,7 +236,7 @@ public class HWGraphGenerator extends GraphGenerator {
 		int maxStates = allStats.attributeMax(HWStatsEntry.STATE_NUMBER);
 		Integer[] mult5 = new Integer[maxStates / 5];
 		for (int i = 1; i <= maxStates / 5; i += 1) {
-			mult5[i - 1] = new Integer(5 * i);
+			mult5[i - 1] = Integer.valueOf(5 * i);
 		}
 		// keptStates = mult5;
 

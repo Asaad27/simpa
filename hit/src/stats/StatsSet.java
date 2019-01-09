@@ -144,7 +144,7 @@ public class StatsSet {
 	}
 
 	public <T extends Comparable<T>> float attributeAVG(Attribute<T> a){
-		Float sum = new Float(0);
+		Float sum = Float.valueOf(0);
 		for (StatsEntry s : restrictedStats){
 			sum +=  s.getFloatValue(a);
 		}

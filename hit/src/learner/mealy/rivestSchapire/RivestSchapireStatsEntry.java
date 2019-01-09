@@ -148,37 +148,37 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 	@Override
 	public <T extends Comparable<T>> T getStaticAttribute(Attribute<T> a) {
 		if (a == RESET_CALL_NB)
-			return (T) new Integer(resetCallNb);
+			return (T) Integer.valueOf(resetCallNb);
 		if (a == HOMING_SEQUENCE_LENGTH)
-			return (T) new Integer(hommingSequenceLength);
+			return (T) Integer.valueOf(hommingSequenceLength);
 		if (a == LEARNER_NB)
-			return (T) new Integer(learnerNb);
+			return (T) Integer.valueOf(learnerNb);
 		if (a == TRACE_LENGTH)
-			return (T) new Integer(traceLength);
+			return (T) Integer.valueOf(traceLength);
 		if (a == INPUT_SYMBOLS)
-			return (T) new Integer(inputSymbols);
+			return (T) Integer.valueOf(inputSymbols);
 		if (a == OUTPUT_SYMBOLS)
-			return (T) new Integer(outputSymbols);
+			return (T) Integer.valueOf(outputSymbols);
 		if (a == STATE_NUMBER)
-			return (T) new Integer(statesNumber);
+			return (T) Integer.valueOf(statesNumber);
 		if (a == LOOP_RATIO)
-			return (T) new Integer(loopTransitionPercentage);
+			return (T) Integer.valueOf(loopTransitionPercentage);
 		if (a == AUTOMATA)
 			return (T) automata;
 		if (a == DURATION)
-			return (T) new Float(duration);
+			return (T) Float.valueOf(duration);
 		if (a == MEMORY)
-			return (T) new Integer(memory);
+			return (T) Integer.valueOf(memory);
 		if (a == H_IS_GIVEN)
-			return (T) new Boolean(hIsGiven);
+			return (T) Boolean.valueOf(hIsGiven);
 		if (a == FAILED_PROBABILISTIC_SEARCH)
-			return (T) new Integer(failedProbalisticSearch);
+			return (T) Integer.valueOf(failedProbalisticSearch);
 		if (a == SUCCEEDED_PROBALISTIC_SEARCH)
-			return (T) new Integer(succeededProbabilisticSearch);
+			return (T) Integer.valueOf(succeededProbabilisticSearch);
 		if (a == ORACLE_USED)
 			return (T) oracleUsed;
 		if (a == ASKED_CE)
-			return (T) new Integer(askedCE);
+			return (T) Integer.valueOf(askedCE);
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 
 	}

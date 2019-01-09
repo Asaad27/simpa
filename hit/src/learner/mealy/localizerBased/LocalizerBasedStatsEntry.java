@@ -7,7 +7,6 @@ import automata.Transition;
 import automata.mealy.InputSequence;
 import drivers.mealy.MealyDriver;
 import learner.mealy.LmConjecture;
-import main.simpa.Options;
 import stats.GraphGenerator;
 import stats.StatsEntry;
 import stats.attribute.Attribute;
@@ -148,37 +147,37 @@ public class LocalizerBasedStatsEntry extends StatsEntry {
 	@Override
 	public <T extends Comparable<T>> T getStaticAttribute(Attribute<T> a) {
 		if (a == W_SIZE)
-			return (T) new Integer(WSize);
+			return (T) Integer.valueOf(WSize);
 		if (a == W1_LENGTH)
-			return (T) new Integer(w1Length);
+			return (T) Integer.valueOf(w1Length);
 		if (a == LOCALIZER_CALL_NB)
-			return (T) new Integer(localizeCallNb);
+			return (T) Integer.valueOf(localizeCallNb);
 		if (a == LOCALIZER_SEQUENCE_LENGTH)
-			return (T) new Integer(localizeSequenceLength);
+			return (T) Integer.valueOf(localizeSequenceLength);
 		if (a == TRACE_LENGTH)
-			return (T) new Integer(traceLength);
+			return (T) Integer.valueOf(traceLength);
 		if (a == INPUT_SYMBOLS)
-			return (T) new Integer(inputSymbols);
+			return (T) Integer.valueOf(inputSymbols);
 		if (a == OUTPUT_SYMBOLS)
-			return (T) new Integer(outputSymbols);
+			return (T) Integer.valueOf(outputSymbols);
 		if (a == STATE_NUMBER)
-			return (T) new Integer(statesNumber);
+			return (T) Integer.valueOf(statesNumber);
 		if (a == STATE_NUMBER_BOUND)
-			return (T) new Integer(n);
+			return (T) Integer.valueOf(n);
 		if (a == STATE_BOUND_OFFSET)
-			return (T) new Integer(n - statesNumber);
+			return (T) Integer.valueOf(n - statesNumber);
 		if (a == LOOP_RATIO)
-			return (T) new Integer(loopTransitionPercentage);
+			return (T) Integer.valueOf(loopTransitionPercentage);
 		if (a == AUTOMATA)
 			return (T) automata;
 		if (a == DURATION)
-			return (T) new Float(duration);
+			return (T) Float.valueOf(duration);
 		if (a == MEMORY)
-			return (T) new Integer(memory);
+			return (T) Integer.valueOf(memory);
 		if (a == WITH_SPEEDUP)
-			return (T) new Boolean(with_speedup);
+			return (T) Boolean.valueOf(with_speedup);
 		if (a == MIN_TRACE_LENGTH)
-			return (T) new Integer(minTraceLength);
+			return (T) Integer.valueOf(minTraceLength);
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 
 	}

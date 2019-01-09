@@ -14,12 +14,12 @@ public class IntegerOption extends NumberOption<Integer> {
 
 	@Override
 	protected Integer parse(String s) {
-		return new Integer(s);
+		return Integer.valueOf(s);
 	}
 
 	@Override
 	protected Integer toType(int v) {
-		return new Integer(v);
+		return Integer.valueOf(v);
 	}
 
 	@Override

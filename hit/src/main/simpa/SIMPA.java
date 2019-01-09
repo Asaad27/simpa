@@ -152,7 +152,7 @@ class IntegerOption extends Option<Integer> {
 				assert !used.get(i) : "argument already parsed";
 				used.set(i, true);
 				try {
-					value = new Integer(args[i]);
+					value = Integer.parseInt(args[i]);
 				} catch (NumberFormatException e) {
 					System.err.println("Error parsing argument '" + args[i] + "' for " + consoleName);
 					throw e;
@@ -176,7 +176,7 @@ class LongOption extends Option<Long> {
 				assert !used.get(i) : "argument already parsed";
 				used.set(i, true);
 				try {
-					value = new Long(args[i]);
+					value = Long.parseLong(args[i]);
 				} catch (NumberFormatException e) {
 					System.err.println("Error parsing argument '" + args[i] + "' for " + consoleName);
 					throw e;
@@ -590,6 +590,7 @@ public class SIMPA {
 
 	}
 
+	@Deprecated
 	public static Driver loadDriver(String system) throws Exception {
 		Driver driver;
 		try {

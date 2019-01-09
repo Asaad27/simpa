@@ -67,7 +67,7 @@ public class AdenilsoSimaoTool {
 			int nodeId = 0;
 			Map<State, Integer> nodeIds = new HashMap<>();
 			for (State s : automata.getStates())
-				nodeIds.put(s, new Integer(nodeId++));
+				nodeIds.put(s, Integer.valueOf(nodeId++));
 			for (MealyTransition t : automata.getTransitionFrom(init))
 				fsmAutomata.append(nodeIds.get(t.getFrom()) + " -- " + t.getInput() + " / " + t.getOutput() + " -> "
 						+ nodeIds.get(t.getTo()) + "\n");

@@ -127,6 +127,7 @@ public class WebInput implements Cloneable {
 	 * @param form
 	 * @return 
 	 */
+	@Deprecated
 	public static List<WebInput> extractInputsFromForm(Element form) {
 		List<WebInput> l = new ArrayList<>();
 

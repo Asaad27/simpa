@@ -1,5 +1,7 @@
 package options.automataOptions;
 
+import java.lang.reflect.InvocationTargetException;
+
 import drivers.Driver;
 import options.OneArgChoiceOptionItem;
 
@@ -26,14 +28,12 @@ public class DriverChoiceItem<T extends Driver> extends OneArgChoiceOptionItem {
 	 */
 	public T createDriver() {
 		try {
-			return driverClass.newInstance();
-		} catch (InstantiationException e) {
-			System.out.println("Unable to instantiate the driver : "
+			return driverClass.getConstructor().newInstance();
+		} catch (InstantiationException | IllegalArgumentException
+				| IllegalAccessException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
+			System.out.println("Unable to instanciate the driver : "
 					+ driverClass.getName());
-			return null;
-		} catch (IllegalAccessException e) {
-			System.out.println(
-					"Unable to access the driver : " + driverClass.getName());
 			return null;
 		}
 

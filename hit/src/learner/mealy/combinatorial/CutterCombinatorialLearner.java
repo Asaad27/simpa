@@ -29,7 +29,6 @@ import options.RandomOption;
 import stats.StatsEntry;
 import tools.GraphViz;
 import tools.StandaloneRandom;
-import tools.Utils;
 import tools.loggers.LogManager;
 
 
@@ -236,10 +235,11 @@ public class CutterCombinatorialLearner extends Learner {
 					String output = t.getOutput();
 					n.desc = n.desc+"\\n"+i+"/" + t.getOutput() +"→" + t.getTo();
 					if (!responses.containsKey(output)){
-						responses.put(output, new Integer(0));
+						responses.put(output, Integer.valueOf(0));
 					}
 					knownResponses++;
-					responses.put(output, new Integer(responses.get(output) + 1));
+					responses.put(output,
+							Integer.valueOf(responses.get(output) + 1));
 				}
 				//n.desc = n.desc+"\\n"+i+" : " + localNewNode;
 			}
@@ -259,7 +259,7 @@ public class CutterCombinatorialLearner extends Learner {
 			if (Options.INTERACTIVE)
 				System.out.println(i+"/? : "+(currentLevel.size()-knownResponses)*root.getStates().size()+" nodes");
 			LogManager.logInfo("if we apply '" +i+ "' and if we get an other output, next level will have "+(currentLevel.size()-knownResponses)*root.getStates().size()+" nodes");
-			maxLength.put(new InputSequence(i), new Integer(maxNodes));
+			maxLength.put(new InputSequence(i), Integer.valueOf(maxNodes));
 		}
 		exportTreeToDot();
 

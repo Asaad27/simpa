@@ -2,6 +2,7 @@ package learner.mealy.hW;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1305,8 +1306,10 @@ public class HWLearner extends Learner {
 					((TransparentMealyDriver) driver).getAutomata());
 		} else
 			try {
-				d = driver.getClass().newInstance();
-			} catch (InstantiationException | IllegalAccessException e) {
+				d = driver.getClass().getConstructor().newInstance();
+			} catch (InstantiationException | IllegalAccessException
+					| IllegalArgumentException | InvocationTargetException
+					| NoSuchMethodException | SecurityException e) {
 				throw new RuntimeException(e);
 			}
 		OutputSequence randomEquivalenceO = d.execute(randomEquivalenceI);

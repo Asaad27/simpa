@@ -143,7 +143,8 @@ public class LiDataTableItem implements Cloneable, Serializable {
 	
 	@Override
 	public Object clone(){
-		TreeMap<String, List<Parameter>> automataStateClone = (TreeMap<String, List<Parameter>>) automataState.clone();
+		TreeMap<String, List<Parameter>> automataStateClone = new TreeMap<>(
+				automataState);
 		List<Parameter> inputParametersClone = new LinkedList<>();
 		for (Parameter inputParameter : inputParameters) {
 			inputParametersClone.add(inputParameter.clone());

@@ -447,7 +447,6 @@ public class GenericDriver extends LowWebDriver {
 		HashMap<String, List<ArrayList<Parameter>>> defaultParamValues = new HashMap<>();
 		ArrayList<ArrayList<Parameter>> params = null;
 		ArrayList<Parameter> one = null;
-		int index = 0;
 		for (WebInput i : inputs) {
 			params = new ArrayList<>();
 			int nbParam = i.getNbValues();
@@ -459,7 +458,6 @@ public class GenericDriver extends LowWebDriver {
 				params.add(one);
 			}
 			defaultParamValues.put(getInputSymbol(i), params);
-			index++;
 		}
 		return defaultParamValues;
 	}

@@ -13,12 +13,12 @@ public class LongOption extends NumberOption<Long> {
 
 	@Override
 	protected Long parse(String s) {
-		return new Long(s);
+		return Long.valueOf(s);
 	}
 
 	@Override
 	protected Long toType(int v) {
-		return new Long(v);
+		return Long.valueOf(v);
 	}
 
 	@Override

@@ -10,7 +10,6 @@ import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import learner.mealy.hW.dataManager.FullyQualifiedState;
 import learner.mealy.hW.dataManager.SimplifiedDataManager;
-import main.simpa.Options;
 import options.RandomOption;
 import stats.GraphGenerator;
 import stats.StatsEntry;
@@ -307,90 +306,82 @@ public class HWStatsEntry extends StatsEntry {
 	@Override
 	public <T extends Comparable<T>> T getStaticAttribute(Attribute<T> a) {
 		if (a == MAX_W_TOTAL_LENGTH)
-			return (T) new Integer(maxWTotalLength);
+			return (T) Integer.valueOf(maxWTotalLength);
 		if (a == MAX_W_SIZE)
-			return (T) new Integer(maxWSize);
+			return (T) Integer.valueOf(maxWSize);
 		if (a == AVERAGE_W_SIZE)
-			return (T) new Float(avgWSize);
+			return (T) Float.valueOf(avgWSize);
 		if (a == H_MAX_LENGTH)
-			return (T) new Integer(hMaxLength);
+			return (T) Integer.valueOf(hMaxLength);
 		if (a==H_ANSWERS_NB)
-			return (T) new Integer(hResponses);
-//		if (a == W1_LENGTH)
-//			return (T) new Integer(w1Length);
+			return (T) Integer.valueOf(hResponses);
 		if (a == LOCALIZER_CALL_NB)
-			return (T) new Integer(localizeCallNb);
-//		if (a == LOCALIZER_SEQUENCE_LENGTH)
-//			return (T) new Integer(localizeSequenceLength);
+			return (T) Integer.valueOf(localizeCallNb);
 		if (a == TRACE_LENGTH)
-			return (T) new Integer(traceLength);
+			return (T) Integer.valueOf(traceLength);
 		if (a == INPUT_SYMBOLS)
-			return (T) new Integer(inputSymbols);
+			return (T) Integer.valueOf(inputSymbols);
 		if (a == OUTPUT_SYMBOLS)
-			return (T) new Integer(outputSymbols);
+			return (T) Integer.valueOf(outputSymbols);
 		if (a == STATE_NUMBER)
-			return (T) new Integer(statesNumber);
-//		if (a == STATE_NUMBER_BOUND)
-//			return (T) new Integer(n);
-//		if (a == STATE_BOUND_OFFSET)
-//			return (T) new Integer(n - statesNumber);
+			return (T) Integer.valueOf(statesNumber);
 		if (a == LOOP_RATIO)
-			return (T) new Integer(loopTransitionPercentage);
+			return (T) Integer.valueOf(loopTransitionPercentage);
 		if (a == AUTOMATA)
 			return (T) automata;
 		if (a == DURATION)
-			return (T) new Float(duration);
+			return (T) Float.valueOf(duration);
 		if (a == MEMORY)
-			return (T) new Integer(memory);
+			return (T) Integer.valueOf(memory);
 		if (a == MIN_TRACE_LENGTH)
-			return (T) new Integer(minTraceLength);
+			return (T) Integer.valueOf(minTraceLength);
 		if (a == MAX_RECKONED_STATES)
-			return (T) new Integer(maxReckonedStates);
+			return (T) Integer.valueOf(maxReckonedStates);
 		if (a == MAX_FAKE_STATES)
-			return (T) new Integer(maxFakeStates);
+			return (T) Integer.valueOf(maxFakeStates);
 		if (a == SEED)
-			return (T) new Long(seed);
+			return (T) Long.valueOf(seed);
 		if (a == ASKED_COUNTER_EXAMPLE)
-			return (T) new Integer(oracle.getAskedCE());
+			return (T) Integer.valueOf(oracle.getAskedCE());
 		if (a == H_INCONSISTENCY_FOUND)
-			return (T) new Integer(hInconsistencies);
+			return (T) Integer.valueOf(hInconsistencies);
 		if (a==W_INCONSISTENCY_FOUND)
-			return (T) new Integer(wInconsistencies);
+			return (T) Integer.valueOf(wInconsistencies);
 		if (a==SUB_INFERANCE_NB)
-			return (T) new Integer(subInferenceNb);
+			return (T) Integer.valueOf(subInferenceNb);
 		if (a == ORACLE_USED)
 			return (T) oracle.getName();
 		if (a == ORACLE_TRACE_LENGTH)
-			return (T) new Integer(oracle.getTraceLength());
+			return (T) Integer.valueOf(oracle.getTraceLength());
 		if (a == ORACLE_DURATION)
-			return (T) new Float(oracle.getDuration());
+			return (T) Float.valueOf(oracle.getDuration());
 		if (a == SEARCH_CE_IN_TRACE)
 			return (T) searchCEInTrace;
 		if (a == ADD_H_IN_W)
-			return (T) new Boolean(add_h_in_w);
+			return (T) Boolean.valueOf(add_h_in_w);
 		if (a==CHECK_3rd_INCONSISTENCY)
-			return (T) new Boolean(check_3rd_inconsistency);
+			return (T) Boolean.valueOf(check_3rd_inconsistency);
 		if (a==REUSE_HZXW)
-				return (T) new Boolean(reuse_hzxw);
+			return (T) Boolean.valueOf(reuse_hzxw);
 		if (a == PRECOMPUTED_W)
-			return (T) new Boolean(precomputedW);
+			return (T) Boolean.valueOf(precomputedW);
 		if (a == ADD_I_IN_W)
-			return (T) new Boolean(add_I_in_W);
+			return (T) Boolean.valueOf(add_I_in_W);
 		if (a == USE_ADAPTIVE_H)
-			return (T) new Boolean(useAdaptiveH);
+			return (T) Boolean.valueOf(useAdaptiveH);
 		if (a == USE_ADAPTIVE_W)
-				return (T) new Boolean(useAdaptiveW);
+			return (T) Boolean.valueOf(useAdaptiveW);
 		if (a == USE_RESET)
-				return (T) new Boolean(useReset);
+			return (T) Boolean.valueOf(useReset);
 		if (a == ORACLE_TRACE_PERCENTAGE)
-			return (T) new Float(
-					100. * oracle.getTraceLength() / traceLength);
+			return (T) Float.valueOf(
+					(float) (100. * oracle.getTraceLength() / traceLength));
 		if (a == AVG_NB_TRIED_W)
-			return (T) new Float(avgNbTriedWSuffixes);
+			return (T) Float.valueOf(avgNbTriedWSuffixes);
 		if (a == RESET_CALL_NB)
-			return (T) new Integer(resetCallNb);
+			return (T) Integer.valueOf(resetCallNb);
 		if (a == ORACLE_RESET_NB)
-			return (T) new Integer(oracle.getResetNb());
+			return (T) Integer.valueOf(oracle.getResetNb());
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 
 	}
