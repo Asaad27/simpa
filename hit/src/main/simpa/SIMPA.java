@@ -39,8 +39,10 @@ import drivers.Driver;
 import drivers.ExhaustiveGeneratorOption;
 import drivers.efsm.real.GenericDriver;
 import drivers.efsm.real.ScanDriver;
+import drivers.mealy.MealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
+import learner.mealy.LmConjecture;
 import main.simpa.Options.LogLevel;
 import options.CanNotComputeOptionValueException;
 import options.MultiArgChoiceOptionItem;
@@ -715,13 +717,22 @@ public class SIMPA {
 				System.exit(1);
 			}
 		}
+		boolean conjectureIsFalse = false;
 		try {
 			l.learn();
+			if (d instanceof MealyDriver) {
+				conjectureIsFalse |= !((MealyDriver) d).searchConjectureError(
+						(LmConjecture) l.createConjecture());
+			}
 			l.logStats();
-			// TODO check conjecture
 		} finally {
 			LogManager.end();
 			LogManager.clearsLoggers();
+		}
+		if (conjectureIsFalse) {
+			LogManager.logError(
+					"Post checking of conjecture failed. The conjecture is false.");
+			return null;
 		}
 		return l;
 	}

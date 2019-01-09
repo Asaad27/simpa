@@ -30,7 +30,6 @@ import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
 import learner.mealy.CeExposedUnknownStateException;
 import learner.mealy.LmConjecture;
-import learner.mealy.LmConjecture.CounterExampleResult;
 import learner.mealy.LmTrace;
 import learner.mealy.hW.dataManager.AdaptiveHomingSequenceChecker;
 import learner.mealy.hW.dataManager.ConjectureNotConnexException;
@@ -64,7 +63,6 @@ public class HWLearner extends Learner {
 	private SimplifiedDataManager dataManager;
 	private HWStatsEntry stats;
 	protected DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W;
-	private int n;// the maximum number of states
 	private List<LmTrace> fullTraces;
 	private GenericOutputSequence lastDeliberatelyAppliedH = null;
 	private GenericHomingSequenceChecker hChecker = null;
@@ -191,34 +189,6 @@ public class HWLearner extends Learner {
 		}
 		LogManager.logInfo("W-set extended with " + newW);
 		W.add(newW);
-	}
-
-	// TODO this method is only used for checking conjecture after learning. The
-	// checking should be moved in main and this method should be deleted
-	@Deprecated
-	private LmTrace getShortestCounterExemple() {
-		if (driver instanceof TransparentMealyDriver) {
-			TransparentMealyDriver d = (TransparentMealyDriver) driver;
-			Mealy realAutomata = d.getAutomata();
-			assert realAutomata.isConnex();
-			LmConjecture conjecture = dataManager.getConjecture();
-			State conjectureStartingState = dataManager.getCurrentState()
-					.getState();
-			State realStartingState = d.getCurrentState();
-
-			List<InputSequence> counterExamples = conjecture.getCounterExamples(
-					conjectureStartingState, realAutomata, realStartingState,
-					true);
-			if (counterExamples.size() > 0) {
-				InputSequence counterExample = counterExamples.get(0);
-					return new LmTrace(counterExample,
-							driver.execute(counterExample));
-			} else {
-				return null;
-			}
-		} else {
-			throw new RuntimeException("not implemented");
-		}
 	}
 
 	private GenericInputSequence proceedHException(GenericHNDException e) {
@@ -540,52 +510,6 @@ public class HWLearner extends Learner {
 		// the next call is not mandatory for algorithm, see checkEquivalence
 		// description.
 		//checkEquivalence(new File("reference.dot"));
-		// The transition count should be stopped
-		driver.stopLog();
-
-		if (driver instanceof TransparentMealyDriver
-				&& !options.useReset.isEnabled()) {
-			if ((counterExampleTrace = getShortestCounterExemple()) != null) {
-				dataManager.walkWithoutCheck(counterExampleTrace, null);
-				LogManager.logError("another counter example can be found");
-				throw new RuntimeException("wrong conjecture");
-			} else {
-				LogManager
-						.logInfo("no counter example can be found, this almost mean that the conjecture is correct"
-								+ " (more precisely, this mean we are in a sub part of the automata which is equivalent to the driver)");
-			}
-		} else {
-			LogManager
-					.logInfo("black box is not transparent. cannot do a real verification of conjecture");
-		}
-		if (driver instanceof TransparentMealyDriver) {
-			TransparentMealyDriver d = (TransparentMealyDriver) driver;
-			LmConjecture conjecture = dataManager.getConjecture();
-			State conjectureState = dataManager.getCurrentState().getState();
-			CounterExampleResult result = conjecture
-					.getAllCounterExamples(conjectureState, d.getAutomata(),
-							d.getCurrentState(), true);
-			if (result.isCompletelyEquivalent()) {
-				LogManager.logConsole("The computed conjecture is exact");
-				LogManager.logInfo("The computed conjecture is exact");
-			} else {
-				LogManager.logConsole("The computed conjecture is not correct");
-				LogManager.logInfo("The computed conjecture is not correct");
-				LogManager.logConsole(result.what());
-				LogManager.logInfo(result.what());
-				throw new RuntimeException("wrong conjecture");
-			}
-		} else {
-			if (checkRandomWalk()) {
-				LogManager
-						.logConsole("The computed conjecture seems to be consistent with the driver");
-				LogManager
-						.logInfo("The computed conjecture seems to be consistent with the driver");
-			} else {
-				LogManager.logConsole("The computed conjecture is not correct");
-				LogManager.logInfo("The computed conjecture is not correct");
-			}
-		}
 
 	}
 
@@ -1339,29 +1263,6 @@ public class HWLearner extends Learner {
 				+ " means we arrived in state " + s);
 		stats.increaseLocalizeCallNb();
 		return s;
-	}
-
-	private boolean checkRandomWalk() {
-		LogManager.logStep(LogManager.STEPOTHER,
-				"checking the computed conjecture with Random Walk");
-
-		// Now the two automata are in same state.
-		// We can do a random walk
-
-		int max_try = driver.getInputSymbols().size() * n * 10;
-		dataManager = null;// we use directly the driver for the walk so
-							// dataManager is not up to date;
-		driver.stopLog();
-		for (int j = 0; j < max_try; j++) {
-			int rand = new StandaloneRandom()
-					.randInt(driver.getInputSymbols().size());
-			String input = driver.getInputSymbols().get(rand);
-			if (!driver.execute(input)
-					.equals(dataManager.walkWithoutCheck(input, null, null)))
-				return false;
-		}
-
-		return true;
 	}
 
 	/**

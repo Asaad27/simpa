@@ -209,7 +209,6 @@ public class ZLearner extends Learner {
 				/ 1000000000.);
 		stats.finalUpdate(createConjecture(), duration,
 				driver.numberOfAtomicRequest, driver.numberOfRequest);
-		//TODO check conjecture (to be done in main)
 	}
 
 	private boolean noLabelledPred(ZObservationNode node) {

@@ -214,7 +214,6 @@ public class LmLearner extends Learner {
 				/ 1000000000.);
 		stats.finalUpdate(createConjecture(), duration,
 				driver.numberOfAtomicRequest, driver.numberOfRequest);
-		//TODO check conjecture (should be done in main)
 	}
 
 	@Override

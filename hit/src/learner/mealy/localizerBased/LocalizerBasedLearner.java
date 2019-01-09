@@ -3,10 +3,8 @@ package learner.mealy.localizerBased;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -182,29 +180,6 @@ public class LocalizerBasedLearner extends Learner {
 		} else {
 			stats.setMinTraceLength(-2);
 		}
-		// The transition count should be stopped
-		driver.stopLog();
-		if (driver instanceof TransparentMealyDriver) {
-			TransparentMealyDriver d = (TransparentMealyDriver) driver;
-			if (checkExact(d.getAutomata(), d.getCurrentState())) {
-				LogManager.logConsole("The computed conjecture is exact");
-				LogManager.logInfo("The computed conjecture is exact");
-			} else {
-				LogManager.logConsole("The computed conjecture is not correct");
-				LogManager.logInfo("The computed conjecture is not correct");
-			}
-		} else {
-			if (checkRandomWalk()) {
-				LogManager
-						.logConsole("The computed conjecture seems to be consistent with the driver");
-				LogManager
-						.logInfo("The computed conjecture seems to be consistent with the driver");
-			} else {
-				LogManager.logConsole("The computed conjecture is not correct");
-				LogManager.logInfo("The computed conjecture is not correct");
-			}
-		}
-
 	}
 
 	public LmConjecture createConjecture() {
@@ -310,174 +285,6 @@ public class LocalizerBasedLearner extends Learner {
 					+ " we were in " + s);
 		assert WResponses.size() == inputSequences.size();
 		return WResponses;
-	}
-
-	private boolean checkRandomWalk() {
-		LogManager.logStep(LogManager.STEPOTHER,
-				"checking the computed conjecture with Random Walk");
-		LocalizerBasedMealyDriver generatedDriver = new LocalizerBasedMealyDriver(
-				dataManager.getConjecture());
-		generatedDriver.stopLog();
-		generatedDriver.setCurrentState(dataManager.getC(
-				dataManager.traceSize()).getState());
-
-		// Now the two automata are in same state.
-		// We can do a random walk
-
-		int max_try = driver.getInputSymbols().size() * n * 10;
-		dataManager = null;// we use directly the driver for the walk so
-							// dataManager is not up to date;
-		driver.stopLog();
-		for (int j = 0; j < max_try; j++) {
-			int rand = new StandaloneRandom()
-					.randInt(driver.getInputSymbols().size());
-			String input = driver.getInputSymbols().get(rand);
-			if (!driver.execute(input).equals(generatedDriver.execute(input)))
-				return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * check if the computed conjecture is equivalent to the given automata the
-	 * control is made by walking in the given automata in order to follow each
-	 * transitions and comparing the two outputs and checking that only one
-	 * state of th conjecture can be associated to a state of the given
-	 * automata.
-	 * 
-	 * @param automata
-	 *            a connex automata
-	 * @param currentState
-	 *            the state in the automata which is supposed to be equivalent
-	 *            to the current state of the driver
-	 * @return true if the two automata are equivalent
-	 */
-	public boolean checkExact(Mealy automata, State currentState) {
-		LogManager.logStep(LogManager.STEPOTHER,
-				"checking the computed conjecture is exactly equivalent");
-		class FoundState {
-			public State computedState; // a state in the conjecture
-			public List<String> uncheckedTransitions;
-
-			public FoundState(State s, List<String> I) {
-				computedState = s;
-				uncheckedTransitions = new ArrayList<String>(I);
-			}
-
-			public String toString() {
-				return computedState + " but transitions "
-						+ uncheckedTransitions + "have not been checked";
-			}
-		}
-		// currentFoundState is maintained in order that
-		// currentFoundState.computedState is the current state in conjecture
-		FoundState currentFoundState = new FoundState(dataManager.getC(
-				dataManager.traceSize()).getState(), driver.getInputSymbols());
-		// assigned is a table to associate a FoundState to each state in the
-		// given automata
-		Map<State, FoundState> assigned = new HashMap<State, FoundState>();
-		assigned.put(currentState, currentFoundState);
-		State uncheckedState = currentState; // a state with an unchecked
-												// transition
-		List<String> path = new ArrayList<String>();// the path from the current
-													// state to uncheckeState
-
-		// now we iterate over all unchecked transitions
-		while (uncheckedState != null) {
-			FoundState uncheckedFoundState = assigned.get(uncheckedState);
-			LogManager.logInfo("Applying " + path + "in order to go in state "
-					+ uncheckedState + " and then try "
-					+ uncheckedFoundState.uncheckedTransitions.get(0));
-			path.add(uncheckedFoundState.uncheckedTransitions.get(0));
-
-			// we follow path in driver (the conjecture) and the given automata
-			for (String i : path) {
-				currentFoundState.uncheckedTransitions.remove(i);
-				MealyTransition t = automata.getTransitionFromWithInput(
-						currentState, i);
-				currentState = t.getTo();
-				String o = dataManager.apply(i);
-				if (!o.equals(t.getOutput())) {
-					LogManager.logInfo("expected output was " + t.getOutput());
-					return false;
-				}
-				currentFoundState = assigned.get(currentState);
-				if (currentFoundState == null) {
-					currentFoundState = new FoundState(dataManager.getC(
-							dataManager.traceSize()).getState(),
-							driver.getInputSymbols());
-					assigned.put(currentState, currentFoundState);
-				} else if (currentFoundState.computedState != dataManager.getC(
-						dataManager.traceSize()).getState()) {
-					LogManager.logInfo("it was expected to arrive in "
-							+ t.getTo());
-					return false;
-				}
-			}
-			// now we've applied an unchecked transition (which is now checked)
-
-			// and then we compute a new path to go to another state with
-			// unchecked transitions
-			class Node {
-				public List<String> path;
-				public State state;
-			}
-			LinkedList<Node> nodes = new LinkedList<Node>();
-			Node node = new Node();
-			node.path = new ArrayList<String>();
-			node.state = currentState;
-			nodes.add(node);
-
-			Map<State, Boolean> crossed = new HashMap<State, Boolean>();// this
-																		// map
-																		// is
-																		// used
-																		// to
-																		// store
-																		// the
-																		// node
-																		// crossed
-																		// during
-																		// the
-																		// path
-																		// searching
-																		// (avoid
-																		// going
-																		// to
-																		// the
-																		// same
-																		// state
-																		// by
-																		// two
-																		// different
-																		// path)
-			for (State s : automata.getStates())
-				crossed.put(s, false);
-			uncheckedState = null;
-			path = null;
-			while (!nodes.isEmpty()) {
-				node = nodes.pollFirst();
-				if (!assigned.get(node.state).uncheckedTransitions.isEmpty()) {
-					uncheckedState = node.state;
-					path = node.path;
-					break;
-				}
-				if (crossed.get(node.state))
-					continue;
-				for (String i : driver.getInputSymbols()) {
-					Node newNode = new Node();
-					newNode.path = new ArrayList<String>(node.path);
-					newNode.path.add(i);
-					newNode.state = automata.getTransitionFromWithInput(
-							node.state, i).getTo();
-					nodes.add(newNode);
-					crossed.put(node.state, true);
-				}
-			}
-		}
-
-		return true;
 	}
 
 	public static List<InputSequence> computeCharacterizationSet(

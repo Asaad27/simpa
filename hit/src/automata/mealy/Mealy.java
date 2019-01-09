@@ -994,7 +994,7 @@ public class Mealy extends Automata implements Serializable {
 	 */
 	public boolean searchConjectureError(LmConjecture conj) {
 		if (conj.getInitialState() != null && getInitialState() != null) {
-			if (conj.getCounterExamplesWithReset(this, true)
+			if (!conj.getCounterExamplesWithReset(this, true)
 					.isCompletelyEquivalent())
 				return false;
 		} else {

@@ -19,6 +19,7 @@ import main.simpa.Options.LogLevel;
 import options.RandomOption;
 import options.learnerOptions.OracleOption;
 import stats.StatsEntry_OraclePart;
+import tools.StandaloneRandom;
 import tools.Utils;
 import tools.loggers.LogManager;
 import automata.State;
@@ -243,7 +244,6 @@ public class MealyDriver extends Driver {
 	 */
 	public Boolean getDistinctionTreeBasedCE(LmConjecture c, State curentState,
 			MultiTrace traces, boolean resetAllowed) {
-		assert Options.USE_DT_CE;
 		if (!c.isFullyKnown())
 			return null;
 		// TODO extend oracle to incomplete automata
@@ -448,6 +448,8 @@ public class MealyDriver extends Driver {
 
 	private boolean doRandomWalk(LmConjecture conjecture, State conjectureState,
 			MultiTrace trace, int maxLength, RandomOption rand) {
+		assert conjectureState != null;
+		assert conjecture.getStates().contains(conjectureState);
 		if (Options.getLogLevel().compareTo(LogLevel.ALL) >= 0)
 			LogManager.logInfo("Starting a random walk");
 		int tried = 0;
@@ -586,6 +588,172 @@ public class MealyDriver extends Driver {
 		return automata.getInitialState();
 	}
 	
-	
+	/**
+	 * Synchronize the driver and the given automata to a given state (without
+	 * using a transparent box). It apply inputs on driver to eliminate states
+	 * in automata.
+	 * 
+	 * If driver is not equivalent to automata, this method MIGHT find a
+	 * counterexample.
+	 * 
+	 * @param automata
+	 *            the automata to synchronize with.
+	 * @param trace
+	 *            the trace of executions applied on driver
+	 * @param hintPossibleCurrentStates
+	 *            a set of {@link State} of @{code automata} in which the driver
+	 *            can be. Use {@code null} if the driver can be in any state.
+	 * @return a state of automata representing the current (after this call)
+	 *         state of driver if automata is equivalent to driver. If automata
+	 *         has equivalent states, only one state is returned.
+	 */
+	public State searchCurrentState(Mealy automata, LmTrace trace,
+			Set<State> hintPossibleCurrentStates) {
+		if (hintPossibleCurrentStates != null)
+			hintPossibleCurrentStates = Collections
+					.unmodifiableSet(hintPossibleCurrentStates);
+		LogManager.logInfo(
+				"searching the current state in automata by applying inputs on driver");
+
+		Set<State> possibleCurrentState;
+		if (hintPossibleCurrentStates != null)
+			possibleCurrentState = new HashSet<>(hintPossibleCurrentStates);
+		else
+			possibleCurrentState = new HashSet<>(automata.getStates());
+		InputSequence distinction = null;
+		State s1 = null;
+		State s2 = null;
+		while (possibleCurrentState.size() > 1) {
+			if (Options.getLogLevel() == LogLevel.ALL)
+				LogManager.logInfo(
+						"The automata can currently be in one state in ",
+						possibleCurrentState);
+			if (distinction == null || distinction.isEmpty()) {
+				java.util.Iterator<State> it = possibleCurrentState.iterator();
+				s1 = it.next();
+				s2 = it.next();
+				distinction = automata.getDistinctionSequence(s1, s2);
+				if (distinction == null) {
+					possibleCurrentState.remove(s1);
+					if (Options.getLogLevel() != LogLevel.LOW)
+						LogManager.logInfo("States ", s1, " and ", s2,
+								" are equivalents. Ignoring state ", s1);
+					continue;
+
+				}
+				if (Options.getLogLevel() != LogLevel.LOW)
+					LogManager.logInfo("Using sequence ", distinction,
+							" to distinguish states ", s1, " and ", s2);
+			}
+			Set<State> previousPossibleState = possibleCurrentState;
+			assert !distinction.isEmpty();
+			String in = distinction.getFirstSymbol();
+			distinction.removeFirstInput();
+			String out = execute(in);
+			trace.append(in, out);
+			possibleCurrentState = new HashSet<>();
+			for (State s : previousPossibleState) {
+				MealyTransition t = automata.getTransitionFromWithInput(s, in);
+				if (t.getOutput().equals(out))
+					possibleCurrentState.add(t.getTo());
+			}
+			if (distinction.isEmpty()) {
+				s1 = null;
+				s2 = null;
+			} else {
+				MealyTransition t1 = automata.getTransitionFromWithInput(s1,
+						in);
+				MealyTransition t2 = automata.getTransitionFromWithInput(s2,
+						in);
+				if (t1.getOutput().equals(out)) {
+					s1 = t1.getTo();
+					s2 = t2.getTo();
+				} else {
+					assert !t2.getOutput().equals(
+							out) : "distinction should differ only for the last symbol";
+					distinction = null;
+					s1 = null;
+					s2 = null;
+					if (Options.getLogLevel() != LogLevel.LOW)
+						LogManager.logInfo(
+								"the previously computed distinction sequence is thrown away because the two states are incompatible with last execution.");
+				}
+			}
+		}
+		if (possibleCurrentState.size() == 0) {
+			LogManager.logInfo(
+					"One counter example found (by inadvertance) : no state of given automata can produce the trace ",
+					trace);
+			return null;
+		}
+		assert possibleCurrentState.size() == 1;
+		State current = possibleCurrentState.iterator().next();
+		LogManager.logInfo("only state ", current,
+				" can be at the end of trace ", trace);
+		return current;
+	}
+
+	/**
+	 * check if conjecture is compatible with this driver.
+	 * 
+	 * @param conj
+	 *            the conjecture to test.
+	 * @return {@code false} if a discrepancy is found between conjecture and
+	 *         this automata, {@code true } if no discrepancy is found.
+	 */
+	public boolean searchConjectureError(LmConjecture conj) {
+		LogManager.logLine();
+		LogManager.logInfo("Checking conjecture");
+
+		if (this instanceof TransparentMealyDriver) {
+			LogManager.logInfo("Checking with transparent driver");
+			if (!((TransparentMealyDriver) this).getAutomata()
+					.searchConjectureError(conj)) {
+				LogManager.logError(
+						"Conjecture is inconsistent with transparent driver");
+				return false;
+			}
+		}
+
+		LogManager.logInfo("Checking with distinction tree");
+		State conjState = searchCurrentState(conj, new LmTrace(), null);
+		if (conjState == null) {
+			LogManager.logError("Conjecture is inconsitent with driver");
+			return false;
+		}
+		Boolean r = getDistinctionTreeBasedCE(conj, conjState,
+				new NoRecordMultiTrace(), conj.getInitialState() != null);
+		assert r != null : "conjecture should be complete";
+		if (r == null || r) {
+			LogManager.logError("Conjecture is inconsitent with driver");
+			return false;
+		}
+
+		LogManager.logInfo("Checking with random walk");
+		int nbtests = getInputSymbols().size() * 10;
+		int testLength = conj.getStateCount() * 2 + 10;
+		StandaloneRandom rand = new StandaloneRandom();
+		for (int i = 0; i < nbtests; i++) {
+			conjState = conj.getInitialState();
+			if (conjState != null)
+				reset();
+			else {
+				conjState = searchCurrentState(conj, new LmTrace(), null);
+				if (conjState == null) {
+					LogManager
+							.logError("Conjecture is inconsitent with driver");
+					return false;
+				}
+			}
+			if (doRandomWalk(conj, conjState, new NoRecordMultiTrace(),
+					testLength, rand)) {
+				LogManager.logError("Conjecture is inconsitent with driver");
+				return false;
+			}
+		}
+
+		LogManager.logInfo("Conjecture seems consistent with the driver");
+		return true;
+	}
 	
 }
