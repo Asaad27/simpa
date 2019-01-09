@@ -64,11 +64,17 @@ public class BooleanOption extends OptionTree {
 	 *            the list of sub-options available when this option is not
 	 *            selected
 	 * @param enabled
-	 *            the initial status of this option.
+	 *            the default status of this option.
 	 */
 	public BooleanOption(String name, String argument, String description,
 			List<OptionTree> subTreeIfTrue, List<OptionTree> subTreeIfFalse,
 			boolean enabled) {
+		this(name, argument, description, subTreeIfTrue, subTreeIfFalse);
+		setEnabledByDefault(enabled);
+	}
+
+	public BooleanOption(String name, String argument, String description,
+			List<OptionTree> subTreeIfTrue, List<OptionTree> subTreeIfFalse) {
 		assert !argument.startsWith("-");
 		this.name = name;
 		makeArgumentDescriptors(argument);
@@ -77,12 +83,7 @@ public class BooleanOption extends OptionTree {
 		this.subTreeIfFalse = subTreeIfFalse;
 		addSortedChildren(subTreeIfTrue);
 		addSortedChildren(subTreeIfFalse);
-		setEnabled(enabled);
-	}
-
-	public BooleanOption(String name, String argument, String description,
-			List<OptionTree> subTreeIfTrue, List<OptionTree> subTreeIfFalse) {
-		this(name, argument, description, subTreeIfTrue, subTreeIfFalse, false);
+		setEnabled(false);
 	}
 
 	public BooleanOption(String name, String argument, String description) {
