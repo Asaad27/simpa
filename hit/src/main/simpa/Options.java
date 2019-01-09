@@ -110,6 +110,7 @@ public class Options {
 	public static boolean LOG_TEXT = false;
 	@Deprecated
 	public static boolean LOG_HTML = false;
+	@Deprecated
 	public static boolean AUTO_OPEN_HTML = false;
 	/**
 	 * if greater than 0, only start and end of sequences are displayed in order

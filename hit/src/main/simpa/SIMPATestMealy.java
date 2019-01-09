@@ -103,7 +103,8 @@ public class SIMPATestMealy {
 						System.out.println("    " + i + "/" + Options.NBTEST);
 					try {
 						if (Options.LOG_HTML)
-							LogManager.addLogger(new HTMLLogger());
+							LogManager.addLogger(
+									new HTMLLogger(Options.AUTO_OPEN_HTML));
 						if (Options.LOG_TEXT)
 							LogManager.addLogger(new TextLogger());
 						LogManager.start();
@@ -136,7 +137,8 @@ public class SIMPATestMealy {
 				Utils.deleteDir(new File(Options.OUTDIR + Options.DIRLOG));
 				try {
 					if (Options.LOG_HTML)
-						LogManager.addLogger(new HTMLLogger());
+						LogManager.addLogger(
+								new HTMLLogger(Options.AUTO_OPEN_HTML));
 					if (Options.LOG_TEXT)
 						LogManager.addLogger(new TextLogger());
 					LogManager.start();

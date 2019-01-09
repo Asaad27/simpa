@@ -151,7 +151,7 @@ public class SIMPAOld {
 		if (Options.LOG_TEXT)
 			LogManager.addLogger(new TextLogger());
 		if (Options.LOG_HTML)
-			LogManager.addLogger(new HTMLLogger());
+			LogManager.addLogger(new HTMLLogger(Options.AUTO_OPEN_HTML));
 	}
 
 	public static Driver loadDriver(String system) throws Exception {

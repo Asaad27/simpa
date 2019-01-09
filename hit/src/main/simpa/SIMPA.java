@@ -339,11 +339,6 @@ public class SIMPA {
 	private static Option<?>[] generalOptions = new Option<?>[] { help,
 			LOAD_DOT_FILE, INTERACTIVE };
 
-	// output options
-	private static BooleanOption AUTO_OPEN_HTML = new BooleanOption("--openhtml", "Open HTML log automatically");
-	private static Option<?>[] outputOptions = new Option<?>[] {
-			AUTO_OPEN_HTML };
-
 	// inference choice
 	private static BooleanOption LOCALIZER_BASED_INFERENCE = new BooleanOption("--localizerBased", "use localizer based Algorithm (also called 'DUBAI' and 'ICTSS2015' and previously 'noReset')");
 	private static Option<?>[] inferenceChoiceOptions = new Option<?>[] {
@@ -450,7 +445,6 @@ public class SIMPA {
 
 		parse(args, used, generalOptions);
 
-		parse(args, used, outputOptions);
 		parse(args, used, inferenceChoiceOptions);
 		if (LOCALIZER_BASED_INFERENCE.getValue()) {
 			parse(args, used, localizerBasedOptions);
@@ -480,8 +474,6 @@ public class SIMPA {
 		}
 
 		Options.INTERACTIVE = INTERACTIVE.getValue();
-
-		Options.AUTO_OPEN_HTML = AUTO_OPEN_HTML.getValue();
 
 		Options.LOCALIZER_BASED_INFERENCE = LOCALIZER_BASED_INFERENCE.getValue();
 
@@ -688,7 +680,8 @@ public class SIMPA {
 		if (getOutputsOptions().textLoggerOption.isEnabled())
 			LogManager.addLogger(new TextLogger());
 		if (getOutputsOptions().htmlLoggerOption.isEnabled())
-			LogManager.addLogger(new HTMLLogger());
+			LogManager.addLogger(new HTMLLogger(
+					getOutputsOptions().autoOpenHTML.isEnabled()));
 		LogManager.start();
 		LogManager.logInfo("starting inference with options "
 				+ allOptions.buildBackCLILine(false));
@@ -740,7 +733,7 @@ public class SIMPA {
 		if (Options.LOG_TEXT)
 			LogManager.addLogger(new TextLogger());
 		if (Options.LOG_HTML)
-			LogManager.addLogger(new HTMLLogger());
+			LogManager.addLogger(new HTMLLogger(false));
 		LogManager.start();
 		Options.LogOptions();
 		LogManager
