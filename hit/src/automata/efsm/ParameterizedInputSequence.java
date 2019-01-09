@@ -137,18 +137,6 @@ public class ParameterizedInputSequence implements Cloneable, Serializable {
 		return newis;
 	}
 
-	/**
-	 * @deprecated please use equals instead, String operations are really slow
-	 * @return 
-	 */
-	public String getHash() {
-		String hash = "";
-		for (ParameterizedInput pi : sequence) {
-			hash += pi.getInputSymbol() + pi.getParamHash();
-		}
-		return hash;
-	}
-
 	public String getSymbol(int k) {
 		return sequence.get(k).getInputSymbol();
 	}

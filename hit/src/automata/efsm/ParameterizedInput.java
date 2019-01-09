@@ -79,23 +79,6 @@ public class ParameterizedInput implements Cloneable, Serializable {
 		return parameters.get(paramIndex).value;
 	}
 
-	/**
-	 * @deprecated please use parameters.equals() instead
-	 * @return 
-	 */
-	public String getParamHash() {
-		StringBuffer s = new StringBuffer();
-		for (int i = 0; i < parameters.size(); i++) {
-			if (i > 0)
-				s.append('|');
-			if (isNdv(i))
-				s.append("Ndv" + parameters.get(i).getNdv());
-			else
-				s.append(parameters.get(i).value);
-		}
-		return s.toString();
-	}
-
 	public boolean isEpsilonSymbol() {
 		return inputSymbol.equals(EFSM.EPSILON);
 	}

@@ -34,23 +34,6 @@ public class LiControlTableItem implements Serializable {
 		return inputParameters;
 	}
 
-	/**
-	 * @deprecated Please use parameters.equals() to compare them
-	 * @return 
-	 */
-	public String getParamHash() {
-		StringBuffer s = new StringBuffer();
-		for (int i = 0; i < inputParameters.size(); i++) {
-			if (i > 0)
-				s.append('|');
-			if (inputParameters.get(i).isNDV())
-				s.append("Ndv" + inputParameters.get(i).getNdv());
-			else
-				s.append(inputParameters.get(i).value);
-		}
-		return s.toString();
-	}
-
 	public boolean isOmegaSymbol() {
 		return outputSymbol.equals(EFSM.OMEGA);
 	}
