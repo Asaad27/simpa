@@ -201,8 +201,6 @@ public class FullyQualifiedState{
 			if (!expectedTraces.addTrace(trace)) {
 				LogManager.logWarning("incoherent characterization : «" + trace
 						+ "» is incoherent with previous traces");
-				LogManager.logConsole("incoherent characterization : «" + trace
-						+ "» is incoherent with previous traces");
 				throw new RuntimeException("invalid characterization");
 			}
 		}

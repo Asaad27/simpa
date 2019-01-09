@@ -529,8 +529,6 @@ public class HWLearner extends Learner {
 				.isCompatible()) {
 			LogManager.logWarning(
 					"conjecture is false or driver is not strongly connected");
-			System.err.println(
-					"conjecture is false or driver is not strongly connected");
 			throw new RuntimeException("wrong conjecture");
 		}
 

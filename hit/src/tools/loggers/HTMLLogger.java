@@ -124,6 +124,16 @@ public class HTMLLogger implements ILogger {
 
 	@Override
 	public void logError(String s) {
+		try {
+			writer.write("<li class=\"error\">\n");
+			writer.write("<span class=\"date\">" + tfm.format(new Date())
+					+ "</span><span class=\"content\">Error : "
+					+ Utils.escapeHTML(s) + "</span>");
+			writer.write("</li>\n");
+			writer.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override

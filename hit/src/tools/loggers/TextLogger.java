@@ -198,6 +198,13 @@ public class TextLogger implements ILogger {
 
 	@Override
 	public void logError(String s) {
+		try {
+			writer.write(LogManager.prefixMultiLines(
+					tfm.format(new Date()) + "Error : ", s) + ret);
+			writer.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override

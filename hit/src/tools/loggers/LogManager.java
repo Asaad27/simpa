@@ -24,6 +24,7 @@ import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedOutput;
 import detection.Reflection;
 import drivers.efsm.real.GenericDriver;
+import tools.Utils;
 
 public class LogManager {
 	private static DateFormat tfm = new SimpleDateFormat("[HH:mm:ss:SSS] ");
@@ -114,6 +115,7 @@ public class LogManager {
 	}
 
 	public static void logWarning(String s) {
+		System.err.println(prefixMultiLines("Warning : ", s));
 		for (ILogger l : loggers)
 			l.logWarning(prefix + s);
 	}
@@ -258,5 +260,10 @@ public class LogManager {
 	
 	public static String getPrefix(){
 		return prefix;
+	}
+
+	public static String prefixMultiLines(String prefix, String message) {
+		String otherLinePrefix = Utils.space(prefix.length());
+		return prefix + message.replace("\n", "\n" + otherLinePrefix);
 	}
 }
