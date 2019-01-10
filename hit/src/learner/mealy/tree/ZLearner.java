@@ -17,6 +17,7 @@ import tools.loggers.LogManager;
 import automata.State;
 import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
+import automata.mealy.multiTrace.SimpleMultiTrace;
 import drivers.Driver;
 import drivers.mealy.MealyDriver;
 
@@ -182,11 +183,11 @@ public class ZLearner extends Learner {
 
 		// 4. while there exists an unprocessed counterexample CE
 		do {
-			List<LmTrace> appliedSequences = new ArrayList<>();
+			SimpleMultiTrace appliedSequences = new SimpleMultiTrace();
 			if (driver.getCounterExample_noThrow(options.oracle, Z_Q, null,
 					appliedSequences, false, stats.getOracle())) {
 				LmTrace ceTrace = appliedSequences
-						.get(appliedSequences.size() - 1);
+						.getLastTrace();
 				ce = ceTrace.getInputsProjection();
 			} else {
 				ce = null;

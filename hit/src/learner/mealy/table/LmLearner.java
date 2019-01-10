@@ -15,6 +15,7 @@ import automata.State;
 import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
+import automata.mealy.multiTrace.SimpleMultiTrace;
 import drivers.Driver;
 import drivers.mealy.MealyDriver;
 
@@ -177,11 +178,10 @@ public class LmLearner extends Learner {
 			LmConjecture conj = createConjecture();
 			startLog();
 			if (!driver.isCounterExample(ce, conj)) {
-				List<LmTrace> appliedSequences = new ArrayList<>();
+				SimpleMultiTrace appliedSequences = new SimpleMultiTrace();
 				if (driver.getCounterExample_noThrow(options.oracle, conj, null,
 						appliedSequences, false, stats.getOracle())) {
-					LmTrace ceTrace = appliedSequences
-							.get(appliedSequences.size() - 1);
+					LmTrace ceTrace = appliedSequences.getLastTrace();
 					handleNewCounterExample(ceTrace);
 					ce = ceTrace.getInputsProjection();
 				} else {

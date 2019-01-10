@@ -26,6 +26,8 @@ import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
+import automata.mealy.multiTrace.MultiTrace;
+import automata.mealy.multiTrace.NoRecordMultiTrace;
 import drivers.Driver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 
@@ -168,8 +170,7 @@ public class MealyDriver extends Driver {
 	 *            the current state in conjecture (can be {@code null} if the
 	 *            oracle is allowed to reset the driver)
 	 * @param appliedSequences
-	 *            a list in which all sequence applied on driver will be added.
-	 *            A reset is applied between each trace of this list.
+	 *            an object to record execution on driver
 	 * @param oracleStats
 	 *            the object which will be used to record statistics about
 	 *            oracle.
@@ -181,7 +182,7 @@ public class MealyDriver extends Driver {
 	 */
 	public boolean getCounterExample(OracleOption options,
 			LmConjecture conjecture, State conjectureStartingState,
-			List<LmTrace> appliedSequences, Boolean forbidReset,
+			MultiTrace appliedSequences, Boolean forbidReset,
 			StatsEntry_OraclePart oracleStats)
 			throws CeExposedUnknownStateException {
 		int startSize = numberOfAtomicRequest;
@@ -196,19 +197,22 @@ public class MealyDriver extends Driver {
 					/ 1000000000;
 			oracleStats.addOracleCall(numberOfAtomicRequest - startSize,
 					duration);
-			assert startReset + appliedSequences.size() - 1 == numberOfRequest;
+			assert startReset
+					+ appliedSequences.getResetNumber() == numberOfRequest;
+			assert appliedSequences.getResetNumber() == 0
+					|| (!forbidReset && options.isResetAllowed());
 		}
 		return result;
 	}
 
 	/**
 	 * same as
-	 * {@link #getCounterExample(OracleOption, LmConjecture, State, List, Boolean, StatsEntry_OraclePart)}
+	 * {@link #getCounterExample(OracleOption, LmConjecture, State, MultiTrace, Boolean, StatsEntry_OraclePart)}
 	 * but for algorithms where the conjecture will not search initial state.
 	 */
 	public boolean getCounterExample_noThrow(OracleOption options,
 			LmConjecture conjecture, State conjectureStartingState,
-			List<LmTrace> appliedSequences, Boolean forbidReset,
+			MultiTrace appliedSequences, Boolean forbidReset,
 			StatsEntry_OraclePart oracleStats) {
 		assert conjecture.getInitialState() != null || forbidReset
 				|| !options.isResetAllowed();
@@ -229,8 +233,7 @@ public class MealyDriver extends Driver {
 	 * @param curentState
 	 *            the current state in conjecture
 	 * @param traces
-	 *            a list which will be filled with the traces applied on driver.
-	 *            See {@link LY_basedOracle#traces}.
+	 *            an object to record traces applied on driver.
 	 * @param resetAllowed
 	 *            indicate whether the oracle is allowed to do a reset or not
 	 * @return {@code true} if a counter example is found, {@code null} if the
@@ -239,7 +242,7 @@ public class MealyDriver extends Driver {
 	 *         transitions were tested but without finding a discrepancy.
 	 */
 	public Boolean getDistinctionTreeBasedCE(LmConjecture c, State curentState,
-			List<LmTrace> traces, boolean resetAllowed) {
+			MultiTrace traces, boolean resetAllowed) {
 		assert Options.USE_DT_CE;
 		if (!c.isFullyKnown())
 			return null;
@@ -265,7 +268,7 @@ public class MealyDriver extends Driver {
 	 */
 	protected boolean getCounterExample(OracleOption options,
 			LmConjecture conjecture, State conjectureState,
-			List<LmTrace> appliedSequences, Boolean forbidReset)
+			MultiTrace appliedSequences, Boolean forbidReset)
 			throws CeExposedUnknownStateException {
 		if (forbidReset == null)
 			forbidReset = false;
@@ -278,14 +281,12 @@ public class MealyDriver extends Driver {
 				if (result)
 					return true;
 			}
-			else {
-				appliedSequences.add(new LmTrace());
-			}
 			// we need to reset to let some oracle start from initial state
 			// (e.g. the search of shortest counter-example needs to be in a
 			// state were all others states are reachable).
 			conjectureState = conjecture.searchInitialState(appliedSequences);
 			reset();
+			appliedSequences.recordReset();
 		}
 
 		assert conjectureState != null;
@@ -298,12 +299,11 @@ public class MealyDriver extends Driver {
 			List<InputSequence> counterExamples = conjecture.getCounterExamples(
 					conjectureState, this.automata, getCurrentState(), true);
 			if (counterExamples.isEmpty()) {
-				appliedSequences.add(new LmTrace());
 				return false;
 			} else {
 				InputSequence ceIn = counterExamples.get(0);
 				OutputSequence ceOut = execute(ceIn);
-				appliedSequences.add(new LmTrace(ceIn, ceOut));
+				appliedSequences.recordTrace(new LmTrace(ceIn, ceOut));
 				return true;
 			}
 		} else if (options.getSelectedItem() == options.mrBean) {
@@ -317,7 +317,6 @@ public class MealyDriver extends Driver {
 						.getCounterExamples(conjectureState, this.automata,
 								getCurrentState(), true);
 				if (counterExamples.isEmpty()) {
-					appliedSequences.add(new LmTrace());
 					return false;
 				} else {
 					LogManager.logInfo("a counter example exixst (e.g. "
@@ -331,15 +330,15 @@ public class MealyDriver extends Driver {
 							maxLength = conjectureBound;
 						boolean counterExampleIsFound;
 						do {
-							LmTrace trace = new LmTrace();
 							if (conjectureState == null) {
 								conjectureState = conjecture
 										.searchInitialState(appliedSequences);
-								appliedSequences.add(trace);
 								reset();
+								appliedSequences.recordReset();
 							}
 							counterExampleIsFound = doRandomWalk(conjecture,
-									conjectureState, trace, maxLength,
+									conjectureState, appliedSequences,
+									maxLength,
 									options.mrBean.random);
 							conjectureState = null;
 							// here is a difficult point : a short length is
@@ -352,10 +351,9 @@ public class MealyDriver extends Driver {
 						return true;
 					} else {
 						assert this.automata.isConnex();
-						LmTrace trace = new LmTrace();
-						doRandomWalk(conjecture, conjectureState, trace, -1,
+						doRandomWalk(conjecture, conjectureState,
+								appliedSequences, -1,
 								options.mrBean.random);
-						appliedSequences.add(trace);
 						return true;
 					}
 				}
@@ -364,13 +362,12 @@ public class MealyDriver extends Driver {
 				if (!resetIsAllowed)
 					maxTraceNumber = 1;
 				for (int i = 0; i < maxTraceNumber; i++) {
-					LmTrace trace = new LmTrace();
-					appliedSequences.add(trace);
-					if (i != 0)
-						reset();// according to specification, there is a reset
-								// BETWEEN the sequences
+					if (i != 0) {
+						reset();
+						appliedSequences.recordReset();
+					}
 					boolean counterExampleIsFound = doRandomWalk(conjecture,
-							conjectureState, trace,
+							conjectureState, appliedSequences,
 							options.mrBean.getMaxTraceLength(),
 							options.mrBean.random);
 					if (counterExampleIsFound)
@@ -390,7 +387,7 @@ public class MealyDriver extends Driver {
 
 	private boolean getInteractiveCounterExample(OracleOption options,
 			LmConjecture conjecture, State conjectureState,
-			List<LmTrace> appliedSequences) {
+			MultiTrace appliedSequences) {
 
 		List<InputSequence> counterExamples = null;
 		if (this.automata != null && getCurrentState() != null) {
@@ -436,7 +433,7 @@ public class MealyDriver extends Driver {
 				"user choose «" + counterExample + "» as counterExemple");
 
 		OutputSequence driverOut = execute(counterExample);
-		appliedSequences.add(new LmTrace(counterExample, driverOut));
+		appliedSequences.recordTrace(new LmTrace(counterExample, driverOut));
 		if (driverOut.equals(
 				conjecture.simulateOutput(conjectureState, counterExample))) {
 			LogManager.logInfo(
@@ -450,7 +447,7 @@ public class MealyDriver extends Driver {
 	}
 
 	private boolean doRandomWalk(LmConjecture conjecture, State conjectureState,
-			LmTrace trace, int maxLength, RandomOption rand) {
+			MultiTrace trace, int maxLength, RandomOption rand) {
 		if (Options.getLogLevel().compareTo(LogLevel.ALL) >= 0)
 			LogManager.logInfo("Starting a random walk");
 		int tried = 0;
@@ -458,7 +455,7 @@ public class MealyDriver extends Driver {
 		while (maxLength < 0 || tried < maxLength) {
 			String input = rand.randIn(is);
 			String output = execute(input);
-			trace.append(input, output);
+			trace.recordIO(input, output);
 			MealyTransition transition = conjecture
 					.getTransitionFromWithInput(conjectureState, input);
 			if (!transition.getOutput().equals(output)) {

@@ -1,6 +1,5 @@
 package drivers.mealy;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,10 +17,10 @@ import automata.mealy.GenericInputSequence.GenericOutputSequence;
 import automata.mealy.GenericInputSequence.Iterator;
 import automata.mealy.distinctionStruct.TotallyAdaptiveW;
 import automata.mealy.distinctionStruct.TotallyAdaptiveW.AdaptiveCharacterization;
+import automata.mealy.multiTrace.MultiTrace;
 import automata.mealy.splittingTree.LY_SplittingTree;
 import automata.mealy.splittingTree.smetsersSplittingTree.SplittingTree;
 import learner.mealy.LmConjecture;
-import learner.mealy.LmTrace;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
 import tools.loggers.LogManager;
@@ -72,14 +71,9 @@ public class LY_basedOracle {
 	State currentState;
 	final LmConjecture conjecture;
 	/**
-	 * The traces applied on driver. A reset was applied between each traces of
-	 * the list.
+	 * The traces applied on driver.
 	 */
-	List<LmTrace> traces;
-	/**
-	 * The last trace of {@link #traces}.
-	 */
-	LmTrace currentTrace;
+	MultiTrace traces;
 	final MealyDriver driver;
 	final List<String> inputSymbols;
 	public boolean verbose = Options.LOG_LEVEL == LogLevel.ALL;
@@ -89,22 +83,14 @@ public class LY_basedOracle {
 	public boolean resetAllowed = true;
 
 	public LY_basedOracle(MealyDriver driver, LmConjecture c,
-			State currentState, List<LmTrace> traces) {
+			State currentState, MultiTrace traces) {
 		depths = c.computeDepths(currentState, verbose);
 		assert currentState != null;
 		this.currentState = currentState;
 		this.conjecture = c;
 		this.driver = driver;
-		currentTrace = new LmTrace();
 		this.traces = traces;
-		if (traces == null)
-			traces = new ArrayList<>();
-		if (traces.size() == 0) {
-			currentTrace = new LmTrace();
-			traces.add(currentTrace);
-		} else {
-			currentTrace = traces.get(traces.size() - 1);
-		}
+		assert traces != null;
 		inputSymbols = driver.getInputSymbols();
 		TotallyAdaptiveW distinctionTree = new SplittingTree(conjecture)
 				.computeW();
@@ -219,7 +205,7 @@ public class LY_basedOracle {
 	 */
 	private String execute(String input) throws InconsistencyFound {
 		String driverOut = driver.execute(input);
-		currentTrace.append(input, driverOut);
+		traces.recordIO(input, driverOut);
 		MealyTransition t = conjecture.getTransitionFromWithInput(currentState,
 				input);
 		if (t == null)
@@ -255,8 +241,7 @@ public class LY_basedOracle {
 	 */
 	private void reset() {
 		driver.reset();
-		currentTrace = new LmTrace();
-		traces.add(currentTrace);
+		traces.recordReset();
 		currentState = conjecture.getInitialState();
 		assert currentState != null;
 	}
@@ -280,7 +265,7 @@ public class LY_basedOracle {
 				}
 				InputSequence seq = computeAlpha();
 				if (seq == null) {
-					if (!resetAllowed || currentTrace.size() == 0) {
+					if (!resetAllowed || traces.isAfterRecordedReset()) {
 						assert !resetAllowed
 								|| currentState == conjecture.getInitialState();
 						throw new UnreachableStatesException(

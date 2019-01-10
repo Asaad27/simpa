@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import automata.mealy.distinctionStruct.Characterization;
 import automata.mealy.distinctionStruct.DistinctionStruct;
 import automata.mealy.distinctionStruct.TotallyAdaptiveW;
 import automata.mealy.distinctionStruct.TotallyFixedW;
+import automata.mealy.multiTrace.SimpleMultiTrace;
 import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
@@ -133,7 +135,7 @@ public class HWLearner extends Learner {
 	 */
 	public LmTrace getCounterExemple(List<GenericHNDException> hExceptions,
 			boolean forbidReset) throws CeExposedUnknownStateException {
-		List<LmTrace> appliedSequences = new ArrayList<>();
+		SimpleMultiTrace appliedSequences = new SimpleMultiTrace();
 		LmTrace returnedCE = null;
 		LmConjecture conjecture = dataManager.getConjecture();
 		State conjectureStartingState = dataManager.getCurrentState()
@@ -145,23 +147,16 @@ public class HWLearner extends Learner {
 					conjectureStartingState, appliedSequences, forbidReset,
 					stats.oracle);
 		} finally {
-			if (found) {
-				assert appliedSequences.size() >= 1;
-				returnedCE = appliedSequences
-						.remove(appliedSequences.size() - 1);
-			} else {
-				returnedCE = null;
+			Iterator<LmTrace> it = appliedSequences.iterator();
+			while (it.hasNext()) {
+				LmTrace trace = it.next();
+				if (found && !it.hasNext()) {
+					returnedCE = trace;
+				} else
+					dataManager.walkWithoutCheck(trace, hExceptions);
+				if (it.hasNext())
+					dataManager.walkWithoutCheckReset();
 			}
-			if (appliedSequences.size() > 0)
-				dataManager.walkWithoutCheck(appliedSequences.get(0),
-						hExceptions);
-			for (int i = 1; i < appliedSequences.size(); i++) {
-				dataManager.walkWithoutCheckReset();
-				dataManager.walkWithoutCheck(appliedSequences.get(i),
-						hExceptions);
-			}
-			if (found && !appliedSequences.isEmpty())
-				dataManager.walkWithoutCheckReset();
 			assert checkTracesAreCompatible();
 		}
 		return returnedCE;

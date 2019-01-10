@@ -1,15 +1,13 @@
 package learner.mealy.hW.dataManager;
 
-import java.util.List;
-
 import automata.State;
 import automata.mealy.GenericInputSequence;
 import automata.mealy.GenericInputSequence.GenericOutputSequence;
 import automata.mealy.distinctionStruct.Characterization;
+import automata.mealy.multiTrace.MultiTrace;
 import drivers.mealy.MealyDriver;
 import learner.mealy.CeExposedUnknownStateException;
 import learner.mealy.LmConjecture;
-import learner.mealy.LmTrace;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
 import tools.loggers.LogManager;
@@ -25,7 +23,7 @@ public class HWConjecture extends LmConjecture {
 	}
 
 	@Override
-	public State searchInitialState(List<LmTrace> appliedSequences)
+	public State searchInitialState(MultiTrace appliedSequences)
 			throws CeExposedUnknownStateException {
 		State s = getInitialState();
 		if (s != null)
@@ -34,8 +32,9 @@ public class HWConjecture extends LmConjecture {
 				.getInitialCharacterization();
 		for (GenericInputSequence w : characterization.unknownPrints()) {
 			driver.reset();
+			appliedSequences.recordReset();
 			GenericOutputSequence r = driver.execute(w);
-			appliedSequences.add(w.buildTrace(r));
+			appliedSequences.recordTrace(w.buildTrace(r));
 			if (Options.getLogLevel() != LogLevel.LOW)
 				LogManager.logInfo(
 						"characterizing initial state with sequence ", w);

@@ -13,6 +13,7 @@ import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
+import automata.mealy.multiTrace.MultiTrace;
 import drivers.mealy.MealyDriver;
 import tools.loggers.LogManager;
 
@@ -380,7 +381,7 @@ public class LmConjecture extends automata.mealy.Mealy {
 	 * @return the initial state of the conjecture or null if the initial state
 	 *         cannot be discovered.
 	 */
-	public State searchInitialState(List<LmTrace> appliedSequences)
+	public State searchInitialState(MultiTrace appliedSequences)
 			throws CeExposedUnknownStateException {
 		return getInitialState();
 	}

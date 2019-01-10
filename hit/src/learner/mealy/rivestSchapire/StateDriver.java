@@ -4,11 +4,11 @@ import java.util.List;
 
 import automata.State;
 import automata.mealy.OutputSequence;
+import automata.mealy.multiTrace.MultiTrace;
 import drivers.mealy.MealyDriver;
 import learner.Learner;
 import learner.mealy.CeExposedUnknownStateException;
 import learner.mealy.LmConjecture;
-import learner.mealy.LmTrace;
 import learner.mealy.table.LmLearner;
 import options.learnerOptions.OracleOption;
 import stats.StatsEntry_OraclePart;
@@ -136,7 +136,7 @@ class StateDriver extends MealyDriver {
 	@Override
 	public boolean getCounterExample(OracleOption options,
 			LmConjecture conjecture, State conjectureStartingState,
-			List<LmTrace> appliedSequences, Boolean forbidReset,
+			MultiTrace appliedSequences, Boolean forbidReset,
 			StatsEntry_OraclePart oracleStats)
 			throws CeExposedUnknownStateException {
 		globalTraceLengthBeforeLastCE = realDriver.numberOfAtomicRequest;
