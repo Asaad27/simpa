@@ -612,7 +612,7 @@ public class HWGraphGenerator extends GraphGenerator {
 			public void personalize(Graph<?, ?> g) {
 				if (upperPersonalizer != null)
 					upperPersonalizer.personalize(g);
-				g.setDataDescriptionFields(new Attribute[] {
+				g.setDataDescriptionFields(new Attribute<?>[] {
 						Attribute.INPUT_SYMBOLS, Attribute.OUTPUT_SYMBOLS,
 						Attribute.AUTOMATA, Attribute.ORACLE_USED });
 				g.setDataDescriptionFields(new Attribute<?>[] {});
@@ -787,12 +787,12 @@ public class HWGraphGenerator extends GraphGenerator {
 			@Override
 			public void personalize(Graph<?, ?> g) {
 
-				g.setDataDescriptionFields(new Attribute[] {
+				g.setDataDescriptionFields(new Attribute<?>[] {
 						Attribute.INPUT_SYMBOLS, Attribute.OUTPUT_SYMBOLS,
 						// Attribute.AUTOMATA,
 						Attribute.ADD_H_IN_W, Attribute.SEARCH_CE_IN_TRACE,
 						Attribute.REUSE_HZXW, });
-				g.setDataDescriptionFields(new Attribute[] {});
+				g.setDataDescriptionFields(new Attribute<?>[] {});
 				if (upperPersonalizer != null)
 					upperPersonalizer.personalize(g);
 
