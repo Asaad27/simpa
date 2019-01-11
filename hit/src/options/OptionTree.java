@@ -5,9 +5,9 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -260,10 +260,10 @@ public abstract class OptionTree {
 	 */
 	public List<OptionTree> getAllSelectedChildren() {
 		List<OptionTree> r = new ArrayList<>();
-		LinkedList<OptionTree> toProcess = new LinkedList<>();
+		Stack<OptionTree> toProcess = new Stack<>();
 		toProcess.addAll(getSelectedChildren());
 		while (!toProcess.isEmpty()) {
-			OptionTree current = toProcess.poll();
+			OptionTree current = toProcess.pop();
 			r.add(current);
 			toProcess.addAll(current.getSelectedChildren());
 		}
@@ -716,12 +716,13 @@ public abstract class OptionTree {
 
 	public void printHelp(PrintStream stream) {
 		// first, list all argument and get their helping text.
-		List<OptionTree> toCompute = new ArrayList<>();
+		Stack<OptionTree> toCompute = new Stack<>();
 		toCompute.add(this);
 		Map<String, ArgumentDescriptor> seenDescriptors = new HashMap<>();
 		Map<ArgumentDescriptor, String> helps = new HashMap<>();
+		List<ArgumentDescriptor> sortedArguments = new ArrayList<>();
 		while (!toCompute.isEmpty()) {
-			OptionTree current = toCompute.remove(0);
+			OptionTree current = toCompute.pop();
 			for (ArgumentDescriptor descriptor : current
 					.getAcceptedArguments()) {
 				String help = current.getHelpByArgument(descriptor);
@@ -731,6 +732,7 @@ public abstract class OptionTree {
 				} else {
 					helps.put(descriptor, help);
 					seenDescriptors.put(descriptor.name, descriptor);
+					sortedArguments.add(descriptor);
 				}
 			}
 			toCompute.addAll(current.getChildren());
@@ -759,7 +761,7 @@ public abstract class OptionTree {
 		int MAX_LENGTH = 80;// maximum length of lines, for readability.
 		int argColumnWidth = maxArgDispLength;
 		argColumnWidth++;// put a blank space between argument and help.
-		for (ArgumentDescriptor descriptor : helps.keySet()) {
+		for (ArgumentDescriptor descriptor : sortedArguments) {
 			String argDisp = displayedArgs.get(descriptor);
 			String help = helps.get(descriptor);
 			stream.print(argDisp);
