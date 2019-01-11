@@ -297,14 +297,6 @@ public class MealyDriver extends Driver {
 						"automata must be strongly connected");
 			List<InputSequence> counterExamples = conjecture.getCounterExamples(
 					conjectureState, this.automata, getCurrentState(), true);
-			if (counterExamples.isEmpty() && options.isResetAllowed()) {
-				reset();
-				appliedSequences.add(new LmTrace());
-				conjectureState = conjecture.getInitialState();
-				assert conjectureState != null;
-				counterExamples = conjecture.getCounterExamples(conjectureState,
-						this.automata, getCurrentState(), true);
-			}
 			if (counterExamples.isEmpty()) {
 				appliedSequences.add(new LmTrace());
 				return false;
@@ -324,15 +316,6 @@ public class MealyDriver extends Driver {
 				List<InputSequence> counterExamples = conjecture
 						.getCounterExamples(conjectureState, this.automata,
 								getCurrentState(), true);
-				if (counterExamples.isEmpty() && resetIsAllowed) {
-					reset();
-					appliedSequences.add(new LmTrace());
-					conjectureState = conjecture.getInitialState();
-					assert conjectureState != null;
-					counterExamples = conjecture.getCounterExamples(
-							conjectureState, this.automata, getCurrentState(),
-							true);
-				}
 				if (counterExamples.isEmpty()) {
 					appliedSequences.add(new LmTrace());
 					return false;
@@ -340,7 +323,7 @@ public class MealyDriver extends Driver {
 					LogManager.logInfo("a counter example exixst (e.g. "
 							+ counterExamples.get(0)
 							+ "). Doing random walk until a CE is found");
-					if (options.isResetAllowed()) {
+					if (resetIsAllowed) {
 						int maxLength = options.mrBean.getMaxTraceLength();
 						int conjectureBound = conjecture.getStateCount()
 								* getInputSymbols().size() * 100 + 500;
@@ -349,11 +332,16 @@ public class MealyDriver extends Driver {
 						boolean counterExampleIsFound;
 						do {
 							LmTrace trace = new LmTrace();
+							if (conjectureState == null) {
+								conjectureState = conjecture
+										.searchInitialState(appliedSequences);
+								appliedSequences.add(trace);
+								reset();
+							}
 							counterExampleIsFound = doRandomWalk(conjecture,
 									conjectureState, trace, maxLength,
 									options.mrBean.random);
-							appliedSequences.add(trace);
-							reset();
+							conjectureState = null;
 							// here is a difficult point : a short length is
 							// good if the automaton is not connex and the
 							// counter-example is near the start but a long
