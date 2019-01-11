@@ -347,8 +347,6 @@ public class SIMPA {
 	// ZQ options
 	private static BooleanOption STOP_AT_CE_SEARCH = new BooleanOption("--stopatce",
 			"Stop inference when a counter exemple is asked");
-	private static BooleanOption USE_DT_CE = new BooleanOption("--dt-ce",
-			"use distinction tree to make a pseudo-checking sequence when searching a counter-exemple");
 	private static StringOption INITIAL_INPUT_SYMBOLS = new StringOption("-I", "Initial input symbols (a,b,c)",
 			Options.INITIAL_INPUT_SYMBOLS);
 	private static StringOption INITIAL_INPUT_SEQUENCES = new StringOption("-Z",
@@ -356,7 +354,7 @@ public class SIMPA {
 	private static BooleanOption INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = new BooleanOption("-I=X",
 			"Initial input symbols set to X");
 	private static Option<?>[] ZQOptions = new Option<?>[] { STOP_AT_CE_SEARCH,
-			USE_DT_CE, INITIAL_INPUT_SYMBOLS,
+			INITIAL_INPUT_SYMBOLS,
 			INITIAL_INPUT_SEQUENCES, INITIAL_INPUT_SYMBOLS_EQUALS_TO_X };
 
 	// LocalizerBased options
@@ -477,7 +475,6 @@ public class SIMPA {
 
 		Options.LOCALIZER_BASED_INFERENCE = LOCALIZER_BASED_INFERENCE.getValue();
 
-		Options.USE_DT_CE = USE_DT_CE.getValue();
 		Options.INITIAL_INPUT_SYMBOLS = INITIAL_INPUT_SYMBOLS.getValue();
 		Options.INITIAL_INPUT_SEQUENCES = INITIAL_INPUT_SEQUENCES.getValue();
 		Options.INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = INITIAL_INPUT_SYMBOLS_EQUALS_TO_X.getValue();

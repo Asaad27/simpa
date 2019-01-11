@@ -244,6 +244,7 @@ public class MealyDriver extends Driver {
 	 */
 	public Boolean getDistinctionTreeBasedCE(LmConjecture c, State curentState,
 			MultiTrace traces, boolean resetAllowed) {
+		assert curentState != null;
 		if (!c.isFullyKnown())
 			return null;
 		// TODO extend oracle to incomplete automata
@@ -251,7 +252,7 @@ public class MealyDriver extends Driver {
 				traces);
 		oracle.resetAllowed = resetAllowed;
 		stopLog();
-		Boolean found = oracle.searchCE();
+		Boolean found = oracle.searchCE(curentState);
 		startLog();
 		return found;
 	}
@@ -380,6 +381,10 @@ public class MealyDriver extends Driver {
 		} else if (options.getSelectedItem() == options.interactive) {
 			return getInteractiveCounterExample(options, conjecture,
 					conjectureState, appliedSequences);
+		} else if (options.getSelectedItem() == options.distinctionTreeBased) {
+			Boolean r = getDistinctionTreeBasedCE(conjecture, conjectureState,
+					appliedSequences, resetIsAllowed);
+			return r != null && r;
 		} else {
 			throw new RuntimeException("option not implemented");
 		}

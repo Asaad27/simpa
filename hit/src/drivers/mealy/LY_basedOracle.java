@@ -83,10 +83,9 @@ public class LY_basedOracle {
 	public boolean resetAllowed = true;
 
 	public LY_basedOracle(MealyDriver driver, LmConjecture c,
-			State currentState, MultiTrace traces) {
-		depths = c.computeDepths(currentState, verbose);
-		assert currentState != null;
-		this.currentState = currentState;
+			State expectedStartingState, MultiTrace traces) {
+		depths = c.computeDepths(expectedStartingState, verbose);
+		this.currentState = null;
 		this.conjecture = c;
 		this.driver = driver;
 		this.traces = traces;
@@ -306,8 +305,9 @@ public class LY_basedOracle {
 	 * 
 	 * @return true if a CE was found, false otherwise.
 	 */
-	public Boolean searchCE() {
+	public Boolean searchCE(State currentState) {
 		assert (!resetAllowed || conjecture.getInitialState() != null);
+		this.currentState = currentState;
 		try {
 			testTransitions();
 			return false;

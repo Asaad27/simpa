@@ -108,6 +108,7 @@ public class OracleOption extends MultiArgChoiceOption {
 	public MultiArgChoiceOptionItem shortest;
 	public MrBeanOptionItem mrBean;
 	public MultiArgChoiceOptionItem interactive;
+	public MultiArgChoiceOptionItem distinctionTreeBased;
 
 	public OracleOption(boolean resetAllowed) {
 		this.resetAllowed = resetAllowed;
@@ -119,9 +120,13 @@ public class OracleOption extends MultiArgChoiceOption {
 		interactive = new MultiArgChoiceOptionItem(
 				"prompt user each time a CE is needed", "--interactiveCE",
 				this);
+		distinctionTreeBased = new MultiArgChoiceOptionItem(
+				"pseudo checking sequence using distinction tree",
+				"--DT-based-CE", this);
 		addChoice(shortest);
 		addChoice(mrBean);
 		addChoice(interactive);
+		addChoice(distinctionTreeBased);
 	}
 
 	public boolean isResetAllowed() {
