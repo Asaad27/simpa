@@ -21,4 +21,9 @@ public class LocalizedHZXWSequence {
 		return sequence.equals(o.sequence)
 				&& (transferPosition == o.transferPosition);
 	}
+
+	@Override
+	public int hashCode() {
+		throw new UnsupportedOperationException();
+	}
 }

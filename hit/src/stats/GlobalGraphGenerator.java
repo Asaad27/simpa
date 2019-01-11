@@ -115,7 +115,7 @@ public class GlobalGraphGenerator extends GraphGenerator {
 		RS.restrict(restrictions);
 		comb.restrict(restrictions);
 
-		g.setDataDescriptionFields(new Attribute[] { Attribute.INPUT_SYMBOLS,
+		g.setDataDescriptionFields(new Attribute<?>[] { Attribute.INPUT_SYMBOLS,
 				Attribute.OUTPUT_SYMBOLS, Attribute.AUTOMATA });
 		g.plot(NRw1, PlotStyle.MEDIAN, "ICTSS2015, p=1");
 		g.plot(NRw2, PlotStyle.MEDIAN, "ICTSS2015, p=2");
@@ -954,7 +954,7 @@ public class GlobalGraphGenerator extends GraphGenerator {
 		int height = 7;
 		int noKeyHeight = 5;
 		int width = 8;
-		Attribute<?>[] description = new Attribute[] {};
+		Attribute<?>[] description = new Attribute<?>[] {};
 		{
 			StatsSet set = new StatsSet();
 			Integer[] keptStates = new Integer[] { 5, 10, 15, 20, 25, 30, 40,

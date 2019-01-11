@@ -604,7 +604,8 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		if (stats.size() > 0 && stats.get(0).get(abs) instanceof String)
 			r.append("set xtics rotate by -30\n");
 		r.append("set label \"");
-		String dataDescription = makeDataDescritption(stats, new Attribute[] { ord, abs }).toString();
+		String dataDescription = makeDataDescritption(stats,
+				new Attribute<?>[] { ord, abs }).toString();
 		r.append(dataDescription.replace("\"", "\\\""));
 		int linesNb = dataDescription.split("\\\\n").length;
 		r.append("\" at graph 1,"+ (linesNb/24.) + " right\n");

@@ -105,6 +105,11 @@ public class LiDataTableItem implements Cloneable, Serializable {
 	}
 
 	@Override
+	public int hashCode() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public String toString() {
 		StringBuilder res = new StringBuilder("((");
 		for (int i = 0; i < inputParameters.size(); i++) {

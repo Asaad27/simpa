@@ -80,10 +80,10 @@ public class MQTT extends RealDriver {
 		c3.addConnect();
 	}
 
-	public MQTT(String broker, List<ClientDescriptor> clientsDescriptors) {
+	public MQTT(String broker, List<MQTTClientDescriptor> clientsDescriptors) {
 		super("MQTT");
 		this.broker = broker;
-		for (ClientDescriptor desc : clientsDescriptors) {
+		for (MQTTClientDescriptor desc : clientsDescriptors) {
 			addClient(new MQTTClient(this, desc));
 		}
 	}

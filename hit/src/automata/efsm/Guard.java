@@ -111,6 +111,7 @@ public class Guard implements Serializable, Cloneable {
 			switch (r.type) {
 			case EQUALSTOVALUE:
 				ll.get(r.op1).value = String.valueOf(r.op2i);
+				break;
 			case NDVCHECK:
 				break;
 			default:

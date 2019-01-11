@@ -461,6 +461,11 @@ public class DataManager {
 			public boolean equals(Object o){ if (o instanceof Node) return equals((Node) o); return false;}
 			public boolean equals(Node o){return path.equals(o.path) && end.equals(o.end);}
 			public String toString(){return path.toString() + "→" + end.toString();}
+
+			@Override
+			public int hashCode() {
+				throw new UnsupportedOperationException();
+			}
 		}
 		class PathComparator implements Comparator<Node>{
 			@Override

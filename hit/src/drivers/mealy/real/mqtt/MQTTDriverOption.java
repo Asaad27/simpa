@@ -18,7 +18,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import drivers.mealy.real.mqtt.ClientDescriptor.Publish;
+import drivers.mealy.real.mqtt.MQTTClientDescriptor.Publish;
 import options.IntegerOption;
 import options.ListOption;
 import options.TextOption;
@@ -26,7 +26,7 @@ import options.automataOptions.DriverChoice;
 import options.automataOptions.DriverChoiceItem;
 import tools.Utils;
 
-class ClientsOption extends ListOption<ClientDescriptor> {
+class ClientsOption extends ListOption<MQTTClientDescriptor> {
 
 	public ClientsOption() {
 		super("--mqttclient");
@@ -80,9 +80,9 @@ class ClientsOption extends ListOption<ClientDescriptor> {
 	}
 
 	@Override
-	protected ClientDescriptor fromString(String s,
+	protected MQTTClientDescriptor fromString(String s,
 			PrintStream parsingErrorStream) {
-		ClientDescriptor desc = new ClientDescriptor();
+		MQTTClientDescriptor desc = new MQTTClientDescriptor();
 		List<String> split = Utils.stringToList(s, ':', '\\');
 		if (split.size() == 1) {
 			s = split.get(0);
@@ -108,7 +108,7 @@ class ClientsOption extends ListOption<ClientDescriptor> {
 						parsingErrorStream);
 				if (args == null)
 					return null;
-				ClientDescriptor.Publish p = desc.new Publish();
+				MQTTClientDescriptor.Publish p = desc.new Publish();
 				p.topic = args.get(0);
 				p.message = args.get(1);
 				p.retain = Boolean.parseBoolean(args.get(2));
@@ -117,7 +117,7 @@ class ClientsOption extends ListOption<ClientDescriptor> {
 				List<String> args = getArgs(e, PUBLISH, 3, parsingErrorStream);
 				if (args == null)
 					return null;
-				ClientDescriptor.Publish p = desc.new Publish();
+				MQTTClientDescriptor.Publish p = desc.new Publish();
 				p.topic = args.get(0);
 				p.message = args.get(1);
 				p.retain = Boolean.parseBoolean(args.get(2));
@@ -149,7 +149,7 @@ class ClientsOption extends ListOption<ClientDescriptor> {
 	}
 
 	@Override
-	protected String valueToString(ClientDescriptor desc) {
+	protected String valueToString(MQTTClientDescriptor desc) {
 		List<String> elements = new ArrayList<>();
 		if (desc.connect)
 			elements.add(CONNECT);
@@ -187,7 +187,7 @@ class ClientsOption extends ListOption<ClientDescriptor> {
 	}
 
 	@Override
-	protected Component createComponentFromValue(ClientDescriptor desc) {
+	protected Component createComponentFromValue(MQTTClientDescriptor desc) {
 		JPanel pane = new JPanel();
 		GridBagConstraints c = new GridBagConstraints();
 		pane.setLayout(new GridBagLayout());
@@ -402,8 +402,8 @@ class ClientsOption extends ListOption<ClientDescriptor> {
 	}
 
 	@Override
-	protected ClientDescriptor createNewValue() {
-		ClientDescriptor desc = new ClientDescriptor();
+	protected MQTTClientDescriptor createNewValue() {
+		MQTTClientDescriptor desc = new MQTTClientDescriptor();
 		desc.connect = true;
 		desc.disconnect = true;
 		return desc;

@@ -70,4 +70,9 @@ public class HZXWSequence {
 				&& transition.equals(o.transition)
 				&& wResponse.equals(o.wResponse);
 	}
+
+	@Override
+	public int hashCode() {
+		throw new UnsupportedOperationException();
+	}
 }

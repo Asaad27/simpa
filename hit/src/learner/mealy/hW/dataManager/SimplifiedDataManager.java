@@ -541,6 +541,11 @@ public class SimplifiedDataManager {
 			public String toString() {
 				return path.toString() + "→" + end.toString();
 			}
+
+			@Override
+			public int hashCode() {
+				throw new UnsupportedOperationException();
+			}
 		}
 		class PathComparator implements Comparator<Node> {
 			@Override

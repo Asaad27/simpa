@@ -14,37 +14,6 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 /**
- * a class representing the options for building one {@link MQTTClient}.
- * 
- * @author Nicolas BREMOND
- *
- */
-class ClientDescriptor {
-	/**
-	 * The id to use when connecting to the broker. Will be automatically filled
-	 * if empty.
-	 */
-	String id = "";
-	boolean connect = false;
-	boolean disconnect = false;
-	Boolean close = false;
-
-	class Publish {
-		String topic;
-		String message;
-		Boolean retain;
-	}
-
-	List<Publish> connectWithWill = new ArrayList<>();
-	List<Publish> publish = new ArrayList<>();
-	List<String> deleteRetain = new ArrayList<>();
-
-	List<String> subscribe = new ArrayList<>();
-	List<String> unsubscribe = new ArrayList<>();
-
-}
-
-/**
  * a class representing one MQTT client. this class will perform actions on the
  * broker
  * 
@@ -357,7 +326,7 @@ public class MQTTClient {
 		this.driver = driver;
 	}
 
-	public MQTTClient(MQTT driver, ClientDescriptor desc) {
+	public MQTTClient(MQTT driver, MQTTClientDescriptor desc) {
 		this.driver = driver;
 		if (!desc.id.isEmpty()) {
 			clientId = desc.id;
@@ -369,9 +338,9 @@ public class MQTTClient {
 			addDisconnect();
 		if (desc.close)
 			addClose();
-		for (ClientDescriptor.Publish p : desc.connectWithWill)
+		for (MQTTClientDescriptor.Publish p : desc.connectWithWill)
 			addConnectWithWill(p.topic, p.message, p.retain);
-		for (ClientDescriptor.Publish p : desc.publish)
+		for (MQTTClientDescriptor.Publish p : desc.publish)
 			addPublishOperation(p.topic, p.message, p.retain);
 		for (String topic : desc.deleteRetain)
 			addDeleteRetained(topic);

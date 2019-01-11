@@ -49,8 +49,12 @@ public class LocalizerBasedGraphGenerator extends GraphGenerator {
 		s1.restrict(new EqualsRestriction<Integer>(LocalizerBasedStatsEntry.W1_LENGTH, 1));
 		g1.plotGroup(s1, LocalizerBasedStatsEntry.W_SIZE, Graph.PlotStyle.MEDIAN);
 		g1.setFileName("influence_of_output_symbols_8states");
-		g1.setDataDescriptionFields(new Attribute[] { LocalizerBasedStatsEntry.W1_LENGTH, LocalizerBasedStatsEntry.INPUT_SYMBOLS,
-				LocalizerBasedStatsEntry.STATE_NUMBER, LocalizerBasedStatsEntry.AUTOMATA, LocalizerBasedStatsEntry.WITH_SPEEDUP });
+		g1.setDataDescriptionFields(
+				new Attribute<?>[] { LocalizerBasedStatsEntry.W1_LENGTH,
+						LocalizerBasedStatsEntry.INPUT_SYMBOLS,
+						LocalizerBasedStatsEntry.STATE_NUMBER,
+						LocalizerBasedStatsEntry.AUTOMATA,
+						LocalizerBasedStatsEntry.WITH_SPEEDUP });
 		g1.export();
 
 		StatsSet s2 = new StatsSet(random);
