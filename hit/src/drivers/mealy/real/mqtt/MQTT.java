@@ -7,6 +7,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+
 import drivers.mealy.real.RealDriver;
 import tools.loggers.LogManager;
 
@@ -20,6 +28,10 @@ public class MQTT extends RealDriver {
 	 * the timeout during which messages are waited from broker.
 	 */
 	int timeout_ms = 500;
+	/**
+	 * the topics which should be cleared for a fake reset.
+	 */
+	List<String> topics = null;
 
 	public MQTT() {
 		super("MQTT");
@@ -174,6 +186,8 @@ public class MQTT extends RealDriver {
 				operations.put(input, operation);
 			}
 		}
+		topics = new ArrayList<>(sortedOperation.keySet());
+		fakeReset();
 	}
 
 	@Override
@@ -192,11 +206,7 @@ public class MQTT extends RealDriver {
 
 		numberOfAtomicRequest++;
 		String output = execute_intern(input);
-		try {
-			Thread.sleep(timeout_ms);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		sleepTimeout();
 		for (MQTTClient client : clients) {
 			while (!client.received.isEmpty()) {
 				output = output + ", " + client.prefix + "received("
@@ -211,5 +221,93 @@ public class MQTT extends RealDriver {
 	public String execute_intern(String input) {
 		assert operations.containsKey(input);
 		return operations.get(input).execute();
+	}
+
+	protected void sleepTimeout() {
+		try {
+			Thread.sleep(timeout_ms);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void reset() {
+		super.reset();
+		fakeReset();
+	}
+
+	/**
+	 * Replace the driver in an initial state without restarting it. This method
+	 * disconnect clients and remove retained messages on known topics on the
+	 * driver.
+	 * 
+	 * Notice that when connecting the first time to a driver, it may already
+	 * have some messages retained. To have an initial state coherent, this
+	 * method should be called before starting inference.
+	 */
+	protected void fakeReset() {
+		for (MQTTClient client : clients)
+			client.new Close().execute();
+		sleepTimeout();
+		// some clients might have received a last will message, we have to
+		// clear it
+		for (MQTTClient client : clients)
+			client.received.clear();
+		deleteRetained();
+	}
+
+	/**
+	 * Delete retained messages for the {@link #topics recorded topics}.
+	 * 
+	 * Suppose that other clients are not sending messages.
+	 */
+	private void deleteRetained() {
+		if (topics == null)
+			updateOperations();
+		try {
+			ArrayList<String> topicsWithRet = new ArrayList<>();
+			MqttClient client = new MqttClient(broker, "retainedRemover",
+					new MemoryPersistence());
+			MqttConnectOptions connOpts = new MqttConnectOptions();
+			connOpts.setCleanSession(true);
+			client.connect(connOpts);
+			client.setCallback(new MqttCallback() {
+
+				@Override
+				public void messageArrived(String topic, MqttMessage message)
+						throws Exception {
+					assert message
+							.isRetained() : "other clients are not supposed to send messages";
+					topicsWithRet.add(topic);
+				}
+
+				@Override
+				public void deliveryComplete(IMqttDeliveryToken token) {
+				}
+
+				@Override
+				public void connectionLost(Throwable cause) {
+				}
+			});
+			sleepTimeout();// let non-retained messages get lost before
+							// subscribing
+
+			// subscribe on topics to check if we receive a retained message
+			for (String topic : topics) {
+				client.subscribe(topic);
+			}
+			sleepTimeout();
+
+			// delete retained on topics which have one
+			MqttMessage message = new MqttMessage(new byte[0]);
+			message.setRetained(true);
+			for (String topic : topicsWithRet) {
+				client.publish(topic, message);
+			}
+			client.disconnect();
+		} catch (MqttException e) {
+			e.printStackTrace();
+		}
 	}
 }
