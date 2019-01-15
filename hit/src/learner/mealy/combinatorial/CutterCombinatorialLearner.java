@@ -40,9 +40,12 @@ public class CutterCombinatorialLearner extends Learner {
 	private CutterCombinatorialStatsEntry stats;
 	private ArrayList<TreeNode> currentLevel;
 	private ArrayList<TreeNode> nextLevel;
+	private CutterCombinatorialOptions options;
 
-	public CutterCombinatorialLearner(MealyDriver driver) {
+	public CutterCombinatorialLearner(MealyDriver driver,
+			CutterCombinatorialOptions options) {
 		this.driver = driver;
+		this.options = options;
 	}
 
 	@Override
@@ -252,11 +255,11 @@ public class CutterCombinatorialLearner extends Learner {
 					maxNodes = nodes;
 				if (responses.get(output) == currentLevel.size())
 					maxNodes = -1;
-				if (Options.INTERACTIVE)
+				if (options.interactive.isEnabled())
 					System.out.println(i+"/"+output+" : "+ nodes + " nodes");
 				LogManager.logInfo("if we apply '" +i+ "' and if we get '" + output +"', next level will have "+nodes+" nodes");
 			}
-			if (Options.INTERACTIVE)
+			if (options.interactive.isEnabled())
 				System.out.println(i+"/? : "+(currentLevel.size()-knownResponses)*root.getStates().size()+" nodes");
 			LogManager.logInfo("if we apply '" +i+ "' and if we get an other output, next level will have "+(currentLevel.size()-knownResponses)*root.getStates().size()+" nodes");
 			maxLength.put(new InputSequence(i), Integer.valueOf(maxNodes));
@@ -284,7 +287,7 @@ public class CutterCombinatorialLearner extends Learner {
 		}	
 		cut ++;
 
-		if (Options.INTERACTIVE){
+		if (options.interactive.isEnabled()) {
 			System.out.println("what do you want to apply ? \n\tenter «auto» to use default sequence '"+
 					cuttingSequence+"'\n\t'a,b,c' for the sequence a, b, c\n\t«empty» to use old algorithm (Shortest unknown transition or shortest counter exemple)");
 

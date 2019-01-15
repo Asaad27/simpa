@@ -244,6 +244,7 @@ abstract class ListOption<T> extends Option<ArrayList<T>> {
 
 	protected abstract T valueFromString(String s);
 
+	@Override
 	public String getDescription() {
 		return super.getDescription() + "\n\tusage : '" + getConsoleName() + " " + sampleValue1 + ";" + sampleValue2
 				+ "' or '" + getConsoleName() + " " + sampleValue1 + " " + getConsoleName() + " " + sampleValue2 + "'";
@@ -294,6 +295,7 @@ class BooleanOption extends Option<Boolean> {
 			}
 	}
 
+	@Override
 	public Boolean getDefaultValue() {
 		return null;
 	}
@@ -320,6 +322,7 @@ class HelpOption extends Option<Object> {
 	protected void postCheck(String[] args, ArrayList<Boolean> used) {
 	}
 
+	@Override
 	protected void preCheck(String[] args, ArrayList<Boolean> used) {
 	}
 }
@@ -334,10 +337,8 @@ public class SIMPA {
 	private static HelpOption help = new HelpOption();
 	private static StringOption LOAD_DOT_FILE = new StringOption("--loadDotFile",
 			"load the specified dot file\n use with drivers.mealy.FromDotMealyDriver", null);
-	private static BooleanOption INTERACTIVE = new BooleanOption("--interactive",
-			"algorithms may ask user to choose a sequence, a counter example or something else");
 	private static Option<?>[] generalOptions = new Option<?>[] { help,
-			LOAD_DOT_FILE, INTERACTIVE };
+			LOAD_DOT_FILE };
 
 	// inference choice
 	private static BooleanOption LOCALIZER_BASED_INFERENCE = new BooleanOption("--localizerBased", "use localizer based Algorithm (also called 'DUBAI' and 'ICTSS2015' and previously 'noReset')");
@@ -471,8 +472,6 @@ public class SIMPA {
 			usage();
 		}
 
-		Options.INTERACTIVE = INTERACTIVE.getValue();
-
 		Options.LOCALIZER_BASED_INFERENCE = LOCALIZER_BASED_INFERENCE.getValue();
 
 		Options.INITIAL_INPUT_SYMBOLS = INITIAL_INPUT_SYMBOLS.getValue();
@@ -547,11 +546,6 @@ public class SIMPA {
 					}
 					System.out.println("what did you say ?");
 				}
-			}
-			if (INTERACTIVE.getValue()) {
-				System.err.println(
-						"you cannot use interactive mode for stats (that may induce wrong values for duration when user wait)");
-				System.exit(1);
 			}
 			if (ENUMERATE_MODE.getValue()){
 				System.err.println("stats are not compatible with enumerate mode yet.");
@@ -941,7 +935,7 @@ public class SIMPA {
 
 
 	public static AutomataChoice automataChoice = new AutomataChoice();
-	private static ModeOption modeOption = new ModeOption();
+	private static ModeOption modeOption = new ModeOption(automataChoice);
 
 	static OutputOptions getOutputsOptions() {
 		if (modeOption.getSelectedItem() == modeOption.simple)
@@ -1072,6 +1066,7 @@ public class SIMPA {
 			});
 			allOptions.parseArguments(lastOptions, nullStream);
 			javax.swing.SwingUtilities.invokeLater(new Runnable() {
+				@Override
 				public void run() {
 					try {
 						createAndShowGUI();
@@ -1111,6 +1106,7 @@ public class SIMPA {
 			if (openGui) {
 
 				javax.swing.SwingUtilities.invokeLater(new Runnable() {
+					@Override
 					public void run() {
 						try {
 							createAndShowGUI();

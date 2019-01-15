@@ -70,7 +70,8 @@ public abstract class Learner {
 			} else if (selectedLearnerChoice == learnerChoice.combinatorial) {
 				return new CombinatorialLearner((MealyDriver) driver);
 			} else if (selectedLearnerChoice == learnerChoice.cutCombinatorial) {
-				return new CutterCombinatorialLearner((MealyDriver) driver);
+				return new CutterCombinatorialLearner((MealyDriver) driver,
+						learnerChoice.cutCombinatorial);
 			} else if (selectedLearnerChoice == learnerChoice.rivestSchapire) {
 				return new RivestSchapireLearner((MealyDriver) driver,
 						learnerChoice.rivestSchapire);

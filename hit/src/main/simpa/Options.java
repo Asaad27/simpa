@@ -81,8 +81,6 @@ public class Options {
 	// public static boolean ADAPTIVE_W_SEQUENCES = false;
 	// public static boolean TRY_TRACE_AS_CE = true;
 
-	public static boolean INTERACTIVE = false; //For algorithms which can prompt user for counter example or chosen sequences
-	
 	// Counterexample options
 	
 	@Deprecated

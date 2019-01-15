@@ -1,5 +1,6 @@
 package options.learnerOptions;
 
+import learner.mealy.combinatorial.CutterCombinatorialOptions;
 import learner.mealy.hW.HWOptions;
 import learner.mealy.localizerBased.LocalizerBasedOptions;
 import learner.mealy.rivestSchapire.RivestSchapireOptions;
@@ -16,7 +17,7 @@ public class MealyLearnerChoice extends MultiArgChoiceOption {
 	public ZOptions tree;
 	public LmOptions lm;
 	public MultiArgChoiceOptionItem combinatorial;
-	public MultiArgChoiceOptionItem cutCombinatorial;
+	public final CutterCombinatorialOptions cutCombinatorial;
 
 	public MealyLearnerChoice() {
 
@@ -28,8 +29,7 @@ public class MealyLearnerChoice extends MultiArgChoiceOption {
 		lm = new LmOptions(this);
 		combinatorial = new MultiArgChoiceOptionItem("combinatorial",
 				"--combinatorial", this);
-		cutCombinatorial = new MultiArgChoiceOptionItem(
-				"combinatorial with cutting", "--cutCombinatorial", this);
+		cutCombinatorial = new CutterCombinatorialOptions(this);
 
 		addChoice(hW);
 		addChoice(localizerBased);
