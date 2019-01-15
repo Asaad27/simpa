@@ -15,13 +15,15 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import options.OptionTree.ArgumentDescriptor.AcceptedValues;
 
 public class FileOption extends OptionTree {
 	public enum FileSelectionMode {
-		FILES_ONLY(JFileChooser.FILES_ONLY), DIRECTORIES_ONLY(
-				JFileChooser.DIRECTORIES_ONLY);
+		FILES_ONLY(JFileChooser.FILES_ONLY),
+		DIRECTORIES_ONLY(JFileChooser.DIRECTORIES_ONLY);
 		// Note : there is also the possibility to allow any kind but it should
 		// probably not be used for options.
 		// FILES_AND_DIRECTORIES(JFileChooser.FILES_AND_DIRECTORIES);
@@ -149,6 +151,7 @@ public class FileOption extends OptionTree {
 	}
 
 	public File getcompletePath() {
+		assert text == null || new File(text.getText()).equals(selectedFile);
 		return new File(selectedFile.getPath() + File.separator + pathSufix);
 	}
 
@@ -159,12 +162,20 @@ public class FileOption extends OptionTree {
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.LINE_AXIS));
 		text = new JTextField();
-		text.addActionListener(new ActionListener() {
+		text.getDocument().addDocumentListener(new DocumentListener() {
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				setSelectedFile(new File(text.getText()));
+			}
 
 			@Override
-			public void actionPerformed(ActionEvent e) {
+			public void insertUpdate(DocumentEvent e) {
 				setSelectedFile(new File(text.getText()));
+			}
 
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				setSelectedFile(new File(text.getText()));
 			}
 		});
 		panel.add(text);
