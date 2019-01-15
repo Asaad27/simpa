@@ -84,6 +84,7 @@ public abstract class GenericChoiceOption<T extends ChoiceOptionItem>
 			choiceCombo.validate();
 		}
 		updateSubTreeComponent("options for " + selectedItem.displayName);
+		validateSelectedTree();
 	}
 
 	@Override

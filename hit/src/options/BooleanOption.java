@@ -121,6 +121,7 @@ public class BooleanOption extends OptionTree {
 		}
 		isEnabled = checked;
 		updateSubTreeComponent(getSubTreeTitle());
+		validateSelectedTree();
 	}
 
 	/**
