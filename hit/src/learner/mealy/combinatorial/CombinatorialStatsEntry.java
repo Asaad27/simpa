@@ -1,7 +1,10 @@
 package learner.mealy.combinatorial;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.StringTokenizer;
 
+import automata.mealy.MealyTransition;
 import drivers.mealy.MealyDriver;
 import stats.GraphGenerator;
 import stats.StatsEntry;
@@ -40,7 +43,6 @@ public class CombinatorialStatsEntry extends StatsEntry {
 
 	protected CombinatorialStatsEntry(MealyDriver d) {
 		this.inputSymbols = d.getInputSymbols().size();
-		this.outputSymbols = d.getOutputSymbols().size();
 		automata = d.getSystemName();
 		nodesNB = 0;
 	}
@@ -70,6 +72,11 @@ public class CombinatorialStatsEntry extends StatsEntry {
 
 	public void updateWithConjecture(Conjecture c){
 		state_number=c.getStates().size();
+		Set<String> outputSymbols = new HashSet<>();
+		for (MealyTransition t : c.getTransitions()) {
+			outputSymbols.add(t.getOutput());
+		}
+		this.outputSymbols = outputSymbols.size();
 	}
 
 	public void addNode(){
