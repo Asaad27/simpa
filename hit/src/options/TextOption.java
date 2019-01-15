@@ -2,8 +2,6 @@ package options;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
@@ -11,6 +9,8 @@ import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import options.OptionTree.ArgumentDescriptor.AcceptedValues;
 
@@ -75,6 +75,7 @@ public class TextOption extends OptionTree {
 	 * @return the value of this option.
 	 */
 	public String getText() {
+		assert field == null || field.getText().equals(text);
 		return text;
 	}
 
@@ -93,6 +94,7 @@ public class TextOption extends OptionTree {
 				field.validate();
 			}
 		}
+		validateSelectedTree();
 	}
 
 	@Override
@@ -111,10 +113,19 @@ public class TextOption extends OptionTree {
 		c.anchor = GridBagConstraints.LINE_START;
 		pane.add(field, c);
 
-		field.addActionListener(new ActionListener() {
+		field.getDocument().addDocumentListener(new DocumentListener() {
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				setValue(field.getText());
+			}
 
 			@Override
-			public void actionPerformed(ActionEvent e) {
+			public void insertUpdate(DocumentEvent e) {
+				setValue(field.getText());
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e) {
 				setValue(field.getText());
 			}
 		});
