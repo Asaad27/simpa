@@ -12,11 +12,42 @@ import options.IntegerOption;
 import options.MultiArgChoiceOption;
 import options.MultiArgChoiceOptionItem;
 import options.OptionTree;
+import options.OptionValidator;
+import options.OptionValidator.CriticalityLevel;
 import options.RandomOption;
 import tools.loggers.LogManager;
 
 public class OracleOption extends MultiArgChoiceOption {
 	protected final boolean resetAllowed;
+
+	private final class DriverValidator extends OptionValidator {
+		MealyDriver lastDriver = null;
+
+		public DriverValidator(OptionTree parent) {
+			super(parent);
+		}
+
+		@Override
+		public void check() {
+			setMessage("");
+			setCriticality(CriticalityLevel.NOTHING);
+			if (lastDriver == null)
+				return;
+			if (getSelectedItem() == shortest
+					&& !(lastDriver instanceof TransparentMealyDriver)) {
+				setMessage(
+						"This option needs a transparent Mealy driver. (NB: this message is computed with last tried driver)");
+				setCriticality(CriticalityLevel.WARNING);
+			}
+		}
+
+		protected void setLastDriver(MealyDriver d) {
+			lastDriver = d;
+			check();
+		}
+	}
+
+	protected final DriverValidator driverValidator = new DriverValidator(this);
 
 	public class MrBeanOptionItem extends MultiArgChoiceOptionItem {
 		public class MrBeanOnlyIfExistsOption extends BooleanOption {
@@ -91,6 +122,7 @@ public class OracleOption extends MultiArgChoiceOption {
 
 	public OracleOption(boolean resetAllowed) {
 		this.resetAllowed = resetAllowed;
+		addValidator(driverValidator);
 		shortest = new MultiArgChoiceOptionItem("use shortest counter example",
 				"--shortestCE", this);
 
@@ -115,6 +147,13 @@ public class OracleOption extends MultiArgChoiceOption {
 	 *            the SUI
 	 */
 	public void updateWithDriver(MealyDriver driver) {
+		driverValidator.setLastDriver(driver);
+		validateSelectedTree();
+		if (driverValidator.getCriticality()
+				.compareTo(CriticalityLevel.NOTHING) != 0)
+			throw new CanNotComputeOptionValueException(
+					"driver is not compatible with these options : "
+							+ driverValidator.getMessage());
 		if (mrBean.maxTraceLength.useAutoValue()) {
 			mrBean.maxTraceLength
 					.setValue(driver.getInputSymbols().size() * 5000);

@@ -4,7 +4,7 @@ import javax.swing.JLabel;
 import javax.swing.UIManager;
 
 public abstract class OptionValidator {
-	enum CriticalityLevel {
+	public enum CriticalityLevel {
 		NOTHING, WARNING, ERROR,
 	}
 
