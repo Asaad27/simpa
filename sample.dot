@@ -1,0 +1,11 @@
+digraph sample {
+    __start0 -> q0
+    q0 -> q1 [label="a/x"];
+    q0 -> q3 [label="b/x"];
+    q1 -> q1 [label="a/y"];
+    q1 -> q2 [label="b/x"];
+    q2 -> q3 [label="a/x"];
+    q2 -> q3 [label="b/x"];
+    q3 -> q0 [label="a/x"];
+    q3 -> q0 [label="b/x"];
+}
