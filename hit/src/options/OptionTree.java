@@ -172,7 +172,16 @@ public abstract class OptionTree {
 			}
 			List<OptionTree> selectedSubTree = getSelectedChildren();
 
-			if (selectedSubTree.size() != 0) {
+			if (selectedSubTree.size() == 1
+					&& selectedSubTree.get(0).getChildren().isEmpty()) {
+				subTreeContainer = new JPanel();
+				subTreeContainer.setLayout(
+						new BoxLayout(subTreeContainer, BoxLayout.X_AXIS));
+				subTreeContainer.add(Box.createHorizontalStrut(20));
+				subTreeContainer.add(selectedSubTree.get(0).getComponent());
+				subTreeContainer.add(Box.createGlue());
+				mainContainer.add(subTreeContainer);
+			} else if (selectedSubTree.size() != 0) {
 				subTreeContainer = new JPanel();
 				subTreeContainer.setBorder(
 						BorderFactory.createTitledBorder(subTreeTitle));
