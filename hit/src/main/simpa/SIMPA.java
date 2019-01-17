@@ -1165,49 +1165,19 @@ public class SIMPA {
 	}
 
 	public static void usage() {
-		allOptions.printHelp(System.out);
-		System.out.println("Usage : SIMPA driverClass [Options]");
-		System.out.println("");
-		System.out.println("Options");
+		PrintStream out = System.out;
+		out.println("Help for " + name);
+		out.println();
 
-		System.out.println("> General");
-		printUsage(generalOptions);
+		out.println("Global options :");
+		out.println(SHORT_HELP_ARGUMENT + " | " + HELP_ARGUMENT
+				+ " \tdisplay this help");
+		out.println(GUI_ARGUMENT
+				+ "       \topen GUI (inference arguments can be specified to preset GUI options)");
+		out.println();
 
-		System.out.println("> Inference Algorithm");
-		printUsage(inferenceChoiceOptions);
-
-		System.out.println("> Algorithm ZQ");
-		printUsage(ZQOptions);
-
-		System.out.println("> Algorithm based on localizer (called ICTSS2015/Dubai/'noReset')");
-		printUsage(localizerBasedOptions);
-
-		System.out.println("> Algorithm Rivest&Schapire");
-		printUsage(RSOptions);
-
-		System.out.println("> Algorithm EFSM");
-		printUsage(EFSMOptions);
-
-		System.out.println("> Random Mealy Generator");
-		printUsage(randomAutomataOptions);
-
-		System.out.println("> Output");
-		printUsage(outputOptions);
-
-		System.out.println("> Stats");
-		printUsage(statsOptions);
-
-		System.out.println("> Test EFSM (should be group with random Generator ?)");
-		printUsage(testEFSMOptions);
-
-		System.out.println("> Others...");
-		printUsage(otherOptions);
-
-		System.out.println();
-		System.out.println("Ex: SIMPA drivers.efsm.NSPKDriver --outdir mydir --text");
-		System.out.println();
-
-		allOptions.printHelp(System.out);
+		out.println("Inference options :");
+		allOptions.printHelp(out);
 	}
 
 	protected static void printUsage(Option<?>[] options) {
