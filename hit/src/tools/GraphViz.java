@@ -3,16 +3,23 @@ package tools;
 import java.io.File;
 import java.io.IOException;
 
-import main.simpa.Options;
 import tools.loggers.LogManager;
 
 public class GraphViz{
    private static String DOT = "dot";
+	public static final boolean IS_AVAILABLE;
+
+	static {
+		IS_AVAILABLE = check() == 0;
+		if (!IS_AVAILABLE)
+			LogManager.logWarning(
+					"Unable to find GraphViz dot. Check your environment.");
+	}
    
    public static File dotToFile(String filename)
    {
 	   File img = null;
-	   if (Options.GRAPHVIZ){      
+		if (IS_AVAILABLE) {
 		   try {
 			   File input = new File(filename);
 			   img = new File(Utils.changeExtension(filename, "svg"));

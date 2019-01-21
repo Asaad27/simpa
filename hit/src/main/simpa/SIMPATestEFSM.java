@@ -200,12 +200,6 @@ public class SIMPATestEFSM {
 					.logError("Warning : Unable to find Weka and make the final conjecture");
 		}
 
-		if (GraphViz.check() != 0) {
-			Options.GRAPHVIZ = false;
-			LogManager
-					.logError("Warning: Unable to find GraphViz and converting dot to image files");
-		}
-
 		File f = new File(Options.OUTDIR + File.separator + Options.DIRTEST);
 		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
 			throw new Exception("Unable to create/write " + f.getName());

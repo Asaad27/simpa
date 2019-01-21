@@ -521,11 +521,6 @@ public class SIMPA {
 			}
 		}
 
-		if (GraphViz.check() != 0) {
-			Options.GRAPHVIZ = false;
-			LogManager.logError("Warning : Unable to find GraphViz dot. Check your environment.");
-		}
-
 		if (STATS_MODE.getValue()) {
 			boolean assert_test = false;
 			assert (assert_test = true);

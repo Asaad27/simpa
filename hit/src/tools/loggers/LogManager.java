@@ -222,13 +222,13 @@ public class LogManager {
 
 	public static void logObservationTree(ZObservationNode root) {
 		for (ILogger l : loggers)
-			if (Options.GRAPHVIZ)
+			if (GraphViz.IS_AVAILABLE)
 				l.logObservationTree(root);
 	}
 
 	public static void logXObservationTree(ZXObservationNode root) {
 		for (ILogger l : loggers)
-			if (Options.GRAPHVIZ)
+			if (GraphViz.IS_AVAILABLE)
 				l.logXObservationTree(root);
 	}
 	

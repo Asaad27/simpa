@@ -129,12 +129,6 @@ public class SIMPAOld {
 			}
 		}
 
-		if (GraphViz.check() != 0) {
-			Options.GRAPHVIZ = false;
-			LogManager
-					.logError("Warning : Unable to find GraphViz dot. Check your environment.");
-		}
-
 		File f = new File(Options.OUTDIR);
 		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
 			throw new Exception("Unable to create/write " + f.getName());
