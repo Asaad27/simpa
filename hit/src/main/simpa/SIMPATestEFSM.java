@@ -8,7 +8,8 @@ import drivers.Driver;
 import drivers.efsm.RandomEFSMDriver;
 import examples.efsm.RandomEFSM;
 import learner.efsm.table.LiLearner;
-import tools.GraphViz;
+import learner.efsm.table.LiOptions;
+import options.automataOptions.AutomataChoice;
 import tools.Stats;
 import tools.Utils;
 import tools.loggers.HTMLLogger;
@@ -16,6 +17,10 @@ import tools.loggers.LogManager;
 import tools.loggers.TextLogger;
 
 public class SIMPATestEFSM {
+	private static LiOptions createOption() {
+		LiOptions r = new AutomataChoice().efsmLearnerChoice.lilearner;
+		return r;
+	}
 	public final static String name = "KITestEFSM";
 
 	private static void init(String[] args) {
@@ -122,7 +127,8 @@ public class SIMPATestEFSM {
 
 						RandomEFSM rEFSM = new RandomEFSM();
 						driver = new RandomEFSMDriver(rEFSM);
-						LiLearner lilearner = new LiLearner(driver);
+						LiLearner lilearner = new LiLearner(driver,
+								createOption());
 						lilearner.learn();
 						driver.logStats();
 						learner.efsm.LiConjecture c = lilearner
@@ -156,7 +162,7 @@ public class SIMPATestEFSM {
 							+ "Random.serialized");
 					randEFSM.exportToDot();
 					driver = new RandomEFSMDriver(randEFSM);
-					LiLearner lilearner = new LiLearner(driver);
+					LiLearner lilearner = new LiLearner(driver, createOption());
 					lilearner.learn();
 					driver.logStats();
 					learner.efsm.LiConjecture c = lilearner.createConjecture();

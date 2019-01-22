@@ -49,6 +49,7 @@ public class Options {
 
 	// Tools available
 
+	@Deprecated
 	public static boolean WEKA = false;
 
 	// Algorithm's options

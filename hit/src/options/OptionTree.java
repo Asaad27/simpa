@@ -32,8 +32,8 @@ import tools.Utils;
  */
 
 public abstract class OptionTree {
-	static protected class ArgumentDescriptor {
-		enum AcceptedValues {
+	public static class ArgumentDescriptor {
+		public enum AcceptedValues {
 			NONE, ONE, SEVERAL,
 		};
 

@@ -57,7 +57,6 @@ import stats.GraphGenerator;
 import stats.StatsEntry;
 import stats.StatsSet;
 import tools.DotAntlrListener;
-import tools.GraphViz;
 import tools.StandaloneRandom;
 import tools.Utils;
 import tools.loggers.HTMLLogger;
@@ -382,11 +381,10 @@ public class SIMPA {
 			"Reuse output parameter for non closed row");
 	private static BooleanOption FORCE_J48 = new BooleanOption("--forcej48",
 			"Force the use of J48 algorithm instead of M5P for numeric classes");
-	private static BooleanOption WEKA = new BooleanOption("--weka", "Force the use of weka");
 	private static IntegerOption SUPPORT_MIN = new IntegerOption("--supportmin", "Minimal support for relation (1-100)",
 			Options.SUPPORT_MIN);
 	private static Option<?>[] EFSMOptions = new Option<?>[] { GENERIC_DRIVER,
-			SCAN, REUSE_OP_IFNEEDED, FORCE_J48, WEKA, SUPPORT_MIN,
+			SCAN, REUSE_OP_IFNEEDED, FORCE_J48, SUPPORT_MIN,
 	};
 
 
@@ -485,7 +483,6 @@ public class SIMPA {
 		Options.GENERICDRIVER = GENERIC_DRIVER.getValue();
 		Options.REUSE_OP_IFNEEDED = REUSE_OP_IFNEEDED.getValue();
 		Options.FORCE_J48 = FORCE_J48.getValue();
-		Options.WEKA = WEKA.getValue();
 		Options.SUPPORT_MIN = SUPPORT_MIN.getValue();
 
 		Options.MINSTATES = MIN_STATE.getValue();
@@ -510,16 +507,6 @@ public class SIMPA {
 
 		if (Options.SUPPORT_MIN < 1 || Options.SUPPORT_MIN > 100)
 			throw new RuntimeException("Minimal between 1 and 100 include needed");
-
-		if (Options.WEKA) {
-			try {
-				Options.WEKA = weka.core.Version.MAJOR >= 3;
-				if (!Options.WEKA)
-					LogManager.logError("Warning : Weka version >= 3 needed. Please update Weka.");
-			} catch (Exception e) {
-				LogManager.logError("Warning : Unable to use Weka. Check the buildpath.");
-			}
-		}
 
 		if (STATS_MODE.getValue()) {
 			boolean assert_test = false;

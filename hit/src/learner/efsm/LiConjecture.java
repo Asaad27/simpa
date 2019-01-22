@@ -37,9 +37,11 @@ public class LiConjecture extends automata.efsm.EFSM {
 	private TreeMap<String, List<String>> paramNames;
 	private Map<String, Label> labels;
 	public List<String> gSymbols;
+	private boolean useWeka;
 
-	public LiConjecture(Driver d) {
+	public LiConjecture(Driver d, boolean useWeka) {
 		super(d.getSystemName());
+		this.useWeka = useWeka;
 		this.inputSymbols = d.getInputSymbols();
 		this.paramNames = ((EFSMDriver) d).getParameterNames();
 		if (paramNames == null) {
@@ -91,7 +93,7 @@ public class LiConjecture extends automata.efsm.EFSM {
 	}
 	
 	public void fillVar(EFSMTransition t, Label label){
-		if (Options.WEKA){
+		if (useWeka) {
 			String dataFile = WekaARFF.generateFileForVar(t, paramNames);
 			dataFile = WekaARFF.filterFileForVar(dataFile);
 			dataFile = WekaARFF.handleConstantOutput(dataFile, label);
@@ -109,7 +111,7 @@ public class LiConjecture extends automata.efsm.EFSM {
 	private void fillPredicate(List<EFSMTransition> list,
 			Map<String, Label> labels) {
 		if (list.size() > 1) {
-			if (Options.WEKA){				
+			if (useWeka) {
 				String dataFile = WekaARFF.generateFileForPredicate(list, paramNames);
 				dataFile = WekaARFF.filterFileForPredicate(dataFile);
 				dataFile = WekaARFF.handleRelatedDataForPredicate(dataFile);

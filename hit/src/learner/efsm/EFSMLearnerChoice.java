@@ -5,7 +5,7 @@ import options.GenericMultiArgChoiceOption;
 
 public class EFSMLearnerChoice
 		extends GenericMultiArgChoiceOption<EFSMLearnerItem> {
-	LiOptions lilearner = new LiOptions(this);
+	public final LiOptions lilearner = new LiOptions(this);
 
 	public EFSMLearnerChoice() {
 		addChoice(lilearner);

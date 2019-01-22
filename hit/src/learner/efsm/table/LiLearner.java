@@ -42,9 +42,11 @@ public class LiLearner extends Learner {
 	
 	/* XSS detector */
 	private XSSDetector xssDetector = null;
+	private LiOptions options;
 	
-	public LiLearner(Driver driver) {
+	public LiLearner(Driver driver, LiOptions options) {
 		this.driver = (EFSMDriver) driver;
+		this.options = options;
 		defaultParamValues = this.driver.getDefaultParamValues();
 
 		this.cTable = new LiControlTable(driver.getInputSymbols(),
@@ -155,7 +157,7 @@ public class LiLearner extends Learner {
 	@Override
 	public LiConjecture createConjecture() {
 		LogManager.logConsole("Building the raw conjecture");
-		LiConjecture c = new LiConjecture(driver);
+		LiConjecture c = new LiConjecture(driver, options.useWeka());
 		for (int i = 0; i < cTable.getCountOfRowsInS(); i++) {
 			c.addState(new State("S" + i, cTable.getRowInS(i).isEpsilon()));
 		}
