@@ -505,7 +505,7 @@ public class WekaARFF {
 	}
 
 	public static String handleDifferentOutput(String dataFile, Label label,
-			Transition t) {
+			Transition t, boolean forceJ48) {
 		WekaTreeNode node = null;
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(dataFile));
@@ -517,7 +517,8 @@ public class WekaARFF {
 				data.setClassIndex(i);
 				differentOutputs.add(data.attribute(i).name());
 
-				if (data.attribute(i).type() == Attribute.NUMERIC && !Options.FORCE_J48) {
+				if (data.attribute(i).type() == Attribute.NUMERIC
+						&& !forceJ48) {
 					M5P m5 = new M5P();
 					m5.setOptions(weka.core.Utils.splitOptions("-M 4.0"));
 					m5.buildClassifier(data);

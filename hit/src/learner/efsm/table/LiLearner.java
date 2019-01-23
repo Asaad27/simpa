@@ -157,7 +157,7 @@ public class LiLearner extends Learner {
 	@Override
 	public LiConjecture createConjecture() {
 		LogManager.logConsole("Building the raw conjecture");
-		LiConjecture c = new LiConjecture(driver, options.useWeka());
+		LiConjecture c = new LiConjecture(driver, options.useWeka);
 		for (int i = 0; i < cTable.getCountOfRowsInS(); i++) {
 			c.addState(new State("S" + i, cTable.getRowInS(i).isEpsilon()));
 		}

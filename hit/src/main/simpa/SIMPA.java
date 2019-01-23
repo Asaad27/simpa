@@ -379,12 +379,10 @@ public class SIMPA {
 	private static BooleanOption SCAN = new BooleanOption("--scan", "Use scan driver");
 	private static BooleanOption REUSE_OP_IFNEEDED = new BooleanOption("--reuseop",
 			"Reuse output parameter for non closed row");
-	private static BooleanOption FORCE_J48 = new BooleanOption("--forcej48",
-			"Force the use of J48 algorithm instead of M5P for numeric classes");
 	private static IntegerOption SUPPORT_MIN = new IntegerOption("--supportmin", "Minimal support for relation (1-100)",
 			Options.SUPPORT_MIN);
 	private static Option<?>[] EFSMOptions = new Option<?>[] { GENERIC_DRIVER,
-			SCAN, REUSE_OP_IFNEEDED, FORCE_J48, SUPPORT_MIN,
+			SCAN, REUSE_OP_IFNEEDED, SUPPORT_MIN,
 	};
 
 
@@ -482,7 +480,6 @@ public class SIMPA {
 
 		Options.GENERICDRIVER = GENERIC_DRIVER.getValue();
 		Options.REUSE_OP_IFNEEDED = REUSE_OP_IFNEEDED.getValue();
-		Options.FORCE_J48 = FORCE_J48.getValue();
 		Options.SUPPORT_MIN = SUPPORT_MIN.getValue();
 
 		Options.MINSTATES = MIN_STATE.getValue();

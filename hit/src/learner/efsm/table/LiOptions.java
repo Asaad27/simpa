@@ -6,7 +6,7 @@ import learner.efsm.EFSMLearnerItem;
 import options.GenericMultiArgChoiceOption;
 
 public class LiOptions extends EFSMLearnerItem {
-	private WekaOption useWeka = new WekaOption();
+	public final WekaOption useWeka = new WekaOption();
 
 	public LiOptions(GenericMultiArgChoiceOption<?> parent) {
 		super("li", "--li", parent);
@@ -18,7 +18,4 @@ public class LiOptions extends EFSMLearnerItem {
 		return new LiLearner(d, this);
 	}
 
-	public boolean useWeka() {
-		return useWeka.isEnabled();
-	}
 }

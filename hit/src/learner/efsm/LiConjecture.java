@@ -29,6 +29,7 @@ import datamining.weka.WekaARFF;
 import datamining.weka.WekaTreeNode;
 import drivers.Driver;
 import drivers.efsm.EFSMDriver;
+import learner.efsm.table.WekaOption;
 
 public class LiConjecture extends automata.efsm.EFSM {
 	private static final long serialVersionUID = 6592229434557819171L;
@@ -37,9 +38,9 @@ public class LiConjecture extends automata.efsm.EFSM {
 	private TreeMap<String, List<String>> paramNames;
 	private Map<String, Label> labels;
 	public List<String> gSymbols;
-	private boolean useWeka;
+	private WekaOption useWeka;
 
-	public LiConjecture(Driver d, boolean useWeka) {
+	public LiConjecture(Driver d, WekaOption useWeka) {
 		super(d.getSystemName());
 		this.useWeka = useWeka;
 		this.inputSymbols = d.getInputSymbols();
@@ -93,12 +94,13 @@ public class LiConjecture extends automata.efsm.EFSM {
 	}
 	
 	public void fillVar(EFSMTransition t, Label label){
-		if (useWeka) {
+		if (useWeka.isEnabled()) {
 			String dataFile = WekaARFF.generateFileForVar(t, paramNames);
 			dataFile = WekaARFF.filterFileForVar(dataFile);
 			dataFile = WekaARFF.handleConstantOutput(dataFile, label);
 			dataFile = WekaARFF.handleRelatedDataForOutput(dataFile);
-			dataFile = WekaARFF.handleDifferentOutput(dataFile, label, t);		
+			dataFile = WekaARFF.handleDifferentOutput(dataFile, label, t,
+					useWeka.forceJ48());
 			
 		}else{
 			String dataFile = FreeARFF.generateFileForVar(t, paramNames);
@@ -111,7 +113,7 @@ public class LiConjecture extends automata.efsm.EFSM {
 	private void fillPredicate(List<EFSMTransition> list,
 			Map<String, Label> labels) {
 		if (list.size() > 1) {
-			if (useWeka) {
+			if (useWeka.isEnabled()) {
 				String dataFile = WekaARFF.generateFileForPredicate(list, paramNames);
 				dataFile = WekaARFF.filterFileForPredicate(dataFile);
 				dataFile = WekaARFF.handleRelatedDataForPredicate(dataFile);
