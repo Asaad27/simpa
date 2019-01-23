@@ -53,14 +53,17 @@ public class Options {
 
 	// Algorithm's options
 
+	@Deprecated
 	public static boolean SCAN = false;
 	@Deprecated
 	public static boolean TREEINFERENCE = false;
+	@Deprecated
 	public static boolean LOCALIZER_BASED_INFERENCE = false;
 	@Deprecated
 	public static boolean COMBINATORIALINFERENCE = false;
 	@Deprecated
 	public static boolean RIVESTSCHAPIREINFERENCE = false;
+	@Deprecated
 	public static boolean GENERICDRIVER = false;
 	public static String INITIAL_INPUT_SYMBOLS = "";
 	public static String INITIAL_INPUT_SEQUENCES = "";
@@ -227,6 +230,7 @@ public class Options {
 	}
 
 	// SIMPATest's options
+	@Deprecated
 	public static int RETEST = -1;
 
 	@Deprecated
