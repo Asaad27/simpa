@@ -59,10 +59,14 @@ public class BooleanOption extends OptionTree {
 	 *            the description of this option
 	 * @param subTreeIfTrue
 	 *            the list of sub-options available when this option is
-	 *            activated
+	 *            activated. If {@code null}, you MUST call
+	 *            {@link #setSubTreeIfTrue(List)} to set it during construction.
 	 * @param subTreeIfFalse
 	 *            the list of sub-options available when this option is not
-	 *            selected
+	 *            selected. If {@code null}, you MUST call
+	 *            {@link #setSubTreeIfFalse(List)} to set it during
+	 *            construction.
+	 * 
 	 * @param enabled
 	 *            the default status of this option.
 	 */
@@ -81,14 +85,44 @@ public class BooleanOption extends OptionTree {
 		this.description = description;
 		this.subTreeIfTrue = subTreeIfTrue;
 		this.subTreeIfFalse = subTreeIfFalse;
-		addSortedChildren(subTreeIfTrue);
-		addSortedChildren(subTreeIfFalse);
+		if (subTreeIfTrue != null)
+			addSortedChildren(subTreeIfTrue);
+		if (subTreeIfFalse != null)
+			addSortedChildren(subTreeIfFalse);
 		setEnabled(false);
 	}
 
 	public BooleanOption(String name, String argument, String description) {
 		this(name, argument, description, new ArrayList<OptionTree>(),
 				new ArrayList<OptionTree>(), false);
+	}
+
+	/**
+	 * MUST be call if and only if {@code null} was passed in constructor. This
+	 * method should be called during construction of object (as said in
+	 * {@link #addSortedChildren(List)}
+	 * 
+	 * @param subTreeIfFalse
+	 *            list of option available when this one is disabled.
+	 */
+	protected void setSubTreeIfFalse(List<OptionTree> subTreeIfFalse) {
+		assert this.subTreeIfFalse == null;
+		this.subTreeIfFalse = subTreeIfFalse;
+		addSortedChildren(subTreeIfFalse);
+	}
+
+	/**
+	 * MUST be call if and only if {@code null} was passed in constructor. This
+	 * method should be called during construction of object (as said in
+	 * {@link #addSortedChildren(List)}
+	 * 
+	 * @param subTreeIfTrue
+	 *            list of option available when this one is enabled.
+	 */
+	protected void setSubTreeIfTrue(List<OptionTree> subTreeIfTrue) {
+		assert this.subTreeIfTrue == null;
+		this.subTreeIfTrue = subTreeIfTrue;
+		addSortedChildren(subTreeIfTrue);
 	}
 
 	@Override
