@@ -36,7 +36,11 @@ import learner.mealy.rivestSchapire.RivestSchapireStatsEntry;
 import learner.mealy.table.LmStatsEntry;
 import learner.mealy.tree.ZStatsEntry;
 import main.simpa.Options;
+import stats.Graph.Color;
+import stats.Graph.KeyParameters.HorizontalPosition;
+import stats.Graph.KeyParameters.VerticalPosition;
 import stats.Graph.PlotStyle;
+import stats.Graph.PointShape;
 import stats.attribute.Attribute;
 import stats.attribute.restriction.ClassRestriction;
 import stats.attribute.restriction.EqualsRestriction;
@@ -44,6 +48,7 @@ import stats.attribute.restriction.HasAttributeRestriction;
 import stats.attribute.restriction.InSetRestriction;
 import stats.attribute.restriction.RangeRestriction;
 import stats.attribute.restriction.Restriction;
+import stats.externalData.Article_2017PetrenkoStatEntry;
 import stats.externalData.Article_2018JARStatEntry;
 import stats.table.Table;
 import stats.table.TableColumn;
@@ -242,22 +247,306 @@ public class GlobalGraphGenerator extends GraphGenerator {
 	}
 
 	private void generate_JSS2018() {
-		if (hW__ == null)
-			return;
 		StatsSet allStats = new StatsSet();
-		if (zQ == null)
-			return;
-		if (rivestSchapire == null)
-			return;
-		if (locW == null)
-			return;
-		if (lm == null)
-			return;
-		allStats.add(zQ);
-		allStats.add(hW__);
-		allStats.add(rivestSchapire);
-		allStats.add(locW);
-		allStats.add(lm);
+		if (hW__ != null)
+			allStats.add(hW__);
+		if (zQ != null)
+			allStats.add(zQ);
+		if (rivestSchapire != null)
+			allStats.add(rivestSchapire);
+		if (locW != null)
+			allStats.add(locW);
+		if (lm != null)
+			allStats.add(lm);
+		String prefix = Options.getArticleDir("JSS2018").resolve("figures")
+				.toAbsolutePath().toString() + File.separator;
+
+		final Restriction hWRestriction = new ClassRestriction<>(
+				HWStatsEntry.class);
+		final Restriction hInWRestriction = new EqualsRestriction<>(
+				Attribute.ADD_H_IN_W, true);
+		final Restriction hNotInWRestriction = new EqualsRestriction<>(
+				Attribute.ADD_H_IN_W, false);
+		final Restriction withoutHZXWRestriction = new EqualsRestriction<>(
+				HWStatsEntry.REUSE_HZXW, false);
+		final Restriction withHZXWRestriction = new EqualsRestriction<>(
+				HWStatsEntry.REUSE_HZXW, true);
+		final Restriction noTraceSearchRestriction = new EqualsRestriction<>(
+				HWStatsEntry.SEARCH_CE_IN_TRACE, "none");
+		final Restriction simpleTraceSearchRestriction = new EqualsRestriction<>(
+				HWStatsEntry.SEARCH_CE_IN_TRACE, "simple");
+		final Restriction check3rdRestriction = new EqualsRestriction<>(
+				HWStatsEntry.CHECK_3rd_INCONSISTENCY, true);
+		final Restriction noCheck3rdRestriction = new EqualsRestriction<>(
+				HWStatsEntry.CHECK_3rd_INCONSISTENCY, false);
+
+		final Restriction randomMealyRestriction = new EqualsRestriction<String>(
+				HWStatsEntry.AUTOMATA, new RandomMealyDriver().getSystemName());
+		final Restriction mrBeanRestriction = new Restriction() {
+
+			@Override
+			public boolean contains(StatsEntry s) {
+				return !s.hasAttribute(Attribute.ORACLE_USED)
+						|| s.get(Attribute.ORACLE_USED).equals("MrBean");
+			}
+		};
+
+		final OneConfigPlotter withoutHeuristics = new OneConfigPlotter(
+				new Restriction[] { hWRestriction, hNotInWRestriction,
+						noTraceSearchRestriction, noCheck3rdRestriction,
+						withoutHZXWRestriction },
+				PointShape.FILLED_TRIANGLE_UP, new Color("#88EB88"),
+				"without heuristics");
+		final OneConfigPlotter hInW = new OneConfigPlotter(
+				new Restriction[] { hWRestriction, hInWRestriction,
+						noTraceSearchRestriction, noCheck3rdRestriction,
+						withoutHZXWRestriction },
+				PointShape.FILLED_CIRCLE, new Color("#E0E070"),
+				"adding h in W");
+		final OneConfigPlotter check3rd = new OneConfigPlotter(
+				new Restriction[] { hWRestriction, hNotInWRestriction,
+						noTraceSearchRestriction, check3rdRestriction,
+						withoutHZXWRestriction },
+				PointShape.EMPTY_SQUARE, new Color("#4B0082"),
+				"inconsistencies on h");
+		final OneConfigPlotter dictionnary = new OneConfigPlotter(
+				new Restriction[] { hWRestriction, hNotInWRestriction,
+						noTraceSearchRestriction, noCheck3rdRestriction,
+						withHZXWRestriction },
+				PointShape.EMPTY_TRIANGLE_DOWN, new Color("#800000"),
+				"use dictionary");
+		final OneConfigPlotter heuristicsWithoutTrace = new OneConfigPlotter(
+				new Restriction[] { hWRestriction, hInWRestriction,
+						noTraceSearchRestriction, check3rdRestriction,
+						withHZXWRestriction },
+				PointShape.TIMES_CROSS, new Color("#008000"),
+				"the 3 heuristics together");
+		final OneConfigPlotter traceAndHeuristicsPlotter = new OneConfigPlotter(
+				new Restriction[] { hWRestriction,hInWRestriction,
+						simpleTraceSearchRestriction, check3rdRestriction,
+						withHZXWRestriction },
+				PointShape.EMPTY_DIAMOND, new Color("#800000"),
+				"the 3 heuristics together and trace");
+
+		int halfPageSize = 3;
+		{
+			StatsSet randomBig;
+			StatsSet randomSmall;
+			{
+				StatsSet random = new StatsSet(allStats);
+
+				random.restrict(randomMealyRestriction);
+				random.restrict(
+						new EqualsRestriction<>(Attribute.INPUT_SYMBOLS, 2));
+				random.restrict(
+						new EqualsRestriction<>(Attribute.OUTPUT_SYMBOLS, 2));
+				random.restrict(mrBeanRestriction);
+				randomBig = new StatsSet(random);
+				randomSmall = new StatsSet(random);
+			}
+			randomSmall.restrict(new Restriction() {
+				@Override
+				public boolean contains(StatsEntry s) {
+					int states = s.get(HWStatsEntry.STATE_NUMBER);
+					return (states % 20 == 0) && states <= 220 && states >= 40;
+				}
+			});
+			randomBig.restrict(new InSetRestriction<>(Attribute.STATE_NUMBER,
+					new Integer[] { 5, 15, 30, 70, 150, 300, 700, 1500,
+							3000 }));
+			{
+				// heuristics comparison
+				List<OneConfigPlotter> plotters = new ArrayList<>();
+				plotters.add(withoutHeuristics);
+				plotters.add(hInW);
+				plotters.add(check3rd);
+				plotters.add(dictionnary);
+				plotters.add(heuristicsWithoutTrace);
+
+				Graph<Integer, Integer> traceLength = new Graph<Integer, Integer>(
+						HWStatsEntry.STATE_NUMBER, HWStatsEntry.TRACE_LENGTH);
+				traceLength.setForArticle(true);
+				traceLength.setSize(halfPageSize, halfPageSize);
+				traceLength.setTitle("");
+				traceLength.setDefaultPlotStyle(Graph.PlotStyle.AVERAGE);
+				for (OneConfigPlotter item : plotters) {
+					item.plotOn(traceLength, randomSmall);
+				}
+				traceLength.setFileName(prefix + "heuristics_comparison_trace");
+				traceLength.setForceAbsLogScale(false);
+				traceLength.setForceOrdLogScale(false);
+				traceLength.forceAbsRange(50, 200);
+				traceLength.setDataDescriptionFields(new Attribute<?>[] {});
+				traceLength.getKeyParameters().setOutside(true);
+				traceLength.export();
+
+				Graph<Integer, Integer> oracleCalls = new Graph<Integer, Integer>(
+						HWStatsEntry.STATE_NUMBER,
+						HWStatsEntry.ASKED_COUNTER_EXAMPLE);
+				oracleCalls.setForArticle(true);
+				oracleCalls.setSize(halfPageSize, halfPageSize);
+				oracleCalls.setDefaultPlotStyle(Graph.PlotStyle.AVERAGE);
+				for (OneConfigPlotter item : plotters) {
+					item.plotOn(oracleCalls, randomBig);
+				}
+				oracleCalls
+						.setFileName(prefix + "heuristics_comparison_oracle");
+				oracleCalls.setForceAbsLogScale(true);
+				oracleCalls.setForceOrdLogScale(false);
+				oracleCalls.forceAbsRange(5, 4000);
+				oracleCalls.setTitle("");
+				oracleCalls.setDataDescriptionFields(new Attribute<?>[] {});
+				oracleCalls.getKeyParameters().setOutside(true);
+				oracleCalls.export();
+			}
+			{
+				// trace CE comparison
+				Graph<Integer, Integer> traceLength = new Graph<Integer, Integer>(
+						HWStatsEntry.STATE_NUMBER, HWStatsEntry.TRACE_LENGTH);
+				traceLength.setForArticle(true);
+				traceLength.setSize(halfPageSize, halfPageSize);
+				traceLength.setTitle("");
+				heuristicsWithoutTrace.plotOn(traceLength, randomSmall,
+						"using only random walk", Graph.PlotStyle.AVERAGE);
+				traceAndHeuristicsPlotter.plotOn(traceLength, randomSmall,
+						"using trace to find CE", Graph.PlotStyle.AVERAGE);
+				traceLength.setFileName(prefix + "traceCE_comparison_trace");
+				traceLength.setForceAbsLogScale(false);
+				traceLength.setForceOrdLogScale(false);
+				traceLength.forceAbsRange(50, 200);
+				traceLength.setDataDescriptionFields(new Attribute<?>[] {});
+				traceLength.getKeyParameters().setOutside(true);
+				traceLength.export();
+
+				Graph<Integer, Integer> oracleCalls = new Graph<Integer, Integer>(
+						HWStatsEntry.STATE_NUMBER,
+						HWStatsEntry.ASKED_COUNTER_EXAMPLE);
+				oracleCalls.setForArticle(true);
+				oracleCalls.setSize(halfPageSize, halfPageSize);
+				heuristicsWithoutTrace.plotOn(oracleCalls, randomBig,
+						"using only random walk", Graph.PlotStyle.AVERAGE);
+				traceAndHeuristicsPlotter.plotOn(oracleCalls, randomBig,
+						"using trace to find CE", Graph.PlotStyle.AVERAGE);
+				oracleCalls.setFileName(prefix + "traceCE_comparison_oracle");
+				oracleCalls.setForceAbsLogScale(true);
+				oracleCalls.setForceOrdLogScale(false);
+				oracleCalls.forceAbsRange(5, 4000);
+				oracleCalls.setTitle("");
+				oracleCalls.setDataDescriptionFields(new Attribute<?>[] {});
+				oracleCalls.getKeyParameters().setOutside(true);
+				oracleCalls.export();
+			}
+		}
+		{
+			// inputs comparison
+			StatsSet s = new StatsSet(allStats);
+			s.restrict(mrBeanRestriction);
+			s.restrict(randomMealyRestriction);
+			s.restrict(new EqualsRestriction<Integer>(HWStatsEntry.STATE_NUMBER,
+					30));
+			s.restrict(new InSetRestriction<>(HWStatsEntry.INPUT_SYMBOLS,
+					new Integer[] { 2, 4, 6, 8, 10, 15, 20, 30, 40, 50, 60 }));
+			Graph<Integer, Integer> inputs_trace = new Graph<Integer, Integer>(
+					HWStatsEntry.INPUT_SYMBOLS, HWStatsEntry.TRACE_LENGTH);
+			inputs_trace.setForArticle(true);
+			inputs_trace.setDefaultPlotStyle(Graph.PlotStyle.AVERAGE);
+			withoutHeuristics.plotOn(inputs_trace, s, "without heuristics",Graph.PlotStyle.AVERAGE);
+			traceAndHeuristicsPlotter.plotOn(inputs_trace, s,
+					"with heuristics",Graph.PlotStyle.AVERAGE);
+
+			inputs_trace.setDataDescriptionFields(new Attribute<?>[] {});
+			inputs_trace.setFileName(prefix + "inputs_influence");
+			inputs_trace.setForceOrdLogScale(false);
+			inputs_trace.setSize(6, 4);
+			inputs_trace.getKeyParameters()
+					.sethPosition(HorizontalPosition.LEFT);
+			inputs_trace.export();
+		}
+		{
+			//algorithms comparison (graph on random)
+			StatsSet algCompSet=new StatsSet(allStats,new Restriction() {
+				List<Integer> keptStates = Arrays.asList(
+		 5, 10, 15, 20, 25, 30, 40, 55, 75, 100,
+			130, 170, 220, 290, 375, 500, 625, 800, 1000, 1300, 1700, 2200,
+						2900);
+				@Override
+				public boolean contains(StatsEntry s) {
+					return s instanceof Article_2017PetrenkoStatEntry
+							|| keptStates
+									.contains(s.get(Attribute.STATE_NUMBER));
+				}});
+			algCompSet.restrict(mrBeanRestriction);
+			algCompSet.restrict(randomMealyRestriction);
+			final OneConfigPlotter RSPlotter = new OneConfigPlotter(
+					new Restriction[] {
+							new ClassRestriction<>(
+									RivestSchapireStatsEntry.class),
+							new EqualsRestriction<>(Attribute.RS_WITH_GIVEN_H,
+									false), },
+					Graph.PointShape.EMPTY_CIRCLE, null,
+					"Rivest and Schaphire");
+			RSPlotter.setPlotStyle(Graph.PlotStyle.AVERAGE);
+			
+			final OneConfigPlotter LocWPlotter = new OneConfigPlotter(
+					new Restriction[] {
+							new ClassRestriction<>(
+									LocalizerBasedStatsEntry.class),
+							new EqualsRestriction<>(Attribute.W_SIZE, 2),
+							new EqualsRestriction<>(Attribute.WITH_SPEEDUP,
+									false), },
+					Graph.PointShape.EMPTY_SQUARE, null,
+					"LocW");
+			LocWPlotter.setPlotStyle(Graph.PlotStyle.AVERAGE);
+
+
+			final OneConfigPlotter CSPlotter = new OneConfigPlotter(
+					new Restriction[] { new ClassRestriction<>(
+							Article_2017PetrenkoStatEntry.class), },
+					Graph.PointShape.EMPTY_DIAMOND, null, "Constraints solver");
+			CSPlotter.setPlotStyle(Graph.PlotStyle.AVERAGE);
+
+			Graph<Integer, Integer> traceLength = new Graph<Integer, Integer>(
+					HWStatsEntry.STATE_NUMBER, HWStatsEntry.TRACE_LENGTH);
+			traceLength.setForArticle(true);
+			traceLength.setSize(6, 4);
+			traceLength.setTitle("");
+			traceAndHeuristicsPlotter.plotOn(traceLength, algCompSet, "hW",
+					Graph.PlotStyle.AVERAGE);
+			RSPlotter.plotOn(traceLength, algCompSet);
+			CSPlotter.plotOn(traceLength, algCompSet);
+			LocWPlotter.plotOn(traceLength, algCompSet);
+			traceLength.setFileName(prefix + "alg_comp_trace");
+			traceLength.setForceAbsLogScale(true);
+			traceLength.setForceOrdLogScale(true);
+			traceLength.forceAbsRange(2, 4000);
+			traceLength.setDataDescriptionFields(new Attribute<?>[] {});
+			traceLength.getKeyParameters().setOutside(false);
+			traceLength.getKeyParameters()
+					.setvPosition(VerticalPosition.BOTTOM);
+			traceLength.export();
+
+			Graph<Integer, Float> duration = new Graph<>(
+					HWStatsEntry.STATE_NUMBER, HWStatsEntry.DURATION);
+			duration.setForArticle(true);
+			duration.setSize(6, 4);
+			duration.setTitle("");
+			traceAndHeuristicsPlotter.plotOn(duration, algCompSet,
+					"hW", Graph.PlotStyle.AVERAGE);
+			RSPlotter.plotOn(duration, algCompSet);
+			CSPlotter.plotOn(duration, algCompSet);
+			LocWPlotter.plotOn(duration, algCompSet);
+			duration.setFileName(prefix + "alg_comp_duration");
+			duration.setForceAbsLogScale(true);
+			duration.setForceOrdLogScale(true);
+			duration.forceAbsRange(2, 4000);
+			duration.setDataDescriptionFields(new Attribute<?>[] {});
+			duration.getKeyParameters().setOutside(false);
+			duration.getKeyParameters()
+					.setvPosition(VerticalPosition.BOTTOM);
+			duration.export();
+
+		}
+
 
 		allStats.restrict(new Restriction() {
 
@@ -279,79 +568,6 @@ public class GlobalGraphGenerator extends GraphGenerator {
 			}
 		});
 
-		String filePrefix = "JSS2018_";
-		Restriction[] hWMrBeanRestrictions = new Restriction[] {
-				new ClassRestriction<>(HWStatsEntry.class),
-				// new EqualsRestriction<>(Attribute.ADD_H_IN_W, false),
-				// new EqualsRestriction<>(HWStatsEntry.USE_ADAPTIVE_W, true),
-				// new EqualsRestriction<>(HWStatsEntry.USE_ADAPTIVE_H, true),
-				// new EqualsRestriction<>(HWStatsEntry.REUSE_HZXW, true),
-				// new EqualsRestriction<>(HWStatsEntry.CHECK_3rd_INCONSISTENCY,
-				// true),
-				// new EqualsRestriction<>(HWStatsEntry.SEARCH_CE_IN_TRACE,
-				// "simple"),
-				// new EqualsRestriction<>(HWStatsEntry.PRECOMPUTED_W, false),
-				new EqualsRestriction<>(HWStatsEntry.ORACLE_USED, "MrBean") };
-		OneConfigPlotter hWMrBeanPlotter = new OneConfigPlotter(
-				hWMrBeanRestrictions, Graph.PointShape.FILLED_TRIANGLE_DOWN,
-				new Graph.Color(255, 200, 50), "hW MrBean");
-
-		OneConfigPlotter hW_LY_plotter = new OneConfigPlotter(
-				new Restriction[] { new ClassRestriction<>(HWStatsEntry.class),
-						new EqualsRestriction<>(HWStatsEntry.ORACLE_USED,
-								"distinctionTree + MrBean") },
-				Graph.PointShape.EMPTY_TRIANGLE_DOWN,
-				new Graph.Color(0, 200, 50), "LY");
-		OneConfigPlotter RS_plotter = new OneConfigPlotter(new Restriction[] {
-				new ClassRestriction<>(RivestSchapireStatsEntry.class),
-
-		}, Graph.PointShape.EMPTY_SQUARE, new Graph.Color(255, 0, 0),
-				"Rivest&schapire");
-
-		PlotStyle defaultStyle = PlotStyle.CANDLESTICK;
-		hWMrBeanPlotter.setPlotStyle(defaultStyle);
-		hW_LY_plotter.setPlotStyle(defaultStyle);
-		RS_plotter.setPlotStyle(defaultStyle);
-		{
-			Graph<String, Integer> g = new Graph<>(Attribute.AUTOMATA,
-					Attribute.ORACLE_TRACE_LENGTH);
-			g.setForArticle(true);
-			// g.setSize(width, noKeyHeight);
-			g.setTitle("");
-			// g.getKeyParameters().disable();
-			// g.setDataDescriptionFields(description);
-			hWMrBeanPlotter.plotOn(g, allStats);
-			hW_LY_plotter.plotOn(g, allStats);
-			// g.forceAbsRange(0, 150);
-			// g.setXTics(50);
-			g.setForceOrdLogScale(true);
-			// g.forceOrdRange(null, 200000);
-			// g.setYTics(50000);
-			g.setForceAbsLogScale(false);
-			g.setFileName(filePrefix + "test");
-			g.export();
-		}
-		{
-			Graph<Integer, Integer> g = new Graph<>(
-					ComputedAttribute.TRANSITION_COUNT, Attribute.TRACE_LENGTH);
-			g.setForArticle(true);
-			// g.setSize(width, noKeyHeight);
-			g.setTitle("");
-			// g.getKeyParameters().disable();
-			g.setDataDescriptionFields(new Attribute<?>[] {});
-			hWMrBeanPlotter.plotOn(g, allStats);
-			hW_LY_plotter.plotOn(g, allStats);
-			RS_plotter.plotOn(g, allStats);
-			// g.forceAbsRange(0, 150);
-			// g.setXTics(50);
-			g.setForceOrdLogScale(true);
-			// g.forceOrdRange(null, 200000);
-			// g.setYTics(50000);
-			g.setForceAbsLogScale(true);
-			g.setFileName(filePrefix + "test2");
-			g.export();
-		}
-
 		{
 
 			StatsSet baseStats = new StatsSet(allStats);
@@ -365,13 +581,6 @@ public class GlobalGraphGenerator extends GraphGenerator {
 					return s.get(HWStatsEntry.AUTOMATA).startsWith("dot_file");
 				}
 			});
-			List<TableRow> rows = new ArrayList<>();
-			rows.add(new AutomataRow("MQTT ActiveMQ two client retain",
-					"dot_file(BenchmarkMQTT_ActiveMQ__two_client_will_retain)"));
-			rows.add(new AutomataRow("FromRhapsodyToDezyne 1",
-					"dot_file(BenchmarkFromRhapsodyToDezyne_model1)"));
-			rows.add(new AutomataRow("FromRhapsodyToDezyne 3",
-					"dot_file(BenchmarkFromRhapsodyToDezyne_model3)"));
 			SortedMap<Integer, List<String>> bySize = new TreeMap<>();
 			Map<String, TableRow> automaticRows = new HashMap<>();
 			for (StatsEntry e : new StatsSet(baseStats, new Restriction[] {
@@ -406,8 +615,7 @@ public class GlobalGraphGenerator extends GraphGenerator {
 					new EqualsRestriction<>(Attribute.SEARCH_CE_IN_TRACE,
 							"simple"));
 
-			rows = new ArrayList<>(automaticRows.values());
-			rows = new ArrayList<>();
+			List<TableRow> rows = new ArrayList<>();
 			for (List<String> entry : bySize.values()) {
 				Collections.sort(entry);
 				for (String fileName : entry) {
@@ -436,28 +644,7 @@ public class GlobalGraphGenerator extends GraphGenerator {
 						return super.title + "(#oracle)";
 					}
 
-					@Override // columns.add(new TableColumn() {
-					//
-					// @Override
-					// String getTitle() {
-					// return "theorical complexity";
-					// }
-					//
-					// @Override
-					// StatsSet restrict(StatsSet set) {
-					// return set;
-					// }
-					//
-					// @Override
-					// String getData(StatsSet stats) {
-					// Integer inputs = stats
-					// .attributeMax(Attribute.INPUT_SYMBOLS);
-					// Float states = stats.attributeMax(Attribute.STATE_NUMBER)
-					// .floatValue();
-					// return "" + (int) (inputs * 75 * Math.pow(states, 1.28));
-					// }
-					// });
-
+					@Override
 					public String getRawData(StatsSet stats) {
 						return super.getRawData(stats) + "(" + stats
 								.attributeAVG(Attribute.ASKED_COUNTER_EXAMPLE)
@@ -469,7 +656,7 @@ public class GlobalGraphGenerator extends GraphGenerator {
 								.resolve("benchmarkLocW").toFile(),
 						baseStats, columns, rows)
 								.export(TableOutputFormat.LATEX);
-				;
+
 			}
 			columns.clear();
 
