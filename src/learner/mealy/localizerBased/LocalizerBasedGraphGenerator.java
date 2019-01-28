@@ -100,7 +100,7 @@ public class LocalizerBasedGraphGenerator extends GraphGenerator {
 		g2w2.forceAbsRange(0, null);
 		g2w2.plotFunc("0.04*" + makeMaxTheoricalFunction(s2w2, LocalizerBasedStatsEntry.INPUT_SYMBOLS),
 				"shape of complexity bound (1/25)", LineStyle.BOUND);
-		g2w2.forceOrdRange(null, s2w2.attributeMax(LocalizerBasedStatsEntry.TRACE_LENGTH));
+		//g2w2.forceOrdRange(null, s2w2.attributeMax(LocalizerBasedStatsEntry.TRACE_LENGTH));
 		g2w2.export();
 
 		// StatsSet s2w3 = new StatsSet(s2);

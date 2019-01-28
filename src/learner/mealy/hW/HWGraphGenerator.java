@@ -83,39 +83,39 @@ public class HWGraphGenerator extends GraphGenerator {
 			HWStatsEntry.PRECOMPUTED_W, true);
 	static public final Restriction withUnknownWRestriction = new EqualsRestriction<Boolean>(
 			HWStatsEntry.PRECOMPUTED_W, false);
-	static Restriction MrBeanRestriction = new EqualsRestriction<>(
+	static public final Restriction MrBeanRestriction = new EqualsRestriction<>(
 			HWStatsEntry.ORACLE_USED, "MrBean");
-	static Restriction shortestOracleRestriction = new EqualsRestriction<>(
+	static public final Restriction shortestOracleRestriction = new EqualsRestriction<>(
 			HWStatsEntry.ORACLE_USED, "shortest");
 
-	static Restriction hInWRestriction = new EqualsRestriction<>(
+	static public final Restriction hInWRestriction = new EqualsRestriction<>(
 			HWStatsEntry.ADD_H_IN_W, true);
-	static Restriction hNotInWRestriction = new EqualsRestriction<>(
+	static public final Restriction hNotInWRestriction = new EqualsRestriction<>(
 			HWStatsEntry.ADD_H_IN_W, false);
 
-	static Restriction simpleTraceSearchRestriction = new EqualsRestriction<>(
+	static public final Restriction simpleTraceSearchRestriction = new EqualsRestriction<>(
 			HWStatsEntry.SEARCH_CE_IN_TRACE, "simple");;
-	static Restriction noTraceSearchRestriction = new EqualsRestriction<>(
+	static public final Restriction noTraceSearchRestriction = new EqualsRestriction<>(
 			HWStatsEntry.SEARCH_CE_IN_TRACE, "none");
 
-	static Restriction check3rdRestriction = new EqualsRestriction<>(
+	static public final Restriction check3rdRestriction = new EqualsRestriction<>(
 			HWStatsEntry.CHECK_3rd_INCONSISTENCY, true);
-	static Restriction noCheck3rdRestriction = new EqualsRestriction<>(
+	static public final Restriction noCheck3rdRestriction = new EqualsRestriction<>(
 			HWStatsEntry.CHECK_3rd_INCONSISTENCY, false);
 
-	static Restriction withHZXWRestriction = new EqualsRestriction<>(
+	static public final Restriction withHZXWRestriction = new EqualsRestriction<>(
 			HWStatsEntry.REUSE_HZXW, true);
-	static Restriction withoutHZXWRestriction = new EqualsRestriction<>(
+	static public final Restriction withoutHZXWRestriction = new EqualsRestriction<>(
 			HWStatsEntry.REUSE_HZXW, false);
 
-	static Restriction fixedHomingSequenceRestriction = new EqualsRestriction<>(
+	static public final Restriction fixedHomingSequenceRestriction = new EqualsRestriction<>(
 			HWStatsEntry.USE_ADAPTIVE_H, false);
-	static Restriction adaptiveHomingSequenceRestriction = new EqualsRestriction<>(
+	static public final Restriction adaptiveHomingSequenceRestriction = new EqualsRestriction<>(
 			HWStatsEntry.USE_ADAPTIVE_H, true);
 
-	static Restriction fixedWRestriction = new EqualsRestriction<>(
+	static public final Restriction fixedWRestriction = new EqualsRestriction<>(
 			HWStatsEntry.USE_ADAPTIVE_W, false);
-	static Restriction adaptiveWRestriction = new EqualsRestriction<>(
+	static public final Restriction adaptiveWRestriction = new EqualsRestriction<>(
 			HWStatsEntry.USE_ADAPTIVE_W, true);
 
 	{
@@ -537,8 +537,6 @@ public class HWGraphGenerator extends GraphGenerator {
 			random_.restrict(input2);
 			random_.setTitle("random automata");
 			baseSets.add(random_);
-			generateHeuristicComparison(baseSets, HWStatsEntry.STATE_NUMBER,
-					" random ", statesPersonalizer);
 			generateOracleComparison(baseSets, HWStatsEntry.STATE_NUMBER,
 					" random ", statesPersonalizer);
 
@@ -605,8 +603,6 @@ public class HWGraphGenerator extends GraphGenerator {
 		generateHeuristicComparison(baseSets, HWStatsEntry.AUTOMATA);
 		generateOracleComparison(baseSets, HWStatsEntry.AUTOMATA, "dot_files",
 				null);
-
-		generateJSS_2018(allStats);
 
 	}
 
@@ -895,182 +891,5 @@ public class HWGraphGenerator extends GraphGenerator {
 			PointShape.EMPTY_DIAMOND, new Color("#800000"),
 			"the 3 heuristics together and trace");
 
-	private void generateJSS_2018(StatsSet allStats_) {
-		if (allStats_.size() == 0)
-			return;
-
-		PlotStyle plotStyle = PlotStyle.AVERAGE;
-		StatsSet allStats = new StatsSet(allStats_);
-		allStats.restrict(withUnknownWRestriction);
-		Integer[] keptStates = new Integer[] { 5, 15, 30, 70, 150, 300, 700,
-				1500, 3000 };
-
-		OneConfigPlotter withoutHeuristics = new OneConfigPlotter(
-				new Restriction[] { MrBeanRestriction, hNotInWRestriction,
-						noTraceSearchRestriction, noCheck3rdRestriction,
-						withoutHZXWRestriction },
-				PointShape.FILLED_TRIANGLE_UP, new Color("#88EB88"),
-				"without heuristics");
-
-		OneConfigPlotter hInW = new OneConfigPlotter(
-				new Restriction[] { MrBeanRestriction, hInWRestriction,
-						noTraceSearchRestriction, noCheck3rdRestriction,
-						withoutHZXWRestriction },
-				PointShape.FILLED_CIRCLE, new Color("#E0E070"),
-				"adding h in W");
-
-		OneConfigPlotter check3rd = new OneConfigPlotter(
-				new Restriction[] { MrBeanRestriction, hNotInWRestriction,
-						noTraceSearchRestriction, check3rdRestriction,
-						withoutHZXWRestriction },
-				PointShape.EMPTY_SQUARE, new Color("#4B0082"),
-				"inconsistencies on h");
-
-		OneConfigPlotter dictionnary = new OneConfigPlotter(
-				new Restriction[] { MrBeanRestriction, hNotInWRestriction,
-						noTraceSearchRestriction, noCheck3rdRestriction,
-						withHZXWRestriction },
-				PointShape.EMPTY_TRIANGLE_DOWN, new Color("#800000"),
-				"use dictionary");
-
-		OneConfigPlotter heuristicsWithoutTrace = new OneConfigPlotter(
-				new Restriction[] { MrBeanRestriction, hInWRestriction,
-						noTraceSearchRestriction, check3rdRestriction,
-						withHZXWRestriction },
-				PointShape.TIMES_CROSS, new Color("#008000"),
-				"the 3 heuristics together");
-
-		StatsSet random_ = new StatsSet(allStats);
-
-		random_.restrict(randomMealyRestriction);
-		random_.restrict(output2);
-		random_.restrict(input2);
-		random_.setTitle("random automata");
-
-		StatsSet randomSmall = new StatsSet(random_);
-		StatsSet randomBig = new StatsSet(random_);
-		randomBig.restrict(new InSetRestriction<Integer>(
-				HWStatsEntry.STATE_NUMBER, keptStates));
-		randomSmall.restrict(new Restriction() {
-			@Override
-			public boolean contains(StatsEntry s) {
-				int states = s.get(HWStatsEntry.STATE_NUMBER);
-				return (states % 20 == 0) && states <= 220 && states >= 40;
-			}
-		});
-
-		int halfPageSize = 300;
-		{
-			// trace CE comparison
-			Graph<Integer, Integer> traceLength = new Graph<Integer, Integer>(
-					HWStatsEntry.STATE_NUMBER, HWStatsEntry.TRACE_LENGTH);
-			traceLength.setForArticle(true);
-			traceLength.setSize(halfPageSize, halfPageSize);
-			traceLength.setTitle("");
-			heuristicsWithoutTrace.plotOn(traceLength, randomSmall,
-					"using only random walk", plotStyle);
-			jss2018_traceAndHeuristicsPlotter.plotOn(traceLength, randomSmall,
-					"using trace to find CE", plotStyle);
-			traceLength.setFileName("traceCE_comparison_trace");
-			traceLength.setForceAbsLogScale(false);
-			traceLength.setForceOrdLogScale(false);
-			traceLength.forceAbsRange(50, 200);
-			traceLength.setDataDescriptionFields(new Attribute<?>[] {});
-			traceLength.getKeyParameters().setOutside(true);
-			traceLength.export();
-
-			Graph<Integer, Integer> oracleCalls = new Graph<Integer, Integer>(
-					HWStatsEntry.STATE_NUMBER,
-					HWStatsEntry.ASKED_COUNTER_EXAMPLE);
-			oracleCalls.setForArticle(true);
-			oracleCalls.setSize(halfPageSize, halfPageSize);
-			heuristicsWithoutTrace.plotOn(oracleCalls, randomBig,
-					"using only random walk", plotStyle);
-			jss2018_traceAndHeuristicsPlotter.plotOn(oracleCalls, randomBig,
-					"using trace to find CE", plotStyle);
-			oracleCalls.setFileName("traceCE_comparison_oracle");
-			oracleCalls.setForceAbsLogScale(true);
-			oracleCalls.setForceOrdLogScale(false);
-			oracleCalls.forceAbsRange(5, 4000);
-			oracleCalls.setTitle("");
-			oracleCalls.setDataDescriptionFields(new Attribute<?>[] {});
-			oracleCalls.getKeyParameters().setOutside(true);
-			oracleCalls.export();
-		}
-		{
-			// heuristics comparison
-			List<OneConfigPlotter> plotters = new ArrayList<>();
-			plotters.add(withoutHeuristics);
-			plotters.add(hInW);
-			plotters.add(check3rd);
-			plotters.add(dictionnary);
-			plotters.add(heuristicsWithoutTrace);
-
-			Graph<Integer, Integer> traceLength = new Graph<Integer, Integer>(
-					HWStatsEntry.STATE_NUMBER, HWStatsEntry.TRACE_LENGTH);
-			traceLength.setForArticle(true);
-			traceLength.setSize(halfPageSize, halfPageSize);
-			traceLength.setTitle("");
-			traceLength.setDefaultPlotStyle(plotStyle);
-			for (OneConfigPlotter item : plotters) {
-				item.plotOn(traceLength, randomSmall);
-			}
-			traceLength.setFileName("heuristics_comparison_trace");
-			// traceLength.getKeyParameters().setvPosition(VerticalPosition.BOTTOM);
-			// traceLength.getKeyParameters().sethPosition(HorizontalPosition.LEFT);
-			traceLength.setForceAbsLogScale(false);
-			traceLength.setForceOrdLogScale(false);
-			traceLength.forceAbsRange(50, 200);
-			traceLength.setDataDescriptionFields(new Attribute<?>[] {});
-			traceLength.getKeyParameters().setOutside(true);
-			traceLength.export();
-
-			Graph<Integer, Integer> oracleCalls = new Graph<Integer, Integer>(
-					HWStatsEntry.STATE_NUMBER,
-					HWStatsEntry.ASKED_COUNTER_EXAMPLE);
-			oracleCalls.setForArticle(true);
-			oracleCalls.setSize(halfPageSize, halfPageSize);
-			oracleCalls.setDefaultPlotStyle(plotStyle);
-			for (OneConfigPlotter item : plotters) {
-				item.plotOn(oracleCalls, randomBig);
-			}
-			oracleCalls.setFileName("heuristics_comparison_oracle");
-			oracleCalls.setForceAbsLogScale(true);
-			oracleCalls.setForceOrdLogScale(false);
-			oracleCalls.forceAbsRange(5, 4000);
-			oracleCalls.setTitle("");
-			oracleCalls.setDataDescriptionFields(new Attribute<?>[] {});
-			oracleCalls.getKeyParameters().setOutside(true);
-			oracleCalls.export();
-		}
-
-		{
-			// inputs comparison
-			StatsSet s = new StatsSet(allStats);
-			s.restrict(MrBeanRestriction);
-			s.restrict(randomMealyRestriction);
-			s.restrict(new EqualsRestriction<Integer>(HWStatsEntry.STATE_NUMBER,
-					30));
-			s.restrict(new InSetRestriction<>(HWStatsEntry.INPUT_SYMBOLS,
-					new Integer[] { 2, 4, 6, 8, 10, 15, 20, 30, 40, 50, 60 }));
-			Graph<Integer, Integer> inputs_trace = new Graph<Integer, Integer>(
-					HWStatsEntry.INPUT_SYMBOLS, HWStatsEntry.TRACE_LENGTH);
-			inputs_trace.setForArticle(true);
-			inputs_trace.setDefaultPlotStyle(plotStyle);
-			withoutHeuristics.plotOn(inputs_trace, s, "without heuristics");
-			jss2018_traceAndHeuristicsPlotter.plotOn(inputs_trace, s,
-					"with heuristics");
-
-			inputs_trace.setDataDescriptionFields(new Attribute<?>[] {});
-			inputs_trace
-					.setFileName("influence_of_inputs_number_on_trace_length");
-			inputs_trace.setForceOrdLogScale(false);
-			inputs_trace.setSize(600, 400);
-			inputs_trace.getKeyParameters()
-					.sethPosition(HorizontalPosition.LEFT);
-			inputs_trace.export();
-		}
-
-	}
 
 }

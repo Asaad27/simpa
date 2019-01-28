@@ -61,8 +61,8 @@ public class TraceLengthCol extends TableColumn {
 							.attributeAVG(Attribute.ASKED_COUNTER_EXAMPLE))
 					+ "]";
 		if (showReset) {
-			if (dispOracle)
-				out = out + "\n";
+//			if (dispOracle)
+//				out = out + "\n";
 			out = out + " ("
 					+ ((int) stats.attributeAVG(Attribute.RESET_CALL_NB)) + ")";
 		}
