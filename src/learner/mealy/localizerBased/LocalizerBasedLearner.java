@@ -317,7 +317,7 @@ public class LocalizerBasedLearner extends Learner {
 		// find a W-set of size 2.
 		// Note that searching a W-set of size 2 can be very long for some
 		// automata
-		boolean findShortestWSet = false;
+		boolean findShortestWSet = true;
 		
 		if (findShortestWSet) {
 			List<InputSequence> toTry = new ArrayList<InputSequence>();

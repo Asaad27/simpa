@@ -591,6 +591,8 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		totalFileName.append(File.separator);
 		if (fileName == null)
 			totalFileName.append(name + "(" + stats.hashCode() + ")");
+		else if (new File(fileName).isAbsolute())
+			totalFileName = new StringBuilder(fileName);
 		else
 			totalFileName.append(fileName.replace(" ", "_"));
 		if (exportForLatex) {
