@@ -443,7 +443,10 @@ public class Mealy extends Automata implements Serializable {
 	public static Mealy importFromUrl(URL url) throws IOException {
 		File file = tools.Utils.downloadWithCache(url);
 		assert file.exists();
-		return importFromDot(file);
+		Mealy m = importFromDot(file);
+		String[] parts = url.toString().split("/");
+		m.name = parts[parts.length - 2] + "_" + parts[parts.length - 1];
+		return m;
 	}
 
 	/**
