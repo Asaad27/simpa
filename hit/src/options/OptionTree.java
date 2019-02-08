@@ -625,8 +625,8 @@ public abstract class OptionTree {
 		List<OptionTree> selectedSubTrees = getSelectedChildren();
 		for (OptionTree subtree : selectedSubTrees)
 			if (!subtree.parseArgumentsInternal(args, parsingErrorStream)) {
-				parsingErrorStream.println("cannot define value of " + subtree
-						+ " with arguments " + args);
+				parsingErrorStream.println("cannot define value of option '"
+						+ subtree.getName() + "' with arguments " + args);
 				subTreeSuccessfullyParsed = false;
 			}
 		return subTreeSuccessfullyParsed && !parseError;
@@ -843,5 +843,14 @@ public abstract class OptionTree {
 		}
 		return max;
 
+	}
+
+	public String getName() {
+		ValueHolder<?> value = getValueHolder();
+		if (value != null)
+			return value.getName();
+		if (description != null && !description.isEmpty())
+			return description;
+		return getClass().getName();
 	}
 }
