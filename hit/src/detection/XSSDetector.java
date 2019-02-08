@@ -12,7 +12,7 @@ import automata.efsm.ParameterizedInputSequence;
 import automata.efsm.ParameterizedOutput;
 import drivers.efsm.real.GenericDriver;
 import learner.efsm.table.LiDataTableItem;
-import options.RandomOption;
+import tools.RandomGenerator;
 import tools.StandaloneRandom;
 import tools.loggers.LogManager;
 
@@ -21,7 +21,7 @@ public class XSSDetector {
 	/**
 	 * @TODO should be put in an option tree.
 	 */
-	RandomOption rand = new StandaloneRandom();
+	RandomGenerator rand = new StandaloneRandom();
 
 	/**
 	 * Parameters values that are not used to seach reflections

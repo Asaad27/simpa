@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import drivers.efsm.EFSMDriver.Types;
-import options.RandomOption;
+import tools.RandomGenerator;
 
 public class Guard implements Serializable, Cloneable {
 	private static final long serialVersionUID = 7535698532882329634L;
@@ -94,7 +94,8 @@ public class Guard implements Serializable, Cloneable {
 		return res;
 	}
 
-	public ArrayList<Parameter> randomize(RandomOption rand, int domainSize) {
+	public ArrayList<Parameter> randomize(RandomGenerator rand,
+			int domainSize) {
 		alwaysFalse = false;
 		alwaysTrue = false;
 		rels.clear();
@@ -122,7 +123,7 @@ public class Guard implements Serializable, Cloneable {
 		return ll;
 	}
 
-	public void checkNdv(int nbNdv, RandomOption rand, int domainSize) {
+	public void checkNdv(int nbNdv, RandomGenerator rand, int domainSize) {
 		alwaysFalse = false;
 		alwaysTrue = false;
 		rels.clear();

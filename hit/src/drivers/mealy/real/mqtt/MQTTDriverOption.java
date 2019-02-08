@@ -428,7 +428,10 @@ public class MQTTDriverOption extends DriverChoiceItem<MQTT> {
 		brokerAddress = new TextOption("--mqtt-broker", "tcp://localhost:1883",
 				"broker address", "the broker to infer");
 		timeout = new IntegerOption("--mqtt-timeout",
-				"timeout to decide quiescence output (ms)", 500);
+				"timeout to decide quiescence output (ms)",
+				"when an input is sent to the broker we do not know if we will get an output or not."
+						+ " After this time, we consider that we will not have an answer.",
+				500);
 		subTrees.add(brokerAddress);
 		subTrees.add(timeout);
 		subTrees.add(clients);

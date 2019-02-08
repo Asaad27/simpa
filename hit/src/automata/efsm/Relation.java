@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import options.RandomOption;
+import tools.RandomGenerator;
 
 public class Relation implements Serializable {
 
@@ -21,7 +21,7 @@ public class Relation implements Serializable {
 	private int nbInputParam;
 	private Map<String, String> memory = null;
 
-	public Relation(int nbInputParam, RandomOption rand, int domainSize) {
+	public Relation(int nbInputParam, RandomGenerator rand, int domainSize) {
 		this.nbInputParam = nbInputParam;
 
 		type = RelationType.EQUALSTOVALUE;
@@ -39,7 +39,7 @@ public class Relation implements Serializable {
 	}
 
 	public void ndvCheck(int nbNdv, Map<String, String> memory,
-			RandomOption rand) {
+			RandomGenerator rand) {
 		this.memory = memory;
 		type = RelationType.NDVCHECK;
 		op1 = rand.randInt(nbInputParam);

@@ -10,10 +10,11 @@ import learner.mealy.table.LmControlTableRow;
 import learner.mealy.table.LmLearner;
 import learner.mealy.table.LmOptions;
 import options.RandomOption;
+import tools.RandomGenerator;
 import tools.loggers.LogManager;
 
 public class LmForRSLearner extends LmLearner {
-	private final RandomOption rand;
+	private final RandomGenerator rand;
 	StateDriver driver;
 	KnownTracesTree knownTraces = new KnownTracesTree();
 
@@ -21,7 +22,7 @@ public class LmForRSLearner extends LmLearner {
 			RandomOption rand) {
 		super(driver, options);
 		this.driver = driver;
-		this.rand = rand;
+		this.rand = rand.getRand();
 	}
 
 	@Override

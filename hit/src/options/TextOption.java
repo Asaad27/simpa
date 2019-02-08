@@ -13,6 +13,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import options.OptionTree.ArgumentDescriptor.AcceptedValues;
+import options.valueHolders.ValueHolder;
 
 public class TextOption extends OptionTree {
 	private JTextField field;
@@ -85,7 +86,7 @@ public class TextOption extends OptionTree {
 	 * @param v
 	 *            the new value of this option.
 	 */
-	private void setValue(String v) {
+	public void setValue(String v) {
 		assert v != null;
 		text = v;
 		if (field != null) {
@@ -183,6 +184,12 @@ public class TextOption extends OptionTree {
 	public String getHelpByArgument(ArgumentDescriptor arg) {
 		assert arg.equals(argument);
 		return help;
+	}
+
+	@Override
+	public ValueHolder<?> getValueHolder() {
+		// TODO update when value will be hold with a value holder
+		return null;
 	}
 
 }

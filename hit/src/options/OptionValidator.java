@@ -10,18 +10,12 @@ public abstract class OptionValidator {
 
 	private CriticalityLevel criticality = CriticalityLevel.NOTHING;
 	private String message = "";
-	private final OptionTree parentOption;
 
-	public OptionValidator(OptionTree parent) {
-		parentOption = parent;
+	public OptionValidator() {
 	}
 
 	public CriticalityLevel getCriticality() {
 		return criticality;
-	}
-
-	protected OptionTree getParentOption() {
-		return parentOption;
 	}
 
 	protected void setCriticality(CriticalityLevel criticality) {

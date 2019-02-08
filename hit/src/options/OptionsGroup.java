@@ -1,10 +1,11 @@
 package options;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OptionsGroup extends OptionTree {
+import options.valueHolders.ValueHolder;
+
+public class OptionsGroup extends NoArgumentOption {
 	String groupName;
 	List<OptionTree> subOptions = new ArrayList<>();
 
@@ -43,36 +44,13 @@ public class OptionsGroup extends OptionTree {
 	}
 
 	@Override
-	protected boolean isActivatedByArg(ArgumentValue arg) {
-		return false;
-	}
-
-	@Override
-	protected boolean setValueFromArg(ArgumentValue arg,
-			PrintStream parsingErrorStream) {
-		assert false;
-		return false;
-	}
-
-	@Override
 	protected void setValueFromSelectedChildren(
 			List<OptionTree> selectedChildren) {
 		assert false;
 	}
 
 	@Override
-	protected ArgumentValue getSelectedArgument() {
-		return null;
-	}
-
-	@Override
-	protected List<ArgumentDescriptor> getAcceptedArguments() {
-		return new ArrayList<>();
-	}
-
-	@Override
-	public String getHelpByArgument(ArgumentDescriptor arg) {
-		assert false;
+	public ValueHolder<?> getValueHolder() {
 		return null;
 	}
 

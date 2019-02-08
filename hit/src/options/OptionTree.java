@@ -15,6 +15,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
 import options.OptionValidator.CriticalityLevel;
+import options.valueHolders.ValueHolder;
 import tools.Utils;
 
 /**
@@ -406,7 +407,7 @@ public abstract class OptionTree {
 				arg = option.getDebugArgument();
 			else
 				arg = option.getSelectedArgument();
-			assert arg != null || option instanceof OptionsGroup;
+			assert arg != null || option instanceof NoArgumentOption;
 			if (arg != null)
 				arg.asCLI(arguments);
 		}
@@ -797,6 +798,14 @@ public abstract class OptionTree {
 
 		}
 	}
+
+	/**
+	 * Get the value of this option or {@code null} if this option has no value.
+	 * 
+	 * @return the {@link ValueHolder} use by this option or {@code null} if
+	 *         this option do not use one.
+	 */
+	public abstract ValueHolder<?> getValueHolder();
 
 	/**
 	 * Check validators of this option and update graphical interface if needed.

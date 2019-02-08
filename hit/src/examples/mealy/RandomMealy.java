@@ -19,7 +19,7 @@ import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
-import options.RandomOption;
+import tools.RandomGenerator;
 import tools.Utils;
 import tools.loggers.LogManager;
 
@@ -32,7 +32,7 @@ public class RandomMealy extends Mealy implements Serializable {
 
 	private List<String> inputSymbols = null;
 	private List<String> outputSymbols = null;
-	private final RandomOption rand;
+	private final RandomGenerator rand;
 	private OUTPUT_STYLE outputStyle;
 
 	public static String replaceCharAt(String s, int pos, char c) {
@@ -83,11 +83,11 @@ public class RandomMealy extends Mealy implements Serializable {
 		return outputs;
 	}
 
-	public RandomMealy(RandomOption rand) {
+	public RandomMealy(RandomGenerator rand) {
 		this(rand, false, OUTPUT_STYLE.RANDOM);
 	}
 
-	public RandomMealy(RandomOption rand, boolean forceConnex) {
+	public RandomMealy(RandomGenerator rand, boolean forceConnex) {
 		this(rand, forceConnex, OUTPUT_STYLE.RANDOM);
 	}
 
@@ -102,7 +102,7 @@ public class RandomMealy extends Mealy implements Serializable {
 		}
 	}
 
-	public RandomMealy(RandomOption rand, boolean forceConnex,
+	public RandomMealy(RandomGenerator rand, boolean forceConnex,
 			OUTPUT_STYLE outputStyle) {
 		super((forceConnex ? "ConnexRandom(" : ("Random("
 				+ Options.TRANSITIONPERCENT + ";"))
@@ -239,11 +239,11 @@ public class RandomMealy extends Mealy implements Serializable {
 		LogManager.logInfo("Number of states : " + nbStates);
 	}
 
-	public static RandomMealy getConnexRandomMealy(RandomOption rand) {
+	public static RandomMealy getConnexRandomMealy(RandomGenerator rand) {
 		return getConnexRandomMealy(rand, OUTPUT_STYLE.RANDOM);
 	}
 
-	public static RandomMealy getConnexRandomMealy(RandomOption rand,
+	public static RandomMealy getConnexRandomMealy(RandomGenerator rand,
 			OUTPUT_STYLE outputStyle) {
 
 		RandomMealy automata = new RandomMealy(rand, true, outputStyle);

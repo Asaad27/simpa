@@ -7,8 +7,8 @@ import java.util.StringTokenizer;
 import automata.mealy.MealyTransition;
 import drivers.mealy.MealyDriver;
 import learner.mealy.LmConjecture;
-import options.RandomOption;
 import options.learnerOptions.OracleOption;
+import options.valueHolders.SeedHolder;
 import stats.GraphGenerator;
 import stats.StatsEntry;
 import stats.StatsEntry_OraclePart;
@@ -111,7 +111,7 @@ public class ZStatsEntry extends StatsEntry {
 	public ZStatsEntry(MealyDriver d, OracleOption oracleOptions) {
 		this.inputSymbols = d.getInputSymbols().size();
 		this.automata = d.getSystemName();
-		this.seed = RandomOption.MAIN_SEED;
+		this.seed = SeedHolder.MAIN_SEED;
 		oracle = new StatsEntry_OraclePart(oracleOptions);
 	}
 

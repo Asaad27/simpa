@@ -22,9 +22,9 @@ import learner.mealy.combinatorial.node.ArrayTreeNodeWithoutConjecture;
 import learner.mealy.combinatorial.node.TreeNode;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
-import options.RandomOption;
 import stats.StatsEntry;
 import tools.GraphViz;
+import tools.RandomGenerator;
 import tools.StandaloneRandom;
 import tools.loggers.LogManager;
 
@@ -188,7 +188,7 @@ public class CombinatorialLearner extends Learner {
 	 * @return true if a counterExemple was found, false if the conjecture seems to be equivalent to the automata.
 	 */
 	private boolean applyCounterExample(Conjecture c, State currentState){
-		RandomOption rand = new StandaloneRandom();// TODO create options
+		RandomGenerator rand = new StandaloneRandom();// TODO create options
 		LogManager.logInfo("searching counter Example");
 		if (driver instanceof TransparentMealyDriver){
 			Mealy original = ((TransparentMealyDriver) driver).getAutomata();

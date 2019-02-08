@@ -11,7 +11,7 @@ import automata.Transition;
 import drivers.efsm.EFSMDriver.Types;
 import learner.efsm.table.LiDataTableItem;
 import main.simpa.Options;
-import options.RandomOption;
+import tools.RandomGenerator;
 
 public class EFSMTransition extends Transition {
 	private static final long serialVersionUID = -7379789456013157473L;
@@ -194,7 +194,7 @@ public class EFSMTransition extends Transition {
 		return null;
 	}
 
-	public ArrayList<Parameter> randomizeGuard(RandomOption rand,
+	public ArrayList<Parameter> randomizeGuard(RandomGenerator rand,
 			int domainSize) {
 		if (outputFunction instanceof GeneratedOutputFunction) {
 			return ((GeneratedOutputFunction) outputFunction).getGuard()
@@ -203,14 +203,14 @@ public class EFSMTransition extends Transition {
 		return null;
 	}
 
-	public void generateNdv(int nbNdv, RandomOption rand) {
+	public void generateNdv(int nbNdv, RandomGenerator rand) {
 		if (outputFunction instanceof GeneratedOutputFunction) {
 			((GeneratedOutputFunction) outputFunction).generateNdv(nbNdv, rand);
 			generateNdv = true;
 		}
 	}
 
-	public void checkNdv(int nbNdv, RandomOption rand, int domainSize) {
+	public void checkNdv(int nbNdv, RandomGenerator rand, int domainSize) {
 		if (outputFunction instanceof GeneratedOutputFunction) {
 			((GeneratedOutputFunction) outputFunction).getGuard()
 					.checkNdv(nbNdv, rand, domainSize);

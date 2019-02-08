@@ -16,9 +16,9 @@ import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
-import options.RandomOption;
 import options.learnerOptions.OracleOption;
 import stats.StatsEntry_OraclePart;
+import tools.RandomGenerator;
 import tools.StandaloneRandom;
 import tools.Utils;
 import tools.loggers.LogManager;
@@ -340,7 +340,7 @@ public class MealyDriver extends Driver {
 							counterExampleIsFound = doRandomWalk(conjecture,
 									conjectureState, appliedSequences,
 									maxLength,
-									options.mrBean.random);
+									options.mrBean.random.getRand());
 							conjectureState = null;
 							// here is a difficult point : a short length is
 							// good if the automaton is not connex and the
@@ -354,7 +354,7 @@ public class MealyDriver extends Driver {
 						assert this.automata.isConnex();
 						doRandomWalk(conjecture, conjectureState,
 								appliedSequences, -1,
-								options.mrBean.random);
+								options.mrBean.random.getRand());
 						return true;
 					}
 				}
@@ -370,7 +370,7 @@ public class MealyDriver extends Driver {
 					boolean counterExampleIsFound = doRandomWalk(conjecture,
 							conjectureState, appliedSequences,
 							options.mrBean.getMaxTraceLength(),
-							options.mrBean.random);
+							options.mrBean.random.getRand());
 					if (counterExampleIsFound)
 						return true;
 				}
@@ -452,7 +452,7 @@ public class MealyDriver extends Driver {
 	}
 
 	private boolean doRandomWalk(LmConjecture conjecture, State conjectureState,
-			MultiTrace trace, int maxLength, RandomOption rand) {
+			MultiTrace trace, int maxLength, RandomGenerator randomGenerator) {
 		assert conjectureState != null;
 		assert conjecture.getStates().contains(conjectureState);
 		if (Options.getLogLevel().compareTo(LogLevel.ALL) >= 0)
@@ -460,7 +460,7 @@ public class MealyDriver extends Driver {
 		int tried = 0;
 		List<String> is = getInputSymbols();
 		while (maxLength < 0 || tried < maxLength) {
-			String input = rand.randIn(is);
+			String input = randomGenerator.randIn(is);
 			String output = execute(input);
 			trace.recordIO(input, output);
 			MealyTransition transition = conjecture

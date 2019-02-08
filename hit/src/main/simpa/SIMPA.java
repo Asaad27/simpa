@@ -48,10 +48,11 @@ import options.CanNotComputeOptionValueException;
 import options.MultiArgChoiceOptionItem;
 import options.OptionTree;
 import options.OptionsGroup;
-import options.RandomOption;
 import options.automataOptions.AutomataChoice;
 import options.modeOptions.ModeOption;
 import options.outputOptions.OutputOptions;
+import options.valueHolders.SeedHolder;
+import options.valueHolders.ValueHolder;
 import stats.GlobalGraphGenerator;
 import stats.GraphGenerator;
 import stats.StatsEntry;
@@ -656,8 +657,9 @@ public class SIMPA {
 		LogManager.logInfo("starting inference with options "
 				+ allOptions.buildBackCLILine(false));
 		for (OptionTree option : allOptions.getAllSelectedChildren()) {
-			if (option instanceof RandomOption)
-				((RandomOption) option).init();
+			ValueHolder<?> value = option.getValueHolder();
+			if (value != null && value instanceof SeedHolder)
+				((SeedHolder) value).initRandom();
 		}
 		if (argLabel != null) {
 			argLabel.setText(allOptions.buildBackCLILine(true));
@@ -767,14 +769,17 @@ public class SIMPA {
 
 		for (int i = 1; i <= nbTests; i++) {
 			for (OptionTree option : allOptions.getAllSelectedChildren())
-				if (option instanceof RandomOption
-						&& !((RandomOption) option).useAutoValue()) {
+			{
+				ValueHolder<?> value = option.getValueHolder();
+				if (value != null && value instanceof SeedHolder
+						&& !((SeedHolder) value).useAutoValue()) {
 					System.err.println(
 							"running stats with forced seeds can produce invalid results.");
 					System.err.println(
 							"If you're sure to want to do this, you must disable this warning in code…");
 					return false;
 				}
+			}
 
 			Runtime.getRuntime().gc();
 			System.out.println("\t" + i + "/" + nbTests);

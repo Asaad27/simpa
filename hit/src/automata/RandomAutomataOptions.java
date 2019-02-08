@@ -7,6 +7,7 @@ import java.util.List;
 import options.IntegerOption;
 import options.OptionTree;
 import options.RandomOption;
+import tools.RandomGenerator;
 
 public class RandomAutomataOptions {
 	List<OptionTree> options = new ArrayList<>();
@@ -22,11 +23,14 @@ public class RandomAutomataOptions {
 	private final RandomOption rand = new RandomOption("--automat-seed",
 			"seed used to initialize random to generate automata");
 	private final IntegerOption statesNumber = new IntegerOption("--nb-states",
-			"number of states for the generated automaton", 10);
+			"number of states", "number of states for the generated automaton",
+			10);
 	private final IntegerOption inputsNumber = new IntegerOption("--nb-inputs",
+			"number of input symbols",
 			"number of inputs for the generated automaton", 2);
 	private final IntegerOption outputsNumber = new IntegerOption(
-			"--nb-outputs", "number of outputs for the generated automaton", 2);
+			"--nb-outputs", "number of output symbols",
+			"number of outputs for the generated automaton", 2);
 
 	public int getStatesNumber() {
 		return statesNumber.getValue();
@@ -40,8 +44,8 @@ public class RandomAutomataOptions {
 		return outputsNumber.getValue();
 	}
 
-	public RandomOption getRand() {
-		return rand;
+	public RandomGenerator getRand() {
+		return rand.getRand();
 	}
 
 	public RandomAutomataOptions() {

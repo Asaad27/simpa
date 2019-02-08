@@ -1,29 +1,21 @@
 package options;
 
-public class IntegerOption extends NumberOption<Integer> {
+import options.valueHolders.IntegerHolder;
 
-	public IntegerOption(String argument, String description,
+public class IntegerOption
+		extends SingleValueArgumentOption<Integer, IntegerHolder> {
+
+	public IntegerOption(String argument, String name, String description,
 			int defaultValue) {
-		super(argument, description, defaultValue);
+		super(argument, new IntegerHolder(name, description, defaultValue));
 	}
 
-	public IntegerOption(String argument, String description,
-			String autoValueLabel) {
-		super(argument, description, autoValueLabel);
+	public void setMaximum(int max) {
+		value.setMaximum(max);
 	}
 
-	@Override
-	protected Integer parse(String s) {
-		return Integer.valueOf(s);
+	public void setMinimum(int min) {
+		value.setMinimum(min);
 	}
 
-	@Override
-	protected Integer toType(int v) {
-		return Integer.valueOf(v);
-	}
-
-	@Override
-	protected Integer toType(Number v) {
-		return v.intValue();
-	}
 }

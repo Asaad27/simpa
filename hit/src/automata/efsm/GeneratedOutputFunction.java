@@ -6,7 +6,7 @@ import java.util.List;
 
 import drivers.efsm.EFSMDriver.Types;
 import main.simpa.Options;
-import options.RandomOption;
+import tools.RandomGenerator;
 import tools.StandaloneRandom;
 
 public class GeneratedOutputFunction implements IOutputFunction, Serializable {
@@ -56,7 +56,7 @@ public class GeneratedOutputFunction implements IOutputFunction, Serializable {
 		return null;
 	}
 
-	public void generateNdv(int nbNdv, RandomOption rand) {
+	public void generateNdv(int nbNdv, RandomGenerator rand) {
 		isNdv.set(rand.randInt(nbOutputParams), "ndv" + nbNdv);
 	}
 

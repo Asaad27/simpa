@@ -1,14 +1,12 @@
 package options;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JCheckBox;
-
 import options.OptionTree.ArgumentDescriptor.AcceptedValues;
+import options.valueHolders.BooleanHolder;
+import options.valueHolders.ValueChangeHandler;
 
 /**
  * An option to select a boolean choice.
@@ -17,11 +15,10 @@ import options.OptionTree.ArgumentDescriptor.AcceptedValues;
  */
 public class BooleanOption extends OptionTree {
 
-	private JCheckBox checkBox = null;
+	private final BooleanHolder value;
 
 	private List<OptionTree> subTreeIfTrue = new ArrayList<>();
 	private List<OptionTree> subTreeIfFalse = new ArrayList<>();
-	private Boolean isEnabled = false;
 	/**
 	 * @see #setEnabledByDefault(Boolean)
 	 */
@@ -85,10 +82,19 @@ public class BooleanOption extends OptionTree {
 		this.description = description;
 		this.subTreeIfTrue = subTreeIfTrue;
 		this.subTreeIfFalse = subTreeIfFalse;
+		this.value = new BooleanHolder(name, description);
 		if (subTreeIfTrue != null)
 			addSortedChildren(subTreeIfTrue);
 		if (subTreeIfFalse != null)
 			addSortedChildren(subTreeIfFalse);
+		value.addHandler(new ValueChangeHandler() {
+
+			@Override
+			public void valueChanged() {
+				updateSubTreeComponent(getSubTreeTitle());
+				validateSelectedTree();
+			}
+		});
 		setEnabled(false);
 	}
 
@@ -127,18 +133,9 @@ public class BooleanOption extends OptionTree {
 
 	@Override
 	protected void createMainComponent() {
-		checkBox = new JCheckBox(name);
-		checkBox.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				setEnabled(checkBox.isSelected());
-
-			}
-		});
-		mainComponent = checkBox;
-
-		setEnabled(isEnabled);
+		mainComponent = value.getComponent();
+		updateSubTreeComponent(getSubTreeTitle());
+		validateSelectedTree();
 	}
 
 	/**
@@ -148,14 +145,8 @@ public class BooleanOption extends OptionTree {
 	 *            the value to set.
 	 */
 	public void setEnabled(Boolean checked) {
-		if (mainComponent != null) {
-			assert checkBox != null;
-			if (checkBox.isSelected() != checked)
-				checkBox.setSelected(checked);
-		}
-		isEnabled = checked;
-		updateSubTreeComponent(getSubTreeTitle());
-		validateSelectedTree();
+		assert checked != null;
+		value.setValue(checked);
 	}
 
 	/**
@@ -171,11 +162,11 @@ public class BooleanOption extends OptionTree {
 
 	public String getSubTreeTitle() {
 		return "options for " + name
-				+ (isEnabled ? " activated" : " disactivated");
+				+ (isEnabled() ? " activated" : " disactivated");
 	}
 
 	public boolean isEnabled() {
-		return isEnabled;
+		return value.getValue();
 	}
 
 	@Override
@@ -203,13 +194,13 @@ public class BooleanOption extends OptionTree {
 
 	@Override
 	public ArgumentValue getSelectedArgument() {
-		return new ArgumentValue(isEnabled ? enableArgumentDescriptor
+		return new ArgumentValue(isEnabled() ? enableArgumentDescriptor
 				: disableArgumentDescriptor);
 	}
 
 	@Override
 	protected List<OptionTree> getSelectedChildren() {
-		return isEnabled ? subTreeIfTrue : subTreeIfFalse;
+		return isEnabled() ? subTreeIfTrue : subTreeIfFalse;
 	}
 
 	@Override
@@ -245,6 +236,11 @@ public class BooleanOption extends OptionTree {
 	@Override
 	public String toString() {
 		return "option " + name;
+	}
+
+	@Override
+	public BooleanHolder getValueHolder() {
+		return value;
 	}
 
 }

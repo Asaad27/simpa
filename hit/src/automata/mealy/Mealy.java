@@ -31,7 +31,7 @@ import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
-import options.RandomOption;
+import options.valueHolders.SeedHolder;
 import tools.DotParser;
 import tools.GraphViz;
 import tools.loggers.LogManager;
@@ -51,7 +51,7 @@ public class Mealy extends Automata implements Serializable {
 	 * 
 	 * @return a new automaton with a mutated transition.
 	 */
-	public Mealy mutate(RandomOption rand) {
+	public Mealy mutate(SeedHolder rand) {
 		boolean mutateOutput = rand.randBoolWithPercent(50);
 		return mutate(mutateOutput, rand);
 	}
@@ -63,7 +63,7 @@ public class Mealy extends Automata implements Serializable {
 	 *            of transition.
 	 * @return a muted automaton
 	 */
-	public Mealy mutate(boolean mutateOutput, RandomOption rand) {
+	public Mealy mutate(boolean mutateOutput, SeedHolder rand) {
 		Mealy r = new Mealy("mutant_" + getName());
 		Map<State, State> states = new HashMap<>();
 		for (State s : getStates()) {

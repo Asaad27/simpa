@@ -3,7 +3,7 @@ package tools;
 import java.util.Random;
 
 import main.simpa.Options;
-import options.RandomOption;
+import options.valueHolders.SeedHolder;
 
 /**
  * This class is a temporary class for random utilities.
@@ -15,7 +15,7 @@ import options.RandomOption;
  * @author Nicolas BREMOND
  *
  */
-public class StandaloneRandom extends RandomOption {
+public class StandaloneRandom extends SeedHolder {
 	static Random seedProvider = null;
 
 	static void setSeed(long s) {
@@ -24,12 +24,12 @@ public class StandaloneRandom extends RandomOption {
 	}
 
 	public StandaloneRandom() {
-		super("--standaloneRand", "standalone random");
+		super("");
 		if (seedProvider == null) {
 			seedProvider = new Random();
 			seedProvider.setSeed(Options.SEED);
 		}
 		setValue(seedProvider.nextLong());
-		init();
+		initRandom();
 	}
 }

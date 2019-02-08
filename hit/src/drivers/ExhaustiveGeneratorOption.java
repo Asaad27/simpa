@@ -3,6 +3,7 @@ package drivers;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import options.AutoLongOption;
 import options.LongOption;
 import options.automataOptions.DriverChoice;
 import options.automataOptions.DriverChoiceItem;
@@ -13,10 +14,12 @@ public abstract class ExhaustiveGeneratorOption<T extends Driver & EnumeratedDri
 	 * The seed used to create a specific driver. It should not be specified
 	 * ({@link LongOption#useAutoValue()} to iterate over all possible drivers.
 	 */
-	public final LongOption seed = new LongOption(
+	public final AutoLongOption seed = new AutoLongOption(
 			"--seed-for-exhaustive-generator",
 			"seed used to build the automaton in driver",
-			"let the enum mode select all seeds");
+			"Anumber used to represent an automata in the generation list."
+					+ " The automatic value let the enum mode select all seeds",
+			(long) 0);
 
 	public ExhaustiveGeneratorOption(DriverChoice<? extends Driver> parent,
 			Class<? extends T> driverClass) {
@@ -47,7 +50,7 @@ public abstract class ExhaustiveGeneratorOption<T extends Driver & EnumeratedDri
 				throw new NoSuchElementException(
 						"invalid seed for exhaustive driver generation");
 		}
-		seed.setValue(next.getSeed());
+		seed.setValueAuto(next.getSeed());
 		return next;
 	}
 

@@ -19,6 +19,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import options.OptionTree.ArgumentDescriptor.AcceptedValues;
+import options.valueHolders.ValueHolder;
 
 public class FileOption extends OptionTree {
 	public enum FileSelectionMode {
@@ -43,7 +44,6 @@ public class FileOption extends OptionTree {
 		FileOption parent;
 
 		public FileExistValidator(FileOption parent) {
-			super(parent);
 			this.parent = parent;
 		}
 
@@ -73,7 +73,6 @@ public class FileOption extends OptionTree {
 		FileOption parent;
 
 		public FileModeValidator(FileOption parent) {
-			super(parent);
 			this.parent = parent;
 		}
 
@@ -256,6 +255,12 @@ public class FileOption extends OptionTree {
 	@Override
 	public String getHelpByArgument(ArgumentDescriptor arg) {
 		return description;
+	}
+
+	@Override
+	public ValueHolder<?> getValueHolder() {
+		// TODO when value will be hold
+		return null;
 	}
 
 }

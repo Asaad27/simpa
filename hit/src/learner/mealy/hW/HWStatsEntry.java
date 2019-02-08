@@ -10,7 +10,7 @@ import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import learner.mealy.hW.dataManager.FullyQualifiedState;
 import learner.mealy.hW.dataManager.SimplifiedDataManager;
-import options.RandomOption;
+import options.valueHolders.SeedHolder;
 import stats.GraphGenerator;
 import stats.StatsEntry;
 import stats.StatsEntry_OraclePart;
@@ -201,7 +201,7 @@ public class HWStatsEntry extends StatsEntry {
 	public HWStatsEntry(MealyDriver d, HWOptions options) {
 		this.inputSymbols = d.getInputSymbols().size();
 		this.automata = d.getSystemName();
-		this.seed = RandomOption.MAIN_SEED;
+		this.seed = SeedHolder.MAIN_SEED;
 		this.reuse_hzxw = options.useDictionary.isEnabled();
 		this.precomputedW = options.usePrecomputedW();
 		this.useAdaptiveH = options.useAdaptiveH();

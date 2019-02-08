@@ -46,7 +46,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.util.Cookie;
 
 import main.drivergen.Options;
-import options.RandomOption;
+import options.valueHolders.SeedHolder;
 import tools.GraphViz;
 import tools.HTTPData;
 import tools.StandaloneRandom;
@@ -55,7 +55,7 @@ import tools.loggers.LogManager;
 
 public abstract class DriverGenerator {
 
-	RandomOption rand = new StandaloneRandom();
+	SeedHolder rand = new StandaloneRandom();
 
 	protected WebClient client = null;
 	/**

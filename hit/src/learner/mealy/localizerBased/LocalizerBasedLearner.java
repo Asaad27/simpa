@@ -21,8 +21,8 @@ import learner.mealy.LmTrace;
 import learner.mealy.localizerBased.dataManager.DataManager;
 import learner.mealy.localizerBased.dataManager.FullyQualifiedState;
 import main.simpa.Options;
-import options.RandomOption;
 import tools.AdenilsoSimaoTool;
+import tools.RandomGenerator;
 import tools.StandaloneRandom;
 import tools.loggers.LogManager;
 
@@ -298,7 +298,7 @@ public class LocalizerBasedLearner extends Learner {
 	}
 
 	private static List<InputSequence> computeCharacterizationSet(
-			RandomOption rand, TransparentMealyDriver driver) {
+			RandomGenerator rand, TransparentMealyDriver driver) {
 		LogManager.logStep(LogManager.STEPOTHER,
 				"computing characterization set");
 		System.out.print("computing characterization set\r");

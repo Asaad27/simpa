@@ -3,6 +3,7 @@ package options;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JComboBox;
@@ -68,6 +69,15 @@ public abstract class GenericChoiceOption<T extends ChoiceOptionItem>
 	public void selectChoice(int index) {
 		assert index < choices.size();
 		selectChoice(choices.get(index));
+	}
+
+	/**
+	 * get the list of available choices.
+	 * 
+	 * @return
+	 */
+	public List<T> getChoices() {
+		return Collections.unmodifiableList(choices);
 	}
 
 	/**

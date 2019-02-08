@@ -8,7 +8,7 @@ import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
 import main.simpa.Options;
-import options.RandomOption;
+import tools.RandomGenerator;
 import tools.Utils;
 import tools.loggers.LogManager;
 
@@ -27,7 +27,8 @@ public class LockerMealy extends Mealy {
 	}
 
 	public LockerMealy(InputSequence unlock, OnError onError,
-			OutputPolicy outputPolicy, List<String> inputSym, RandomOption rand// when
+			OutputPolicy outputPolicy, List<String> inputSym,
+			RandomGenerator rand// when
 																				// switching
 																				// to
 																				// options,
@@ -101,7 +102,7 @@ public class LockerMealy extends Mealy {
 	}
 	
 	public static LockerMealy getRandomLockerMealy(OnError onError,
-			OutputPolicy outputPolicy, RandomOption rand) {
+			OutputPolicy outputPolicy, RandomGenerator rand) {
 		List<String> inputs = new ArrayList<>();
 		String s = "a";
 		int inputs_nb = rand.randIntBetween(Options.MININPUTSYM,

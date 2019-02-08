@@ -12,7 +12,7 @@ public class ModeOption extends MultiArgChoiceOption {
 		addChoice(stats);
 		addChoice(simple);
 		setDefaultItem(simple);
-		addValidator(new OptionValidator(this) {
+		addValidator(new OptionValidator() {
 			@Override
 			public void check() {
 				setCriticality(CriticalityLevel.NOTHING);

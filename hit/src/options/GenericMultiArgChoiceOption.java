@@ -4,6 +4,8 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import options.valueHolders.ValueHolder;
+
 public class GenericMultiArgChoiceOption<T extends MultiArgChoiceOptionItem>
 		extends GenericChoiceOption<T> {
 	protected String optionName = "";
@@ -66,5 +68,11 @@ public class GenericMultiArgChoiceOption<T extends MultiArgChoiceOptionItem>
 	public String getHelpByArgument(ArgumentDescriptor arg) {
 		return "set value of option " + optionName + " to "
 				+ getItemFromArg(new ArgumentValue(arg));
+	}
+
+	@Override
+	public ValueHolder<?> getValueHolder() {
+		// TODO update when value will be hold with a value holder
+		return null;
 	}
 }

@@ -15,6 +15,8 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import options.valueHolders.ValueHolder;
+
 /**
  * Generic class for an option which can be provided several times.
  * 
@@ -231,5 +233,11 @@ public abstract class ListOption<T> extends OptionTree {
 	 *         {@link #getHelpByArgument(ArgumentDescriptor)}
 	 */
 	public abstract String getHelp();
+
+	@Override
+	public ValueHolder<?> getValueHolder() {
+		// TODO when value will be hold with a value Holder
+		return null;
+	}
 
 }

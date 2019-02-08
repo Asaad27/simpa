@@ -4,7 +4,7 @@ public class PercentageOption extends IntegerOption {
 
 	public PercentageOption(String argument, String description,
 			int defaultValue) {
-		super(argument, description, defaultValue);
+		super(argument, argument, description, defaultValue);// TODO add name
 		setMaximum(100);
 		setMinimum(0);
 	}

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import options.OptionTree.ArgumentDescriptor.AcceptedValues;
+import options.valueHolders.ValueHolder;
 
 /**
  * This class represent a choice option like {@link MultiArgChoiceOption} but in
@@ -106,6 +107,12 @@ public class GenericOneArgChoiceOption<T extends OneArgChoiceOptionItem>
 	@Override
 	public String getHelpByArgument(ArgumentDescriptor arg) {
 		return description;
+	}
+
+	@Override
+	public ValueHolder<?> getValueHolder() {
+		// TODO update when value will be handled with a valueHolder
+		return null;
 	}
 
 }

@@ -5,10 +5,10 @@ import java.util.List;
 
 import drivers.mealy.MealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
+import options.AutoIntegerOption;
 import options.BooleanOption;
 import options.CanNotComputeOptionValueException;
 import options.GenericMultiArgChoiceOption;
-import options.IntegerOption;
 import options.MultiArgChoiceOption;
 import options.MultiArgChoiceOptionItem;
 import options.OptionTree;
@@ -23,8 +23,7 @@ public class OracleOption extends MultiArgChoiceOption {
 	private final class DriverValidator extends OptionValidator {
 		MealyDriver lastDriver = null;
 
-		public DriverValidator(OptionTree parent) {
-			super(parent);
+		public DriverValidator() {
 		}
 
 		@Override
@@ -47,30 +46,33 @@ public class OracleOption extends MultiArgChoiceOption {
 		}
 	}
 
-	protected final DriverValidator driverValidator = new DriverValidator(this);
+	protected final DriverValidator driverValidator = new DriverValidator();
 
 	public class MrBeanOptionItem extends MultiArgChoiceOptionItem {
 
 		BooleanOption mrBeanOnlyIfExists;
-		IntegerOption maxTraceLength;
-		IntegerOption maxTraceNumber;// null if reset is not allowed
+		AutoIntegerOption maxTraceLength;
+		AutoIntegerOption maxTraceNumber;// null if reset is not allowed
 		public final RandomOption random;
 
 		public MrBeanOptionItem(GenericMultiArgChoiceOption<?> parent) {
 			super("ask MrBean to find a counter example (random walk)",
 					"--mrBean", parent);
-			random = new RandomOption("--oracleSeed",
-					"seed to initialize random for random walks");
+			random = new RandomOption("--oracleSeed", "random walks");
 			subTrees.add(random);
 			List<OptionTree> randomWalkOptions = new ArrayList<>();
-			maxTraceLength = new IntegerOption("--maxcelength",
-					"maximum length of one random walk (from a reset if there is a reset or for all the walk)",
-					"use a length proportional to the size of driver");
+			maxTraceLength = new AutoIntegerOption("--maxcelength",
+					"maximum length of one random walk",
+					"This is the length of random walk from a reset if there is a reset or for all the walk."
+							+ " The automatic value use a length proportional to the size of driver",
+					100);
 			randomWalkOptions.add(maxTraceLength);
 			if (resetAllowed) {
-				maxTraceNumber = new IntegerOption("--maxceresets",
-						"maximum number of reset i.e. maximum number of random walk from initial state for oracle.",
-						"reset the driver a number of time proprtional to its size");
+				maxTraceNumber = new AutoIntegerOption("--maxceresets",
+						"maximum number of reset ",
+						"Maximum number of random walk from initial state for oracle."
+								+ " The automatic value reset the driver a number of time proprtional to its size.",
+						5);
 				randomWalkOptions.add(maxTraceNumber);
 			}
 			mrBeanOnlyIfExists = new BooleanOption(
@@ -150,7 +152,7 @@ public class OracleOption extends MultiArgChoiceOption {
 							+ driverValidator.getMessage());
 		if (mrBean.maxTraceLength.useAutoValue()) {
 			mrBean.maxTraceLength
-					.setValue(driver.getInputSymbols().size() * 5000);
+					.setValueAuto(driver.getInputSymbols().size() * 5000);
 			LogManager.logInfo("Maximum counter example length set to "
 					+ mrBean.getMaxTraceLength());
 		}
@@ -160,7 +162,7 @@ public class OracleOption extends MultiArgChoiceOption {
 				if (driver instanceof TransparentMealyDriver) {
 					TransparentMealyDriver transparent = (TransparentMealyDriver) driver;
 					mrBean.maxTraceNumber
-							.setValue(transparent.getStateCount() * 20);
+							.setValueAuto(transparent.getStateCount() * 20);
 				} else {
 					mrBean.maxTraceNumber.setAutoValueError(
 							"the value of this option can not be automatically choosen with last tried driver."
