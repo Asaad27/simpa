@@ -7,7 +7,7 @@ import tools.Utils;
 import automata.mealy.Mealy;
 import examples.mealy.RandomMealy;
 
-public class RandomMealyDriver extends MealyDriver {
+public class RandomMealyDriver extends AutomatonMealyDriver {
 
 	public RandomMealyDriver() {
 		super(new RandomMealy(new StandaloneRandom()));// TODO option for seed

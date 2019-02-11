@@ -1,10 +1,10 @@
 package drivers.mealy.transparent;
 
-import drivers.mealy.MealyDriver;
-import automata.mealy.Mealy;
 import automata.State;
+import automata.mealy.Mealy;
+import drivers.mealy.AutomatonMealyDriver;
 
-public class TransparentMealyDriver extends MealyDriver {
+public class TransparentMealyDriver extends AutomatonMealyDriver {
 	public TransparentMealyDriver(Mealy automata){
 		super(automata);
 	}

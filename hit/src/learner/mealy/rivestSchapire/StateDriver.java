@@ -97,11 +97,6 @@ class StateDriver extends MealyDriver {
 		return realDriver.getInputSymbols();
 	}
 
-	@Override
-	public Integer getStateCount() {
-		return realDriver.getStateCount();
-	}
-
 	//	//this let us to have a global dictionary for used CE.
 	//	public InputSequence getRandomCounterExemple(Mealy c){
 	//		return realDriver.getRandomCounterExemple(c); // this do not work because returned CE start from initial state of realDriver
@@ -185,5 +180,10 @@ class StateDriver extends MealyDriver {
 
 	public int getGlobalTraceLengthBeforeLastCE() {
 		return globalTraceLengthBeforeLastCE;
+	}
+
+	@Override
+	public List<String> getOutputSymbols() {
+		return realDriver.getOutputSymbols();
 	}
 }

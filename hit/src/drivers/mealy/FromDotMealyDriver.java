@@ -10,7 +10,7 @@ import options.FileOption.FileSelectionMode;
 import options.automataOptions.DriverChoice;
 import options.automataOptions.DriverChoiceItem;
 
-public class FromDotMealyDriver extends MealyDriver {
+public class FromDotMealyDriver extends AutomatonMealyDriver {
 	public static class FromDotChoiceItem
 			extends DriverChoiceItem<MealyDriver> {
 

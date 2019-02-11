@@ -6,12 +6,16 @@ import java.util.List;
 import automata.mealy.InputSequence;
 import examples.mealy.SFM11Stefen;
 
-public class SFM11StefenDriver extends MealyDriver {
+public class SFM11StefenDriver extends AutomatonMealyDriver {
 
 	public SFM11StefenDriver() {
 		super(SFM11Stefen.getAutomata());
 	}
 
+	/**
+	 * This is a legacy method, it is unused I left it here because those CE
+	 * might be important.
+	 */
 	protected List<InputSequence> getForcedCE() {
 		List<InputSequence> forcedCE = new ArrayList<InputSequence>();
 

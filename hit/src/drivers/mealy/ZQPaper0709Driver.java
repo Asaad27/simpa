@@ -6,12 +6,16 @@ import java.util.List;
 import automata.mealy.InputSequence;
 import examples.mealy.ZQPaper0709;
 
-public class ZQPaper0709Driver extends MealyDriver {
+public class ZQPaper0709Driver extends AutomatonMealyDriver {
 
 	public ZQPaper0709Driver() {
 		super(ZQPaper0709.getAutomata());
 	}
 
+	/**
+	 * This is a legacy method, it is unused I left it here because those CE
+	 * might be important.
+	 */
 	protected List<InputSequence> getForcedCE() {
 		List<InputSequence> seq = new ArrayList<InputSequence>();
 

@@ -115,7 +115,8 @@ public class SIMPATestMealy {
 						l.learn();
 						driver.logStats();
 
-						stats.addRecord(((RandomMealyDriver) driver).getStats());
+						// stats.addRecord(((RandomMealyDriver)
+						// driver).getStats());
 					} catch (Exception e){
 						e.printStackTrace();
 					} finally {

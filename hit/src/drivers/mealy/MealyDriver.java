@@ -1,16 +1,23 @@
 package drivers.mealy;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
+import automata.State;
 import automata.mealy.GenericInputSequence;
 import automata.mealy.GenericInputSequence.GenericOutputSequence;
 import automata.mealy.GenericInputSequence.Iterator;
+import automata.mealy.InputSequence;
+import automata.mealy.Mealy;
+import automata.mealy.MealyTransition;
+import automata.mealy.OutputSequence;
+import automata.mealy.multiTrace.MultiTrace;
+import automata.mealy.multiTrace.NoRecordMultiTrace;
+import drivers.Driver;
+import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.mealy.CeExposedUnknownStateException;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
@@ -20,19 +27,9 @@ import options.learnerOptions.OracleOption;
 import stats.StatsEntry_OraclePart;
 import tools.RandomGenerator;
 import tools.StandaloneRandom;
-import tools.Utils;
 import tools.loggers.LogManager;
-import automata.State;
-import automata.mealy.InputSequence;
-import automata.mealy.Mealy;
-import automata.mealy.MealyTransition;
-import automata.mealy.OutputSequence;
-import automata.mealy.multiTrace.MultiTrace;
-import automata.mealy.multiTrace.NoRecordMultiTrace;
-import drivers.Driver;
-import drivers.mealy.transparent.TransparentMealyDriver;
 
-public class MealyDriver extends Driver {
+public abstract class MealyDriver extends Driver {
 	public class UnableToComputeException extends Exception {
 		private static final long serialVersionUID = -6169240870495799817L;
 
@@ -47,43 +44,14 @@ public class MealyDriver extends Driver {
 
 	protected Mealy automata;
 	protected State currentState;
-	protected List<InputSequence> forcedCE;
-	protected Set<InputSequence> triedCE;
-	private int nbStates = 0;
-	private int transitionCount = 0;
 	private String name = null;
-
-	public MealyDriver(Mealy automata) {
-		super();
-		type = DriverType.MEALY;
-		this.automata = automata;
-		this.forcedCE = getForcedCE();
-		triedCE = new HashSet<>();
-		this.nbStates = automata.getStateCount();
-		this.name = automata.getName();
-		this.currentState = automata.getInitialState();
-		if (this.currentState==null)
-			throw new RuntimeException("the driver has no initial state");
-	}
 
 	public MealyDriver(String name) {
 		this.name = name;
-		this.automata = null;
-		triedCE = new HashSet<>();
 	}
 
-	public List<String> getStats() {
-		return Utils.createArrayList(String.valueOf(nbStates), String.valueOf(getInputSymbols().size()),
-				String.valueOf(getOutputSymbols().size()),
-				String.valueOf(((float) numberOfAtomicRequest / numberOfRequest)), String.valueOf(numberOfRequest),
-				String.valueOf(((float) duration / 1000000000)), String.valueOf(automata.getTransitionCount()));
-	}
 
-	protected List<InputSequence> getForcedCE() {
-		return null;
-	}
-
-	public GenericOutputSequence execute(GenericInputSequence in) {
+	public final GenericOutputSequence execute(GenericInputSequence in) {
 		Iterator it = in.inputIterator();
 		while (it.hasNext()) {
 			String outSymbol = execute(it.next());
@@ -92,7 +60,7 @@ public class MealyDriver extends Driver {
 		return it.getResponse();
 	}
 
-	public OutputSequence execute(InputSequence in){
+	public final OutputSequence execute(InputSequence in) {
 		OutputSequence out=new OutputSequence();
 		for (String i:in.sequence){
 			out.addOutput(execute(i));
@@ -100,60 +68,16 @@ public class MealyDriver extends Driver {
 		return out;
 	}
 	
-	public String execute(String input) {
-		assert currentState != null : "is the initial state of driver specified ?";
-		String output = null;
-		if (input.length() > 0) {
-			numberOfAtomicRequest++;
-			State before = currentState;
-			MealyTransition currentTrans = automata.getTransitionFromWithInput(currentState, input);
-			if (currentTrans != null) {
-				output = new String(currentTrans.getOutput());
-				currentState = currentTrans.getTo();
-			} else {
-				output = new String();
-			}
-			if (addtolog)
-				LogManager.logRequest(input, output, transitionCount, before,
-						currentState);
-			transitionCount++;
-		}
-		return output;
-	}
+	public abstract String execute(String input);
 
-	public List<String> getInputSymbols() {
-		List<String> is = new ArrayList<String>();
-		for (MealyTransition t : automata.getTransitions()) {
-			if (!is.contains(t.getInput()))
-				is.add(t.getInput());
-		}
-		Collections.sort(is);
-		return is;
-	}
+	@Override
+	public abstract List<String> getInputSymbols();
 
-	/**
-	 * get the number of states in driver if the driver is transparent.
-	 * 
-	 * @return the number of states in driver or {@code null} if the driver is
-	 *         not transparent.
-	 */
-	public Integer getStateCount() {
-		if (this instanceof TransparentMealyDriver) {
-			return ((TransparentMealyDriver) this).getAutomata()
-					.getStateCount();
-		}
-		return null;
-	}
 
-	public List<String> getOutputSymbols() {
-		List<String> os = new ArrayList<String>();
-		for (MealyTransition t : automata.getTransitions()) {
-			if (!os.contains(t.getOutput()))
-				os.add(t.getOutput());
-		}
-		Collections.sort(os);
-		return os;
-	}
+	public abstract List<String> getOutputSymbols(); // TODO remove this as all
+														// drivers do not
+														// provide their output
+														// symbols
 
 	@Override
 	public String getSystemName() {
@@ -293,12 +217,12 @@ public class MealyDriver extends Driver {
 		assert conjectureState != null;
 		if (options.getSelectedItem() == options.shortest) {
 			assert this.automata != null;
-			assert this.getCurrentState() != null;
+			assert this.currentState != null;
 			if (!this.automata.isConnex())
 				throw new RuntimeException(
 						"automata must be strongly connected");
 			List<InputSequence> counterExamples = conjecture.getCounterExamples(
-					conjectureState, this.automata, getCurrentState(), true);
+					conjectureState, this.automata, currentState, true);
 			if (counterExamples.isEmpty()) {
 				return false;
 			} else {
@@ -310,13 +234,13 @@ public class MealyDriver extends Driver {
 		} else if (options.getSelectedItem() == options.mrBean) {
 			if (options.mrBean.onlyIfCEExists()) {
 				assert this.automata != null;
-				assert this.getCurrentState() != null;
+				assert this.currentState != null;
 				if (!this.automata.isConnex())
 					throw new RuntimeException(
 							"automata must be strongly connected");
 				List<InputSequence> counterExamples = conjecture
 						.getCounterExamples(conjectureState, this.automata,
-								getCurrentState(), true);
+								currentState, true);
 				if (counterExamples.isEmpty()) {
 					return false;
 				} else {
@@ -395,9 +319,9 @@ public class MealyDriver extends Driver {
 			MultiTrace appliedSequences) {
 
 		List<InputSequence> counterExamples = null;
-		if (this.automata != null && getCurrentState() != null) {
+		if (this.automata != null && currentState != null) {
 			counterExamples = conjecture.getCounterExamples(conjectureState,
-					this.automata, getCurrentState(), false);
+					this.automata, currentState, false);
 			if (counterExamples.size() == 0)
 				return false;
 			LogManager.logInfo(
@@ -474,37 +398,6 @@ public class MealyDriver extends Driver {
 		return false;
 	}
 
-	@Override
-	public void reset() {
-		super.reset();
-		if (automata != null) {
-			automata.reset();
-			currentState = automata.getInitialState();
-		}
-	}
-
-	public boolean isCounterExample(Object ce, Object c) {
-		if (ce == null)
-			return false;
-		InputSequence realCe = (InputSequence) ce;
-		LmConjecture conj = (LmConjecture) c;
-		MealyDriver conjDriver = new MealyDriver(conj);
-		stopLog();
-		conjDriver.stopLog();
-		reset();
-		conjDriver.reset();
-		boolean isCe = false;
-		for (String input : realCe.sequence) {
-			if (!execute(input).equals(conjDriver.execute(input))) {
-				isCe = true;
-				break;
-			}
-		}
-		startLog();
-		conjDriver.startLog();
-		return isCe;
-	}
-
 	/**
 	 * compute an input sequence s.t. the output sequence entirely define the
 	 * final state
@@ -513,85 +406,29 @@ public class MealyDriver extends Driver {
 	 * @throws UnableToComputeException
 	 */
 	public InputSequence getHomingSequence() throws UnableToComputeException {
-		LogManager.logInfo("Computing homing sequence");
-		if (automata == null) {
-			LogManager.logInfo("Unable to compute homing sequence");
-			throw new UnableToComputeException();
-		}
-		InputSequence r = new InputSequence();
-		boolean found = false;
-		while (!found) {
-			found = true;
-			for (int i = 0; i < automata.getStateCount(); i++) {
-				State s1 = automata.getState(i);
-				for (int j = i + 1; j < automata.getStateCount(); j++) {
-					State s2 = automata.getState(j);
-					OutputSequence o1 = automata.apply(r, s1);
-					State os1 = automata.applyGetState(r, s1);
-					OutputSequence o2 = automata.apply(r, s2);
-					State os2 = automata.applyGetState(r, s2);
-					if (o1.equals(o2) && os1 != os2) {
-						found = false;
-						LinkedList<InputSequence> l = new LinkedList<>();
-						l.add(new InputSequence());
-						boolean foundLocalSeq = false;
-						while (!foundLocalSeq) {
-							InputSequence current = l.poll();
-							if (current.getLength() >= nbStates) {
-								LogManager.logInfo("Unable to compute homming sequence because " + os1 + " and " + os2
-										+ " have same outputs which leads in differents states");
-								LogManager.logInfo("Maybe thoose states are equivalent and you can use " + r
-										+ " as homming sequence (be careful, some states have not been tested). But in strict definition of homing sequence, if you got the same output, you must be in the same state");
-								automata.exportToDot();
-								throw new UnableToComputeException(os1 + " and " + os2 + " seems to be equivalents");
-							}
-							OutputSequence currentO1 = automata.apply(current, os1);
-							State currentOs1 = automata.applyGetState(current, os1);
-							OutputSequence currentO2 = automata.apply(current, os2);
-							State currentOs2 = automata.applyGetState(current, os2);
-							if (currentOs1 == currentOs2 || !currentO1.equals(currentO2)) {
-								foundLocalSeq = true;
-								r.addInputSequence(current);
-								if (Options.getLogLevel() != LogLevel.LOW) {
-									LogManager.logInfo("appending " + current
-											+ " to homing sequence in order to distinguish " + os1 + " and " + os2
-											+ " respectively reached from " + s1 + " and " + s2 + " with output " + o1);
-									if (currentOs1 == currentOs2)
-										LogManager.logInfo("Now, applying homing sequence from " + s1 + " and " + s2
-												+ " lead in same state " + currentOs1);
-									else {
-										o1.addOutputSequence(currentO1);
-										o2.addOutputSequence(currentO2);
-										LogManager.logInfo("Now, applying homing sequence from " + s1 + " and " + s2
-												+ " give outputs " + o1 + " and " + o2);
-									}
-								}
+		LogManager.logInfo("Unable to compute homing sequence");
+		throw new UnableToComputeException();
+	}
 
-							} else {
-								for (String in : getInputSymbols()) {
-									InputSequence toTry = new InputSequence();
-									toTry.addInputSequence(current);
-									toTry.addInput(in);
-									l.add(toTry);
-								}
-							}
-						}
-					}
-				}
+	@Override
+	public boolean isCounterExample(Object ce, Object c) {
+		if (ce == null)
+			return false;
+		InputSequence realCe = (InputSequence) ce;
+		LmConjecture conj = (LmConjecture) c;
+		State state = conj.getInitialState();
+		reset();
+		for (String input : realCe.sequence) {
+			MealyTransition t = conj.getTransitionFromWithInput(state, input);
+			state = t.getTo();
+			if (!execute(input).equals(t.getOutput())) {
+				return true;
 			}
 		}
-		LogManager.logInfo("Found homing sequence " + r);
-		return r;
+
+		return false;
 	}
 
-	/** Get current state **/
-	public State getCurrentState() {
-		return currentState;
-	}
-	/** Get init state **/
-	public State getInitState() {
-		return automata.getInitialState();
-	}
 	
 	/**
 	 * Synchronize the driver and the given automata to a given state (without
