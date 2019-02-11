@@ -8,7 +8,7 @@ import options.LongOption;
 import options.automataOptions.DriverChoice;
 import options.automataOptions.DriverChoiceItem;
 
-public abstract class ExhaustiveGeneratorOption<T extends Driver & EnumeratedDriver>
+public abstract class ExhaustiveGeneratorOption<T extends Driver<?, ?> & EnumeratedDriver>
 		extends DriverChoiceItem<T> implements Iterable<T> {
 	/**
 	 * The seed used to create a specific driver. It should not be specified
@@ -21,7 +21,8 @@ public abstract class ExhaustiveGeneratorOption<T extends Driver & EnumeratedDri
 					+ " The automatic value let the enum mode select all seeds",
 			(long) 0);
 
-	public ExhaustiveGeneratorOption(DriverChoice<? extends Driver> parent,
+	public ExhaustiveGeneratorOption(
+			DriverChoice<? extends Driver<?, ?>> parent,
 			Class<? extends T> driverClass) {
 		super("Exhaustive generator", "--exhaustive-generator", parent,
 				driverClass);

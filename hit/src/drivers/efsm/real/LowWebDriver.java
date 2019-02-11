@@ -4,7 +4,6 @@ import tools.CookieManager;
 import tools.HTTPRequest;
 import tools.HTTPResponse;
 import tools.TCPSend;
-import tools.loggers.LogManager;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedOutput;
 import drivers.efsm.EFSMDriver;
@@ -46,13 +45,11 @@ public abstract class LowWebDriver extends EFSMDriver {
 		return new HTTPResponse(TCPSend.Send(systemHost, systemPort, req));
 	}
 
-	public ParameterizedOutput execute(ParameterizedInput pi) {
-		numberOfAtomicRequest++;
+	public ParameterizedOutput execute_implem(ParameterizedInput pi) {
 		HTTPRequest req = abstractToConcrete(pi);
 		ParameterizedOutput po = new ParameterizedOutput();
 		if (req != null)
 			po = concreteToAbstract(executeWeb(req));
-		LogManager.logRequest(pi, po);
 		return po;
 	}
 

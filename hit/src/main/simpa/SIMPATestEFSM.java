@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import drivers.Driver;
+import drivers.efsm.EFSMDriver;
 import drivers.efsm.RandomEFSMDriver;
 import examples.efsm.RandomEFSM;
 import learner.efsm.table.LiLearner;
@@ -126,8 +127,9 @@ public class SIMPATestEFSM {
 						Options.LogOptions();
 
 						RandomEFSM rEFSM = new RandomEFSM();
-						driver = new RandomEFSMDriver(rEFSM);
-						LiLearner lilearner = new LiLearner(driver,
+						EFSMDriver efsmDriver = new RandomEFSMDriver(rEFSM);
+						driver = efsmDriver;
+						LiLearner lilearner = new LiLearner(efsmDriver,
 								createOption());
 						lilearner.learn();
 						driver.logStats();
@@ -161,8 +163,10 @@ public class SIMPATestEFSM {
 					RandomEFSM randEFSM = RandomEFSM.deserialize(Options.OUTDIR
 							+ "Random.serialized");
 					randEFSM.exportToDot();
-					driver = new RandomEFSMDriver(randEFSM);
-					LiLearner lilearner = new LiLearner(driver, createOption());
+					EFSMDriver efsmDriver = new RandomEFSMDriver(randEFSM);
+					driver = efsmDriver;
+					LiLearner lilearner = new LiLearner(efsmDriver,
+							createOption());
 					lilearner.learn();
 					driver.logStats();
 					learner.efsm.LiConjecture c = lilearner.createConjecture();

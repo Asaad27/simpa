@@ -34,8 +34,6 @@ public interface ILogger {
 
 	public void logRequest(ParameterizedInput pi, ParameterizedOutput po);
 
-	public void logRequest(String input, String ouput);
-
 	public void logRequest(String input, String ouput, int n);
 
 	public void logRequest(String input, String output, int n, State before,

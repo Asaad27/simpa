@@ -125,11 +125,6 @@ public class LogManager {
 			l.logRequest(pi, po);
 	}
 
-	public static void logRequest(String input, String output) {
-		for (ILogger l : loggers)
-			l.logRequest(input, output);
-	}
-
 	public static void logRequest(String input, String output, int n) {
 		for (ILogger l : loggers)
 			l.logRequest(input, output, n);

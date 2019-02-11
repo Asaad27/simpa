@@ -4,9 +4,9 @@ import java.util.List;
 
 import tools.loggers.LogManager;
 
-public abstract class Driver {
-	public int numberOfRequest = 0;
-	public int numberOfAtomicRequest = 0;
+public abstract class Driver<I, O> {
+	private int numberOfRequest = 0;
+	private int numberOfAtomicRequest = 0;
 	private long start = 0;
 	public long duration = 0;
 
@@ -33,6 +33,15 @@ public abstract class Driver {
 
 	public abstract String getSystemName();
 
+	public int getNumberOfRequest() {
+		return numberOfRequest;
+	}
+
+	public int getNumberOfAtomicRequest() {
+		return numberOfAtomicRequest;
+	}
+
+
 	public abstract boolean isCounterExample(Object ce, Object conjecture);
 
 	public void logStats() {
@@ -46,6 +55,18 @@ public abstract class Driver {
 		LogManager.logLine();
 	}
 	
+	protected abstract void logRequest(I input, O output);
+
+	public final O execute(I input) {
+		O output = execute_implem(input);
+		numberOfAtomicRequest++;
+		if (addtolog)
+			logRequest(input, output);
+		return output;
+	}
+
+	protected abstract O execute_implem(I input);
+
 	public void reset() {
 		if (addtolog) {
 			LogManager.logReset();

@@ -301,8 +301,7 @@ public class SIPDriverIPTel extends RealDriver {
 	}
 
 	@Override
-	public String execute(String input) {
-		numberOfAtomicRequest++;
+	public String execute_implem(String input) {
 		Request req = abstractToConcrete(input);
 		LogManager.logInfo("\n" + req.toString());
 		Response resp = null;
@@ -325,7 +324,6 @@ public class SIPDriverIPTel extends RealDriver {
 		}
 		if (!outputSymbols.contains(output))
 			outputSymbols.add(output);
-		LogManager.logRequest(input, output);
 		return output;
 	}
 

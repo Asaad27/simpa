@@ -20,7 +20,6 @@ import automata.efsm.ParameterizedInputSequence;
 import automata.efsm.ParameterizedOutput;
 import automata.efsm.ParameterizedOutputSequence;
 import detection.XSSDetector;
-import drivers.Driver;
 import drivers.efsm.EFSMDriver;
 import drivers.efsm.EFSMDriver.Types;
 import drivers.efsm.real.GenericDriver;
@@ -44,8 +43,8 @@ public class LiLearner extends Learner {
 	private XSSDetector xssDetector = null;
 	private LiOptions options;
 	
-	public LiLearner(Driver driver, LiOptions options) {
-		this.driver = (EFSMDriver) driver;
+	public LiLearner(EFSMDriver driver, LiOptions options) {
+		this.driver = driver;
 		this.options = options;
 		defaultParamValues = this.driver.getDefaultParamValues();
 

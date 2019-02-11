@@ -5,7 +5,7 @@ import java.lang.reflect.Constructor;
 import drivers.Driver;
 import options.GenericOneArgChoiceOption;
 
-public class DriverChoice<T extends Driver>
+public class DriverChoice<T extends Driver<?, ?>>
 		extends GenericOneArgChoiceOption<DriverChoiceItem<? extends T>> {
 	Class<T> driverBaseType;
 

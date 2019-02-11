@@ -16,6 +16,7 @@ import stats.attribute.Attribute;
 import tools.loggers.LogManager;
 import automata.Automata;
 import drivers.Driver;
+import drivers.efsm.EFSMDriver;
 import drivers.mealy.MealyDriver;
 
 public abstract class Learner {
@@ -51,7 +52,7 @@ public abstract class Learner {
 		LogManager.logLine();
 	}
 
-	public static Learner getLearnerFor(Driver driver) throws Exception {
+	public static Learner getLearnerFor(Driver<?, ?> driver) throws Exception {
 		AutomataChoice automataChoice = SIMPA.automataChoice;
 		ChoiceOptionItem selectedAutomataChoice = automataChoice
 				.getSelectedItem();
@@ -60,28 +61,29 @@ public abstract class Learner {
 			// return new ZLearner(driver);
 		} else if (selectedAutomataChoice == automataChoice.efsm) {
 			return automataChoice.efsmLearnerChoice.getSelectedItem()
-					.getLearner(driver);
+					.getLearner((EFSMDriver) driver);
 		} else if (selectedAutomataChoice == automataChoice.mealy) {
+			MealyDriver mDriver = (MealyDriver) driver;
 			MealyLearnerChoice learnerChoice = automataChoice.mealyLearnerChoice;
 			ChoiceOptionItem selectedLearnerChoice = learnerChoice
 					.getSelectedItem();
 			if (selectedLearnerChoice == learnerChoice.tree) {
-				return new ZLearner(driver, learnerChoice.tree);
+				return new ZLearner(mDriver, learnerChoice.tree);
 			} else if (selectedLearnerChoice == learnerChoice.combinatorial) {
-				return new CombinatorialLearner((MealyDriver) driver);
+				return new CombinatorialLearner(mDriver);
 			} else if (selectedLearnerChoice == learnerChoice.cutCombinatorial) {
-				return new CutterCombinatorialLearner((MealyDriver) driver,
+				return new CutterCombinatorialLearner(mDriver,
 						learnerChoice.cutCombinatorial);
 			} else if (selectedLearnerChoice == learnerChoice.rivestSchapire) {
-				return new RivestSchapireLearner((MealyDriver) driver,
+				return new RivestSchapireLearner(mDriver,
 						learnerChoice.rivestSchapire);
 			} else if (selectedLearnerChoice == learnerChoice.localizerBased) {
-				return new LocalizerBasedLearner((MealyDriver) driver,
+				return new LocalizerBasedLearner(mDriver,
 						learnerChoice.localizerBased);
 			} else if (selectedLearnerChoice == learnerChoice.hW) {
-				return new HWLearner((MealyDriver) driver, learnerChoice.hW);
+				return new HWLearner(mDriver, learnerChoice.hW);
 			} else if (selectedLearnerChoice == learnerChoice.lm) {
-				return new LmLearner(driver, learnerChoice.lm);
+				return new LmLearner(mDriver, learnerChoice.lm);
 			} else {
 				assert false;
 				return null;

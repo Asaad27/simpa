@@ -29,7 +29,7 @@ import tools.RandomGenerator;
 import tools.StandaloneRandom;
 import tools.loggers.LogManager;
 
-public abstract class MealyDriver extends Driver {
+public abstract class MealyDriver extends Driver<String, String> {
 	public class UnableToComputeException extends Exception {
 		private static final long serialVersionUID = -6169240870495799817L;
 
@@ -51,6 +51,11 @@ public abstract class MealyDriver extends Driver {
 	}
 
 
+	@Override
+	protected void logRequest(String input, String output) {
+		LogManager.logRequest(input, output, getNumberOfAtomicRequest());
+	}
+
 	public final GenericOutputSequence execute(GenericInputSequence in) {
 		Iterator it = in.inputIterator();
 		while (it.hasNext()) {
@@ -67,8 +72,8 @@ public abstract class MealyDriver extends Driver {
 		}
 		return out;
 	}
-	
-	public abstract String execute(String input);
+
+
 
 	@Override
 	public abstract List<String> getInputSymbols();
@@ -110,8 +115,8 @@ public abstract class MealyDriver extends Driver {
 			MultiTrace appliedSequences, Boolean forbidReset,
 			StatsEntry_OraclePart oracleStats)
 			throws CeExposedUnknownStateException {
-		int startSize = numberOfAtomicRequest;
-		int startReset = numberOfRequest;
+		int startSize = getNumberOfAtomicRequest();
+		int startReset = getNumberOfRequest();
 		long startTime = System.nanoTime();
 		boolean result;
 		try {
@@ -120,10 +125,10 @@ public abstract class MealyDriver extends Driver {
 		} finally {
 			float duration = (float) (System.nanoTime() - startTime)
 					/ 1000000000;
-			oracleStats.addOracleCall(numberOfAtomicRequest - startSize,
+			oracleStats.addOracleCall(getNumberOfAtomicRequest() - startSize,
 					duration);
 			assert startReset
-					+ appliedSequences.getResetNumber() == numberOfRequest;
+					+ appliedSequences.getResetNumber() == getNumberOfRequest();
 			assert appliedSequences.getResetNumber() == 0
 					|| (!forbidReset && options.isResetAllowed());
 		}

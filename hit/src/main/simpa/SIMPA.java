@@ -329,7 +329,7 @@ class HelpOption extends Option<Object> {
 
 public class SIMPA {
 	public final static String name = SIMPA.class.getSimpleName();
-	private static Driver driver;
+	private static Driver<?, ?> driver;
 	public static final boolean DEFENSIVE_CODE = true;
 	private static String[] launchArgs;
 
@@ -551,8 +551,8 @@ public class SIMPA {
 	}
 
 	@Deprecated
-	public static Driver loadDriver(String system) throws Exception {
-		Driver driver;
+	public static Driver<?, ?> loadDriver(String system) throws Exception {
+		Driver<?, ?> driver;
 		try {
 			try {
 				if (Options.GENERICDRIVER) {
@@ -561,13 +561,14 @@ public class SIMPA {
 					driver = new ScanDriver(system);
 				} else if (LOAD_DOT_FILE.getValue() != null) {
 					try {
-						driver = (Driver) Class.forName(system).getConstructor(File.class)
+						driver = (Driver<?, ?>) Class.forName(system)
+								.getConstructor(File.class)
 								.newInstance(new File(LOAD_DOT_FILE.getValue()));
 					} catch (InvocationTargetException e) {
 						throw new Exception(e.getTargetException());
 					}
 				} else {
-					driver = (Driver) Class.forName(system).newInstance();
+					driver = (Driver<?, ?>) Class.forName(system).newInstance();
 				}
 				if (getLogLevel() != LogLevel.LOW)
 					LogManager.logConsole("System : " + driver.getSystemName());
@@ -666,7 +667,7 @@ public class SIMPA {
 		}
 		System.out.println("you can start inference again using "
 				+ allOptions.buildBackCLILine(true));
-		Driver d = null;
+		Driver<?, ?> d = null;
 		Learner l = null;
 		if (automataChoice.getSelectedItem() == automataChoice.mealy) {
 			d = automataChoice.mealyDriverChoice.createDriver();
@@ -892,7 +893,7 @@ public class SIMPA {
 	}
 
 	protected static boolean run_enum() {
-		ExhaustiveGeneratorOption<? extends Driver> option;
+		ExhaustiveGeneratorOption<? extends Driver<?, ?>> option;
 
 		if (automataChoice.getSelectedItem() == automataChoice.mealy) {
 			option = automataChoice.mealyDriverChoice.exhaustiveDriver;

@@ -1,6 +1,6 @@
 package learner.efsm.table;
 
-import drivers.Driver;
+import drivers.efsm.EFSMDriver;
 import learner.Learner;
 import learner.efsm.EFSMLearnerItem;
 import options.GenericMultiArgChoiceOption;
@@ -14,7 +14,7 @@ public class LiOptions extends EFSMLearnerItem {
 	}
 
 	@Override
-	public Learner getLearner(Driver d) {
+	public Learner getLearner(EFSMDriver d) {
 		return new LiLearner(d, this);
 	}
 

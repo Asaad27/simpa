@@ -27,9 +27,12 @@ public class AutomatonMealyDriver extends MealyDriver {
 
 	protected Mealy automata;
 	protected State currentState;
+	/**
+	 * record the state before last execution for logging purpose.
+	 */
+	private State previousState = null;
 	protected Set<InputSequence> triedCE;
 	private int nbStates = 0;
-	private int transitionCount = 0;
 	private String name = null;
 
 	public AutomatonMealyDriver(Mealy automata) {
@@ -44,12 +47,17 @@ public class AutomatonMealyDriver extends MealyDriver {
 	}
 
 	@Override
-	public String execute(String input) {
+	protected void logRequest(String input, String output) {
+		LogManager.logRequest(input, output, getNumberOfAtomicRequest(),
+				previousState, currentState);
+	}
+
+	@Override
+	public final String execute_implem(String input) {
 		assert currentState != null : "is the initial state of driver specified ?";
+		previousState = currentState;
 		String output = null;
 		if (input.length() > 0) {
-			numberOfAtomicRequest++;
-			State before = currentState;
 			MealyTransition currentTrans = automata
 					.getTransitionFromWithInput(currentState, input);
 			if (currentTrans != null) {
@@ -58,10 +66,6 @@ public class AutomatonMealyDriver extends MealyDriver {
 			} else {
 				output = new String();
 			}
-			if (addtolog)
-				LogManager.logRequest(input, output, transitionCount, before,
-						currentState);
-			transitionCount++;
 		}
 		return output;
 	}
@@ -133,8 +137,8 @@ public class AutomatonMealyDriver extends MealyDriver {
 			MultiTrace appliedSequences, Boolean forbidReset,
 			StatsEntry_OraclePart oracleStats)
 			throws CeExposedUnknownStateException {
-		int startSize = numberOfAtomicRequest;
-		int startReset = numberOfRequest;
+		int startSize = getNumberOfAtomicRequest();
+		int startReset = getNumberOfRequest();
 		long startTime = System.nanoTime();
 		boolean result;
 		try {
@@ -143,10 +147,10 @@ public class AutomatonMealyDriver extends MealyDriver {
 		} finally {
 			float duration = (float) (System.nanoTime() - startTime)
 					/ 1000000000;
-			oracleStats.addOracleCall(numberOfAtomicRequest - startSize,
+			oracleStats.addOracleCall(getNumberOfAtomicRequest() - startSize,
 					duration);
 			assert startReset
-					+ appliedSequences.getResetNumber() == numberOfRequest;
+					+ appliedSequences.getResetNumber() == getNumberOfRequest();
 			assert appliedSequences.getResetNumber() == 0
 					|| (!forbidReset && options.isResetAllowed());
 		}

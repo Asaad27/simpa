@@ -472,16 +472,6 @@ public class TextLogger implements ILogger {
 	}
 
 	@Override
-	public void logRequest(String input, String ouput) {
-		try {
-			writer.write(tfm.format(new Date()) + input + " -> " + ouput + ret);
-			writer.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	@Override
 	public void logRequest(String input, String ouput, int n) {
 		try {
 			writer.write(tfm.format(new Date()) + "transition n°" + n  + " : " + input + " -> " + ouput + ret);

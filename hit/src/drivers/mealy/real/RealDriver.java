@@ -19,6 +19,6 @@ public abstract class RealDriver extends MealyDriver {
 		return outputSymbols;
 	}
 
-	public abstract String execute(String input);
+	public abstract String execute_implem(String input);
 
 }

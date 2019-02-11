@@ -41,10 +41,9 @@ public class HeatingSystem extends RealDriver {
 	}
 
 	@Override
-	public String execute(String input) {
+	public String execute_implem(String input) {
 		if (process == null)
 			reset();
-		numberOfAtomicRequest++;
 		assert !input.contains("\n");
 		try {
 			processInput.write(input.getBytes());
@@ -62,7 +61,7 @@ public class HeatingSystem extends RealDriver {
 			if (!process.isAlive()) {
 				if (doRandomWalkOnKilled) {
 					InputSequence randomSequence = InputSequence.generate(
-							getInputSymbols(), 10 * numberOfAtomicRequest,
+							getInputSymbols(), 10 * getNumberOfAtomicRequest(),
 							new StandaloneRandom());
 					HeatingSystem other = new HeatingSystem();
 					other.doRandomWalkOnKilled = false;
@@ -73,10 +72,10 @@ public class HeatingSystem extends RealDriver {
 								+ " did not kill SUI");
 					} catch (SUIDiedException e) {
 						LogManager.logConsole("Random walk killed SUI after "
-								+ other.numberOfAtomicRequest + " inputs");
+								+ other.getNumberOfAtomicRequest() + " inputs");
 					}
 				}
-				throw new SUIDiedException(numberOfAtomicRequest);
+				throw new SUIDiedException(getNumberOfAtomicRequest());
 			}
 			byte[] outputBytes = new byte[1024];
 			int numberRead;
@@ -102,8 +101,6 @@ public class HeatingSystem extends RealDriver {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		if (addtolog)
-			LogManager.logRequest(input, output, numberOfAtomicRequest);
 		return output;
 	}
 

@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.TreeMap;
 
 import tools.Utils;
-import tools.loggers.LogManager;
 import automata.efsm.Parameter;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedOutput;
@@ -41,10 +40,9 @@ public class CacheDriver extends EFSMDriver{
 	}
 	
 	
-	public ParameterizedOutput execute(ParameterizedInput pi) {
+	public ParameterizedOutput execute_implem(ParameterizedInput pi) {
 		ParameterizedOutput po = null;
 		if (!pi.isEpsilonSymbol()) {
-			numberOfAtomicRequest++;
 			
 			List<Parameter> p = new ArrayList<Parameter>();
 			p.add(new Parameter(String.valueOf(cache.find(Integer.valueOf(pi.getParameterValue(0)))), Types.NOMINAL));
@@ -56,8 +54,6 @@ public class CacheDriver extends EFSMDriver{
 				po = new ParameterizedOutput("miss", p);
 			}
 			
-			
-			LogManager.logRequest(pi, po);
 		}
 		return po;
 	}

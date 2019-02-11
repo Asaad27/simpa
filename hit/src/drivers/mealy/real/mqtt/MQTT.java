@@ -16,7 +16,6 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import drivers.mealy.real.RealDriver;
-import tools.loggers.LogManager;
 
 public class MQTT extends RealDriver {
 
@@ -202,9 +201,8 @@ public class MQTT extends RealDriver {
 	}
 
 	@Override
-	public String execute(String input) {
+	public String execute_implem(String input) {
 
-		numberOfAtomicRequest++;
 		String output = execute_intern(input);
 		sleepTimeout();
 		for (MQTTClient client : clients) {
@@ -213,8 +211,6 @@ public class MQTT extends RealDriver {
 						+ client.received.poll() + ")";
 			}
 		}
-		LogManager.logRequest(input, output, numberOfAtomicRequest);
-		System.out.println(numberOfAtomicRequest + ":" + input + "/" + output);
 		return output;
 	}
 

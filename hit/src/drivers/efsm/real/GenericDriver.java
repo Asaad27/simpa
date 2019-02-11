@@ -144,8 +144,7 @@ public class GenericDriver extends LowWebDriver {
 	 * @return the response of the web application
 	 */
 	@Override
-	public ParameterizedOutput execute(ParameterizedInput pi) {
-		numberOfAtomicRequest++;
+	public ParameterizedOutput execute_implem(ParameterizedInput pi) {
 
 		/* Sends the parameterized input to the server and retrieve the HTML source code of the response */
 		String source = submit(pi);
@@ -153,7 +152,6 @@ public class GenericDriver extends LowWebDriver {
 		/* Translate the response in an parameterized output symbol */ 
 		ParameterizedOutput po = htmlToParameterizedOutput(source);
 		
-		LogManager.logRequest(pi, po);
 		return po;
 	}
 

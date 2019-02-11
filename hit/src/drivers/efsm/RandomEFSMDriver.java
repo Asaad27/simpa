@@ -56,8 +56,10 @@ public class RandomEFSMDriver extends EFSMDriver {
 						String.valueOf(getOutputSymbols().size()),
 						String.valueOf(efsm.getSimpleGuardCount()),
 						String.valueOf(efsm.getNdvGuardCount()),
-						String.valueOf(((float) numberOfAtomicRequest / numberOfRequest)),
-						String.valueOf(numberOfRequest), String
+						String.valueOf(((float) getNumberOfAtomicRequest()
+								/ getNumberOfRequest())),
+						String.valueOf(getNumberOfRequest()),
+						String
 								.valueOf(((float) duration / 1000000000)));
 	}
 

@@ -3,7 +3,6 @@ package drivers.efsm.real;
 import tools.HTTPRequest;
 import tools.HTTPResponse;
 import tools.TCPSend;
-import tools.loggers.LogManager;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedOutput;
 
@@ -51,10 +50,8 @@ public abstract class HighWebDriver extends EFSMDriver {
 		return new HTTPResponse(TCPSend.Send(systemHost, systemPort, req));
 	}
 
-	public ParameterizedOutput execute(ParameterizedInput pi) {
-		numberOfAtomicRequest++;
+	public ParameterizedOutput execute_implem(ParameterizedInput pi) {
 		ParameterizedOutput po = concreteToAbstract(abstractToConcrete(pi));
-		LogManager.logRequest(pi, po);
 		return po;
 	}
 

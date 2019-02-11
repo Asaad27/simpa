@@ -26,8 +26,8 @@ public class ZXLearner extends Learner {
 	private ZXObservationNode u;
 	private List<ZXObservationNode> states;
 
-	public ZXLearner(Driver driver) {
-		this.driver = (ScanDriver) driver;
+	public ZXLearner(ScanDriver driver) {
+		this.driver = driver;
 
 		this.i = new ArrayList<String>();
 		this.z = new ArrayList<InputSequence>();
@@ -331,7 +331,7 @@ public class ZXLearner extends Learner {
 		// extends Mealy an thus, it should have a MealyDriver. The next call is
 		// considered invalid because a ScanDriver (which extends EFSM) should
 		// not have a Mealy conjecture.
-		LmConjecture c = new LmConjecture((MealyDriver) (Driver) driver);
+		LmConjecture c = new LmConjecture((MealyDriver) (Driver<?, ?>) driver);
 
 		for (int i = 0; i < states.size(); i++)
 			c.addState(new State("S" + i, i == 0));

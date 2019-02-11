@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 
-import tools.loggers.LogManager;
 import automata.Automata;
 import automata.State;
 import automata.efsm.EFSM;
@@ -16,8 +15,10 @@ import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedInputSequence;
 import automata.efsm.ParameterizedOutput;
 import drivers.Driver;
+import tools.loggers.LogManager;
 
-public abstract class EFSMDriver extends Driver {
+public abstract class EFSMDriver
+		extends Driver<ParameterizedInput, ParameterizedOutput> {
 	protected EFSM automata;
 	protected State currentState;
 
@@ -31,10 +32,14 @@ public abstract class EFSMDriver extends Driver {
 		this.automata = automata;
 	}
 
-	public ParameterizedOutput execute(ParameterizedInput pi) {
+	@Override
+	protected void logRequest(ParameterizedInput input,
+			ParameterizedOutput output) {
+		LogManager.logRequest(input, output);
+	}
+	public ParameterizedOutput execute_implem(ParameterizedInput pi) {
 		ParameterizedOutput po = null;
 		if (!pi.isEpsilonSymbol()) {
-			numberOfAtomicRequest++;
 			EFSMTransition currentTrans = null;
 			for (EFSMTransition t : automata
 					.getTransitions()) {
@@ -53,7 +58,6 @@ public abstract class EFSMDriver extends Driver {
 			} else {
 				po = new ParameterizedOutput();
 			}
-			LogManager.logRequest(pi, po);
 		}
 		return po;
 	}

@@ -18,7 +18,6 @@ import automata.State;
 import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
 import automata.mealy.multiTrace.SimpleMultiTrace;
-import drivers.Driver;
 import drivers.mealy.MealyDriver;
 
 public class ZLearner extends Learner {
@@ -30,9 +29,9 @@ public class ZLearner extends Learner {
 	private ZStatsEntry stats;
 	private ZOptions options;
 
-	public ZLearner(Driver driver, ZOptions options) {
+	public ZLearner(MealyDriver driver, ZOptions options) {
 		this.options = options;
-		this.driver = (MealyDriver) driver;
+		this.driver = driver;
 		options.oracle.updateWithDriver(this.driver);
 
 		// Initialize I and Z with specified options
@@ -208,7 +207,7 @@ public class ZLearner extends Learner {
 		float duration = (float) ((System.nanoTime() - start_time)
 				/ 1000000000.);
 		stats.finalUpdate(createConjecture(), duration,
-				driver.numberOfAtomicRequest, driver.numberOfRequest);
+				driver.getNumberOfAtomicRequest(), driver.getNumberOfRequest());
 	}
 
 	private boolean noLabelledPred(ZObservationNode node) {

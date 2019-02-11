@@ -27,7 +27,6 @@ import datamining.free.FreeARFF;
 import datamining.free.TreeNode;
 import datamining.weka.WekaARFF;
 import datamining.weka.WekaTreeNode;
-import drivers.Driver;
 import drivers.efsm.EFSMDriver;
 import learner.efsm.table.WekaOption;
 
@@ -40,11 +39,11 @@ public class LiConjecture extends automata.efsm.EFSM {
 	public List<String> gSymbols;
 	private WekaOption useWeka;
 
-	public LiConjecture(Driver d, WekaOption useWeka) {
+	public LiConjecture(EFSMDriver d, WekaOption useWeka) {
 		super(d.getSystemName());
 		this.useWeka = useWeka;
 		this.inputSymbols = d.getInputSymbols();
-		this.paramNames = ((EFSMDriver) d).getParameterNames();
+		this.paramNames = d.getParameterNames();
 		if (paramNames == null) {
 			LogManager.logException("No parameter names defined",
 					new Exception());

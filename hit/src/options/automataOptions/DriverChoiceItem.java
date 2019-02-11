@@ -5,7 +5,8 @@ import java.lang.reflect.InvocationTargetException;
 import drivers.Driver;
 import options.OneArgChoiceOptionItem;
 
-public class DriverChoiceItem<T extends Driver> extends OneArgChoiceOptionItem {
+public class DriverChoiceItem<T extends Driver<?, ?>>
+		extends OneArgChoiceOptionItem {
 	Class<? extends T> driverClass;
 
 	public DriverChoiceItem(String displayName, String argument,

@@ -464,22 +464,6 @@ public class HTMLLogger implements ILogger {
 	}
 
 	@Override
-	public void logRequest(String input, String output) {
-		try {
-			writer.flush();
-			writer.write("<li class=\"request\">\n");
-			writer.write("<span class=\"date\">" + tfm.format(new Date())
-					+ "</span><span class=\"content\">" + LogManager.getPrefix()
-					+ "<span class=\"pi\">"
-					+ input + "</span> -&gt <span class=\"po\">"
-					+ (output.length() > 0 ? output : Options.SYMBOL_OMEGA_LOW)
-					+ "</span></span>\n</li>\n");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	@Override
 	public void logRequest(String input, String output, int n) {
 		try {
 			writer.flush();

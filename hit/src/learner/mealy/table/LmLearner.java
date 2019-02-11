@@ -16,7 +16,6 @@ import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
 import automata.mealy.multiTrace.SimpleMultiTrace;
-import drivers.Driver;
 import drivers.mealy.MealyDriver;
 
 public class LmLearner extends Learner {
@@ -25,9 +24,9 @@ public class LmLearner extends Learner {
 	private LmStatsEntry stats;
 	private LmOptions options;
 
-	public LmLearner(Driver driver, LmOptions options) {
+	public LmLearner(MealyDriver driver, LmOptions options) {
 		this.options = options;
-		this.driver = (MealyDriver) driver;
+		this.driver = driver;
 		this.cTable = new LmControlTable(driver.getInputSymbols());
 		stats = new LmStatsEntry(this.driver, options);
 		options.oracle.updateWithDriver(this.driver);
@@ -213,7 +212,7 @@ public class LmLearner extends Learner {
 		float duration = (float) ((System.nanoTime() - startTime)
 				/ 1000000000.);
 		stats.finalUpdate(createConjecture(), duration,
-				driver.numberOfAtomicRequest, driver.numberOfRequest);
+				driver.getNumberOfAtomicRequest(), driver.getNumberOfRequest());
 	}
 
 	@Override

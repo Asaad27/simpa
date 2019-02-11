@@ -8,7 +8,6 @@ import java.util.Random;
 import java.util.TreeMap;
 
 import tools.Utils;
-import tools.loggers.LogManager;
 import automata.Automata;
 import automata.efsm.Parameter;
 import automata.efsm.ParameterizedInput;
@@ -83,10 +82,9 @@ public class LibcAllocatorDriver extends EFSMDriver {
 		
 	}
 	
-	public ParameterizedOutput execute(ParameterizedInput pi) {
+	public ParameterizedOutput execute_implem(ParameterizedInput pi) {
 		ParameterizedOutput po = null;
 		if (!pi.isEpsilonSymbol()) {
-			numberOfAtomicRequest++;
 			List<Parameter> p = new ArrayList<Parameter>();
 			
 			if (pi.getInputSymbol() == FREE) {
@@ -198,7 +196,6 @@ public class LibcAllocatorDriver extends EFSMDriver {
 					po = new ParameterizedOutput("address_out", p);
 				}
 			}
-			LogManager.logRequest(pi, po);
 		}
 
 		return po;

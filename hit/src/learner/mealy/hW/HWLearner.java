@@ -109,9 +109,9 @@ public class HWLearner extends Learner {
 		for (LmTrace trace : fullTraces) {
 			totalLength += trace.size();
 		}
-		if (totalLength != driver.numberOfAtomicRequest)
+		if (totalLength != driver.getNumberOfAtomicRequest())
 			return false;
-		if (fullTraces.size() - 1 != driver.numberOfRequest)
+		if (fullTraces.size() - 1 != driver.getNumberOfRequest())
 			return false;
 		return true;
 
