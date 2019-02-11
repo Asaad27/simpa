@@ -132,7 +132,6 @@ public class EFSM extends Automata implements Serializable{
         }		
 	}
 	
-	@Override
 	public void reset(){
 		memory.clear();
 	}

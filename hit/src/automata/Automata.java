@@ -71,9 +71,6 @@ public class Automata implements Serializable {
 		}
 	}
 
-	public void reset(){
-	}
-
 	/**
 	 * find a strongly connected component of an automaton. This can be used to
 	 * check if the automaton is strongly connected.
