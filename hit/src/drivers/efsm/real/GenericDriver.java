@@ -309,8 +309,7 @@ public class GenericDriver extends LowWebDriver {
 	
 
 	@Override
-	public void reset(){
-		super.reset();
+	public void reset_implem(){
 		if (config.getCookies() == null) {
 			client.getCookieManager().clearCookies();
 		}

@@ -55,8 +55,8 @@ public class ScanDriver extends EFSMDriver {
 		client.setCredentialsProvider(creds);
 	}
 	
-	public void reset(){
-		super.reset();
+	@Override
+	public void reset_implem(){
 		cm.clearCookies();
 	}
 	

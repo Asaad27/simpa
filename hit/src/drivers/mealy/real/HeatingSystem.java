@@ -105,8 +105,7 @@ public class HeatingSystem extends RealDriver {
 	}
 
 	@Override
-	public void reset() {
-		super.reset();
+	public void reset_implem() {
 		if (process != null)
 			process.destroy();
 		try {

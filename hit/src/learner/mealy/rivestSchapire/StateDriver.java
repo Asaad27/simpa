@@ -101,7 +101,8 @@ class StateDriver extends MealyDriver {
 	//		return realDriver.getRandomCounterExemple(c); // this do not work because returned CE start from initial state of realDriver
 	//	}
 
-	public void reset(){
+	@Override
+	protected void reset_implem() {
 		LogManager.logInfo("reset call for state " + homingSequenceResponse);
 		if (resetDone){
 			LogManager.logInfo("    already in state after " + homingSequenceResponse);

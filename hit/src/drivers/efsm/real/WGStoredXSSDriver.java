@@ -168,8 +168,7 @@ public class WGStoredXSSDriver extends LowWebDriver {
 	}
 
 	@Override
-	public void reset() {
-		super.reset();
+	public void reset_implem() {
 		HTTPRequest res = new HTTPRequest(Method.GET, "/WebGoat/attack?Screen="
 				+ screen + "&menu=900&Restart=" + screen, Version.v11);
 		res.addHeader("Authorization", basicAuth);

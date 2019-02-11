@@ -364,8 +364,7 @@ public class LibcAllocatorDriver extends EFSMDriver {
 	}
 	
 	@Override
-	public void reset() {
-		super.reset();
+	public void reset_implem() {
 		this.allocator.reset();
 	}
 

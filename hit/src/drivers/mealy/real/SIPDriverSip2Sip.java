@@ -328,8 +328,7 @@ public class SIPDriverSip2Sip extends RealDriver {
 	}
 
 	@Override
-	public void reset() {
-		super.reset();
+	public void reset_implem() {
 		try {
 			cseq += 5;
 			if (phone != null) {

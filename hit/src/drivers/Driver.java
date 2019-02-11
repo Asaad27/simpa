@@ -67,10 +67,14 @@ public abstract class Driver<I, O> {
 
 	protected abstract O execute_implem(I input);
 
-	public void reset() {
+	public final void reset() {
+		reset_implem();
 		if (addtolog) {
 			LogManager.logReset();
 		}
 		numberOfRequest++;
 	}
+
+	protected abstract void reset_implem();
+
 }

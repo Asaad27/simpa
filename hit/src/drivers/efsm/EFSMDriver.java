@@ -92,8 +92,7 @@ public abstract class EFSMDriver
 	public abstract TreeMap<String, List<String>> getParameterNames();
 
 	@Override
-	public void reset() {
-		super.reset();
+	public void reset_implem() {
 		if (automata != null) {
 			automata.reset();
 			currentState = automata.getInitialState();

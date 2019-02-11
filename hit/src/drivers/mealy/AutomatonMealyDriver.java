@@ -232,8 +232,7 @@ public class AutomatonMealyDriver extends MealyDriver {
 	}
 
 	@Override
-	public void reset() {
-		super.reset();
+	public void reset_implem() {
 		assert (automata != null);
 		automata.reset();
 		currentState = automata.getInitialState();

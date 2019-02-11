@@ -90,8 +90,7 @@ public class CacheDriver extends EFSMDriver{
 	}
 
 	@Override
-	public void reset() {
-		super.reset();
+	public void reset_implem() {
 		cache.reset();
 	}
 	

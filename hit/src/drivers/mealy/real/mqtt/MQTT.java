@@ -228,8 +228,7 @@ public class MQTT extends RealDriver {
 	}
 
 	@Override
-	public void reset() {
-		super.reset();
+	public void reset_implem() {
 		fakeReset();
 	}
 

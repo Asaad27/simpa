@@ -91,8 +91,7 @@ public class WebSamlSSOSPDriver extends HighWebDriver {
 	}
 
 	@Override
-	public void reset() {
-		super.reset();
+	public void reset_implem() {
 		webClient = new WebClient();
 		currentPage = null;
 	}
