@@ -12,15 +12,9 @@ import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
-import automata.mealy.multiTrace.MultiTrace;
 import drivers.mealy.transparent.TransparentMealyDriver;
-import learner.mealy.CeExposedUnknownStateException;
-import learner.mealy.LmConjecture;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
-import options.learnerOptions.OracleOption;
-import stats.StatsEntry_OraclePart;
-import tools.RandomGenerator;
 import tools.loggers.LogManager;
 
 public class AutomatonMealyDriver extends MealyDriver {
@@ -109,126 +103,6 @@ public class AutomatonMealyDriver extends MealyDriver {
 	@Override
 	public String getSystemName() {
 		return name;
-	}
-
-	/**
-	 * Search a counter-example.
-	 * 
-	 * @param options
-	 *            the options for oracle selection and settings
-	 * @param conjecture
-	 *            the conjecture to test
-	 * @param conjectureStartingState
-	 *            the current state in conjecture (can be {@code null} if the
-	 *            oracle is allowed to reset the driver)
-	 * @param appliedSequences
-	 *            an object to record execution on driver
-	 * @param oracleStats
-	 *            the object which will be used to record statistics about
-	 *            oracle.
-	 * @return true if a counter example is found, false otherwise.
-	 * @throws CeExposedUnknownStateException
-	 *             if a new state is found while searching the initial state in
-	 *             conjecture (during the potential call to
-	 *             {@link LmConjecture#searchInitialState(List)})
-	 */
-	public boolean getCounterExample(OracleOption options,
-			LmConjecture conjecture, State conjectureStartingState,
-			MultiTrace appliedSequences, Boolean forbidReset,
-			StatsEntry_OraclePart oracleStats)
-			throws CeExposedUnknownStateException {
-		int startSize = getNumberOfAtomicRequest();
-		int startReset = getNumberOfRequest();
-		long startTime = System.nanoTime();
-		boolean result;
-		try {
-			result = getCounterExample(options, conjecture,
-					conjectureStartingState, appliedSequences, forbidReset);
-		} finally {
-			float duration = (float) (System.nanoTime() - startTime)
-					/ 1000000000;
-			oracleStats.addOracleCall(getNumberOfAtomicRequest() - startSize,
-					duration);
-			assert startReset
-					+ appliedSequences.getResetNumber() == getNumberOfRequest();
-			assert appliedSequences.getResetNumber() == 0
-					|| (!forbidReset && options.isResetAllowed());
-		}
-		return result;
-	}
-
-	/**
-	 * same as
-	 * {@link #getCounterExample(OracleOption, LmConjecture, State, MultiTrace, Boolean, StatsEntry_OraclePart)}
-	 * but for algorithms where the conjecture will not search initial state.
-	 */
-	public boolean getCounterExample_noThrow(OracleOption options,
-			LmConjecture conjecture, State conjectureStartingState,
-			MultiTrace appliedSequences, Boolean forbidReset,
-			StatsEntry_OraclePart oracleStats) {
-		assert conjecture.getInitialState() != null || forbidReset
-				|| !options.isResetAllowed();
-		try {
-			return getCounterExample(options, conjecture,
-					conjectureStartingState, appliedSequences, forbidReset,
-					oracleStats);
-		} catch (CeExposedUnknownStateException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	/**
-	 * Search a counter example by using a distinction tree
-	 * 
-	 * @param c
-	 *            the conjecture to test
-	 * @param curentState
-	 *            the current state in conjecture
-	 * @param traces
-	 *            an object to record traces applied on driver.
-	 * @param resetAllowed
-	 *            indicate whether the oracle is allowed to do a reset or not
-	 * @return {@code true} if a counter example is found, {@code null} if the
-	 *         oracle was not able to test all the conjecture (missing
-	 *         transitions, unreachable states,…) or {@code false} all
-	 *         transitions were tested but without finding a discrepancy.
-	 */
-	public Boolean getDistinctionTreeBasedCE(LmConjecture c, State curentState,
-			MultiTrace traces, boolean resetAllowed) {
-		assert curentState != null;
-		if (!c.isFullyKnown())
-			return null;
-		// TODO extend oracle to incomplete automata
-		LY_basedOracle oracle = new LY_basedOracle(this, c, curentState,
-				traces);
-		oracle.resetAllowed = resetAllowed;
-		stopLog();
-		Boolean found = oracle.searchCE(curentState);
-		startLog();
-		return found;
-	}
-
-	private boolean doRandomWalk(LmConjecture conjecture, State conjectureState,
-			MultiTrace trace, int maxLength, RandomGenerator randomGenerator) {
-		assert conjectureState != null;
-		assert conjecture.getStates().contains(conjectureState);
-		if (Options.getLogLevel().compareTo(LogLevel.ALL) >= 0)
-			LogManager.logInfo("Starting a random walk");
-		int tried = 0;
-		List<String> is = getInputSymbols();
-		while (maxLength < 0 || tried < maxLength) {
-			String input = randomGenerator.randIn(is);
-			String output = execute(input);
-			trace.recordIO(input, output);
-			MealyTransition transition = conjecture
-					.getTransitionFromWithInput(conjectureState, input);
-			if (!transition.getOutput().equals(output)) {
-				return true;
-			}
-			conjectureState = transition.getTo();
-			tried++;
-		}
-		return false;
 	}
 
 	@Override

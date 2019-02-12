@@ -42,8 +42,6 @@ public abstract class MealyDriver extends Driver<String, String> {
 		}
 	}
 
-	protected Mealy automata;
-	protected State currentState;
 	private String name = null;
 
 	public MealyDriver(String name) {
@@ -104,6 +102,11 @@ public abstract class MealyDriver extends Driver<String, String> {
 	 * @param oracleStats
 	 *            the object which will be used to record statistics about
 	 *            oracle.
+	 * @param noResetAttempt
+	 *            simple attempt to find a counter example without doing a
+	 *            reset. To make a best search without reset,
+	 *            {@code options.}{@link OracleOption#isResetAllowed()
+	 *            isResetAllowed()} must be false.
 	 * @return true if a counter example is found, false otherwise.
 	 * @throws CeExposedUnknownStateException
 	 *             if a new state is found while searching the initial state in
@@ -112,7 +115,7 @@ public abstract class MealyDriver extends Driver<String, String> {
 	 */
 	public boolean getCounterExample(OracleOption options,
 			LmConjecture conjecture, State conjectureStartingState,
-			MultiTrace appliedSequences, Boolean forbidReset,
+			MultiTrace appliedSequences, Boolean noResetAttempt,
 			StatsEntry_OraclePart oracleStats)
 			throws CeExposedUnknownStateException {
 		int startSize = getNumberOfAtomicRequest();
@@ -120,8 +123,8 @@ public abstract class MealyDriver extends Driver<String, String> {
 		long startTime = System.nanoTime();
 		boolean result;
 		try {
-			result = getCounterExample(options, conjecture,
-					conjectureStartingState, appliedSequences, forbidReset);
+			result = getCounterExampleNoStats(options, conjecture,
+					conjectureStartingState, appliedSequences, noResetAttempt);
 		} finally {
 			float duration = (float) (System.nanoTime() - startTime)
 					/ 1000000000;
@@ -130,7 +133,7 @@ public abstract class MealyDriver extends Driver<String, String> {
 			assert startReset
 					+ appliedSequences.getResetNumber() == getNumberOfRequest();
 			assert appliedSequences.getResetNumber() == 0
-					|| (!forbidReset && options.isResetAllowed());
+					|| (!noResetAttempt && options.isResetAllowed());
 		}
 		return result;
 	}
@@ -142,13 +145,13 @@ public abstract class MealyDriver extends Driver<String, String> {
 	 */
 	public boolean getCounterExample_noThrow(OracleOption options,
 			LmConjecture conjecture, State conjectureStartingState,
-			MultiTrace appliedSequences, Boolean forbidReset,
+			MultiTrace appliedSequences, Boolean noResetAttempt,
 			StatsEntry_OraclePart oracleStats) {
-		assert conjecture.getInitialState() != null || forbidReset
+		assert conjecture.getInitialState() != null || noResetAttempt
 				|| !options.isResetAllowed();
 		try {
 			return getCounterExample(options, conjecture,
-					conjectureStartingState, appliedSequences, forbidReset,
+					conjectureStartingState, appliedSequences, noResetAttempt,
 					oracleStats);
 		} catch (CeExposedUnknownStateException e) {
 			throw new RuntimeException(e);
@@ -188,7 +191,7 @@ public abstract class MealyDriver extends Driver<String, String> {
 
 	/**
 	 * Same as
-	 * {@link #getCounterExample(OracleOption, LmConjecture, State, List, StatsEntry_OraclePart)}
+	 * {@link #getCounterExample(OracleOption, LmConjecture, State, MultiTrace, Boolean, StatsEntry_OraclePart)}
 	 * but this method do not record statistics.
 	 * 
 	 * @throws CeExposedUnknownStateException
@@ -196,17 +199,19 @@ public abstract class MealyDriver extends Driver<String, String> {
 	 *             conjecture (during the potential call to
 	 *             {@link LmConjecture#searchInitialState(List)})
 	 */
-	protected boolean getCounterExample(OracleOption options,
+	protected boolean getCounterExampleNoStats(OracleOption options,
 			LmConjecture conjecture, State conjectureState,
-			MultiTrace appliedSequences, Boolean forbidReset)
-			throws CeExposedUnknownStateException {
-		if (forbidReset == null)
-			forbidReset = false;
-		boolean resetIsAllowed = options.isResetAllowed() && !forbidReset;
+			MultiTrace appliedSequences,
+			Boolean noResetAttempt) throws CeExposedUnknownStateException {
+		assert options.isResetAllowed()
+				|| noResetAttempt == null : "noReset attempt should only be done when reset is allowed in options";
+		if (noResetAttempt == null)
+			noResetAttempt = false;
+		boolean resetIsAllowed = options.isResetAllowed() && !noResetAttempt;
 		if (resetIsAllowed) {
 			if (conjectureState != null) {
 				// first, try to find a CE without using reset
-				boolean result = getCounterExample(options, conjecture,
+				boolean result = getCounterExampleNoStats(options, conjecture,
 						conjectureState, appliedSequences, true);
 				if (result)
 					return true;
@@ -215,42 +220,34 @@ public abstract class MealyDriver extends Driver<String, String> {
 			// (e.g. the search of shortest counter-example needs to be in a
 			// state were all others states are reachable).
 			conjectureState = conjecture.searchInitialState(appliedSequences);
+			assert conjectureState != null;
 			reset();
 			appliedSequences.recordReset();
 		}
 
 		assert conjectureState != null;
 		if (options.getSelectedItem() == options.shortest) {
-			assert this.automata != null;
-			assert this.currentState != null;
-			if (!this.automata.isConnex())
-				throw new RuntimeException(
-						"automata must be strongly connected");
-			List<InputSequence> counterExamples = conjecture.getCounterExamples(
-					conjectureState, this.automata, currentState, true);
-			if (counterExamples.isEmpty()) {
+			assert this instanceof TransparentMealyDriver;
+			InputSequence ce = ((TransparentMealyDriver) this).getShortestCE(
+					conjecture, conjectureState, appliedSequences);
+			if (ce == null) {
 				return false;
 			} else {
-				InputSequence ceIn = counterExamples.get(0);
-				OutputSequence ceOut = execute(ceIn);
-				appliedSequences.recordTrace(new LmTrace(ceIn, ceOut));
+				OutputSequence ceOut = execute(ce);
+				appliedSequences.recordTrace(new LmTrace(ce, ceOut));
 				return true;
 			}
 		} else if (options.getSelectedItem() == options.mrBean) {
 			if (options.mrBean.onlyIfCEExists()) {
-				assert this.automata != null;
-				assert this.currentState != null;
-				if (!this.automata.isConnex())
-					throw new RuntimeException(
-							"automata must be strongly connected");
-				List<InputSequence> counterExamples = conjecture
-						.getCounterExamples(conjectureState, this.automata,
-								currentState, true);
-				if (counterExamples.isEmpty()) {
+				assert this instanceof TransparentMealyDriver;
+				InputSequence ce = ((TransparentMealyDriver) this)
+						.getShortestCE(conjecture, conjectureState,
+								appliedSequences);
+				if (ce == null) {
 					return false;
 				} else {
 					LogManager.logInfo("a counter example exist (e.g. "
-							+ counterExamples.get(0)
+							+ ce
 							+ "). Doing random walk until a CE is found");
 					if (resetIsAllowed) {
 						int maxLength = options.mrBean.getMaxTraceLength();
@@ -280,11 +277,29 @@ public abstract class MealyDriver extends Driver<String, String> {
 						} while (!counterExampleIsFound);
 						return true;
 					} else {
-						assert this.automata.isConnex();
-						doRandomWalk(conjecture, conjectureState,
-								appliedSequences, -1,
-								options.mrBean.random.getRand());
-						return true;
+						if (options.isResetAllowed()) {
+							// we are doing an ATTEMPT of no reset CE.
+							assert noResetAttempt;
+							// we know that a CE exists from the current state
+							// but random walk may lead to a sink were the CE is
+							// not reachable anymore.
+							// Thus, we must set a maximal length to the random
+							// walk and abort if the CE is not found.
+
+							// (another solution should be to check existence of
+							// CE after each input to know if we should continue
+							// the random walk or not)
+
+							return doRandomWalk(conjecture, conjectureState,
+									appliedSequences,
+									conjecture.getTransitionCount() * 10,
+									options.mrBean.random.getRand());
+						} else {
+							doRandomWalk(conjecture, conjectureState,
+									appliedSequences, -1,
+									options.mrBean.random.getRand());
+							return true;
+						}
 					}
 				}
 			} else {
@@ -324,14 +339,16 @@ public abstract class MealyDriver extends Driver<String, String> {
 			MultiTrace appliedSequences) {
 
 		List<InputSequence> counterExamples = null;
-		if (this.automata != null && currentState != null) {
-			counterExamples = conjecture.getCounterExamples(conjectureState,
-					this.automata, currentState, false);
-			if (counterExamples.size() == 0)
-				return false;
-			LogManager.logInfo(
-					"there is no more counter example. user were not asked about one");
-		}
+		// TODO
+//		if (this.automata != null && currentState != null) {
+//			counterExamples = conjecture.getCounterExamples(conjectureState,
+//					this.automata, currentState, false);
+//			if (counterExamples.size() == 0)
+//				return false;
+//			LogManager.logInfo(
+//					"there is no more counter example. user were not asked about one");
+//		}
+
 		InputSequence counterExample = new InputSequence();
 		LogManager.logInfo("asking for counter example");
 		Scanner input = new Scanner(System.in);

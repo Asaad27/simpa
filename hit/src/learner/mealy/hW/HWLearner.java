@@ -134,7 +134,7 @@ public class HWLearner extends Learner {
 	 *             state in conjecture.
 	 */
 	public LmTrace getCounterExemple(List<GenericHNDException> hExceptions,
-			boolean forbidReset) throws CeExposedUnknownStateException {
+			Boolean noResetAttempt) throws CeExposedUnknownStateException {
 		SimpleMultiTrace appliedSequences = new SimpleMultiTrace();
 		LmTrace returnedCE = null;
 		LmConjecture conjecture = dataManager.getConjecture();
@@ -144,7 +144,7 @@ public class HWLearner extends Learner {
 		try {
 			found = driver.getCounterExample(options.getOracleOption(),
 					conjecture,
-					conjectureStartingState, appliedSequences, forbidReset,
+					conjectureStartingState, appliedSequences, noResetAttempt,
 					stats.oracle);
 		} finally {
 			Iterator<LmTrace> it = appliedSequences.iterator();
@@ -421,7 +421,7 @@ public class HWLearner extends Learner {
 				else
 					try {
 						counterExampleTrace = getCounterExemple(hExceptions,
-								true);
+								null);
 					} catch (CeExposedUnknownStateException e) {
 						// this should not happen because the discovery of a
 						// new state needs to reset the driver
