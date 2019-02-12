@@ -235,6 +235,53 @@ public class Automata implements Serializable {
 	}
 
 	/**
+	 * Compute the set of states reachable from a given state.
+	 * 
+	 * @param s
+	 *            the state leading to all returned states
+	 * @return a set of states which can be reached from the state {@code s}
+	 */
+	public Set<State> getStatesReachableFrom(State s) {
+		HashSet<State> reachable = new HashSet<State>();
+		reachable.add(s);
+		ArrayList<Transition> transitionsToCompute = new ArrayList<>(
+				transitions);
+		boolean added = false;
+		do {
+			ArrayList<Transition> unused = new ArrayList<>(
+					transitionsToCompute.size());
+			added = false;
+			for (Transition t : transitionsToCompute) {
+				if (reachable.contains(t.from)) {
+					reachable.add(t.to);
+					added = true;
+				} else {
+					unused.add(t);
+				}
+			}
+			transitionsToCompute = unused;
+		} while (added);
+		return reachable;
+	}
+
+	/**
+	 * Indicate weather there is a path from given state to any state of this
+	 * automaton.
+	 * 
+	 * @param start
+	 *            the state at the start of all path
+	 * @return {@code true} if it exists a path from the state {@code start} to
+	 *         any state of this automaton, {@code false} otherwise.
+	 */
+	public boolean allStatesAreReachableFrom(State start) {
+		Set<State> reachable = getStatesReachableFrom(start);
+		assert states.containsAll(reachable);
+		assert new HashSet<State>(states).size() == states
+				.size() : "some states are recordered twice";
+		return reachable.size() == states.size();
+	}
+
+	/**
 	 * Compute a relative depth in the graph for nodes reachable or reaching the
 	 * node start.
 	 * 

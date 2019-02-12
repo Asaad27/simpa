@@ -563,16 +563,19 @@ public abstract class MealyDriver extends Driver<String, String> {
 	public boolean searchConjectureError(LmConjecture conj) {
 		LogManager.logLine();
 		LogManager.logInfo("Checking conjecture");
+		boolean prevAddToLog = addtolog;
+		stopLog();
+		boolean result = searchConjectureError_implem(conj);
+		if (prevAddToLog)
+			startLog();
+		if (result)
+			LogManager.logInfo("Conjecture seems consistent with the driver");
+		return result;
+	}
 
-		if (this instanceof TransparentMealyDriver) {
-			LogManager.logInfo("Checking with transparent driver");
-			if (!((TransparentMealyDriver) this).getAutomata()
-					.searchConjectureError(conj)) {
-				LogManager.logError(
-						"Conjecture is inconsistent with transparent driver");
-				return false;
-			}
-		}
+	protected boolean searchConjectureError_implem(LmConjecture conj) {
+		assert !(this instanceof AutomatonMealyDriver) : "automaton driver should implement an exect search";
+		assert conj.isFullyKnown();
 
 		LogManager.logInfo("Checking with distinction tree");
 		State conjState = searchCurrentState(conj, new LmTrace(), null);
@@ -611,7 +614,6 @@ public abstract class MealyDriver extends Driver<String, String> {
 			}
 		}
 
-		LogManager.logInfo("Conjecture seems consistent with the driver");
 		return true;
 	}
 	

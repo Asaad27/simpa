@@ -13,6 +13,7 @@ import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
 import drivers.mealy.transparent.TransparentMealyDriver;
+import learner.mealy.LmConjecture;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
 import tools.loggers.LogManager;
@@ -197,6 +198,20 @@ public class AutomatonMealyDriver extends MealyDriver {
 	/** Get init state **/
 	public State getInitState() {
 		return automata.getInitialState();
+	}
+
+	@Override
+	protected boolean searchConjectureError_implem(LmConjecture conj) {
+		if (this instanceof TransparentMealyDriver) {
+			LogManager.logInfo("Checking with transparent driver");
+			if (!((TransparentMealyDriver) this).getAutomata()
+					.searchConjectureError(conj)) {
+				LogManager.logError(
+						"Conjecture is inconsistent with transparent driver");
+				return false;
+			}
+		}
+		return true;
 	}
 
 }

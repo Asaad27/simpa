@@ -172,7 +172,7 @@ public class LmConjecture extends automata.mealy.Mealy {
 	 */
 	public List<InputSequence> getCounterExamples(State conjectureStartingState,
 			Mealy realAutomata, State realStartingState, boolean stopOnFirst) {
-		assert realAutomata.isConnex();
+		assert realAutomata.allStatesAreReachableFrom(realStartingState);
 		CounterExampleResult counterExamples = getAllCounterExamplesReachable(
 				conjectureStartingState, realAutomata, realStartingState,
 				false);

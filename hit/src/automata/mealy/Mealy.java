@@ -987,7 +987,15 @@ public class Mealy extends Automata implements Serializable {
 	}
 
 	/**
-	 * check if conjecture is compatible with this automata.
+	 * Check if conjecture is compatible with this automata. This automata must
+	 * have an initial state or be strongly connected.
+	 * 
+	 * Suppose that input symbols of conjecture are the same this automata
+	 * (otherwise it will check for counter example matching only symbols from
+	 * conjecture)
+	 * 
+	 * If conjecture does not have an initial state, the equivalence is checked
+	 * with the whole automaton, not only with a strongly connected part.
 	 * 
 	 * @param conj
 	 *            the conjecture to test.
@@ -1000,8 +1008,18 @@ public class Mealy extends Automata implements Serializable {
 					.isCompletelyEquivalent())
 				return false;
 		} else {
-			assert isConnex(false);
-			State thisState = getState(0);
+			State thisState = getInitialState();
+			if (thisState == null) {
+				if (!isConnex(false)) {
+					LogManager.logWarning("automaton " + this
+							+ " do not have an initial state and is not strongly connected."
+							+ "The equivalence checking is not implemented as it might be incomplete.");
+					assert false : "Unimplemented: we need to choose a state which can reach all others";
+					return false;
+				}
+				thisState = getState(0);
+			}
+			assert allStatesAreReachableFrom(thisState);
 			TotallyAdaptiveW W = new SplittingTree(this,
 					conj.getInputSymbols()).computeW();
 			AdaptiveCharacterization thisStateCharac = W
@@ -1011,6 +1029,9 @@ public class Mealy extends Automata implements Serializable {
 						.get(0);
 				thisStateCharac.addPrint(w, apply(w, thisState));
 			}
+			LogManager.logInfo("Searching a state in conjecture " + conj
+					+ " equivalent to state " + thisState + " in automaton "
+					+ this + ".");
 			State conjState = null;
 			for (State conjTestState : conj.getStates()) {
 				AdaptiveCharacterization conjStateCharac = W
@@ -1022,15 +1043,26 @@ public class Mealy extends Automata implements Serializable {
 				}
 				if (conjStateCharac.equals(thisStateCharac)) {
 					conjState = conjTestState;
+					LogManager.logInfo("state " + conjState + " in conjecture "
+							+ conj + " has same characterization ("
+							+ thisStateCharac + ") than state " + thisState
+							+ " in automaton " + this + ".");
 					break;
 				}
 			}
 			if (conjState == null) {
+				LogManager.logInfo("No state in conjecture " + conj
+						+ " is equivalent to state " + thisState
+						+ " in automaton " + this + ".");
 				return false;
 			} else {
 				if (conj.getCounterExamples(conjState, this, thisState, true)
-						.size() != 0)
+						.size() != 0) {
+					LogManager.logInfo("state " + conjState + " in conjecture "
+							+ conj + " is not equivalent to state " + thisState
+							+ " in automaton " + this + ".");
 					return false;
+				}
 			}
 		}
 		return true;

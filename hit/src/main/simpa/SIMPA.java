@@ -749,7 +749,6 @@ public class SIMPA {
 		// learner.createConjecture();
 		learner.logStats();
 		driver.logStats();
-		// TODO check conjecture
 		LogManager.end();
 		LogManager.clearsLoggers();
 		return learner;
