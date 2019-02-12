@@ -297,6 +297,7 @@ public class CombinatorialLearner extends Learner {
 		return o;
 	}
 
+	@Override
 	public StatsEntry getStats() {
 		return stats;
 	}

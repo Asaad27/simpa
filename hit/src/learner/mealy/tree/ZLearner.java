@@ -170,6 +170,7 @@ public class ZLearner extends Learner {
 		return ret;
 	}
 
+	@Override
 	public void learn() {
 		LogManager.logConsole("Inferring the system");
 		long start_time = System.nanoTime();
@@ -378,6 +379,7 @@ public class ZLearner extends Learner {
 		return seq;
 	}
 
+	@Override
 	public LmConjecture createConjecture() {
 		LogManager.logInfo("Building conjecture");
 		LogManager.logObservationTree(u);

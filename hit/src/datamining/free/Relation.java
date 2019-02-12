@@ -119,6 +119,7 @@ public class Relation {
 		return lr;
 	}
 
+	@Override
 	public String toString() {
 		String res = name1;
 		switch (type) {
@@ -144,6 +145,7 @@ public class Relation {
 		return fv;
 	}
 
+	@Override
 	public boolean equals(Object to) {
 		if (this == to)
 			return true;
@@ -160,6 +162,7 @@ public class Relation {
 		}
 	}
 
+	@Override
 	public int hashCode() {
 		switch (type) {
 		case EQUALS:

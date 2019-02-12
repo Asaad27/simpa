@@ -466,6 +466,7 @@ public class CutterCombinatorialLearner extends Learner {
 		return o;
 	}
 
+	@Override
 	public StatsEntry getStats() {
 		return stats;
 	}

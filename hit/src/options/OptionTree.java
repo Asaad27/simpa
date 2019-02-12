@@ -83,6 +83,7 @@ public abstract class OptionTree {
 			return descriptor.name;
 		}
 
+		@Override
 		public String toString() {
 			return getName();
 		}

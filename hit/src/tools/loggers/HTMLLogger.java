@@ -65,6 +65,7 @@ public class HTMLLogger implements ILogger {
 		}
 	}
 
+	@Override
 	public void logControlTable(LiControlTable l) {
 		try {
 			if (htmlLogDivOpened) {

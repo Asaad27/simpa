@@ -472,6 +472,7 @@ public class Mealy extends Automata implements Serializable {
 				this.s2 = s2;
 			}
 
+			@Override
 			public boolean equals(Object other) {
 				if (other instanceof StatePair)
 					return equals((StatePair) other);
@@ -483,11 +484,13 @@ public class Mealy extends Automata implements Serializable {
 						|| (s1 == other.s2 && s2 == other.s1);
 			}
 
+			@Override
 			public int hashCode() {
 				return s1.hashCode() * s2.hashCode() + s1.hashCode()
 						+ s2.hashCode();
 			}
 
+			@Override
 			public String toString() {
 				if (s1.getId() < s2.getId())
 					return "(" + s1 + "," + s2 + ")";

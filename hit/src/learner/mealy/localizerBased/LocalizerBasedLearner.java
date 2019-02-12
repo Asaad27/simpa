@@ -40,6 +40,7 @@ public class LocalizerBasedLearner extends Learner {
 		this.options = options;
 	}
 
+	@Override
 	public void learn() {
 		List<InputSequence> W = Options.CHARACTERIZATION_SET;
 		if (W == null) {
@@ -183,6 +184,7 @@ public class LocalizerBasedLearner extends Learner {
 		}
 	}
 
+	@Override
 	public LmConjecture createConjecture() {
 		LmConjecture c = dataManager.getConjecture();
 		LogManager.logInfo("Conjecture has " + c.getStateCount()
@@ -190,6 +192,7 @@ public class LocalizerBasedLearner extends Learner {
 		return c;
 	}
 
+	@Override
 	public LocalizerBasedStatsEntry getStats() {
 		return stats;
 	}

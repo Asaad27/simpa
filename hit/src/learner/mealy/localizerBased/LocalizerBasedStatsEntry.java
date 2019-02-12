@@ -61,6 +61,7 @@ public class LocalizerBasedStatsEntry extends StatsEntry {
 		return attributes;
 	}	
 	
+	@Override
 	protected Attribute<?>[] getAttributesIntern() {
 		return attributes;
 	}
@@ -185,6 +186,7 @@ public class LocalizerBasedStatsEntry extends StatsEntry {
 
 	}
 
+	@Override
 	public <T extends Comparable<T>> Float getFloatValue(Attribute<T> a) {
 		if (a == W_SIZE || 
 				a == W1_LENGTH ||

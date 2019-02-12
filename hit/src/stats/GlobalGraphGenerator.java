@@ -1227,6 +1227,7 @@ public class GlobalGraphGenerator extends GraphGenerator {
 		HashMap<String, String> filesNames = new HashMap<String, String>() {
 			private static final long serialVersionUID = 1L;
 
+			@Override
 			public String put(String dot, String name) {
 				String shortName = name;
 				if (shortName.length() > 40)

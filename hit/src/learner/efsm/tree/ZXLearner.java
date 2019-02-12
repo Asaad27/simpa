@@ -147,6 +147,7 @@ public class ZXLearner extends Learner {
 		return ret;
 	}
 
+	@Override
 	public void learn() {
 		LogManager.logConsole("Inferring the system");
 
@@ -326,6 +327,7 @@ public class ZXLearner extends Learner {
 		return seq;
 	}
 
+	@Override
 	public LmConjecture createConjecture() {
 		LogManager.logInfo("Building conjecture");
 		//LogManager.logObservationTree(u);

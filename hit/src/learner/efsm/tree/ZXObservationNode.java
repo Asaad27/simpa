@@ -75,6 +75,7 @@ public class ZXObservationNode extends Node<ZXObservationNode> {
 		return imagePath;
 	}
 
+	@Override
 	public String toString() {
 		return "[" + id + ", " + state + ", " + label + "]";
 	}

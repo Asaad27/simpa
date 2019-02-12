@@ -59,6 +59,7 @@ class StateDriver extends MealyDriver {
 				learner = l;
 				d = s;
 			}
+			@Override
 			public void run(){
 				d.learner.lock.lock();
 				try{
@@ -87,11 +88,13 @@ class StateDriver extends MealyDriver {
 		thread.notify();
 	}
 
+	@Override
 	protected String execute_implem(String i) {
 		resetDone = false;
 		return realDriver.execute(i);
 	}
 
+	@Override
 	public List<String> getInputSymbols(){
 		return realDriver.getInputSymbols();
 	}

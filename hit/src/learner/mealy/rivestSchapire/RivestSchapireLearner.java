@@ -157,6 +157,7 @@ public class RivestSchapireLearner extends Learner {
 		next.unpause();
 	}
 
+	@Override
 	public StatsEntry getStats(){
 		return stats;
 	}

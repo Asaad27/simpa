@@ -8,7 +8,6 @@ import drivers.Driver;
 import drivers.mealy.transparent.RandomMealyDriver;
 import examples.mealy.RandomMealy;
 import learner.Learner;
-import tools.GraphViz;
 import tools.Stats;
 import tools.Utils;
 import tools.loggers.HTMLLogger;

@@ -103,6 +103,7 @@ public class CombinatorialStatsEntry extends StatsEntry {
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 	}
 
+	@Override
 	public <T extends Comparable<T>> Float getFloatValue(Attribute<T> a) {
 		if (
 				a == TRACE_LENGTH ||

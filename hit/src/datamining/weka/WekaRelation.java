@@ -102,6 +102,7 @@ public class WekaRelation {
 		return lr;
 	}
 	
+	@Override
 	public String toString(){
 		String res = name1;
 		switch(type){
@@ -125,6 +126,7 @@ public class WekaRelation {
 		return fv;
 	}
 	
+	@Override
 	public boolean equals(Object to){
 		if ( this == to ) return true;
 	    if ( !(to instanceof WekaRelation) ) return false;
@@ -138,6 +140,7 @@ public class WekaRelation {
 	    }		
 	}
 	
+	@Override
 	public int hashCode(){
 		switch (type){
 	    case EQUALS:

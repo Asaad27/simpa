@@ -256,6 +256,7 @@ public class HWLearner extends Learner {
 		return h;
 	}
 
+	@Override
 	public void learn() {
 		if (driver instanceof TransparentMealyDriver) {
 			TransparentMealyDriver d = (TransparentMealyDriver) driver;
@@ -1213,6 +1214,7 @@ public class HWLearner extends Learner {
 		list.add(newSeq);
 	}
 
+	@Override
 	public LmConjecture createConjecture() {
 		LmConjecture c = dataManager.getConjecture();
 		LogManager.logInfo("Conjecture has " + c.getStateCount()
@@ -1220,6 +1222,7 @@ public class HWLearner extends Learner {
 		return c;
 	}
 
+	@Override
 	public HWStatsEntry getStats() {
 		return stats;
 	}

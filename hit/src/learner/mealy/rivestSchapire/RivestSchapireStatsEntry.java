@@ -65,6 +65,7 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 		return attributes;
 	}	
 
+	@Override
 	protected Attribute<?>[] getAttributesIntern() {
 		return attributes;
 	}
@@ -186,6 +187,7 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 
 	}
 
+	@Override
 	public <T extends Comparable<T>> Float getFloatValue(Attribute<T> a) {
 		if (a == RESET_CALL_NB || 
 				a == HOMING_SEQUENCE_LENGTH ||

@@ -10,7 +10,6 @@ import drivers.efsm.real.GenericDriver;
 import drivers.efsm.real.ScanDriver;
 import learner.Learner;
 import main.simpa.Options.LogLevel;
-import tools.GraphViz;
 import tools.Utils;
 import tools.loggers.HTMLLogger;
 import tools.loggers.LogManager;

@@ -1,6 +1,5 @@
 package learner.mealy.table;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -74,6 +73,7 @@ public class LmLearner extends Learner {
 		}
 	}
 
+	@Override
 	public LmConjecture createConjecture() {
 		if (addtolog)
 			LogManager.logConsole("Building the conjecture");
@@ -147,6 +147,7 @@ public class LmLearner extends Learner {
 		completeTable();
 	}
 
+	@Override
 	public void learn() {
 		LogManager.logConsole("Inferring the system");
 		long startTime = System.nanoTime();

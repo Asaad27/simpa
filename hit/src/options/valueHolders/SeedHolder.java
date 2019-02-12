@@ -58,6 +58,7 @@ public class SeedHolder extends SingleValueAutoHolder<Long, LongHolder>
 	 * @return the seed which can be used to produce the same sequence of
 	 *         random.
 	 */
+	@Override
 	public long getSeed() {
 		return getValue();
 	}
@@ -66,21 +67,25 @@ public class SeedHolder extends SingleValueAutoHolder<Long, LongHolder>
 		return this;
 	}
 
+	@Override
 	public Random getRand() {
 		assert rand != null : "rand must be initialized with a call to init()";
 		return rand;
 	}
 
+	@Override
 	public boolean randBoolWithPercent(PercentageOption percent) {
 		return randBoolWithPercent(percent.getIntValue());
 	}
 
 	// the following method were taken from tools.Utils
 
+	@Override
 	public boolean randBoolWithPercent(int p) {
 		return rand.nextInt(100) < p;
 	}
 
+	@Override
 	public int randIntBetween(int a, int b) {
 		if (a == b)
 			return a;
@@ -92,6 +97,7 @@ public class SeedHolder extends SingleValueAutoHolder<Long, LongHolder>
 		return rand.nextInt(b - a + 1) + a;
 	}
 
+	@Override
 	public <T> T randIn(List<T> l) {
 		if (l.isEmpty())
 			return null;
@@ -99,6 +105,7 @@ public class SeedHolder extends SingleValueAutoHolder<Long, LongHolder>
 			return l.get(rand.nextInt(l.size()));
 	}
 
+	@Override
 	public <T> T randIn(T l[]) {
 		if (l.length == 0)
 			return null;
@@ -106,23 +113,28 @@ public class SeedHolder extends SingleValueAutoHolder<Long, LongHolder>
 			return l[rand.nextInt(l.length)];
 	}
 
+	@Override
 	public long randLong() {
 		return rand.nextLong();
 	}
 
+	@Override
 	public int randInt(int max) {
 		return rand.nextInt(max);
 	}
 
+	@Override
 	public <T> T randIn(Set<T> s) {
 		List<T> l = new ArrayList<>(s);
 		return randIn(l);
 	}
 
+	@Override
 	public String randString() {
 		return "random" + randInt(1000);
 	}
 
+	@Override
 	public String randAlphaNumString(int size) {
 		String charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 		StringBuilder randomString = new StringBuilder();

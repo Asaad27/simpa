@@ -72,8 +72,6 @@ public abstract class MealyDriver extends Driver<String, String> {
 		return out;
 	}
 
-
-
 	@Override
 	public abstract List<String> getInputSymbols();
 
