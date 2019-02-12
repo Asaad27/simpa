@@ -76,12 +76,6 @@ public abstract class MealyDriver extends Driver<String, String> {
 	@Override
 	public abstract List<String> getInputSymbols();
 
-
-	public abstract List<String> getOutputSymbols(); // TODO remove this as all
-														// drivers do not
-														// provide their output
-														// symbols
-
 	@Override
 	public String getSystemName() {
 		return name;

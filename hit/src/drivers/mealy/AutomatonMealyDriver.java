@@ -90,17 +90,6 @@ public class AutomatonMealyDriver extends MealyDriver {
 	}
 
 	@Override
-	public List<String> getOutputSymbols() {
-		List<String> os = new ArrayList<String>();
-		for (MealyTransition t : automata.getTransitions()) {
-			if (!os.contains(t.getOutput()))
-				os.add(t.getOutput());
-		}
-		Collections.sort(os);
-		return os;
-	}
-
-	@Override
 	public String getSystemName() {
 		return name;
 	}

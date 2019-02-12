@@ -1,10 +1,11 @@
 package learner.mealy.rivestSchapire;
 
+import java.util.HashSet;
 import java.util.StringTokenizer;
 
-import automata.Transition;
 import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
+import automata.mealy.MealyTransition;
 import drivers.mealy.MealyDriver;
 import drivers.mealy.transparent.RandomMealyDriver;
 import stats.Graph;
@@ -113,7 +114,6 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 			RivestSchapireOptions options) {
 		this.hIsGiven = hIsGiven;
 		this.inputSymbols = d.getInputSymbols().size();
-		this.outputSymbols = d.getOutputSymbols().size();
 		this.automata = d.getSystemName();
 		memory = 0;
 	}
@@ -137,10 +137,13 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 	public void updateWithConjecture(Mealy conjecture) {
 		statesNumber = conjecture.getStateCount();
 		int loopTransitions=0;
-		for (Transition t : conjecture.getTransitions()){
+		HashSet<String> outputSymbols = new HashSet<>();
+		for (MealyTransition t : conjecture.getTransitions()) {
+			outputSymbols.add(t.getOutput());
 			if (t.getTo() == t.getFrom())
 				loopTransitions++;
 		}
+		this.outputSymbols = outputSymbols.size();
 		loopTransitionPercentage = ((100*loopTransitions)/conjecture.getTransitionCount());
 	}
 

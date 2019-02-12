@@ -181,8 +181,4 @@ class StateDriver extends MealyDriver {
 		return globalTraceLengthBeforeLastCE;
 	}
 
-	@Override
-	public List<String> getOutputSymbols() {
-		return realDriver.getOutputSymbols();
-	}
 }

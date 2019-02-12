@@ -1,10 +1,11 @@
 package learner.mealy.localizerBased;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import automata.Transition;
 import automata.mealy.InputSequence;
+import automata.mealy.MealyTransition;
 import drivers.mealy.MealyDriver;
 import learner.mealy.LmConjecture;
 import stats.GraphGenerator;
@@ -108,7 +109,6 @@ public class LocalizerBasedStatsEntry extends StatsEntry {
 		WSize = W.size();
 		w1Length = W.get(0).getLength();
 		this.inputSymbols = d.getInputSymbols().size();
-		this.outputSymbols = d.getOutputSymbols().size();
 		this.n = n;
 		this.automata = d.getSystemName();
 		this.with_speedup = options.useSpeedUp();
@@ -136,10 +136,13 @@ public class LocalizerBasedStatsEntry extends StatsEntry {
 	public void updateWithConjecture(LmConjecture conjecture) {
 		statesNumber = conjecture.getStateCount();
 		int loopTransitions=0;
-		for (Transition t : conjecture.getTransitions()){
+		HashSet<String> outputSymbols = new HashSet<>();
+		for (MealyTransition t : conjecture.getTransitions()) {
+			outputSymbols.add(t.getOutput());
 			if (t.getTo() == t.getFrom())
 				loopTransitions++;
 		}
+		this.outputSymbols = outputSymbols.size();
 		loopTransitionPercentage = ((100*loopTransitions)/conjecture.getTransitionCount());
 	}
 

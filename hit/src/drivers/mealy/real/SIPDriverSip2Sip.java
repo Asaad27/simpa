@@ -52,7 +52,6 @@ public class SIPDriverSip2Sip extends RealDriver {
 			msg_factory = stack.getMessageFactory();
 			addr_factory = stack.getAddressFactory();
 			hdr_factory = stack.getHeaderFactory();
-			outputSymbols = new ArrayList<String>();
 		} catch (Exception e) {
 			LogManager.logException("Error initializing SIP driver", e);
 		}
@@ -322,8 +321,6 @@ public class SIPDriverSip2Sip extends RealDriver {
 		} catch (ParseException e) {
 			LogManager.logException("Unable to parse response", e);
 		}
-		if (!outputSymbols.contains(output))
-			outputSymbols.add(output);
 		return output;
 	}
 
