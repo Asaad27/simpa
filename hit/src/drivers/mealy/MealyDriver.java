@@ -46,6 +46,7 @@ public abstract class MealyDriver extends Driver<String, String> {
 
 	public MealyDriver(String name) {
 		this.name = name;
+		type = DriverType.MEALY;
 	}
 
 

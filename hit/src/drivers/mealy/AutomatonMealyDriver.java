@@ -31,7 +31,6 @@ public class AutomatonMealyDriver extends MealyDriver {
 
 	public AutomatonMealyDriver(Mealy automata) {
 		super(automata.getName());
-		type = DriverType.MEALY;
 		this.automata = automata;
 		triedCE = new HashSet<>();
 		this.nbStates = automata.getStateCount();
