@@ -66,6 +66,12 @@ public class LY_basedOracle {
 	 */
 	Map<State, Map<MealyTransition, AdaptiveCharacterization>> transitionsToTest = new HashMap<>();
 	/**
+	 * A map recording alpha to reduce computation costs. The sequence recorded
+	 * is not removed when the path change, and thus, it must be tested before
+	 * use.
+	 */
+	private Map<State, InputSequence> lastAlpha = new HashMap<>();
+	/**
 	 * The current state in conjecture.
 	 */
 	State currentState;
@@ -114,14 +120,37 @@ public class LY_basedOracle {
 	}
 
 	/**
+	 * Same as {@link #computeAlpha()} but cache result path to avoid
+	 * computations.
+	 */
+	InputSequence computeAlpha_cached() {
+		InputSequence r = lastAlpha.get(currentState);
+		if (r == null && lastAlpha.containsKey(currentState)) {
+			return null;
+		}
+		if (r != null) {
+			if (transitionsToTest
+					.get(conjecture.applyGetState(r, currentState)) == null) {
+				// this path do not lead to an unchecked state anymore
+				r = null;
+			}
+		}
+		if (r == null) {
+			r = computeAlpha();
+			lastAlpha.put(currentState, r);
+		}
+		assert r == null || transitionsToTest
+				.get(conjecture.applyGetState(r, currentState)) != null;
+		return r;
+	}
+
+	/**
 	 * Search a path from current state to a state with unchecked transitions.
 	 * The path returned leads to a state of nearest depth.
 	 * 
 	 * @return a path to a state with unchecked transitions.
 	 */
 	InputSequence computeAlpha() {
-		// TODO this method can be improved by saving paths to reuse them on
-		// next call
 		class Path {
 			InputSequence seq;
 			State reachedState;
@@ -252,6 +281,7 @@ public class LY_basedOracle {
 	 *             if a discrepancy is found
 	 */
 	void testTransitions() throws InconsistencyFound {
+		lastAlpha.clear();
 		while (transitionsToTest.size() > 0) {
 			State startState = currentState;
 			Map<MealyTransition, AdaptiveCharacterization> localTransitions = transitionsToTest
@@ -262,7 +292,7 @@ public class LY_basedOracle {
 							currentState,
 							") are known. Let's move to another state with incomplete transitions");
 				}
-				InputSequence seq = computeAlpha();
+				InputSequence seq = computeAlpha_cached();
 				if (seq == null) {
 					if (!resetAllowed || traces.isAfterRecordedReset()) {
 						assert !resetAllowed
@@ -276,10 +306,12 @@ public class LY_basedOracle {
 				execute(seq);
 				continue;
 			}
-			// TODO optional: search a transition leading to a state of
-			// nearest depth
 			MealyTransition transition = localTransitions.keySet().iterator()
 					.next();
+			for (MealyTransition t2 : localTransitions.keySet()) {
+				if (depths.get(t2.getTo()) < depths.get(transition.getTo()))
+					transition = t2;
+			}
 			if (verbose) {
 				LogManager.logInfo("Testing transition ", transition, ".");
 			}
