@@ -31,13 +31,13 @@ import drivers.Driver;
 import drivers.mealy.transparent.RandomMealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
+import learner.mealy.localizerBased.LocalizerBasedLearner;
 import main.simpa.Options.LogLevel;
 import stats.GlobalGraphGenerator;
 import stats.GraphGenerator;
 import stats.StatsEntry;
 import stats.StatsSet;
 import tools.Utils;
-import tools.loggers.LogManager;
 
 public class JSS_figures {
 
@@ -185,8 +185,10 @@ public class JSS_figures {
 				d = new RandomMealyDriver();
 			} while (d.getAutomata().getStateCount() != Options.MAXSTATES);
 			driver = d;
+			LocalizerBasedLearner.findShortestWSet = false;
 		} else {
 			driver = new TransparentMealyDriver(Mealy.importFromUrl(url, true));
+			LocalizerBasedLearner.findShortestWSet = true;
 		}
 		return driver;
 	}
@@ -202,7 +204,7 @@ public class JSS_figures {
 			Options.MAX_CE_RESETS = 1;
 			Options.MAX_CE_LENGTH = automaton.getStateCount()
 					* driver.getInputSymbols().size() * 1500;
-			Options.MAX_CE_LENGTH = 500000;
+			Options.MAX_CE_LENGTH = 50000;
 			if (random)
 				Options.MAX_CE_LENGTH = (int) (Math
 						.pow(automaton.getStateCount()
@@ -213,7 +215,7 @@ public class JSS_figures {
 				Options.MAX_CE_RESETS = Options.MAX_CE_LENGTH;
 				Options.MAX_CE_LENGTH = automaton.getStateCount() * 10;
 			}
-			LogManager.logConsole("Maximum counter example length set to "
+			System.out.println("Maximum counter example length set to "
 					+ Options.MAX_CE_LENGTH
 					+ " and maximum counter example reset set to "
 					+ Options.MAX_CE_RESETS + " from topology of driver ("
@@ -257,8 +259,6 @@ public class JSS_figures {
 		learner.logStats();
 		driver.logStats();
 		// TODO check conjecture
-		LogManager.end();
-		LogManager.clearsLoggers();
 		return learner;
 	}
 
@@ -325,7 +325,6 @@ public class JSS_figures {
 				globalStatsWriter.append(learnerStats.toCSV() + "\n");
 				globalStatsWriter.close();
 			} catch (Exception e) {
-				LogManager.end();
 				String failDir = baseDir + File.separator + Options.DIRFAIL;
 				Utils.createDir(new File(failDir));
 				failDir = failDir + File.separator
@@ -361,8 +360,6 @@ public class JSS_figures {
 				e.printStackTrace();
 				System.err.println("data saved in " + failDir);
 				System.exit(1);
-			} finally {
-				LogManager.clearsLoggers();
 			}
 
 		}
@@ -398,7 +395,7 @@ public class JSS_figures {
 	}
 
 	public static void main(String[] args) throws MalformedURLException {
-		Options.NBTEST = 1;
+		Options.NBTEST = 2;
 		Options.LOG_LEVEL = LogLevel.LOW;
 
 		makeGraph();
@@ -607,40 +604,5 @@ public class JSS_figures {
 		System.out.println("[+] End");
 	}
 
-	public static void usage() {
-	}
 
-	protected static void printUsage(Option<?>[] options) {
-		int firstColumnLength = 0;
-		for (Option<?> o : options) {
-			int length = o.consoleName.length()
-					+ ((o.getDefaultValue() == null) ? 0
-							: o.getDefaultValue().toString().length() + 3);
-			if (length > firstColumnLength && length < 25)
-				firstColumnLength = length;
-		}
-
-		StringBuilder newLine = new StringBuilder("\n\t");
-		for (int j = 0; j <= firstColumnLength; j++)
-			newLine.append(" ");
-		newLine.append("  ");
-		for (Option<?> o : options) {
-			StringBuilder s = new StringBuilder("\t");
-			s.append(o.consoleName);
-			if (o.getDefaultValue() == null) {
-				for (int i = s.length(); i <= firstColumnLength; i++)
-					s.append(" ");
-			} else {
-				for (int i = s.length(); i <= firstColumnLength - 3
-						- o.getDefaultValue().toString().length(); i++)
-					s.append(" ");
-				s.append(" (");
-				s.append(o.getDefaultValue().toString());
-				s.append(")");
-			}
-			s.append(" : ");
-			s.append(o.getDescription().replaceAll("\n", newLine.toString()));
-			System.out.println(s.toString());
-		}
-	}
 }
