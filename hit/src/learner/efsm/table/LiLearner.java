@@ -591,7 +591,7 @@ public class LiLearner extends Learner {
 					finished = false;
 					int seems = -1;
 					boolean tablesHaveChanged = true;
-					if (Options.REUSE_OP_IFNEEDED
+					if (options.reuseOpIfNeeded.isEnabled()
 							&& ((seems = seemsEquivalent(nonClosedRowRealIndex)) != -1)
 							&& !cTable.getRowInR(nonClosedRowRealIndex)
 									.seems()) {

@@ -378,11 +378,8 @@ public class SIMPA {
 	// EFSM options
 	private static BooleanOption GENERIC_DRIVER = new BooleanOption("--generic", "Use generic driver");
 	private static BooleanOption SCAN = new BooleanOption("--scan", "Use scan driver");
-	private static BooleanOption REUSE_OP_IFNEEDED = new BooleanOption("--reuseop",
-			"Reuse output parameter for non closed row");
 	private static Option<?>[] EFSMOptions = new Option<?>[] { GENERIC_DRIVER,
 			SCAN,
-REUSE_OP_IFNEEDED,
 	};
 
 
@@ -479,7 +476,6 @@ REUSE_OP_IFNEEDED,
 		Options.RS_WITH_UNKNOWN_H = RS_WITH_UNKNOWN_H.getValue();
 
 		Options.GENERICDRIVER = GENERIC_DRIVER.getValue();
-		Options.REUSE_OP_IFNEEDED = REUSE_OP_IFNEEDED.getValue();
 
 		Options.MINSTATES = MIN_STATE.getValue();
 		Options.MAXSTATES = MAX_STATE.getValue();

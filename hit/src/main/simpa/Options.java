@@ -71,6 +71,7 @@ public class Options {
 	public static boolean INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = true;
 	@Deprecated
 	public static int SUPPORT_MIN = 20;
+	@Deprecated
 	public static boolean REUSE_OP_IFNEEDED = false;
 	@Deprecated
 	public static boolean FORCE_J48 = false;
