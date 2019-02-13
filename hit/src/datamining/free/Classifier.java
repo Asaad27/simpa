@@ -376,7 +376,7 @@ public class Classifier {
 		return dataFile.substring(index, dataFile.length()-5);
 	}
 	
-	public static String addRel(String dataFile) {
+	public static String addRel(String dataFile, int supportMin) {
 		try {
 			String NewFile = dataFile;
 			ArffReader reader = new ArffReader(dataFile);
@@ -387,7 +387,8 @@ public class Classifier {
 			
 			for (int i = 0; i < columns_attributes.size(); i++) {
 				for (int j = 0; j < i; j++) {
-					if (rel(columns_attributes.get(i), columns_attributes.get(j)) > Options.SUPPORT_MIN) {
+					if (rel(columns_attributes.get(i),
+							columns_attributes.get(j)) > supportMin) {
 						String att1 = array_attributes.get(i);
 						String att2 = array_attributes.get(j);
 						String newAtt = new String(att1 +".equals."+ att2);
@@ -409,9 +410,9 @@ public class Classifier {
 		return null;
 	}
 	
-	public static String filterArff(String dataFile) {
+	public static String filterArff(String dataFile, int supportMin) {
 		dataFile = filterDoubleLines(dataFile);
-		dataFile = addRel(dataFile);
+		dataFile = addRel(dataFile, supportMin);
 		return dataFile;
 	}
 	
@@ -661,7 +662,7 @@ public class Classifier {
 		return null;
 	}
 	
-	public static String handleRelatedDataForOutput(String dataFile) {
+	public static String handleRelatedDataForOutput(String dataFile,int supportMin) {
 		try {
 			ArffReader reader = new ArffReader(dataFile);
 			List<LinkedList<String>> columns_attributes = reader.getColumnsAttributes();
@@ -719,7 +720,7 @@ public class Classifier {
 					
 					for (int i = 0; i < New.size(); i++) {
 						for (int j = i+1; j < New.size(); j++) {
-							if (rel(New.get(i), New.get(j)) > Options.SUPPORT_MIN) {
+							if (rel(New.get(i), New.get(j)) > supportMin) {
 								String att1 = array_attributes.get(i);
 								String att2 = array_attributes.get(j);
 								String newAtt = new String(att1 +".equals."+ att2);

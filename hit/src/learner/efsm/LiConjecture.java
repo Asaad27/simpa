@@ -23,6 +23,7 @@ import tools.loggers.LogManager;
 import automata.State;
 import automata.efsm.EFSMTransition;
 import automata.efsm.EFSMTransition.Label;
+import datamining.SupportMinOption;
 import datamining.free.FreeARFF;
 import datamining.free.TreeNode;
 import datamining.weka.WekaARFF;
@@ -38,10 +39,13 @@ public class LiConjecture extends automata.efsm.EFSM {
 	private Map<String, Label> labels;
 	public List<String> gSymbols;
 	private WekaOption useWeka;
+	private final SupportMinOption supportMin;
 
-	public LiConjecture(EFSMDriver d, WekaOption useWeka) {
+	public LiConjecture(EFSMDriver d, WekaOption useWeka,
+			SupportMinOption supportMin) {
 		super(d.getSystemName());
 		this.useWeka = useWeka;
+		this.supportMin = supportMin;
 		this.inputSymbols = d.getInputSymbols();
 		this.paramNames = d.getParameterNames();
 		if (paramNames == null) {
@@ -97,14 +101,16 @@ public class LiConjecture extends automata.efsm.EFSM {
 			String dataFile = WekaARFF.generateFileForVar(t, paramNames);
 			dataFile = WekaARFF.filterFileForVar(dataFile);
 			dataFile = WekaARFF.handleConstantOutput(dataFile, label);
-			dataFile = WekaARFF.handleRelatedDataForOutput(dataFile);
+			dataFile = WekaARFF.handleRelatedDataForOutput(dataFile,
+					supportMin.getIntValue());
 			dataFile = WekaARFF.handleDifferentOutput(dataFile, label, t,
 					useWeka.forceJ48());
 			
 		}else{
 			String dataFile = FreeARFF.generateFileForVar(t, paramNames);
 			dataFile = FreeARFF.handleConstantOutput(dataFile, label);
-			dataFile = FreeARFF.handleRelatedDataForOutput(dataFile);
+			dataFile = FreeARFF.handleRelatedDataForOutput(dataFile,
+					supportMin.getIntValue());
 			dataFile = FreeARFF.handleDifferentOutput(dataFile, label, t);			
 		}		 
 	}
@@ -115,7 +121,8 @@ public class LiConjecture extends automata.efsm.EFSM {
 			if (useWeka.isEnabled()) {
 				String dataFile = WekaARFF.generateFileForPredicate(list, paramNames);
 				dataFile = WekaARFF.filterFileForPredicate(dataFile);
-				dataFile = WekaARFF.handleRelatedDataForPredicate(dataFile);
+				dataFile = WekaARFF.handleRelatedDataForPredicate(dataFile,
+						supportMin.getIntValue());
 				WekaTreeNode node = WekaARFF.handlePredicate(dataFile);
 				if(node != null){
 					for(EFSMTransition t : list){
@@ -127,7 +134,8 @@ public class LiConjecture extends automata.efsm.EFSM {
 				
 			}else{
 				String dataFile = datamining.free.Classifier.generateFileForPredicate(list, paramNames);
-				dataFile = datamining.free.Classifier.filterArff(dataFile);
+				dataFile = datamining.free.Classifier.filterArff(dataFile,
+						supportMin.getIntValue());
 				TreeNode node = datamining.free.Classifier.Classify(dataFile, -1);
 				if(node != null){
 					for(EFSMTransition t : list){

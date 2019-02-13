@@ -69,6 +69,7 @@ public class Options {
 	public static String INITIAL_INPUT_SYMBOLS = "";
 	public static String INITIAL_INPUT_SEQUENCES = "";
 	public static boolean INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = true;
+	@Deprecated
 	public static int SUPPORT_MIN = 20;
 	public static boolean REUSE_OP_IFNEEDED = false;
 	@Deprecated

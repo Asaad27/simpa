@@ -68,7 +68,7 @@ public class Relation {
 		return false;
 	}
 
-	public static List<Relation> findOn(List<Instance> insts) {
+	public static List<Relation> findOn(List<Instance> insts, int supportMin) {
 		List<Relation> lr = new ArrayList<Relation>();
 		if (!insts.isEmpty()) {
 			int attrCount = insts.get(0).numAttributes() - 1;
@@ -98,7 +98,7 @@ public class Relation {
 									}
 								}
 								if (r != null) {
-									if (r.isTrueOn(insts, Options.SUPPORT_MIN))
+									if (r.isTrueOn(insts, supportMin))
 										lr.add(r);
 								}
 							}

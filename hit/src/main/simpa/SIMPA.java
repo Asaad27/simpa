@@ -380,10 +380,9 @@ public class SIMPA {
 	private static BooleanOption SCAN = new BooleanOption("--scan", "Use scan driver");
 	private static BooleanOption REUSE_OP_IFNEEDED = new BooleanOption("--reuseop",
 			"Reuse output parameter for non closed row");
-	private static IntegerOption SUPPORT_MIN = new IntegerOption("--supportmin", "Minimal support for relation (1-100)",
-			Options.SUPPORT_MIN);
 	private static Option<?>[] EFSMOptions = new Option<?>[] { GENERIC_DRIVER,
-			SCAN, REUSE_OP_IFNEEDED, SUPPORT_MIN,
+			SCAN,
+REUSE_OP_IFNEEDED,
 	};
 
 
@@ -481,7 +480,6 @@ public class SIMPA {
 
 		Options.GENERICDRIVER = GENERIC_DRIVER.getValue();
 		Options.REUSE_OP_IFNEEDED = REUSE_OP_IFNEEDED.getValue();
-		Options.SUPPORT_MIN = SUPPORT_MIN.getValue();
 
 		Options.MINSTATES = MIN_STATE.getValue();
 		Options.MAXSTATES = MAX_STATE.getValue();
@@ -502,9 +500,6 @@ public class SIMPA {
 		int minor = Integer.parseInt(v.substring(v.indexOf(".") + 1));
 		if (major < 1 || minor < 5)
 			throw new RuntimeException("Java >=1.5 needed");
-
-		if (Options.SUPPORT_MIN < 1 || Options.SUPPORT_MIN > 100)
-			throw new RuntimeException("Minimal between 1 and 100 include needed");
 
 		if (STATS_MODE.getValue()) {
 			boolean assert_test = false;

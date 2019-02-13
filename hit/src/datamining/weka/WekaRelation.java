@@ -61,7 +61,8 @@ public class WekaRelation {
 		return false;
 	}
 	
-	public static List<WekaRelation> findOn(List<Instance> insts){
+	public static List<WekaRelation> findOn(List<Instance> insts,
+			int supportMin) {
 		List<WekaRelation> lr = new ArrayList<WekaRelation>();		
 		if (!insts.isEmpty()){
 			int attrCount = insts.get(0).numAttributes()-1;
@@ -82,7 +83,8 @@ public class WekaRelation {
 									}
 								}
 								if (r != null){
-									if (r.isTrueOn(insts, Options.SUPPORT_MIN)) lr.add(r);									
+									if (r.isTrueOn(insts, supportMin))
+										lr.add(r);
 								}
 							}
 						}							

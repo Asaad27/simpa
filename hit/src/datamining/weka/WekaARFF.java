@@ -583,7 +583,8 @@ public class WekaARFF {
 		return dataFile;
 	}
 
-	public static String handleRelatedDataForPredicate(String dataFile) {
+	public static String handleRelatedDataForPredicate(String dataFile,
+			int supportMin) {
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(dataFile));
 			Instances data = new Instances(reader);
@@ -609,7 +610,7 @@ public class WekaARFF {
 					
 			for(String dest : allinsts.keySet()){
 				List<Instance> l = allinsts.get(dest);
-				allRelation.addAll(WekaRelation.findOn(l));
+				allRelation.addAll(WekaRelation.findOn(l, supportMin));
 			}
 			
 			Instances newData = new Instances(data);
@@ -651,7 +652,8 @@ public class WekaARFF {
 		return dataFile;
 	}
 	
-	public static String handleRelatedDataForOutput(String dataFile) {
+	public static String handleRelatedDataForOutput(String dataFile,
+			int supportMin) {
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(dataFile));
 			Instances data = new Instances(reader);
@@ -678,7 +680,7 @@ public class WekaARFF {
 						
 				for(String dest : allinsts.keySet()){
 					List<Instance> l = allinsts.get(dest);
-					allRelation.addAll(WekaRelation.findOn(l));
+					allRelation.addAll(WekaRelation.findOn(l, supportMin));
 				}	
 				
 				outIndex--;
