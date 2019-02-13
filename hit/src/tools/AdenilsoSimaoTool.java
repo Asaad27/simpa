@@ -52,9 +52,9 @@ public class AdenilsoSimaoTool {
 			throws InterruptedException {
 		assert length <= trace.getLength();
 		System.out.println("checking if " + length + " symbols are sufficient to find the automaton");
+		File tempSeq = null;
 		try {
-			File tempSeq = File.createTempFile("simpa_" + length + "_", ".seq");
-			// tempSeq.deleteOnExit();
+			tempSeq = File.createTempFile("simpa_" + length + "_", ".seq");
 			Writer writer = new BufferedWriter(new FileWriter(tempSeq));
 			for (int i = 0; i < length; i++)
 				writer.write(trace.sequence.get(i) + " ");
@@ -102,6 +102,9 @@ public class AdenilsoSimaoTool {
 			return p.exitValue() == 0;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		} finally {
+			if (tempSeq != null && tempSeq.exists())
+				tempSeq.delete();
 		}
 	}
 }
