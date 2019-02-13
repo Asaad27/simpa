@@ -305,6 +305,11 @@ public class LocalizerBasedLearner extends Learner {
 		}
 	}
 
+	// control if we should compute the W-set in the old way or in order to
+	// find a W-set of size 2.
+	// Note that searching a W-set of size 2 can be very long for some
+	// automata
+	static public boolean findShortestWSet = true;
 	private static List<InputSequence> computeCharacterizationSet(
 			RandomGenerator rand, TransparentMealyDriver driver) {
 		LogManager.logStep(LogManager.STEPOTHER,
@@ -313,11 +318,10 @@ public class LocalizerBasedLearner extends Learner {
 		Mealy automata = driver.getAutomata();
 		assert (automata != null);
 		
-		// control if we should compute the W-set in the old way or in order to
-		// find a W-set of size 2.
-		// Note that searching a W-set of size 2 can be very long for some
-		// automata
-		boolean findShortestWSet = true;
+		if (findShortestWSet)
+			System.out.println("searching shortest W-set");
+		else
+			System.out.println("searching W-set by discriminating seequences");
 		
 		if (findShortestWSet) {
 			List<InputSequence> toTry = new ArrayList<InputSequence>();
