@@ -9,7 +9,6 @@ import java.util.Map;
 
 import learner.Learner;
 import learner.mealy.LmConjecture;
-import learner.mealy.Node;
 import main.simpa.Options;
 import tools.loggers.LogManager;
 import automata.State;
@@ -63,7 +62,8 @@ public class ZXLearner extends Learner {
 		return K;
 	}
 	
-	private String getTracesFromNode(Node n, List<InputSequence> seqs){
+	private String getTracesFromNode(ZXObservationNode n,
+			List<InputSequence> seqs) {
 		StringBuilder s = new StringBuilder();
 		for(InputSequence seq : seqs){
 			s.append(getTraceFromNode(n, seq));
@@ -71,7 +71,7 @@ public class ZXLearner extends Learner {
 		return s.toString();
 	}
 	
-	private String getTraceFromNode(Node n, InputSequence seq){
+	private String getTraceFromNode(ZXObservationNode n, InputSequence seq) {
 		StringBuilder s = new StringBuilder();
 		for(String i : seq.sequence){
 			n = n.childBy(i);
@@ -85,22 +85,22 @@ public class ZXLearner extends Learner {
 		LogManager.logInfo("Build Quotient");
 		LogManager.logInfo("Z : " + z.toString());
 		LogManager.logInfo("I : " + i.toString());
-		Deque<Node> queue = null;
+		Deque<ZXObservationNode> queue = null;
 		ZXObservationNode currentNode = null;
 
 		// 1. q0 := e, Q : = {q0}
 		this.states = new ArrayList<ZXObservationNode>();
 		
 		//1.5 CachedEquivalent
-		Map<String, Node> cache = new HashMap<String, Node>();
+		Map<String, ZXObservationNode> cache = new HashMap<String, ZXObservationNode>();
 
 
 		// 2. for (each state u of U being traversed during Breadth First Search
-		queue = new ArrayDeque<Node>();
+		queue = new ArrayDeque<>();
 		queue.add(u);
 		currentNode = null;
 		while (!queue.isEmpty()) {
-			currentNode = (ZXObservationNode) queue.pollFirst();
+			currentNode = queue.pollFirst();
 
 			// 2. such that u has no labelled predecessor
 			if (noLabelledPred(currentNode)) {
@@ -108,7 +108,7 @@ public class ZXLearner extends Learner {
 				extendNodeWithInputSeqs(currentNode, z);
 
 				// 5. if (u is Z-equivalent to a traversed state w of U)
-				ZXObservationNode w = (ZXObservationNode) cache.get(getTracesFromNode(currentNode, z));
+				ZXObservationNode w = cache.get(getTracesFromNode(currentNode, z));
 				if (w != null) {
 					// 6. Label u with w
 					currentNode.label = w.state;
@@ -162,7 +162,7 @@ public class ZXLearner extends Learner {
 	private boolean noLabelledPred(ZXObservationNode node) {
 		boolean noLabelledPred = true;
 		while (node.parent != null) {
-			ZXObservationNode parent = (ZXObservationNode) node.parent;
+			ZXObservationNode parent = node.parent;
 			if (parent.isLabelled())
 				return false;
 			node = parent;
@@ -179,13 +179,15 @@ public class ZXLearner extends Learner {
 		states.add(node);
 	}
 
-	private void extendNodeWithInputSeqs(Node node, List<InputSequence> Z) {
+	private void extendNodeWithInputSeqs(ZXObservationNode node,
+			List<InputSequence> Z) {
 		for (InputSequence seq : Z) {
 			askInputSequenceToNode(node, seq);
 		}
 	}
 
-	private void extendNodeWithSymbols(Node node, List<String> symbols) {
+	private void extendNodeWithSymbols(ZXObservationNode node,
+			List<String> symbols) {
 		for (String symbol : symbols) {
 			askInputSequenceToNode(node, new InputSequence(symbol));
 		}
@@ -227,10 +229,10 @@ public class ZXLearner extends Learner {
 		if (node.isLabelled())
 			label = true;
 		if (!node.children.isEmpty()) {
-			for (Node n : node.children.values()) {
+			for (ZXObservationNode n : node.children.values()) {
 				MealyTransition t = q.getTransitionFromWithInput(s, n.input);
 				if (t != null)
-					labelNodesRec(q, (ZXObservationNode) n, t.getTo(), label);
+					labelNodesRec(q, n, t.getTo(), label);
 			}
 		}
 	}
@@ -248,13 +250,13 @@ public class ZXLearner extends Learner {
 
 	private InputSequence findInconsistencyRec(LmConjecture c, State s,
 			ZXObservationNode node, InputSequence ce) {
-		for (Node n : node.children.values()) {
-			if (!((ZXObservationNode) n).isState())
+		for (ZXObservationNode n : node.children.values()) {
+			if (!n.isState())
 				ce.addInput(n.input);
 			MealyTransition t = c.getTransitionFromWithInput(s, n.input);
 			if (t != null && t.getOutput().equals(n.output)) {
 				InputSequence otherCE = findInconsistencyRec(c, t.getTo(),
-						(ZXObservationNode) n, ce);
+						n, ce);
 				if (otherCE != null) {
 					boolean processed = false;
 					for (InputSequence seq : z) {
@@ -281,14 +283,15 @@ public class ZXLearner extends Learner {
 						return ce.removeFirstInput();
 				}
 			}
-			if (!((ZXObservationNode) n).isState())
+			if (!n.isState())
 				ce.removeLastInput();
 		}
 		return null;
 	}
 
-	private void askInputSequenceToNode(Node node, InputSequence sequence) {
-		Node currentNode = node;
+	private void askInputSequenceToNode(ZXObservationNode node,
+			InputSequence sequence) {
+		ZXObservationNode currentNode = node;
 		InputSequence seq = sequence.clone();
 		InputSequence previousSeq = getPreviousInputSequenceFromNode(currentNode);
 		while (seq.getLength() > 0
@@ -312,8 +315,9 @@ public class ZXLearner extends Learner {
 		}
 	}
 
-	private InputSequence getPreviousInputSequenceFromNode(Node node) {
-		Node currentNode = node;
+	private InputSequence getPreviousInputSequenceFromNode(
+			ZXObservationNode node) {
+		ZXObservationNode currentNode = node;
 		InputSequence seq = new InputSequence();
 		while (currentNode.parent != null) {
 			seq.prependInput(currentNode.input);
@@ -338,7 +342,7 @@ public class ZXLearner extends Learner {
 
 		for (ZXObservationNode s : states) {
 			for (String input : i) {
-				ZXObservationNode child = (ZXObservationNode) s.childBy(input);
+				ZXObservationNode child = s.childBy(input);
 				if (!child.output.isEmpty()) {
 					if (child.isState())
 						c.addTransition(new MealyTransition(c, c

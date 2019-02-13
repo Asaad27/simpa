@@ -9,17 +9,26 @@ import java.util.Map;
 
 import main.simpa.Options;
 
-public class Node {
+/**
+ * 
+ * @param <T>
+ *            the type (or a super type) of the class inheriting this class. You
+ *            cannot use a type which is not a parent of the class implementing
+ *            Node, especially because you will have to implement
+ *            {@link #thisAsT()}.
+ */
+public abstract class Node<T extends Node<T>> {
 	public static int GLOBALID = 1;
 	public int id = 0;
 	public String input = null;
 	public String output = null;
-	public Node parent = null;
-	public Map<String,Node> children = null;
+	public T parent = null;
+	public Map<String, T> children = null;
 
 
 	public Node() {
-		children = new HashMap<String, Node>();
+		children = new HashMap<>();
+		assert thisAsT() == this : "this object must be of type T";
 	}
 
 	public Node(String input, String output) {
@@ -28,28 +37,37 @@ public class Node {
 		this.output = output;
 	}
 
-	public Node addChild(Node node) {
+	/**
+	 * Return this as a T object. It can be done with casting (i.e.
+	 * {@code (T) this}) but implementing this method ensure that this object is
+	 * an instance of generic type T : {@code A extends Node<A>} can implement
+	 * this method, but {@code B extends Node<A>} cannot return himself as type
+	 * A
+	 */
+	protected abstract T thisAsT();
+
+	public T addChild(T node) {
 		children.put(node.input, node);
-		node.setParent(this);
+		node.setParent(thisAsT());
 		node.id = GLOBALID++;
 		return node;
 	}
 
-	public void setParent(Node node) {
+	public void setParent(T node) {
 		parent = node;
 	}
 
-	public Node childBy(String inputSymbol) {
+	public T childBy(String inputSymbol) {
 		return children.get(inputSymbol);
 	}
 
 	protected void toDotWrite(Writer w) throws IOException {
-		List<Node> queue = new ArrayList<Node>();
+		List<Node<T>> queue = new ArrayList<>();
 		queue.add(this);
-		Node currentNode = null;
+		Node<T> currentNode = null;
 		while (!queue.isEmpty()) {
 			currentNode = queue.get(0);
-			for (Node n : currentNode.children.values()) {
+			for (Node<T> n : currentNode.children.values()) {
 				w.write("    node"
 						+ currentNode.id
 						+ " -> node"

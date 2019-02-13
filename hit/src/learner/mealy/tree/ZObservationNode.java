@@ -11,7 +11,7 @@ import main.simpa.Options;
 import tools.GraphViz;
 import tools.loggers.LogManager;
 
-public class ZObservationNode extends Node {
+public class ZObservationNode extends Node<ZObservationNode> {
 	public int state = -1;
 	public int label = -1;
 
@@ -46,8 +46,8 @@ public class ZObservationNode extends Node {
 					+ " [style=\"rounded,filled\", fillcolor=\"#" + "E0FEEE"
 					+ "\", color=\"#666666" + "\", shape=record, label=\"{"
 					+ state + " | " + label + "}\"]\n");
-		for (Node n : children.values()) {
-			((ZObservationNode) n).toDotCreateNodes(w);
+		for (ZObservationNode n : children.values()) {
+			n.toDotCreateNodes(w);
 		}
 	}
 
@@ -77,5 +77,10 @@ public class ZObservationNode extends Node {
 
 	public String toString() {
 		return "[" + id + ", " + state + ", " + label + "]";
+	}
+
+	@Override
+	protected ZObservationNode thisAsT() {
+		return this;
 	}
 }
