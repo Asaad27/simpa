@@ -59,5 +59,6 @@ public class UtilsTest {
 		Utils.setFileContent(f, in);
 		String out = Utils.fileContentOf(f);
 		assertEquals(in, out);
+		f.delete();
 	}
 }
