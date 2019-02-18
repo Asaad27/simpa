@@ -363,11 +363,6 @@ public class SIMPA {
 	private static Option<?>[] localizerBasedOptions = new Option<?>[] {
 			CHARACTERIZATION_SET, };
 
-	// RS Options
-	private static BooleanOption RS_WITH_UNKNOWN_H = new BooleanOption(
-			"--RS-probabilistic",
-			"do not compute a homming sequence to give to RS algorithme. h will be computed by RS itself.");
-	private static Option<?>[] RSOptions = new Option<?>[] {RS_WITH_UNKNOWN_H};
 	// EFSM options
 	private static BooleanOption GENERIC_DRIVER = new BooleanOption("--generic", "Use generic driver");
 	private static BooleanOption SCAN = new BooleanOption("--scan", "Use scan driver");
@@ -463,8 +458,6 @@ public class SIMPA {
 		Options.INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = INITIAL_INPUT_SYMBOLS_EQUALS_TO_X.getValue();
 
 		Options.CHARACTERIZATION_SET = CHARACTERIZATION_SET.getValue();
-
-		Options.RS_WITH_UNKNOWN_H = RS_WITH_UNKNOWN_H.getValue();
 
 		Options.GENERICDRIVER = GENERIC_DRIVER.getValue();
 

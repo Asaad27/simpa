@@ -77,8 +77,6 @@ public class Options {
 	public static boolean FORCE_J48 = false;
 	public static List<InputSequence> CHARACTERIZATION_SET;
 
-	public static boolean RS_WITH_UNKNOWN_H = false;
-
 	// public static boolean CHECK_INCONSISTENCY_H_NOT_HOMING = false;
 	// public static boolean REUSE_HZXW = false;
 	// public static boolean HW_WITH_KNOWN_W = false;

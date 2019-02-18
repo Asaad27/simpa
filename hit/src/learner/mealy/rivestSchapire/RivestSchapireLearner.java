@@ -51,7 +51,7 @@ public class RivestSchapireLearner extends Learner {
 	@Override
 	public void learn() {
 		long start = System.nanoTime();
-		if (Options.RS_WITH_UNKNOWN_H) {
+		if (options.probabilisticRS()) {
 			n = options.getStateNumberBound();
 			System.out.println(n);
 			hIsGiven = false;
