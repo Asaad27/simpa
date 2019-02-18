@@ -26,6 +26,11 @@ public abstract class OptionValidator {
 		this.message = message;
 	}
 
+	protected void clear() {
+		setMessage("");
+		setCriticality(CriticalityLevel.NOTHING);
+	}
+
 	public String getMessage() {
 		return message;
 	}

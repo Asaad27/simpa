@@ -39,8 +39,7 @@ class AutoValueValidator<T, H extends ValueHolder<T>> extends OptionValidator {
 	}
 
 	public void clearError() {
-		setCriticality(CriticalityLevel.NOTHING);
-		setMessage("");
+		clear();
 	}
 
 	public void setError(String string) {

@@ -28,8 +28,7 @@ public class OracleOption extends MultiArgChoiceOption {
 
 		@Override
 		public void check() {
-			setMessage("");
-			setCriticality(CriticalityLevel.NOTHING);
+			clear();
 			if (lastDriver == null)
 				return;
 			if (getSelectedItem() == shortest

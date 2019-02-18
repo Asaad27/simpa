@@ -63,8 +63,7 @@ public class FileOption extends OptionTree {
 				setCriticality(CriticalityLevel.WARNING);
 				setMessage("file will be overwritten");
 			} else {
-				setCriticality(CriticalityLevel.NOTHING);
-				setMessage("");
+				clear();
 			}
 		}
 	}
@@ -88,8 +87,7 @@ public class FileOption extends OptionTree {
 				setCriticality(CriticalityLevel.ERROR);
 				setMessage("only directories are allowed");
 			} else {
-				setCriticality(CriticalityLevel.NOTHING);
-				setMessage("");
+				clear();
 			}
 		}
 	}

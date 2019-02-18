@@ -15,8 +15,7 @@ public class ModeOption extends MultiArgChoiceOption {
 		addValidator(new OptionValidator() {
 			@Override
 			public void check() {
-				setCriticality(CriticalityLevel.NOTHING);
-				setMessage("");
+				clear();
 				if (getSelectedItem() == stats
 						&& automataChoice
 								.getSelectedItem() == automataChoice.mealy
