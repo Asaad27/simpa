@@ -12,36 +12,22 @@ import options.GenericMultiArgChoiceOption;
 import options.MultiArgChoiceOption;
 import options.MultiArgChoiceOptionItem;
 import options.OptionTree;
-import options.OptionValidator;
 import options.OptionValidator.CriticalityLevel;
+import options.automataOptions.TransparentDriverValidator;
 import options.RandomOption;
 import tools.loggers.LogManager;
 
 public class OracleOption extends MultiArgChoiceOption {
 	protected final boolean resetAllowed;
 
-	private final class DriverValidator extends OptionValidator {
-		MealyDriver lastDriver = null;
-
-		public DriverValidator() {
-		}
+	private final class DriverValidator extends TransparentDriverValidator {
 
 		@Override
 		public void check() {
-			clear();
-			if (lastDriver == null)
-				return;
-			if (getSelectedItem() == shortest
-					&& !(lastDriver instanceof TransparentMealyDriver)) {
-				setMessage(
-						"This option needs a transparent Mealy driver. (NB: this message is computed with last tried driver)");
-				setCriticality(CriticalityLevel.WARNING);
-			}
-		}
-
-		protected void setLastDriver(MealyDriver d) {
-			lastDriver = d;
-			check();
+			if (getSelectedItem() == shortest)
+				super.check();
+			else
+				clear();
 		}
 	}
 

@@ -35,6 +35,7 @@ public class RivestSchapireLearner extends Learner {
 	public RivestSchapireLearner(MealyDriver driver,
 			RivestSchapireOptions options) {
 		this.driver = driver;
+		options.updateWithDriver(driver);
 		this.options = options;
 	}
 
@@ -51,7 +52,7 @@ public class RivestSchapireLearner extends Learner {
 	public void learn() {
 		long start = System.nanoTime();
 		if (Options.RS_WITH_UNKNOWN_H) {
-			n = Options.STATE_NUMBER_BOUND;
+			n = options.getStateNumberBound();
 			System.out.println(n);
 			hIsGiven = false;
 			homingSequence = new InputSequence();

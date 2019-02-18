@@ -40,7 +40,6 @@ import drivers.ExhaustiveGeneratorOption;
 import drivers.efsm.real.GenericDriver;
 import drivers.efsm.real.ScanDriver;
 import drivers.mealy.MealyDriver;
-import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
 import learner.mealy.LmConjecture;
 import main.simpa.Options.LogLevel;
@@ -58,7 +57,6 @@ import stats.GraphGenerator;
 import stats.StatsEntry;
 import stats.StatsSet;
 import tools.DotAntlrListener;
-import tools.StandaloneRandom;
 import tools.Utils;
 import tools.loggers.HTMLLogger;
 import tools.loggers.LogManager;
@@ -359,16 +357,11 @@ public class SIMPA {
 			INITIAL_INPUT_SEQUENCES, INITIAL_INPUT_SYMBOLS_EQUALS_TO_X };
 
 	// LocalizerBased options
-	private static IntegerOption STATE_NUMBER_BOUND = new IntegerOption("--stateBound",
-			"a bound of states number in the infered automaton\n" + "\tn  → use n as bound of state number\n"
-					+ "\t0  → use exact states number (need to know the automaton)\n"
-					+ "\t-n → use a random bound between the number of states and the number of states plus n (need to know the automaton)",
-			0);
 	private static InputSequenceListOption CHARACTERIZATION_SET = new InputSequenceListOption("--characterizationSeq",
 			"use the given charcacterization sequences", null);
 
 	private static Option<?>[] localizerBasedOptions = new Option<?>[] {
-			STATE_NUMBER_BOUND, CHARACTERIZATION_SET, };
+			CHARACTERIZATION_SET, };
 
 	// RS Options
 	private static BooleanOption RS_WITH_UNKNOWN_H = new BooleanOption(
@@ -705,31 +698,6 @@ public class SIMPA {
 		driver = loadDriver(Options.SYSTEM);
 		if (driver == null)
 			System.exit(1);
-		if (Options.LOCALIZER_BASED_INFERENCE
-				|| (Options.RIVESTSCHAPIREINFERENCE && Options.RS_WITH_UNKNOWN_H)) {
-			if (STATE_NUMBER_BOUND.getValue() > 0)
-				Options.STATE_NUMBER_BOUND = STATE_NUMBER_BOUND.getValue();
-			else {
-				if (driver instanceof TransparentMealyDriver) {
-					int nb_states = ((TransparentMealyDriver) driver).getAutomata().getStateCount();
-					if (STATE_NUMBER_BOUND.getValue() == 0)
-						Options.STATE_NUMBER_BOUND = nb_states;
-					else
-						Options.STATE_NUMBER_BOUND = new StandaloneRandom()
-								.randIntBetween(nb_states,
-								nb_states - STATE_NUMBER_BOUND.getValue());
-				} else {
-					if (STATE_NUMBER_BOUND.haveBeenParsed())
-						throw new IllegalArgumentException(
-								"You must provide a positive integer for state number bound ("
-										+ STATE_NUMBER_BOUND.getConsoleName()
-										+ ") because the number of states in the driver is unspecified");
-					else
-						throw new IllegalArgumentException("You must specify " + STATE_NUMBER_BOUND
-								+ " because the number of states in driver is unknown");
-				}
-			}
-		}
 		Learner learner = Learner.getLearnerFor(driver);
 		learner.learn();
 		// System.err.println(learner.toString());

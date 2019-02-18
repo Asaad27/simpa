@@ -97,7 +97,7 @@ public abstract class SingleValueArgumentOption<T, H extends ValueHolder<T> & Si
 	}
 
 	@Override
-	public ValueHolder<?> getValueHolder() {
+	public H getValueHolder() {
 		return value;
 	}
 

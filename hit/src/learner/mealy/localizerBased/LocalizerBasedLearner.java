@@ -36,6 +36,7 @@ public class LocalizerBasedLearner extends Learner {
 
 	public LocalizerBasedLearner(MealyDriver d, LocalizerBasedOptions options) {
 		driver = d;
+		options.updateWithDriver(d);
 		this.options = options;
 	}
 
@@ -59,10 +60,10 @@ public class LocalizerBasedLearner extends Learner {
 
 	public void learn(List<InputSequence> W) {
 		LogManager.logStep(LogManager.STEPOTHER, "Inferring the system");
+		n = options.getStateNumberBound();
 		LogManager.logConsole("Inferring the system with W=" + W + " and n="
-				+ Options.STATE_NUMBER_BOUND);
+				+ n);
 
-		n = Options.STATE_NUMBER_BOUND;
 		stats = new LocalizerBasedStatsEntry(W, driver, n, options);
 
 		this.W = new ArrayList<InputSequence>(W);
