@@ -10,7 +10,6 @@ import java.util.TreeMap;
 
 import learner.Learner;
 import learner.efsm.LiConjecture;
-import main.simpa.Options;
 import tools.loggers.LogManager;
 import automata.State;
 import automata.efsm.EFSMTransition;
@@ -52,12 +51,13 @@ public class LiLearner extends Learner {
 				defaultParamValues);
 		this.dTable = new LiDataTable(driver.getInputSymbols(),
 				defaultParamValues);
-		if (Options.XSS_DETECTION) {
+		if (options.xssDetection.isEnabled()) {
 			ArrayList<String> ignoredValues = new ArrayList<>();
 			ignoredValues.add(Parameter.PARAMETER_INIT_VALUE);
 			ignoredValues.add(Parameter.PARAMETER_NO_VALUE);
 			ignoredValues.add("");
-			this.xssDetector = new XSSDetector(ignoredValues, (GenericDriver) driver);
+			this.xssDetector = new XSSDetector(ignoredValues,
+					(GenericDriver) driver, options.xssSeed.getRand());
 		}
 	}
 
@@ -628,7 +628,7 @@ public class LiLearner extends Learner {
 						LogManager.logInfo("The tables have not been modified\n");
 					}
 				}
-				if (Options.XSS_DETECTION) {
+				if (options.xssDetection.isEnabled()) {
 					if (xssDetector.detectReflections()) {
 						LogManager.logInfo("[XSS] Trying to confirm reflections");
 						xssDetector.confirmReflections();
@@ -808,7 +808,7 @@ public class LiLearner extends Learner {
 	
 	private void updateDataTable(LiDataTableItem dti, ParameterizedInputSequence pis) {
 		dTable.addAtCorrespondingPlace(dti, pis);
-		if (Options.XSS_DETECTION) {
+		if (options.xssDetection.isEnabled()) {
 			xssDetector.recordItem(dti, pis);
 		}
 	}

@@ -56,8 +56,9 @@ public class LogManager {
 		logConsole("End");
 		for (ILogger l : loggers)
 			l.logEnd();
-		if(Options.XSS_DETECTION){
+		if (xssLogger != null) {
 			xssLogger.logEnd();
+			xssLogger = null;
 		}
 		// System.exit(0);
 	}
@@ -139,10 +140,12 @@ public class LogManager {
 	public static void start() {
 		for (ILogger l : loggers)
 			l.logStart();
-		if(Options.XSS_DETECTION){
-			xssLogger = new XSSLogger();
-			xssLogger.logStart();
-		}
+	}
+
+	public static void startXSSLogger() {
+		assert xssLogger == null;
+		xssLogger = new XSSLogger();
+		xssLogger.logStart();
 	}
 
 	public static void logReset() {

@@ -13,15 +13,11 @@ import automata.efsm.ParameterizedOutput;
 import drivers.efsm.real.GenericDriver;
 import learner.efsm.table.LiDataTableItem;
 import tools.RandomGenerator;
-import tools.StandaloneRandom;
 import tools.loggers.LogManager;
 
 public class XSSDetector {
 
-	/**
-	 * @TODO should be put in an option tree.
-	 */
-	RandomGenerator rand = new StandaloneRandom();
+	private final RandomGenerator rand;
 
 	/**
 	 * Parameters values that are not used to seach reflections
@@ -75,12 +71,15 @@ public class XSSDetector {
 
 	}
 
-	public XSSDetector(ArrayList<String> ignoredValues, GenericDriver driver) {
+	public XSSDetector(ArrayList<String> ignoredValues, GenericDriver driver,
+			RandomGenerator rand) {
 		this.ignoredValues = ignoredValues;
 		this.itemsToCheck = new LinkedList<>();
 		this.potentialReflectionsFound = new LinkedList<>();
 		this.reflectionsFound = new LinkedList<>();
 		this.driver = driver;
+		this.rand = rand;
+		LogManager.startXSSLogger();
 	}
 
 	/**

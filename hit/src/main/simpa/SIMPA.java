@@ -414,9 +414,7 @@ public class SIMPA {
 
 	// Other options undocumented //TODO sort and explain them.
 	private static StringListOption URLS = new StringListOption("--urls", "??? TODO", "url1", "url2", Options.URLS);
-	private static BooleanOption XSS_DETECTION = new BooleanOption("--xss", "Detect XSS vulnerability");
-	private static Option<?>[] otherOptions = new Option<?>[] { URLS,
-			XSS_DETECTION, };
+	private static Option<?>[] otherOptions = new Option<?>[] { URLS, };
 
 	private static void parse(String[] args, ArrayList<Boolean> used, Option<?>[] options) {
 		for (Option<?> o : options)
@@ -485,7 +483,6 @@ public class SIMPA {
 		Options.MAXOUTPUTSYM = MAX_OUTPUT_SYM.getValue();
 		Options.TRANSITIONPERCENT = TRANSITION_PERCENT.getValue();
 
-		Options.XSS_DETECTION = XSS_DETECTION.getValue();
 		Options.URLS = URLS.getValue();
 		Options.SCAN = SCAN.getValue();
 	}

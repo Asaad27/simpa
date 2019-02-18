@@ -95,7 +95,6 @@ public class Options {
 	public static boolean USE_SHORTEST_CE;
 
 	//Web application analysis
-	public static boolean XSS_DETECTION = false;
 
 	@Deprecated
 	public static int MAX_CE_LENGTH = 20;
