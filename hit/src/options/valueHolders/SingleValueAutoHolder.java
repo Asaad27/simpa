@@ -2,8 +2,8 @@ package options.valueHolders;
 
 import options.ParseException;
 
-public class SingleValueAutoHolder<T, H extends ValueHolder<T> & SingleValueHolder>
-		extends AutoHolder<T, H> implements SingleValueHolder {
+public class SingleValueAutoHolder<T, H extends ValueHolder<T> & Stringifyable>
+		extends AutoHolder<T, H> implements Stringifyable {
 
 	public SingleValueAutoHolder(H baseHolder) {
 		super(baseHolder);

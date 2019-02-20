@@ -15,7 +15,7 @@ import javax.swing.event.ChangeListener;
 import options.ParseException;
 
 public abstract class NumberHolder<T extends Number & Comparable<T>>
-		extends ValueHolder<T> implements SingleValueHolder {
+		extends ValueHolder<T> implements Stringifyable {
 	SpinnerNumberModel spinnerModel;
 	JSpinner spinner;
 	T maximum;

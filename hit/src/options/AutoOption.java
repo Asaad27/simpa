@@ -1,10 +1,10 @@
 package options;
 
 import options.valueHolders.SingleValueAutoHolder;
-import options.valueHolders.SingleValueHolder;
+import options.valueHolders.Stringifyable;
 import options.valueHolders.ValueHolder;
 
-public class AutoOption<T, B extends ValueHolder<T> & SingleValueHolder>
+public class AutoOption<T, B extends ValueHolder<T> & Stringifyable>
 		extends SingleValueArgumentOption<T, SingleValueAutoHolder<T, B>> {
 
 	private AutoValueValidator<T, B> autoValueValidator;

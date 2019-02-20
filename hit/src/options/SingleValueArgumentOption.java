@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import options.OptionTree.ArgumentDescriptor.AcceptedValues;
-import options.valueHolders.SingleValueHolder;
+import options.valueHolders.Stringifyable;
 import options.valueHolders.ValueHolder;
 
-public abstract class SingleValueArgumentOption<T, H extends ValueHolder<T> & SingleValueHolder>
+public abstract class SingleValueArgumentOption<T, H extends ValueHolder<T> & Stringifyable>
 		extends OptionTree {
 
 	final H value;
