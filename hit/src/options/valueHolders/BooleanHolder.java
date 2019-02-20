@@ -6,7 +6,10 @@ import java.awt.event.ActionListener;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 
-public class BooleanHolder extends SingleTypeValueHolder<Boolean> {
+import options.ParseException;
+
+public class BooleanHolder extends SingleTypeValueHolder<Boolean>
+		implements Stringifyable {
 
 	private JCheckBox checkBox;
 
@@ -35,6 +38,17 @@ public class BooleanHolder extends SingleTypeValueHolder<Boolean> {
 		assert getValue() != null;
 		if (checkBox != null)
 			checkBox.setSelected(getValue());
+	}
+
+	@Override
+	public void setValueFromString(String s) throws ParseException {
+		Boolean b = Boolean.valueOf(s);
+		setValue(b);
+	}
+
+	@Override
+	public String getValueAsString(boolean forDebug) {
+		return getValue().toString();
 	}
 
 }
