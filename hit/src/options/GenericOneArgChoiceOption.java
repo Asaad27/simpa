@@ -110,7 +110,7 @@ public class GenericOneArgChoiceOption<T extends OneArgChoiceOptionItem>
 	}
 
 	@Override
-	public ValueHolder<?> getValueHolder() {
+	public ValueHolder<?, ?> getValueHolder() {
 		// TODO update when value will be handled with a valueHolder
 		return null;
 	}

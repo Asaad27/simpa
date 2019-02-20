@@ -6,8 +6,8 @@ import java.util.List;
 
 import javax.swing.JComponent;
 
-public abstract class ValueHolder<T> {
-	private T value;
+public abstract class ValueHolder<UserType, InnerType> {
+	private InnerType value;
 	private String name;
 	private String description;
 	JComponent valueComponent;
@@ -19,9 +19,10 @@ public abstract class ValueHolder<T> {
 		this.description = description;
 	}
 
-	ValueHolder(String name, String description, T startValue) {
+	ValueHolder(String name, String description, UserType startValue) {
 		this(name, description);
-		value = startValue;
+		value = UserToInnerType(startValue, null);
+		assert InnerToUser(value).equals(startValue);
 	}
 
 	public String getName() {
@@ -32,16 +33,26 @@ public abstract class ValueHolder<T> {
 		return description;
 	}
 
-	public final void setValue(T v) {
+	protected abstract UserType InnerToUser(InnerType i);
+
+	protected abstract InnerType UserToInnerType(UserType u,
+			InnerType previousValue);
+
+	public final void setValue(UserType v) {
 		if (value == null && v == null)
 			return;
-		if (value != null && value.equals(v))
+		if (value != null && InnerToUser(value).equals(v))
 			return;
-		value = v;
+		value = UserToInnerType(v, value);
+		assert InnerToUser(value).equals(v);
+		callChangeHandlers();
+		updateWithValue();
+	}
+
+	protected final void callChangeHandlers() {
 		for (ValueChangeHandler handler : changeHandlers) {
 			handler.valueChanged();
 		}
-		updateWithValue();
 	}
 
 	/**
@@ -90,7 +101,11 @@ public abstract class ValueHolder<T> {
 		return valueComponent;
 	}
 
-	public T getValue() {
+	public UserType getValue() {
+		return InnerToUser(value);
+	}
+
+	protected InnerType getInnerValue() {
 		return value;
 	}
 

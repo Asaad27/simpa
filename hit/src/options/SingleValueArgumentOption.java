@@ -8,7 +8,7 @@ import options.OptionTree.ArgumentDescriptor.AcceptedValues;
 import options.valueHolders.Stringifyable;
 import options.valueHolders.ValueHolder;
 
-public abstract class SingleValueArgumentOption<T, H extends ValueHolder<T> & Stringifyable>
+public abstract class SingleValueArgumentOption<T, H extends ValueHolder<T, T> & Stringifyable>
 		extends OptionTree {
 
 	final H value;

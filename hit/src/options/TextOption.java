@@ -140,7 +140,7 @@ public class TextOption extends OptionTree {
 
 	@Override
 	protected boolean isActivatedByArg(ArgumentValue arg) {
-		return arg.descriptor.name.equals(argument.name);
+		return arg.getDescriptor().name.equals(argument.name);
 	}
 
 	@Override
@@ -187,7 +187,7 @@ public class TextOption extends OptionTree {
 	}
 
 	@Override
-	public ValueHolder<?> getValueHolder() {
+	public ValueHolder<?, ?> getValueHolder() {
 		// TODO update when value will be hold with a value holder
 		return null;
 	}

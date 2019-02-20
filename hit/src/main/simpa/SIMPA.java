@@ -632,7 +632,7 @@ public class SIMPA {
 		LogManager.logInfo("starting inference with options "
 				+ allOptions.buildBackCLILine(false));
 		for (OptionTree option : allOptions.getAllSelectedChildren()) {
-			ValueHolder<?> value = option.getValueHolder();
+			ValueHolder<?, ?> value = option.getValueHolder();
 			if (value != null && value instanceof SeedHolder)
 				((SeedHolder) value).initRandom();
 		}
@@ -719,7 +719,7 @@ public class SIMPA {
 		for (int i = 1; i <= nbTests; i++) {
 			for (OptionTree option : allOptions.getAllSelectedChildren())
 			{
-				ValueHolder<?> value = option.getValueHolder();
+				ValueHolder<?, ?> value = option.getValueHolder();
 				if (value != null && value instanceof SeedHolder
 						&& !((SeedHolder) value).useAutoValue()) {
 					System.err.println(

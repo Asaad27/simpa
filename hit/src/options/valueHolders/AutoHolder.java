@@ -5,8 +5,8 @@ import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-public abstract class AutoHolder<T, H extends ValueHolder<T>>
-		extends ValueHolder<T> {
+public abstract class AutoHolder<T, H extends ValueHolder<T, T>>
+		extends SingleTypeValueHolder<T> {
 
 	final H baseHolder;
 	final BooleanHolder useAuto;

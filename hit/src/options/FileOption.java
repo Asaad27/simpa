@@ -256,7 +256,7 @@ public class FileOption extends OptionTree {
 	}
 
 	@Override
-	public ValueHolder<?> getValueHolder() {
+	public ValueHolder<?, ?> getValueHolder() {
 		// TODO when value will be hold
 		return null;
 	}

@@ -20,7 +20,6 @@ import javax.swing.JTextField;
 
 import drivers.mealy.real.mqtt.MQTTClientDescriptor.Publish;
 import options.IntegerOption;
-import options.ListOption;
 import options.TextOption;
 import options.automataOptions.DriverChoice;
 import options.automataOptions.DriverChoiceItem;

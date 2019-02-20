@@ -4,7 +4,7 @@ import options.valueHolders.SingleValueAutoHolder;
 import options.valueHolders.Stringifyable;
 import options.valueHolders.ValueHolder;
 
-public class AutoOption<T, B extends ValueHolder<T> & Stringifyable>
+public class AutoOption<T, B extends ValueHolder<T, T> & Stringifyable>
 		extends SingleValueArgumentOption<T, SingleValueAutoHolder<T, B>> {
 
 	private AutoValueValidator<T, B> autoValueValidator;
@@ -33,7 +33,8 @@ public class AutoOption<T, B extends ValueHolder<T> & Stringifyable>
 	}
 }
 
-class AutoValueValidator<T, H extends ValueHolder<T>> extends OptionValidator {
+class AutoValueValidator<T, H extends ValueHolder<T, T>>
+		extends OptionValidator {
 
 	public AutoValueValidator() {
 	}

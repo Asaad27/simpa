@@ -115,6 +115,10 @@ public abstract class OptionTree {
 				}
 		}
 
+		public ArgumentDescriptor getDescriptor() {
+			return descriptor;
+		}
+
 	}
 
 	private List<List<OptionTree>> sortedChildren = new ArrayList<>();
@@ -805,7 +809,7 @@ public abstract class OptionTree {
 	 * @return the {@link ValueHolder} use by this option or {@code null} if
 	 *         this option do not use one.
 	 */
-	public abstract ValueHolder<?> getValueHolder();
+	public abstract ValueHolder<?, ?> getValueHolder();
 
 	/**
 	 * Check validators of this option and update graphical interface if needed.
@@ -846,7 +850,7 @@ public abstract class OptionTree {
 	}
 
 	public String getName() {
-		ValueHolder<?> value = getValueHolder();
+		ValueHolder<?, ?> value = getValueHolder();
 		if (value != null)
 			return value.getName();
 		if (description != null && !description.isEmpty())

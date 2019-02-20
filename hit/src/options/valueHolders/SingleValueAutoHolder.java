@@ -2,7 +2,7 @@ package options.valueHolders;
 
 import options.ParseException;
 
-public class SingleValueAutoHolder<T, H extends ValueHolder<T> & Stringifyable>
+public class SingleValueAutoHolder<T, H extends ValueHolder<T, T> & Stringifyable>
 		extends AutoHolder<T, H> implements Stringifyable {
 
 	public SingleValueAutoHolder(H baseHolder) {

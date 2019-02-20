@@ -6,4 +6,8 @@ public class ParseException extends Exception {
 	public ParseException(Exception other) {
 		super(other);
 	}
+
+	public ParseException() {
+
+	}
 }

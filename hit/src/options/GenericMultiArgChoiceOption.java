@@ -71,7 +71,7 @@ public class GenericMultiArgChoiceOption<T extends MultiArgChoiceOptionItem>
 	}
 
 	@Override
-	public ValueHolder<?> getValueHolder() {
+	public ValueHolder<?, ?> getValueHolder() {
 		// TODO update when value will be hold with a value holder
 		return null;
 	}

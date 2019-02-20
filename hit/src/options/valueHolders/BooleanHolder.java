@@ -6,7 +6,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 
-public class BooleanHolder extends ValueHolder<Boolean> {
+public class BooleanHolder extends SingleTypeValueHolder<Boolean> {
 
 	private JCheckBox checkBox;
 

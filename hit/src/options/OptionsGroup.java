@@ -50,7 +50,7 @@ public class OptionsGroup extends NoArgumentOption {
 	}
 
 	@Override
-	public ValueHolder<?> getValueHolder() {
+	public ValueHolder<?, ?> getValueHolder() {
 		return null;
 	}
 
