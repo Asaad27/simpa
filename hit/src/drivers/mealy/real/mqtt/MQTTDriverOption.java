@@ -24,6 +24,7 @@ import options.TextOption;
 import options.automataOptions.DriverChoice;
 import options.automataOptions.DriverChoiceItem;
 import tools.Utils;
+import tools.loggers.LogManager;
 
 class ClientsOption extends ListOption<MQTTClientDescriptor> {
 
@@ -64,7 +65,12 @@ class ClientsOption extends ListOption<MQTTClientDescriptor> {
 		}
 		String args = element.substring(1 + funcName.length(),
 				element.length() - 1);
-		List<String> split = Utils.stringToList(args, ',', '\\');
+		StringBuilder warnings = new StringBuilder();
+		List<String> split = Utils.stringToList(args, ',', '\\', warnings);
+		if (warnings.length() != 0) {
+			errorStream.append(LogManager.prefixMultiLines("Warning : ",
+					warnings.toString()));
+		}
 		if (split.size() != expectedSize) {
 			errorStream.println("invalid syntax for '" + element + "', "
 					+ expectedSize + " parameters are expected");
@@ -82,7 +88,13 @@ class ClientsOption extends ListOption<MQTTClientDescriptor> {
 	protected MQTTClientDescriptor fromString(String s,
 			PrintStream parsingErrorStream) {
 		MQTTClientDescriptor desc = new MQTTClientDescriptor();
-		List<String> split = Utils.stringToList(s, ':', '\\');
+		StringBuilder warnings = new StringBuilder();
+		List<String> split = Utils.stringToList(s, ':', '\\', warnings);
+		if (warnings.length() != 0) {
+			parsingErrorStream.append(LogManager.prefixMultiLines("Warning : ",
+					warnings.toString()));
+			warnings = new StringBuilder();
+		}
 		if (split.size() == 1) {
 			s = split.get(0);
 		} else if (split.size() == 2) {
@@ -94,7 +106,11 @@ class ClientsOption extends ListOption<MQTTClientDescriptor> {
 			return null;
 		}
 
-		List<String> elements = Utils.stringToList(s, '|', '\\');
+		List<String> elements = Utils.stringToList(s, '|', '\\', warnings);
+		if (warnings.length() != 0) {
+			parsingErrorStream.append(LogManager.prefixMultiLines("Warning : ",
+					warnings.toString()));
+		}
 		for (String e : elements) {
 			if (e.equals(CONNECT))
 				desc.connect = true;

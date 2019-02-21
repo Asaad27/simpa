@@ -182,7 +182,8 @@ public abstract class ListHolder<E, H extends ValueHolder<E, ?> & Stringifyable>
 	@Override
 	public void setValueFromString(String strValue) throws ParseException {
 		clear();
-		for (String s : tools.Utils.stringToList(strValue, separator, escape))
+		for (String s : tools.Utils.stringToList(strValue, separator, escape,
+				null))
 			addElement(s);
 	}
 

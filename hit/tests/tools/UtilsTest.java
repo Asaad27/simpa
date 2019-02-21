@@ -1,6 +1,7 @@
 package tools;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,13 +30,18 @@ public class UtilsTest {
 	}
 
 	public void StringToListToString(String in) {
-		String out = Utils.listToString(Utils.stringToList(in));
-		assertEquals(in, out);
+		StringBuilder warnings = new StringBuilder();
+		String out = Utils.listToString(Utils.stringToList(in, warnings));
+		assertTrue((out.equals(in) && warnings.length() == 0)
+				|| out.contentEquals(in + " "));
 	}
 
 	public void ListToStringToList(List<String> in) {
-		List<String> out = Utils.stringToList(Utils.listToString(in));
+		StringBuilder warnings = new StringBuilder();
+		List<String> out = Utils.stringToList(Utils.listToString(in), warnings);
 		assertEquals(in, out);
+		assertEquals(warnings.length(), 0);// warnings should only appear in
+											// user-written strings.
 	}
 
 	@Test

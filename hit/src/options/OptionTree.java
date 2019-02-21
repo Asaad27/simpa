@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import options.OptionValidator.CriticalityLevel;
 import options.valueHolders.ValueHolder;
 import tools.Utils;
+import tools.loggers.LogManager;
 
 /**
  * 
@@ -430,7 +431,15 @@ public abstract class OptionTree {
 	 * @see #parseArguments(List, PrintStream) parseArguments for more details.
 	 */
 	public boolean parseArguments(String args, PrintStream parsingErrorStream) {
-		return parseArguments(Utils.stringToList(args), parsingErrorStream);
+		StringBuilder warnings = new StringBuilder();
+		boolean r = parseArguments(Utils.stringToList(args, warnings),
+				parsingErrorStream);
+		if (warnings.length() != 0) {
+			parsingErrorStream.append(LogManager.prefixMultiLines("Warning : ",
+					warnings.toString()));
+			warnings = new StringBuilder();
+		}
+		return r;
 	}
 
 	/**

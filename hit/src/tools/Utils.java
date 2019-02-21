@@ -510,12 +510,17 @@ public class Utils {
 	 * split a string into a list of string using spaces as separators. escaped
 	 * space are transformed into normal spaces.
 	 * 
-	 * @param args a string to split.
+	 * @param args
+	 *            a string to split.
+	 * @param warnings
+	 *            a {@link StringBuilder} where warning messages can be store.
+	 *            can be {@code null}.
 	 * @return a list of string which can be concatenated again using
 	 *         {@link #listToString(List)}
 	 */
-	public static List<String> stringToList(String args) {
-		return stringToList(args, ' ', '\\');
+	public static List<String> stringToList(String args,
+			StringBuilder warnings) {
+		return stringToList(args, ' ', '\\', warnings);
 	}
 
 	/**
@@ -530,18 +535,26 @@ public class Utils {
 	 * @param escape
 	 *            the char to escape special char. Cannot be the same as
 	 *            separating char
+	 * @param warnings
+	 *            a {@link StringBuilder} which will be filled parsing warning
+	 *            messages. Can be {@code null}.
 	 * @return a list of string which can be concatenated again using
 	 *         {@link #listToString(List)}
 	 */
 	public static List<String> stringToList(String args, char sep,
-			char escape) {
+			char escape, StringBuilder warnings) {
+		assert sep != escape;
 		List<String> r = new ArrayList<>();
 		boolean escapeSeen = false;
 		StringBuilder currentArg = new StringBuilder();
 		for (char c : args.toCharArray()) {
 			if (escapeSeen) {
-				assert c == sep || c == escape : "only '" + sep + "' and '"
-						+ escape + "' characters can be escaped at this level";
+				if (c != sep && c != escape) {
+					if (warnings != null)
+						warnings.append("only '" + sep + "' and '" + escape
+								+ "' characters can be escaped at this level\n");
+					currentArg.append(escape);
+				}
 				currentArg.append(c);
 				escapeSeen = false;
 			} else if (c == escape) {
@@ -557,6 +570,13 @@ public class Utils {
 		}
 		if (currentArg.length() > 0) {
 			// compatibility and user-friendly behavior
+			if (warnings != null) {
+				warnings.append("string '");
+				warnings.append(args);
+				warnings.append("' should end with '");
+				warnings.append(sep);
+				warnings.append("'\n");
+			}
 			r.add(currentArg.toString());
 		}
 		return r;
