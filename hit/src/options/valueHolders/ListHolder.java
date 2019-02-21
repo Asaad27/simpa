@@ -17,14 +17,30 @@ import javax.swing.JPanel;
 import options.ParseException;
 
 public abstract class ListHolder<E, H extends ValueHolder<E, ?> & Stringifyable>
-		extends ValueHolder<List<E>, List<H>> {
+		extends ValueHolder<List<E>, List<H>> implements Stringifyable {
+
+	/**
+	 * separator used to strigify the list of values
+	 */
+	final char separator;
+	/**
+	 * escape char used to escape separator in while stringify values.
+	 */
+	final char escape;
 
 	JButton addButton = null;
 	JPanel mainComponent = null;
 	private GridBagConstraints constraints;
 
 	public ListHolder(String name, String description) {
+		this(name, description, ',', '\\');
+	}
+
+	public ListHolder(String name, String description, char separator,
+			char escape) {
 		super(name, description, new ArrayList<>());
+		this.separator = separator;
+		this.escape = escape;
 	}
 
 	@Override
@@ -41,7 +57,7 @@ public abstract class ListHolder<E, H extends ValueHolder<E, ?> & Stringifyable>
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				addElement(createNewElement().getValue());
+				addElementFromString(createNewElement().getValue());
 			}
 
 		});
@@ -96,7 +112,7 @@ public abstract class ListHolder<E, H extends ValueHolder<E, ?> & Stringifyable>
 		setValue(new ArrayList<>());
 	}
 
-	public void addElement(E element) {
+	public void addElementFromString(E element) {
 		List<E> newValue = new ArrayList<>(getValue());
 		newValue.add(element);
 		setValue(newValue);
@@ -105,7 +121,7 @@ public abstract class ListHolder<E, H extends ValueHolder<E, ?> & Stringifyable>
 	public void addElement(String s) throws ParseException {
 		H parser = createNewElement();
 		parser.setValueFromString(s);
-		addElement(parser.getValue());
+		addElementFromString(parser.getValue());
 	}
 
 	public List<String> getValueAsStrings(boolean forDebug) {
@@ -161,5 +177,18 @@ public abstract class ListHolder<E, H extends ValueHolder<E, ?> & Stringifyable>
 		while (user.size() < previousValue.size())
 			previousValue.remove(previousValue.size() - 1);
 		return previousValue;
+	}
+
+	@Override
+	public void setValueFromString(String strValue) throws ParseException {
+		clear();
+		for (String s : tools.Utils.stringToList(strValue, separator, escape))
+			addElement(s);
+	}
+
+	@Override
+	public String getValueAsString(boolean debug) {
+		return tools.Utils.listToString(getValueAsStrings(debug), separator,
+				escape);
 	}
 }
