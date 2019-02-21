@@ -479,17 +479,19 @@ public class Utils {
 	 * change a list of string into a single string where all elements are
 	 * separated with one special char (special chars in elements are escaped)
 	 * 
-	 * @param arguments a non-empty list of string
-	 * @param sep       the special char to separate elements
-	 * @param escape    the char to escape special char. Cannot be the same as
-	 *                  separating char
+	 * @param arguments
+	 *            a list of string
+	 * @param sep
+	 *            the special char to separate elements
+	 * @param escape
+	 *            the char to escape special char. Cannot be the same as
+	 *            separating char
 	 * @return a string which can be transformed into {@code arguments} using
 	 *         {@link #stringToList(String, char, char)} with the same separator
 	 *         and escape chars
 	 */
 	public static String listToString(List<String> arguments, char sep,
 			char escape) {
-		assert !arguments.isEmpty();
 		assert sep != escape;
 		StringBuilder s = new StringBuilder();
 		for (int i = 0; i < arguments.size(); i++) {
@@ -499,8 +501,7 @@ public class Utils {
 					s.append(escape);
 				s.append(c);
 			}
-			if (i + 1 != arguments.size())
-				s.append(sep);
+			s.append(sep);
 		}
 		return s.toString();
 	}
@@ -518,13 +519,17 @@ public class Utils {
 	}
 
 	/**
-	 * split a string into a list of string using special char as separators.
-	 * escaped special chars are un-escaped.
+	 * Splits a string into a list of string using special char as separators.
+	 * escaped special chars are un-escaped. A separator is expected after each
+	 * sub-string, including at the end of the whole string
 	 * 
-	 * @param args   a string to split.
-	 * @param sep    the special char to separate elements
-	 * @param escape the char to escape special char. Cannot be the same as
-	 *               separating char
+	 * @param args
+	 *            a string to split.
+	 * @param sep
+	 *            the special char to separate elements
+	 * @param escape
+	 *            the char to escape special char. Cannot be the same as
+	 *            separating char
 	 * @return a list of string which can be concatenated again using
 	 *         {@link #listToString(List)}
 	 */
@@ -550,7 +555,10 @@ public class Utils {
 			}
 
 		}
-		r.add(currentArg.toString());
+		if (currentArg.length() > 0) {
+			// compatibility and user-friendly behavior
+			r.add(currentArg.toString());
+		}
 		return r;
 	}
 

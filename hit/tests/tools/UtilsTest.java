@@ -13,13 +13,13 @@ public class UtilsTest {
 
 	@Test
 	public void testStringToList() {
-		StringToListToString("abcd efgh");
-		StringToListToString("abcd\\ efgh");
-		StringToListToString("abcd\\\\ efgh");
-		StringToListToString("ab\\\\cd efgh");
-		StringToListToString("");
+		StringToListToString("abcd efgh ");
+		StringToListToString("abcd\\ efgh ");
+		StringToListToString("abcd\\\\ efgh ");
+		StringToListToString("ab\\\\cd efgh ");
 		StringToListToString(" ");
-		StringToListToString("\\ ");
+		StringToListToString("  ");
+		StringToListToString("\\  ");
 		ListToStringToList(Arrays.asList("abcd", "efgh"));
 		ListToStringToList(Arrays.asList("abcd\\", "efgh"));
 		ListToStringToList(Arrays.asList("abcd\\\\", "efgh"));
