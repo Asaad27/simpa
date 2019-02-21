@@ -72,13 +72,6 @@ public abstract class ListOption<T, H extends ValueHolder<T, ?> & Stringifyable>
 		mainComponent = value.getComponent();
 	}
 
-	/**
-	 * get the graphical title for this list.
-	 * 
-	 * @return a title for the titled border or {@code null} to use no border.
-	 */
-	protected abstract String getOptionTitle();
-
 	@Override
 	protected List<OptionTree> getSelectedChildren() {
 		return getChildren();
