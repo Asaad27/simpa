@@ -42,8 +42,8 @@ public class LocalizerBasedLearner extends Learner {
 
 	@Override
 	public void learn() {
-		List<InputSequence> W = Options.CHARACTERIZATION_SET;
-		if (W == null) {
+		List<InputSequence> W;
+		if (options.computeWSet()) {
 			W = computeCharacterizationSet(driver);
 			class InputSequenceComparator implements Comparator<InputSequence> {
 				@Override
@@ -53,6 +53,8 @@ public class LocalizerBasedLearner extends Learner {
 				}
 			}
 			W.sort(new InputSequenceComparator());
+		} else {
+			W = options.getWSet();
 		}
 		if (W.size() > 2)
 			throw new RuntimeException("W-set too large");

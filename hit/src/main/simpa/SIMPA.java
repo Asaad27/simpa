@@ -338,11 +338,6 @@ public class SIMPA {
 	private static Option<?>[] generalOptions = new Option<?>[] { help,
 			LOAD_DOT_FILE };
 
-	// inference choice
-	private static BooleanOption LOCALIZER_BASED_INFERENCE = new BooleanOption("--localizerBased", "use localizer based Algorithm (also called 'DUBAI' and 'ICTSS2015' and previously 'noReset')");
-	private static Option<?>[] inferenceChoiceOptions = new Option<?>[] {
-			LOCALIZER_BASED_INFERENCE };
-
 	// ZQ options
 	private static BooleanOption STOP_AT_CE_SEARCH = new BooleanOption("--stopatce",
 			"Stop inference when a counter exemple is asked");
@@ -355,13 +350,6 @@ public class SIMPA {
 	private static Option<?>[] ZQOptions = new Option<?>[] { STOP_AT_CE_SEARCH,
 			INITIAL_INPUT_SYMBOLS,
 			INITIAL_INPUT_SEQUENCES, INITIAL_INPUT_SYMBOLS_EQUALS_TO_X };
-
-	// LocalizerBased options
-	private static InputSequenceListOption CHARACTERIZATION_SET = new InputSequenceListOption("--characterizationSeq",
-			"use the given charcacterization sequences", null);
-
-	private static Option<?>[] localizerBasedOptions = new Option<?>[] {
-			CHARACTERIZATION_SET, };
 
 	// EFSM options
 	private static BooleanOption GENERIC_DRIVER = new BooleanOption("--generic", "Use generic driver");
@@ -415,18 +403,12 @@ public class SIMPA {
 
 		URLS.setNeeded(false);
 		LOAD_DOT_FILE.setNeeded(false);
-		CHARACTERIZATION_SET.setNeeded(false);
 
 		ArrayList<Boolean> used = new ArrayList<>();
 		for (int j = 0; j < args.length; j++)
 			used.add(false);
 
 		parse(args, used, generalOptions);
-
-		parse(args, used, inferenceChoiceOptions);
-		if (LOCALIZER_BASED_INFERENCE.getValue()) {
-			parse(args, used, localizerBasedOptions);
-		}
 
 		parse(args, used, EFSMOptions);
 		parse(args, used, randomAutomataOptions);
@@ -451,13 +433,9 @@ public class SIMPA {
 			usage();
 		}
 
-		Options.LOCALIZER_BASED_INFERENCE = LOCALIZER_BASED_INFERENCE.getValue();
-
 		Options.INITIAL_INPUT_SYMBOLS = INITIAL_INPUT_SYMBOLS.getValue();
 		Options.INITIAL_INPUT_SEQUENCES = INITIAL_INPUT_SEQUENCES.getValue();
 		Options.INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = INITIAL_INPUT_SYMBOLS_EQUALS_TO_X.getValue();
-
-		Options.CHARACTERIZATION_SET = CHARACTERIZATION_SET.getValue();
 
 		Options.GENERICDRIVER = GENERIC_DRIVER.getValue();
 

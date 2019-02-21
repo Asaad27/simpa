@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Random;
 
-import automata.mealy.InputSequence;
 import tools.loggers.LogManager;
 
 public class Options {
@@ -75,7 +74,6 @@ public class Options {
 	public static boolean REUSE_OP_IFNEEDED = false;
 	@Deprecated
 	public static boolean FORCE_J48 = false;
-	public static List<InputSequence> CHARACTERIZATION_SET;
 
 	// public static boolean CHECK_INCONSISTENCY_H_NOT_HOMING = false;
 	// public static boolean REUSE_HZXW = false;
