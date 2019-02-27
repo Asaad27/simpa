@@ -56,15 +56,9 @@ public class Options {
 	public static boolean SCAN = false;
 	@Deprecated
 	public static boolean TREEINFERENCE = false;
-	@Deprecated
-	public static boolean LMINFERENCE = false;
 	public static boolean LOCALIZER_BASED_INFERENCE = false;
 	@Deprecated
-	public static boolean HW_INFERENCE = false;
-	@Deprecated
 	public static boolean COMBINATORIALINFERENCE = false;
-	@Deprecated
-	public static boolean CUTTERCOMBINATORIALINFERENCE = false;
 	@Deprecated
 	public static boolean RIVESTSCHAPIREINFERENCE = false;
 	public static boolean GENERICDRIVER = false;

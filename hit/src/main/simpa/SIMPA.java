@@ -338,27 +338,14 @@ public class SIMPA {
 			LOAD_DOT_FILE, INTERACTIVE };
 
 	// output options
-	private static BooleanOption LOG_HTML = new BooleanOption("--html", "Use HTML logger");
-	private static BooleanOption LOG_TEXT = new BooleanOption("--text", "Use the text logger");
 	private static BooleanOption AUTO_OPEN_HTML = new BooleanOption("--openhtml", "Open HTML log automatically");
-	private static Option<?>[] outputOptions = new Option<?>[] { LOG_HTML, LOG_TEXT, AUTO_OPEN_HTML };
+	private static Option<?>[] outputOptions = new Option<?>[] {
+			AUTO_OPEN_HTML };
 
 	// inference choice
-	private static BooleanOption TREE_INFERENCE = new BooleanOption("--tree",
-			"Use tree inference (if available) instead of table");
-	private static BooleanOption LM_INFERENCE = new BooleanOption("--lm", "Use lm inference");
 	private static BooleanOption LOCALIZER_BASED_INFERENCE = new BooleanOption("--localizerBased", "use localizer based Algorithm (also called 'DUBAI' and 'ICTSS2015' and previously 'noReset')");
-	private static BooleanOption HW_INFERENCE = new BooleanOption("--hW", "use hW algorithm");
-	private static BooleanOption COMBINATORIAL_INFERENCE = new BooleanOption("--combinatorial",
-			"use the combinatorial inference");
-	private static BooleanOption CUTTER_COMBINATORIAL_INFERENCE = new BooleanOption("--cutCombinatorial",
-			"use the combinatorial inference with cutting");
-	private static BooleanOption RIVETSCHAPIRE_INFERENCE = new BooleanOption("--rivestSchapire",
-			"use the RivestSchapire inference (must be used with an other learner)\nThis option let you to run an inference algorithm with resets on a driver without reset.");
 	private static Option<?>[] inferenceChoiceOptions = new Option<?>[] {
-			TREE_INFERENCE, LM_INFERENCE, LOCALIZER_BASED_INFERENCE,
-			HW_INFERENCE, CUTTER_COMBINATORIAL_INFERENCE,
-			COMBINATORIAL_INFERENCE, RIVETSCHAPIRE_INFERENCE };
+			LOCALIZER_BASED_INFERENCE };
 
 	// ZQ options
 	private static BooleanOption STOP_AT_CE_SEARCH = new BooleanOption("--stopatce",
@@ -480,19 +467,8 @@ public class SIMPA {
 
 		parse(args, used, outputOptions);
 		parse(args, used, inferenceChoiceOptions);
-		if (TREE_INFERENCE.getValue() && LOCALIZER_BASED_INFERENCE.getValue()) {
-			System.out.println("You cannot choose two inference system");
-			usage();
-			System.exit(1);
-		}
-		if (TREE_INFERENCE.getValue() || LM_INFERENCE.getValue()) {
-			parse(args, used, ZQOptions);
-		}
 		if (LOCALIZER_BASED_INFERENCE.getValue()) {
 			parse(args, used, localizerBasedOptions);
-		}
-		if (RIVETSCHAPIRE_INFERENCE.getValue()) {
-			parse(args, used, RSOptions);
 		}
 
 		parse(args, used, EFSMOptions);
@@ -520,17 +496,9 @@ public class SIMPA {
 
 		Options.INTERACTIVE = INTERACTIVE.getValue();
 
-		Options.LOG_HTML = LOG_HTML.getValue();
-		Options.LOG_TEXT = LOG_TEXT.getValue();
 		Options.AUTO_OPEN_HTML = AUTO_OPEN_HTML.getValue();
 
-		Options.LMINFERENCE = LM_INFERENCE.getValue();
-		Options.TREEINFERENCE = TREE_INFERENCE.getValue();
 		Options.LOCALIZER_BASED_INFERENCE = LOCALIZER_BASED_INFERENCE.getValue();
-		Options.HW_INFERENCE = HW_INFERENCE.getValue();
-		Options.COMBINATORIALINFERENCE = COMBINATORIAL_INFERENCE.getValue();
-		Options.CUTTERCOMBINATORIALINFERENCE = CUTTER_COMBINATORIAL_INFERENCE.getValue();
-		Options.RIVESTSCHAPIREINFERENCE = RIVETSCHAPIRE_INFERENCE.getValue();
 
 		Options.USE_DT_CE = USE_DT_CE.getValue();
 		Options.INITIAL_INPUT_SYMBOLS = INITIAL_INPUT_SYMBOLS.getValue();
@@ -702,10 +670,6 @@ public class SIMPA {
 						i++;
 				}
 			}
-			if (arg.equals(LOG_HTML.getConsoleName()))
-				keepArg = false;
-			if (arg.equals(LOG_TEXT.getConsoleName()))
-				keepArg = false;
 
 			if (keepArg) {
 				if (arg.contains(" "))
@@ -715,8 +679,6 @@ public class SIMPA {
 				r.append(" ");
 			}
 		}
-		r.append(LOG_HTML.getConsoleName() + " ");
-		r.append(LOG_TEXT.getConsoleName() + " ");
 		return r.toString();
 	}
 
