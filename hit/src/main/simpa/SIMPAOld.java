@@ -2,7 +2,6 @@ package main.simpa;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 
 import drivers.Driver;
@@ -64,10 +63,6 @@ public class SIMPAOld {
 					Options.MINOUTPUTSYM = Integer.parseInt(args[++i]);
 				else if (args[i].equals("--maxoutputsym"))
 					Options.MAXOUTPUTSYM = Integer.parseInt(args[++i]);
-				else if (args[i].equals("--urls")){
-					Options.URLS = new ArrayList<String>();
-					for(String url : args[++i].split(";")) Options.URLS.add(url);
-				}
 				else if (args[i].equals("--generic"))
 					Options.GENERICDRIVER = true;
 				else if (args[i].equals("--tree"))

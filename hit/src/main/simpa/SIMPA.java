@@ -388,10 +388,6 @@ public class SIMPA {
 	private static Option<?>[] statsOptions = new Option<?>[] { MAKE_GRAPH,
 			STATS_MODE, ENUMERATE_MODE };
 
-	// Other options undocumented //TODO sort and explain them.
-	private static StringListOption URLS = new StringListOption("--urls", "??? TODO", "url1", "url2", Options.URLS);
-	private static Option<?>[] otherOptions = new Option<?>[] { URLS, };
-
 	private static void parse(String[] args, ArrayList<Boolean> used, Option<?>[] options) {
 		for (Option<?> o : options)
 			o.parse(args, used);
@@ -401,7 +397,6 @@ public class SIMPA {
 	private static void parseArguments(String[] args) {
 		LogManager.logConsole("Checking environment and options");
 
-		URLS.setNeeded(false);
 		LOAD_DOT_FILE.setNeeded(false);
 
 		ArrayList<Boolean> used = new ArrayList<>();
@@ -414,9 +409,6 @@ public class SIMPA {
 		parse(args, used, randomAutomataOptions);
 
 		parse(args, used, statsOptions);
-
-		// TODO check those options and put them in the right place
-		parse(args, used, otherOptions);
 
 		// check for unused arguments and select the driver
 		int unusedArgs = 0;
@@ -447,7 +439,6 @@ public class SIMPA {
 		Options.MAXOUTPUTSYM = MAX_OUTPUT_SYM.getValue();
 		Options.TRANSITIONPERCENT = TRANSITION_PERCENT.getValue();
 
-		Options.URLS = URLS.getValue();
 		Options.SCAN = SCAN.getValue();
 	}
 

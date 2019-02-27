@@ -9,7 +9,6 @@ import java.util.Map;
 
 import learner.Learner;
 import learner.mealy.LmConjecture;
-import main.simpa.Options;
 import tools.loggers.LogManager;
 import automata.State;
 import automata.mealy.InputSequence;
@@ -36,7 +35,9 @@ public class ZXLearner extends Learner {
 
 		LogManager.logConsole("Options : I -> " + i.toString());
 		LogManager.logConsole("Options : Z -> " + z.toString());
-		LogManager.logConsole("Options : Urls -> " + Options.URLS);
+		// Next line was removed because Options.URLS was undocumented and
+		// unused (apart for this line).
+		// LogManager.logConsole("Options : Urls -> " + Options.URLS);
 	}
 
 	private LmConjecture fixPointConsistency(LmConjecture K) {

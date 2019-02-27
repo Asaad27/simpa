@@ -2,7 +2,6 @@ package main.simpa;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Random;
 
 import tools.loggers.LogManager;
@@ -117,7 +116,6 @@ public class Options {
 
 	@Deprecated
 	public static String SYSTEM = "";
-	public static List<String> URLS = null;
 	@Deprecated
 	public static String OUTDIR = System.getProperty("user.dir");
 
