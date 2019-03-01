@@ -19,10 +19,6 @@ public class BooleanOption extends OptionTree {
 
 	private List<OptionTree> subTreeIfTrue = new ArrayList<>();
 	private List<OptionTree> subTreeIfFalse = new ArrayList<>();
-	/**
-	 * @see #setEnabledByDefault(Boolean)
-	 */
-	private Boolean isEnabledByDefault = null;
 	private String name;
 
 	protected ArgumentDescriptor enableArgumentDescriptor = null;
@@ -157,7 +153,7 @@ public class BooleanOption extends OptionTree {
 	 *            disabled by default or {@code null} to use no default value.
 	 */
 	public void setEnabledByDefault(Boolean def) {
-		isEnabledByDefault = def;
+		value.setDefaultValue(def);
 	}
 
 	public String getSubTreeTitle() {
@@ -185,6 +181,7 @@ public class BooleanOption extends OptionTree {
 
 	@Override
 	protected ArgumentValue getDefaultValue() {
+		Boolean isEnabledByDefault = value.getDefaultValue();
 		if (isEnabledByDefault == null)
 			return null;
 		if (isEnabledByDefault)

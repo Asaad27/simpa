@@ -51,6 +51,7 @@ public class StateBoundOption extends BooleanOption {
 				"This offset will be added to the number of state get from driver. It can be positive or negative.",
 				0);
 		stateOffset.setMinimum(Integer.MIN_VALUE);
+		stateOffset.setDefaultValue(0);
 
 		setSubTreeIfFalse(Arrays.asList(stateNumber));
 		setSubTreeIfTrue(Arrays.asList(stateOffset));

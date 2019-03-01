@@ -7,6 +7,11 @@ import java.util.List;
 import javax.swing.JComponent;
 
 public abstract class ValueHolder<UserType, InnerType> {
+	/**
+	 * The default value or {@code null} if there is no value defined by
+	 * default.
+	 */
+	private UserType defaultValue;
 	private InnerType value;
 	private String name;
 	private String description;
@@ -107,6 +112,14 @@ public abstract class ValueHolder<UserType, InnerType> {
 
 	protected InnerType getInnerValue() {
 		return value;
+	}
+
+	public UserType getDefaultValue() {
+		return defaultValue;
+	}
+
+	public void setDefaultValue(UserType def) {
+		defaultValue = def;
 	}
 
 }

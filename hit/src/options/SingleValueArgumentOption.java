@@ -101,4 +101,20 @@ public abstract class SingleValueArgumentOption<T, H extends ValueHolder<T, T> &
 		return value;
 	}
 
+	public void setDefaultValue(T def) {
+		value.setDefaultValue(def);
+	}
+
+	@Override
+	protected ArgumentValue getDefaultValue() {
+		if (value.getDefaultValue() == null)
+			return null;
+		ArgumentValue argValue = new ArgumentValue(argument);
+		T current = value.getValue();
+		value.setValue(value.getDefaultValue());
+		argValue.addValue(value.getValueAsString(false));
+		value.setValue(current);
+		return argValue;
+	}
+
 }
