@@ -23,14 +23,14 @@ public class RandomAutomataOptions {
 	private final RandomOption rand = new RandomOption("--automat-seed",
 			"seed used to initialize random to generate automata");
 	private final IntegerOption statesNumber = new IntegerOption("--nb-states",
-			"number of states", "number of states for the generated automaton",
+			"number of states", "Number of states for the generated automaton.",
 			10);
 	private final IntegerOption inputsNumber = new IntegerOption("--nb-inputs",
 			"number of input symbols",
-			"number of inputs for the generated automaton", 2);
+			"Number of inputs for the generated automaton.", 2);
 	private final IntegerOption outputsNumber = new IntegerOption(
 			"--nb-outputs", "number of output symbols",
-			"number of outputs for the generated automaton", 2);
+			"Number of outputs for the generated automaton.", 2);
 
 	public int getStatesNumber() {
 		return statesNumber.getValue();

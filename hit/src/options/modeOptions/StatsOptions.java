@@ -13,7 +13,7 @@ public class StatsOptions extends MultiArgChoiceOptionItem {
 	StatsOptions(MultiArgChoiceOption parent) {
 		super("statistics mode", "--stats", parent);
 		inferenceNb = new IntegerOption("--nbtest", "number of inferences",
-				"number of inferences to try", 1);
+				"Number of inferences to try.", 1);
 		subTrees.add(inferenceNb);
 
 		// outputs options are NOT added in subtree to ensure user cannot change

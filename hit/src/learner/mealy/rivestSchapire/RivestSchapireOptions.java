@@ -24,6 +24,10 @@ public class RivestSchapireOptions extends MultiArgChoiceOptionItem {
 			"Use probabilistic version of Rivest and Schapire algorithm which computes automatically the homing sequence.",
 			Arrays.asList(stateBound, seedForProbabilistic),
 			Collections.emptyList()) {
+		@Override
+		public String getDisableHelp() {
+			return "Compute a homing sequence (from glass-box driver) which will be provided to the algorithm.";
+		};
 
 		@Override
 		protected void makeArgumentDescriptors(String argument) {
@@ -35,11 +39,12 @@ public class RivestSchapireOptions extends MultiArgChoiceOptionItem {
 	};
 
 	public RivestSchapireOptions(GenericMultiArgChoiceOption<?> parent) {
-		super("RS", "--rivestSchapire", parent);
+		super("Rivest and Schapire", "--rivestSchapire", parent);
 		lmOptions = new LmOptions(subLearnerOption, "--RS-with-lm");
 		subLearnerOption = new MultiArgChoiceOption() {
 			{
 				addChoice(lmOptions);
+				optionName = "sub-learner for Rivest and Schapire algorithm";
 			}
 		};
 		subTrees.add(subLearnerOption);

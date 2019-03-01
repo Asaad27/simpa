@@ -16,16 +16,16 @@ public class LiOptions extends EFSMLearnerItem {
 	public final SupportMinOption supportMin = new SupportMinOption();
 	public final BooleanOption reuseOpIfNeeded = new BooleanOption(
 			"Reuse op if needed", "reuseop",
-			"Reuse output parameter for non closed row",
+			"Reuse output parameter for non closed row.",
 			Collections.emptyList(), Collections.emptyList(), false);
-	public final RandomOption xssSeed = new RandomOption("-xss-seed",
+	public final RandomOption xssSeed = new RandomOption("--xss-seed",
 			"random source for xss detector");
 	public final BooleanOption xssDetection;
 
 	public LiOptions(GenericMultiArgChoiceOption<?> parent) {
 		super("li", "--li", parent);
 		xssDetection = new BooleanOption("Detect XSS vulnerability", "xss",
-				"Search XSS vulnerabilities during inference",
+				"Search XSS vulnerabilities during inference.",
 				Arrays.asList(xssSeed), Collections.emptyList(), false);
 		subTrees.add(useWeka);
 		subTrees.add(supportMin);

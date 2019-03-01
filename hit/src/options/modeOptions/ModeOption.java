@@ -9,6 +9,7 @@ public class ModeOption extends MultiArgChoiceOption {
 	public final StatsOptions stats = new StatsOptions(this);
 
 	public ModeOption(AutomataChoice automataChoice) {
+		optionName = "inference mode";
 		addChoice(stats);
 		addChoice(simple);
 		setDefaultItem(simple);

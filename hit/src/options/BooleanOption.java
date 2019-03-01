@@ -224,13 +224,31 @@ public class BooleanOption extends OptionTree {
 	}
 
 	@Override
-	public String getHelpByArgument(ArgumentDescriptor arg) {
+	public final String getHelpByArgument(ArgumentDescriptor arg) {
 		if (arg == enableArgumentDescriptor)
-			return "enable " + name;
+			return getEnableHelp();
 		else {
 			assert arg == disableArgumentDescriptor;
-			return "disable " + name;
+			return getDisableHelp();
 		}
+	}
+
+	/**
+	 * Get the help message describing the behavior when this option is enabled
+	 * 
+	 * @return the description of valueHolder by default;
+	 */
+	public String getEnableHelp() {
+		return getValueHolder().getDescription();
+	}
+
+	/**
+	 * Get the help message describing the behavior when this option is disabled
+	 * 
+	 * @return "Do not " + the help of enable by default;
+	 */
+	public String getDisableHelp() {
+		return "Do not " + tools.Utils.decapitalize(getEnableHelp());
 	}
 
 	@Override

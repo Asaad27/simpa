@@ -198,7 +198,7 @@ class ClientsOption extends ListOption<MQTTClientDescriptor> {
 
 	@Override
 	public String getHelp() {
-		return "describe a client for MQTT";
+		return "Describe a client for MQTT.";
 	}
 
 	@Override
@@ -441,11 +441,11 @@ public class MQTTDriverOption extends DriverChoiceItem<MQTT> {
 		super("MQTT Driver", "mqttDriver", parent, MQTT.class);
 		clients = new ClientsOption();
 		brokerAddress = new TextOption("--mqtt-broker", "tcp://localhost:1883",
-				"broker address", "the broker to infer");
+				"broker address", "The adress of the broker to infer.");
 		timeout = new IntegerOption("--mqtt-timeout",
 				"timeout to decide quiescence output (ms)",
-				"when an input is sent to the broker we do not know if we will get an output or not."
-						+ " After this time, we consider that we will not have an answer.",
+				"When an input is sent to the broker we do not know if we will get an output or not."
+						+ " After this timeout (in ms), we consider that we will not have an answer.",
 				500);
 		subTrees.add(brokerAddress);
 		subTrees.add(timeout);

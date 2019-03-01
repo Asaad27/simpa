@@ -48,8 +48,8 @@ public class OracleOption extends MultiArgChoiceOption {
 			List<OptionTree> randomWalkOptions = new ArrayList<>();
 			maxTraceLength = new AutoIntegerOption("--maxcelength",
 					"maximum length of one random walk",
-					"This is the length of random walk from a reset if there is a reset or for all the walk."
-							+ " The automatic value use a length proportional to the size of driver",
+					"The length of random walk from a reset if there is a reset or for all the walk."
+							+ " The automatic value use a length proportional to the size of driver.",
 					100);
 			randomWalkOptions.add(maxTraceLength);
 			if (resetAllowed) {
@@ -63,12 +63,17 @@ public class OracleOption extends MultiArgChoiceOption {
 			mrBeanOnlyIfExists = new BooleanOption(
 					"check existence of counter example before calling MrBean",
 					"exhaustive-before-MrBean",
-					"First do an exhaustive check to see if a counter example exists and if it exists do a random walk to find it",
+					"First do an exhaustive check to see if a counter example exists and if it exists do a random walk to find it.",
 					new ArrayList<OptionTree>(), randomWalkOptions, false) {
 				@Override
 				public String getSubTreeTitle() {
 					return isEnabled() ? ""
 							: "options for random walk when there is no pre-check on the automaton";
+				}
+
+				@Override
+				public String getDisableHelp() {
+					return "Call MrBean without searching counterExample in transparent box.";
 				}
 			};
 
@@ -98,6 +103,7 @@ public class OracleOption extends MultiArgChoiceOption {
 	public MultiArgChoiceOptionItem distinctionTreeBased;
 
 	public OracleOption(boolean resetAllowed) {
+		optionName = "oracle choice";
 		this.resetAllowed = resetAllowed;
 		addValidator(driverValidator);
 		shortest = new MultiArgChoiceOptionItem("use shortest counter example",

@@ -38,14 +38,14 @@ public class WSetOption extends ListOption<InputSequence, InputSequenceHolder> {
 
 	public WSetOption() {
 		super("--W-set", "Characterization set ('W-Set')",
-				"a set of sequences which distinguish pairs of states");
+				"A set of sequences which distinguish pairs of states.");
 		addValidator(inputValidator);
 	}
 
 	@Override
 	protected InputSequenceHolder createSimpleHolder() {
 		return new InputSequenceHolder("Characterization sequence",
-				"a sequence which distinguish at least two states of the automaton");
+				"A sequence which distinguish at least two states of the automaton.");
 	}
 
 	@Override

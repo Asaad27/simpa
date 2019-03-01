@@ -19,7 +19,7 @@ public class FromDotMealyDriver extends AutomatonMealyDriver {
 		public FromDotChoiceItem(DriverChoice<MealyDriver> parent) {
 			super(parent, FromDotMealyDriver.class);
 			file = new FileOption("--loadDotFile",
-					"select the file to load as driver", null,
+					"Select the file to load as driver.", null,
 					FileSelectionMode.FILES_ONLY, FileExistance.MUST_EXIST);
 			subTrees.add(file);
 		}

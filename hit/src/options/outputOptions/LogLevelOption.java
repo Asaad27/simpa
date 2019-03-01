@@ -8,7 +8,7 @@ public class LogLevelOption
 
 	public LogLevelOption() {
 		super("--log-level");
-		this.description = "set the logging level";
+		this.description = "Set the logging level.";
 		for (LogLevel level : LogLevel.values())
 			addChoice(LogLevelOptionItem.getItem(level, this));
 	}

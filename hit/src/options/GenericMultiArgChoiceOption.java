@@ -66,8 +66,8 @@ public class GenericMultiArgChoiceOption<T extends MultiArgChoiceOptionItem>
 
 	@Override
 	public String getHelpByArgument(ArgumentDescriptor arg) {
-		return "set value of option " + optionName + " to "
-				+ getItemFromArg(new ArgumentValue(arg));
+		return "Set " + optionName + " to "
+				+ getItemFromArg(new ArgumentValue(arg)) + ".";
 	}
 
 	@Override

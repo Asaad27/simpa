@@ -1017,7 +1017,8 @@ public class SIMPA {
 				});
 			} else {
 				if (!parsedSuccessfully) {
-					usage();
+					System.err.println("Cannot parse options. Use argument "
+							+ HELP_ARGUMENT + " to display usage.");
 					System.exit(1);
 				}
 				runWithOptions();

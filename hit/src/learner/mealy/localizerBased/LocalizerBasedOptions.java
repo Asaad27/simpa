@@ -10,6 +10,7 @@ import java.util.Arrays;
 import options.BooleanOption;
 import options.GenericMultiArgChoiceOption;
 import options.MultiArgChoiceOptionItem;
+import options.OptionTree.ArgumentDescriptor.AcceptedValues;
 import options.WSetOption;
 import options.learnerOptions.StateBoundOption;
 
@@ -23,13 +24,30 @@ public class LocalizerBasedOptions extends MultiArgChoiceOptionItem {
 	public LocalizerBasedOptions(GenericMultiArgChoiceOption<?> parent) {
 		super("localizer-based", "--localizerBased", parent);
 		useSpeedUp = new BooleanOption("speed up", "speedUp",
-				"Use speedUp (deduction from trace based on state incompatibilities)\nthis is usefull if you don't know the real state number but only the bound.");
+				"Use speed-up (deduction from trace based on state incompatibilities)\nthis is usefull if you don't know the real state number but only the bound.") {
+			@Override
+			public String getDisableHelp() {
+				return "Disable speed-up.";
+			}
+		};
 		subTrees.add(useSpeedUp);
 		subTrees.add(stateNumberBound);
 		computeCharacterizationSet = new BooleanOption(
 				"Compute characterization set", "compute-W-set",
-				"compute a characterization set from Glass-Box driver",
-				Collections.emptyList(), Arrays.asList(wSet));
+				"Compute a characterization set from glass-box driver.",
+				Collections.emptyList(), Arrays.asList(wSet)) {
+			@Override
+			protected void makeArgumentDescriptors(String argument) {
+				super.makeArgumentDescriptors(argument);
+				disableArgumentDescriptor = new ArgumentDescriptor(
+						AcceptedValues.NONE, "--given-W-set", this);
+			}
+
+			@Override
+			public String getDisableHelp() {
+				return "Manually enter a W-set.";
+			}
+		};
 		subTrees.add(computeCharacterizationSet);
 	}
 

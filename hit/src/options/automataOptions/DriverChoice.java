@@ -13,8 +13,8 @@ public class DriverChoice<T extends Driver<?, ?>>
 
 	public DriverChoice(Class<T> baseType) {
 		super("--driver");
-		description = "select the driver to infer."
-				+ " There are some pre-defined values but you can use the full name of a java class, e.g. : drivers.efsm.NSPKDriver";
+		description = "Select the driver to infer."
+				+ " There are some pre-defined values but you can use the full name of a java class, e.g. : drivers.efsm.NSPKDriver .";
 		driverBaseType = baseType;
 	}
 

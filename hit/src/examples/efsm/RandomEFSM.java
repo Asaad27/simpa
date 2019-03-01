@@ -41,23 +41,23 @@ public class RandomEFSM extends EFSM implements Serializable {
 	public static class RandomEFSMOption extends RandomAutomataOptions {
 		private final IntegerOption minParam = new IntegerOption(
 				"--minimum-parameter-nb", "minimum parameter number",
-				"minimum number of parameter to generate for each symbol", 1);
+				"Minimum number of parameter to generate for each symbol.", 1);
 		private final IntegerOption maxParam = new IntegerOption(
 				"--maximum-parameter-nb", "maximum parameters number",
-				"maximum number of parameter to generate for each symbol", 1);
+				"Maximum number of parameter to generate for each symbol.", 1);
 		final IntegerOption domainSize = new IntegerOption("--domain-size",
 				"Size of the parameter's domain",
-				"Size of the parameter's domain", 10);
+				"Size of the parameter's domain.", 10);
 		final PercentageOption simpleGuardPercent = new PercentageOption(
 				"--simpleguard", "% of simple guard transitions", 25);
 		final PercentageOption ndvGuardPercent = new PercentageOption(
 				"--ndvguard", "% of generating NDV by transitions", 25);
 		private final IntegerOption ndvMinTransToCheck = new IntegerOption(
 				"--ndvmintrans", "minumum number of states before NDV",
-				"Minimum number of states before checking NDV value", 1);
+				"Minimum number of states before checking NDV value.", 1);
 		private final IntegerOption ndvMaxTransToCheck = new IntegerOption(
 				"--ndvmaxtrans", "maximum number of states before NDV",
-				"Maximum number of states before checking NDV value", 1);
+				"Maximum number of states before checking NDV value.", 1);
 
 		public RandomEFSMOption() {
 			addSubOption(minParam);

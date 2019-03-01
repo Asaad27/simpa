@@ -15,10 +15,10 @@ public abstract class ExhaustiveGeneratorOption<T extends Driver<?, ?> & Enumera
 	 * ({@link LongOption#useAutoValue()} to iterate over all possible drivers.
 	 */
 	public final AutoLongOption seed = new AutoLongOption(
-			"--seed-for-exhaustive-generator",
+			"--exhaustive-generator-pos",
 			"seed used to build the automaton in driver",
-			"Anumber used to represent an automata in the generation list."
-					+ " The automatic value let the enum mode select all seeds",
+			"A number used to represent an automata in the generation list."
+					+ " The automatic value let the enum mode select all seeds.",
 			(long) 0);
 
 	public ExhaustiveGeneratorOption(

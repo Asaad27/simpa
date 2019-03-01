@@ -7,6 +7,7 @@ import drivers.mealy.MealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import options.BooleanOption;
 import options.IntegerOption;
+import options.OptionTree.ArgumentDescriptor.AcceptedValues;
 import options.OptionValidator;
 import options.automataOptions.TransparentDriverValidator;
 
@@ -36,18 +37,18 @@ public class StateBoundOption extends BooleanOption {
 
 	private final IntegerOption stateNumber = new IntegerOption(
 			"--states-bound", "bound on states number",
-			"A bound on the number of states which will be found in the driver",
+			"A bound on the number of states which will be found in the driver.",
 			1);
 	private final IntegerOption stateOffset;
 
 	public StateBoundOption() {
 		super("compute state number bound from driver",
 				"state-bound-from-driver",
-				"Use a glass-box driver to count the states in the automaton",
+				"Use a glass-box driver to count the states in the automaton.",
 				null, null, false);
 		stateOffset = new IntegerOption("--states-bound-offset",
 				"offset of state number bound",
-				"This offset will be added to the number of state get from driver",
+				"This offset will be added to the number of state get from driver. It can be positive or negative.",
 				0);
 		stateOffset.setMinimum(Integer.MIN_VALUE);
 
@@ -72,5 +73,17 @@ public class StateBoundOption extends BooleanOption {
 
 	public int getValue() {
 		return stateNumber.getValue();
+	}
+
+	@Override
+	public String getDisableHelp() {
+		return "Manually set the bound of states number.";
+	}
+
+	@Override
+	protected void makeArgumentDescriptors(String argument) {
+		super.makeArgumentDescriptors(argument);
+		disableArgumentDescriptor = new ArgumentDescriptor(AcceptedValues.NONE,
+				"--manual-state-bound", this);
 	}
 }

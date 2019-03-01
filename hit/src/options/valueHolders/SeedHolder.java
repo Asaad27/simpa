@@ -13,8 +13,8 @@ public class SeedHolder extends SingleValueAutoHolder<Long, LongHolder>
 		implements RandomGenerator {
 
 	public SeedHolder(String seedUse) {
-		super(new LongHolder("seed for " + seedUse,
-				"seed used to initialize a random source."
+		super(new LongHolder("Seed for " + seedUse,
+				"Seed used to initialize a random source."
 						+ " It can be manualy choosen to re-run a previous inference.",
 				(long) 1));
 		updateWithValue();

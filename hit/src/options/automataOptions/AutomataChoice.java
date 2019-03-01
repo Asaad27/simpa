@@ -22,6 +22,7 @@ public class AutomataChoice extends MultiArgChoiceOption {
 	public MultiArgChoiceOptionItem scan;
 
 	public AutomataChoice() {
+		optionName = "automata type";
 		List<OptionTree> subTree;
 		subTree = new ArrayList<>();
 		subTree.add(mealyLearnerChoice);

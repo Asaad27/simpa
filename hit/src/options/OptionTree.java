@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 
 import options.OptionValidator.CriticalityLevel;
 import options.valueHolders.ValueHolder;
+import tools.NullStream;
 import tools.Utils;
 import tools.loggers.LogManager;
 
@@ -45,6 +46,8 @@ public abstract class OptionTree {
 
 		public ArgumentDescriptor(AcceptedValues acceptedValues, String name,
 				OptionTree parentOption) {
+			assert name.startsWith("--")
+					|| (name.startsWith("-") && name.length() == 2);
 			this.acceptedValues = acceptedValues;
 			this.name = name;
 			this.parentOption = parentOption;
@@ -86,6 +89,17 @@ public abstract class OptionTree {
 		@Override
 		public String toString() {
 			return getName();
+		}
+
+		public String toStringWithValues() {
+			StringBuilder s = new StringBuilder();
+			for (String arg : asCLI()) {
+				s.append(arg);
+				s.append(" ");
+			}
+			if (s.length() > 0)
+				s.deleteCharAt(s.length() - 1);
+			return s.toString();
 		}
 
 		/**
@@ -616,17 +630,21 @@ public abstract class OptionTree {
 			}
 			if (subTrees.size() == 1) {
 				setValueFromSelectedChildren(subTrees.get(0));
-				parsingErrorStream.println(
-						"Warning : deduced value of this option by trying sub options."
-								+ " It is better to specify directly the value of this option ("
-								+ getSelectedArgument()
-								+ ") to remove ambiguity");
+				parsingErrorStream.println("Info : value of option '"
+						+ getName() + "' was deduced from sub options."
+						+ " It is better to specify directly the value of this option (with "
+						+ getSelectedArgument().toStringWithValues()
+						+ ") to remove ambiguity.");
 				assert (getSelectedChildren() == subTrees.get(0));
 			} else {
 				ArgumentValue defaultValue = getDefaultValue();
-				if (defaultValue == null)
+				if (defaultValue == null) {
 					parseError = true;
-				else {
+					parsingErrorStream.println("Cannot define value of option '"
+							+ getName() + "' with arguments " + args + ".");
+					parsingErrorStream.println("\tUse one argument in "
+							+ getAcceptedArguments() + ".");
+				} else {
 					boolean r = setValueFromArg(defaultValue,
 							parsingErrorStream);
 					assert r;
@@ -635,12 +653,15 @@ public abstract class OptionTree {
 		}
 
 		// now parse arguments in subtree
+		if (parseError) {
+			// If there is an error in this option, we try to parse sub-options
+			// but without displaying a bunch of errors and warnings.
+			parsingErrorStream = new NullStream();
+		}
 		boolean subTreeSuccessfullyParsed = true;
 		List<OptionTree> selectedSubTrees = getSelectedChildren();
 		for (OptionTree subtree : selectedSubTrees)
 			if (!subtree.parseArgumentsInternal(args, parsingErrorStream)) {
-				parsingErrorStream.println("cannot define value of option '"
-						+ subtree.getName() + "' with arguments " + args);
 				subTreeSuccessfullyParsed = false;
 			}
 		return subTreeSuccessfullyParsed && !parseError;
@@ -748,6 +769,11 @@ public abstract class OptionTree {
 			for (ArgumentDescriptor descriptor : current
 					.getAcceptedArguments()) {
 				String help = current.getHelpByArgument(descriptor);
+				assert Character.toUpperCase(help.charAt(0)) == help
+						.charAt(0) : "help message '" + help
+								+ "' should start with a capital letter";
+				assert help.endsWith(".") : "help message '" + help
+						+ "' should end with a dot";
 				if (seenDescriptors.containsKey(descriptor.name)) {
 					assert helps.get(seenDescriptors.get(descriptor.name))
 							.equals(help);

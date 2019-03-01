@@ -47,14 +47,32 @@ public class WekaOption extends BooleanOption {
 
 	private final BooleanOption forceJ48 = new BooleanOption(
 			"use J48 algorithm", "use-J48",
-			"Force the use of J48 algorithm instead of M5P for numeric classes",
-			new ArrayList<>(), new ArrayList<>(), false);
+			"Force the use of J48 algorithm instead of M5P for numeric classes.",
+			new ArrayList<>(), new ArrayList<>(), false) {
+		@Override
+		public String getDisableHelp() {
+			return "Do not use J48 algorithm and use M5P instead for numeric classes.";
+		}
+	};
 
 	WekaOption() {
-		super("use weka", "weka", "select the library used for data mining",
+		super("use weka", "weka", "Select the library used for data mining.",
 				null, new ArrayList<>(), false);
 		assert !isEnabled();
 		setSubTreeIfTrue(Arrays.asList(forceJ48));
+	}
+
+	@Override
+	public String getEnableHelp() {
+		if (isAvailable())
+			return "Use weka library.";
+		else
+			return "Use weka library (but it is not available on this system).";
+	}
+
+	@Override
+	public String getDisableHelp() {
+		return "Use free ARFF library instead of weka.";
 	}
 
 	@Override
