@@ -16,7 +16,7 @@ public class MealyDriverChoice extends DriverChoice<MealyDriver> {
 			this);
 
 	public MealyDriverChoice() {
-		super(MealyDriver.class);
+		super(MealyDriver.class, "Mealy driver");
 		addChoice(SIPDriverIpTel);
 		addChoice(new DriverChoiceItem<MealyDriver>(this,
 				RandomMealyDriver.class));

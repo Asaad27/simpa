@@ -8,7 +8,10 @@ import options.valueHolders.ValueHolder;
 
 public class GenericMultiArgChoiceOption<T extends MultiArgChoiceOptionItem>
 		extends GenericChoiceOption<T> {
-	protected String optionName = "";
+
+	public GenericMultiArgChoiceOption(String optionName) {
+		super(optionName);
+	}
 
 	@Override
 	protected boolean isActivatedByArg(ArgumentValue arg) {
@@ -66,7 +69,7 @@ public class GenericMultiArgChoiceOption<T extends MultiArgChoiceOptionItem>
 
 	@Override
 	public String getHelpByArgument(ArgumentDescriptor arg) {
-		return "Set " + optionName + " to "
+		return "Set " + getName() + " to "
 				+ getItemFromArg(new ArgumentValue(arg)) + ".";
 	}
 

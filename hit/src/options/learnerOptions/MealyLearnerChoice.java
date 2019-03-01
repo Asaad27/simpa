@@ -20,7 +20,7 @@ public class MealyLearnerChoice extends MultiArgChoiceOption {
 	public final CutterCombinatorialOptions cutCombinatorial;
 
 	public MealyLearnerChoice() {
-		optionName = "learner choice";
+		super("Mealy learner");
 
 		hW = new HWOptions(this);
 

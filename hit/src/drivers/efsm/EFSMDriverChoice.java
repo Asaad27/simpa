@@ -11,7 +11,7 @@ import options.automataOptions.DriverChoiceItem;
 public class EFSMDriverChoice extends DriverChoice<EFSMDriver> {
 
 	public EFSMDriverChoice() {
-		super(EFSMDriver.class);
+		super(EFSMDriver.class, "EFSM driver");
 		addChoice(new DriverChoiceItem<EFSMDriver>(this, ArticleDriver.class));
 		addChoice(
 				new DriverChoiceItem<EFSMDriver>(this, ArticleErrDriver.class));

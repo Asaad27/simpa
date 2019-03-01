@@ -8,7 +8,7 @@ public class EFSMLearnerChoice
 	public final LiOptions lilearner = new LiOptions(this);
 
 	public EFSMLearnerChoice() {
-		optionName = "learner";
+		super("EFSM learner");
 		addChoice(lilearner);
 	}
 }

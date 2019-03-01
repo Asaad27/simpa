@@ -1,5 +1,7 @@
 package options;
 
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
@@ -7,6 +9,8 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 import options.OptionTree;
 
@@ -20,11 +24,17 @@ import options.OptionTree;
  */
 public abstract class GenericChoiceOption<T extends ChoiceOptionItem>
 		extends OptionTree {
+	private final String optionName;
 
 	private JComboBox<T> choiceCombo = null;
 	protected List<T> choices = new ArrayList<>();
 	private T selectedItem = null;
 	protected T defaultItem = null;
+
+	public GenericChoiceOption(String optionName) {
+		assert !Character.isLowerCase(optionName.charAt(0));
+		this.optionName = optionName;
+	}
 
 	/**
 	 * Add a possible choice in the list.
@@ -55,7 +65,14 @@ public abstract class GenericChoiceOption<T extends ChoiceOptionItem>
 				selectChoice(choiceCombo.getSelectedIndex());
 			}
 		});
-		mainComponent = choiceCombo;
+		JPanel panel = new JPanel();
+		GridBagLayout layout = new GridBagLayout();
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.anchor = GridBagConstraints.LINE_START;
+		panel.setLayout(layout);
+		panel.add(new JLabel(getName()), constraints);
+		panel.add(choiceCombo, constraints);
+		mainComponent = panel;
 		selectChoice(selectedItem);
 	}
 
@@ -136,4 +153,8 @@ public abstract class GenericChoiceOption<T extends ChoiceOptionItem>
 		defaultItem = item;
 	}
 
+	@Override
+	public String getName() {
+		return optionName;
+	}
 }

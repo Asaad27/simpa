@@ -103,7 +103,7 @@ public class OracleOption extends MultiArgChoiceOption {
 	public MultiArgChoiceOptionItem distinctionTreeBased;
 
 	public OracleOption(boolean resetAllowed) {
-		optionName = "oracle choice";
+		super("Oracle choice");
 		this.resetAllowed = resetAllowed;
 		addValidator(driverValidator);
 		shortest = new MultiArgChoiceOptionItem("use shortest counter example",

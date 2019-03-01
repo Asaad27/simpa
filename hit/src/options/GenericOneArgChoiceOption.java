@@ -19,12 +19,8 @@ public class GenericOneArgChoiceOption<T extends OneArgChoiceOptionItem>
 		extends GenericChoiceOption<T> {
 	ArgumentDescriptor argumentDescriptor;
 
-	public GenericOneArgChoiceOption(ArgumentDescriptor argument) {
-		assert argument.name.startsWith("-");
-		argumentDescriptor = argument;
-	}
-
-	public GenericOneArgChoiceOption(String argument) {
+	public GenericOneArgChoiceOption(String argument, String optionName) {
+		super(optionName);
 		assert argument.startsWith("-");
 		argumentDescriptor = new ArgumentDescriptor(
 				ArgumentDescriptor.AcceptedValues.ONE, argument, this);

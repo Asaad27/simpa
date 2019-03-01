@@ -41,10 +41,10 @@ public class RivestSchapireOptions extends MultiArgChoiceOptionItem {
 	public RivestSchapireOptions(GenericMultiArgChoiceOption<?> parent) {
 		super("Rivest and Schapire", "--rivestSchapire", parent);
 		lmOptions = new LmOptions(subLearnerOption, "--RS-with-lm");
-		subLearnerOption = new MultiArgChoiceOption() {
+		subLearnerOption = new MultiArgChoiceOption(
+				"Sub-learner for Rivest and Schapire algorithm") {
 			{
 				addChoice(lmOptions);
-				optionName = "sub-learner for Rivest and Schapire algorithm";
 			}
 		};
 		subTrees.add(subLearnerOption);
