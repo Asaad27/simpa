@@ -24,7 +24,6 @@ import java.util.Scanner;
 import java.util.StringTokenizer;
 
 import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -882,12 +881,21 @@ public class SIMPA {
 		JScrollPane scroll = new JScrollPane();
 		scroll.setLayout(new ScrollPaneLayout());
 		JPanel optionsPanel = new JPanel();
-		optionsPanel
-				.setLayout(new BoxLayout(optionsPanel, BoxLayout.PAGE_AXIS));
 		scroll.getViewport().add(optionsPanel);
-		optionsPanel.add(automataChoice.getComponent());
-		optionsPanel.add(modeOption.getComponent());
-		optionsPanel.add(Box.createGlue());
+		{
+			optionsPanel.setLayout(new GridBagLayout());
+			GridBagConstraints c = new GridBagConstraints();
+			c.gridx = 0;
+			c.gridy = GridBagConstraints.RELATIVE;
+			c.anchor = GridBagConstraints.LINE_START;
+			c.fill = GridBagConstraints.HORIZONTAL;
+			c.weightx = 1;
+			optionsPanel.add(automataChoice.getComponent(), c);
+			optionsPanel.add(modeOption.getComponent(), c);
+			c.weighty = 1;
+			c.fill = GridBagConstraints.BOTH;
+			optionsPanel.add(Box.createGlue(), c);
+		}
 		constraints.fill = GridBagConstraints.BOTH;
 		constraints.weighty = 1;
 		pane.add(scroll, constraints);

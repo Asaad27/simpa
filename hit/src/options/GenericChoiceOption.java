@@ -71,6 +71,7 @@ public abstract class GenericChoiceOption<T extends ChoiceOptionItem>
 		constraints.anchor = GridBagConstraints.LINE_START;
 		panel.setLayout(layout);
 		panel.add(new JLabel(getName()), constraints);
+		constraints.weightx = 1;
 		panel.add(choiceCombo, constraints);
 		mainComponent = panel;
 		selectChoice(selectedItem);

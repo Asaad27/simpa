@@ -1,6 +1,8 @@
 package options;
 
 import java.awt.Component;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -154,21 +156,26 @@ public abstract class OptionTree {
 	public Component getComponent() {
 		if (mainContainer == null) {
 			mainContainer = new JPanel();
+			mainContainer.setLayout(new GridBagLayout());
 			JPanel topContainer = new JPanel();
 			topContainer.setLayout(
 					new BoxLayout(topContainer, BoxLayout.LINE_AXIS));
 			validationContainer = new JPanel();
 			validationContainer.setLayout(
 					new BoxLayout(validationContainer, BoxLayout.PAGE_AXIS));
-
-			mainContainer.add(topContainer);
+			GridBagConstraints constraints = new GridBagConstraints();
+			constraints.fill = GridBagConstraints.BOTH;
+			constraints.anchor = GridBagConstraints.LINE_START;
+			mainContainer.add(topContainer, constraints);
+			constraints.gridy = 0;
+			constraints.gridx = 1;
+			constraints.weightx = 1;
+			mainContainer.add(Box.createGlue(), constraints);
 			createMainComponent();
 			if (mainComponent != null)
 				topContainer.add(mainComponent);
+			topContainer.add(Box.createHorizontalGlue());
 			topContainer.add(validationContainer);
-			topContainer.add(Box.createGlue());
-			mainContainer.setLayout(
-					new BoxLayout(mainContainer, BoxLayout.PAGE_AXIS));
 			checkValidators();
 		}
 		return mainContainer;
@@ -193,6 +200,10 @@ public abstract class OptionTree {
 			}
 			List<OptionTree> selectedSubTree = getSelectedChildren();
 
+			GridBagConstraints verticalListConstraints = new GridBagConstraints();
+			verticalListConstraints.gridx = 0;
+			verticalListConstraints.gridy = GridBagConstraints.RELATIVE;
+			verticalListConstraints.anchor = GridBagConstraints.LINE_START;
 			if (selectedSubTree.size() == 1
 					&& selectedSubTree.get(0).getChildren().isEmpty()) {
 				subTreeContainer = new JPanel();
@@ -201,17 +212,17 @@ public abstract class OptionTree {
 				subTreeContainer.add(Box.createHorizontalStrut(20));
 				subTreeContainer.add(selectedSubTree.get(0).getComponent());
 				subTreeContainer.add(Box.createGlue());
-				mainContainer.add(subTreeContainer);
+				mainContainer.add(subTreeContainer, verticalListConstraints);
 			} else if (selectedSubTree.size() != 0) {
 				subTreeContainer = new JPanel();
+				mainContainer.add(subTreeContainer, verticalListConstraints);
 				subTreeContainer.setBorder(
 						BorderFactory.createTitledBorder(subTreeTitle));
+				subTreeContainer.setLayout(new GridBagLayout());
 				for (OptionTree subOption : selectedSubTree) {
-					subTreeContainer.add(subOption.getComponent());
+					subTreeContainer.add(subOption.getComponent(),
+							verticalListConstraints);
 				}
-				subTreeContainer.setLayout(
-						new BoxLayout(subTreeContainer, BoxLayout.Y_AXIS));
-				mainContainer.add(subTreeContainer);
 			}
 			mainContainer.revalidate();
 		}
