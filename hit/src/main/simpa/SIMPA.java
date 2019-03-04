@@ -11,7 +11,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Writer;
@@ -57,6 +56,7 @@ import stats.GraphGenerator;
 import stats.StatsEntry;
 import stats.StatsSet;
 import tools.DotAntlrListener;
+import tools.NullStream;
 import tools.Utils;
 import tools.loggers.HTMLLogger;
 import tools.loggers.LogManager;
@@ -961,12 +961,7 @@ public class SIMPA {
 			if (lastOptionsFile.exists())
 				lastOptions = Utils
 						.fileContentOf(lastOptionsFile);
-			PrintStream nullStream = new PrintStream(new OutputStream() {
-				@Override
-				public void write(int b) throws IOException {
-				}
-			});
-			allOptions.parseArguments(lastOptions, nullStream);
+			allOptions.parseArguments(lastOptions, new NullStream());
 			javax.swing.SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
