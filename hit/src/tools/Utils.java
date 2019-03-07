@@ -466,6 +466,36 @@ public class Utils {
 	}
 
 	/**
+	 * Try to get the width of terminal and return a default value if width
+	 * cannot be found.
+	 * 
+	 * @param defaultValue
+	 *            the width to return if width cannot be found
+	 * @return the width of terminal or a default value
+	 */
+	public static Integer terminalWidth(Integer defaultValue) {
+		String env = System.getenv("COLUMNS");
+		if (env == null)
+			return defaultValue;
+		try {
+			return Integer.valueOf(env);
+		} catch (NumberFormatException e) {
+			return defaultValue;
+		}
+
+	}
+
+	/**
+	 * Try to get the width of terminal and return a default value if width
+	 * cannot be found.
+	 * 
+	 * @return the width of terminal or a default value
+	 */
+	public static int terminalWidth() {
+		return terminalWidth(80);
+	}
+
+	/**
 	 * change a list of string into a single string where all elements are
 	 * separated with spaces (and spaces in elements are escaped)
 	 * 

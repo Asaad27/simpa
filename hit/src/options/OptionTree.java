@@ -806,7 +806,7 @@ public abstract class OptionTree {
 				maxArgDispLength = disp.length();
 		}
 
-		int MAX_LENGTH = 80;// maximum length of lines, for readability.
+		int MAX_LENGTH = tools.Utils.terminalWidth();
 		int argColumnWidth = maxArgDispLength;
 		argColumnWidth++;// put a blank space between argument and help.
 		for (ArgumentDescriptor descriptor : sortedArguments) {
