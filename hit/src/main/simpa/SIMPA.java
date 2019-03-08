@@ -703,7 +703,7 @@ public class SIMPA {
 			if (!learnAndSaveOneTime())
 				return false;
 		}
-		boolean makeGraphs = true;// TODO
+		boolean makeGraphs = modeOption.stats.makeGraphs.isEnabled();
 		if (makeGraphs) {
 			System.out.println("[+] Make Graph");
 			GlobalGraphGenerator globalGraph = new GlobalGraphGenerator();
