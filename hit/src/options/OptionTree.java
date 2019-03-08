@@ -551,7 +551,7 @@ public abstract class OptionTree {
 				switch (descriptor.acceptedValues) {
 				case NONE:
 					if (valueArg.values.size() > 0) {
-						System.out.println("Warning : argument "
+						parsingErrorStream.println("Warning : argument "
 								+ descriptor.name
 								+ " should not have a value and '" + value
 								+ "' cannot be parsed as an argument");
@@ -559,20 +559,20 @@ public abstract class OptionTree {
 					break;
 				case ONE:
 					if (valueArg.values.size() > 1) {
-						System.out
+						parsingErrorStream
 								.println("Warning : argument " + descriptor.name
 										+ " should have only one value and '"
 										+ valueArg.values
 										+ "' cannot be parsed as arguments");
 					} else if (valueArg.values.size() == 0) {
-						System.out
+						parsingErrorStream
 								.println("Warning : argument " + descriptor.name
 										+ " is waiting for some value");
 					}
 					break;
 				case SEVERAL:
 					if (valueArg.values.size() == 0) {
-						System.out
+						parsingErrorStream
 								.println("Warning : argument " + descriptor.name
 										+ " is waiting for some value");
 					}
@@ -583,7 +583,7 @@ public abstract class OptionTree {
 		boolean parsingInternalSucces = parseArgumentsInternal(valuesList,
 				parsingErrorStream);
 		if (valuesList.size() != 0) {
-			System.out.println(
+			parsingErrorStream.println(
 					"Warning : some arguments were not used because they are not compatible with options of upper level."
 							+ " You can remove the following options : "
 							+ valuesList);
