@@ -49,9 +49,11 @@ public class RandomEFSM extends EFSM implements Serializable {
 				"Size of the parameter's domain",
 				"Size of the parameter's domain.", 10);
 		final PercentageOption simpleGuardPercent = new PercentageOption(
-				"--simpleguard", "% of simple guard transitions", 25);
+				"--simpleguard", "Percentage of simple guard transitions.",
+				"Percentage of simple guard transitions.", 25);
 		final PercentageOption ndvGuardPercent = new PercentageOption(
-				"--ndvguard", "% of generating NDV by transitions", 25);
+				"--ndvguard", "Percentage of generating NDV by transitions.",
+				"Percentage of generating NDV by transitions.", 25);
 		private final IntegerOption ndvMinTransToCheck = new IntegerOption(
 				"--ndvmintrans", "minumum number of states before NDV",
 				"Minimum number of states before checking NDV value.", 1);

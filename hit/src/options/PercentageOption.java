@@ -2,9 +2,9 @@ package options;
 
 public class PercentageOption extends IntegerOption {
 
-	public PercentageOption(String argument, String description,
+	public PercentageOption(String argument, String name, String description,
 			int defaultValue) {
-		super(argument, argument, description, defaultValue);// TODO add name
+		super(argument, name, description, defaultValue);
 		setMaximum(100);
 		setMinimum(0);
 	}
