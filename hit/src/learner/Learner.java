@@ -70,7 +70,8 @@ public abstract class Learner {
 			if (selectedLearnerChoice == learnerChoice.tree) {
 				return new ZLearner(mDriver, learnerChoice.tree);
 			} else if (selectedLearnerChoice == learnerChoice.combinatorial) {
-				return new CombinatorialLearner(mDriver);
+				return new CombinatorialLearner(mDriver,
+						learnerChoice.combinatorial);
 			} else if (selectedLearnerChoice == learnerChoice.cutCombinatorial) {
 				return new CutterCombinatorialLearner(mDriver,
 						learnerChoice.cutCombinatorial);

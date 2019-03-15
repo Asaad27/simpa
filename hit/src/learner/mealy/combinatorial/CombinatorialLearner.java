@@ -11,11 +11,10 @@ import java.util.LinkedList;
 import automata.Automata;
 import automata.State;
 import automata.mealy.InputSequence;
-import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
+import automata.mealy.multiTrace.SimpleMultiTrace;
 import drivers.mealy.MealyDriver;
-import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
 import learner.mealy.LmTrace;
 import learner.mealy.combinatorial.node.ArrayTreeNodeWithoutConjecture;
@@ -24,8 +23,6 @@ import main.simpa.Options;
 import main.simpa.Options.LogLevel;
 import stats.StatsEntry;
 import tools.GraphViz;
-import tools.RandomGenerator;
-import tools.StandaloneRandom;
 import tools.loggers.LogManager;
 
 
@@ -35,9 +32,12 @@ public class CombinatorialLearner extends Learner {
 	private TreeNode root;
 	private Conjecture conjecture;
 	private CombinatorialStatsEntry stats;
+	private final CombinatorialOptions options;
 
-	public CombinatorialLearner(MealyDriver driver) {
+	public CombinatorialLearner(MealyDriver driver,
+			CombinatorialOptions options) {
 		this.driver = driver;
+		this.options = options;
 	}
 
 	@Override
@@ -49,7 +49,7 @@ public class CombinatorialLearner extends Learner {
 	public void learn() {
 		LogManager.logStep(LogManager.STEPOTHER,"Inferring the system");
 		LogManager.logConsole("Inferring the system");
-		stats = new CombinatorialStatsEntry(driver);
+		stats = new CombinatorialStatsEntry(driver, options);
 		long start = System.nanoTime();
 		driver.reset();
 		trace = new LmTrace();
@@ -179,83 +179,23 @@ public class CombinatorialLearner extends Learner {
 	/**
 	 * search a sequence which distinguish the conjecture and the blackbox and apply it.
 	 * 
-	 * If the driver is an instance of {@link TransparentMealyDriver}, the real automata is used to find the shortest counter example
-	 * 
-	 * If the automata are not equivalents, the distinguish sequence is applied. If they seems to be equivalent, a sequence may are may not be applied
-	 * @see #getShortestCounterExemple(Mealy, State, Conjecture, State)
 	 * @param c the conjecture
 	 * @param currentState the current position in conjecture
 	 * @return true if a counterExemple was found, false if the conjecture seems to be equivalent to the automata.
 	 */
 	private boolean applyCounterExample(Conjecture c, State currentState){
-		RandomGenerator rand = new StandaloneRandom();// TODO create options
-		LogManager.logInfo("searching counter Example");
-		if (driver instanceof TransparentMealyDriver){
-			Mealy original = ((TransparentMealyDriver) driver).getAutomata();
-			State originalState = ((TransparentMealyDriver) driver).getCurrentState();
-			InputSequence r = getShortestCounterExemple(original, originalState, c, currentState);
-			if (r == null)
-				return false;
-			apply(r);
-			return true;
-		}
-		int maxTry = driver.getInputSymbols().size() * c.getStateCount() * 20;//TODO find a better way to choose this number ?
-		for (int i = 0; i < maxTry; i++){
-			String input = rand.randIn(driver.getInputSymbols());
-			String driverOutput = apply(input,false);
-			MealyTransition t = c.getTransitionFromWithInput(currentState, input);
-			String conjectureOutput = t.getOutput();
-			currentState = t.getTo();
-			if (! driverOutput.equals(conjectureOutput)){
-				LogManager.logInfo("trace is now " + trace);
-				return true;
-			}
-		}
-		LogManager.logInfo("no CounterExample found after " + maxTry + " try");
-		return false;
-	}
+		LogManager.logLine();
+		LogManager.logInfo("Searching counter Example");
+		SimpleMultiTrace appliedSequences=new SimpleMultiTrace();
+		
+		boolean found = driver.getCounterExample_noThrow(
+				options.getOracleOption(), c,
+				currentState, appliedSequences, false, stats.oracle);
 
-	/**
-	 * get a shortest distinguish sequence for two automata
-	 * The two automata ares supposed to be connex.
-	 * @param a1 the first automata
-	 * @param s1 the current position in a1
-	 * @param a2 the second automata (a conjecture, in order to get the input symbols)
-	 * @param s2 the current position in a2
-	 * @return a distinguish sequence for the two automata starting from their current states.
-	 */
-	private InputSequence getShortestCounterExemple(Mealy a1,
-			State s1, Conjecture a2, State s2) {
-		assert a1.isConnex() && a2.isConnex();
-		int maxLength = (a1.getStateCount() > a2.getStateCount() ? a1.getStateCount() : a2.getStateCount());
-		class Node{public InputSequence i; public State originalEnd; public State conjectureEnd;}
-		LinkedList<Node> toCompute = new LinkedList<Node>();
-		Node n = new Node();
-		n.i = new InputSequence();
-		n.originalEnd = s1;
-		n.conjectureEnd = s2;
-		toCompute.add(n);
-		while (!toCompute.isEmpty()){
-			Node current = toCompute.pollFirst();
-			if (current.i.getLength() > maxLength)
-				continue;
-			for (String i : a2.getInputSymbols()){
-				MealyTransition originalT = a1.getTransitionFromWithInput(current.originalEnd, i);
-				MealyTransition conjectureT = a2.getTransitionFromWithInput(current.conjectureEnd, i);
-				if (!originalT.getOutput().equals(conjectureT.getOutput())){
-					current.i.addInput(i);
-					return current.i;
-				}
-				Node newNode = new Node();
-				newNode.i = new InputSequence();
-				newNode.i.addInputSequence(current.i);
-				newNode.i.addInput(i);
-				newNode.originalEnd = originalT.getTo();
-				newNode.conjectureEnd = conjectureT.getTo();
-				toCompute.add(newNode);
-			}
-		}
-		return null;
+		assert appliedSequences.getResetNumber() == 0;
+		trace.append(appliedSequences.getLastTrace());
+
+		return found;
 	}
 
 	/**

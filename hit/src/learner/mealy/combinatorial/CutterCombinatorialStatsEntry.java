@@ -8,8 +8,9 @@ public class CutterCombinatorialStatsEntry extends CombinatorialStatsEntry {
 		super(line);
 	}
 
-	protected CutterCombinatorialStatsEntry(MealyDriver d) {
-		super(d);
+	protected CutterCombinatorialStatsEntry(MealyDriver d,
+			CutterCombinatorialOptions options) {
+		super(d, options);
 		traceLength = 0;
 	}
 

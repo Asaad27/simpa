@@ -2,9 +2,8 @@ package learner.mealy.combinatorial;
 
 import options.BooleanOption;
 import options.GenericMultiArgChoiceOption;
-import options.MultiArgChoiceOptionItem;
 
-public class CutterCombinatorialOptions extends MultiArgChoiceOptionItem {
+public class CutterCombinatorialOptions extends CombinatorialOptions {
 	public final BooleanOption interactive = new BooleanOption(
 			"interactive pruning", "interactive-pruning",
 			"Prompt user to select pruning sequences.");

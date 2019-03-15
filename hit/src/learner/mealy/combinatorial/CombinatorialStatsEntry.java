@@ -8,6 +8,7 @@ import automata.mealy.MealyTransition;
 import drivers.mealy.MealyDriver;
 import stats.GraphGenerator;
 import stats.StatsEntry;
+import stats.StatsEntry_OraclePart;
 import stats.attribute.Attribute;
 
 public class CombinatorialStatsEntry extends StatsEntry {
@@ -18,6 +19,10 @@ public class CombinatorialStatsEntry extends StatsEntry {
 	public final static Attribute<Float> DURATION = Attribute.DURATION;
 	public final static Attribute<Integer> NODES_NB = Attribute.NODES_NB;
 	public final static Attribute<String>  AUTOMATA = Attribute.AUTOMATA;
+	public final static Attribute<Integer> ASKED_COUNTER_EXAMPLE = Attribute.ASKED_COUNTER_EXAMPLE;
+	public final static Attribute<String> ORACLE_USED = Attribute.ORACLE_USED;
+	public final static Attribute<Float> ORACLE_DURATION = Attribute.ORACLE_DURATION;
+	public final static Attribute<Integer> ORACLE_TRACE_LENGTH = Attribute.ORACLE_TRACE_LENGTH;
 
 	private static final Attribute<?>[] attributes = new Attribute<?>[]{
 		TRACE_LENGTH,
@@ -27,6 +32,10 @@ public class CombinatorialStatsEntry extends StatsEntry {
 		DURATION,
 		NODES_NB,
 		AUTOMATA,
+		ASKED_COUNTER_EXAMPLE,
+		ORACLE_USED,
+		ORACLE_DURATION,
+		ORACLE_TRACE_LENGTH,
 	};
 
 	protected int traceLength;
@@ -36,15 +45,18 @@ public class CombinatorialStatsEntry extends StatsEntry {
 	private float duration;
 	private int nodesNB;
 	private String automata;
+	final StatsEntry_OraclePart oracle;
 
 	public static String getCSVHeader_s(){
 		return makeCSVHeader(attributes);
 	}
 
-	protected CombinatorialStatsEntry(MealyDriver d) {
+	protected CombinatorialStatsEntry(MealyDriver d,
+			CombinatorialOptions options) {
 		this.inputSymbols = d.getInputSymbols().size();
 		automata = d.getSystemName();
 		nodesNB = 0;
+		oracle = new StatsEntry_OraclePart(options.getOracleOption());
 	}
 
 	/**
@@ -60,6 +72,9 @@ public class CombinatorialStatsEntry extends StatsEntry {
 		duration = Float.parseFloat(st.nextToken());
 		nodesNB = Integer.parseInt(st.nextToken());
 		automata = st.nextToken();
+
+		st = new StringTokenizer(line, ",");
+		oracle = new StatsEntry_OraclePart(st, getAttributes());
 	}
 
 	public void setDuration(float d){
@@ -100,19 +115,31 @@ public class CombinatorialStatsEntry extends StatsEntry {
 			return (T) Integer.valueOf(nodesNB);
 		if (a == AUTOMATA)
 			return (T) automata;
+		if (a == ASKED_COUNTER_EXAMPLE)
+			return (T) Integer.valueOf(oracle.getAskedCE());
+		if (a == ORACLE_USED)
+			return (T) oracle.getName();
+		if (a == ORACLE_DURATION)
+			return (T) Float.valueOf(oracle.getDuration());
+		if (a == ORACLE_TRACE_LENGTH)
+			return (T) Integer.valueOf(oracle.getTraceLength());
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 	}
 
 	@Override
 	public <T extends Comparable<T>> Float getFloatValue(Attribute<T> a) {
 		if (
+				a == ASKED_COUNTER_EXAMPLE ||
+				a == ORACLE_TRACE_LENGTH ||
 				a == TRACE_LENGTH ||
 				a == INPUT_SYMBOLS ||
 				a == OUTPUT_SYMBOLS ||
 				a == STATE_NUMBER ||
 				a == NODES_NB)
 			return ((Integer) get(a)).floatValue();
-		if (a == DURATION)
+		if (
+				a == DURATION ||
+				a == ORACLE_DURATION)
 			return (Float) get(a);
 		throw new RuntimeException(a.getName() + " is not available or cannot be cast to float");
 	}
