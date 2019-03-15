@@ -29,13 +29,16 @@ public class TransparentMealyDriver extends AutomatonMealyDriver {
 		if (!this.automata.isConnex())
 			throw new RuntimeException("automata must be strongly connected");
 		List<InputSequence> counterExamples = conjecture.getCounterExamples(
-				conjectureState, this.automata, currentState, true);
+				conjectureState, this.automata, currentState, false);
 		if (counterExamples.isEmpty()) {
 			return null;
 		} else {
-			assert counterExamples
-					.size() == 1 : "only the shortest CE should be in the list";
-			return counterExamples.get(0);
+			InputSequence shortest = counterExamples.get(0);
+			for (InputSequence seq : counterExamples) {
+				if (seq.getLength() < shortest.getLength())
+					shortest = seq;
+			}
+			return shortest;
 		}
 	}
 }

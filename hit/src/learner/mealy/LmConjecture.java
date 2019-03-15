@@ -175,7 +175,7 @@ public class LmConjecture extends automata.mealy.Mealy {
 		assert realAutomata.allStatesAreReachableFrom(realStartingState);
 		CounterExampleResult counterExamples = getAllCounterExamplesReachable(
 				conjectureStartingState, realAutomata, realStartingState,
-				false);
+				stopOnFirst);
 		assert counterExamples.testedRealStates
 				.containsAll(realAutomata.getStates());
 		return counterExamples.noResetCE;
