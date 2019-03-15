@@ -96,6 +96,7 @@ public class FileOption extends OptionTree {
 	private JTextField text;
 	private JLabel suffixLabel;
 	private File selectedFile;
+	private File defaultFile = null;
 	private String pathSufix = "";
 	private final List<OptionTree> subOptions = new ArrayList<>();// Sub options
 																	// are not
@@ -131,8 +132,10 @@ public class FileOption extends OptionTree {
 			FileSelectionMode fileSelectionMode, FileExistance fileExistance) {
 		this(argument, fileSelectionMode, fileExistance);
 		this.description = description;
-		if (defaultFile != null)
+		if (defaultFile != null) {
 			setSelectedFile(defaultFile);
+			this.defaultFile = defaultFile;
+		}
 	}
 
 	public void setSuffix(String suffix) {
@@ -234,6 +237,15 @@ public class FileOption extends OptionTree {
 	protected void setValueFromSelectedChildren(
 			List<OptionTree> selectedChildren) {
 		assert selectedChildren == subOptions;
+	}
+
+	@Override
+	protected ArgumentValue getDefaultValue() {
+		if (defaultFile == null)
+			return null;
+		ArgumentValue argValue = new ArgumentValue(argument);
+		argValue.addValue(defaultFile.getPath());
+		return argValue;
 	}
 
 	@Override
