@@ -29,8 +29,23 @@ public abstract class Driver<I, O> {
 		addtolog = true;
 	}
 
+	/**
+	 * Get the list of input symbols which can be applied to the System Under
+	 * Inference.
+	 * 
+	 * Learning algorithms currently suppose that SUI are complete and thus,
+	 * this value returned by this method should not depend on the state of the
+	 * SUI.
+	 * 
+	 * @return the list of input which can be applied on SUI.
+	 */
 	public abstract List<String> getInputSymbols();
 
+	/**
+	 * Get the name of the System Under Inference.
+	 * 
+	 * @return the name of the system.
+	 */
 	public abstract String getSystemName();
 
 	public int getNumberOfRequest() {
@@ -65,6 +80,14 @@ public abstract class Driver<I, O> {
 		return output;
 	}
 
+	/**
+	 * Execute an input on the System Under Inference and return the output
+	 * produced by the system.
+	 * 
+	 * @param input
+	 *            the input to apply on SUI
+	 * @return the output produced by SUI
+	 */
 	protected abstract O execute_implem(I input);
 
 	public final void reset() {
@@ -75,6 +98,11 @@ public abstract class Driver<I, O> {
 		numberOfRequest++;
 	}
 
+	/**
+	 * Reset the System Under Inference to its initial state. A driver used with
+	 * no-reset algorithm will not use this method and thus, the implementation
+	 * can simply be {@code throw new RuntimeException();}.
+	 */
 	protected abstract void reset_implem();
 
 }

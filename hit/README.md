@@ -83,3 +83,34 @@ There are some examples for **Program Arguments** :
 	--mealy --driver drivers.mealy.SFM11StefenDriver --lm --mrBean --oracleSeed=auto --maxcelength=20 --maxceresets=30 --html --text
 
 	--mealy --driver drivers.mealy.FromDotMealyDriver --lm --html --text --loadDotFile /Documents/workspace/DotParser/test2.dot
+
+# Inferring a real system (writing a new Driver)
+
+To write a new driver, you must extends the class `drivers.mealy.MealyDriver` or
+`drivers.efsm.EMFSDriver`. You must define the following methods :
+
+	@Override
+	public Output execute_implem(Input input) {
+	}
+which must execute the given input on system under inference and return the
+output observed (`Input` and `Output` types depends on type of system : Mealy or
+EFMS),
+
+	@Override
+	public void reset_implem() {
+	}
+which reset the driver to its initial state (if you plan to use only no-reset
+algorithms, you can just put a `throw new RuntimeException();` in the body to be
+sure that the method is never called),
+
+	@Override
+	public List<String> getInputSymbols() {
+	}
+which return a list of input symbols,
+
+You must also add a constructor which takes no argument.
+
+
+As an example, `drivers.mealy.real.HeatingSystem` is a driver which simply send
+inputs to standard input of an executable an reads outputs from standard output
+of the same software.
