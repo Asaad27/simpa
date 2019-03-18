@@ -206,7 +206,9 @@ public class HWLearner extends Learner {
 			AdaptiveHomingSequenceChecker.AdaptiveHNDException adaptiveE = (AdaptiveHomingSequenceChecker.AdaptiveHNDException) e;
 			adaptiveE.updateH();
 			if (Options.getLogLevel() != LogLevel.LOW)
-				adaptiveE.getNewH().exportToDot();
+				adaptiveE.getNewH().exportToDot(
+						Options.getDotDir().toPath().resolve("H.dot").toFile(),
+						"homing sequence");
 			List<GenericOutputSequence> responses = new ArrayList<>(
 					hZXWSequences.keySet());
 			for (GenericOutputSequence hresponse : responses) {
@@ -954,7 +956,10 @@ public class HWLearner extends Learner {
 			}
 			if (W instanceof TotallyAdaptiveW
 					&& Options.getLogLevel() == LogLevel.ALL) {
-				((TotallyAdaptiveW) W).exportToDot();
+				((TotallyAdaptiveW) W).exportToDot(
+						Options.getDotDir().toPath().resolve("W-tree.dot")
+								.toFile(),
+						"W-tree");
 			}
 			LogManager.logInfo(logW.toString());
 			LogManager.logInfo("Using homing sequence «" + h + "»"

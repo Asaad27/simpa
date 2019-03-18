@@ -103,7 +103,11 @@ public class LY_basedOracle {
 			throw new RuntimeException("invalid tree");
 		if (verbose) {
 			LogManager.logInfo("using distinction tree ", distinctionTree);
-			distinctionTree.exportToDot();
+			distinctionTree
+					.exportToDot(
+							Options.getDotDir().toPath()
+									.resolve("Distinction tree.dot").toFile(),
+							"distinction_tree");
 		}
 		for (State s : conjecture.getStates()) {
 			// can be changed to add only reachable states
