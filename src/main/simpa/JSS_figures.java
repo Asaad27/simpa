@@ -44,6 +44,8 @@ public class JSS_figures {
 
 	static abstract class Config {
 		abstract void set_up();
+
+		abstract String name();
 	}
 
 	static final Config hWWithoutHeuristic = new Config() {
@@ -60,12 +62,22 @@ public class JSS_figures {
 			Options.TRY_TRACE_AS_CE = false;
 			Options.HW_WITH_KNOWN_W = false;
 		}
+
+		@Override
+		String name() {
+			return "hW Without Heuristic";
+		}
 	};
 	static final Config hW_addHInW = new Config() {
 		@Override
 		void set_up() {
 			hWWithoutHeuristic.set_up();
 			Options.ADD_H_IN_W = true;
+		}
+
+		@Override
+		String name() {
+			return "hW add h in W";
 		}
 	};
 	static final Config hw_hzxw = new Config() {
@@ -75,6 +87,11 @@ public class JSS_figures {
 			hWWithoutHeuristic.set_up();
 			Options.REUSE_HZXW = true;
 		}
+
+		@Override
+		String name() {
+			return "hW hzxw";
+		}
 	};
 	static final Config hw_3rd = new Config() {
 
@@ -82,6 +99,11 @@ public class JSS_figures {
 		void set_up() {
 			hWWithoutHeuristic.set_up();
 			Options.CHECK_INCONSISTENCY_H_NOT_HOMING = true;
+		}
+
+		@Override
+		String name() {
+			return "hW 3rd inconsitencies";
 		}
 	};
 	static final Config hW_heuristicsNoTrace = new Config() {
@@ -98,6 +120,11 @@ public class JSS_figures {
 			Options.CHECK_INCONSISTENCY_H_NOT_HOMING = true;
 			Options.TRY_TRACE_AS_CE = false;
 			Options.HW_WITH_KNOWN_W = false;
+		}
+
+		@Override
+		String name() {
+			return "hW_heuristicNoTrace";
 		}
 	};
 	static final Config hWWithAllHeuristics = new Config() {
@@ -116,6 +143,11 @@ public class JSS_figures {
 			Options.HW_WITH_KNOWN_W = false;
 		}
 
+		@Override
+		String name() {
+			return "hW all heuristics";
+		}
+
 	};
 	static final Config hWWithKnownW = new Config() {
 
@@ -123,6 +155,11 @@ public class JSS_figures {
 		void set_up() {
 			hWWithAllHeuristics.set_up();
 			Options.HW_WITH_KNOWN_W = true;
+		}
+
+		@Override
+		String name() {
+			return "hW known W";
 		}
 
 	};
@@ -134,6 +171,11 @@ public class JSS_figures {
 			Options.HW_WITH_RESET = true;
 		}
 
+		@Override
+		String name() {
+			return "hW with reset";
+		}
+
 	};
 	static final Config RS = new Config() {
 
@@ -142,6 +184,11 @@ public class JSS_figures {
 			resetInferenceOption();
 			Options.RIVESTSCHAPIREINFERENCE = true;
 			Options.RS_WITH_UNKNOWN_H = true;
+		}
+
+		@Override
+		String name() {
+			return "Rivest&Schapire";
 		}
 	};
 	static final Config locW = new Config() {
@@ -152,6 +199,11 @@ public class JSS_figures {
 			Options.LOCALIZER_BASED_INFERENCE = true;
 			Options.ICTSS2015_WITHOUT_SPEEDUP = true;
 		}
+
+		@Override
+		String name() {
+			return "LocW";
+		}
 	};
 	static final Config Lm = new Config() {
 
@@ -159,6 +211,11 @@ public class JSS_figures {
 		void set_up() {
 			resetInferenceOption();
 			Options.LMINFERENCE = true;
+		}
+
+		@Override
+		String name() {
+			return "LM";
 		}
 	};
 
@@ -220,7 +277,9 @@ public class JSS_figures {
 		return driver;
 	}
 
-	protected static Learner learnOneTime() throws Exception {
+	protected static Learner learnOneTime(Config config) throws Exception {
+		config.set_up();
+		System.out.println("Using config : " + config.name());
 		Learner learner = null;
 		Driver driver = null;
 		boolean error = false;
@@ -250,7 +309,8 @@ public class JSS_figures {
 		return learner;
 	}
 
-	protected static void run_stats() {
+	protected static void run_stats(Config config) {
+		config.set_up();
 		if (random)
 			System.out.println("states " + Options.MAXSTATES);
 		else
@@ -292,7 +352,7 @@ public class JSS_figures {
 			Options.OUTDIR = logDir + File.separator + i + File.separator;
 			Utils.createDir(new File(Options.OUTDIR));
 			try {
-				Learner l = learnOneTime();
+				Learner l = learnOneTime(config);
 
 				StatsEntry learnerStats = l.getStats();
 
@@ -412,7 +472,7 @@ public class JSS_figures {
 					180, 200, 5, 15, 30, 70, 150, 300, 700, 1500, 3000 }) {
 				Options.MAXSTATES = s;
 				Options.MINSTATES = s;
-				run_stats();
+				run_stats(config);
 			}
 		}
 
@@ -430,7 +490,7 @@ public class JSS_figures {
 			for (Integer i : new Integer[] { 2, 5, 10, 15, 20, 30, 40, 50,
 					60 }) {
 				Options.MININPUTSYM = Options.MAXINPUTSYM = i;
-				run_stats();
+				run_stats(config);
 			}
 		}
 
@@ -465,7 +525,7 @@ public class JSS_figures {
 					continue;
 				Options.MAXSTATES = Options.MINSTATES = s;
 				Options.STATE_NUMBER_BOUND = s;
-				run_stats();
+				run_stats(config);
 			}
 		}
 
@@ -572,7 +632,7 @@ public class JSS_figures {
 				}
 				for (Boolean useDT : new Boolean[] { true, false }) {
 					Options.USE_DT_CE = useDT;
-					run_stats();
+					run_stats(config);
 				}
 			}
 		}
@@ -584,7 +644,7 @@ public class JSS_figures {
 				config.set_up();
 				for (Boolean useDT : new Boolean[] { true, false }) {
 					Options.USE_DT_CE = useDT;
-					run_stats();
+					run_stats(config);
 				}
 			}
 		}
