@@ -100,6 +100,93 @@ public class Utils {
 		return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase().replace(' ', '_');
 	}
 
+	/**
+	 * Same as {@link #prefixString(String, String, int, boolean)} but do not
+	 * repeat prefix on each lines.
+	 * 
+	 * @See {@link #prefixString(String, String, int, boolean)}
+	 */
+	public static String prefixString(String prefix, String text, int length) {
+		return prefixString(prefix, text, length, false);
+	}
+
+	/**
+	 * Cut a text into several lines of a specific width. add a prefix at start
+	 * of each lines to keep them aligned.
+	 * 
+	 * @param prefix
+	 *            the String to to add at start of the text
+	 * @param text
+	 *            the to split into several lines
+	 * @param length
+	 *            the length of lines. Negative value means that there is no
+	 *            limit. In some cases, width of output lines can be larger than
+	 *            this given width.
+	 * @param repeatPrefix
+	 *            repeat prefix String at start of each lines, otherwise it is
+	 *            displayed at first line and others line are filled width
+	 *            spaces
+	 * @return the string modified.
+	 */
+	public static String prefixString(String prefix, String text, int length,
+			boolean repeatPrefix) {
+		String newLine = System.lineSeparator();
+		assert !prefix.contains("\n");
+
+		StringBuilder result = new StringBuilder();
+		int lines = 0;
+
+		do {
+			if (repeatPrefix || lines == 0) {
+				result.append(prefix);
+			} else {
+				for (int i = 0; i < prefix.length(); i++) {
+					result.append(' ');
+				}
+			}
+			int prefixPartLength = prefix.length();
+
+			int remainingLength;
+			if (length > 0) {
+				remainingLength = length - prefixPartLength;
+			} else {
+				remainingLength = text.length();
+			}
+
+			int textCutEnd = text.length();// position to stop current line
+			int textCutStart = textCutEnd;// position to start next line
+
+			// cut line regarding words
+			if (text.length() > remainingLength) {
+				int lastWordEnd = text.lastIndexOf(' ', remainingLength);
+				if (lastWordEnd == -1)
+					lastWordEnd = text.indexOf(' ');
+				if (lastWordEnd == -1)
+					lastWordEnd = text.length();
+				if (lastWordEnd < textCutEnd) {
+					textCutEnd = lastWordEnd;
+					textCutStart = textCutEnd + 1;
+				}
+			}
+
+			// cut line regarding new lines in text
+			int textNewLinePos = text.indexOf(newLine);
+			if (textNewLinePos != -1 && textNewLinePos < textCutEnd) {
+				textCutEnd = textNewLinePos;
+				textCutStart = textNewLinePos + newLine.length();
+			}
+
+			// print line and cut text
+			result.append(text.substring(0, textCutEnd));
+			result.append(newLine);
+			lines++;
+			if (textCutStart >= text.length())
+				break;
+			text = text.substring(textCutStart);
+		} while (true);
+		return result.toString();
+	}
+
 	public static String exec(String cmd) {
 		String output = null;
 		try {

@@ -823,30 +823,12 @@ public abstract class OptionTree {
 		for (ArgumentDescriptor descriptor : sortedArguments) {
 			String argDisp = displayedArgs.get(descriptor);
 			String help = helps.get(descriptor);
-			stream.print(argDisp);
-			int blankNumber = argColumnWidth - argDisp.length();
-
-			do {
-				for (int i = 0; i < blankNumber; i++) {
-					stream.print(" ");
-				}
-				blankNumber = argColumnWidth;
-				int helpLineLength = MAX_LENGTH - argColumnWidth;
-				int lastWordEnd = help.length();
-				if (help.length() > MAX_LENGTH - argColumnWidth) {
-					lastWordEnd = help.lastIndexOf(' ', helpLineLength);
-					if (lastWordEnd == -1)
-						lastWordEnd = help.indexOf(' ');
-					if (lastWordEnd == -1)
-						lastWordEnd = help.length();
-				}
-				stream.println(help.substring(0, lastWordEnd));
-				if (lastWordEnd < help.length() - 1)
-					help = help.substring(lastWordEnd + 1);
-				else
-					help = "";
-			} while (help.length() > 0);
-
+			StringBuilder prefix = new StringBuilder();
+			prefix.append(argDisp);
+			while (prefix.length() < argColumnWidth)
+				prefix.append(' ');
+			stream.print(
+					Utils.prefixString(prefix.toString(), help, MAX_LENGTH));
 		}
 	}
 
