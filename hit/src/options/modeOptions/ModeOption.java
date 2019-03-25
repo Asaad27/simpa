@@ -23,8 +23,10 @@ public class ModeOption extends MultiArgChoiceOption {
 						&& automataChoice
 								.getSelectedItem() == automataChoice.mealy
 						&& automataChoice.mealyLearnerChoice
-								.getSelectedItem() == automataChoice.mealyLearnerChoice.cutCombinatorial
-						&& automataChoice.mealyLearnerChoice.cutCombinatorial
+								.getSelectedItem() == automataChoice.mealyLearnerChoice.combinatorial
+						&& automataChoice.mealyLearnerChoice.combinatorial
+								.withCut()
+						&& automataChoice.mealyLearnerChoice.combinatorial
 								.isInteractive()) {
 					setCriticality(CriticalityLevel.WARNING);
 					setMessage(

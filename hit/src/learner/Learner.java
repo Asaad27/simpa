@@ -70,11 +70,12 @@ public abstract class Learner {
 			if (selectedLearnerChoice == learnerChoice.tree) {
 				return new ZLearner(mDriver, learnerChoice.tree);
 			} else if (selectedLearnerChoice == learnerChoice.combinatorial) {
-				return new CombinatorialLearner(mDriver,
-						learnerChoice.combinatorial);
-			} else if (selectedLearnerChoice == learnerChoice.cutCombinatorial) {
-				return new CutterCombinatorialLearner(mDriver,
-						learnerChoice.cutCombinatorial);
+				if (learnerChoice.combinatorial.withCut())
+					return new CombinatorialLearner(mDriver,
+							learnerChoice.combinatorial);
+				else
+					return new CutterCombinatorialLearner(mDriver,
+							learnerChoice.combinatorial);
 			} else if (selectedLearnerChoice == learnerChoice.rivestSchapire) {
 				return new RivestSchapireLearner(mDriver,
 						learnerChoice.rivestSchapire);

@@ -36,6 +36,7 @@ public class CombinatorialLearner extends Learner {
 
 	public CombinatorialLearner(MealyDriver driver,
 			CombinatorialOptions options) {
+		assert !options.withCut();
 		this.driver = driver;
 		this.options = options;
 	}

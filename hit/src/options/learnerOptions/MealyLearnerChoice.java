@@ -1,7 +1,6 @@
 package options.learnerOptions;
 
 import learner.mealy.combinatorial.CombinatorialOptions;
-import learner.mealy.combinatorial.CutterCombinatorialOptions;
 import learner.mealy.hW.HWOptions;
 import learner.mealy.localizerBased.LocalizerBasedOptions;
 import learner.mealy.rivestSchapire.RivestSchapireOptions;
@@ -19,7 +18,6 @@ public class MealyLearnerChoice
 	public ZOptions tree;
 	public LmOptions lm;
 	public CombinatorialOptions combinatorial;
-	public final CutterCombinatorialOptions cutCombinatorial;
 
 	public MealyLearnerChoice() {
 		super("--algo", "Mealy learner",
@@ -32,7 +30,6 @@ public class MealyLearnerChoice
 		tree = new ZOptions(this);
 		lm = new LmOptions(this);
 		combinatorial = new CombinatorialOptions(this);
-		cutCombinatorial = new CutterCombinatorialOptions(this);
 
 		addChoice(hW);
 		addChoice(localizerBased);
@@ -40,7 +37,6 @@ public class MealyLearnerChoice
 		addChoice(tree);
 		addChoice(lm);
 		addChoice(combinatorial);
-		addChoice(cutCombinatorial);
 		setDefaultItem(hW);
 
 	}

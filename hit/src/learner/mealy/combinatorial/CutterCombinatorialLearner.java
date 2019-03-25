@@ -37,10 +37,11 @@ public class CutterCombinatorialLearner extends Learner {
 	private CutterCombinatorialStatsEntry stats;
 	private ArrayList<TreeNode> currentLevel;
 	private ArrayList<TreeNode> nextLevel;
-	private CutterCombinatorialOptions options;
+	private CombinatorialOptions options;
 
 	public CutterCombinatorialLearner(MealyDriver driver,
-			CutterCombinatorialOptions options) {
+			CombinatorialOptions options) {
+		assert options.withCut();
 		this.driver = driver;
 		this.options = options;
 	}

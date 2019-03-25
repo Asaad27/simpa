@@ -9,7 +9,7 @@ public class CutterCombinatorialStatsEntry extends CombinatorialStatsEntry {
 	}
 
 	protected CutterCombinatorialStatsEntry(MealyDriver d,
-			CutterCombinatorialOptions options) {
+			CombinatorialOptions options) {
 		super(d, options);
 		traceLength = 0;
 	}
