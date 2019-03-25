@@ -19,9 +19,9 @@ public class StatsOptions extends MultiArgChoiceOptionItem {
 		inferenceNb = new IntegerOption("--nbtest", "number of inferences",
 				"Number of inferences to try.", 1);
 		subTrees.add(inferenceNb);
-		makeGraphs = new BooleanOption("plot graphs after stats", "make-graph",
+		makeGraphs = new BooleanOption("plot graphs after stats", "Sgraph",
 				"Use the stored inference results to plot graphs.",
-				Collections.emptyList(), Collections.emptyList(), true);
+				Collections.emptyList(), Collections.emptyList(), false);
 		subTrees.add(makeGraphs);
 
 		// outputs options are NOT added in subtree to ensure user cannot change
