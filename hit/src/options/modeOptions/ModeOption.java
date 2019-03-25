@@ -1,5 +1,7 @@
 package options.modeOptions;
 
+import java.util.List;
+
 import options.MultiArgChoiceOption;
 import options.OptionValidator;
 import options.automataOptions.AutomataChoice;
@@ -30,5 +32,12 @@ public class ModeOption extends MultiArgChoiceOption {
 				}
 			}
 		});
+	}
+
+	@Override
+	protected List<ArgumentDescriptor> getHelpArguments() {
+		List<ArgumentDescriptor> r = super.getHelpArguments();
+		r.remove(simple.argument);
+		return r;
 	}
 }
