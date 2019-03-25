@@ -41,6 +41,7 @@ public class MealyLearnerChoice
 		addChoice(lm);
 		addChoice(combinatorial);
 		addChoice(cutCombinatorial);
+		setDefaultItem(hW);
 
 	}
 }

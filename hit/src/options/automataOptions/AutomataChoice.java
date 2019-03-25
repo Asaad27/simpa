@@ -37,5 +37,6 @@ public class AutomataChoice extends MultiArgChoiceOption {
 		addChoice(mealy);
 		addChoice(efsm);
 		addChoice(scan);
+		setDefaultItem(mealy);
 	}
 }
