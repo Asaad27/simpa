@@ -11,14 +11,13 @@ public class LogLevelOptionItem extends OneArgChoiceOptionItem {
 			GenericChoiceOption<?> parent) {
 		switch (level) {
 		case ALL:
-			return new LogLevelOptionItem("Log everything", "all", level,
-					parent);
+			return new LogLevelOptionItem("Log everything", "3", level, parent);
 		case DO_NOT_COMPLEXIFY:
 			return new LogLevelOptionItem(
 					"Log only things which can be logged in a constant-time",
-					"do-not-complexify", level, parent);
+					"2", level, parent);
 		case LOW:
-			return new LogLevelOptionItem("Log almost nothing", "low", level,
+			return new LogLevelOptionItem("Log almost nothing", "1", level,
 					parent);
 		}
 		assert false;
