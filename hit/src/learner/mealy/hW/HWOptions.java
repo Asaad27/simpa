@@ -5,12 +5,12 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import options.BooleanOption;
-import options.GenericMultiArgChoiceOption;
-import options.MultiArgChoiceOptionItem;
+import options.GenericOneArgChoiceOption;
+import options.OneArgChoiceOptionItem;
 import options.OptionTree;
 import options.learnerOptions.OracleOption;
 
-public class HWOptions extends MultiArgChoiceOptionItem {
+public class HWOptions extends OneArgChoiceOptionItem {
 
 	public final BooleanOption addHInW;
 	public final BooleanOption useReset;
@@ -48,8 +48,8 @@ public class HWOptions extends MultiArgChoiceOptionItem {
 	private final OracleOption oracleWhenUsingReset;
 	private final OracleOption oracleWhithoutReset;
 
-	public HWOptions(GenericMultiArgChoiceOption<?> parent) {
-		super("hW", "--hW", parent);
+	public HWOptions(GenericOneArgChoiceOption<?> parent) {
+		super("hW", "MhW", parent);
 		checkInconsistenciesHMapping = new BooleanOption(
 				"search 3rd inconsistencies", "3rd-inconsistency",
 				"Search inconsistencies between homing sequence and conjecture.");

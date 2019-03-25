@@ -16,7 +16,7 @@ public class OptionTreeTest {
 	class ArgumentValue {
 		AutomataChoice t = new AutomataChoice();
 
-		String base = "--mealy --lm --shortestCE ";
+		String base = "--mealy --algo=MLm --shortestCE ";
 		String sampleDriver = "drivers.mealy.transparent.RandomMealyDriver";
 		String driver = "--driver";
 

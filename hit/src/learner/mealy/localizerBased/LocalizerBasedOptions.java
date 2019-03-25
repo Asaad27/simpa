@@ -8,21 +8,21 @@ import automata.mealy.InputSequence;
 
 import java.util.Arrays;
 import options.BooleanOption;
-import options.GenericMultiArgChoiceOption;
-import options.MultiArgChoiceOptionItem;
+import options.GenericOneArgChoiceOption;
+import options.OneArgChoiceOptionItem;
 import options.OptionTree.ArgumentDescriptor.AcceptedValues;
 import options.WSetOption;
 import options.learnerOptions.StateBoundOption;
 
-public class LocalizerBasedOptions extends MultiArgChoiceOptionItem {
+public class LocalizerBasedOptions extends OneArgChoiceOptionItem {
 	BooleanOption useSpeedUp;
 	private final StateBoundOption stateNumberBound = new StateBoundOption();
 
 	private final BooleanOption computeCharacterizationSet;
 	private final WSetOption wSet = new WSetOption();
 
-	public LocalizerBasedOptions(GenericMultiArgChoiceOption<?> parent) {
-		super("localizer-based", "--localizerBased", parent);
+	public LocalizerBasedOptions(GenericOneArgChoiceOption<?> parent) {
+		super("localizer-based", "MLocW", parent);
 		useSpeedUp = new BooleanOption("speed up", "speedUp",
 				"Use speed-up (deduction from trace based on state incompatibilities)\nthis is usefull if you don't know the real state number but only the bound.") {
 			@Override

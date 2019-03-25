@@ -1,20 +1,20 @@
 package learner.mealy.combinatorial;
 
-import options.GenericMultiArgChoiceOption;
-import options.MultiArgChoiceOptionItem;
+import options.GenericChoiceOption;
+import options.OneArgChoiceOptionItem;
 import options.learnerOptions.OracleOption;
 
-public class CombinatorialOptions extends MultiArgChoiceOptionItem {
+public class CombinatorialOptions extends OneArgChoiceOptionItem {
 	private OracleOption oracleOptions = new OracleOption(false);
 
 	protected CombinatorialOptions(String name, String argument,
-			GenericMultiArgChoiceOption<?> parent) {
+			GenericChoiceOption<?> parent) {
 		super(name, argument, parent);
 		subTrees.add(oracleOptions);
 	}
 
-	public CombinatorialOptions(GenericMultiArgChoiceOption<?> parent) {
-		this("combinatorial", "--combinatorial", parent);
+	public CombinatorialOptions(GenericChoiceOption<?> parent) {
+		this("combinatorial", "MComb", parent);
 	}
 
 	public OracleOption getOracleOption() {

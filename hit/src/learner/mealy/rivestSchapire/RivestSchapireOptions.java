@@ -7,14 +7,14 @@ import java.util.List;
 import drivers.mealy.MealyDriver;
 import learner.mealy.table.LmOptions;
 import options.BooleanOption;
-import options.GenericMultiArgChoiceOption;
-import options.MultiArgChoiceOption;
-import options.MultiArgChoiceOptionItem;
+import options.GenericChoiceOption;
+import options.GenericOneArgChoiceOption;
+import options.OneArgChoiceOptionItem;
 import options.RandomOption;
 import options.learnerOptions.StateBoundOption;
 
-public class RivestSchapireOptions extends MultiArgChoiceOptionItem {
-	private MultiArgChoiceOption subLearnerOption;
+public class RivestSchapireOptions extends OneArgChoiceOptionItem {
+	private GenericOneArgChoiceOption<OneArgChoiceOptionItem> subLearnerOption;
 	public LmOptions lmOptions;
 	public final RandomOption seedForProbabilistic = new RandomOption(
 			"--MRS_probabilistic_seed",
@@ -39,11 +39,13 @@ public class RivestSchapireOptions extends MultiArgChoiceOptionItem {
 		}
 	};
 
-	public RivestSchapireOptions(GenericMultiArgChoiceOption<?> parent) {
-		super("Rivest and Schapire", "--rivestSchapire", parent);
-		lmOptions = new LmOptions(subLearnerOption, "--RS-with-lm");
-		subLearnerOption = new MultiArgChoiceOption(
-				"Sub-learner for Rivest and Schapire algorithm") {
+	public RivestSchapireOptions(GenericChoiceOption<?> parent) {
+		super("Rivest and Schapire", "MRS", parent);
+		lmOptions = new LmOptions(subLearnerOption);
+		subLearnerOption = new GenericOneArgChoiceOption<OneArgChoiceOptionItem>(
+				"--RS-sub-learner",
+				"Sub-learner for Rivest and Schapire algorithm",
+				"Select learner (using reset) to emulate on non-ressetable driver (Rivest & Schapire algorithm is written only with Lm, but this implementation should work with others).") {
 			{
 				addChoice(lmOptions);
 				setDefaultItem(lmOptions);

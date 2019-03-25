@@ -7,9 +7,11 @@ import learner.mealy.localizerBased.LocalizerBasedOptions;
 import learner.mealy.rivestSchapire.RivestSchapireOptions;
 import learner.mealy.table.LmOptions;
 import learner.mealy.tree.ZOptions;
-import options.MultiArgChoiceOption;
+import options.GenericOneArgChoiceOption;
+import options.OneArgChoiceOptionItem;
 
-public class MealyLearnerChoice extends MultiArgChoiceOption {
+public class MealyLearnerChoice
+		extends GenericOneArgChoiceOption<OneArgChoiceOptionItem> {
 
 	public HWOptions hW;
 	public RivestSchapireOptions rivestSchapire;
@@ -20,7 +22,8 @@ public class MealyLearnerChoice extends MultiArgChoiceOption {
 	public final CutterCombinatorialOptions cutCombinatorial;
 
 	public MealyLearnerChoice() {
-		super("Mealy learner");
+		super("--algo", "Mealy learner",
+				"The learner to use to infer Mealy systems.");
 
 		hW = new HWOptions(this);
 

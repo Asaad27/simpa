@@ -1,14 +1,14 @@
 package learner.mealy.tree;
 
-import options.GenericMultiArgChoiceOption;
-import options.MultiArgChoiceOptionItem;
+import options.GenericOneArgChoiceOption;
+import options.OneArgChoiceOptionItem;
 import options.learnerOptions.OracleOption;
 
-public class ZOptions extends MultiArgChoiceOptionItem {
+public class ZOptions extends OneArgChoiceOptionItem {
 	public OracleOption oracle;
 
-	public ZOptions(GenericMultiArgChoiceOption<?> parent) {
-		super("tree", "--tree", parent);
+	public ZOptions(GenericOneArgChoiceOption<?> parent) {
+		super("ZQuotient algortihm", "MZQ", parent);
 		oracle = new OracleOption(true);
 		subTrees.add(oracle);
 	}

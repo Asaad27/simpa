@@ -1,18 +1,14 @@
 package learner.mealy.table;
 
-import options.GenericMultiArgChoiceOption;
-import options.MultiArgChoiceOptionItem;
+import options.GenericChoiceOption;
+import options.OneArgChoiceOptionItem;
 import options.learnerOptions.OracleOption;
 
-public class LmOptions extends MultiArgChoiceOptionItem {
+public class LmOptions extends OneArgChoiceOptionItem {
 	public OracleOption oracle;
 
-	public LmOptions(GenericMultiArgChoiceOption<?> parent) {
-		this(parent, "--lm");
-	}
-
-	public LmOptions(GenericMultiArgChoiceOption<?> parent, String argument) {
-		super("lm", argument, parent);
+	public LmOptions(GenericChoiceOption<?> parent) {
+		super("Mealy Shabaz algorithm (Lm)", "MLm", parent);
 		oracle = new OracleOption(true);
 		subTrees.add(oracle);
 	}
