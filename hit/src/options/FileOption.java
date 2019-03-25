@@ -264,7 +264,12 @@ public class FileOption extends OptionTree {
 
 	@Override
 	public String getHelpByArgument(ArgumentDescriptor arg) {
-		return description;
+		if (getDefaultValue() == null)
+			return description;
+		assert description.endsWith(".");
+		return description.substring(0, description.length() - 1)
+				+ " (default : " + getDefaultValue().toStringWithValues()
+				+ ").";
 	}
 
 	@Override

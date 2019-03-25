@@ -69,8 +69,14 @@ public class GenericMultiArgChoiceOption<T extends MultiArgChoiceOptionItem>
 
 	@Override
 	public String getHelpByArgument(ArgumentDescriptor arg) {
+		boolean isDefault = false;
+		if (getDefaultValue() != null) {
+			if (getDefaultValue().getDescriptor().equals(arg))
+				isDefault = true;
+		}
 		return "Set " + getName() + " to "
-				+ getItemFromArg(new ArgumentValue(arg)) + ".";
+				+ getItemFromArg(new ArgumentValue(arg))
+				+ (isDefault ? " (default)" : "") + ".";
 	}
 
 	@Override

@@ -102,6 +102,11 @@ public class GenericOneArgChoiceOption<T extends OneArgChoiceOptionItem>
 
 	@Override
 	public String getHelpByArgument(ArgumentDescriptor arg) {
+		assert description.endsWith(".");
+		if (getDefaultValue() != null)
+			return description.substring(0, description.length() - 1)
+					+ " (default : " + getDefaultValue().toStringWithValues()
+					+ ").";
 		return description;
 	}
 
