@@ -21,8 +21,7 @@ public class MealyLearnerChoice
 	public CombinatorialOptions combinatorial;
 
 	public MealyLearnerChoice() {
-		super("--algo", "Mealy learner",
-				"The learner to use to infer Mealy systems.");
+		super("--algo", "Mealy learner", "Select Mealy learner.");
 		setCategory(OptionCategory.INFERENCE);
 
 		hW = new HWOptions(this);
@@ -41,5 +40,11 @@ public class MealyLearnerChoice
 		addChoice(combinatorial);
 		setDefaultItem(hW);
 
+	}
+
+	@Override
+	public String getHelpByArgument(ArgumentDescriptor arg) {
+		assert arg.name.equals("--algo");
+		return "Set learner algorithm.";
 	}
 }

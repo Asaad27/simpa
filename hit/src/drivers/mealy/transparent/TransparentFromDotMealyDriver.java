@@ -19,7 +19,7 @@ public class TransparentFromDotMealyDriver extends TransparentMealyDriver {
 
 		public FromDotChoiceItem(DriverChoice<MealyDriver> parent) {
 			super(parent, TransparentFromDotMealyDriver.class);
-			file = new FileOption("--loadDotFile",
+			file = new FileOption("--TDDotFile",
 					"Select the file to load as driver.", null,
 					FileSelectionMode.FILES_ONLY, FileExistance.MUST_EXIST);
 			subTrees.add(file);

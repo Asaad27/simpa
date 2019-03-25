@@ -14,8 +14,9 @@ public class DriverChoice<T extends Driver<?, ?>>
 	protected DriverChoiceItem<T> extraChoice = null;
 
 	public DriverChoice(Class<T> baseType, String optionName) {
-		super("--driver", optionName, "Select the driver to infer."
-				+ " There are some pre-defined values but you can use the full name of a java class, e.g. : drivers.efsm.NSPKDriver .");
+		super("--Driver", optionName,
+				"Select the driver to connect to the System to infer."
+						+ " There are some pre-defined values but you can use the full name of a java class, e.g. : drivers.efsm.NSPKDriver .");
 		driverBaseType = baseType;
 		setCategory(OptionCategory.INFERENCE);
 	}

@@ -17,9 +17,9 @@ public class OptionTreeTest {
 	class ArgumentValue {
 		AutomataChoice t = new AutomataChoice();
 
-		String base = "--mealy --algo=MLm --shortestCE ";
+		String base = "--Mealy --algo=MLm --OT_shortest ";
 		String sampleDriver = "drivers.mealy.transparent.RandomMealyDriver";
-		String driver = "--driver";
+		String driver = "--Driver";
 
 		void checkValue() {
 			assertEquals(t.mealy, t.getSelectedItem());

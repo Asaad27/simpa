@@ -897,14 +897,12 @@ public class SIMPA {
 		out.println("Help for " + name);
 		out.println();
 
-		out.println("Global options :");
 		out.println(SHORT_HELP_ARGUMENT + " | " + HELP_ARGUMENT
 				+ " \tdisplay this help");
 		out.println(GUI_ARGUMENT
-				+ "       \topen GUI (inference arguments can be specified to preset GUI options)");
+				+ "       \topen GUI (other arguments can be specified to preset GUI options)");
 		out.println();
 
-		out.println("Inference options :");
 		allOptions.printHelp(out);
 	}
 

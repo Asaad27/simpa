@@ -12,6 +12,7 @@ import options.MultiArgChoiceOption;
 import options.MultiArgChoiceOptionItem;
 import options.OptionCategory;
 import options.OptionTree;
+import options.OptionTree.ArgumentDescriptor.AcceptedValues;
 import options.RandomOption;
 import options.automataOptions.TransparentDriverValidator;
 import tools.loggers.LogManager;
@@ -56,22 +57,21 @@ public class OracleOption extends MultiArgChoiceOption {
 		public final RandomOption random;
 
 		public MrBeanOptionItem(GenericMultiArgChoiceOption<?> parent) {
-			super("ask MrBean to find a counter example (random walk)",
-					"--mrBean", parent);
-			random = new RandomOption("--oracleSeed", "random walks");
+			super("random walk on conjecture", "--ORnd", parent);
+			random = new RandomOption("--ORnd_seed", "random walks");
 			subTrees.add(random);
 			List<OptionTree> randomWalkOptions = new ArrayList<>();
-			maxTraceLength = new AutoIntegerOption("--maxcelength",
+			maxTraceLength = new AutoIntegerOption("--ORnd_maxlength",
 					"maximum length of one random walk",
 					"The length of random walk from a reset if there is a reset or for all the walk."
 							+ " The automatic value use a length proportional to the size of driver.",
 					100);
 			randomWalkOptions.add(maxTraceLength);
 			if (resetAllowed) {
-				maxTraceNumber = new AutoIntegerOption("--maxceresets",
+				maxTraceNumber = new AutoIntegerOption("--ORnd_maxresets",
 						"maximum number of reset ",
 						"Maximum number of random walk from initial state for oracle."
-								+ " The automatic value reset the driver a number of time proprtional to its size.",
+								+ " The automatic value reset the driver a number of time proportional to its size.",
 						5) {
 					{
 						addValidator(maxTraceNumberValidator);
@@ -81,7 +81,7 @@ public class OracleOption extends MultiArgChoiceOption {
 			}
 			mrBeanOnlyIfExists = new BooleanOption(
 					"check existence of counter example before calling MrBean",
-					"exhaustive-before-MrBean",
+					"OTRnd_precheck",
 					"First do an exhaustive check to see if a counter example exists and if it exists do a random walk to find it.",
 					new ArrayList<OptionTree>(), randomWalkOptions, false) {
 				{
@@ -97,6 +97,14 @@ public class OracleOption extends MultiArgChoiceOption {
 				@Override
 				public String getDisableHelp() {
 					return "Call MrBean without searching counterExample in transparent box.";
+				}
+
+				@Override
+				protected void makeArgumentDescriptors(String argument) {
+					super.makeArgumentDescriptors(argument);
+					disableArgumentDescriptor = new ArgumentDescriptor(
+							AcceptedValues.NONE,
+							"--ORnd_no-exhaustive-before-MrBean", this);
 				}
 			};
 
@@ -159,15 +167,15 @@ public class OracleOption extends MultiArgChoiceOption {
 		this.resetAllowed = resetAllowed;
 		addValidator(driverValidator);
 		shortest = new MultiArgChoiceOptionItem("use shortest counter example",
-				"--shortestCE", this);
+				"--OT_shortest", this);
 
 		mrBean = new MrBeanOptionItem(this);
 		interactive = new MultiArgChoiceOptionItem(
-				"prompt user each time a CE is needed", "--interactiveCE",
+				"prompt user each time a CE is needed", "--O_interactive",
 				this);
 		distinctionTreeBased = new MultiArgChoiceOptionItem(
-				"pseudo checking sequence using distinction tree",
-				"--DT-based-CE", this);
+				"pseudo checking sequence using distinction tree", "--O_DT",
+				this);
 		addChoice(shortest);
 		addChoice(mrBean);
 		addChoice(interactive);

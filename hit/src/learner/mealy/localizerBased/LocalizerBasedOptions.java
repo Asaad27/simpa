@@ -32,18 +32,25 @@ public class LocalizerBasedOptions extends OneArgChoiceOptionItem {
 				return "Disable speed-up." + System.lineSeparator()
 						+ "This is usefull if you don't know the real state number but only the bound.";
 			}
-		};
-		subTrees.add(useSpeedUp);
-		subTrees.add(stateNumberBound);
-		computeCharacterizationSet = new BooleanOption(
-				"Compute characterization set", "compute-W-set",
-				"Compute a characterization set from glass-box driver.",
-				Collections.emptyList(), Arrays.asList(wSet)) {
+
 			@Override
 			protected void makeArgumentDescriptors(String argument) {
 				super.makeArgumentDescriptors(argument);
 				disableArgumentDescriptor = new ArgumentDescriptor(
-						AcceptedValues.NONE, "--given-W-set", this);
+						AcceptedValues.NONE, "--LocW_no-speed-up", this);
+			}
+		};
+		subTrees.add(useSpeedUp);
+		subTrees.add(stateNumberBound);
+		computeCharacterizationSet = new BooleanOption(
+				"Compute characterization set", "TMLocW",
+				"Compute a characterization set from glass-box driver.",
+				Collections.emptyList(), Arrays.asList(wSet), false) {
+			@Override
+			protected void makeArgumentDescriptors(String argument) {
+				super.makeArgumentDescriptors(argument);
+				disableArgumentDescriptor = new ArgumentDescriptor(
+						AcceptedValues.NONE, "--MLocW_given_W_set", this);
 			}
 
 			@Override

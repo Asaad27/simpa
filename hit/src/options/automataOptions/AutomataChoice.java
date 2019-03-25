@@ -29,9 +29,9 @@ public class AutomataChoice extends MultiArgChoiceOption {
 		subTree = new ArrayList<>();
 		subTree.add(mealyLearnerChoice);
 		subTree.add(mealyDriverChoice);
-		mealy = new MultiArgChoiceOptionItem("Mealy", "--mealy", this, subTree);
+		mealy = new MultiArgChoiceOptionItem("Mealy", "--Mealy", this, subTree);
 
-		efsm = new MultiArgChoiceOptionItem("EFSM", "--efsm", this,
+		efsm = new MultiArgChoiceOptionItem("EFSM", "--Efsm", this,
 				Arrays.asList(efsmDriverChoice, efsmLearnerChoice));
 
 		addChoice(mealy);

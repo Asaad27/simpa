@@ -19,11 +19,11 @@ public class RivestSchapireOptions extends OneArgChoiceOptionItem {
 	private GenericOneArgChoiceOption<OneArgChoiceOptionItem> subLearnerOption;
 	public LmOptions lmOptions;
 	public final RandomOption seedForProbabilistic = new RandomOption(
-			"--MRS_probabilistic_seed",
+			"--MRivest_probabilistic_seed",
 			"the probabilistic search of new homing sequence");
 	private final StateBoundOption stateBound = new StateBoundOption();
 	private final BooleanOption probabilisticRS = new BooleanOption(
-			"start with an empty homing sequence", "MRS_probabilistic",
+			"start with an empty homing sequence", "MRivest_probabilistic",
 			"Use probabilistic version of Rivest and Schapire algorithm which computes automatically the homing sequence.",
 			Arrays.asList(stateBound, seedForProbabilistic),
 			Collections.emptyList()) {
@@ -36,16 +36,16 @@ public class RivestSchapireOptions extends OneArgChoiceOptionItem {
 		protected void makeArgumentDescriptors(String argument) {
 			super.makeArgumentDescriptors(argument);
 			disableArgumentDescriptor = new ArgumentDescriptor(
-					ArgumentDescriptor.AcceptedValues.NONE, "--TMRS_init_h",
+					ArgumentDescriptor.AcceptedValues.NONE, "--TMRivest_init_h",
 					this);
 		}
 	};
 
 	public RivestSchapireOptions(GenericChoiceOption<?> parent) {
-		super("Rivest and Schapire", "MRS", parent);
+		super("Rivest & Schapire", "MRivest", parent);
 		lmOptions = new LmOptions(subLearnerOption);
 		subLearnerOption = new GenericOneArgChoiceOption<OneArgChoiceOptionItem>(
-				"--RS-sub-learner",
+				"--Rivest_sub-learner",
 				"Sub-learner for Rivest and Schapire algorithm",
 				"Select learner (using reset) to emulate on non-ressetable driver (Rivest & Schapire algorithm is written only with Lm, but this implementation should work with others).") {
 			{

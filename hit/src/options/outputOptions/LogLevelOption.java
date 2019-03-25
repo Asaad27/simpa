@@ -7,7 +7,7 @@ public class LogLevelOption
 		extends GenericOneArgChoiceOption<LogLevelOptionItem> {
 
 	public LogLevelOption() {
-		super("--log-level", "Log level", "Set the logging level.");
+		super("--log", "Log level", "Set the logging level.");
 		for (LogLevel level : LogLevel.values())
 			addChoice(LogLevelOptionItem.getItem(level, this));
 	}

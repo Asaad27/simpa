@@ -37,15 +37,16 @@ public class WSetOption extends ListOption<InputSequence, InputSequenceHolder> {
 	InputExistanceValidator inputValidator = new InputExistanceValidator();
 
 	public WSetOption() {
-		super("--W-set", "Characterization set ('W-Set')",
-				"A set of sequences which distinguish pairs of states.");
+		super("--M_W-set", "Characterization set ('W-Set')",
+				"A set of sequences which distinguishes pairs of states.");
 		addValidator(inputValidator);
+		setCategory(OptionCategory.ALGO_COMMON);
 	}
 
 	@Override
 	protected InputSequenceHolder createSimpleHolder() {
 		return new InputSequenceHolder("Characterization sequence",
-				"A sequence which distinguish at least two states of the automaton.");
+				"A sequence of inputs which distinguishes at least two states of the automaton.");
 	}
 
 	@Override

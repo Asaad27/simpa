@@ -20,7 +20,7 @@ public class MealyDriverChoice extends DriverChoice<MealyDriver> {
 		addChoice(SIPDriverIpTel);
 		addChoice(new DriverChoiceItem<MealyDriver>(this,
 				RandomMealyDriver.class));
-		addChoice(new FromDotMealyDriver.FromDotChoiceItem(this));
+		// addChoice(new FromDotMealyDriver.FromDotChoiceItem(this));
 		addChoice(new TransparentFromDotMealyDriver.FromDotChoiceItem(this));
 		addChoice(exhaustiveDriver);
 		addChoice(new MQTTDriverOption(this));

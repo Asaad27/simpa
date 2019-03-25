@@ -17,7 +17,7 @@ public class LogLevelOptionItem extends OneArgChoiceOptionItem {
 					"Log only things which can be logged in a constant-time",
 					"2", level, parent);
 		case LOW:
-			return new LogLevelOptionItem("Log almost nothing", "1", level,
+			return new LogLevelOptionItem("Minimum log level", "1", level,
 					parent);
 		}
 		assert false;

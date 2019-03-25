@@ -4,7 +4,7 @@ import options.IntegerOption;
 
 public class TimeoutOption extends IntegerOption {
 	public TimeoutOption(int default_ms) {
-		super("--D_timeout", "timeout to decide quiescence output (ms)",
+		super("--Dtimeout", "timeout to decide quiescence output (ms)",
 				"When an input is sent to the System Under Learning, we do not know if we will get an output or not."
 						+ " After this timeout (in ms), we consider that we will not have an answer.",
 				default_ms);

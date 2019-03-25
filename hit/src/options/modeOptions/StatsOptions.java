@@ -15,8 +15,8 @@ public class StatsOptions extends MultiArgChoiceOptionItem {
 	public final OutputOptions outputOptions;
 
 	StatsOptions(MultiArgChoiceOption parent) {
-		super("statistics mode", "--stats", parent);
-		inferenceNb = new IntegerOption("--nbtest", "number of inferences",
+		super("statistics mode", "--Stats", parent);
+		inferenceNb = new IntegerOption("--Snbtest", "number of inferences",
 				"Number of inferences to try.", 1);
 		subTrees.add(inferenceNb);
 		makeGraphs = new BooleanOption("plot graphs after stats", "Sgraph",

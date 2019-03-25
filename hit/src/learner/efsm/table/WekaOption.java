@@ -45,19 +45,27 @@ public class WekaOption extends BooleanOption {
 		return availabilityMessage;
 	}
 
-	private final BooleanOption forceJ48 = new BooleanOption(
-			"use J48 algorithm", "use-J48",
-			"Force the use of J48 algorithm instead of M5P for numeric classes.",
-			new ArrayList<>(), new ArrayList<>(), false) {
-		@Override
-		public String getDisableHelp() {
-			return "Do not use J48 algorithm and use M5P instead for numeric classes.";
-		}
-	};
+	private final BooleanOption forceJ48;
 
 	WekaOption() {
-		super("use weka", "weka", "Select the library used for data mining.",
-				null, new ArrayList<>(), false);
+		super("use weka library", "E_weka",
+				"Select the library used for data mining.", null,
+				new ArrayList<>(), false);
+		forceJ48 = new BooleanOption("use J48 algorithm", "E_use_J48",
+				"Force the use of J48 algorithm instead of M5P for numeric classes.",
+				new ArrayList<>(), new ArrayList<>(), false) {
+			@Override
+			public String getDisableHelp() {
+				return "Do not use J48 algorithm and use M5P instead for numeric classes.";
+			}
+
+			@Override
+			protected void makeArgumentDescriptors(String argument) {
+				super.makeArgumentDescriptors(argument);
+				disableArgumentDescriptor = new ArgumentDescriptor(
+						AcceptedValues.NONE, "--E_use_M5P", this);
+			}
+		};
 		assert !isEnabled();
 		setSubTreeIfTrue(Arrays.asList(forceJ48));
 	}
@@ -65,7 +73,7 @@ public class WekaOption extends BooleanOption {
 	@Override
 	public String getEnableHelp() {
 		if (isAvailable())
-			return "Use weka library.";
+			return "Use weka library (instead of free ARFF library).";
 		else
 			return "Use weka library (but it is not available on this system).";
 	}
@@ -94,11 +102,10 @@ public class WekaOption extends BooleanOption {
 
 	@Override
 	protected void makeArgumentDescriptors(String argument) {
-		assert argument.equals("weka");
-		enableArgumentDescriptor = new ArgumentDescriptor(AcceptedValues.NONE,
-				"--weka", this);
+		assert argument.equals("E_weka");
+		super.makeArgumentDescriptors(argument);
 		disableArgumentDescriptor = new ArgumentDescriptor(AcceptedValues.NONE,
-				"--freeARFF", this);
+				"--E_freeARFF", this);
 	}
 
 	@Override

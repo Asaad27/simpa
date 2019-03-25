@@ -22,17 +22,10 @@ public class RandomAutomataOptions {
 		return Collections.unmodifiableList(options);
 	}
 
-	private final RandomOption rand = new RandomOption("--automat-seed",
-			"seed used to initialize random to generate automata");
-	private final IntegerOption statesNumber = new IntegerOption("--nb-states",
-			"number of states", "Number of states for the generated automaton.",
-			10);
-	private final IntegerOption inputsNumber = new IntegerOption("--nb-inputs",
-			"number of input symbols",
-			"Number of inputs for the generated automaton.", 2);
-	private final IntegerOption outputsNumber = new IntegerOption(
-			"--nb-outputs", "number of output symbols",
-			"Number of outputs for the generated automaton.", 2);
+	private final RandomOption rand;
+	private final IntegerOption statesNumber;
+	private final IntegerOption inputsNumber;
+	private final IntegerOption outputsNumber;
 
 	public int getStatesNumber() {
 		return statesNumber.getValue();
@@ -51,6 +44,16 @@ public class RandomAutomataOptions {
 	}
 
 	public RandomAutomataOptions() {
+		rand = new RandomOption("--Sgeneration_seed",
+				"seed used to initialize random to generate automata");
+		statesNumber = new IntegerOption("--Snb_states", "number of states",
+				"Number of states for the generated automaton.", 10);
+		inputsNumber = new IntegerOption("--Snb_inputs",
+				"number of input symbols",
+				"Number of inputs for the generated automaton.", 2);
+		outputsNumber = new IntegerOption("--Snb_outputs",
+				"number of output symbols",
+				"Number of outputs for the generated automaton.", 2);
 		addSubOption(statesNumber);
 		addSubOption(inputsNumber);
 		addSubOption(outputsNumber);

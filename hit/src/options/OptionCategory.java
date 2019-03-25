@@ -11,6 +11,7 @@ public enum OptionCategory {
 	ALGO_RS("OPTIONS for Rivest&Schapire"),
 	ALGO_LOCW("OPTIONS for LocW algorithm"),
 	ALGO_HW("OPTIONS for hW-inference"),
+	ALGO_COMMON("OPTIONS common to several algorithms :"),
 	STATS("Specific STAT OPTIONS :"),
 
 	;

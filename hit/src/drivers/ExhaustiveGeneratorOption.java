@@ -16,7 +16,7 @@ public abstract class ExhaustiveGeneratorOption<T extends Driver<?, ?> & Enumera
 	 * ({@link LongOption#useAutoValue()} to iterate over all possible drivers.
 	 */
 	public final AutoLongOption seed = new AutoLongOption(
-			"--exhaustive-generator-pos",
+			"--Sexhaustive-generator-pos",
 			"seed used to build the automaton in driver",
 			"A number used to represent an automata in the generation list."
 					+ " The automatic value let the enum mode select all seeds.",
@@ -25,8 +25,8 @@ public abstract class ExhaustiveGeneratorOption<T extends Driver<?, ?> & Enumera
 	public ExhaustiveGeneratorOption(
 			DriverChoice<? extends Driver<?, ?>> parent,
 			Class<? extends T> driverClass) {
-		super("Exhaustive generator", "--exhaustive-generator", parent,
-				driverClass);
+		super("Exhaustive generator (for stats)", "exhaustive_generator",
+				parent, driverClass);
 		subTrees.add(seed);
 		seed.setCategory(OptionCategory.STATS);
 	}

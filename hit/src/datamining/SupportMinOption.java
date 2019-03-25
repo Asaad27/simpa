@@ -4,8 +4,8 @@ import options.PercentageOption;
 
 public class SupportMinOption extends PercentageOption {
 
-	public SupportMinOption() {
-		super("--supportmin", "Minimal support for relation",
+	public SupportMinOption(String argPrefix) {
+		super("--" + argPrefix + "minsupport", "Minimal support for relation",
 				"Minimal support for relation.", 20);
 	}
 

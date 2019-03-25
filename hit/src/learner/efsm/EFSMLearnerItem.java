@@ -2,13 +2,12 @@ package learner.efsm;
 
 import drivers.efsm.EFSMDriver;
 import learner.Learner;
-import options.GenericMultiArgChoiceOption;
-import options.MultiArgChoiceOptionItem;
+import options.OneArgChoiceOptionItem;
 
-public abstract class EFSMLearnerItem extends MultiArgChoiceOptionItem {
+public abstract class EFSMLearnerItem extends OneArgChoiceOptionItem {
 
 	public EFSMLearnerItem(String name, String argument,
-			GenericMultiArgChoiceOption<?> parent) {
+			EFSMLearnerChoice parent) {
 		super(name, argument, parent);
 	}
 

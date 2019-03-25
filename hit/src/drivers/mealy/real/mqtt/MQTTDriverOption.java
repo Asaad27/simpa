@@ -29,7 +29,7 @@ import tools.loggers.LogManager;
 class ClientsOption extends ListOption<MQTTClientDescriptor> {
 
 	public ClientsOption() {
-		super("--mqttclient");
+		super("--DMQTT_client");
 	}
 
 	static final String CONNECT = "connect";
@@ -440,11 +440,11 @@ public class MQTTDriverOption extends DriverChoiceItem<MQTT> {
 	public MQTTDriverOption(DriverChoice<?> parent) {
 		super("MQTT Driver", "mqttDriver", parent, MQTT.class);
 		clients = new ClientsOption();
-		brokerAddress = new TextOption("--mqtt-broker", "tcp://localhost:1883",
+		brokerAddress = new TextOption("--DMQTT_broker", "tcp://localhost:1883",
 				"broker address", "The adress of the broker to infer.");
 		timeout = new TimeoutOption(500);
-		subTrees.add(brokerAddress);
 		subTrees.add(timeout);
+		subTrees.add(brokerAddress);
 		subTrees.add(clients);
 	}
 
