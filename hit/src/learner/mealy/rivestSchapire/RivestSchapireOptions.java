@@ -2,6 +2,7 @@ package learner.mealy.rivestSchapire;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import drivers.mealy.MealyDriver;
 import learner.mealy.table.LmOptions;
@@ -45,6 +46,14 @@ public class RivestSchapireOptions extends MultiArgChoiceOptionItem {
 				"Sub-learner for Rivest and Schapire algorithm") {
 			{
 				addChoice(lmOptions);
+				setDefaultItem(lmOptions);
+			}
+
+			@Override
+			protected List<ArgumentDescriptor> getHelpArguments() {
+				// This option is hidden because there only one possible value
+				// at this time.
+				return Collections.emptyList();
 			}
 		};
 		subTrees.add(subLearnerOption);

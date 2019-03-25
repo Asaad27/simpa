@@ -760,6 +760,16 @@ public abstract class OptionTree {
 	}
 
 	/**
+	 * Get the list of arguments to display in global help. This method can be
+	 * overridden to hide some arguments (e.g. hide the default arguments).
+	 * 
+	 * @return the list of arguments which should be displayed in general help.
+	 */
+	protected List<ArgumentDescriptor> getHelpArguments() {
+		return getAcceptedArguments();
+	}
+
+	/**
 	 * Get description/helping text for the provided argument.
 	 * 
 	 * @param arg
@@ -777,8 +787,7 @@ public abstract class OptionTree {
 		List<ArgumentDescriptor> sortedArguments = new ArrayList<>();
 		while (!toCompute.isEmpty()) {
 			OptionTree current = toCompute.pop();
-			for (ArgumentDescriptor descriptor : current
-					.getAcceptedArguments()) {
+			for (ArgumentDescriptor descriptor : current.getHelpArguments()) {
 				String help = current.getHelpByArgument(descriptor);
 				assert Character.toUpperCase(help.charAt(0)) == help
 						.charAt(0) : "help message '" + help

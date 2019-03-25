@@ -221,6 +221,15 @@ public class BooleanOption extends OptionTree {
 	}
 
 	@Override
+	protected List<ArgumentDescriptor> getHelpArguments() {
+		List<ArgumentDescriptor> arguments = super.getHelpArguments();
+		ArgumentValue defaultValue = getDefaultValue();
+		if (defaultValue != null)
+			arguments.remove(defaultValue.getDescriptor());
+		return arguments;
+	}
+
+	@Override
 	public final String getHelpByArgument(ArgumentDescriptor arg) {
 		if (arg == enableArgumentDescriptor)
 			return getEnableHelp();
