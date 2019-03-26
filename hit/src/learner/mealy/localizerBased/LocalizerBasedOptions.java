@@ -23,11 +23,12 @@ public class LocalizerBasedOptions extends OneArgChoiceOptionItem {
 
 	public LocalizerBasedOptions(GenericOneArgChoiceOption<?> parent) {
 		super("localizer-based", "MLocW", parent);
-		useSpeedUp = new BooleanOption("speed up", "speedUp",
-				"Use speed-up (deduction from trace based on state incompatibilities)\nthis is usefull if you don't know the real state number but only the bound.") {
+		useSpeedUp = new BooleanOption("speed up", "MLocW_exact_bound",
+				"Use speed-up (deduction from trace based on state incompatibilities).") {
 			@Override
 			public String getDisableHelp() {
-				return "Disable speed-up.";
+				return "Disable speed-up." + System.lineSeparator()
+						+ "This is usefull if you don't know the real state number but only the bound.";
 			}
 		};
 		subTrees.add(useSpeedUp);
