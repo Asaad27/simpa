@@ -4,20 +4,58 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
+import drivers.mealy.MealyDriver;
 import options.BooleanOption;
 import options.GenericOneArgChoiceOption;
 import options.OneArgChoiceOptionItem;
 import options.OptionTree;
+import options.OptionTree.ArgumentDescriptor.AcceptedValues;
+import options.automataOptions.TransparentDriverValidator;
 import options.learnerOptions.OracleOption;
 
 public class HWOptions extends OneArgChoiceOptionItem {
+	class PreComputedW extends BooleanOption {
+		private final TransparentDriverValidator driverValidator = new TransparentDriverValidator() {
+			@Override
+			public void check() {
+				if (PreComputedW.this.isEnabled())
+					super.check();
+				else
+					clear();
+			}
+		};
+
+		public PreComputedW() {
+			super("use a computed W-set", "hW_with-computed-W",
+					"Compute a W-set before starting inference. This needs a transparent driver.",
+					Collections.emptyList(), Collections.emptyList(), false);
+			addValidator(driverValidator);
+		}
+
+		@Override
+		public String getDisableHelp() {
+			return "Do not use a glass-box driver to compute a W-set.";
+		}
+
+		@Override
+		protected void makeArgumentDescriptors(String argument) {
+			super.makeArgumentDescriptors(argument);
+			disableArgumentDescriptor = new ArgumentDescriptor(
+					AcceptedValues.NONE, "--hW_without-computed-W", this);
+		}
+
+		void updateWithDriver(MealyDriver d) {
+			driverValidator.setLastDriver(d);
+			validateSelectedTree();
+		}
+	};
 
 	public final BooleanOption addHInW;
 	public final BooleanOption useReset;
 	public final BooleanOption searchCeInTrace;
 	public final BooleanOption checkInconsistenciesHMapping;
 	public final BooleanOption useDictionary;
-	private final BooleanOption usePrecomputedW;
+	private final PreComputedW usePrecomputedW;
 	private final BooleanOption addIInW;
 	private final BooleanOption useAdaptiveH;
 	private final BooleanOption useAdaptiveW;
@@ -58,15 +96,7 @@ public class HWOptions extends OneArgChoiceOptionItem {
 				"Try to execute the traces observed on conjecture to see if it makes a counter example.");
 		useDictionary = new BooleanOption("use dictionary", "use-dictionary",
 				"Record the sequences of form 'h z x w' and 'h w' to avoid re-executing them on the SUI.");
-		usePrecomputedW = new BooleanOption("use a computed W-set",
-				"with-computed-W",
-				"Compute a W-set before starting inference. This needs a transparent driver.",
-				Collections.emptyList(), Collections.emptyList(), false) {
-			@Override
-			public String getDisableHelp() {
-				return "Do not use a glass-box driver to compute a W-set.";
-			}
-		};
+		usePrecomputedW = new PreComputedW();
 		addIInW = new BooleanOption("add input symbols in W", "add-I-in-W",
 				"Before starting inference, all inputs symbols of SUI are added to W-set as new input sequences.") {
 			@Override
@@ -139,4 +169,9 @@ public class HWOptions extends OneArgChoiceOptionItem {
 		subTrees.add(searchCeInTrace);
 	}
 
+	public void updateWithDriver(MealyDriver d) {
+		usePrecomputedW.updateWithDriver(d);
+		oracleWhenUsingReset.updateWithDriver(d);
+		oracleWhithoutReset.updateWithDriver(d);
+	}
 }
