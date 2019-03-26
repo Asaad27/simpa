@@ -4,7 +4,8 @@ import drivers.mealy.MealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import options.OptionValidator;
 
-public class TransparentDriverValidator extends OptionValidator {
+public class TransparentDriverValidator extends OptionValidator
+		implements PostDriverValidator {
 	MealyDriver lastDriver = null;
 
 	@Override
@@ -15,7 +16,7 @@ public class TransparentDriverValidator extends OptionValidator {
 		if (!(lastDriver instanceof TransparentMealyDriver)) {
 			setMessage(
 					"This option needs a transparent Mealy driver. (NB: this message is computed with last tried driver)");
-			setCriticality(CriticalityLevel.WARNING);
+			setCriticality(CriticalityLevel.ERROR);
 		}
 	}
 

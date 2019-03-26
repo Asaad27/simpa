@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.function.Predicate;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -869,17 +870,49 @@ public abstract class OptionTree {
 	 * Validate every selected option and return the maximum criticality level
 	 * encountered.
 	 * 
-	 * @return the maximum criticality level encountered in the tree.
+	 * @return the maximum critiality level in the selected tree.
+	 * @see #validateSelectedTree(boolean) to print messages in console.
 	 */
 	public OptionValidator.CriticalityLevel validateSelectedTree() {
+		return validateSelectedTree(false, null);
+	}
+
+	/**
+	 * Validate every selected option and return the maximum criticality level
+	 * encountered.
+	 * 
+	 * @param printConsole
+	 *            indicate whether to print messages encountered in console or
+	 *            not. Graphical messages are updated in any case.
+	 * @param filter
+	 *            a predicate to indicate which validators to take into account.
+	 *            if {@code null}, all validators are used.
+	 * 
+	 * @return the maximum criticality level encountered in the tree.
+	 */
+	public OptionValidator.CriticalityLevel validateSelectedTree(
+			boolean printConsole, Predicate<OptionValidator> filter) {
 		CriticalityLevel max = CriticalityLevel.NOTHING;
 		checkValidators();
 		for (OptionValidator validator : validators) {
+			if (filter != null && !filter.test(validator))
+				continue;
+			if (printConsole
+					&& validator.getCriticality() != CriticalityLevel.NOTHING) {
+				System.out.println(Utils.prefixString(
+						validator.getCriticality() + " in option '" + getName()
+								+ "' : ",
+						validator.getMessage() + "\nTry to change \""
+								+ buildBackCLILine(false)
+								+ "\" with other options or with another value.",
+						Utils.terminalWidth()));
+			}
 			if (validator.getCriticality().compareTo(max) > 0)
 				max = validator.getCriticality();
 		}
 		for (OptionTree option : getSelectedChildren()) {
-			CriticalityLevel optionLevel = option.validateSelectedTree();
+			CriticalityLevel optionLevel = option
+					.validateSelectedTree(printConsole, filter);
 			if (optionLevel.compareTo(max) > 0)
 				max = optionLevel;
 		}

@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 import java.util.StringTokenizer;
+import java.util.function.Predicate;
 
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -41,11 +42,13 @@ import drivers.mealy.MealyDriver;
 import learner.Learner;
 import learner.mealy.LmConjecture;
 import main.simpa.Options.LogLevel;
-import options.CanNotComputeOptionValueException;
 import options.MultiArgChoiceOptionItem;
 import options.OptionTree;
+import options.OptionValidator;
 import options.OptionsGroup;
+import options.OptionValidator.CriticalityLevel;
 import options.automataOptions.AutomataChoice;
+import options.automataOptions.PostDriverValidator;
 import options.modeOptions.ModeOption;
 import options.outputOptions.OutputOptions;
 import options.valueHolders.SeedHolder;
@@ -589,6 +592,17 @@ public class SIMPA {
 	 *         {@code true} if everything went fine.
 	 */
 	private static Learner inferOneTime() {
+		Predicate<OptionValidator> postDriverPredicate = new Predicate<OptionValidator>() {
+					@Override
+					public boolean test(OptionValidator t) {
+						if (t instanceof PostDriverValidator)
+					return true;
+				return false;
+					}
+		};
+		if (allOptions.validateSelectedTree(true, postDriverPredicate.negate())
+				.compareTo(CriticalityLevel.WARNING) > 0)
+			return null;
 		Utils.deleteDir(Options.getArffDir());
 		Utils.deleteDir(Options.getDotDir());
 		if (getOutputsOptions().textLoggerOption.isEnabled())
@@ -615,14 +629,16 @@ public class SIMPA {
 			d = automataChoice.mealyDriverChoice.createDriver();
 			try {
 				l = Learner.getLearnerFor(d);
-			} catch (CanNotComputeOptionValueException e) {
-				LogManager.logError("unable to infer with these options");
-				return null;
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.exit(1);
 			}
 		}
+		if (allOptions.validateSelectedTree(true, postDriverPredicate)
+				.compareTo(CriticalityLevel.WARNING) > 0)
+			return null;
+		assert (allOptions.validateSelectedTree(false, null).compareTo(
+				CriticalityLevel.WARNING) <= 0) : "all validators were not checked or some validators changed their values";
 		boolean conjectureIsFalse = false;
 		try {
 			l.learn();

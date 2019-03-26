@@ -39,4 +39,13 @@ public class AutomataChoice extends MultiArgChoiceOption {
 		addChoice(scan);
 		setDefaultItem(mealy);
 	}
+
+	public OptionTree getDriverOptions() {
+		if (getSelectedItem() == mealy)
+			return mealyDriverChoice;
+		else {
+			assert getSelectedItem() == efsm;
+			return efsmLearnerChoice;
+		}
+	}
 }
