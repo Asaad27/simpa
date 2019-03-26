@@ -432,6 +432,7 @@ public abstract class OptionTree {
 	 */
 	public String buildBackCLILine(boolean forDebug) {
 		List<OptionTree> options = getAllSelectedChildren();
+		options.add(this);
 		List<String> arguments = new ArrayList<>();
 		for (OptionTree option : options) {
 			ArgumentValue arg;
