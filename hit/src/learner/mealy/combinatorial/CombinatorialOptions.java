@@ -6,6 +6,8 @@ import java.util.Collections;
 import options.BooleanOption;
 import options.GenericChoiceOption;
 import options.OneArgChoiceOptionItem;
+import options.OptionCategory;
+import options.OptionTree;
 import options.OptionTree.ArgumentDescriptor.AcceptedValues;
 import options.learnerOptions.OracleOption;
 
@@ -39,6 +41,8 @@ public class CombinatorialOptions extends OneArgChoiceOptionItem {
 		super(name, argument, parent);
 		subTrees.add(oracleOptions);
 		subTrees.add(withCutting);
+		for (OptionTree option : subTrees)
+			option.setCategoryIfUndef(OptionCategory.ALGO_COMB);
 	}
 
 	public CombinatorialOptions(GenericChoiceOption<?> parent) {

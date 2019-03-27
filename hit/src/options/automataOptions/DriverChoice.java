@@ -4,6 +4,8 @@ import java.lang.reflect.Constructor;
 
 import drivers.Driver;
 import options.GenericOneArgChoiceOption;
+import options.OptionCategory;
+import options.OptionTree;
 
 public class DriverChoice<T extends Driver<?, ?>>
 		extends GenericOneArgChoiceOption<DriverChoiceItem<? extends T>> {
@@ -15,6 +17,7 @@ public class DriverChoice<T extends Driver<?, ?>>
 		super("--driver", optionName, "Select the driver to infer."
 				+ " There are some pre-defined values but you can use the full name of a java class, e.g. : drivers.efsm.NSPKDriver .");
 		driverBaseType = baseType;
+		setCategory(OptionCategory.INFERENCE);
 	}
 
 	@Override
@@ -68,5 +71,12 @@ public class DriverChoice<T extends Driver<?, ?>>
 
 	public T createDriver() {
 		return getSelectedItem().createDriver();
+	}
+
+	@Override
+	protected void addChoice(DriverChoiceItem<? extends T> choice) {
+		for (OptionTree option : choice.subTrees)
+			option.setCategoryIfUndef(OptionCategory.DRIVER);
+		super.addChoice(choice);
 	}
 }

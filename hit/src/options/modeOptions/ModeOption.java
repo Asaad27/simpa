@@ -1,8 +1,9 @@
 package options.modeOptions;
 
 import java.util.List;
-
 import options.MultiArgChoiceOption;
+import options.OptionCategory;
+import options.OptionTree;
 import options.OptionValidator;
 import options.automataOptions.AutomataChoice;
 
@@ -12,7 +13,10 @@ public class ModeOption extends MultiArgChoiceOption {
 
 	public ModeOption(AutomataChoice automataChoice) {
 		super("Inference mode");
+		setCategory(OptionCategory.GLOBAL);
 		addChoice(stats);
+		for (OptionTree option : stats.subTrees)
+			option.setCategory(OptionCategory.STATS);
 		addChoice(simple);
 		setDefaultItem(simple);
 		addValidator(new OptionValidator() {
@@ -42,4 +46,5 @@ public class ModeOption extends MultiArgChoiceOption {
 		r.remove(simple.argument);
 		return r;
 	}
+
 }

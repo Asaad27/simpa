@@ -10,6 +10,8 @@ import options.BooleanOption;
 import options.GenericChoiceOption;
 import options.GenericOneArgChoiceOption;
 import options.OneArgChoiceOptionItem;
+import options.OptionCategory;
+import options.OptionTree;
 import options.RandomOption;
 import options.learnerOptions.StateBoundOption;
 
@@ -61,6 +63,8 @@ public class RivestSchapireOptions extends OneArgChoiceOptionItem {
 		subTrees.add(subLearnerOption);
 
 		subTrees.add(probabilisticRS);
+		for (OptionTree option : subTrees)
+			option.setCategoryIfUndef(OptionCategory.ALGO_RS);
 	}
 
 	public void updateWithDriver(MealyDriver driver) {

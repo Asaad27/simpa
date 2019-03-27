@@ -10,6 +10,8 @@ import java.util.Arrays;
 import options.BooleanOption;
 import options.GenericOneArgChoiceOption;
 import options.OneArgChoiceOptionItem;
+import options.OptionCategory;
+import options.OptionTree;
 import options.OptionTree.ArgumentDescriptor.AcceptedValues;
 import options.WSetOption;
 import options.learnerOptions.StateBoundOption;
@@ -50,6 +52,8 @@ public class LocalizerBasedOptions extends OneArgChoiceOptionItem {
 			}
 		};
 		subTrees.add(computeCharacterizationSet);
+		for (OptionTree option : subTrees)
+			option.setCategoryIfUndef(OptionCategory.ALGO_LOCW);
 	}
 
 	public boolean useSpeedUp() {

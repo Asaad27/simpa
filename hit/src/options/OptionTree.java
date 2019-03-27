@@ -60,6 +60,20 @@ public abstract class OptionTree {
 		public String toString() {
 			return name;
 		}
+
+		public OptionCategory getCategory() {
+			return parentOption.getCategorie(this);
+		}
+
+		public String getHelp() {
+			String help = parentOption.getHelpByArgument(this);
+			assert Character.toUpperCase(help.charAt(0)) == help
+					.charAt(0) : "help message '" + help
+							+ "' should start with a capital letter";
+			assert help.endsWith(".") : "help message '" + help
+					+ "' should end with a dot";
+			return help;
+		}
 	}
 
 	static protected class ArgumentValue {
@@ -142,12 +156,14 @@ public abstract class OptionTree {
 
 	private List<List<OptionTree>> sortedChildren = new ArrayList<>();
 	private List<OptionTree> children = new ArrayList<>();
+	private OptionTree parent = null;
 	private List<OptionValidator> validators = new ArrayList<>();
 	protected Component mainComponent = null;
 	private JPanel mainContainer = null;
 	protected JPanel subTreeContainer = null;
 	private JPanel validationContainer = null;
 	protected String description = "";
+	private OptionCategory category = null;
 
 	/**
 	 * get the graphical component for this option and build it if necessary.
@@ -262,6 +278,10 @@ public abstract class OptionTree {
 	 *            of this option.
 	 */
 	protected void addSortedChildren(List<OptionTree> children) {
+		for (OptionTree child : children) {
+			assert child.parent == null;
+			child.parent = this;
+		}
 		this.children.addAll(children);
 		this.sortedChildren.add(children);
 	}
@@ -781,37 +801,68 @@ public abstract class OptionTree {
 	public abstract String getHelpByArgument(ArgumentDescriptor arg);
 
 	public void printHelp(PrintStream stream) {
-		// first, list all argument and get their helping text.
 		Stack<OptionTree> toCompute = new Stack<>();
 		toCompute.add(this);
-		Map<String, ArgumentDescriptor> seenDescriptors = new HashMap<>();
-		Map<ArgumentDescriptor, String> helps = new HashMap<>();
+		Map<OptionCategory, List<ArgumentDescriptor>> descriptors = new HashMap<>();
+		for (OptionCategory cat : OptionCategory.values()) {
+			descriptors.put(cat, new ArrayList<>());
+		}
+
+		while (!toCompute.isEmpty()) {
+			OptionTree currentOption = toCompute.pop();
+			toCompute.addAll(currentOption.getChildren());
+			for (ArgumentDescriptor descriptor : currentOption
+					.getHelpArguments()) {
+				List<ArgumentDescriptor> list = descriptors
+						.get(descriptor.getCategory());
+				list.add(descriptor);
+			}
+		}
+
+		for (OptionCategory cat : OptionCategory.values()) {
+			stream.println(cat.title);
+			List<ArgumentDescriptor> args = descriptors.get(cat);
+			stream.println();
+			printArguments(args, stream);
+			if (args.size() > 0)
+				stream.println();
+		}
+	}
+
+	public void printAllHelp(PrintStream stream) {
+		Stack<OptionTree> toCompute = new Stack<>();
+		toCompute.add(this);
 		List<ArgumentDescriptor> sortedArguments = new ArrayList<>();
 		while (!toCompute.isEmpty()) {
 			OptionTree current = toCompute.pop();
-			for (ArgumentDescriptor descriptor : current.getHelpArguments()) {
-				String help = current.getHelpByArgument(descriptor);
-				assert Character.toUpperCase(help.charAt(0)) == help
-						.charAt(0) : "help message '" + help
-								+ "' should start with a capital letter";
-				assert help.endsWith(".") : "help message '" + help
-						+ "' should end with a dot";
-				if (seenDescriptors.containsKey(descriptor.name)) {
-					assert helps.get(seenDescriptors.get(descriptor.name))
-							.equals(help);
-				} else {
-					helps.put(descriptor, help);
-					seenDescriptors.put(descriptor.name, descriptor);
-					sortedArguments.add(descriptor);
-				}
+			for (ArgumentDescriptor descriptor : current
+					.getAcceptedArguments()) {
+				sortedArguments.add(descriptor);
 			}
 			toCompute.addAll(current.getChildren());
 		}
 
-		// now print arguments in a readable format;
+		printArguments(sortedArguments, stream);
+	}
+
+	public static void printArguments(List<ArgumentDescriptor> args,
+			PrintStream stream) {
+		Map<String, ArgumentDescriptor> usedArguments = new HashMap<>();
 		int maxArgDispLength = 0;
-		Map<ArgumentDescriptor, String> displayedArgs = new HashMap<>();
-		for (ArgumentDescriptor descriptor : helps.keySet()) {
+		List<ArgumentDescriptor> keptArgs = new ArrayList<>();
+		List<String> displayedArgs = new ArrayList<>();
+		for (ArgumentDescriptor descriptor : args) {
+			if (usedArguments.containsKey(descriptor.name)) {
+				assert usedArguments.get(descriptor.name).getHelp()
+						.equals(descriptor.getHelp()) : descriptor.name
+								+ " has two differents help messages : \n"
+								+ descriptor.getHelp() + "\n"
+								+ usedArguments.get(descriptor.name).getHelp();
+				assert usedArguments.get(
+						descriptor.name).acceptedValues == descriptor.acceptedValues;
+				continue;
+			}
+			usedArguments.put(descriptor.name, descriptor);
 			String disp = descriptor.name;
 			switch (descriptor.acceptedValues) {
 			case NONE:
@@ -823,7 +874,8 @@ public abstract class OptionTree {
 				disp = disp + "=<> ...";
 				break;
 			}
-			displayedArgs.put(descriptor, disp);
+			keptArgs.add(descriptor);
+			displayedArgs.add(disp);
 			if (disp.length() > maxArgDispLength)
 				maxArgDispLength = disp.length();
 		}
@@ -831,9 +883,10 @@ public abstract class OptionTree {
 		int MAX_LENGTH = tools.Utils.terminalWidth();
 		int argColumnWidth = maxArgDispLength;
 		argColumnWidth++;// put a blank space between argument and help.
-		for (ArgumentDescriptor descriptor : sortedArguments) {
-			String argDisp = displayedArgs.get(descriptor);
-			String help = helps.get(descriptor);
+		for (int i = 0; i < keptArgs.size(); i++) {
+			ArgumentDescriptor descriptor = keptArgs.get(i);
+			String argDisp = displayedArgs.get(i);
+			String help = descriptor.getHelp();
 			StringBuilder prefix = new StringBuilder();
 			prefix.append(argDisp);
 			while (prefix.length() < argColumnWidth)
@@ -928,5 +981,52 @@ public abstract class OptionTree {
 		if (description != null && !description.isEmpty())
 			return description;
 		return getClass().getName();
+	}
+
+	/**
+	 * Set the category of this option.
+	 * 
+	 * @param cat
+	 *            the category of this option.
+	 */
+	public final void setCategory(OptionCategory cat) {
+		assert category == null;
+		category = cat;
+	}
+
+	/**
+	 * set the category of this option unless the category is already defined.
+	 * 
+	 * @param cat
+	 *            the category to set.
+	 */
+	public final void setCategoryIfUndef(OptionCategory cat) {
+		if (category == null)
+			setCategory(cat);
+	}
+
+	/**
+	 * Get the category of this option.
+	 * 
+	 * @return the category of this option.
+	 */
+	public final OptionCategory getCategory() {
+		if (category != null)
+			return category;
+		assert parent != null : "Root option must have a category";
+		return parent.getCategory();
+	}
+
+	/**
+	 * Get the category of an argument of this option. The default is the
+	 * category of the option itself but this method can be overridden to put
+	 * arguments in different categories.
+	 * 
+	 * @param arg
+	 *            the argument to classify
+	 * @return the category of the given argument.
+	 */
+	public OptionCategory getCategorie(ArgumentDescriptor arg) {
+		return getCategory();
 	}
 }

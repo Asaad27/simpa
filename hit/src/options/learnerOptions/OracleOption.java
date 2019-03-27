@@ -10,6 +10,7 @@ import options.BooleanOption;
 import options.GenericMultiArgChoiceOption;
 import options.MultiArgChoiceOption;
 import options.MultiArgChoiceOptionItem;
+import options.OptionCategory;
 import options.OptionTree;
 import options.RandomOption;
 import options.automataOptions.TransparentDriverValidator;
@@ -154,6 +155,7 @@ public class OracleOption extends MultiArgChoiceOption {
 
 	public OracleOption(boolean resetAllowed) {
 		super("Oracle choice");
+		setCategory(OptionCategory.ORACLE);
 		this.resetAllowed = resetAllowed;
 		addValidator(driverValidator);
 		shortest = new MultiArgChoiceOptionItem("use shortest counter example",

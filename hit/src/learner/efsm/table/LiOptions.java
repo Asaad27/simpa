@@ -9,6 +9,8 @@ import learner.Learner;
 import learner.efsm.EFSMLearnerItem;
 import options.BooleanOption;
 import options.GenericMultiArgChoiceOption;
+import options.OptionCategory;
+import options.OptionTree;
 import options.RandomOption;
 
 public class LiOptions extends EFSMLearnerItem {
@@ -31,6 +33,8 @@ public class LiOptions extends EFSMLearnerItem {
 		subTrees.add(supportMin);
 		subTrees.add(reuseOpIfNeeded);
 		subTrees.add(xssDetection);
+		for (OptionTree option : subTrees)
+			option.setCategoryIfUndef(OptionCategory.ALGO_LI);
 	}
 
 	@Override

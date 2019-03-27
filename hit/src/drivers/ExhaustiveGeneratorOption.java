@@ -5,6 +5,7 @@ import java.util.NoSuchElementException;
 
 import options.AutoLongOption;
 import options.LongOption;
+import options.OptionCategory;
 import options.automataOptions.DriverChoice;
 import options.automataOptions.DriverChoiceItem;
 
@@ -27,6 +28,7 @@ public abstract class ExhaustiveGeneratorOption<T extends Driver<?, ?> & Enumera
 		super("Exhaustive generator", "--exhaustive-generator", parent,
 				driverClass);
 		subTrees.add(seed);
+		seed.setCategory(OptionCategory.STATS);
 	}
 
 	/**

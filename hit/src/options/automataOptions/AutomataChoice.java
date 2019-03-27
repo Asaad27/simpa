@@ -9,6 +9,7 @@ import drivers.mealy.MealyDriverChoice;
 import learner.efsm.EFSMLearnerChoice;
 import options.MultiArgChoiceOption;
 import options.MultiArgChoiceOptionItem;
+import options.OptionCategory;
 import options.OptionTree;
 import options.learnerOptions.MealyLearnerChoice;
 
@@ -23,6 +24,7 @@ public class AutomataChoice extends MultiArgChoiceOption {
 
 	public AutomataChoice() {
 		super("Automata type");
+		setCategory(OptionCategory.GLOBAL);
 		List<OptionTree> subTree;
 		subTree = new ArrayList<>();
 		subTree.add(mealyLearnerChoice);

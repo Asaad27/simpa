@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import options.IntegerOption;
+import options.OptionCategory;
 import options.OptionTree;
 import options.RandomOption;
 import tools.RandomGenerator;
@@ -14,6 +15,7 @@ public class RandomAutomataOptions {
 
 	protected void addSubOption(OptionTree option) {
 		options.add(option);
+		option.setCategoryIfUndef(OptionCategory.STATS);
 	}
 
 	public List<OptionTree> getOptions() {

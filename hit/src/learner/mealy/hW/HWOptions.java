@@ -8,6 +8,7 @@ import drivers.mealy.MealyDriver;
 import options.BooleanOption;
 import options.GenericOneArgChoiceOption;
 import options.OneArgChoiceOptionItem;
+import options.OptionCategory;
 import options.OptionTree;
 import options.OptionTree.ArgumentDescriptor.AcceptedValues;
 import options.automataOptions.TransparentDriverValidator;
@@ -167,6 +168,8 @@ public class HWOptions extends OneArgChoiceOptionItem {
 		subTrees.add(useDictionary);
 		subTrees.add(checkInconsistenciesHMapping);
 		subTrees.add(searchCeInTrace);
+		for (OptionTree option : subTrees)
+			option.setCategoryIfUndef(OptionCategory.ALGO_HW);
 	}
 
 	public void updateWithDriver(MealyDriver d) {

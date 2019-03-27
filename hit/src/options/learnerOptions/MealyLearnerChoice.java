@@ -8,6 +8,7 @@ import learner.mealy.table.LmOptions;
 import learner.mealy.tree.ZOptions;
 import options.GenericOneArgChoiceOption;
 import options.OneArgChoiceOptionItem;
+import options.OptionCategory;
 
 public class MealyLearnerChoice
 		extends GenericOneArgChoiceOption<OneArgChoiceOptionItem> {
@@ -22,6 +23,7 @@ public class MealyLearnerChoice
 	public MealyLearnerChoice() {
 		super("--algo", "Mealy learner",
 				"The learner to use to infer Mealy systems.");
+		setCategory(OptionCategory.INFERENCE);
 
 		hW = new HWOptions(this);
 
