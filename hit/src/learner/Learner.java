@@ -56,10 +56,7 @@ public abstract class Learner {
 		AutomataChoice automataChoice = SIMPA.automataChoice;
 		ChoiceOptionItem selectedAutomataChoice = automataChoice
 				.getSelectedItem();
-		if (selectedAutomataChoice == automataChoice.scan) {
-			throw new RuntimeException("not implemented yet");
-			// return new ZLearner(driver);
-		} else if (selectedAutomataChoice == automataChoice.efsm) {
+		if (selectedAutomataChoice == automataChoice.efsm) {
 			return automataChoice.efsmLearnerChoice.getSelectedItem()
 					.getLearner((EFSMDriver) driver);
 		} else if (selectedAutomataChoice == automataChoice.mealy) {

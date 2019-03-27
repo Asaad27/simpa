@@ -20,7 +20,6 @@ public class AutomataChoice extends MultiArgChoiceOption {
 	public EFSMLearnerChoice efsmLearnerChoice = new EFSMLearnerChoice();
 	public EFSMDriverChoice efsmDriverChoice = new EFSMDriverChoice();
 	public MultiArgChoiceOptionItem efsm;
-	public MultiArgChoiceOptionItem scan;
 
 	public AutomataChoice() {
 		super("Automata type");
@@ -34,11 +33,8 @@ public class AutomataChoice extends MultiArgChoiceOption {
 		efsm = new MultiArgChoiceOptionItem("EFSM", "--efsm", this,
 				Arrays.asList(efsmDriverChoice, efsmLearnerChoice));
 
-		scan = new MultiArgChoiceOptionItem("Scan", "--scan", this);
-
 		addChoice(mealy);
 		addChoice(efsm);
-		addChoice(scan);
 		setDefaultItem(mealy);
 	}
 
