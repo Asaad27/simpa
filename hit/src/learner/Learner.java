@@ -52,7 +52,7 @@ public abstract class Learner {
 		LogManager.logLine();
 	}
 
-	public static Learner getLearnerFor(Driver<?, ?> driver) throws Exception {
+	public static Learner getLearnerFor(Driver<?, ?> driver) {
 		AutomataChoice automataChoice = SIMPA.automataChoice;
 		ChoiceOptionItem selectedAutomataChoice = automataChoice
 				.getSelectedItem();

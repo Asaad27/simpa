@@ -36,6 +36,7 @@ import javax.swing.ScrollPaneLayout;
 import automata.mealy.InputSequence;
 import drivers.Driver;
 import drivers.ExhaustiveGeneratorOption;
+import drivers.efsm.EFSMDriver;
 import drivers.efsm.real.GenericDriver;
 import drivers.efsm.real.ScanDriver;
 import drivers.mealy.MealyDriver;
@@ -627,12 +628,14 @@ public class SIMPA {
 		Learner l = null;
 		if (automataChoice.getSelectedItem() == automataChoice.mealy) {
 			d = automataChoice.mealyDriverChoice.createDriver();
-			try {
-				l = Learner.getLearnerFor(d);
-			} catch (Exception e) {
-				e.printStackTrace();
-				System.exit(1);
-			}
+			l = Learner.getLearnerFor(d);
+		} else if (automataChoice.getSelectedItem() == automataChoice.efsm) {
+			EFSMDriver eDriver = automataChoice.efsmDriverChoice.createDriver();
+			d = eDriver;
+			l = automataChoice.efsmLearnerChoice.getSelectedItem()
+					.getLearner(eDriver);
+		} else {
+			throw new RuntimeException("this must be implemented");
 		}
 		if (allOptions.validateSelectedTree(true, postDriverPredicate)
 				.compareTo(CriticalityLevel.WARNING) > 0)
