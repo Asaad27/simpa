@@ -14,13 +14,11 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.function.Predicate;
 
@@ -162,30 +160,6 @@ class IntegerOption extends Option<Integer> {
 	}
 }
 
-class LongOption extends Option<Long> {
-	public LongOption(String consoleName, String description, Long defaultValue) {
-		super(consoleName, description, defaultValue);
-	}
-
-	@Override
-	public void parseInternal(String[] args, ArrayList<Boolean> used) {
-		for (int i = 0; i < args.length; i++)
-			if (args[i].equals(consoleName)) {
-				haveBeenParsed = true;
-				used.set(i, true);
-				i++;
-				assert !used.get(i) : "argument already parsed";
-				used.set(i, true);
-				try {
-					value = Long.parseLong(args[i]);
-				} catch (NumberFormatException e) {
-					System.err.println("Error parsing argument '" + args[i] + "' for " + consoleName);
-					throw e;
-				}
-			}
-	}
-}
-
 class StringOption extends Option<String> {
 	public StringOption(String consoleName, String description, String defaultValue) {
 		super(consoleName, description, defaultValue);
@@ -302,44 +276,10 @@ class BooleanOption extends Option<Boolean> {
 	}
 }
 
-class HelpOption extends Option<Object> {
-	public HelpOption() {
-		super("--help | -h", "Show help", null);
-		needed = false;
-	}
-
-	@Override
-	public void parseInternal(String[] args, ArrayList<Boolean> used) {
-		for (int i = 0; i < args.length; i++)
-			if (args[i].equals("-h") || args[i].equals("--help")) {
-				haveBeenParsed = true;
-				used.set(i, true);
-				System.out.println("you don't know how it works ?");
-				SIMPA.usage();
-				System.exit(0);
-			}
-	}
-
-	protected void postCheck(String[] args, ArrayList<Boolean> used) {
-	}
-
-	@Override
-	protected void preCheck(String[] args, ArrayList<Boolean> used) {
-	}
-}
-
 public class SIMPA {
 	public final static String name = SIMPA.class.getSimpleName();
-	private static Driver<?, ?> driver;
 	public static final boolean DEFENSIVE_CODE = true;
-	private static String[] launchArgs;
 
-	// General Options
-	private static HelpOption help = new HelpOption();
-	private static StringOption LOAD_DOT_FILE = new StringOption("--loadDotFile",
-			"load the specified dot file\n use with drivers.mealy.FromDotMealyDriver", null);
-	private static Option<?>[] generalOptions = new Option<?>[] { help,
-			LOAD_DOT_FILE };
 
 	// ZQ options
 	private static BooleanOption STOP_AT_CE_SEARCH = new BooleanOption("--stopatce",
@@ -354,12 +294,6 @@ public class SIMPA {
 			INITIAL_INPUT_SYMBOLS,
 			INITIAL_INPUT_SEQUENCES, INITIAL_INPUT_SYMBOLS_EQUALS_TO_X };
 
-	// EFSM options
-	private static BooleanOption GENERIC_DRIVER = new BooleanOption("--generic", "Use generic driver");
-	private static BooleanOption SCAN = new BooleanOption("--scan", "Use scan driver");
-	private static Option<?>[] EFSMOptions = new Option<?>[] { GENERIC_DRIVER,
-			SCAN,
-	};
 
 
 	// Random driver options
@@ -382,15 +316,6 @@ public class SIMPA {
 	private static Option<?>[] randomAutomataOptions = new Option<?>[] { MIN_STATE, MAX_STATE, MIN_INPUT_SYM,
 			MAX_INPUT_SYM, MIN_OUTPUT_SYM, MAX_OUTPUT_SYM, TRANSITION_PERCENT };
 
-	// stats options
-	private static BooleanOption MAKE_GRAPH = new BooleanOption("--makeGraph", "create graph based on csv files");
-	private static BooleanOption STATS_MODE = new BooleanOption("--stats",
-			"enable stats mode\n - save results to csv\n - disable some feature");
-	private static BooleanOption ENUMERATE_MODE = new BooleanOption("--enumerate",
-			"generate automata with an interval of seeds");
-	private static Option<?>[] statsOptions = new Option<?>[] { MAKE_GRAPH,
-			STATS_MODE, ENUMERATE_MODE };
-
 	private static void parse(String[] args, ArrayList<Boolean> used, Option<?>[] options) {
 		for (Option<?> o : options)
 			o.parse(args, used);
@@ -400,18 +325,13 @@ public class SIMPA {
 	private static void parseArguments(String[] args) {
 		LogManager.logConsole("Checking environment and options");
 
-		LOAD_DOT_FILE.setNeeded(false);
 
 		ArrayList<Boolean> used = new ArrayList<>();
 		for (int j = 0; j < args.length; j++)
 			used.add(false);
 
-		parse(args, used, generalOptions);
-
-		parse(args, used, EFSMOptions);
 		parse(args, used, randomAutomataOptions);
 
-		parse(args, used, statsOptions);
 
 		// check for unused arguments and select the driver
 		int unusedArgs = 0;
@@ -432,7 +352,6 @@ public class SIMPA {
 		Options.INITIAL_INPUT_SEQUENCES = INITIAL_INPUT_SEQUENCES.getValue();
 		Options.INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = INITIAL_INPUT_SYMBOLS_EQUALS_TO_X.getValue();
 
-		Options.GENERICDRIVER = GENERIC_DRIVER.getValue();
 
 		Options.MINSTATES = MIN_STATE.getValue();
 		Options.MAXSTATES = MAX_STATE.getValue();
@@ -442,7 +361,6 @@ public class SIMPA {
 		Options.MAXOUTPUTSYM = MAX_OUTPUT_SYM.getValue();
 		Options.TRANSITIONPERCENT = TRANSITION_PERCENT.getValue();
 
-		Options.SCAN = SCAN.getValue();
 	}
 
 	private static void check() {
@@ -452,32 +370,6 @@ public class SIMPA {
 		if (major < 1 || minor < 5)
 			throw new RuntimeException("Java >=1.5 needed");
 
-		if (STATS_MODE.getValue()) {
-			boolean assert_test = false;
-			assert (assert_test = true);
-			if (assert_test) {
-				System.out.println("you're about to make stats with active assertions."
-						+ "This can make wrong results for duration stats because some assertions may have a big computation duration.\n"
-						+ "Do you want to continue ? [y/n]");
-				while (true) {
-					Scanner input = new Scanner(System.in);
-					String answer = input.next();
-					if (answer.equalsIgnoreCase("y") || answer.equalsIgnoreCase("yes")) {
-						input.close();
-						break;
-					}
-					if (answer.equalsIgnoreCase("n") || answer.equalsIgnoreCase("no")) {
-						input.close();
-						System.exit(0);
-					}
-					System.out.println("what did you say ?");
-				}
-			}
-			if (ENUMERATE_MODE.getValue()){
-				System.err.println("stats are not compatible with enumerate mode yet.");
-				System.exit(1);
-			}
-		}
 
 		if (Options.MINSTATES < 1)
 			throw new RuntimeException("Minimal number of states >= 1 needed");
@@ -505,14 +397,6 @@ public class SIMPA {
 					driver = new GenericDriver(system);
 				} else if (Options.SCAN) {
 					driver = new ScanDriver(system);
-				} else if (LOAD_DOT_FILE.getValue() != null) {
-					try {
-						driver = (Driver<?, ?>) Class.forName(system)
-								.getConstructor(File.class)
-								.newInstance(new File(LOAD_DOT_FILE.getValue()));
-					} catch (InvocationTargetException e) {
-						throw new Exception(e.getTargetException());
-					}
 				} else {
 					driver = (Driver<?, ?>) Class.forName(system).newInstance();
 				}
@@ -540,32 +424,6 @@ public class SIMPA {
 	 */
 	static File lastOptionsFile;
 
-	@Deprecated
-	private static String makeLaunchLine() {
-		StringBuilder r = new StringBuilder();
-		r.append("java ");
-		r.append(SIMPA.class.getName() + " ");
-		for (int i = 0; i < launchArgs.length; i++) {
-			String arg = launchArgs[i];
-			boolean keepArg = true;
-			for (Option<?> statArg : statsOptions) {
-				if (arg.equals(statArg.getConsoleName())) {
-					keepArg = false;
-					if (!(statArg instanceof BooleanOption))
-						i++;
-				}
-			}
-
-			if (keepArg) {
-				if (arg.contains(" "))
-					r.append("\"" + arg + "\"");
-				else
-					r.append(arg);
-				r.append(" ");
-			}
-		}
-		return r.toString();
-	}
 
 	private static boolean runWithOptions() {
 		MultiArgChoiceOptionItem selectedMode = modeOption.getSelectedItem();
@@ -662,33 +520,6 @@ public class SIMPA {
 		return l;
 	}
 
-	@Deprecated
-	protected static Learner learnOneTime() throws Exception {
-		if (Options.LOG_TEXT)
-			LogManager.addLogger(new TextLogger());
-		if (Options.LOG_HTML)
-			LogManager.addLogger(new HTMLLogger(false));
-		LogManager.start();
-		Options.LogOptions();
-		LogManager
-				.logInfo("you can try to do this learning again by running something like '" + makeLaunchLine() + "'");
-		LogManager.logConsole(
-				"you can try to do this learning again by running something like '" + makeLaunchLine() + "'");
-		driver = null;
-		driver = loadDriver(Options.SYSTEM);
-		if (driver == null)
-			System.exit(1);
-		Learner learner = Learner.getLearnerFor(driver);
-		learner.learn();
-		// System.err.println(learner.toString());
-		/** LX add commentaire **/
-		// learner.createConjecture();
-		learner.logStats();
-		driver.logStats();
-		LogManager.end();
-		LogManager.clearsLoggers();
-		return learner;
-	}
 
 	/**
 	 * launch several inferences and record results in CSV files
@@ -1026,7 +857,6 @@ public class SIMPA {
 				parsingErrorStream
 						.println("there was errors while parsing arguments");
 
-			launchArgs = args;
 			welcome();
 			// parseArguments(args);
 			// check();
@@ -1079,35 +909,4 @@ public class SIMPA {
 		allOptions.printHelp(out);
 	}
 
-	protected static void printUsage(Option<?>[] options) {
-		int firstColumnLength = 0;
-		for (Option<?> o : options) {
-			int length = o.consoleName.length()
-					+ ((o.getDefaultValue() == null) ? 0 : o.getDefaultValue().toString().length() + 3);
-			if (length > firstColumnLength && length < 25)
-				firstColumnLength = length;
-		}
-
-		StringBuilder newLine = new StringBuilder("\n\t");
-		for (int j = 0; j <= firstColumnLength; j++)
-			newLine.append(" ");
-		newLine.append("  ");
-		for (Option<?> o : options) {
-			StringBuilder s = new StringBuilder("\t");
-			s.append(o.consoleName);
-			if (o.getDefaultValue() == null) {
-				for (int i = s.length(); i <= firstColumnLength; i++)
-					s.append(" ");
-			} else {
-				for (int i = s.length(); i <= firstColumnLength - 3 - o.getDefaultValue().toString().length(); i++)
-					s.append(" ");
-				s.append(" (");
-				s.append(o.getDefaultValue().toString());
-				s.append(")");
-			}
-			s.append(" : ");
-			s.append(o.getDescription().replaceAll("\n", newLine.toString()));
-			System.out.println(s.toString());
-		}
-	}
 }
