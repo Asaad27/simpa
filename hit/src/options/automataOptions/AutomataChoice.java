@@ -2,6 +2,7 @@ package options.automataOptions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import drivers.efsm.EFSMDriverChoice;
@@ -45,5 +46,10 @@ public class AutomataChoice extends MultiArgChoiceOption {
 			assert getSelectedItem() == efsm;
 			return efsmLearnerChoice;
 		}
+	}
+
+	@Override
+	protected List<ArgumentDescriptor> getHelpArguments() {
+		return Collections.emptyList();
 	}
 }
