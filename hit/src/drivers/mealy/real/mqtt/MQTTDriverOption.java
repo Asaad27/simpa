@@ -19,7 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import drivers.mealy.real.mqtt.MQTTClientDescriptor.Publish;
-import options.IntegerOption;
+import options.driverOptions.TimeoutOption;
 import options.TextOption;
 import options.automataOptions.DriverChoice;
 import options.automataOptions.DriverChoiceItem;
@@ -435,18 +435,14 @@ public class MQTTDriverOption extends DriverChoiceItem<MQTT> {
 
 	ClientsOption clients;
 	TextOption brokerAddress;
-	IntegerOption timeout;
+	TimeoutOption timeout;
 
 	public MQTTDriverOption(DriverChoice<?> parent) {
 		super("MQTT Driver", "mqttDriver", parent, MQTT.class);
 		clients = new ClientsOption();
 		brokerAddress = new TextOption("--mqtt-broker", "tcp://localhost:1883",
 				"broker address", "The adress of the broker to infer.");
-		timeout = new IntegerOption("--mqtt-timeout",
-				"timeout to decide quiescence output (ms)",
-				"When an input is sent to the broker we do not know if we will get an output or not."
-						+ " After this timeout (in ms), we consider that we will not have an answer.",
-				500);
+		timeout = new TimeoutOption(500);
 		subTrees.add(brokerAddress);
 		subTrees.add(timeout);
 		subTrees.add(clients);
@@ -455,7 +451,7 @@ public class MQTTDriverOption extends DriverChoiceItem<MQTT> {
 	@Override
 	public MQTT createDriver() {
 		MQTT driver = new MQTT(brokerAddress.getText(), clients.getValues());
-		driver.setTimeout_ms(timeout.getValue());
+		driver.setTimeout_ms(timeout.getValue_ms());
 		return driver;
 	}
 
