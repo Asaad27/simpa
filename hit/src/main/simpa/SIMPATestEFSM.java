@@ -120,7 +120,7 @@ public class SIMPATestEFSM {
 					try {
 						if (Options.LOG_HTML)
 							LogManager.addLogger(
-									new HTMLLogger(Options.AUTO_OPEN_HTML));
+									new HTMLLogger());
 						if (Options.LOG_TEXT)
 							LogManager.addLogger(new TextLogger());
 						LogManager.start();
@@ -156,7 +156,7 @@ public class SIMPATestEFSM {
 				try {
 					if (Options.LOG_HTML)
 						LogManager.addLogger(
-								new HTMLLogger(Options.AUTO_OPEN_HTML));
+								new HTMLLogger());
 					if (Options.LOG_TEXT)
 						LogManager.addLogger(new TextLogger());
 					LogManager.start();

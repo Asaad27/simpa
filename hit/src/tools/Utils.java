@@ -28,7 +28,6 @@ import java.util.StringTokenizer;
 import automata.efsm.Parameter;
 import automata.efsm.ParameterizedInputSequence;
 import main.simpa.Options;
-import tools.loggers.LogManager;
 
 public class Utils {
 	@Deprecated
@@ -394,29 +393,6 @@ public class Utils {
 		for (int i = 1; i < l.size(); i++)
 			res += sep + filter(l.get(i).toString());
 		return res;
-	}
-
-	public static void browse(File log) {
-		String os = System.getProperty("os.name").toLowerCase();
-		Runtime rt = Runtime.getRuntime();
-		try {
-			if (os.indexOf("win") >= 0) {
-				rt.exec("rundll32 url.dll,FileProtocolHandler "
-						+ log.getAbsolutePath());
-			} else if (os.indexOf("mac") >= 0) {
-				rt.exec("open " + log.getAbsolutePath());
-			} else if (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0) {
-				String[] browsers = { "epiphany", "firefox", "mozilla",
-						"konqueror", "netscape", "opera", "links", "lynx" };
-				StringBuffer cmd = new StringBuffer();
-				for (int i = 0; i < browsers.length; i++)
-					cmd.append((i == 0 ? "" : " || ") + browsers[i] + " \""
-							+ log.getAbsolutePath() + "\" ");
-				rt.exec(new String[] { "sh", "-c", cmd.toString() });
-			}
-		} catch (Exception e) {
-			LogManager.logException("Unable to start the browser", e);
-		}
 	}
 
 	public static boolean deleteDir(File path) {

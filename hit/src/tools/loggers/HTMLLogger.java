@@ -43,12 +43,10 @@ public class HTMLLogger implements ILogger {
 	private DateFormat tfm;
 	private DateFormat filenameFm;
 	private Writer writer = null;
-	private boolean autoOpenHTML;
 	
 	private boolean htmlLogDivOpened = false;
 
-	public HTMLLogger(boolean autoOpenHTML) {
-		this.autoOpenHTML = autoOpenHTML;
+	public HTMLLogger() {
 		file = null;
 		dir = Options.getLogDir();
 		filenameFm = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS");
@@ -118,8 +116,6 @@ public class HTMLLogger implements ILogger {
 			writer.write("</html>\n");
 			writer.flush();
 			writer.close();
-			if (autoOpenHTML)
-				Utils.browse(file);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

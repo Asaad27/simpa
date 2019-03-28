@@ -467,8 +467,7 @@ public class SIMPA {
 		if (getOutputsOptions().textLoggerOption.isEnabled())
 			LogManager.addLogger(new TextLogger());
 		if (getOutputsOptions().htmlLoggerOption.isEnabled())
-			LogManager.addLogger(new HTMLLogger(
-					getOutputsOptions().autoOpenHTML.isEnabled()));
+			LogManager.addLogger(new HTMLLogger());
 		LogManager.start();
 		LogManager.logInfo("starting inference with options "
 				+ allOptions.buildBackCLILine(false));
