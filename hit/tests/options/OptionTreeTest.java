@@ -3,6 +3,7 @@ package options;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Nested;
@@ -66,6 +67,21 @@ public class OptionTreeTest {
 					t.parseArguments(driver + "=" + sampleDriver + " " + base,
 							new NullStream()));
 			checkValue();
+		}
+	}
+
+	@Nested
+	class FullTreeTest extends main.simpa.SIMPA {
+		@Test
+		void testHelpAssertions() {
+			// this test is used to run assertions in the help method (for
+			// instance checking that two options with same argument also have
+			// the same help text).
+			boolean ea = false;
+			assert ea = true;
+			assumeTrue(ea);
+			getOptions().printAllHelp(new NullStream());
+			getOptions().printHelp(new NullStream());
 		}
 	}
 

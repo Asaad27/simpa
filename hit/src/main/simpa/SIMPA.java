@@ -877,6 +877,10 @@ public class SIMPA {
 			validateSubOptions();
 		}
 	};
+
+	protected static OptionTree getOptions() {
+		return allOptions;
+	}
 	static Thread inferThread = null;
 	/**
 	 * The label to display the CLI line. Must be filled after computing the
