@@ -20,6 +20,7 @@ public class EFSMDriverChoice extends DriverChoice<EFSMDriver> {
 				LibcAllocatorDriver.class));
 		addChoice(new DriverChoiceItem<EFSMDriver>(this, NSPK2NDVDriver.class));
 		addChoice(new DriverChoiceItem<EFSMDriver>(this, NSPK2PDriver.class));
+		addChoice(new DriverChoiceItem<EFSMDriver>(this, NSPKDriver.class));
 		addChoice(new DriverChoiceItem<EFSMDriver>(this, NSPK3SDriver.class));
 		addChoice(new DriverChoiceItem<EFSMDriver>(this, NSPK2NDVDriver.class));
 		addChoice(
