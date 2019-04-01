@@ -903,6 +903,15 @@ public class SIMPA {
 				+ "       \topen GUI (other arguments can be specified to preset GUI options)");
 		out.println();
 
+		out.println(Utils.prefixString("", "Keys for prefixes in options:"
+				+ System.lineSeparator()
+				+ "T : option applies only to Transparent (glass-box) Drivers"
+				+ System.lineSeparator() + "M: option specific for Mealy models"
+				+ System.lineSeparator() + "E: option specific for EFSM models"
+				+ System.lineSeparator()
+				+ "Other prefix letters indicate which component the option modifies D(river), O(racle), S(tatistics), and algorithm-specific options are prefixed with the name of the algorithm.",
+				Utils.terminalWidth()));
+		out.println();
 		allOptions.printHelp(out);
 	}
 
