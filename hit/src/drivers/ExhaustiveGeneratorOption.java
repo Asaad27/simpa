@@ -1,6 +1,8 @@
 package drivers;
 
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import options.AutoLongOption;
@@ -17,10 +19,15 @@ public abstract class ExhaustiveGeneratorOption<T extends Driver<?, ?> & Enumera
 	 */
 	public final AutoLongOption seed = new AutoLongOption(
 			"--Sexhaustive-generator-pos",
-			"seed used to build the automaton in driver",
+			"a number representing the automaton built",
 			"A number used to represent an automata in the generation list."
 					+ " The automatic value let the enum mode select all seeds.",
-			(long) 0);
+			(long) 0) {
+		@Override
+		protected List<ArgumentDescriptor> getHelpArguments() {
+			return Collections.emptyList();
+		}
+	};
 
 	public ExhaustiveGeneratorOption(
 			DriverChoice<? extends Driver<?, ?>> parent,
