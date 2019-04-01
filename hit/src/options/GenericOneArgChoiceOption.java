@@ -24,8 +24,12 @@ public class GenericOneArgChoiceOption<T extends OneArgChoiceOptionItem>
 		super(optionName);
 		this.description = description;
 		assert argument.startsWith("-");
-		argumentDescriptor = new ArgumentDescriptor(
-				ArgumentDescriptor.AcceptedValues.ONE, argument, this);
+		argumentDescriptor = makeArgumentDescriptor(argument);
+	}
+
+	protected ArgumentDescriptor makeArgumentDescriptor(String argument) {
+		return new ArgumentDescriptor(ArgumentDescriptor.AcceptedValues.ONE,
+				argument, this);
 	}
 
 	@Override

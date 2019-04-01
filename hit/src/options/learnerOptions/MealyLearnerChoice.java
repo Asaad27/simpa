@@ -9,6 +9,7 @@ import learner.mealy.tree.ZOptions;
 import options.GenericOneArgChoiceOption;
 import options.OneArgChoiceOptionItem;
 import options.OptionCategory;
+import options.OptionTree.ArgumentDescriptor.AcceptedValues;
 
 public class MealyLearnerChoice
 		extends GenericOneArgChoiceOption<OneArgChoiceOptionItem> {
@@ -40,6 +41,18 @@ public class MealyLearnerChoice
 		addChoice(combinatorial);
 		setDefaultItem(hW);
 
+	}
+
+	@Override
+	protected ArgumentDescriptor makeArgumentDescriptor(String argument) {
+		return new ArgumentDescriptor(AcceptedValues.ONE, argument, this) {
+			@Override
+			public String getHelpDisplay() {
+				assert super.getHelpDisplay()
+						.equals(name + "=<>") : "need update for consistence";
+				return name + "=<name>";
+			}
+		};
 	}
 
 	@Override

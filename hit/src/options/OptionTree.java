@@ -82,6 +82,18 @@ public abstract class OptionTree {
 			assert acceptedValues != AcceptedValues.NONE;
 			return parentOption.getSampleArgumentValues(this);
 		}
+
+		public String getHelpDisplay() {
+			switch (acceptedValues) {
+			case NONE:
+				return name;
+			case ONE:
+				return name + "=<>";
+			case SEVERAL:
+				return name + "=<> ...";
+			}
+			return null;
+		}
 	}
 
 	static protected class ArgumentValue {
@@ -952,17 +964,7 @@ public abstract class OptionTree {
 			}
 
 			usedArguments.put(descriptor.name, descriptor);
-			String disp = descriptor.name;
-			switch (descriptor.acceptedValues) {
-			case NONE:
-				break;
-			case ONE:
-				disp = disp + "=<>";
-				break;
-			case SEVERAL:
-				disp = disp + "=<> ...";
-				break;
-			}
+			String disp = descriptor.getHelpDisplay();
 			keptArgs.add(descriptor);
 			displayedArgs.add(disp);
 			if (disp.length() > maxArgDispLength)
