@@ -1,6 +1,8 @@
 package options.automataOptions;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.List;
 
 import drivers.Driver;
 import options.GenericOneArgChoiceOption;
@@ -14,9 +16,8 @@ public class DriverChoice<T extends Driver<?, ?>>
 	protected DriverChoiceItem<T> extraChoice = null;
 
 	public DriverChoice(Class<T> baseType, String optionName) {
-		super("--Driver", optionName,
-				"Select the driver to connect to the System to infer."
-						+ " There are some pre-defined values but you can use the full name of a java class, e.g. : drivers.efsm.NSPKDriver .");
+		super("--Driver", optionName, "Select the driver to infer."
+				+ " There are some pre-defined values but you can use the full name of a java class.");
 		driverBaseType = baseType;
 		setCategory(OptionCategory.INFERENCE);
 	}
@@ -79,5 +80,23 @@ public class DriverChoice<T extends Driver<?, ?>>
 		for (OptionTree option : choice.subTrees)
 			option.setCategoryIfUndef(OptionCategory.DRIVER);
 		super.addChoice(choice);
+	}
+
+	@Override
+	public List<SampleArgumentValue> getSampleArgumentValues(
+			ArgumentDescriptor arg) {
+		List<SampleArgumentValue> result = new ArrayList<>();
+		super.getSampleArgumentValues(arg);
+		result.add(new SampleArgumentValue(arg, "a class name", false,
+				"use the driver written in the specified class"));
+		for (SampleArgumentValue sample : super.getSampleArgumentValues(arg)) {
+			assert (sample.argument == arg);
+			if (sample.value.endsWith(sample.help) && sample.real) {
+				sample = new SampleArgumentValue(arg, sample.value,
+						sample.real);
+			}
+			result.add(sample);
+		}
+		return result;
 	}
 }

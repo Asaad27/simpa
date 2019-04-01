@@ -118,4 +118,16 @@ public class GenericOneArgChoiceOption<T extends OneArgChoiceOptionItem>
 		return null;
 	}
 
+	@Override
+	public List<SampleArgumentValue> getSampleArgumentValues(
+			ArgumentDescriptor arg) {
+		assert arg == argumentDescriptor;
+		List<SampleArgumentValue> r = new ArrayList<>();
+		for (T choice : choices) {
+			r.add(new SampleArgumentValue(arg, choice.argValue, true,
+					choice.displayName));
+		}
+		return r;
+	}
+
 }

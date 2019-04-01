@@ -6,7 +6,9 @@ import java.awt.GridBagLayout;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -17,6 +19,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
+import options.OptionTree.ArgumentDescriptor.AcceptedValues;
 import options.OptionValidator.CriticalityLevel;
 import options.valueHolders.ValueHolder;
 import tools.NullStream;
@@ -73,6 +76,11 @@ public abstract class OptionTree {
 			assert help.endsWith(".") : "help message '" + help
 					+ "' should end with a dot";
 			return help;
+		}
+
+		public List<SampleArgumentValue> getSampleValues() {
+			assert acceptedValues != AcceptedValues.NONE;
+			return parentOption.getSampleArgumentValues(this);
 		}
 	}
 
@@ -150,6 +158,42 @@ public abstract class OptionTree {
 
 		public ArgumentDescriptor getDescriptor() {
 			return descriptor;
+		}
+
+	}
+
+	static protected class SampleArgumentValue {
+		/**
+		 * The argument for which this value is written.
+		 */
+		public final ArgumentDescriptor argument;
+		/**
+		 * A possible value for the {@link #argument}
+		 */
+		public final String value;
+		/**
+		 * an optional text describing the value (or {@code null}).
+		 */
+		public final String help;
+		/**
+		 * Indicate whether this value can be parsed or if it is an example for
+		 * human reading. For instance the value "a number" can be used if an
+		 * integer is wanted and real must be false.
+		 */
+		public final boolean real;
+
+		public SampleArgumentValue(ArgumentDescriptor argument, String value,
+				boolean real, String help) {
+			super();
+			this.argument = argument;
+			this.value = value;
+			this.help = help;
+			this.real = real;
+		}
+
+		public SampleArgumentValue(ArgumentDescriptor argument, String value,
+				boolean real) {
+			this(argument, value, real, null);
 		}
 
 	}
@@ -800,6 +844,19 @@ public abstract class OptionTree {
 	 */
 	public abstract String getHelpByArgument(ArgumentDescriptor arg);
 
+	/**
+	 * Get sample values for a specific argument. This method is designed to be
+	 * overridden.
+	 * 
+	 * @param arg
+	 *            the argument for which sample values are requested.
+	 * @return some values readable by the user.
+	 */
+	public List<SampleArgumentValue> getSampleArgumentValues(
+			ArgumentDescriptor arg) {
+		return Collections.emptyList();
+	}
+
 	public void printHelp(PrintStream stream) {
 		Stack<OptionTree> toCompute = new Stack<>();
 		toCompute.add(this);
@@ -848,10 +905,41 @@ public abstract class OptionTree {
 	public static void printArguments(List<ArgumentDescriptor> args,
 			PrintStream stream) {
 		Map<String, ArgumentDescriptor> usedArguments = new HashMap<>();
+		Map<String, List<SampleArgumentValue>> sampleValues = new HashMap<>();
 		int maxArgDispLength = 0;
 		List<ArgumentDescriptor> keptArgs = new ArrayList<>();
 		List<String> displayedArgs = new ArrayList<>();
 		for (ArgumentDescriptor descriptor : args) {
+
+			// add sample values if they are not already in the list.
+			if (descriptor.acceptedValues != AcceptedValues.NONE) {
+				List<SampleArgumentValue> descriptorSamples = descriptor
+						.getSampleValues();
+				if (sampleValues.containsKey(descriptor.name)) {
+					for (SampleArgumentValue sample : descriptorSamples) {
+						boolean exist = false;
+						List<SampleArgumentValue> existingValues = sampleValues
+								.get(descriptor.name);
+						for (SampleArgumentValue existing : existingValues) {
+							if (existing.value.equals(sample.value)) {
+								assert (existing.help == null
+										&& sample.help == null)
+										|| (existing.help != null
+												&& existing.help
+														.equals(sample.help));
+								exist = true;
+							}
+						}
+						if (!exist) {
+							existingValues.add(sample);
+						}
+					}
+				} else {
+					sampleValues.put(descriptor.name,
+							new ArrayList<>(descriptorSamples));
+				}
+			}
+
 			if (usedArguments.containsKey(descriptor.name)) {
 				assert usedArguments.get(descriptor.name).getHelp()
 						.equals(descriptor.getHelp()) : descriptor.name
@@ -862,6 +950,7 @@ public abstract class OptionTree {
 						descriptor.name).acceptedValues == descriptor.acceptedValues;
 				continue;
 			}
+
 			usedArguments.put(descriptor.name, descriptor);
 			String disp = descriptor.name;
 			switch (descriptor.acceptedValues) {
@@ -886,13 +975,58 @@ public abstract class OptionTree {
 		for (int i = 0; i < keptArgs.size(); i++) {
 			ArgumentDescriptor descriptor = keptArgs.get(i);
 			String argDisp = displayedArgs.get(i);
-			String help = descriptor.getHelp();
+			StringBuilder argumentHelp = new StringBuilder(
+					descriptor.getHelp());
+
+			List<SampleArgumentValue> descriptorSamples = sampleValues
+					.get(descriptor.name);
+			if (descriptorSamples != null && descriptorSamples.size() != 0) {
+				argumentHelp = argumentHelp.append(" Possible values are ");
+				Collections.sort(descriptorSamples,
+						new Comparator<SampleArgumentValue>() {
+							@Override
+							public int compare(SampleArgumentValue o1,
+									SampleArgumentValue o2) {
+								if (o1.help == null && o2.help != null)
+									return -1;
+								if (o2.help == null && o1.help != null)
+									return 1;
+								if (o1.real && !o2.real)
+									return 1;
+								if (o2.real && !o1.real)
+									return -1;
+								return 0;
+							}
+						});
+				boolean hasHelp = false;
+				Iterator<SampleArgumentValue> it = descriptorSamples.iterator();
+				SampleArgumentValue sample;
+				while (it.hasNext()) {
+					sample = it.next();
+					String value = sample.value;
+					if (!sample.real)
+						value = "<" + sample.value + ">";
+					if (sample.help != null) {
+						hasHelp = true;
+						argumentHelp = argumentHelp
+								.append("\n" + value + " : " + sample.help);
+					} else {
+						argumentHelp = argumentHelp.append(value);
+						if (it.hasNext())
+							argumentHelp = argumentHelp.append(" | ");
+					}
+				}
+
+				if (!hasHelp)
+					argumentHelp = argumentHelp.append(".");
+			}
+
 			StringBuilder prefix = new StringBuilder();
 			prefix.append(argDisp);
 			while (prefix.length() < argColumnWidth)
 				prefix.append(' ');
-			stream.print(
-					Utils.prefixString(prefix.toString(), help, MAX_LENGTH));
+			stream.print(Utils.prefixString(prefix.toString(),
+					argumentHelp.toString(), MAX_LENGTH));
 		}
 	}
 
