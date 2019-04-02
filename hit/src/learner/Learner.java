@@ -16,7 +16,7 @@ import stats.attribute.Attribute;
 import tools.loggers.LogManager;
 import automata.Automata;
 import drivers.Driver;
-import drivers.efsm.EFSMDriver;
+//EFSM//import drivers.efsm.EFSMDriver;
 import drivers.mealy.MealyDriver;
 
 public abstract class Learner {
@@ -56,10 +56,11 @@ public abstract class Learner {
 		AutomataChoice automataChoice = SIMPA.automataChoice;
 		ChoiceOptionItem selectedAutomataChoice = automataChoice
 				.getSelectedItem();
-		if (selectedAutomataChoice == automataChoice.efsm) {
-			return automataChoice.efsmLearnerChoice.getSelectedItem()
-					.getLearner((EFSMDriver) driver);
-		} else if (selectedAutomataChoice == automataChoice.mealy) {
+//EFSM//		if (selectedAutomataChoice == automataChoice.efsm) {
+//EFSM//			return automataChoice.efsmLearnerChoice.getSelectedItem()
+//EFSM//					.getLearner((EFSMDriver) driver);
+//EFSM//		} else 
+		if (selectedAutomataChoice == automataChoice.mealy) {
 			MealyDriver mDriver = (MealyDriver) driver;
 			MealyLearnerChoice learnerChoice = automataChoice.mealyLearnerChoice;
 			ChoiceOptionItem selectedLearnerChoice = learnerChoice

@@ -111,17 +111,17 @@ public class SIMPAOld {
 		if (Options.SUPPORT_MIN < 1 || Options.SUPPORT_MIN > 100)
 			throw new Exception("Minimal between 1 and 100 include needed");
 
-		if (Options.WEKA){
-			try {
-				Options.WEKA = weka.core.Version.MAJOR >= 3;
-				if (!Options.WEKA)
-					LogManager
-							.logError("Warning : Weka version >= 3 needed. Please update Weka.");
-			} catch (Exception e) {
-				LogManager
-						.logError("Warning : Unable to use Weka. Check the buildpath.");
-			}
-		}
+//EFSM//		if (Options.WEKA){
+//EFSM//			try {
+//EFSM//				Options.WEKA = weka.core.Version.MAJOR >= 3;
+//EFSM//				if (!Options.WEKA)
+//EFSM//					LogManager
+//EFSM//							.logError("Warning : Weka version >= 3 needed. Please update Weka.");
+//EFSM//			} catch (Exception e) {
+//EFSM//				LogManager
+//EFSM//						.logError("Warning : Unable to use Weka. Check the buildpath.");
+//EFSM//			}
+//EFSM//		}
 
 		File f = new File(Options.OUTDIR);
 		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())

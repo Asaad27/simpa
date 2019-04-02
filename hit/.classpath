@@ -8,7 +8,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
-	<classpathentry kind="lib" path="lib/weka.jar"/>
 	<classpathentry kind="lib" path="lib/sipunit/jain-sip-api-1.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/sipunit/jain-sip-ri-1.2.164.jar"/>
 	<classpathentry kind="lib" path="lib/sipunit/sipunit-2.0.0.jar"/>
