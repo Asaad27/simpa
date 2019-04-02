@@ -194,6 +194,8 @@ public abstract class OptionTree {
 		 */
 		public final boolean real;
 
+		private boolean hidden = false;
+
 		public SampleArgumentValue(ArgumentDescriptor argument, String value,
 				boolean real, String help) {
 			super();
@@ -208,6 +210,25 @@ public abstract class OptionTree {
 			this(argument, value, real, null);
 		}
 
+		/**
+		 * indicate that this value should not be displayed in global help.
+		 * 
+		 * @see #isHidden();
+		 */
+		public void hide() {
+			hidden = true;
+		}
+
+		/**
+		 * This method indicate whether this value should be displayed in global
+		 * help or not.
+		 * 
+		 * @return {@code true} if the value should be hidden in global help.
+		 * @see #hide()
+		 */
+		boolean isHidden() {
+			return hidden;
+		}
 	}
 
 	private List<List<OptionTree>> sortedChildren = new ArrayList<>();
@@ -927,28 +948,26 @@ public abstract class OptionTree {
 			if (descriptor.acceptedValues != AcceptedValues.NONE) {
 				List<SampleArgumentValue> descriptorSamples = descriptor
 						.getSampleValues();
-				if (sampleValues.containsKey(descriptor.name)) {
-					for (SampleArgumentValue sample : descriptorSamples) {
-						boolean exist = false;
-						List<SampleArgumentValue> existingValues = sampleValues
-								.get(descriptor.name);
-						for (SampleArgumentValue existing : existingValues) {
-							if (existing.value.equals(sample.value)) {
-								assert (existing.help == null
-										&& sample.help == null)
-										|| (existing.help != null
-												&& existing.help
-														.equals(sample.help));
-								exist = true;
-							}
-						}
-						if (!exist) {
-							existingValues.add(sample);
+				if (!sampleValues.containsKey(descriptor.name))
+					sampleValues.put(descriptor.name, new ArrayList<>());
+				for (SampleArgumentValue sample : descriptorSamples) {
+					if (sample.isHidden())
+						continue;
+					boolean exist = false;
+					List<SampleArgumentValue> existingValues = sampleValues
+							.get(descriptor.name);
+					for (SampleArgumentValue existing : existingValues) {
+						if (existing.value.equals(sample.value)) {
+							assert (existing.help == null
+									&& sample.help == null)
+									|| (existing.help != null && existing.help
+											.equals(sample.help));
+							exist = true;
 						}
 					}
-				} else {
-					sampleValues.put(descriptor.name,
-							new ArrayList<>(descriptorSamples));
+					if (!exist) {
+						existingValues.add(sample);
+					}
 				}
 			}
 
@@ -1005,6 +1024,7 @@ public abstract class OptionTree {
 				SampleArgumentValue sample;
 				while (it.hasNext()) {
 					sample = it.next();
+					assert !sample.isHidden();
 					String value = sample.value;
 					if (!sample.real)
 						value = "<" + sample.value + ">";

@@ -1,5 +1,7 @@
 package drivers.mealy;
 
+import java.util.List;
+
 import drivers.ExhaustiveGeneratorOption;
 import drivers.mealy.real.SIPDriverIPTel;
 import drivers.mealy.real.mqtt.MQTTDriverOption;
@@ -26,4 +28,14 @@ public class MealyDriverChoice extends DriverChoice<MealyDriver> {
 		addChoice(new MQTTDriverOption(this));
 	}
 
+	@Override
+	public List<SampleArgumentValue> getSampleArgumentValues(
+			ArgumentDescriptor arg) {
+		List<SampleArgumentValue> result = super.getSampleArgumentValues(arg);
+		for (SampleArgumentValue sample : result) {
+			if (sample.value.equals(exhaustiveDriver.argValue))
+				sample.hide();
+		}
+		return result;
+	}
 }

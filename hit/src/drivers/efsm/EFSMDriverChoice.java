@@ -1,5 +1,8 @@
 package drivers.efsm;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import drivers.efsm.real.GenericDriver;
 import drivers.efsm.real.HighWebDriver;
 import drivers.efsm.real.LowWebDriver;
@@ -9,20 +12,27 @@ import options.automataOptions.DriverChoice;
 import options.automataOptions.DriverChoiceItem;
 
 public class EFSMDriverChoice extends DriverChoice<EFSMDriver> {
+	List<DriverChoiceItem<EFSMDriver>> hiddenChoices = new ArrayList<>();
 
 	public EFSMDriverChoice() {
 		super(EFSMDriver.class, "EFSM driver");
-		addChoice(new DriverChoiceItem<EFSMDriver>(this, ArticleDriver.class));
-		addChoice(
+		addHiddenChoice(
+				new DriverChoiceItem<EFSMDriver>(this, ArticleDriver.class));
+		addHiddenChoice(
 				new DriverChoiceItem<EFSMDriver>(this, ArticleErrDriver.class));
 		addChoice(new DriverChoiceItem<EFSMDriver>(this, CacheDriver.class));
 		addChoice(new DriverChoiceItem<EFSMDriver>(this,
 				LibcAllocatorDriver.class));
-		addChoice(new DriverChoiceItem<EFSMDriver>(this, NSPK2NDVDriver.class));
-		addChoice(new DriverChoiceItem<EFSMDriver>(this, NSPK2PDriver.class));
-		addChoice(new DriverChoiceItem<EFSMDriver>(this, NSPKDriver.class));
-		addChoice(new DriverChoiceItem<EFSMDriver>(this, NSPK3SDriver.class));
-		addChoice(new DriverChoiceItem<EFSMDriver>(this, NSPK2NDVDriver.class));
+		addHiddenChoice(
+				new DriverChoiceItem<EFSMDriver>(this, NSPK2NDVDriver.class));
+		addHiddenChoice(
+				new DriverChoiceItem<EFSMDriver>(this, NSPK2PDriver.class));
+		addHiddenChoice(
+				new DriverChoiceItem<EFSMDriver>(this, NSPKDriver.class));
+		addHiddenChoice(
+				new DriverChoiceItem<EFSMDriver>(this, NSPK3SDriver.class));
+		addHiddenChoice(
+				new DriverChoiceItem<EFSMDriver>(this, NSPK2NDVDriver.class));
 		addChoice(
 				new DriverChoiceItem<EFSMDriver>(this, SamlSSOSPDriver.class));
 		addChoice(new DriverChoiceItem<EFSMDriver>(this, CacheDriver.class));
@@ -36,6 +46,24 @@ public class EFSMDriverChoice extends DriverChoice<EFSMDriver> {
 				WebSamlSSOSPDriver.class));
 		addChoice(new DriverChoiceItem<EFSMDriver>(this,
 				WGStoredXSSDriver.class));
+	}
+
+	private void addHiddenChoice(DriverChoiceItem<EFSMDriver> choice) {
+		hiddenChoices.add(choice);
+		addChoice(choice);
+	}
+
+	@Override
+	public List<SampleArgumentValue> getSampleArgumentValues(
+			ArgumentDescriptor arg) {
+		List<SampleArgumentValue> result = super.getSampleArgumentValues(arg);
+		for (SampleArgumentValue sample : result) {
+			for (DriverChoiceItem<EFSMDriver> choice : hiddenChoices) {
+				if (choice.argValue.equals(sample.value))
+					sample.hide();
+			}
+		}
+		return result;
 	}
 
 }
