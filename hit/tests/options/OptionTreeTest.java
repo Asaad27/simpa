@@ -83,6 +83,14 @@ public class OptionTreeTest {
 			getOptions().printAllHelp(new NullStream());
 			getOptions().printHelp(new NullStream());
 		}
+
+		@Test
+		void testExamples() {
+			for (Sample s : samples) {
+				assertTrue(
+						getOptions().parseArguments(s.cmd + " ", System.out));
+			}
+		}
 	}
 
 }

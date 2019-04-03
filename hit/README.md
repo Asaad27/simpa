@@ -74,15 +74,11 @@ And now you can launch SIMPA :
 #  Usage
 
 The basic arguments are :
-    - `--help` display the list of available command line arguments.
-    - `--gui` open graphical interface (other arguments can be provided to
-    preset values in graphical interface).
+- `--help` display the list of available command line arguments.
+- `--gui` open graphical interface (other arguments can be provided
+  to preset values in graphical interface).
 
-There are some examples for **Program Arguments** :
-
-	--mealy --driver drivers.mealy.SFM11StefenDriver --lm --mrBean --oracleSeed=auto --maxcelength=20 --maxceresets=30 --html --text
-
-	--mealy --driver drivers.mealy.FromDotMealyDriver --lm --html --text --loadDotFile /Documents/workspace/DotParser/test2.dot
+Some example are shown when you use the `--help` argument.
 
 # Inferring a real system (writing a new Driver)
 

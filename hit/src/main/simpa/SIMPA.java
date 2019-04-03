@@ -892,6 +892,35 @@ public class SIMPA {
 		System.out.println();
 	}
 
+	static protected class Sample {
+		public final String cmd, description;
+
+		public Sample(String cmd, String description) {
+			super();
+			this.cmd = cmd;
+			this.description = description;
+		}
+	}
+
+	protected final static Sample[] samples = {
+			new Sample(
+					"--TDDotFile=automaton.dot --algo=MLm --html --OT_shortest",
+					"Infer the Mealy system represented in file 'automaton.dot' with Lm algorithm. As we use a transparent (glass-box) driver, we can compare conjecture and real automata to compute the shortest counter-example."),
+			new Sample(
+					"--algo=MhW --MhW_whitout_reset --Driver=mqttDriver --Dtimeout=500 --DMQTT_client=client2:connect|disconnect|publish(topic,hello,false,)|: --DMQTT_client=client1:connect|disconnect|subscribe(topic,)|: --ORnd --ORnd_seed=auto --ORnd_maxlength=200 --text",
+					"Infer a non-resetable MQTT System with hW algorithm."
+							+ System.lineSeparator()
+							+ "The configuration of MQTT client (i.e. the choice of actions sent to the broker) can be made in graphical interface with argument "
+							+ GUI_ARGUMENT + "."),
+			new Sample(
+					"--Stats --Sgraph --Snbtest=10 --Driver=drivers.mealy.RandomMealyDriver --algo=MZQ --ORnd --ORnd_seed=auto --ORnd_maxlength=200 --ORnd_maxresets=1 --outdir=stats",
+					"Run 10 inferences of a random automata with ZQ algorithm."
+							+ System.lineSeparator()
+							+ "The graph plotted at end of execution is configured through the java class "
+							+ learner.mealy.tree.ZStatsEntry.class + "."),
+
+	};
+
 	public static void usage() {
 		PrintStream out = System.out;
 		out.println("Help for " + name);
@@ -913,6 +942,16 @@ public class SIMPA {
 				Utils.terminalWidth()));
 		out.println();
 		allOptions.printHelp(out);
+		out.println();
+		out.println();
+		out.println("EXAMPLES :");
+		for (Sample sample : samples) {
+			out.println(sample.cmd);
+			out.print(Utils.prefixString("  ", sample.description,
+					Utils.terminalWidth()));
+			out.println();
+		}
+
 	}
 
 }
