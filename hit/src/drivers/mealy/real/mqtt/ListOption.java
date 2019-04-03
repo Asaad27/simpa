@@ -200,7 +200,7 @@ public abstract class ListOption<T> extends OptionTree {
 				assert valueToString(value).equals(stringValue);
 			}
 		}
-		return error;
+		return !error;
 	}
 
 	@Override
