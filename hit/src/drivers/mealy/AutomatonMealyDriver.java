@@ -28,7 +28,6 @@ public class AutomatonMealyDriver extends MealyDriver {
 	private State previousState = null;
 	protected Set<InputSequence> triedCE;
 	private int nbStates = 0;
-	private String name = null;
 
 	public AutomatonMealyDriver(Mealy automata) {
 		super(automata.getName());
@@ -87,11 +86,6 @@ public class AutomatonMealyDriver extends MealyDriver {
 					.getStateCount();
 		}
 		return null;
-	}
-
-	@Override
-	public String getSystemName() {
-		return name;
 	}
 
 	@Override
