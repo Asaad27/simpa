@@ -65,6 +65,7 @@ SIMPA has quite a lot of dependencies which have to be added in your `CLASSPATH`
 Then you can compile the sources :
 
     cd $SIMPA/src
+    java -jar "$SIMPA/lib/antlr-4.5.3-complete.jar" -no-visitor -package tools.antlr4.DotMealy "$SIMPA/src/tools/antlr4/DotMealy/DotMealy.g4"
     javac -g -d ../bin  */*.java */*/*.java */*/*/*.java */*/*/*/*.java */*/*/*/*/*.java
     
 And now you can launch SIMPA :
