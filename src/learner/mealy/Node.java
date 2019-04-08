@@ -9,6 +9,7 @@
  *
  * Contributors:
  *     Karim HOSSEN
+ *     Nicolas BREMOND
  ********************************************************************************/
 package learner.mealy;
 
