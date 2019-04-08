@@ -49,6 +49,15 @@ httpclient (4.2.2)
  * JCIP-ANNOTATIONS
     * License: Creative Commons Attribution License 
 
+xml-apis (1.4.01)
+
+ * License: Apache License, 2.0
+
+ * some portions
+    * software copyright (c) 1999, IBM Corporation., http://www.ibm.com.
+    * software copyright (c) 1999, Sun Microsystems., http://www.sun.com.
+    * software copyright (c) 2000 World Wide Web Consortium, http://www.w3.org
+
 antlr (4.5.3)
 
  * License: BSD i3-clause License
