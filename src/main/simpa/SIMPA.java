@@ -921,11 +921,12 @@ public class SIMPA {
 
 	protected final static Sample[] samples = {
 			new Sample(
-					"--TDDotFile=automaton.dot --algo=MLm --html --OT_shortest",
-					"Infer the Mealy system represented in file 'automaton.dot' with Lm algorithm. As we use a transparent (glass-box) driver, we can compare conjecture and real automata to compute the shortest counter-example."),
+					"--TDDotFile=sample.dot --algo=MLm --html --OT_shortest",
+					"Infer the Mealy system represented in file 'sample.dot' with Lm algorithm. As we use a transparent (glass-box) driver, we can compare conjecture and real automata to compute the shortest counter-example."),
 			new Sample(
-					"--algo=MhW --MhW_whitout_reset --Driver=mqttDriver --Dtimeout=500 --DMQTT_client=client2:connect|disconnect|publish(topic,hello,false,)|: --DMQTT_client=client1:connect|disconnect|subscribe(topic,)|: --ORnd --ORnd_seed=auto --ORnd_maxlength=200 --text",
+					"--algo=MhW --MhW_whitout_reset --Driver=mqttDriver --Dtimeout=500 --DMQTT_client=client1:connect/disconnect/publish[topic,hello,false,]/: --DMQTT_client=client2:connect/disconnect/subscribe[topic,]/: --ORnd --ORnd_seed=auto --ORnd_maxlength=200 --text",
 					"Infer a non-resetable MQTT System with hW algorithm."
+							+ "For this example, you need to run a MQTT broker."
 							+ System.lineSeparator()
 							+ "The configuration of MQTT client (i.e. the choice of actions sent to the broker) can be made in graphical interface with argument "
 							+ GUI_ARGUMENT + "."),

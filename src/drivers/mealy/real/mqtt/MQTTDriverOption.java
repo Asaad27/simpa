@@ -70,9 +70,9 @@ class ClientsOption extends ListOption<MQTTClientDescriptor> {
 	 */
 	static List<String> getArgs(String element, String funcName,
 			int expectedSize, PrintStream errorStream) {
-		if (!element.startsWith(funcName + "(") || !element.endsWith(")")) {
+		if (!element.startsWith(funcName + "[") || !element.endsWith("]")) {
 			errorStream.println("invalid syntax for '" + element
-					+ "', should be '" + funcName + "(...)'");
+					+ "', should be '" + funcName + "[...]'");
 			return null;
 		}
 		String args = element.substring(1 + funcName.length(),
@@ -92,8 +92,8 @@ class ClientsOption extends ListOption<MQTTClientDescriptor> {
 	}
 
 	static String buildFunc(String funcName, String... args) {
-		return funcName + "("
-				+ Utils.listToString(Arrays.asList(args), ',', '\\') + ")";
+		return funcName + "["
+				+ Utils.listToString(Arrays.asList(args), ',', '\\') + "]";
 	}
 
 	@Override
@@ -118,7 +118,7 @@ class ClientsOption extends ListOption<MQTTClientDescriptor> {
 			return null;
 		}
 
-		List<String> elements = Utils.stringToList(s, '|', '\\', warnings);
+		List<String> elements = Utils.stringToList(s, '/', '\\', warnings);
 		if (warnings.length() != 0) {
 			parsingErrorStream.append(LogManager.prefixMultiLines("Warning : ",
 					warnings.toString()));
@@ -200,7 +200,7 @@ class ClientsOption extends ListOption<MQTTClientDescriptor> {
 			elements.add(buildFunc(SUBSCRIBE, topic));
 		for (String topic : desc.unsubscribe)
 			elements.add(buildFunc(UNSUBSCRIBE, topic));
-		String inputs = Utils.listToString(elements, '|', '\\');
+		String inputs = Utils.listToString(elements, '/', '\\');
 		elements.clear();
 		if (!desc.id.isEmpty())
 			elements.add(desc.id);
