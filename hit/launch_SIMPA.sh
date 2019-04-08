@@ -3,7 +3,7 @@
 hit="$(cd "$(dirname "$0")"; pwd)"
 bin="$hit/bin"
 
-classpath="$(find "$hit/lib" -iname '*.jar' -printf ':%p')"
+classpath="$(find "$hit/lib" -iname '*.jar' -exec echo -n ':{}' \;)"
 mkdir -p "$bin"
 echo "compiling"
 pushd "$hit/src" >/dev/null
