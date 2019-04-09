@@ -716,6 +716,7 @@ public abstract class OptionTree {
 	private boolean parseArgumentsInternal(List<ArgumentValue> args,
 			PrintStream parsingErrorStream) {
 		boolean parseError = false;
+		StringBuilder helpForSubTreeErrors = new StringBuilder();
 		// first check if this option is activated by an argument provided
 		ArgumentValue activatingArg = null;
 		for (ArgumentValue arg : args) {
@@ -753,11 +754,11 @@ public abstract class OptionTree {
 			}
 			if (subTrees.size() == 1) {
 				setValueFromSelectedChildren(subTrees.get(0));
-				parsingErrorStream.println("Info : value of option '"
+				helpForSubTreeErrors.append("Info : value of option '"
 						+ getName() + "' was deduced from sub options."
 						+ " It is better to specify directly the value of this option (with "
 						+ getSelectedArgument().toStringWithValues()
-						+ ") to remove ambiguity.");
+						+ ") to remove ambiguity." + System.lineSeparator());
 				assert (getSelectedChildren() == subTrees.get(0));
 				deducedFromChildren = true;
 			}
@@ -774,6 +775,22 @@ public abstract class OptionTree {
 			} else {
 				boolean r = setValueFromArg(defaultValue, parsingErrorStream);
 				assert r;
+				helpForSubTreeErrors
+						.append("Info : using default value for option '"
+								+ getName() + "'");
+				if (!defaultValue.values.isEmpty())
+					helpForSubTreeErrors.append(
+							" (" + defaultValue.toStringWithValues() + ")");
+				else {
+					ArrayList<ArgumentDescriptor> others = new ArrayList<ArgumentDescriptor>(
+							getAcceptedArguments());
+					others.remove(defaultValue.descriptor);
+					if (!others.isEmpty())
+						helpForSubTreeErrors.append("." + System.lineSeparator()
+								+ "\tOther values can be selected with one argument in "
+								+ others);
+				}
+				helpForSubTreeErrors.append("." + System.lineSeparator());
 			}
 		}
 
@@ -789,6 +806,8 @@ public abstract class OptionTree {
 			if (!subtree.parseArgumentsInternal(args, parsingErrorStream)) {
 				subTreeSuccessfullyParsed = false;
 			}
+		if (!subTreeSuccessfullyParsed && helpForSubTreeErrors.length() > 0)
+			parsingErrorStream.println(helpForSubTreeErrors.toString());
 		return subTreeSuccessfullyParsed && !parseError;
 	}
 
