@@ -13,6 +13,7 @@
 package options;
 
 import options.valueHolders.SeedHolder;
+import options.valueHolders.SingleValueAutoHolder;
 import tools.RandomGenerator;
 
 public class RandomOption extends SingleValueArgumentOption<Long, SeedHolder> {
@@ -25,6 +26,13 @@ public class RandomOption extends SingleValueArgumentOption<Long, SeedHolder> {
 	}
 
 	public RandomGenerator getRand() {
+		return value;
+	}
+
+	@Override
+	protected ArgumentValue getDefaultValue() {
+		ArgumentValue value = new ArgumentValue(argument);
+		value.addValue(SingleValueAutoHolder.AUTO_VALUE);
 		return value;
 	}
 }

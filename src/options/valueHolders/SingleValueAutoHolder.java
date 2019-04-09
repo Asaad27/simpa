@@ -16,6 +16,7 @@ import options.ParseException;
 
 public class SingleValueAutoHolder<T, H extends ValueHolder<T, T> & Stringifyable>
 		extends AutoHolder<T, H> implements Stringifyable {
+	public static final String AUTO_VALUE = "auto";
 
 	public SingleValueAutoHolder(H baseHolder) {
 		super(baseHolder);
@@ -23,7 +24,7 @@ public class SingleValueAutoHolder<T, H extends ValueHolder<T, T> & Stringifyabl
 
 	@Override
 	public void setValueFromString(String strValue) throws ParseException {
-		if (strValue.equals("auto") || strValue.isEmpty()) {
+		if (strValue.equals(AUTO_VALUE) || strValue.isEmpty()) {
 			useAuto.setValue(true);
 		} else {
 			useAuto.setValue(false);
@@ -34,7 +35,7 @@ public class SingleValueAutoHolder<T, H extends ValueHolder<T, T> & Stringifyabl
 	@Override
 	public String getValueAsString(boolean debug) {
 		if (useAutoValue() && !debug)
-			return "auto";
+			return AUTO_VALUE;
 		return baseHolder.getValueAsString(debug);
 	}
 }
