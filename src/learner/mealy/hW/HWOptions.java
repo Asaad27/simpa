@@ -77,7 +77,7 @@ public class HWOptions extends OneArgChoiceOptionItem {
 		if (useReset.isEnabled())
 			return oracleWhenUsingReset;
 		else
-			return oracleWhithoutReset;
+			return oracleWithoutReset;
 	}
 
 	public boolean useAdaptiveH() {
@@ -97,7 +97,7 @@ public class HWOptions extends OneArgChoiceOptionItem {
 	}
 
 	private final OracleOption oracleWhenUsingReset;
-	private final OracleOption oracleWhithoutReset;
+	private final OracleOption oracleWithoutReset;
 
 	public HWOptions(GenericOneArgChoiceOption<?> parent) {
 		super("hW", "MhW", parent);
@@ -194,17 +194,17 @@ public class HWOptions extends OneArgChoiceOptionItem {
 			}
 
 		};
-		oracleWhithoutReset = new OracleOption(false);
+		oracleWithoutReset = new OracleOption(false);
 		oracleWhenUsingReset = new OracleOption(true);
 
 		useReset = new BooleanOption("use reset", "MhW_use_reset",
 				"Allows the algorithm to use reset when it seems to be necessary "
 						+ "(the oracle will also use reset to check validity of conjecture).",
 				Arrays.asList((OptionTree) oracleWhenUsingReset),
-				Arrays.asList((OptionTree) oracleWhithoutReset), false) {
+				Arrays.asList((OptionTree) oracleWithoutReset), false) {
 			@Override
 			public String getDisableHelp() {
-				return "Infer whithout reseting the driver (assuming that the SUL is connected).";
+				return "Infer without reseting the driver (assuming that the SUL is connected).";
 			}
 
 			@Override
@@ -212,7 +212,7 @@ public class HWOptions extends OneArgChoiceOptionItem {
 				super.makeArgumentDescriptors(argument);
 				disableArgumentDescriptor = new ArgumentDescriptor(
 						ArgumentDescriptor.AcceptedValues.NONE,
-						"--MhW_whitout_reset", this);
+						"--MhW_without_reset", this);
 			}
 		};
 		subTrees.add(useReset);
@@ -228,6 +228,6 @@ public class HWOptions extends OneArgChoiceOptionItem {
 	public void updateWithDriver(MealyDriver d) {
 		usePrecomputedW.updateWithDriver(d);
 		oracleWhenUsingReset.updateWithDriver(d);
-		oracleWhithoutReset.updateWithDriver(d);
+		oracleWithoutReset.updateWithDriver(d);
 	}
 }

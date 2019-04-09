@@ -20,7 +20,7 @@ public class SimpleLearnOption extends MultiArgChoiceOptionItem {
 	public final OutputOptions outputOptions;
 
 	SimpleLearnOption(MultiArgChoiceOption parent) {
-		super("simple learn mode", "--simpleLearn", parent);
+		super("single learn mode", "--singleLearn", parent);
 		outputOptions = new OutputOptions();
 		subTrees.add(outputOptions);
 	}

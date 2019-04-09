@@ -933,7 +933,7 @@ public class SIMPA {
 					"--TDDotFile=sample.dot --TMLocW --TM_states_bound",
 					"Infer the automaton in 'sample.dot' with the algorithm LocW."),
 			new Sample(
-					"--algo=MhW --MhW_whitout_reset --Driver=mqttDriver --Dtimeout=500 --DMQTT_client=client1:connect/disconnect/publish[topic,hello,false,]/: --DMQTT_client=client2:connect/disconnect/subscribe[topic,]/: --ORnd --ORnd_seed=auto --ORnd_maxlength=200 --text",
+					"--algo=MhW --MhW_without_reset --Driver=mqttDriver --Dtimeout=500 --DMQTT_client=client1:connect/disconnect/publish[topic,hello,false,]/: --DMQTT_client=client2:connect/disconnect/subscribe[topic,]/: --ORnd --ORnd_seed=auto --ORnd_maxlength=200 --text",
 					"Infer a non-resetable MQTT System with hW algorithm."
 							+ "For this example, you need to run a MQTT broker."
 							+ System.lineSeparator()
