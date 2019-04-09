@@ -17,6 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Nested;
 
@@ -24,6 +26,21 @@ import tools.NullStream;
 import options.automataOptions.AutomataChoice;
 
 public class OptionTreeTest {
+	/**
+	 * assert that a tree can parse option and show output if an error occurs.
+	 * 
+	 * @param tree
+	 *            the tree to test
+	 * @param arguments
+	 *            the arguments to parse.
+	 */
+	static void testParse(OptionTree tree, String arguments) {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		boolean result = tree.parseArguments(arguments, new PrintStream(out));
+		if (!result)
+			System.out.println(out.toString());
+		assertTrue(result, out.toString());
+	}
 
 	@Nested
 	class ArgumentValue {
@@ -47,9 +64,7 @@ public class OptionTreeTest {
 
 			// argument and its value are valid
 			t = new AutomataChoice();
-			assertTrue(
-					t.parseArguments(base + " " + driver + "=" + sampleDriver,
-							new NullStream()));
+			testParse(t, base + " " + driver + "=" + sampleDriver);
 			checkValue();
 		}
 
@@ -67,17 +82,13 @@ public class OptionTreeTest {
 
 		@Test
 		void testValueWithSpace() {
-			assertTrue(
-					t.parseArguments(base + " " + driver + " " + sampleDriver,
-							new NullStream()));
+			testParse(t, base + " " + driver + " " + sampleDriver);
 			checkValue();
 		}
 
 		@Test
 		void testValueWithEqual() {
-			assertTrue(
-					t.parseArguments(driver + "=" + sampleDriver + " " + base,
-							new NullStream()));
+			testParse(t, driver + "=" + sampleDriver + " " + base);
 			checkValue();
 		}
 	}
@@ -99,9 +110,13 @@ public class OptionTreeTest {
 		@Test
 		void testExamples() {
 			for (Sample s : samples) {
-				assertTrue(
-						getOptions().parseArguments(s.cmd + " ", System.out));
+				testParse(getOptions(), s.cmd + " ");
 			}
+		}
+
+		@Test
+		void testInitialGuiOptions() {
+			testParse(getOptions(), initialGuiOptions);
 		}
 	}
 

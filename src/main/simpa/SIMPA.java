@@ -830,8 +830,12 @@ public class SIMPA {
 	private static final String HELP_ARGUMENT = "--help";
 	private static final String SHORT_HELP_ARGUMENT = "-h";
 
+	protected static final String initialGuiOptions = "--TDDotFile=sample.dot "
+			+ "--OT_shortest ";
+
 	public static void main(String[] args) {
 		if (args.length == 0) {
+			allOptions.parseArguments(initialGuiOptions, new NullStream());
 			lastOptionsFile = new File(
 					Utils.getSIMPACacheDirectory().getAbsolutePath()
 							+ File.separator + "lastOptions");
