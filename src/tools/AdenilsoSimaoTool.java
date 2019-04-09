@@ -30,7 +30,7 @@ import automata.mealy.MealyTransition;
 
 public class AdenilsoSimaoTool {
 	
-	private static String nCompleteExhaustiveToolPath = "../../n-complete-exhaustive";
+	private static String nCompleteExhaustiveToolPath = "n-complete-exhaustive";
 	
 	public static boolean isToolPresent() {
 		boolean isPresent = false;
@@ -43,6 +43,11 @@ public class AdenilsoSimaoTool {
 	}
 
 	public static int minLengthForExhaustivAutomata(Mealy automata, InputSequence trace) {
+		if (!isToolPresent()) {
+			System.out.println("tool to compute minimum trace ('"
+					+ nCompleteExhaustiveToolPath + "') is not found.");
+			return -2;
+		}
 		try {
 			int min = 1;
 			int max = trace.getLength();
