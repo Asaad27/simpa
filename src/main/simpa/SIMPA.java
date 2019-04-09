@@ -927,15 +927,15 @@ public class SIMPA {
 			new Sample(
 					"--TDDotFile=sample.dot --algo=MLm --html --OT_shortest",
 					"Infer the Mealy system represented in file 'sample.dot' with Lm algorithm. As we use a transparent (glass-box) driver, we can compare conjecture and real automata to compute the shortest counter-example."),
-			new Sample("--TDDotFile=sample.dot --algo=MhW --OT_shortest",
-					"Infer the automaton in 'sample.dot' with the algorithm hW."),
+			new Sample("--TDDotFile=sample.dot --algo=MhW --ORnd --ORnd_maxlength=100",
+					"Infer the automaton in 'sample.dot' with the algorithm hW and a random walk to find counter examples."),
 			new Sample(
 					"--TDDotFile=sample.dot --TMLocW --TM_states_bound",
-					"Infer the automaton in 'sample.dot' with the algorithm LocW."),
+					"Infer the automaton in 'sample.dot' with the algorithm LocW which needs a bound on the number of states."),
 			new Sample(
 					"--algo=MhW --MhW_without_reset --Driver=mqttDriver --Dtimeout=500 --DMQTT_client=client1:connect/disconnect/publish[topic,hello,false,]/: --DMQTT_client=client2:connect/disconnect/subscribe[topic,]/: --ORnd --ORnd_seed=auto --ORnd_maxlength=200 --text",
 					"Infer a non-resetable MQTT System with hW algorithm."
-							+ "For this example, you need to run a MQTT broker."
+							+ "For this example, you need to run a MQTT broker (for instance, you can download one at https://mosquitto.org/download/)."
 							+ System.lineSeparator()
 							+ "The configuration of MQTT client (i.e. the choice of actions sent to the broker) can be made in graphical interface with argument "
 							+ GUI_ARGUMENT + "."),
