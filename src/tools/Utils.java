@@ -380,7 +380,12 @@ public class Utils {
 		if (system != null)
 			return new File(system + File.separator + "SIMPA");
 		File nonStandardPath = null;
-		if (isUnix()) {
+		if (isMac()) {
+			String home = System.getProperty("user.home");
+			if (home != null)
+				nonStandardPath = new File(home + File.separator + "Library"
+						+ File.separator + "Caches");
+		} else if (isUnix()) {
 			String home = System.getProperty("user.home");
 			if (home != null)
 				nonStandardPath = new File(home + File.separator + ".cache"
