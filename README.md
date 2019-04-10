@@ -50,8 +50,7 @@ command-line.
 #### Unix
 
 In this repository, you can find a script named `launch_SIMPA.sh` which will
-compile and launch SIMPA. The script is not optimized and the compilation will
-take place each time you run the script.
+compile and launch SIMPA.
 
 You can add arguments to `launch_SIMPA.sh` and they will be passed to SIMPA.
 
