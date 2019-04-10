@@ -734,6 +734,7 @@ public abstract class OptionTree {
 			if (!setValueFromArg(activatingArg, parsingErrorStream))
 				parseError = true;
 		}
+		boolean deducedFromChildren = false;
 		if ((activatingArg == null || parseError)
 				&& getSortedChildren().size() != 1) {
 			// this option is not activated, but maybe a sub option can be
@@ -758,19 +759,21 @@ public abstract class OptionTree {
 						+ getSelectedArgument().toStringWithValues()
 						+ ") to remove ambiguity.");
 				assert (getSelectedChildren() == subTrees.get(0));
+				deducedFromChildren = true;
+			}
+		}
+		if (activatingArg == null && !deducedFromChildren
+				&& !(this instanceof NoArgumentOption)) {
+			ArgumentValue defaultValue = getDefaultValue();
+			if (defaultValue == null) {
+				parseError = true;
+				parsingErrorStream.println("Cannot define value of option '"
+						+ getName() + "' with arguments " + args + ".");
+				parsingErrorStream.println("\tUse one argument in "
+						+ getAcceptedArguments() + ".");
 			} else {
-				ArgumentValue defaultValue = getDefaultValue();
-				if (defaultValue == null) {
-					parseError = true;
-					parsingErrorStream.println("Cannot define value of option '"
-							+ getName() + "' with arguments " + args + ".");
-					parsingErrorStream.println("\tUse one argument in "
-							+ getAcceptedArguments() + ".");
-				} else {
-					boolean r = setValueFromArg(defaultValue,
-							parsingErrorStream);
-					assert r;
-				}
+				boolean r = setValueFromArg(defaultValue, parsingErrorStream);
+				assert r;
 			}
 		}
 
