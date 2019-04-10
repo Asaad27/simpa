@@ -17,6 +17,18 @@ import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+/**
+ * This class aims to store a value but it has an additional switch to define if
+ * the value is provided by SIMPA user or by SIMPA itself.
+ * 
+ * @author Nicolas BREMOND
+ *
+ * @param <T>
+ *            The type of value to store.
+ * @param <H>
+ *            The type of {@link ValueHolder} to use if the SIMPA user provided
+ *            the value itself.
+ */
 public abstract class AutoHolder<T, H extends ValueHolder<T, T>>
 		extends SingleTypeValueHolder<T> {
 
@@ -24,8 +36,8 @@ public abstract class AutoHolder<T, H extends ValueHolder<T, T>>
 	final BooleanHolder useAuto;
 
 	/**
-	 * In the case were autoValue is allowed, this method indicate whether the
-	 * user wants to use the value he set or the auto value.
+	 * This method indicate whether the user wants to use the value he set or
+	 * the auto value.
 	 */
 	public boolean useAutoValue() {
 		assert useAuto != null;
