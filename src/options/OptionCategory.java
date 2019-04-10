@@ -12,6 +12,19 @@
  ********************************************************************************/
 package options;
 
+/**
+ * This describe the sections displayed in CLI help. Each argument is directly
+ * assigned to one of these category or inherits the category of its parent
+ * option.
+ * 
+ * Categories are displayed in the order they are defined.
+ * 
+ * @author Nicolas BREMOND
+ * @see OptionTree#getCategorie(options.OptionTree.ArgumentDescriptor)
+ * @see OptionTree#setCategory(OptionCategory)
+ * @see OptionTree#setCategoryIfUndef(OptionCategory)
+ *
+ */
 public enum OptionCategory {
 	GLOBAL("GLOBAL OPTIONS :"),
 	INFERENCE("INFERENCE OPTIONS :"),
