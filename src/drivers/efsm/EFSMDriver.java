@@ -31,6 +31,11 @@ import automata.efsm.ParameterizedOutput;
 import drivers.Driver;
 import tools.loggers.LogManager;
 
+/**
+ * This class aims to connect to a system which will be modeled as an EFSM
+ * (Extended Finite State Machine).
+ *
+ */
 public abstract class EFSMDriver
 		extends Driver<ParameterizedInput, ParameterizedOutput> {
 	protected EFSM automata;

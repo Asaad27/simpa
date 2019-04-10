@@ -44,6 +44,11 @@ import tools.RandomGenerator;
 import tools.StandaloneRandom;
 import tools.loggers.LogManager;
 
+/**
+ * This class aims to connect to a system which will be modeled as a Mealy
+ * Automaton.
+ *
+ */
 public abstract class MealyDriver extends Driver<String, String> {
 	public class UnableToComputeException extends Exception {
 		private static final long serialVersionUID = -6169240870495799817L;

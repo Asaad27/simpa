@@ -17,6 +17,14 @@ import java.util.List;
 
 import tools.loggers.LogManager;
 
+/**
+ * This is the base class to interact with the System Under Learning (SUL).
+ *
+ * @param <I>
+ *            The type of input send to the system.
+ * @param <O>
+ *            The type of output received from the system.
+ */
 public abstract class Driver<I, O> {
 	private int numberOfRequest = 0;
 	private int numberOfAtomicRequest = 0;
