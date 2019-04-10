@@ -12,6 +12,14 @@
  ********************************************************************************/
 package options.valueHolders;
 
+/**
+ * A {@link ValueHolder} which has the same type for innerValue and userValue.
+ * 
+ * @author Nicolas BREMOND
+ *
+ * @param <T>
+ *            the type of data to store.
+ */
 public abstract class SingleTypeValueHolder<T> extends ValueHolder<T, T> {
 
 	SingleTypeValueHolder(String name, String description) {
