@@ -32,13 +32,6 @@ public abstract class AutoHolder<T, H extends ValueHolder<T, T>>
 		return useAuto.getValue();
 	}
 
-	/**
-	 * a String describing the use of default value. e.g. "use size of set as
-	 * value for this option". A {@code null} String indicate that this option
-	 * do not provide auto value.
-	 */
-	String autoValueLabel = null;
-
 	public AutoHolder(H baseHolder) {
 		super(baseHolder.getName(), baseHolder.getDescription(),
 				baseHolder.getValue());
