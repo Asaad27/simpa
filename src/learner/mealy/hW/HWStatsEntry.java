@@ -36,7 +36,6 @@ public class HWStatsEntry extends StatsEntry {
 	public final static Attribute<Integer> H_ANSWERS_NB =	Attribute.H_ANSWERS_NB;
 	public static final Attribute<Integer>LOCALIZER_CALL_NB = Attribute.LOCALIZER_CALL_NB;
 	public static final Attribute<Integer>TRACE_LENGTH = Attribute.TRACE_LENGTH;
-	public static final Attribute<Integer>MIN_TRACE_LENGTH = Attribute.MIN_TRACE_LENGTH;
 	public static final Attribute<Integer>INPUT_SYMBOLS = Attribute.INPUT_SYMBOLS;
 	public static final Attribute<Integer>OUTPUT_SYMBOLS = Attribute.OUTPUT_SYMBOLS;
 	public static final Attribute<Integer>STATE_NUMBER = Attribute.STATE_NUMBER;
@@ -85,7 +84,6 @@ public class HWStatsEntry extends StatsEntry {
 			AUTOMATA,
 			DURATION,
 			MEMORY,
-			MIN_TRACE_LENGTH,
 			MAX_RECKONED_STATES,
 			MAX_FAKE_STATES,
 			SEED,
@@ -140,7 +138,6 @@ public class HWStatsEntry extends StatsEntry {
 	private String automata;
 	private float duration;
 	private int memory = 0;
-	private int minTraceLength = -1;
 	private int maxReckonedStates = -1;
 	private int maxFakeStates = -1;
 	private long seed;
@@ -181,7 +178,6 @@ public class HWStatsEntry extends StatsEntry {
 		automata = st.nextToken();
 		duration = Float.parseFloat(st.nextToken());
 		memory = Integer.parseUnsignedInt(st.nextToken());
-		minTraceLength = Integer.parseInt(st.nextToken());
 		maxReckonedStates = Integer.parseInt(st.nextToken());
 		maxFakeStates = Integer.parseInt(st.nextToken());
 		seed = Long.parseLong(st.nextToken());
@@ -245,9 +241,6 @@ public class HWStatsEntry extends StatsEntry {
 
 	protected void increaseTraceLength(int traceLength) {
 		this.traceLength += traceLength;
-	}
-	protected void setMinTraceLength(int minTraceLength) {
-		this.minTraceLength = minTraceLength;
 	}
 
 	protected void setStatesNumber(int statesNumber) {
@@ -345,8 +338,6 @@ public class HWStatsEntry extends StatsEntry {
 			return (T) Float.valueOf(duration);
 		if (a == MEMORY)
 			return (T) Integer.valueOf(memory);
-		if (a == MIN_TRACE_LENGTH)
-			return (T) Integer.valueOf(minTraceLength);
 		if (a == MAX_RECKONED_STATES)
 			return (T) Integer.valueOf(maxReckonedStates);
 		if (a == MAX_FAKE_STATES)
@@ -408,7 +399,6 @@ public class HWStatsEntry extends StatsEntry {
 				a == OUTPUT_SYMBOLS ||
 				a == STATE_NUMBER ||
 				a == MEMORY ||
-				a == MIN_TRACE_LENGTH ||
 				a == MAX_RECKONED_STATES ||
 				a == MAX_FAKE_STATES ||
 				a == H_ANSWERS_NB ||
