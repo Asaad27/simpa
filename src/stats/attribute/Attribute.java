@@ -30,6 +30,7 @@ public class Attribute <T extends Comparable<T>> {
 	public final static Attribute<Integer>	LOCALIZER_CALL_NB = 		new Attribute<Integer>(	"Number of call to localizer",					false,	Units.FUNCTION_CALL,false,	false,	false);
 	public final static Attribute<Integer>	LOCALIZER_SEQUENCE_LENGTH = new Attribute<Integer>(	"Length of localizer sequence",					true,	Units.SYMBOLS,		false,	false,	false);
 	public final static Attribute<Integer>	TRACE_LENGTH = 				new Attribute<Integer>(	"length of trace",								true,	Units.SYMBOLS,		true,	false,	false);
+	public final static Attribute<Integer>	MIN_TRACE_LENGTH = 			new Attribute<Integer>(	"sufficient length of trace",					true,	Units.SYMBOLS,		true,	false,	false);
 	public final static Attribute<Integer>	INPUT_SYMBOLS = 			new Attribute<Integer>(	"number of input symbols",						false,	Units.SYMBOLS,		false,	true,	false);
 	public final static Attribute<Integer>	OUTPUT_SYMBOLS = 			new Attribute<Integer>(	"number of output symbols",						false,	Units.SYMBOLS,		false,	true,	false);
 	public final static Attribute<Integer>	STATE_NUMBER = 				new Attribute<Integer>(	"number of states",								false,	Units.STATES,		true,	true,	false);

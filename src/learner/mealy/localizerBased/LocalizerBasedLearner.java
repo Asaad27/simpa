@@ -36,6 +36,7 @@ import learner.mealy.LmTrace;
 import learner.mealy.localizerBased.dataManager.DataManager;
 import learner.mealy.localizerBased.dataManager.FullyQualifiedState;
 import main.simpa.Options;
+import tools.AdenilsoSimaoTool;
 import tools.RandomGenerator;
 import tools.StandaloneRandom;
 import tools.loggers.LogManager;
@@ -186,6 +187,18 @@ public class LocalizerBasedLearner extends Learner {
 		if (Options.getLogLevel() == Options.LogLevel.ALL)
 			LogManager.logConsole(dataManager.readableTrace());
 		dataManager.getConjecture().exportToDot();
+		if (driver instanceof TransparentMealyDriver) {
+			int minTraceLength = AdenilsoSimaoTool
+					.minLengthForExhaustivAutomata(
+							((TransparentMealyDriver) driver).getAutomata(),
+							dataManager.getTrace().getInputsProjection());
+			if (minTraceLength > dataManager.traceSize())
+				throw new RuntimeException(
+						"error in learning, there is another automata which produce the same trace");
+			stats.setMinTraceLength(minTraceLength);
+		} else {
+			stats.setMinTraceLength(-2);
+		}
 	}
 
 	@Override

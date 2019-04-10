@@ -30,6 +30,7 @@ public class LocalizerBasedStatsEntry extends StatsEntry {
 	public static final Attribute<Integer>LOCALIZER_CALL_NB = Attribute.LOCALIZER_CALL_NB;
 	public static final Attribute<Integer>LOCALIZER_SEQUENCE_LENGTH = Attribute.LOCALIZER_SEQUENCE_LENGTH;
 	public static final Attribute<Integer>TRACE_LENGTH = Attribute.TRACE_LENGTH;
+	public static final Attribute<Integer>MIN_TRACE_LENGTH = Attribute.MIN_TRACE_LENGTH;
 	public static final Attribute<Integer>INPUT_SYMBOLS = Attribute.INPUT_SYMBOLS;
 	public static final Attribute<Integer>OUTPUT_SYMBOLS = Attribute.OUTPUT_SYMBOLS;
 	public static final Attribute<Integer>STATE_NUMBER = Attribute.STATE_NUMBER;
@@ -57,6 +58,7 @@ public class LocalizerBasedStatsEntry extends StatsEntry {
 			DURATION,
 			MEMORY,
 			WITH_SPEEDUP,
+			MIN_TRACE_LENGTH,
 	};
 	
 	public static String getCSVHeader_s(){
@@ -90,6 +92,7 @@ public class LocalizerBasedStatsEntry extends StatsEntry {
 	private float duration;
 	private int memory = 0;
 	private boolean with_speedup;
+	private int minTraceLength = -1;
 	
 	/**
 	 * rebuild a LocalizerBasedStats object from a CSV line
@@ -111,6 +114,7 @@ public class LocalizerBasedStatsEntry extends StatsEntry {
 		duration = Float.parseFloat(st.nextToken());
 		memory = Integer.parseUnsignedInt(st.nextToken());
 		with_speedup = Boolean.parseBoolean(st.nextToken());
+		minTraceLength = Integer.parseInt(st.nextToken());
 	}
 
 	public LocalizerBasedStatsEntry(List<InputSequence> W, MealyDriver d,
@@ -133,6 +137,9 @@ public class LocalizerBasedStatsEntry extends StatsEntry {
 
 	protected void setTraceLength(int traceLength) {
 		this.traceLength = traceLength;
+	}
+	protected void setMinTraceLength(int minTraceLength) {
+		this.minTraceLength = minTraceLength;
 	}
 
 	protected void setStatesNumber(int statesNumber) {
@@ -185,6 +192,8 @@ public class LocalizerBasedStatsEntry extends StatsEntry {
 			return (T) Integer.valueOf(memory);
 		if (a == WITH_SPEEDUP)
 			return (T) Boolean.valueOf(with_speedup);
+		if (a == MIN_TRACE_LENGTH)
+			return (T) Integer.valueOf(minTraceLength);
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 
 	}
@@ -202,6 +211,7 @@ public class LocalizerBasedStatsEntry extends StatsEntry {
 				a == STATE_NUMBER_BOUND ||
 				a == STATE_BOUND_OFFSET ||
 				a == MEMORY ||
+				a == MIN_TRACE_LENGTH ||
 				a == LOOP_RATIO)
 			return ((Integer) get(a)).floatValue();
 		if (a == DURATION)
