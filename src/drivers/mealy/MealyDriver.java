@@ -478,8 +478,9 @@ public abstract class MealyDriver extends Driver<String, String> {
 	 * @param trace
 	 *            the trace of executions applied on driver
 	 * @param hintPossibleCurrentStates
-	 *            a set of {@link State} of @{code automata} in which the driver
-	 *            can be. Use {@code null} if the driver can be in any state.
+	 *            a set of {@link automata.State} of {@code automata} in which
+	 *            the driver can be. Use {@code null} if the driver can be in
+	 *            any state.
 	 * @return a state of automata representing the current (after this call)
 	 *         state of driver if automata is equivalent to driver. If automata
 	 *         has equivalent states, only one state is returned.

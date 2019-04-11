@@ -15,6 +15,9 @@ package automata;
 
 import java.io.Serializable;
 
+/**
+ * This class represent a state of an automaton.
+ */
 public class State implements Serializable {
 	private static final long serialVersionUID = 3191363945864393433L;
 
@@ -28,6 +31,12 @@ public class State implements Serializable {
 		this.flag = false;
 	}
 
+	/**
+	 * @deprecated by Nicolas BREMOND because states does not always have a name
+	 *             with a number after one letter (for instance states from dot
+	 *             files).
+	 */
+	@Deprecated
 	public int getId() {
 		return Integer.parseInt(name.substring(1));
 	}
@@ -44,10 +53,18 @@ public class State implements Serializable {
 		return flag;
 	}
 
+	/**
+	 * @return the name of this state
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Indicate whether this state is marked as initial
+	 * 
+	 * @return true if this state is marked as initial.
+	 */
 	public Boolean isInitial() {
 		return initial;
 	}
@@ -69,7 +86,16 @@ public class State implements Serializable {
 	public String toString() {
 		return name;
 	}
-	
+
+	/**
+	 * change whether this state is marked as initial or not.
+	 * 
+	 * @param isInitial
+	 *            the new status of this state.
+	 * @warning it is really unlikely that you should use this method. see
+	 *          {@link automata.Automata#setInitialState(State)} instead.
+	 * @see automata.Automata#setInitialState(State)
+	 */
 	protected void setInitial(boolean isInitial){
 		initial = isInitial;
 	}
