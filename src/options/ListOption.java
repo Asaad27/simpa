@@ -70,10 +70,9 @@ public abstract class ListOption<T, H extends ValueHolder<T, ?> & Stringifyable>
 	protected abstract H createSimpleHolder();
 
 	/**
-	 * get the value represented by this option.
+	 * Get the value represented by this option. The list cannot be modified.
 	 * 
 	 * @return the list of value represented by this option.
-	 * @see #addValue(Object);
 	 */
 	public List<T> getValues() {
 		return Collections.unmodifiableList(value.getValue());
