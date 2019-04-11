@@ -18,9 +18,22 @@ import java.util.Random;
 import java.util.Set;
 
 import options.PercentageOption;
+import options.RandomOption;
 import tools.RandomGenerator;
 import tools.loggers.LogManager;
 
+/**
+ * A managed random source. This class manage the seed used to initialize the
+ * random source and let the user choose to reuse a previous seed.
+ * 
+ * After setting the value of this option, (either automatic or forced with a
+ * seed), the method {@link #initRandom()} must be called before getting any
+ * value.
+ * 
+ * @author Nicolas BREMOND
+ * @see RandomOption
+ *
+ */
 public class SeedHolder extends SingleValueAutoHolder<Long, LongHolder>
 		implements RandomGenerator {
 
@@ -78,10 +91,6 @@ public class SeedHolder extends SingleValueAutoHolder<Long, LongHolder>
 	@Override
 	public long getSeed() {
 		return getValue();
-	}
-
-	public RandomGenerator getRandomGenerator() {
-		return this;
 	}
 
 	@Override
