@@ -65,11 +65,12 @@ public class BooleanOption extends OptionTree {
 	 * @param subTreeIfTrue
 	 *            the list of sub-options available when this option is
 	 *            activated. If {@code null}, you MUST call
-	 *            {@link #setSubTreeIfTrue(List)} to set it during construction.
+	 *            {@link #setSubTreeIfTrue(List<OptionTree>)} to set it during
+	 *            construction.
 	 * @param subTreeIfFalse
 	 *            the list of sub-options available when this option is not
 	 *            selected. If {@code null}, you MUST call
-	 *            {@link #setSubTreeIfFalse(List)} to set it during
+	 *            {@link #setSubTreeIfFalse(List<OptionTree>)} to set it during
 	 *            construction.
 	 * 
 	 * @param enabled
@@ -114,7 +115,7 @@ public class BooleanOption extends OptionTree {
 	/**
 	 * MUST be call if and only if {@code null} was passed in constructor. This
 	 * method should be called during construction of object (as said in
-	 * {@link #addSortedChildren(List)}
+	 * {@link #addSortedChildren(List<OptionTree>)}
 	 * 
 	 * @param subTreeIfFalse
 	 *            list of option available when this one is disabled.
@@ -128,7 +129,7 @@ public class BooleanOption extends OptionTree {
 	/**
 	 * MUST be call if and only if {@code null} was passed in constructor. This
 	 * method should be called during construction of object (as said in
-	 * {@link #addSortedChildren(List)}
+	 * {@link #addSortedChildren(List<OptionTree>)}
 	 * 
 	 * @param subTreeIfTrue
 	 *            list of option available when this one is enabled.
@@ -168,11 +169,23 @@ public class BooleanOption extends OptionTree {
 		value.setDefaultValue(def);
 	}
 
+	/**
+	 * For graphical interface, get the title to put on the border surrounding
+	 * sub options. This method provide default value but should be overridden
+	 * depending on the name of the option.
+	 * 
+	 * @return the title to use for subtree options.
+	 */
 	public String getSubTreeTitle() {
 		return "options for " + name
-				+ (isEnabled() ? " activated" : " disactivated");
+				+ (isEnabled() ? " activated" : " deactivated");
 	}
 
+	/**
+	 * Indicate whether the boolean value of this option is true or false.
+	 * 
+	 * @return the current value of this option.
+	 */
 	public boolean isEnabled() {
 		return value.getValue();
 	}
