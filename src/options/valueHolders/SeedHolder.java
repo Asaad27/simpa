@@ -24,6 +24,11 @@ import tools.loggers.LogManager;
 public class SeedHolder extends SingleValueAutoHolder<Long, LongHolder>
 		implements RandomGenerator {
 
+	/**
+	 * @param seedUse
+	 *            a text describing what the seed is used for (not describing
+	 *            the seed itself).
+	 */
 	public SeedHolder(String seedUse) {
 		super(new LongHolder("Seed for " + seedUse,
 				"Seed used to initialize a random source."

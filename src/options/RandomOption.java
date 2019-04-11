@@ -16,15 +16,37 @@ import options.valueHolders.SeedHolder;
 import options.valueHolders.SingleValueAutoHolder;
 import tools.RandomGenerator;
 
+/**
+ * This option is used as a random source. If the user does not provide any
+ * value, a random seed is used to initialize the random generator. This seed is
+ * used and can be forced by user to reproduce some scenario.
+ * 
+ * This option is based on {@link options.valueHolders.SeedHolder}
+ * 
+ * @author Nicolas BREMOND
+ *
+ */
 public class RandomOption extends SingleValueArgumentOption<Long, SeedHolder> {
 
-	public RandomOption(String argument, String name) {
-		super(argument, new SeedHolder(name));
+	/**
+	 * @param argument
+	 *            the argument to use in CLI.
+	 * @param seedUse
+	 *            a text describing what the seed is used for (not describing
+	 *            the seed itself).
+	 */
+	public RandomOption(String argument, String seedUse) {
+		super(argument, new SeedHolder(seedUse));
 		this.description = getValueHolder().getName() + ".";
 		assert !this.description.endsWith("..") : "two dots at end of string '"
 				+ description + "'";
 	}
 
+	/**
+	 * Get the random source.
+	 * 
+	 * @return the random source.
+	 */
 	public RandomGenerator getRand() {
 		return value;
 	}
