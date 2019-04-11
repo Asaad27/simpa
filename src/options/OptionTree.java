@@ -439,10 +439,12 @@ public abstract class OptionTree {
 	 * 
 	 * @param arg
 	 *            the argument used to set value of this option.
+	 * @param parsingErrorStream
+	 *            the stream in which errors should be printed.
 	 * @return <code>false</code> if an error occurred, <code>true</code> if
 	 *         everything was fine
 	 * 
-	 * @warning if {@link isActivatedByArg(String)} do not accept
+	 * @warning if {@link #isActivatedByArg(ArgumentValue)} does not accept
 	 *          <code>arg</code>, the behavior of this function is undefined.
 	 */
 	protected abstract boolean setValueFromArg(ArgumentValue arg,
@@ -557,15 +559,16 @@ public abstract class OptionTree {
 	}
 
 	/**
-	 * same as {@link #parseArguments(List, PrintStream)} but take arguments as
-	 * a space separated single string.
+	 * same as {@link #parseArguments(List<String>, PrintStream)} but take
+	 * arguments as a space separated single string.
 	 * 
 	 * @param args
 	 *            the string to parse
 	 * @param parsingErrorStream
 	 *            a stream to output errors
 	 * @return false if the parsing cannot be achieved
-	 * @see #parseArguments(List, PrintStream) parseArguments for more details.
+	 * @see #parseArguments(List<String>, PrintStream) parseArguments for more
+	 *      details.
 	 */
 	public boolean parseArguments(String args, PrintStream parsingErrorStream) {
 		StringBuilder warnings = new StringBuilder();
@@ -587,8 +590,8 @@ public abstract class OptionTree {
 	 * 
 	 * The first part of this function is to translate String arguments into
 	 * ArgumentValues and try to detect errors like misspelling. Then it calls
-	 * {@link parseArgumentsInternal} which will transpose ArgumentValue in the
-	 * OptionTree
+	 * {@link #parseArgumentsInternal(List<ArgumentValue>, PrintStream)} which
+	 * will transpose ArgumentValue in the OptionTree
 	 * 
 	 * @param args
 	 *            the list of arguments.
@@ -1091,8 +1094,8 @@ public abstract class OptionTree {
 	/**
 	 * Get the value of this option or {@code null} if this option has no value.
 	 * 
-	 * @return the {@link ValueHolder} use by this option or {@code null} if
-	 *         this option do not use one.
+	 * @return the {@link options.valueHolders.ValueHolder} use by this option
+	 *         or {@code null} if this option do not use one.
 	 */
 	public abstract ValueHolder<?, ?> getValueHolder();
 
@@ -1117,7 +1120,8 @@ public abstract class OptionTree {
 	 * encountered.
 	 * 
 	 * @return the maximum critiality level in the selected tree.
-	 * @see #validateSelectedTree(boolean) to print messages in console.
+	 * @see #validateSelectedTree(boolean, Predicate<OptionValidator>) to print
+	 *      messages in console.
 	 */
 	public OptionValidator.CriticalityLevel validateSelectedTree() {
 		return validateSelectedTree(false, null);
