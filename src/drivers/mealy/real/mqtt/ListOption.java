@@ -33,12 +33,13 @@ import options.valueHolders.ValueHolder;
 /**
  * This class was the generic List Option before the use of ValueHolders. It is
  * kept for MQTT driver but MQTT should be rewritten to use the now standard
- * option.ListOption.
+ * {@link options.ListOption}.
  * 
  * @author Nicolas BREMOND
  *
  * @param <T>
  *            the type of element provided in each option
+ * @deprecated in favor of {@link options.ListOption}
  */
 public abstract class ListOption<T> extends OptionTree {
 
@@ -79,7 +80,7 @@ public abstract class ListOption<T> extends OptionTree {
 	 * get the value represented by this option.
 	 * 
 	 * @return the list of value represented by this option.
-	 * @see #addValue(Object);
+	 * @see #addValue(T);
 	 */
 	public List<T> getValues() {
 		return Collections.unmodifiableList(values);
@@ -159,7 +160,7 @@ public abstract class ListOption<T> extends OptionTree {
 	 * create a component representing the object value. modifications to this
 	 * component must be reflected into the object
 	 * 
-	 * @param v
+	 * @param value
 	 *            the object to represent
 	 * @return
 	 */
@@ -235,6 +236,9 @@ public abstract class ListOption<T> extends OptionTree {
 		return Arrays.asList(argument);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String getHelpByArgument(ArgumentDescriptor arg) {
 		assert arg == argument;
