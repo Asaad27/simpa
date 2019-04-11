@@ -28,9 +28,9 @@ import options.OptionTree;
 
 /**
  * An option to select one choice in a list. The command line argument can be
- * either one argument per choice using class {@link MultiArgChoiceOption} or
- * one argument for the option and one value per choice with
- * {@link GenericOneArgChoiceOption}.
+ * either one argument per choice using class
+ * {@link GenericMultiArgChoiceOption} or one argument for the option and one
+ * value per choice with {@link GenericOneArgChoiceOption}.
  * 
  * @author Nicolas BREMOND
  */

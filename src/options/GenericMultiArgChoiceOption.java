@@ -18,6 +18,13 @@ import java.util.List;
 
 import options.valueHolders.ValueHolder;
 
+/**
+ * Implements a choice option where each choice has its own CLI argument.
+ * 
+ * @brief A choice option with an argument per possible choice.
+ * @author Nicolas BREMOND
+ *
+ */
 public class GenericMultiArgChoiceOption<T extends MultiArgChoiceOptionItem>
 		extends GenericChoiceOption<T> {
 
@@ -34,6 +41,13 @@ public class GenericMultiArgChoiceOption<T extends MultiArgChoiceOptionItem>
 		return false;
 	}
 
+	/**
+	 * get the item corresponding to the given argument.
+	 * 
+	 * @param arg
+	 *            an argument corresponding to one item.
+	 * @return the item corresponding to the given argument.
+	 */
 	protected T getItemFromArg(ArgumentValue arg) {
 		for (T choice : choices) {
 			if (choice.argument.name.equals(arg.getName())) {

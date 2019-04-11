@@ -20,8 +20,8 @@ import options.OptionTree.ArgumentDescriptor.AcceptedValues;
 import options.valueHolders.ValueHolder;
 
 /**
- * This class represent a choice option like {@link MultiArgChoiceOption} but in
- * this class, there is only one argument for this option in command line
+ * This class represent a choice option like {@link GenericMultiArgChoiceOption}
+ * but in this class, there is only one argument for this option in command line
  * instead of one argument per choice.
  * 
  * @author Nicolas BREMOND
