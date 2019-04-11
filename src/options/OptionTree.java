@@ -709,11 +709,13 @@ public abstract class OptionTree {
 	 * @param args
 	 *            the list of arguments. Arguments successfully parsed will be
 	 *            removed from this list.
+	 * @param parsingErrorStream
+	 *            the Stream in which error messages should be printed.
 	 * @return <code>false</code> if the parsing cannot be achieved,
 	 *         <code>true</code> if the option tree is defined from arguments,
 	 *         even if there was minor mistakes.
 	 */
-	private boolean parseArgumentsInternal(List<ArgumentValue> args,
+	protected final boolean parseArgumentsInternal(List<ArgumentValue> args,
 			PrintStream parsingErrorStream) {
 		boolean parseError = false;
 		StringBuilder helpForSubTreeErrors = new StringBuilder();

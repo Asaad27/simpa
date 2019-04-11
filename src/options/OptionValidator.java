@@ -124,7 +124,7 @@ public abstract class OptionValidator {
 	 * @return a graphical component containing the {@link #getMessage()
 	 *         message}.
 	 */
-	public JLabel createComponent() {
+	public final JLabel createComponent() {
 		if (criticality.compareTo(CriticalityLevel.ERROR) >= 0)
 			return new JLabel(getMessage(),
 					UIManager.getIcon("OptionPane.errorIcon"), JLabel.LEFT);
