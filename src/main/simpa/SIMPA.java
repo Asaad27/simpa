@@ -447,6 +447,11 @@ public class SIMPA {
 		if (selectedMode == modeOption.simple) {
 			try {
 				inferOneTime();
+			} catch (InvalidOptionException e) {
+				System.err.println("Invalid option.");
+				return false;
+			} catch (WrongConjectureException e) {
+				System.out.println("The computed conjecture is false.");
 			} catch (Exception e) {
 				LogManager.end();
 				System.err.println("Unexpected error");
@@ -460,14 +465,27 @@ public class SIMPA {
 		return true;
 	}
 
+	private static class InvalidOptionException extends Exception {
+		private static final long serialVersionUID = -1383827043195278927L;
+	};
+
+	private static class WrongConjectureException extends Exception {
+		private static final long serialVersionUID = -7414261848736360688L;
+	}
+	
 	/**
 	 * run one inference. This method do not catch RuntimeException which may
 	 * occur during inference.
 	 * 
 	 * @return {@code false} if an error occurred during one inference,
 	 *         {@code true} if everything went fine.
+	 * @throws InvalidOptionException
+	 *             if the option tree cannot be validated
+	 * @throws WrongConjectureException
+	 *             if there is an evidence that the conjecture is false.
 	 */
-	private static Learner inferOneTime() {
+	protected static Learner inferOneTime()
+			throws InvalidOptionException, WrongConjectureException {
 		Predicate<OptionValidator> postDriverPredicate = new Predicate<OptionValidator>() {
 					@Override
 					public boolean test(OptionValidator t) {
@@ -478,7 +496,7 @@ public class SIMPA {
 		};
 		if (allOptions.validateSelectedTree(true, postDriverPredicate.negate())
 				.compareTo(CriticalityLevel.WARNING) > 0)
-			return null;
+			throw new InvalidOptionException();
 		Utils.deleteDir(Options.getArffDir());
 		Utils.deleteDir(Options.getDotDir());
 		if (getOutputsOptions().textLoggerOption.isEnabled())
@@ -513,7 +531,7 @@ public class SIMPA {
 		}
 		if (allOptions.validateSelectedTree(true, postDriverPredicate)
 				.compareTo(CriticalityLevel.WARNING) > 0)
-			return null;
+			throw new InvalidOptionException();
 		assert (allOptions.validateSelectedTree(false, null).compareTo(
 				CriticalityLevel.WARNING) <= 0) : "all validators were not checked or some validators changed their values";
 		boolean conjectureIsFalse = false;
@@ -531,7 +549,7 @@ public class SIMPA {
 		if (conjectureIsFalse) {
 			LogManager.logError(
 					"Post checking of conjecture failed. The conjecture is false.");
-			return null;
+			throw new WrongConjectureException();
 		}
 		return l;
 	}
