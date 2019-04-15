@@ -514,8 +514,6 @@ public class SIMPA {
 		if (argLabel != null) {
 			argLabel.setText(allOptions.buildBackCLILine(true));
 		}
-		System.out.println("you can start inference again using "
-				+ allOptions.buildBackCLILine(true));
 		Driver<?, ?> d = null;
 		Learner l = null;
 		if (automataChoice.getSelectedItem() == automataChoice.mealy) {
@@ -534,6 +532,8 @@ public class SIMPA {
 			throw new InvalidOptionException();
 		assert (allOptions.validateSelectedTree(false, null).compareTo(
 				CriticalityLevel.WARNING) <= 0) : "all validators were not checked or some validators changed their values";
+		System.out.println("you can start inference again using "
+				+ allOptions.buildBackCLILine(true));
 		boolean conjectureIsFalse = false;
 		try {
 			l.learn();
@@ -659,7 +659,11 @@ public class SIMPA {
 			e.printStackTrace();
 			System.err.println("Saving data in " + failDir);
 			try {
-				Utils.copyDir(Options.getLogDir().toPath(), failDir.toPath());
+				if (Options.getLogDir().exists())
+					Utils.copyDir(Options.getLogDir().toPath(),
+							failDir.toPath());
+				else
+					Utils.createDir(failDir);
 				File readMe = new File(failDir + File.separator + "ReadMe.txt");
 				Writer readMeWriter = new BufferedWriter(
 						new FileWriter(readMe));
