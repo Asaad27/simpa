@@ -101,4 +101,10 @@ public class StateBoundOption extends BooleanOption {
 		disableArgumentDescriptor = new ArgumentDescriptor(AcceptedValues.NONE,
 				"--M_manual-state-bound", this);
 	}
+
+	public void setBound(int nb_states) {
+		stateNumber.getValueHolder().setValue(nb_states);
+		stateOffset.getValueHolder().setValue(0);
+//TODO check this method
+	}
 }

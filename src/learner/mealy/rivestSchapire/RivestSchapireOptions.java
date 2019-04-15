@@ -87,6 +87,11 @@ public class RivestSchapireOptions extends OneArgChoiceOptionItem {
 		return stateBound.getValue();
 	}
 
+	public void setStateNumberBound(int nb_states) {
+		stateBound.setBound(nb_states);
+		assert getStateNumberBound() == nb_states;
+	}
+
 	public boolean probabilisticRS() {
 		return probabilisticRS.isEnabled();
 	}

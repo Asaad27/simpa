@@ -88,6 +88,11 @@ public class LocalizerBasedOptions extends OneArgChoiceOptionItem {
 		return stateNumberBound.getValue();
 	}
 
+	public void setStateNumberBound(int nb_states) {
+		stateNumberBound.setBound(nb_states);
+		assert getStateNumberBound() == nb_states;
+	}
+
 	public void updateWithDriver(MealyDriver d) {
 		stateNumberBound.updateWithDriver(d);
 		if (computeWSet())

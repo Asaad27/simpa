@@ -131,11 +131,23 @@ public class OracleOption extends MultiArgChoiceOption {
 			return maxTraceLength.getValue();
 		}
 
+		public void setMaxTraceLength(int length) {
+			maxTraceLength.getValueHolder().setValueNonAuto(length);
+			assert getMaxTraceLength() == length;
+		}
+
 		public int getMaxTraceNumber() {
 			if (resetAllowed)
 				return maxTraceNumber.getValue();
 			assert maxTraceNumber == null;
 			return 1;
+		}
+
+		public void setMaxTraceNumber(int max) {
+			if (resetAllowed) {
+				maxTraceNumber.getValueHolder().setValueNonAuto(max);
+				assert getMaxTraceNumber() == max;
+			}
 		}
 
 		public void updateWithDriver(MealyDriver d) {

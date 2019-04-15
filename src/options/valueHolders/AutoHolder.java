@@ -110,4 +110,10 @@ public abstract class AutoHolder<T, H extends ValueHolder<T, T>>
 		baseHolder.setValue(getValue());
 		baseHolder.setEnabled(!useAutoValue());
 	}
+
+	public void setValueNonAuto(T v) {
+		useAuto.setValue(false);
+		super.setValue(v);
+		assert getValue().equals(v);
+	}
 }
