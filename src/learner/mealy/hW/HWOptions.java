@@ -84,6 +84,14 @@ public class HWOptions extends OneArgChoiceOptionItem {
 		return !addHInW.isEnabled() && useAdaptiveH.isEnabled();
 	}
 
+	public void setUseAdaptiveH(boolean b) {
+		if (b)
+			addHInW.getValueHolder().setValue(false);
+		useAdaptiveH.getValueHolder().setValue(b);
+		assert (useAdaptiveH() == b);
+
+	}
+
 	public boolean addIInW() {
 		return !useAdaptiveW() && addIInW.isEnabled();
 	}
@@ -92,8 +100,20 @@ public class HWOptions extends OneArgChoiceOptionItem {
 		return !addHInW.isEnabled() && useAdaptiveW.isEnabled();
 	}
 
+	public void setUseAdaptiveW(boolean enable) {
+		if (enable)
+			addHInW.getValueHolder().setValue(false);
+		useAdaptiveW.getValueHolder().setValue(enable);
+		assert useAdaptiveW() == enable;
+	}
+
 	public boolean usePrecomputedW() {
 		return usePrecomputedW.isEnabled();
+	}
+
+	public void setUsePrecomputedW(boolean enable) {
+		usePrecomputedW.getValueHolder().setValue(enable);
+		assert usePrecomputedW() == enable;
 	}
 
 	private final OracleOption oracleWhenUsingReset;

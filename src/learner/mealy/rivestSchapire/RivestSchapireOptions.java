@@ -91,4 +91,9 @@ public class RivestSchapireOptions extends OneArgChoiceOptionItem {
 		return probabilisticRS.isEnabled();
 	}
 
+	public void setProbabilisticRS(boolean b) {
+		probabilisticRS.getValueHolder().setValue(b);
+		assert probabilisticRS() == b;
+	}
+
 }

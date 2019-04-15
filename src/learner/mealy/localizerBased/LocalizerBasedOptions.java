@@ -79,6 +79,11 @@ public class LocalizerBasedOptions extends OneArgChoiceOptionItem {
 		return useSpeedUp.isEnabled();
 	}
 
+	public void setUseSpeedUp(boolean b) {
+		useSpeedUp.getValueHolder().setValue(b);
+		assert b == useSpeedUp();
+	}
+
 	public int getStateNumberBound() {
 		return stateNumberBound.getValue();
 	}
