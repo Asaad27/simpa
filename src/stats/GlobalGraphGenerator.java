@@ -882,7 +882,9 @@ public class GlobalGraphGenerator extends GraphGenerator {
 				"GnuTLS_3.3.8_client_regular");
 		filesNames.put("dot_file(tls_GnuTLS_3.3.8_server_full)",
 				"GnuTLS_3.3.8_server_full");
-		String dispName = name.substring(18, name.length() - 1);
+		String dispName = name;
+		if (name.startsWith("dot_file(Benchmark"))
+			dispName = name.substring(18, name.length() - 1);
 		dispName = dispName.replaceAll("FromRhapsodyToDezyne_",
 				"Rhapsody-Dezyne ");
 		if (dispName.startsWith("Bankcard"))
