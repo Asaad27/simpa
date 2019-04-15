@@ -248,18 +248,43 @@ public class JSS_figures {
 			Mealy automaton = ((TransparentMealyDriver) driver).getAutomata();
 			Options.MAX_CE_RESETS = 1;
 			Options.MAX_CE_LENGTH = automaton.getStateCount()
-					* driver.getInputSymbols().size() * 1500;
-			Options.MAX_CE_LENGTH = 50000;
+					* driver.getInputSymbols().size() * 4500;
+			Options.MAX_CE_LENGTH = 50000000;
+			Options.MAX_CE_LENGTH = (int) Math.pow(
+					driver.getInputSymbols().size(), automaton.getStateCount())
+					* 2;
 			if (random)
 				Options.MAX_CE_LENGTH = (int) (Math
 						.pow(automaton.getStateCount()
-								* driver.getInputSymbols().size(), 0.5)
-						* 100);
+								* driver.getInputSymbols().size(), 0.7)
+						* 500.);
 			if (Options.LMINFERENCE || Options.TREEINFERENCE
 					|| (Options.HW_INFERENCE && Options.HW_WITH_RESET)) {
-				Options.MAX_CE_RESETS = Options.MAX_CE_LENGTH;
-				Options.MAX_CE_LENGTH = automaton.getStateCount() * 10;
+				Options.MAX_CE_RESETS = automaton.getStateCount()
+						* driver.getInputSymbols().size() * 10000;
+				Options.MAX_CE_RESETS = (int) Math.pow(
+						driver.getInputSymbols().size() / 2 + 1,
+						automaton.getStateCount() / 4 + 2) * 10;
+				Options.MAX_CE_RESETS = 100000;
+				if (driver.getInputSymbols().size() < 5
+						&& automaton.getStateCount() < 10)
+					Options.MAX_CE_RESETS = 10000;
+				if (driver.getInputSymbols().size() == 12
+						&& automaton.getStateCount() == 15)
+					Options.MAX_CE_RESETS = 1400000;
+				if (driver.getInputSymbols().size() == 13
+						&& automaton.getStateCount() == 17)
+					Options.MAX_CE_RESETS = 600000;
+				if (driver.getInputSymbols().size() == 12
+						&& automaton.getStateCount() == 9)
+					Options.MAX_CE_RESETS = 500000;
+				Options.MAX_CE_LENGTH = automaton.getStateCount() * 2;
 			}
+			// 22 states 8 inputs
+			// 16 states 9 inputs
+			// 17 states 13 inputs -> plus de 100000 reset
+			// 15 states 12 inputs -> + de 500000 reset
+			// 9 states 12 inputs -> + de 100000 reset
 			System.out.println("Maximum counter example length set to "
 					+ Options.MAX_CE_LENGTH
 					+ " and maximum counter example reset set to "
@@ -297,6 +322,34 @@ public class JSS_figures {
 					throw e;
 				}
 				System.out.println("retring because of error " + e);
+				String message=e.getMessage();
+				if (message==null)message="";
+				message.replaceAll("[^a-zA-Z0-9()]", "");
+				File f = new File(Options.DIRFAIL).toPath()
+						.resolve(message).resolve(new Date().toString())
+						.toFile();
+				f.getParentFile().mkdirs();
+				f.createNewFile();
+				PrintWriter writer = new PrintWriter(new FileWriter(f));
+				writer.println(new Date().toString());
+				writer.println("Maximum counter example length "
+						+ Options.MAX_CE_LENGTH);
+				writer.println(" and maximum counter example reset set to "
+						+ Options.MAX_CE_RESETS);
+				if (random) {
+					writer.println("random");
+				} else {
+					writer.println("url " + url);
+				}
+				writer.println(driver.getInputSymbols().size() + " inputs");
+				if (driver instanceof TransparentMealyDriver) {
+					Mealy a = ((TransparentMealyDriver) driver).getAutomata();
+					writer.println(a.getStateCount() + " states");
+				}
+				writer.println("config : " + config.name());
+				writer.println();
+				e.printStackTrace(writer);
+				writer.close();
 				error = true;
 			}
 		} while (error);
@@ -443,7 +496,7 @@ public class JSS_figures {
 	}
 
 	public static void main(String[] args) throws MalformedURLException {
-		Options.NBTEST = 2;
+		Options.NBTEST = 1;
 		Options.LOG_LEVEL = LogLevel.LOW;
 
 		makeGraph();

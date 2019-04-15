@@ -190,7 +190,8 @@ public class Table {
 
 	public static String stringToLatex(String str) {
 		str = str.replaceAll("_", "\\\\_").replaceAll("#", "\\\\#")
-				.replaceAll("≥", "\\$\\\\geq\\$");
+				.replaceAll("≥", "\\$\\\\geq\\$")
+				.replaceAll("≤", "\\$\\\\leq\\$");
 		if (str.contains("\n"))
 			str = "\\shortstack{" + str.replaceAll("\n", "\\\\\\\\ \\\\relax ")
 					+ "}";

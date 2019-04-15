@@ -53,7 +53,7 @@ public class ResetCostComparisonCol extends TableColumn {
 		StatsSet refStats = ref.restrict(stats);
 		StatsSet testStats = test.restrict(stats);
 		if (refStats.size() == 0 || testStats.size() == 0)
-			return "";
+			return "missing data";
 		float refReset = refStats.attributeAVG(Attribute.RESET_CALL_NB);
 		float testLength = testStats.attributeAVG(Attribute.TRACE_LENGTH);
 		float refLength = refStats.attributeAVG(Attribute.TRACE_LENGTH);
@@ -72,8 +72,10 @@ public class ResetCostComparisonCol extends TableColumn {
 				}
 			}
 		} else {
-			if (testReset > refReset)
-				throw new RuntimeException();
+			if (testReset > refReset) {
+				String ratioString = String.format("%.2g", resetRatio);
+				return " ≤ " + ratioString;
+			}
 			return "0";
 		}
 	}
