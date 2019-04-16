@@ -537,6 +537,7 @@ public class SIMPA {
 		try {
 			l.learn();
 			if (d instanceof MealyDriver) {
+				System.out.println("checking conjecture");
 				conjectureIsFalse |= !((MealyDriver) d).searchConjectureError(
 						(LmConjecture) l.createConjecture());
 			}
