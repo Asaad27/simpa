@@ -589,6 +589,12 @@ public class SIMPA {
 		}
 		boolean makeGraphs = modeOption.stats.makeGraphs.isEnabled();
 		if (makeGraphs) {
+			makeGraphs();
+		}
+		return true;
+	}
+
+	static void makeGraphs() {
 			System.out.println("[+] Make Graph");
 			GlobalGraphGenerator globalGraph = new GlobalGraphGenerator();
 			for (File statFile : Options.getStatsCSVDir().listFiles()) {
@@ -605,8 +611,6 @@ public class SIMPA {
 			}
 			globalGraph.generate();
 		}
-		return true;
-	}
 
 	/**
 	 * Launch one inference and record result in CSV files.
