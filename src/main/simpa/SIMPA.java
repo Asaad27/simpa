@@ -677,7 +677,7 @@ public class SIMPA {
 				readMeWriter
 						.write("\nOne learner during stats throw an exception");
 				readMeWriter.write("\n");
-				e.printStackTrace(new PrintWriter(readMeWriter));
+				errorLogger.addReadMeInformationForFail(readMeWriter, e);
 				readMeWriter.write("\n");
 				readMeWriter.write("\n");
 				readMeWriter.write(
@@ -699,6 +699,24 @@ public class SIMPA {
 		}
 		return true;
 	}
+
+	static protected class ErrorLogger {
+
+	/**
+	 * write additional informations to save when an error occurs during stats.
+	 * 
+	 * @param readMeWriter
+	 *            the writer in which data should be written.
+	 * @param e
+	 *            the exception which has interrupted execution.
+	 */
+		public void addReadMeInformationForFail(Writer readMeWriter,
+			Exception e) throws IOException {
+		e.printStackTrace(new PrintWriter(readMeWriter));
+	}
+	}
+
+	protected static ErrorLogger errorLogger = new ErrorLogger();
 
 	protected static boolean run_enum() {
 		ExhaustiveGeneratorOption<? extends Driver<?, ?>> option;
