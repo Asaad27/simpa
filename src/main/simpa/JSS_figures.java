@@ -315,7 +315,7 @@ public class JSS_figures extends SIMPA{
 		}
 	}
 
-	protected static Learner learnOneTime(Config config) throws Exception {
+	protected static void learnOneTime(Config config) throws Exception {
 		config.set_up();
 		System.out.println("Using config : " + config.name());
 		boolean error = false;

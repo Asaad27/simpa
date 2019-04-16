@@ -619,7 +619,7 @@ public class SIMPA {
 	 * @return {@code false} if an error occurred during one inference,
 	 *         {@code true} if everything went fine.
 	 */
-	private static boolean learnAndSaveOneTime() {
+	protected static boolean learnAndSaveOneTime() {
 
 		try {
 			Options.useTmpLogDir();
