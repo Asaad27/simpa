@@ -12,46 +12,40 @@
  ********************************************************************************/
 package main.simpa;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 import automata.mealy.Mealy;
 import drivers.Driver;
+import drivers.mealy.MealyDriver;
+import drivers.mealy.MealyDriverChoice;
 import drivers.mealy.transparent.RandomMealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
-import learner.Learner;
+import learner.mealy.hW.HWOptions;
 import learner.mealy.localizerBased.LocalizerBasedLearner;
-import main.simpa.Options.LogLevel;
-import stats.GlobalGraphGenerator;
-import stats.GraphGenerator;
-import stats.StatsEntry;
-import stats.StatsSet;
-import tools.Utils;
+import learner.mealy.localizerBased.LocalizerBasedOptions;
+import learner.mealy.rivestSchapire.RivestSchapireOptions;
+import options.OptionTree;
+import options.automataOptions.DriverChoice;
+import options.automataOptions.DriverChoiceItem;
+import options.learnerOptions.MealyLearnerChoice;
+import options.learnerOptions.OracleOption;
 
-public class JSS_figures {
+public class JSS_figures extends SIMPA{
+	
+	static MealyLearnerChoice learnerChoice=automataChoice.mealyLearnerChoice;
 
 	static void resetInferenceOption() {
-		Options.HW_INFERENCE = false;
-		Options.RIVESTSCHAPIREINFERENCE = false;
-		Options.TREEINFERENCE = false;
-		Options.COMBINATORIALINFERENCE = false;
-		Options.CUTTERCOMBINATORIALINFERENCE = false;
-		Options.LMINFERENCE = false;
-		Options.LOCALIZER_BASED_INFERENCE = false;
-		Options.USE_SHORTEST_CE = false;
-		Options.USE_DT_CE = false;
-		Options.LOG_LEVEL = LogLevel.LOW;
+		setUseDT(false);
+		modeOption.selectChoice(modeOption.stats);
+		modeOption.stats.inferenceNb.getValueHolder().setValue(1);;
+		modeOption.stats.makeGraphs.getValueHolder().setValue(true);
 	}
 
 	static abstract class Config {
@@ -64,15 +58,16 @@ public class JSS_figures {
 		@Override
 		void set_up() {
 			resetInferenceOption();
-			Options.HW_INFERENCE = true;
-			Options.HW_WITH_RESET = false;
-			Options.ADAPTIVE_H = false;
-			Options.ADAPTIVE_W_SEQUENCES = false;
-			Options.ADD_H_IN_W = false;
-			Options.REUSE_HZXW = false;
-			Options.CHECK_INCONSISTENCY_H_NOT_HOMING = false;
-			Options.TRY_TRACE_AS_CE = false;
-			Options.HW_WITH_KNOWN_W = false;
+			HWOptions hW = learnerChoice.hW;
+			learnerChoice.selectChoice(hW);
+			hW.useReset.getValueHolder().setValue(false);
+			hW.setUseAdaptiveH(false);
+			hW.setUseAdaptiveW(false);
+			hW.addHInW.getValueHolder().setValue(false);
+			hW.useDictionary.getValueHolder().setValue(false);
+			hW.checkInconsistenciesHMapping.getValueHolder().setValue(false);
+			hW.searchCeInTrace.getValueHolder().setValue(false);
+			hW.setUsePrecomputedW(false);
 		}
 
 		@Override
@@ -84,7 +79,7 @@ public class JSS_figures {
 		@Override
 		void set_up() {
 			hWWithoutHeuristic.set_up();
-			Options.ADD_H_IN_W = true;
+			learnerChoice.hW.addHInW.getValueHolder().setValue(true);
 		}
 
 		@Override
@@ -97,7 +92,7 @@ public class JSS_figures {
 		@Override
 		void set_up() {
 			hWWithoutHeuristic.set_up();
-			Options.REUSE_HZXW = true;
+			learnerChoice.hW.useDictionary.getValueHolder().setValue(true);
 		}
 
 		@Override
@@ -110,7 +105,8 @@ public class JSS_figures {
 		@Override
 		void set_up() {
 			hWWithoutHeuristic.set_up();
-			Options.CHECK_INCONSISTENCY_H_NOT_HOMING = true;
+			learnerChoice.hW.checkInconsistenciesHMapping.getValueHolder()
+					.setValue(true);
 		}
 
 		@Override
@@ -123,15 +119,16 @@ public class JSS_figures {
 		@Override
 		void set_up() {
 			resetInferenceOption();
-			Options.HW_INFERENCE = true;
-			Options.HW_WITH_RESET = false;
-			Options.ADAPTIVE_H = false;
-			Options.ADAPTIVE_W_SEQUENCES = false;
-			Options.ADD_H_IN_W = true;
-			Options.REUSE_HZXW = true;
-			Options.CHECK_INCONSISTENCY_H_NOT_HOMING = true;
-			Options.TRY_TRACE_AS_CE = false;
-			Options.HW_WITH_KNOWN_W = false;
+			HWOptions hW = learnerChoice.hW;
+			learnerChoice.selectChoice(hW);
+			hW.useReset.getValueHolder().setValue(false);
+			hW.setUseAdaptiveH(false);
+			hW.setUseAdaptiveW(false);
+			hW.addHInW.getValueHolder().setValue(true);
+			hW.useDictionary.getValueHolder().setValue(true);
+			hW.checkInconsistenciesHMapping.getValueHolder().setValue(true);
+			hW.searchCeInTrace.getValueHolder().setValue(false);
+			hW.setUsePrecomputedW(false);
 		}
 
 		@Override
@@ -143,16 +140,8 @@ public class JSS_figures {
 
 		@Override
 		void set_up() {
-			resetInferenceOption();
-			Options.HW_INFERENCE = true;
-			Options.HW_WITH_RESET = false;
-			Options.ADAPTIVE_H = false;
-			Options.ADAPTIVE_W_SEQUENCES = false;
-			Options.ADD_H_IN_W = true;
-			Options.REUSE_HZXW = true;
-			Options.CHECK_INCONSISTENCY_H_NOT_HOMING = true;
-			Options.TRY_TRACE_AS_CE = true;
-			Options.HW_WITH_KNOWN_W = false;
+			hW_heuristicsNoTrace.set_up();
+			learnerChoice.hW.searchCeInTrace.getValueHolder().setValue(true);
 		}
 
 		@Override
@@ -166,7 +155,7 @@ public class JSS_figures {
 		@Override
 		void set_up() {
 			hWWithAllHeuristics.set_up();
-			Options.HW_WITH_KNOWN_W = true;
+			learnerChoice.hW.setUsePrecomputedW(true);
 		}
 
 		@Override
@@ -180,7 +169,7 @@ public class JSS_figures {
 		@Override
 		void set_up() {
 			hWWithAllHeuristics.set_up();
-			Options.HW_WITH_RESET = true;
+			learnerChoice.hW.useReset.getValueHolder().setValue(true);
 		}
 
 		@Override
@@ -194,8 +183,9 @@ public class JSS_figures {
 		@Override
 		void set_up() {
 			resetInferenceOption();
-			Options.RIVESTSCHAPIREINFERENCE = true;
-			Options.RS_WITH_UNKNOWN_H = true;
+			RivestSchapireOptions RSchoice = learnerChoice.rivestSchapire;
+			learnerChoice.selectChoice(RSchoice);
+			RSchoice.setProbabilisticRS(true);
 		}
 
 		@Override
@@ -208,8 +198,9 @@ public class JSS_figures {
 		@Override
 		void set_up() {
 			resetInferenceOption();
-			Options.LOCALIZER_BASED_INFERENCE = true;
-			Options.ICTSS2015_WITHOUT_SPEEDUP = true;
+			LocalizerBasedOptions lw = learnerChoice.localizerBased;
+			learnerChoice.selectChoice(lw);
+			lw.setUseSpeedUp(false);
 		}
 
 		@Override
@@ -222,7 +213,7 @@ public class JSS_figures {
 		@Override
 		void set_up() {
 			resetInferenceOption();
-			Options.LMINFERENCE = true;
+			learnerChoice.selectChoice(learnerChoice.lm);
 		}
 
 		@Override
@@ -304,12 +295,17 @@ public class JSS_figures {
 					+ automaton.getStateCount() + " states and "
 					+ driver.getInputSymbols().size() + " inputs).");
 		}
-		if (Options.LOCALIZER_BASED_INFERENCE
-				|| (Options.RIVESTSCHAPIREINFERENCE
-						&& Options.RS_WITH_UNKNOWN_H)) {
-			int nb_states = ((TransparentMealyDriver) driver).getAutomata()
+
+		if (learnerChoice.getSelectedItem() == learnerChoice.localizerBased
+				|| (learnerChoice
+						.getSelectedItem() == learnerChoice.rivestSchapire)
+						&& learnerChoice.rivestSchapire.probabilisticRS()) {
+			int nb_states = driver.getAutomata()
 					.getStateCount();
-			Options.STATE_NUMBER_BOUND = nb_states;
+			if (learnerChoice.getSelectedItem() == learnerChoice.localizerBased)
+				learnerChoice.localizerBased.setStateNumberBound(nb_states);
+			else
+				learnerChoice.rivestSchapire.setStateNumberBound(nb_states);
 		}
 		return driver;
 	}
@@ -317,213 +313,75 @@ public class JSS_figures {
 	protected static Learner learnOneTime(Config config) throws Exception {
 		config.set_up();
 		System.out.println("Using config : " + config.name());
-		Learner learner = null;
-		Driver driver = null;
 		boolean error = false;
 		int errorNb = 0;
 		do {
 			error = false;
-			try {
 				System.out.println(new Date());
-				driver = createAndUpdateDriver();
-				learner = Learner.getLearnerFor(driver);
-				learner.learn();
-			} catch (Exception e) {
+			error = !learnAndSaveOneTime();
 				if (++errorNb > 100) {
 					System.err.println("too many errors occured");
-					throw e;
+				throw new RuntimeException("cannot infer");
 				}
-				System.out.println("retring because of error " + e);
-				String message=e.getMessage();
-				if (message==null)message="";
-				message.replaceAll("[^a-zA-Z0-9()]", "");
-				File f = new File(Options.DIRFAIL).toPath()
-						.resolve(message).resolve(new Date().toString())
-						.toFile();
-				f.getParentFile().mkdirs();
-				f.createNewFile();
-				PrintWriter writer = new PrintWriter(new FileWriter(f));
-				writer.println(new Date().toString());
-				writer.println("Maximum counter example length "
-						+ Options.MAX_CE_LENGTH);
-				writer.println(" and maximum counter example reset set to "
-						+ Options.MAX_CE_RESETS);
-				if (random) {
-					writer.println("random");
-				} else {
-					writer.println("url " + url);
-				}
-				writer.println(driver.getInputSymbols().size() + " inputs");
-				if (driver instanceof TransparentMealyDriver) {
-					Mealy a = ((TransparentMealyDriver) driver).getAutomata();
-					writer.println(a.getStateCount() + " states");
-				}
-				writer.println("config : " + config.name());
-				writer.println();
-				e.printStackTrace(writer);
-				writer.close();
-				error = true;
-			}
 		} while (error);
-		// System.err.println(learner.toString());
-		/** LX add commentaire **/
-		// learner.createConjecture();
-		learner.logStats();
-		driver.logStats();
-		// TODO check conjecture
-		return learner;
 	}
 
+	static int configNb = 0;
 	protected static void run_stats(Config config) {
 		config.set_up();
+		configNb++;
+		if (configNb < 106)
+			return;
 		if (random)
 			System.out.println("states " + Options.MAXSTATES);
 		else
 			System.out.println(url);
-		if (Options.HW_INFERENCE)
-			System.out.println("hW");
-		if (Options.RIVESTSCHAPIREINFERENCE)
-			System.out.println("RS");
-		if (Options.LOCALIZER_BASED_INFERENCE)
-			System.out.println("locW");
-		if (Options.USE_DT_CE)
-			System.out.println("distinction tree CE");
-		else if (Options.USE_SHORTEST_CE)
-			System.out.println("shortest CE");
-		else
-			System.out.println("Mr Bean");
-		String baseDir = System.getProperty("user.dir");
-		File f = new File(baseDir + File.separator + Options.DIRSTATSCSV);
+		System.out.println(learnerChoice.getSelectedItem().displayName);
+		if (getOracleOptions() != null)
+			System.out
+					.println(getOracleOptions().getSelectedItem().displayName);
+		File f = Options.getStatsCSVDir();
 		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
 			throw new RuntimeException("Unable to create/write " + f.getName());
-		String statsDir = Utils.makePath(f.getAbsolutePath());
 
-		f = new File(baseDir + File.separator + Options.DIRTEST);
-		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
-			throw new RuntimeException("Unable to create/write " + f.getName());
-		String logDir = Utils.makePath(f.getAbsolutePath());
+		assert (modeOption.getSelectedItem() == modeOption.stats);
+		System.out.println(
+				"[+] Testing " + modeOption.stats.inferenceNb.getValue()
+						+ " automaton for configuration number " + configNb);
 
-		if (Options.NBTEST > 0)
-			Utils.cleanDir(new File(logDir));
-		Options.OUTDIR = logDir;
-		System.out.println("[+] Testing " + Options.NBTEST + " automaton");
-		Options.LOG_LEVEL = LogLevel.LOW;
-
-		for (int i = 1; i <= Options.NBTEST; i++) {
+		for (int i = 1; i <= modeOption.stats.inferenceNb.getValue(); i++) {
 			Runtime.getRuntime().gc();
-			System.out.println("\t" + i + "/" + Options.NBTEST);
-			Options.SEED = Utils.randLong();
-			Utils.setSeed(Options.SEED);
-			Options.OUTDIR = logDir + File.separator + i + File.separator;
-			Utils.createDir(new File(Options.OUTDIR));
+			System.out.println(
+					"\t" + i + "/" + modeOption.stats.inferenceNb.getValue());
+			setUpDriverOption();
 			try {
-				Learner l = learnOneTime(config);
-
-				StatsEntry learnerStats = l.getStats();
-
-				File globalStats = new File(statsDir + File.separator
-						+ learnerStats.getClass().getName() + ".csv");
-				Writer globalStatsWriter;
-				if (!globalStats.exists()) {
-					globalStats.createNewFile();
-					globalStatsWriter = new BufferedWriter(
-							new FileWriter(globalStats));
-					globalStatsWriter
-							.append(learnerStats.getCSVHeader() + "\n");
-				} else {
-					globalStatsWriter = new BufferedWriter(
-							new FileWriter(globalStats, true));
-				}
-
-				globalStatsWriter.append(learnerStats.toCSV() + "\n");
-				globalStatsWriter.close();
+				learnOneTime(config);
 			} catch (Exception e) {
-				String failDir = baseDir + File.separator + Options.DIRFAIL;
-				Utils.createDir(new File(failDir));
-				failDir = failDir + File.separator
-						+ e.getClass().getSimpleName() + "-" + e.getMessage();
-				if (!Utils.createDir(new File(failDir)))
-					failDir = failDir + File.separator
-							+ e.getClass().getSimpleName();
-				Utils.createDir(new File(failDir));
-				failDir = failDir + File.separator
-						+ new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS")
-								.format(new Date());
-				try {
-					Utils.copyDir(Paths.get(Options.OUTDIR),
-							Paths.get(failDir));
-					File readMe = new File(
-							failDir + File.separator + "ReadMe.txt");
-					Writer readMeWriter = new BufferedWriter(
-							new FileWriter(readMe));
-					readMeWriter.write(
-							"\nOne learner during stats throw an exception");
-					readMeWriter.write("\n");
-					e.printStackTrace(new PrintWriter(readMeWriter));
-					readMeWriter.write("\n");
-					readMeWriter.write("\n");
-					readMeWriter.write("\nthe driver was " + Options.SYSTEM);
-					readMeWriter.write("\nthe seed was " + Options.SEED);
-
-					readMeWriter.close();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-					System.exit(1);
-				}
 				e.printStackTrace();
-				System.err.println("data saved in " + failDir);
-				System.exit(1);
 			}
 
 		}
 
 	}
 
-	static void makeGraph() {
-		System.out.println("[+] Make Graph");
-		String baseDir = System.getProperty("user.dir");
-		File f = new File(baseDir + File.separator + Options.DIRSTATSCSV);
-		if (!f.isDirectory() && !f.mkdirs() && !f.canWrite())
-			throw new RuntimeException("Unable to create/write " + f.getName());
-		String statsDir = Utils.makePath(f.getAbsolutePath());
-		String baseDirGraph = baseDir + File.separator + Options.DIRGRAPHSTATS
-				+ File.separator;
-		new File(baseDirGraph).mkdir();
-		GlobalGraphGenerator globalGraph = new GlobalGraphGenerator();
-		for (File statFile : new File(statsDir).listFiles()) {
-			String statName = statFile.getName().substring(0,
-					statFile.getName().length() - 4);
-			statName = statName.substring(statName.lastIndexOf(".") + 1,
-					statName.length());
-			System.out.println("\tmaking graph for " + statName);
-			Options.OUTDIR = baseDirGraph + File.separator + statName;
-			new File(Options.OUTDIR).mkdir();
-			Utils.cleanDir(new File(Options.OUTDIR));
-			StatsSet stats = new StatsSet(statFile);
-			GraphGenerator gen = stats.get(0).getDefaultsGraphGenerator();
-			gen.generate(stats);
-			globalGraph.add(stats);
-		}
-		globalGraph.generate();
-	}
 
-	public static void main(String[] args) throws MalformedURLException {
-		Options.NBTEST = 1;
-		Options.LOG_LEVEL = LogLevel.LOW;
+	public static void main(String[] args)
+	{
 
-		makeGraph();
+		makeGraphs();
 		// System.exit(0);
 
 		// heuristic comparison on states
 		random = true;
 		resetInferenceOption();
-		Options.HW_INFERENCE = true;
-		Options.ADAPTIVE_H = false;
-		Options.ADAPTIVE_W_SEQUENCES = false;
-		Options.USE_SHORTEST_CE = false;
+		learnerChoice.selectChoice(learnerChoice.hW);
+		learnerChoice.hW.setUseAdaptiveH(false);
+		learnerChoice.hW.setUseAdaptiveW(false);
+
+		getOracleOptions().selectChoice(getOracleOptions().mrBean);
 		Options.MININPUTSYM = Options.MAXINPUTSYM = 2;
 		Options.MAXOUTPUTSYM = Options.MINOUTPUTSYM = 2;
-		Options.TRY_TRACE_AS_CE = false;
+		learnerChoice.hW.searchCeInTrace.getValueHolder().setValue(false);
 //		for (int config = 0; config < 6; config++) {
 //			Options.REUSE_HZXW = config == 3 || config >= 4;
 //			Options.ADD_H_IN_W = config == 1 || config >= 4;
@@ -685,36 +543,66 @@ public class JSS_figures {
 
 		for (String automata : connected) {
 			random = false;
-			url = new URL(automata);
+			try {
+				url = new URL(automata);
+			} catch (MalformedURLException e) {
+				throw new RuntimeException(e);
+			}
 			for (Config config : new Config[] { hWWithAllHeuristics,
 					hWWithKnownW, RS, locW, Lm }) {
 				config.set_up();
-				if ((Options.LOCALIZER_BASED_INFERENCE
-						|| (Options.HW_INFERENCE && Options.HW_WITH_KNOWN_W))
+				if ((learnerChoice
+						.getSelectedItem() == learnerChoice.localizerBased
+						|| (learnerChoice.getSelectedItem() == learnerChoice.hW
+								&& learnerChoice.hW.usePrecomputedW()))
 						&& wSetTooLarge.contains(automata)) {
 					System.out.println("skiped");
 					continue;
 				}
 				for (Boolean useDT : new Boolean[] { true, false }) {
-					Options.USE_DT_CE = useDT;
 					run_stats(config);
+					setUseDT(useDT);
 				}
 			}
 		}
 
 		for (String automata : reset) {
 			random = false;
-			url = new URL(automata);
+			try {
+				url = new URL(automata);
+			} catch (MalformedURLException e) {
+				throw new RuntimeException(e);
+			}
 			for (Config config : new Config[] { hWWithReset, Lm }) {
 				config.set_up();
 				for (Boolean useDT : new Boolean[] { true, false }) {
-					Options.USE_DT_CE = useDT;
+					setUseDT(useDT);
 					run_stats(config);
 				}
 			}
 		}
-		makeGraph();
+		makeGraphs();
 		System.out.println("[+] End");
+	}
+
+	static OracleOption getOracleOptions() {
+		for (OptionTree o : learnerChoice.getAllSelectedChildren()) {
+			if (o instanceof OracleOption) {
+				return (OracleOption) o;
+			}
+		}
+		return null;
+	}
+
+	static void setUseDT(boolean enable) {
+		OracleOption oracle = getOracleOptions();
+		if (oracle == null)
+			return;
+				if (enable) {
+					oracle.selectChoice(oracle.distinctionTreeBased);
+				} else {
+					oracle.selectChoice(oracle.mrBean);
+		}
 	}
 
 

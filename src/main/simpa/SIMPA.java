@@ -724,7 +724,7 @@ public class SIMPA {
 
 
 	public static AutomataChoice automataChoice = new AutomataChoice();
-	private static ModeOption modeOption = new ModeOption(automataChoice);
+	protected static ModeOption modeOption = new ModeOption(automataChoice);
 
 	static OutputOptions getOutputsOptions() {
 		if (modeOption.getSelectedItem() == modeOption.simple)
