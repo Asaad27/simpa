@@ -228,12 +228,7 @@ public class LmLearner extends Learner {
 		float duration = (float) ((System.nanoTime() - startTime)
 				/ 1000000000.);
 		stats.finalUpdate(createConjecture(), duration,
-//<<<<<<< HEAD:src/learner/mealy/table/LmLearner.java
 				driver.getNumberOfAtomicRequest(), driver.getNumberOfRequest());
-//=======
-//				driver.numberOfAtomicRequest - lastOracleLength,
-//				driver.numberOfRequest - lastOracleResets);
-//>>>>>>> 4cc71680... add fixes to build stats and display graphs:hit/src/learner/mealy/table/LmLearner.java
 	}
 
 	@Override
