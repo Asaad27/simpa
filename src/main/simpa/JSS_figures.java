@@ -245,14 +245,9 @@ public class JSS_figures extends SIMPA{
 		int resets;
 		int length;
 
-		Driver driver = null;
-		driver = loadDriver(Options.SYSTEM);
-		if (driver == null)
-			System.exit(1);
-		if (driver instanceof TransparentMealyDriver) {
-			Mealy automaton = ((TransparentMealyDriver) driver).getAutomata();
-			Options.MAX_CE_RESETS = 1;
-			Options.MAX_CE_LENGTH = automaton.getStateCount()
+			Mealy automaton = driver.getAutomata();
+			resets = 1;
+			length = automaton.getStateCount()
 					* driver.getInputSymbols().size() * 4500;
 			length = 50000000;
 			length = (int) Math.pow(
