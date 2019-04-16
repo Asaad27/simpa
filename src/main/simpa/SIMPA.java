@@ -588,8 +588,19 @@ public class SIMPA {
 		}
 		boolean makeGraphs = modeOption.stats.makeGraphs.isEnabled();
 		if (makeGraphs) {
+			makeGraphs();
+		}
+		return true;
+	}
+
+	static void makeGraphs() {
 			System.out.println("[+] Make Graph");
 			GlobalGraphGenerator globalGraph = new GlobalGraphGenerator();
+		File[] CSVFiles = Options.getStatsCSVDir().listFiles();
+		if (CSVFiles == null) {
+			System.out.println("no data to plot yet.");
+			return;
+		}
 			for (File statFile : Options.getStatsCSVDir().listFiles()) {
 				String statName = statFile.getName().substring(0,
 						statFile.getName().length() - 4);
@@ -604,8 +615,6 @@ public class SIMPA {
 			}
 			globalGraph.generate();
 		}
-		return true;
-	}
 
 	/**
 	 * Launch one inference and record result in CSV files.
