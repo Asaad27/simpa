@@ -33,12 +33,12 @@ public class TraceLengthCol extends TableColumn {
 	@Override
 	public String getRawTitle() {
 		String r = title;
-		if (dispOracle)
-			r = r + "[#oracle]";
-		if (dispReset && dispOracle)
-			r = r + "\n";
 		if (dispReset)
 			r = r + " (#resets)";
+		if (dispReset && dispOracle)
+			r = r + "\n";
+		if (dispOracle)
+			r = r + "[#oracle]";
 		return r;
 	}
 
@@ -55,17 +55,17 @@ public class TraceLengthCol extends TableColumn {
 					showReset = false;
 			}
 		}
-		if (dispOracle)
-			out = out + " ["
-					+ ((int) stats
-							.attributeAVG(Attribute.ASKED_COUNTER_EXAMPLE))
-					+ "]";
 		if (showReset) {
 //			if (dispOracle)
 //				out = out + "\n";
 			out = out + " ("
 					+ ((int) stats.attributeAVG(Attribute.RESET_CALL_NB)) + ")";
 		}
+		if (dispOracle)
+			out = out + " ["
+					+ ((int) stats
+							.attributeAVG(Attribute.ASKED_COUNTER_EXAMPLE))
+					+ "]";
 		return out;
 	}
 
