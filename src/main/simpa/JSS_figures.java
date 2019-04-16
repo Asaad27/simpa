@@ -313,7 +313,6 @@ public class JSS_figures extends SIMPA{
 			else
 				learnerChoice.rivestSchapire.setStateNumberBound(nb_states);
 		}
-		return driver;
 	}
 
 	protected static Learner learnOneTime(Config config) throws Exception {
