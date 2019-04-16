@@ -390,6 +390,23 @@ public class JSS_figures extends SIMPA {
 	}
 
 	public static void main(String[] args) {
+		errorLogger = new ErrorLogger() {
+			@Override
+			public void addReadMeInformationForFail(Writer readMeWriter,
+					Exception e) throws IOException {
+				super.addReadMeInformationForFail(readMeWriter, e);
+				readMeWriter.append(System.lineSeparator());
+				readMeWriter.append("Configuation number " + configNb
+						+ System.lineSeparator());
+				if (random) {
+					readMeWriter.append(
+							"with random driver" + System.lineSeparator());
+				} else {
+					readMeWriter.append("with automaton from " + url
+							+ System.lineSeparator());
+				}
+			}
+		};
 
 		makeGraphs();
 		// System.exit(0);
