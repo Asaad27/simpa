@@ -66,11 +66,14 @@ public class StatsEntry_OraclePart {
 	 * @param thisDuration
 	 *            the duration of this call to oracle
 	 */
-	public void addOracleCall(int thisTraceLength, float thisDuration) {
+	public void addOracleCall(int thisTraceLength, int thisResetNumber,
+			float thisDuration) {
 		askedCE++;
 		traceLength += lastTraceLength;
+		resetNb += lastResetNb;
 		duration += lastDuration;
 		lastTraceLength = thisTraceLength;
+		lastResetNb = thisResetNumber;
 		lastDuration = thisDuration;
 	}
 

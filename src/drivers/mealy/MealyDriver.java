@@ -137,6 +137,7 @@ public abstract class MealyDriver extends Driver<String, String> {
 			float duration = (float) (System.nanoTime() - startTime)
 					/ 1000000000;
 			oracleStats.addOracleCall(getNumberOfAtomicRequest() - startSize,
+					getNumberOfRequest() - startReset,
 					duration);
 			assert startReset
 					+ appliedSequences.getResetNumber() == getNumberOfRequest();
