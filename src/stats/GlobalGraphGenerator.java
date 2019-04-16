@@ -241,6 +241,7 @@ public class GlobalGraphGenerator extends GraphGenerator {
 					Options.getArticleDir("AMOST2019").resolve("figures")
 							.resolve("table_MQTT").toFile(),
 					set, columns, rows);
+			table.setRotateHeader(80);
 			table.topCell = "Systems";
 			table.export(TableOutputFormat.LATEX);
 		}
@@ -651,11 +652,12 @@ public class GlobalGraphGenerator extends GraphGenerator {
 								+ ")";
 					}
 				});
-				new Table(
+				Table table = new Table(
 						Options.getArticleDir("JSS2018").resolve("figures")
 								.resolve("benchmarkLocW").toFile(),
-						baseStats, columns, rows)
-								.export(TableOutputFormat.LATEX);
+						baseStats, columns, rows);
+				table.setRotateHeader(75);
+				table.export(TableOutputFormat.LATEX);
 
 			}
 			columns.clear();
@@ -688,16 +690,21 @@ public class GlobalGraphGenerator extends GraphGenerator {
 			StatsSet MrBean = new StatsSet(baseStats,
 					new HasAttributeRestriction<>(Attribute.ORACLE_USED,
 							"MrBean"));
-			new Table(
+			Table table = new Table(
 					Options.getArticleDir("JSS2018").resolve("figures")
 							.resolve("benchmarkStrongMrBean").toFile(),
-					MrBean, columns, rows).export(TableOutputFormat.LATEX);
+					MrBean, columns, rows);
+			table.setRotateHeader(75);
+			table.export(TableOutputFormat.LATEX);
 			StatsSet DS = new StatsSet(baseStats, new HasAttributeRestriction<>(
 					Attribute.ORACLE_USED, "distinctionTree + MrBean"));
-			new Table(
+			
+			table=new Table(
 					Options.getArticleDir("JSS2018").resolve("figures")
 							.resolve("benchmarkStrongDS").toFile(),
-					DS, columns, rows).export(TableOutputFormat.LATEX);
+					DS, columns, rows);
+			table.setRotateHeader(75);
+			table.export(TableOutputFormat.LATEX);
 
 			// now proceed not strongly connected
 
