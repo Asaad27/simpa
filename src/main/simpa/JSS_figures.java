@@ -366,8 +366,9 @@ public class JSS_figures extends SIMPA {
 	protected static void run_stats(Config config) {
 		config.set_up();
 		configNb++;
-		if (configNb < 106)
-			return;
+		// used for debug
+//		if (configNb < 106)
+//			return;
 		if (random)
 			System.out.println("states " + Options.MAXSTATES);
 		else
