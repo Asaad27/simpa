@@ -25,14 +25,15 @@ import options.automataOptions.DriverChoiceItem;
 import options.learnerOptions.MealyLearnerChoice;
 import options.learnerOptions.OracleOption;
 
-public class JSS_figures extends SIMPA{
-	
-	static MealyLearnerChoice learnerChoice=automataChoice.mealyLearnerChoice;
+public class JSS_figures extends SIMPA {
+
+	static MealyLearnerChoice learnerChoice = automataChoice.mealyLearnerChoice;
 
 	static void resetInferenceOption() {
 		setUseDT(false);
 		modeOption.selectChoice(modeOption.stats);
-		modeOption.stats.inferenceNb.getValueHolder().setValue(1);;
+		modeOption.stats.inferenceNb.getValueHolder().setValue(1);
+		;
 		modeOption.stats.makeGraphs.getValueHolder().setValue(true);
 	}
 
@@ -213,80 +214,110 @@ public class JSS_figures extends SIMPA{
 	static boolean random;
 	static URL url;
 
-	public static Driver loadDriver(String system) throws Exception {
-		Driver driver = null;
+	static DriverChoiceItem<MealyDriver> randomDriver;
+	static DriverChoiceItem<MealyDriver> dotItem;
+
+	public static DriverChoiceItem<MealyDriver> getRandomItem(
+			DriverChoice<?> parent) {
+		randomDriver = new DriverChoiceItem<MealyDriver>("random",
+				"--JSS_custom_random", parent, TransparentMealyDriver.class) {
+			@Override
+			public MealyDriver createDriver() {
+				TransparentMealyDriver d;
+				do {
+					d = new RandomMealyDriver();
+				} while (d.getAutomata().getStateCount() != Options.MAXSTATES);
+				updateWithDriver(d);
+				return d;
+			}
+
+		};
+		return randomDriver;
+	}
+
+	public static DriverChoiceItem<MealyDriver> getDotItem(
+			MealyDriverChoice parent) {
+		dotItem = new DriverChoiceItem<MealyDriver>("dot file",
+				"--JSS_custom_url", parent, TransparentMealyDriver.class) {
+			@Override
+			public MealyDriver createDriver() {
+				try {
+					TransparentMealyDriver d = new TransparentMealyDriver(
+							Mealy.importFromUrl(url, true));
+					updateWithDriver(d);
+					return d;
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+
+		};
+		return dotItem;
+	}
+
+	private static void setUpDriverOption() {
 		if (random) {
-			RandomMealyDriver d = null;
-			do {
-				d = new RandomMealyDriver();
-			} while (d.getAutomata().getStateCount() != Options.MAXSTATES);
-			driver = d;
+			automataChoice.mealyDriverChoice.selectChoice(randomDriver);
 			LocalizerBasedLearner.findShortestWSet = false;
 		} else {
-			driver = new TransparentMealyDriver(Mealy.importFromUrl(url, true));
+			automataChoice.mealyDriverChoice.selectChoice(dotItem);
 			LocalizerBasedLearner.findShortestWSet = true;
 		}
-		return driver;
 	}
 
 	private static void updateWithDriver(TransparentMealyDriver driver) {
 		int resets;
 		int length;
 
-			Mealy automaton = driver.getAutomata();
-			resets = 1;
-			length = automaton.getStateCount()
-					* driver.getInputSymbols().size() * 4500;
-			length = 50000000;
-			length = (int) Math.pow(
-					driver.getInputSymbols().size(), automaton.getStateCount())
-					* 2;
-			if (random)
-				length = (int) (Math
-						.pow(automaton.getStateCount()
-								* driver.getInputSymbols().size(), 0.7)
-						* 500.);
-			if (learnerChoice.getSelectedItem() == learnerChoice.lm
-					|| learnerChoice.getSelectedItem() == learnerChoice.tree
-					|| (learnerChoice.getSelectedItem() == learnerChoice.hW
-							&& learnerChoice.hW.useReset.isEnabled())) {
-				resets = automaton.getStateCount()
-						* driver.getInputSymbols().size() * 10000;
-				resets = (int) Math.pow(
-						driver.getInputSymbols().size() / 2 + 1,
-						automaton.getStateCount() / 4 + 2) * 10;
-				resets = 100000;
-				if (driver.getInputSymbols().size() < 5
-						&& automaton.getStateCount() < 10)
+		Mealy automaton = driver.getAutomata();
+		resets = 1;
+		length = automaton.getStateCount() * driver.getInputSymbols().size()
+				* 4500;
+		length = 50000000;
+		length = (int) Math.pow(driver.getInputSymbols().size(),
+				automaton.getStateCount()) * 2;
+		if (random)
+			length = (int) (Math.pow(
+					automaton.getStateCount() * driver.getInputSymbols().size(),
+					0.7) * 500.);
+		if (learnerChoice.getSelectedItem() == learnerChoice.lm
+				|| learnerChoice.getSelectedItem() == learnerChoice.tree
+				|| (learnerChoice.getSelectedItem() == learnerChoice.hW
+						&& learnerChoice.hW.useReset.isEnabled())) {
+			resets = automaton.getStateCount() * driver.getInputSymbols().size()
+					* 10000;
+			resets = (int) Math.pow(driver.getInputSymbols().size() / 2 + 1,
+					automaton.getStateCount() / 4 + 2) * 10;
+			resets = 100000;
+			if (driver.getInputSymbols().size() < 5
+					&& automaton.getStateCount() < 10)
 				resets = 1000;
-				if (driver.getInputSymbols().size() == 12
-						&& automaton.getStateCount() == 15)
-					resets = 1400000;
-				if (driver.getInputSymbols().size() == 13
-						&& automaton.getStateCount() == 17)
+			if (driver.getInputSymbols().size() == 12
+					&& automaton.getStateCount() == 15)
+				resets = 1400000;
+			if (driver.getInputSymbols().size() == 13
+					&& automaton.getStateCount() == 17)
 				resets = 100000;// 600000 but memory
-				if (driver.getInputSymbols().size() == 12
-						&& automaton.getStateCount() == 9)
-					resets = 500000;
-				length = automaton.getStateCount() * 2;
-			}
-			// 22 states 8 inputs
-			// 16 states 9 inputs
-			// 17 states 13 inputs -> plus de 100000 reset
-			// 15 states 12 inputs -> + de 500000 reset
-			// 9 states 12 inputs -> + de 100000 reset
-			System.out.println("Maximum counter example length set to "
-					+ length
-					+ " and maximum counter example reset set to "
-					+ resets + " from topology of driver ("
-					+ automaton.getStateCount() + " states and "
-					+ driver.getInputSymbols().size() + " inputs).");
+			if (driver.getInputSymbols().size() == 12
+					&& automaton.getStateCount() == 9)
+				resets = 500000;
+			length = automaton.getStateCount() * 2;
+		}
+		// 22 states 8 inputs
+		// 16 states 9 inputs
+		// 17 states 13 inputs -> plus de 100000 reset
+		// 15 states 12 inputs -> + de 500000 reset
+		// 9 states 12 inputs -> + de 100000 reset
+		System.out.println("Maximum counter example length set to " + length
+				+ " and maximum counter example reset set to " + resets
+				+ " from topology of driver (" + automaton.getStateCount()
+				+ " states and " + driver.getInputSymbols().size()
+				+ " inputs).");
 		OracleOption oracle = getOracleOptions();
 		if (oracle != null) {
 			oracle.mrBean.setMaxTraceLength(length);
 			oracle.mrBean.setMaxTraceNumber(resets);
-		}
-		else {
+		} else {
 			System.out.println("no oracle found");
 		}
 
@@ -294,8 +325,7 @@ public class JSS_figures extends SIMPA{
 				|| (learnerChoice
 						.getSelectedItem() == learnerChoice.rivestSchapire)
 						&& learnerChoice.rivestSchapire.probabilisticRS()) {
-			int nb_states = driver.getAutomata()
-					.getStateCount();
+			int nb_states = driver.getAutomata().getStateCount();
 			if (learnerChoice.getSelectedItem() == learnerChoice.localizerBased)
 				learnerChoice.localizerBased.setStateNumberBound(nb_states);
 			else
@@ -310,16 +340,17 @@ public class JSS_figures extends SIMPA{
 		int errorNb = 0;
 		do {
 			error = false;
-				System.out.println(new Date());
+			System.out.println(new Date());
 			error = !learnAndSaveOneTime();
-				if (++errorNb > 100) {
-					System.err.println("too many errors occured");
+			if (++errorNb > 100) {
+				System.err.println("too many errors occured");
 				throw new RuntimeException("cannot infer");
-				}
+			}
 		} while (error);
 	}
 
 	static int configNb = 0;
+
 	protected static void run_stats(Config config) {
 		config.set_up();
 		configNb++;
@@ -357,9 +388,7 @@ public class JSS_figures extends SIMPA{
 
 	}
 
-
-	public static void main(String[] args)
-	{
+	public static void main(String[] args) {
 
 		makeGraphs();
 		// System.exit(0);
@@ -440,7 +469,7 @@ public class JSS_figures extends SIMPA{
 				if (config == locW && s > 100)
 					continue;
 				Options.MAXSTATES = Options.MINSTATES = s;
-				Options.STATE_NUMBER_BOUND = s;
+				// Options.STATE_NUMBER_BOUND = s;
 				run_stats(config);
 			}
 		}
@@ -591,12 +620,11 @@ public class JSS_figures extends SIMPA{
 		OracleOption oracle = getOracleOptions();
 		if (oracle == null)
 			return;
-				if (enable) {
-					oracle.selectChoice(oracle.distinctionTreeBased);
-				} else {
-					oracle.selectChoice(oracle.mrBean);
+		if (enable) {
+			oracle.selectChoice(oracle.distinctionTreeBased);
+		} else {
+			oracle.selectChoice(oracle.mrBean);
 		}
 	}
-
 
 }

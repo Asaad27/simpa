@@ -20,6 +20,7 @@ import drivers.mealy.real.mqtt.MQTTDriverOption;
 import drivers.mealy.transparent.EnumeratedMealyDriver.EnumeratedMealyOption;
 import drivers.mealy.transparent.RandomMealyDriver;
 import drivers.mealy.transparent.TransparentFromDotMealyDriver;
+import main.simpa.JSS_figures;
 import options.automataOptions.DriverChoice;
 import options.automataOptions.DriverChoiceItem;
 
@@ -38,6 +39,8 @@ public class MealyDriverChoice extends DriverChoice<MealyDriver> {
 		addChoice(new TransparentFromDotMealyDriver.FromDotChoiceItem(this));
 		addChoice(exhaustiveDriver);
 		addChoice(new MQTTDriverOption(this));
+		addChoice(JSS_figures.getRandomItem(this));
+		addChoice(JSS_figures.getDotItem(this));
 	}
 
 	@Override
