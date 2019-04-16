@@ -229,7 +229,9 @@ public class JSS_figures extends SIMPA{
 		return driver;
 	}
 
-	protected static Driver createAndUpdateDriver() throws Exception {
+	private static void updateWithDriver(TransparentMealyDriver driver) {
+		int resets;
+		int length;
 
 		Driver driver = null;
 		driver = loadDriver(Options.SYSTEM);
@@ -240,36 +242,38 @@ public class JSS_figures extends SIMPA{
 			Options.MAX_CE_RESETS = 1;
 			Options.MAX_CE_LENGTH = automaton.getStateCount()
 					* driver.getInputSymbols().size() * 4500;
-			Options.MAX_CE_LENGTH = 50000000;
-			Options.MAX_CE_LENGTH = (int) Math.pow(
+			length = 50000000;
+			length = (int) Math.pow(
 					driver.getInputSymbols().size(), automaton.getStateCount())
 					* 2;
 			if (random)
-				Options.MAX_CE_LENGTH = (int) (Math
+				length = (int) (Math
 						.pow(automaton.getStateCount()
 								* driver.getInputSymbols().size(), 0.7)
 						* 500.);
-			if (Options.LMINFERENCE || Options.TREEINFERENCE
-					|| (Options.HW_INFERENCE && Options.HW_WITH_RESET)) {
-				Options.MAX_CE_RESETS = automaton.getStateCount()
+			if (learnerChoice.getSelectedItem() == learnerChoice.lm
+					|| learnerChoice.getSelectedItem() == learnerChoice.tree
+					|| (learnerChoice.getSelectedItem() == learnerChoice.hW
+							&& learnerChoice.hW.useReset.isEnabled())) {
+				resets = automaton.getStateCount()
 						* driver.getInputSymbols().size() * 10000;
-				Options.MAX_CE_RESETS = (int) Math.pow(
+				resets = (int) Math.pow(
 						driver.getInputSymbols().size() / 2 + 1,
 						automaton.getStateCount() / 4 + 2) * 10;
-				Options.MAX_CE_RESETS = 100000;
+				resets = 100000;
 				if (driver.getInputSymbols().size() < 5
 						&& automaton.getStateCount() < 10)
-					Options.MAX_CE_RESETS = 10000;
+				resets = 1000;
 				if (driver.getInputSymbols().size() == 12
 						&& automaton.getStateCount() == 15)
-					Options.MAX_CE_RESETS = 1400000;
+					resets = 1400000;
 				if (driver.getInputSymbols().size() == 13
 						&& automaton.getStateCount() == 17)
-					Options.MAX_CE_RESETS = 600000;
+				resets = 100000;// 600000 but memory
 				if (driver.getInputSymbols().size() == 12
 						&& automaton.getStateCount() == 9)
-					Options.MAX_CE_RESETS = 500000;
-				Options.MAX_CE_LENGTH = automaton.getStateCount() * 2;
+					resets = 500000;
+				length = automaton.getStateCount() * 2;
 			}
 			// 22 states 8 inputs
 			// 16 states 9 inputs
@@ -277,11 +281,18 @@ public class JSS_figures extends SIMPA{
 			// 15 states 12 inputs -> + de 500000 reset
 			// 9 states 12 inputs -> + de 100000 reset
 			System.out.println("Maximum counter example length set to "
-					+ Options.MAX_CE_LENGTH
+					+ length
 					+ " and maximum counter example reset set to "
-					+ Options.MAX_CE_RESETS + " from topology of driver ("
+					+ resets + " from topology of driver ("
 					+ automaton.getStateCount() + " states and "
 					+ driver.getInputSymbols().size() + " inputs).");
+		OracleOption oracle = getOracleOptions();
+		if (oracle != null) {
+			oracle.mrBean.setMaxTraceLength(length);
+			oracle.mrBean.setMaxTraceNumber(resets);
+		}
+		else {
+			System.out.println("no oracle found");
 		}
 
 		if (learnerChoice.getSelectedItem() == learnerChoice.localizerBased
