@@ -600,8 +600,8 @@ public class JSS_figures extends SIMPA {
 					continue;
 				}
 				for (Boolean useDT : new Boolean[] { true, false }) {
-					run_stats(config);
 					setUseDT(useDT);
+					run_stats(config);
 				}
 			}
 		}
