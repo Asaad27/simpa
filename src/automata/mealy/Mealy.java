@@ -43,6 +43,7 @@ import automata.mealy.distinctionStruct.TotallyAdaptiveW;
 import automata.mealy.distinctionStruct.TotallyAdaptiveW.AdaptiveCharacterization;
 import automata.mealy.splittingTree.smetsersSplittingTree.SplittingTree;
 import learner.mealy.LmConjecture;
+import learner.mealy.LmConjecture.CounterExampleResult;
 import learner.mealy.LmTrace;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
@@ -1025,9 +1026,12 @@ public class Mealy extends Automata implements Serializable {
 	 */
 	public boolean searchConjectureError(LmConjecture conj) {
 		if (conj.getInitialState() != null && getInitialState() != null) {
-			if (!conj.getCounterExamplesWithReset(this, true)
-					.isCompletelyEquivalent())
+			CounterExampleResult CER = conj.getCounterExamplesWithReset(this,
+					true);
+			if (!CER.isCompletelyEquivalent()) {
+				System.out.println(CER.what());
 				return false;
+			}
 		} else {
 			State thisState = getInitialState();
 			if (thisState == null) {
