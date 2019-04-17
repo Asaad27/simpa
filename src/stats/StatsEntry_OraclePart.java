@@ -55,6 +55,8 @@ public class StatsEntry_OraclePart {
 			oracleUsed = "shortest";
 		else if (mode == oracle.mrBean)
 			oracleUsed = "MrBean";
+		else if (mode == oracle.distinctionTreeBased)
+			oracleUsed = "distinctionTree";
 	}
 
 	/**
