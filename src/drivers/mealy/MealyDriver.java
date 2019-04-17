@@ -320,6 +320,8 @@ public abstract class MealyDriver extends Driver<String, String> {
 						reset();
 						appliedSequences.recordReset();
 					}
+					if (options.mrBean.getMaxTraceLength() == 0)
+						throw new RuntimeException("invalid options");
 					boolean counterExampleIsFound = doRandomWalk(conjecture,
 							conjectureState, appliedSequences,
 							options.mrBean.getMaxTraceLength(),
