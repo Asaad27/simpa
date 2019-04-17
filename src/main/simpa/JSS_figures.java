@@ -307,7 +307,7 @@ public class JSS_figures extends SIMPA {
 			if (!random && url.getFile().contains("GnuTLS_3.3.8_server_full"))
 				resets = 1200000;
 			if (!random && url.getFile().contains("OpenSSL_1.0.2_client_full"))
-				resets = 1200000;
+				resets = 1400000;
 			if (!random && url.getFile().contains("GnuTLS_3.3.8_client_full"))
 				resets = 1200000;// for wrong conjectures, there is a counter
 									// example of length 6 from
