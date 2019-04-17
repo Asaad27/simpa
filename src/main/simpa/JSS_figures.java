@@ -610,8 +610,21 @@ public class JSS_figures extends SIMPA {
 					continue;
 				}
 				for (Boolean useDT : new Boolean[] { true, false }) {
+					Config configOracle = new Config() {
+
+						@Override
+						void set_up() {
+							config.set_up();
 					setUseDT(useDT);
-					run_stats(config);
+						}
+
+						@Override
+						String name() {
+							return config.name();
+						}
+
+					};
+					run_stats(configOracle);
 				}
 			}
 		}
@@ -626,8 +639,21 @@ public class JSS_figures extends SIMPA {
 			for (Config config : new Config[] { hWWithReset, Lm }) {
 				config.set_up();
 				for (Boolean useDT : new Boolean[] { true, false }) {
+					Config configOracle = new Config() {
+
+						@Override
+						void set_up() {
+							config.set_up();
 					setUseDT(useDT);
-					run_stats(config);
+						}
+
+						@Override
+						String name() {
+							return config.name();
+						}
+
+					};
+					run_stats(configOracle);
 				}
 			}
 		}
