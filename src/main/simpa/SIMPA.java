@@ -597,6 +597,11 @@ public class SIMPA {
 	static void makeGraphs() {
 			System.out.println("[+] Make Graph");
 			GlobalGraphGenerator globalGraph = new GlobalGraphGenerator();
+		File[] CSVFiles = Options.getStatsCSVDir().listFiles();
+		if (CSVFiles == null) {
+			System.out.println("no data to plot yet.");
+			return;
+		}
 			for (File statFile : Options.getStatsCSVDir().listFiles()) {
 				String statName = statFile.getName().substring(0,
 						statFile.getName().length() - 4);
