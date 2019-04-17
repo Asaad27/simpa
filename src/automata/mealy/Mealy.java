@@ -446,7 +446,8 @@ public class Mealy extends Automata implements Serializable {
 		assert file.exists();
 		Mealy m = importFromDot(file);
 		String[] parts = url.toString().split("/");
-		m.name = parts[parts.length - 2] + "_" + parts[parts.length - 1];
+		m.name = "dot_file(" + parts[parts.length - 2] + "_"
+				+ parts[parts.length - 1].replaceAll("\\.dot$", "") + ")";
 		return m;
 	}
 
