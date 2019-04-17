@@ -359,7 +359,7 @@ public abstract class MealyDriver extends Driver<String, String> {
 				return true;
 			options.selectChoice(options.mrBean);
 			r = getCounterExample(options, conjecture, nextState,
-					appliedSequences, false,
+					appliedSequences, noResetAttempt,
 					new StatsEntry_OraclePart(options));
 			options.selectChoice(options.distinctionTreeBased);
 			return r;
