@@ -103,6 +103,10 @@ public class LocalizerBasedOptions extends OneArgChoiceOptionItem {
 		return computeCharacterizationSet.isEnabled();
 	}
 
+	public void setComputeWSet(boolean b) {
+		computeCharacterizationSet.getValueHolder().setValue(b);
+	}
+
 	public List<InputSequence> getWSet() {
 		assert !computeWSet();
 		return wSet.getValues();
