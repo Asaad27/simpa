@@ -244,7 +244,7 @@ public class JSS_figures extends SIMPA {
 			public MealyDriver createDriver() {
 				try {
 					TransparentMealyDriver d = new TransparentMealyDriver(
-							Mealy.importFromUrl(url, true));
+							Mealy.importFromUrl(url));
 					updateWithDriver(d);
 					return d;
 				} catch (IOException e) {
