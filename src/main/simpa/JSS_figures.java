@@ -352,6 +352,7 @@ public class JSS_figures extends SIMPA {
 	static int configNb = 0;
 
 	protected static void run_stats(Config config) {
+		System.out.println();
 		config.set_up();
 		configNb++;
 		// used for debug
