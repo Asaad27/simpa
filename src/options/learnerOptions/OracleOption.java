@@ -203,6 +203,13 @@ public class OracleOption extends MultiArgChoiceOption {
 		distinctionTreeBased = new MultiArgChoiceOptionItem(
 				"pseudo checking sequence using distinction tree", "--O_DT",
 				this);
+		distinctionTreeBased.subTrees.addAll(mrBean.subTrees);// Hack for JSS
+																// script but
+																// options are
+																// not supposed
+																// to be two
+																// time in a
+																// tree
 		addChoice(shortest);
 		addChoice(mrBean);
 		addChoice(interactive);
