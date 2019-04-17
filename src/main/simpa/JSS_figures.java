@@ -202,6 +202,7 @@ public class JSS_figures extends SIMPA {
 			LocalizerBasedOptions lw = learnerChoice.localizerBased;
 			learnerChoice.selectChoice(lw);
 			lw.setUseSpeedUp(false);
+			lw.setComputeWSet(true);
 		}
 
 		@Override
