@@ -518,7 +518,8 @@ public class HWLearner extends Learner {
 				.isCompatible()) {
 			LogManager.logWarning(
 					"conjecture is false or driver is not strongly connected");
-			throw new RuntimeException("wrong conjecture");
+			throw new RuntimeException(
+					"conjecture is not compatible with trace observed");
 		}
 
 		// State initialState=searchInitialState();
