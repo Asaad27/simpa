@@ -132,8 +132,11 @@ public class OracleOption extends MultiArgChoiceOption {
 		}
 
 		public void setMaxTraceLength(int length) {
+			if (length < 0)
+				throw new RuntimeException("invlaid length");
 			maxTraceLength.getValueHolder().setValueNonAuto(length);
-			assert getMaxTraceLength() == length;
+			if (getMaxTraceLength() != length)
+				throw new RuntimeException("error set");
 		}
 
 		public int getMaxTraceNumber() {
