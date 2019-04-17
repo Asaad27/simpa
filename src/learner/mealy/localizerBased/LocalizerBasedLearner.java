@@ -69,6 +69,7 @@ public class LocalizerBasedLearner extends Learner {
 			W.sort(new InputSequenceComparator());
 		} else {
 			W = options.getWSet();
+			throw new RuntimeException("invalid for JSS script");
 		}
 		if (W.size() > 2)
 			throw new RuntimeException("W-set too large");
