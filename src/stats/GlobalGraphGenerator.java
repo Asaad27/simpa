@@ -697,7 +697,7 @@ public class GlobalGraphGenerator extends GraphGenerator {
 			table.setRotateHeader(75);
 			table.export(TableOutputFormat.LATEX);
 			StatsSet DS = new StatsSet(baseStats, new HasAttributeRestriction<>(
-					Attribute.ORACLE_USED, "distinctionTree + MrBean"));
+					Attribute.ORACLE_USED, "distinctionTree"));
 			
 			table=new Table(
 					Options.getArticleDir("JSS2018").resolve("figures")

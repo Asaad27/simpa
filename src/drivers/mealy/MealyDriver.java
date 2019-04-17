@@ -31,6 +31,7 @@ import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
 import automata.mealy.multiTrace.MultiTrace;
 import automata.mealy.multiTrace.NoRecordMultiTrace;
+import automata.mealy.multiTrace.SimpleMultiTrace;
 import drivers.Driver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.mealy.CeExposedUnknownStateException;
@@ -337,9 +338,33 @@ public abstract class MealyDriver extends Driver<String, String> {
 			return getInteractiveCounterExample(options, conjecture,
 					conjectureState, appliedSequences);
 		} else if (options.getSelectedItem() == options.distinctionTreeBased) {
-			Boolean r = getDistinctionTreeBasedCE(conjecture, conjectureState,
+			// Should be written in a proper way
+			State nextState;
+			Boolean r;
+			if (resetIsAllowed) {
+				r = getDistinctionTreeBasedCE(conjecture, conjectureState,
 					appliedSequences, resetIsAllowed);
-			return r != null && r;
+				nextState = null;
+			}
+			else {
+				SimpleMultiTrace DTtrace = new SimpleMultiTrace();
+				r = getDistinctionTreeBasedCE(conjecture,
+						conjectureState, DTtrace, resetIsAllowed);
+				appliedSequences.recordTrace(DTtrace.getLastTrace());
+				nextState = conjecture.applyGetState(
+						DTtrace.getLastTrace().getInputsProjection(),
+						conjectureState);
+			}
+			if (r != null && r)
+				return true;
+			options.selectChoice(options.mrBean);
+			r = getCounterExample(options, conjecture, nextState,
+					appliedSequences, false,
+					new StatsEntry_OraclePart(options));
+			options.selectChoice(options.distinctionTreeBased);
+			return r;
+
+
 		} else {
 			throw new RuntimeException("option not implemented");
 		}
