@@ -36,6 +36,7 @@ import options.automataOptions.DriverChoice;
 import options.automataOptions.DriverChoiceItem;
 import options.learnerOptions.MealyLearnerChoice;
 import options.learnerOptions.OracleOption;
+import options.valueHolders.SeedHolder;
 
 public class JSS_figures extends SIMPA {
 
@@ -400,6 +401,8 @@ public class JSS_figures extends SIMPA {
 			Runtime.getRuntime().gc();
 			System.out.println(
 					"\t" + i + "/" + modeOption.stats.inferenceNb.getValue());
+			SeedHolder.seedGenerator.setSeed(i);
+			SeedHolder.seedGenerator.nextLong();
 			setUpDriverOption();
 			try {
 				learnOneTime(config);

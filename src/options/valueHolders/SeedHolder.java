@@ -43,7 +43,7 @@ public class SeedHolder extends SingleValueAutoHolder<Long, LongHolder>
 	 * The {@link Random} source of seed for each {@link RandomOption}. It is
 	 * initialize with {@link #MAIN_SEED}.
 	 */
-	static private final Random seedGenerator;
+	static public final Random seedGenerator;
 	static {
 		MAIN_SEED = new Random().nextLong();
 		seedGenerator = new Random();
