@@ -316,7 +316,6 @@ public class HWLearner extends Learner {
 		if (W.isEmpty())
 			W.refine(W.getEmptyCharacterization(), new LmTrace());
 
-		LogManager.logConsole("hw : start of learning");
 		long start = System.nanoTime();
 
 		GenericInputSequence h = null;
@@ -507,20 +506,12 @@ public class HWLearner extends Learner {
 				|| stateDiscoveredInCe);
 
 		float duration = (float) (System.nanoTime() - start) / 1000000000;
-		LogManager.logConsole("hw : end of learning : " + duration + "s");
 		stats.setDuration(duration);
 		stats.setAvgTriedWSuffixes((float)nbOfTriedWSuffixes/wRefinenmentNb);
 	
 		stats.updateMemory((int) (runtime.totalMemory() - runtime.freeMemory()));
 		stats.finalUpdate(dataManager);
 
-		if (!dataManager.getConjecture().checkOnAllStatesWithReset(fullTraces)
-				.isCompatible()) {
-			LogManager.logWarning(
-					"conjecture is false or driver is not strongly connected");
-			throw new RuntimeException(
-					"conjecture is not compatible with trace observed");
-		}
 
 		// State initialState=searchInitialState();
 		// if (initialState!=null)

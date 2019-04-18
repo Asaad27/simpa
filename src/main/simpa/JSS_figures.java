@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.List;
 
 import automata.mealy.Mealy;
-import drivers.Driver;
 import drivers.mealy.MealyDriver;
 import drivers.mealy.MealyDriverChoice;
 import drivers.mealy.transparent.RandomMealyDriver;
@@ -345,7 +344,6 @@ public class JSS_figures extends SIMPA {
 
 	protected static void learnOneTime(Config config) throws Exception {
 		config.set_up();
-		System.out.println("Using config : " + config.name());
 		boolean error = false;
 		int errorNb = 0;
 		do {
@@ -383,7 +381,8 @@ public class JSS_figures extends SIMPA {
 		assert (modeOption.getSelectedItem() == modeOption.stats);
 		System.out.println(
 				"[+] Testing " + modeOption.stats.inferenceNb.getValue()
-						+ " automaton for configuration number " + configNb);
+						+ " automaton for configuration number " + configNb
+						+ " (" + config.name() + ")");
 
 		for (int i = 1; i <= modeOption.stats.inferenceNb.getValue(); i++) {
 			Runtime.getRuntime().gc();
@@ -409,11 +408,13 @@ public class JSS_figures extends SIMPA {
 					Exception e) throws IOException {
 				super.addReadMeInformationForFail(readMeWriter, e);
 				readMeWriter.append(System.lineSeparator());
-				readMeWriter.append("Configuation number " + configNb
+				readMeWriter.append("Configuration number " + configNb
 						+ System.lineSeparator());
 				if (random) {
 					readMeWriter.append(
-							"with random driver" + System.lineSeparator());
+							"with random driver " + Options.MINSTATES
+									+ " states and " + Options.MININPUTSYM
+									+ " inputs " + System.lineSeparator());
 				} else {
 					readMeWriter.append("with automaton from " + url
 							+ System.lineSeparator());
