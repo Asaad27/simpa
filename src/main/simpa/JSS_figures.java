@@ -389,7 +389,7 @@ public class JSS_figures extends SIMPA {
 			System.out.println(
 					"\t" + i + "/" + modeOption.stats.inferenceNb.getValue());
 			SeedHolder.seedGenerator.setSeed(i);
-			SeedHolder.seedGenerator.nextLong();
+			Options.SEED = SeedHolder.seedGenerator.nextLong();
 			setUpDriverOption();
 			try {
 				learnOneTime(config);
