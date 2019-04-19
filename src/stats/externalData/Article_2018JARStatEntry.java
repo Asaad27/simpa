@@ -25,7 +25,7 @@ import stats.attribute.Attribute;
  * @author Nicolas BREMOND
  *
  */
-public class Article_2018JARStatEntry extends StatsEntry {
+public class Article_2018JARStatEntry extends ExternalData {
 	static public final String emqttDot = "dot_file(BenchmarkMQTT_emqtt__two_client_will_retain)";
 	static public final String hbmqttDot = "dot_file(BenchmarkMQTT_hbmqtt__two_client_will_retain)";
 	static public final String mosquittoDot = "dot_file(BenchmarkMQTT_mosquitto__two_client_will_retain)";
