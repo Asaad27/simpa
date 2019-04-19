@@ -343,6 +343,8 @@ public class JSS_figures extends SIMPA {
 	static int configNb = 0;
 
 	protected static void run_stats(Config config) {
+		if (!random && url.getFile().contains("GnuTLS_3.3.8_client_full"))
+			return;
 		System.out.println();
 		config.set_up();
 		configNb++;
