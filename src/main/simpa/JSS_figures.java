@@ -283,51 +283,33 @@ public class JSS_figures extends SIMPA {
 		int length;
 
 		Mealy automaton = driver.getAutomata();
-		resets = 1;
-		if (random) {
-			length = (int) (Math.pow(
-					automaton.getStateCount() * driver.getInputSymbols().size(),
-					0.7) * 500.);
-		} else {
-			length = automaton.getStateCount() * driver.getInputSymbols().size()
-					* 200;
-		}
 		if (learnerChoice.getSelectedItem() == learnerChoice.lm
 				|| learnerChoice.getSelectedItem() == learnerChoice.tree
 				|| (learnerChoice.getSelectedItem() == learnerChoice.hW
 						&& learnerChoice.hW.useReset.isEnabled())) {
 			// the learner use reset.
-			resets = 100000;
-			if (driver.getInputSymbols().size() < 5
-					&& automaton.getStateCount() < 10)
-				resets = 1000;
-			if (driver.getInputSymbols().size() == 12
-					&& automaton.getStateCount() == 15)
-				resets = 1400000;
-			if (driver.getInputSymbols().size() == 13
-					&& automaton.getStateCount() == 17)
-				resets = 500000;
-			if (driver.getInputSymbols().size() == 12
-					&& automaton.getStateCount() == 9)
-				resets = 500000;
-			if (!random
-					&& url.getFile().contains("NSS_3.17.4_client_full"))
-				resets = 500000;
-			if (!random
-					&& url.getFile().contains("GnuTLS_3.3.8_client_regular"))
-				resets = 1200000;
-			if (!random && url.getFile().contains("GnuTLS_3.3.8_server_full"))
-				resets = 1200000;
-			if (!random && url.getFile().contains("OpenSSL_1.0.2_client_full"))
-				resets = 1400000;
-			if (!random && url.getFile().contains("GnuTLS_3.3.8_client_full"))
-				resets = 1200000;// for wrong conjectures, there is a counter
-									// example of length 6 from
-									// initial state. 12^6=2985984 but not
-									// enough memory…
-			length = (int) (automaton.getStateCount() * 1.5);
-			if (length <= 0)
-				throw new RuntimeException("invalid options length");
+			if (random) {
+				length = automaton.getStateCount();
+				resets = automaton.getStateCount()
+						* driver.getInputSymbols().size() * 100;
+				if (url.getFile().contains("GnuTLS_3.3.8_client_full"))
+					resets = 1000000;
+			} else {
+				resets = 100000;
+				length = 40;
+			}
+		} else {
+			resets = 1;
+			if (random) {
+				length = (int) (Math
+						.pow(automaton.getStateCount()
+								* driver.getInputSymbols().size(), 0.7)
+						* 4000.);
+			} else {
+				length = automaton.getStateCount()
+						* driver.getInputSymbols().size() * 200;
+			}
+
 		}
 		System.out.println("Maximum counter example length set to " + length
 				+ " and maximum counter example reset set to " + resets
