@@ -336,7 +336,7 @@ public class JSS_figures extends SIMPA {
 		}
 	}
 
-	protected static void learnOneTime(Config config) throws Exception {
+	protected static int learnOneTime(Config config) throws Exception {
 		config.set_up();
 		boolean error = false;
 		int errorNb = 0;
@@ -344,11 +344,12 @@ public class JSS_figures extends SIMPA {
 			error = false;
 			System.out.println(new Date());
 			error = !learnAndSaveOneTime();
-			if (++errorNb > 100) {
+			if (error && ++errorNb > 100) {
 				System.err.println("too many errors occured");
 				throw new RuntimeException("cannot infer");
 			}
 		} while (error);
+		return errorNb;
 	}
 
 	static int configNb = 0;
@@ -379,18 +380,30 @@ public class JSS_figures extends SIMPA {
 						+ " (" + config.name() + ")");
 
 		for (int i = 1; i <= modeOption.stats.inferenceNb.getValue(); i++) {
+			File inference = Options.getStatsCSVDir().getParentFile().toPath()
+					.resolve("" + configNb).resolve("" + i).toFile();
+			if (inference.exists())
+				continue;
+
 			Runtime.getRuntime().gc();
 			System.out.println(
 					"\t" + i + "/" + modeOption.stats.inferenceNb.getValue());
 			SeedHolder.seedGenerator.setSeed(i);
 			Options.SEED = SeedHolder.seedGenerator.nextLong();
 			setUpDriverOption();
+			int errors = -1;
 			try {
-				learnOneTime(config);
+				errors = learnOneTime(config);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-
+			if (errors == 0)
+			try {
+				inference.getParentFile().mkdirs();
+				inference.createNewFile();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 		}
 
 	}
