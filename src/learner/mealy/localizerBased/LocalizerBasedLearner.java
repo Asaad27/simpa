@@ -299,8 +299,22 @@ public class LocalizerBasedLearner extends Learner {
 	public static List<InputSequence> computeCharacterizationSet(
 			MealyDriver driver) {
 		if (driver instanceof TransparentMealyDriver) {
-			return computeCharacterizationSet(new StandaloneRandom(),
-					(TransparentMealyDriver) driver);
+			List<InputSequence> set;
+			RuntimeException error = null;
+			int nbTry = 0;
+			do {
+				nbTry++;
+				try {
+				set = computeCharacterizationSet(new StandaloneRandom(),
+						(TransparentMealyDriver) driver);
+				} catch (RuntimeException e) {
+					set = null;
+					error = e;
+				}
+			} while ((set == null || set.size() > 2) && nbTry < 50);
+			if (set == null)
+				throw error;
+			return set;
 		} else {
 			throw new RuntimeException("unable to compute W");
 		}
