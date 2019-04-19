@@ -354,6 +354,7 @@ public class JSS_figures extends SIMPA {
 	}
 
 	static int configNb = 0;
+	static int loopNumber;
 	static double oracleFactor = 1;
 
 	protected static void run_stats(Config config) {
@@ -399,16 +400,17 @@ public class JSS_figures extends SIMPA {
 						+ " automaton for configuration number " + configNb
 						+ " (" + config.name() + ")");
 		boolean errorInOne = false;
-		for (int i = 1; i <= modeOption.stats.inferenceNb.getValue(); i++) {
+		for (loopNumber = 1; loopNumber <= modeOption.stats.inferenceNb.getValue(); loopNumber++) {
 			File inference = Options.getStatsCSVDir().getParentFile().toPath()
-					.resolve("" + configNb).resolve("" + i).toFile();
+					.resolve("" + configNb).resolve("" + loopNumber).toFile();
 			if (inference.exists())
 				continue;
 
 			Runtime.getRuntime().gc();
 			System.out.println(
-					"\t" + i + "/" + modeOption.stats.inferenceNb.getValue());
-			SeedHolder.seedGenerator.setSeed(i);
+					"\t" + loopNumber + "/"
+							+ modeOption.stats.inferenceNb.getValue());
+			SeedHolder.seedGenerator.setSeed(loopNumber);
 			Options.SEED = SeedHolder.seedGenerator.nextLong();
 			setUpDriverOption();
 			int errors = -1;
@@ -439,7 +441,8 @@ public class JSS_figures extends SIMPA {
 				super.addReadMeInformationForFail(readMeWriter, e);
 				readMeWriter.append(System.lineSeparator());
 				readMeWriter.append("Configuration number " + configNb
-						+ System.lineSeparator());
+						+ " in loop " + loopNumber);
+				readMeWriter.append(System.lineSeparator());
 				if (oracleFactor != 1)
 					readMeWriter.append("Oracle length factor :" + oracleFactor
 							+ System.lineSeparator());
