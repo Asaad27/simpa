@@ -240,7 +240,7 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 		Map<T_ABS, StatsSet> setByAbs = stats.sortByAtribute(abs);
 		for (Entry<T_ABS, StatsSet> e : setByAbs.entrySet()) {
 
-			if (e.getValue().size() < 150) {
+			if (e.getValue().size() < 50) {
 				fewData = true;
 				if (isForArticle)
 					System.err.println("few " + stats.getTitle() + " for value "
