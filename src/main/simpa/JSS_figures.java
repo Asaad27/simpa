@@ -315,11 +315,12 @@ public class JSS_figures extends SIMPA {
 				+ " and maximum counter example reset set to " + resets
 				+ " from topology of driver (" + automaton.getStateCount()
 				+ " states and " + driver.getInputSymbols().size()
-				+ " inputs).");
+				+ " inputs)." + ((oracleFactor == 1) ? ""
+						: " oracle factor " + oracleFactor));
 		OracleOption oracle = getOracleOptions();
 		if (oracle != null) {
-			oracle.mrBean.setMaxTraceLength(length);
-			oracle.mrBean.setMaxTraceNumber(resets);
+			oracle.mrBean.setMaxTraceLength((int) (length * oracleFactor));
+			oracle.mrBean.setMaxTraceNumber((int) (resets * oracleFactor));
 		} else {
 			System.out.println("no oracle found");
 		}
@@ -344,25 +345,38 @@ public class JSS_figures extends SIMPA {
 			error = false;
 			System.out.println(new Date());
 			error = !learnAndSaveOneTime();
-			if (error && ++errorNb > 100) {
+			if (error && ++errorNb > 0) {
 				System.err.println("too many errors occured");
-				throw new RuntimeException("cannot infer");
+				// throw new RuntimeException("cannot infer");
 			}
 		} while (error);
 		return errorNb;
 	}
 
 	static int configNb = 0;
+	static double oracleFactor = 1;
 
 	protected static void run_stats(Config config) {
+		configNb++;
 		if (!random && url.getFile().contains("GnuTLS_3.3.8_client_full"))
 			return;
 		System.out.println();
 		config.set_up();
-		configNb++;
 		// used for debug
 //		if (configNb < 106)
 //			return;
+
+		oracleFactor = 1;
+		while (oracleFactor < 10) {
+			if (run_stats_one(config))
+				break;
+			System.out.println("increasing trace length");
+			System.err.println("increasing trace length");
+			oracleFactor *= 1.5;
+		}
+	}
+
+	protected static boolean run_stats_one(Config config) {
 		if (random)
 			System.out.println("states " + Options.MAXSTATES);
 		else
@@ -380,7 +394,7 @@ public class JSS_figures extends SIMPA {
 				"[+] Testing " + modeOption.stats.inferenceNb.getValue()
 						+ " automaton for configuration number " + configNb
 						+ " (" + config.name() + ")");
-
+		boolean errorInOne = false;
 		for (int i = 1; i <= modeOption.stats.inferenceNb.getValue(); i++) {
 			File inference = Options.getStatsCSVDir().getParentFile().toPath()
 					.resolve("" + configNb).resolve("" + i).toFile();
@@ -405,9 +419,12 @@ public class JSS_figures extends SIMPA {
 				inference.createNewFile();
 			} catch (IOException e1) {
 				e1.printStackTrace();
+				}
+			else {
+				errorInOne = true;
 			}
 		}
-
+		return !errorInOne;
 	}
 
 	public static void main(String[] args) {
@@ -419,6 +436,9 @@ public class JSS_figures extends SIMPA {
 				readMeWriter.append(System.lineSeparator());
 				readMeWriter.append("Configuration number " + configNb
 						+ System.lineSeparator());
+				if (oracleFactor != 1)
+					readMeWriter.append("Oracle length factor :" + oracleFactor
+							+ System.lineSeparator());
 				if (random) {
 					readMeWriter.append(
 							"with random driver " + Options.MINSTATES
@@ -505,10 +525,6 @@ public class JSS_figures extends SIMPA {
 			for (Config config : new Config[] { hWWithAllHeuristics, RS,
 					locW, }) {
 				config.set_up();
-				if (config == RS && s > 170)
-					continue;
-				if (config == locW && s > 100)
-					continue;
 				Options.MAXSTATES = Options.MINSTATES = s;
 				// Options.STATE_NUMBER_BOUND = s;
 				run_stats(config);
