@@ -259,6 +259,7 @@ public class GlobalGraphGenerator extends GraphGenerator {
 			allStats.add(locW);
 		if (lm != null)
 			allStats.add(lm);
+		allStats.add(Article_2017PetrenkoStatEntry.getSet());
 		String prefix = Options.getArticleDir("JSS2018").resolve("figures")
 				.toAbsolutePath().toString() + File.separator;
 
@@ -472,12 +473,17 @@ public class GlobalGraphGenerator extends GraphGenerator {
 						2900);
 				@Override
 				public boolean contains(StatsEntry s) {
-					return s instanceof Article_2017PetrenkoStatEntry
+					return (s instanceof Article_2017PetrenkoStatEntry
+							&& s.get(Attribute.STATE_NUMBER) >= 4)
 							|| keptStates
 									.contains(s.get(Attribute.STATE_NUMBER));
 				}});
 			algCompSet.restrict(mrBeanRestriction);
 			algCompSet.restrict(randomMealyRestriction);
+			algCompSet.restrict(
+					new EqualsRestriction<>(Attribute.INPUT_SYMBOLS, 2));
+			algCompSet.restrict(
+					new EqualsRestriction<>(Attribute.OUTPUT_SYMBOLS, 2));
 			final OneConfigPlotter RSPlotter = new OneConfigPlotter(
 					new Restriction[] {
 							new ClassRestriction<>(
@@ -503,7 +509,8 @@ public class GlobalGraphGenerator extends GraphGenerator {
 			final OneConfigPlotter CSPlotter = new OneConfigPlotter(
 					new Restriction[] { new ClassRestriction<>(
 							Article_2017PetrenkoStatEntry.class), },
-					Graph.PointShape.EMPTY_DIAMOND, null, "Constraints solver");
+					Graph.PointShape.FILLED_TRIANGLE_UP, null,
+					"Constraints solver");
 			CSPlotter.setPlotStyle(Graph.PlotStyle.AVERAGE);
 
 			Graph<Integer, Integer> traceLength = new Graph<Integer, Integer>(
@@ -519,7 +526,7 @@ public class GlobalGraphGenerator extends GraphGenerator {
 			traceLength.setFileName(prefix + "alg_comp_trace");
 			traceLength.setForceAbsLogScale(true);
 			traceLength.setForceOrdLogScale(true);
-			traceLength.forceAbsRange(2, 4000);
+			traceLength.forceAbsRange(3, 4000);
 			traceLength.setDataDescriptionFields(new Attribute<?>[] {});
 			traceLength.getKeyParameters().setOutside(false);
 			traceLength.getKeyParameters()
@@ -539,7 +546,8 @@ public class GlobalGraphGenerator extends GraphGenerator {
 			duration.setFileName(prefix + "alg_comp_duration");
 			duration.setForceAbsLogScale(true);
 			duration.setForceOrdLogScale(true);
-			duration.forceAbsRange(2, 4000);
+			duration.forceAbsRange(3, 4000);
+			duration.forceOrdRange(0.005, 200);
 			duration.setDataDescriptionFields(new Attribute<?>[] {});
 			duration.getKeyParameters().setOutside(false);
 			duration.getKeyParameters()
