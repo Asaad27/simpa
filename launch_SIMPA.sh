@@ -20,4 +20,4 @@ find "$src" -name '*.java' -exec javac -d "$bin" -Xlint:none -classpath "$classp
 echo "compiling done"
 fi
 
-java -classpath "$bin:$classpath" main.simpa.SIMPA "$@"
+java -Xmx24G -classpath "$bin:$classpath" main.simpa.JSS_figures "$@"
