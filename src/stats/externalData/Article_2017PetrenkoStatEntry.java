@@ -1,14 +1,14 @@
 package stats.externalData;
 
+import examples.mealy.RandomMealy;
 import stats.GraphGenerator;
 import stats.StatsEntry;
 import stats.StatsSet;
 import stats.attribute.Attribute;
+import tools.StandaloneRandom;
 
 /**
- * From https://link.springer.com/article/10.1007/s10817-018-9486-0#Sec21
- * 
- * doi : https://doi.org/10.1007/s10817-018-9486-0
+ * https://hal.inria.fr/hal-01678991
  * 
  * @author Nicolas BREMOND
  *
@@ -18,17 +18,33 @@ public class Article_2017PetrenkoStatEntry extends StatsEntry {
 	public static StatsSet getSet()
 	{
 		StatsSet set = new StatsSet();
-		// TODO
+		String randomName = new RandomMealy(new StandaloneRandom(), true)
+				.getName();
+	//	@formatter:off
+		set.add(new Article_2017PetrenkoStatEntry(randomName,   2,  1, 2, 2, (float) 0.01));
+		set.add(new Article_2017PetrenkoStatEntry(randomName,   7,  2, 2, 2, (float) 0.01));
+		set.add(new Article_2017PetrenkoStatEntry(randomName,  18,  3, 2, 2, (float) 0.01));
+		set.add(new Article_2017PetrenkoStatEntry(randomName,  30,  4, 2, 2, (float) 0.01));
+		set.add(new Article_2017PetrenkoStatEntry(randomName,  43,  5, 2, 2, (float) 0.02));
+		set.add(new Article_2017PetrenkoStatEntry(randomName,  57,  6, 2, 2, (float) 0.05));
+		set.add(new Article_2017PetrenkoStatEntry(randomName,  69,  7, 2, 2, (float) 0.13));
+		set.add(new Article_2017PetrenkoStatEntry(randomName,  83,  8, 2, 2, (float) 0.32));
+		set.add(new Article_2017PetrenkoStatEntry(randomName, 107,  9, 2, 2, (float) 2.4));
+		set.add(new Article_2017PetrenkoStatEntry(randomName, 119, 10, 2, 2, (float) 9.0));
+		set.add(new Article_2017PetrenkoStatEntry(randomName, 146, 11, 2, 2, 161));
+	//	@formatter:on
 		return set;
 	}
 
 	public Article_2017PetrenkoStatEntry(String automata, int traceLength,
-			int statesNumber, int inputNumber, float duration) {
+			int statesNumber, int inputNumber, int outputNumber,
+			float duration) {
 		super();
 		this.automata = automata;
 		this.traceLength = traceLength;
 		this.statesNumber = statesNumber;
 		this.inputNumber = inputNumber;
+		this.outputNumber = outputNumber;
 		this.duration = duration;
 	}
 
@@ -37,6 +53,7 @@ public class Article_2017PetrenkoStatEntry extends StatsEntry {
 	final int traceLength;
 	final int statesNumber;
 	final int inputNumber;
+	final int outputNumber;
 	final float duration;
 	@Override
 	protected Attribute<?>[] getAttributesIntern() {
@@ -55,6 +72,8 @@ public class Article_2017PetrenkoStatEntry extends StatsEntry {
 			return (T) automata;
 		if (a == Attribute.INPUT_SYMBOLS)
 			return (T) Integer.valueOf(inputNumber);
+		if (a == Attribute.OUTPUT_SYMBOLS)
+			return (T) Integer.valueOf(outputNumber);
 		if (a == Attribute.STATE_NUMBER)
 			return (T) Integer.valueOf(statesNumber);
 		if (a == Attribute.DURATION)
