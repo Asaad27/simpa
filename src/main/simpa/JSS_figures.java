@@ -279,9 +279,7 @@ public class JSS_figures extends SIMPA {
 			if (random) {
 				length = automaton.getStateCount();
 				resets = automaton.getStateCount()
-						* driver.getInputSymbols().size() * 100;
-				if (url.getFile().contains("GnuTLS_3.3.8_client_full"))
-					resets = 1000000;
+						* driver.getInputSymbols().size() * 10;
 			} else {
 				resets = 100000;
 				length = 40;
@@ -292,7 +290,7 @@ public class JSS_figures extends SIMPA {
 				length = (int) (Math
 						.pow(automaton.getStateCount()
 								* driver.getInputSymbols().size(), 0.7)
-						* 4000.);
+						* 400.);
 			} else {
 				length = automaton.getStateCount()
 						* driver.getInputSymbols().size() * 200;
@@ -360,12 +358,12 @@ public class JSS_figures extends SIMPA {
 //			return;
 
 		oracleFactor = 1;
-		while (oracleFactor < 10) {
+		while (oracleFactor < 50) {
 			if (run_stats_one(config))
 				break;
 			System.out.println("increasing trace length");
 			System.err.println("increasing trace length");
-			oracleFactor *= 1.5;
+			oracleFactor *= 1.8;
 		}
 	}
 
