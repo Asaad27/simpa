@@ -302,7 +302,7 @@ public class JSS_figures extends SIMPA {
 				length = (int) (Math
 						.pow(automaton.getStateCount()
 								* driver.getInputSymbols().size(), 0.7)
-						* 400.);
+						* 100.);
 			} else {
 				length = automaton.getStateCount()
 						* driver.getInputSymbols().size() * 200;
@@ -370,12 +370,12 @@ public class JSS_figures extends SIMPA {
 //			return;
 
 		oracleFactor = 1;
-		while (oracleFactor < 50) {
+		while (oracleFactor < 130) {
 			if (run_stats_one(config))
 				break;
 			System.out.println("increasing trace length");
 			System.err.println("increasing trace length");
-			oracleFactor *= 1.8;
+			oracleFactor *= 2;
 		}
 	}
 
