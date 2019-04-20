@@ -1,3 +1,9 @@
+This version of SIMPA software was written to generate experiments for an
+article for JSS.
+Others branch of this repository are probably more intersting for you if you
+want to use SIMPA.
+
+
 # Installation
 
 SIMPA was mainly developed in Eclipse and it is easiest to use SIMPA directly in
@@ -10,49 +16,32 @@ command-line.
 
 	Java Runtime Environment >= 1.8         www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html
 	Eclipse                  >= Mars        eclipse.org/ide/
-	GraphViz                 >= 2           www.graphviz.org/Download.php
+	Gnuplot                  >= 5
 ###  INSTALLATION
 
-- Install Eclipse Plugins, following plugins may be interesting:
-    - **Eclox** is a simple doxygen frontend plug-in for eclipse, it is used to
-    generate the documentation from sources. You can install with the Help ==>
-    Eclipse Marketplace
 - You can use the ***Import Wizard*** to  command link import an existing project into workspace.
     - From the main menu bar, select  command link ***File*** > ***Import***....
     The Import wizard opens.
     - Select ***General*** > ***Existing Project into Workspace*** and click
     Next.
     - Choose ***Select root directory***  and click the associated **Browse** to
-    locate the directory ***simpa-clean***.
-    - Under ***simpa-clean*** select the project or projects which you would
-    like to import.
+    locate the directory ***SIMPA***.
     - Click Finish to start the import.
-- The class to run is `main.simpa.SIMPA`.
+- The class to run is `main.simpa.JSS_figures`.
 
 —> If you are getting a problem like (`The method getTextContent() is undefined for the type Node`) in Eclipse, my tested solution would be : ***Java Build Path*** > ***Order and Export***, select **JRE System Library** and move it to Top.
-
-###  Detailed Instructions for Command Line Arguments in Eclipse
-
-- Right-click on your project **SIMPA**.
-- Go to **Debug As > Java Application** or **Run As > Java Application**.
-- Find the class *SIMPA (main.simpa)*.
-- Go to **Debug As > Debug Configurations** or **Run As > Run Configurations**, and then click that says **Arguments**.
-- Enter in your **Program Arguments**
-- Click **Apply** or **Debug**
 
 ## Command-line
 
 ###  PREREQUISITES
 
 	Java Runtime Environment >= 1.8        www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html
-	GraphViz                 >= 2          www.graphviz.org/Download.php
+	Gnuplot                  >= 5
 
 #### Unix
 
 In this repository, you can find a script named `launch_SIMPA.sh` which will
 compile and launch SIMPA.
-
-You can add arguments to `launch_SIMPA.sh` and they will be passed to SIMPA.
 
 #### Others
 
@@ -69,44 +58,17 @@ Then you can compile the sources :
     
 And now you can launch SIMPA :
 
-	java main.simpa.SIMPA
+	java main.simpa.JSS_figures
 
 #  Usage
 
-The basic arguments are :
-- `--help` display the list of available command line arguments.
-- `--gui` open graphical interface (other arguments can be provided
-  to preset values in graphical interface).
+The class `JSS_figure` has no argument. It will run several inferences (which
+can take several days of computation in total) and then generate the figures
+used for our JSS paper.
 
-Some example are shown when you use the `--help` argument.
+The experiments are based on random walk, but the seeds used to initialize the
+random sources are pre-defined, so you should get the same results as us.
 
-# Inferring a real system (writing a new Driver)
+It is possible to interrupt the inferences, and they should start almost at the
+same point the next time you launch the script.
 
-To write a new driver, you must extends the class `drivers.mealy.MealyDriver` or
-`drivers.efsm.EMFSDriver`. You must define the following methods :
-
-	@Override
-	public Output execute_implem(Input input) {
-	}
-which must execute the given input on system under inference and return the
-output observed (`Input` and `Output` types depends on type of system : Mealy or
-EFMS),
-
-	@Override
-	public void reset_implem() {
-	}
-which reset the driver to its initial state (if you plan to use only no-reset
-algorithms, you can just put a `throw new RuntimeException();` in the body to be
-sure that the method is never called),
-
-	@Override
-	public List<String> getInputSymbols() {
-	}
-which return a list of input symbols,
-
-You must also add a constructor which takes no argument.
-
-
-As an example, `drivers.mealy.real.HeatingSystem` is a driver which simply send
-inputs to standard input of an executable an reads outputs from standard output
-of the same software.
