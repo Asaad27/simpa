@@ -570,6 +570,15 @@ public class Mealy extends Automata implements Serializable {
 		return null;
 
 	}
+
+public boolean isMinimal(){
+for (int i=0;i<getStateCount();i++){
+for (int j=i+1;j<getStateCount();j++){
+    if (getDistinctionSequence(states.get(i),states.get(j))==null)return false;
+
+}
+}return true;
+}
 	
 	public OutputSequence simulateOutput(State start,InputSequence inSeq){
 		OutputSequence outSeq=new OutputSequence();

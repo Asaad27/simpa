@@ -253,7 +253,14 @@ public class RandomMealy extends Mealy implements Serializable {
 	}
 
 	public static RandomMealy getConnexRandomMealy(RandomGenerator rand) {
-		return getConnexRandomMealy(rand, OUTPUT_STYLE.RANDOM);
+		RandomMealy automaton;
+		int nbTry=0;
+		do {
+		    automaton=getConnexRandomMealy(rand, OUTPUT_STYLE.RANDOM);
+		    nbTry++;
+		    if (nbTry>100)throw new RuntimeException("cannot find minimal automaton");
+                }while(!automaton.isMinimal());
+                return automaton;
 	}
 
 	public static RandomMealy getConnexRandomMealy(RandomGenerator rand,
