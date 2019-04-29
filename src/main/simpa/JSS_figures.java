@@ -379,10 +379,12 @@ public class JSS_figures extends SIMPA {
 		configNb++;
 		if (!random && url.getFile().contains("GnuTLS_3.3.8_client_full"))
 			return;
+		if (random) {
 		if (config == locW && Options.MINSTATES > 50)
 			return;
 		if (config == RS && Options.MINSTATES > 170)
 			return;
+		}
 		System.out.println();
 		config.set_up();
 		// used for debug
