@@ -57,6 +57,7 @@ import drivers.efsm.real.ScanDriver;
 import drivers.mealy.MealyDriver;
 import learner.Learner;
 import learner.mealy.LmConjecture;
+import learner.mealy.localizerBased.LocalizerBasedLearner.W_Set_exception;
 import main.simpa.Options.LogLevel;
 import options.MultiArgChoiceOptionItem;
 import options.OptionTree;
@@ -618,6 +619,7 @@ public class SIMPA {
 			globalGraph.generate();
 		}
 
+	protected static W_Set_exception cannotfindWSet = null;
 	/**
 	 * Launch one inference and record result in CSV files.
 	 * 
@@ -630,6 +632,7 @@ public class SIMPA {
 	 *         {@code true} if everything went fine.
 	 */
 	protected static boolean learnAndSaveOneTime() {
+		cannotfindWSet = null;
 
 		try {
 			Options.useTmpLogDir();
@@ -656,6 +659,8 @@ public class SIMPA {
 			globalStatsWriter.close();
 		} catch (Exception e) {
 			LogManager.end();
+			if (e instanceof W_Set_exception)
+				cannotfindWSet = (W_Set_exception) e;
 			File failDir = new File(Options.getFailDir() + File.separator
 					+ e.getClass().getSimpleName() + "-" + e.getMessage());
 			if (!Utils.createDir(failDir))

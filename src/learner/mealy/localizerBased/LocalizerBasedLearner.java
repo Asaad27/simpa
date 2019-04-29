@@ -296,18 +296,25 @@ public class LocalizerBasedLearner extends Learner {
 		return WResponses;
 	}
 
+	public static class W_Set_exception extends RuntimeException {
+
+		public W_Set_exception(String string) {
+			super(string);
+		}
+	}
+
 	public static List<InputSequence> computeCharacterizationSet(
 			MealyDriver driver) {
 		if (driver instanceof TransparentMealyDriver) {
 			List<InputSequence> set;
-			RuntimeException error = null;
+			W_Set_exception error = null;
 			int nbTry = 0;
 			do {
 				nbTry++;
 				try {
 				set = computeCharacterizationSet(new StandaloneRandom(),
 						(TransparentMealyDriver) driver);
-				} catch (RuntimeException e) {
+				} catch (W_Set_exception e) {
 					set = null;
 					error = e;
 				}
@@ -447,7 +454,7 @@ public class LocalizerBasedLearner extends Learner {
 				}
 				current = shortestTried;
 			}
-			throw new RuntimeException("cannot compute W-set");
+			throw new W_Set_exception("cannot compute W-set");
 		}
 
 		List<InputSequence> W = new ArrayList<InputSequence>();
@@ -516,7 +523,7 @@ public class LocalizerBasedLearner extends Learner {
 					"unable to distinguish two states for W set (with getDistinctionSequence from Mealy)");
 		}
 		if (W.size() >= 2)
-			throw new RuntimeException("W-set too large");
+			throw new W_Set_exception("W-set too large");
 		// then we try to compute a w from scratch
 		LinkedList<InputSequence> testW = new LinkedList<InputSequence>();
 		for (String i : inputSymbols)

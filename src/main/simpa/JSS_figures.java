@@ -349,6 +349,8 @@ public class JSS_figures extends SIMPA {
 			error = false;
 			System.out.println(new Date());
 			error = !learnAndSaveOneTime();
+			if (cannotfindWSet != null)
+				continue;
 			if (error && ++errorNb > 0) {
 				System.err.println("too many errors occured");
 				// throw new RuntimeException("cannot infer");
