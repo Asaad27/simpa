@@ -95,8 +95,8 @@ public class GlobalGraphGenerator extends GraphGenerator {
 			generate_ICGI2018();
 		}
 		generate_JSS2018();
-		generate_SANER19();
-		generate_AMOST2019();
+		// generate_SANER19();
+		// generate_AMOST2019();
 	}
 
 	@Override
