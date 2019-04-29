@@ -331,8 +331,12 @@ public class JSS_figures extends SIMPA {
 						: " oracle factor " + oracleFactor));
 		OracleOption oracle = getOracleOptions();
 		if (oracle != null) {
-			oracle.mrBean.setMaxTraceLength((int) (length * oracleFactor));
+		    if (oracle.isResetAllowed()){
 			oracle.mrBean.setMaxTraceNumber((int) (resets * oracleFactor));
+			oracle.mrBean.setMaxTraceLength(length);
+                    }
+                    else
+			oracle.mrBean.setMaxTraceLength((int) (length * oracleFactor));
 		} else {
 			System.out.println("no oracle found");
 		}
