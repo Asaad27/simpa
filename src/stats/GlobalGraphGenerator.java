@@ -37,6 +37,7 @@ import learner.mealy.table.LmStatsEntry;
 import learner.mealy.tree.ZStatsEntry;
 import main.simpa.Options;
 import stats.Graph.Color;
+import stats.Graph.EstimationMode;
 import stats.Graph.KeyParameters.HorizontalPosition;
 import stats.Graph.KeyParameters.VerticalPosition;
 import stats.Graph.PlotStyle;
@@ -531,6 +532,21 @@ public class GlobalGraphGenerator extends GraphGenerator {
 			traceLength.getKeyParameters().setOutside(false);
 			traceLength.getKeyParameters()
 					.setvPosition(VerticalPosition.BOTTOM);
+			traceLength.export();
+
+			traceLength.setFileName(
+					new File(prefix).getParent() + File.separator
+							+ "alg_comp_trace__estimation_functions");
+			traceLength.setSize(10, 6);
+			traceLength.plotEstimation(
+					traceAndHeuristicsPlotter.restrict(algCompSet),
+					EstimationMode.POWER);
+			traceLength.plotEstimation(RSPlotter.restrict(algCompSet),
+					EstimationMode.POWER);
+			traceLength.plotEstimation(CSPlotter.restrict(algCompSet),
+					EstimationMode.POWER);
+			traceLength.plotEstimation(LocWPlotter.restrict(algCompSet),
+					EstimationMode.POWER);
 			traceLength.export();
 
 			Graph<Integer, Float> duration = new Graph<>(

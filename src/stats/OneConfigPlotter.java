@@ -74,6 +74,13 @@ public class OneConfigPlotter {
 		g.plot(s, plotStyle, title, pointShape, color);
 	}
 
+	public StatsSet restrict(StatsSet set) {
+		StatsSet s = new StatsSet(set);
+		s.restrict(restrictions);
+		s.setTitle(this.title);
+		return s;
+	}
+
 	public void plotOn(Graph<?, ?> g, StatsSet set, String title) {
 		StatsSet s = new StatsSet(set);
 		s.restrict(restrictions);
