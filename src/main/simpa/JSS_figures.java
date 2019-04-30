@@ -397,6 +397,7 @@ public class JSS_figures extends SIMPA {
 				break;
 			System.out.println("increasing trace length");
 			System.err.println("increasing trace length");
+			if (configNb==533)oracleFactor=6;
 			oracleFactor *= 2;
 		}
 	}
