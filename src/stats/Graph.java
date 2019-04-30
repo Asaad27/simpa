@@ -27,6 +27,7 @@ import java.util.Set;
 
 import main.simpa.Options;
 import stats.attribute.Attribute;
+import stats.externalData.Article_2017PetrenkoStatEntry;
 import tools.GNUPlot;
 import tools.loggers.LogManager;
 
@@ -239,12 +240,18 @@ public class Graph<T_ABS extends Comparable<T_ABS>, T_ORD extends Comparable<T_O
 
 		Map<T_ABS, StatsSet> setByAbs = stats.sortByAtribute(abs);
 		for (Entry<T_ABS, StatsSet> e : setByAbs.entrySet()) {
-
 			if (e.getValue().size() < 50) {
+				boolean externalData = true;
+				for (Object stat : e.getValue().getStats()) {
+					if (!(stat instanceof Article_2017PetrenkoStatEntry))
+						externalData = false;
+				}
+				if (!externalData) {
 				fewData = true;
 				if (isForArticle)
 					System.err.println("few " + stats.getTitle() + " for value "
 							+ e.getKey());
+				}
 			}
 		}
 

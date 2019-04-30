@@ -499,7 +499,8 @@ public class GlobalGraphGenerator extends GraphGenerator {
 					new Restriction[] {
 							new ClassRestriction<>(
 									LocalizerBasedStatsEntry.class),
-							new EqualsRestriction<>(Attribute.W_SIZE, 2),
+							new InSetRestriction<>(Attribute.W_SIZE,
+									new Integer[] { 1, 2 }),
 							new EqualsRestriction<>(Attribute.WITH_SPEEDUP,
 									false), },
 					Graph.PointShape.EMPTY_SQUARE, null,
