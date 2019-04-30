@@ -113,8 +113,8 @@ public class RivestSchapireLearner extends Learner {
 
 	protected void learn(InputSequence homingSequence) throws Throwable {
 		if (Options.getLogLevel() != LogLevel.LOW)
-			LogManager.logConsole("lerning with homming sequence "
-					+ homingSequence);
+			LogManager.logConsole(
+					"learning with homing sequence " + homingSequence);
 		LogManager.logInfo("learning with homing sequence h=" + homingSequence);
 		drivers = new HashMap<OutputSequence, StateDriver>();
 		resetCall();
