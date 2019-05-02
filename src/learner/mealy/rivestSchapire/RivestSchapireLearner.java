@@ -91,6 +91,9 @@ public class RivestSchapireLearner extends Learner {
 			} catch (KnownTracesTree.InconsistencyException e) {
 				hIsCorrect = false;
 				homingSequence.addInputSequence(e.seen.getInputsProjection());
+		for (StateDriver s : drivers.values())
+			s.killThread();
+		System.out.println("extended\n\n\n\n");
 			} catch (Throwable e) {
 				throw new RuntimeException(e);
 			}
