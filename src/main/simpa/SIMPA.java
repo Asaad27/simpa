@@ -619,7 +619,6 @@ public class SIMPA {
 			globalGraph.generate();
 		}
 
-	protected static W_Set_exception cannotfindWSet = null;
 	/**
 	 * Launch one inference and record result in CSV files.
 	 * 
@@ -632,11 +631,21 @@ public class SIMPA {
 	 *         {@code true} if everything went fine.
 	 */
 	protected static boolean learnAndSaveOneTime() {
-		cannotfindWSet = null;
 
 		try {
 			Options.useTmpLogDir();
-			Learner l = inferOneTime();
+			int W_set_errors = 0;// count consecutive errors
+			Learner l = null;
+			do {
+				try {
+					l = inferOneTime();
+					W_set_errors = 0;
+				} catch (W_Set_exception e) {
+					W_set_errors++;
+					if (W_set_errors > 150)
+						throw e;
+				}
+			} while (W_set_errors != 0);
 
 			StatsEntry learnerStats = l.getStats();
 
@@ -659,8 +668,6 @@ public class SIMPA {
 			globalStatsWriter.close();
 		} catch (Exception e) {
 			LogManager.end();
-			if (e instanceof W_Set_exception)
-				cannotfindWSet = (W_Set_exception) e;
 			File failDir = new File(Options.getFailDir() + File.separator
 					+ e.getClass().getSimpleName() + "-" + e.getMessage());
 			if (!Utils.createDir(failDir))
