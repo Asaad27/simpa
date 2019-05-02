@@ -153,6 +153,9 @@ public class Table {
 			out.println();
 			out.print("\\begin{tabular}{|");
 			for (int i = 0; i < cells.get(0).size(); i++)
+				if (i != 0 && columns.get(i - 1) == null)
+					out.print('|');
+				else
 				out.print("l|");
 			out.println("}");
 			out.println("\\hline");
@@ -161,6 +164,10 @@ public class Table {
 				int pos = 0;
 				addhline = false;
 				for (TableCell cell : currentRow) {
+					if (pos != 0 && columns.get(pos - 1) == null) {
+						pos++;
+						continue;
+					}
 					if (pos != 0) {
 						out.print("& ");
 						if (cell.isHeader())
