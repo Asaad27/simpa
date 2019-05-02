@@ -666,6 +666,18 @@ public class SIMPA {
 
 			globalStatsWriter.append(learnerStats.toCSV() + "\n");
 			globalStatsWriter.close();
+
+			// for JSS debug
+			File backupFile = new File(Options.getStatsCSVDir().getParentFile()
+					+ File.separator + "backupCSV" + File.separator
+					+ learnerStats.getClass().getName() + ".csv");
+			backupFile.getParentFile().mkdirs();
+			backupFile.createNewFile();
+			BufferedWriter writer = new BufferedWriter(
+					new FileWriter(backupFile, true));
+			writer.append(JSS_figures.configNb + "," + JSS_figures.loopNumber
+					+ "," + learnerStats.toCSV() + "\n");
+			writer.close();
 		} catch (Exception e) {
 			LogManager.end();
 			File failDir = new File(Options.getFailDir() + File.separator
