@@ -323,6 +323,8 @@ public class JSS_figures extends SIMPA {
 			}
 
 		}
+		if (configNb==219&&loopNumber==81)length=8000;
+		if (configNb==533&&loopNumber==83)resets=800000;
 		System.out.println("Maximum counter example length set to " + length
 				+ " and maximum counter example reset set to " + resets
 				+ " from topology of driver (" + automaton.getStateCount()
