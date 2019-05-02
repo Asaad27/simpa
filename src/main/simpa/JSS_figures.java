@@ -343,22 +343,10 @@ public class JSS_figures extends SIMPA {
 		}
 	}
 
-	protected static int learnOneTime(Config config) throws Exception {
+	protected static boolean learnOneTime(Config config) throws Exception {
 		config.set_up();
-		boolean error = false;
-		int errorNb = 0;
-		do {
-			error = false;
 			System.out.println(new Date());
-			error = !learnAndSaveOneTime();
-			if (cannotfindWSet != null)
-				continue;
-			if (error && ++errorNb > 0) {
-				System.err.println("too many errors occured");
-				// throw new RuntimeException("cannot infer");
-			}
-		} while (error);
-		return errorNb;
+		return learnAndSaveOneTime();
 	}
 
 	static int configNb = 0;
@@ -424,13 +412,14 @@ public class JSS_figures extends SIMPA {
 			SeedHolder.seedGenerator.setSeed(loopNumber);
 			Options.SEED = SeedHolder.seedGenerator.nextLong();
 			setUpDriverOption();
-			int errors = -1;
+			boolean success = false;
 			try {
-				errors = learnOneTime(config);
+				success = learnOneTime(config);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			if (errors == 0)
+
+			if (success)
 			try {
 				inference.getParentFile().mkdirs();
 				inference.createNewFile();
