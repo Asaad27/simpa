@@ -46,6 +46,14 @@ public class TraceLengthCol extends TableColumn {
 	public String getRawData(StatsSet stats) {
 		assert stats.size() != 0;
 		String out = "" + (int) stats.attributeAVG(Attribute.TRACE_LENGTH);
+		out += " \\textit{"
+				+ (int) Math.sqrt(stats.attributeVar(Attribute.TRACE_LENGTH))
+				+ "}";
+//		float expectedhW = 75 * stats.attributeAVG(Attribute.INPUT_SYMBOLS)
+//				* (float) Math.pow(stats.attributeAVG(Attribute.STATE_NUMBER),
+//						1.21);
+//		out += " " + stats.attributeAVG(Attribute.TRACE_LENGTH) / expectedhW;
+//
 		boolean showReset = dispReset;
 		if (showReset) {
 			if (stats.get(0).hasAttribute(Attribute.USE_RESET)) {
