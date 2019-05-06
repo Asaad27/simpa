@@ -455,7 +455,7 @@ public class GlobalGraphGenerator extends GraphGenerator {
 			inputs_trace.setDefaultPlotStyle(Graph.PlotStyle.AVERAGE);
 			withoutHeuristics.plotOn(inputs_trace, s, "without heuristics",Graph.PlotStyle.AVERAGE);
 			traceAndHeuristicsPlotter.plotOn(inputs_trace, s,
-					"with heuristics",Graph.PlotStyle.AVERAGE);
+					"with heuristics and using trace", Graph.PlotStyle.AVERAGE);
 
 			inputs_trace.setDataDescriptionFields(new Attribute<?>[] {});
 			inputs_trace.setFileName(prefix + "inputs_influence");
@@ -564,7 +564,7 @@ public class GlobalGraphGenerator extends GraphGenerator {
 			duration.setForceAbsLogScale(true);
 			duration.setForceOrdLogScale(true);
 			duration.forceAbsRange(3, 4000);
-			duration.forceOrdRange(0.005, 200);
+			duration.forceOrdRange(0.008, 200);
 			duration.setDataDescriptionFields(new Attribute<?>[] {});
 			duration.getKeyParameters().setOutside(false);
 			duration.getKeyParameters()
@@ -681,6 +681,7 @@ public class GlobalGraphGenerator extends GraphGenerator {
 						Options.getArticleDir("JSS2018").resolve("figures")
 								.resolve("benchmarkLocW").toFile(),
 						baseStats, columns, rows);
+				table.topCell = "automata";
 				table.setRotateHeader(75);
 				table.export(TableOutputFormat.LATEX);
 
@@ -720,6 +721,7 @@ public class GlobalGraphGenerator extends GraphGenerator {
 							.resolve("benchmarkStrongMrBean").toFile(),
 					MrBean, columns, rows);
 			table.setRotateHeader(75);
+			table.topCell = "automata";
 			table.export(TableOutputFormat.LATEX);
 			StatsSet DS = new StatsSet(baseStats, new HasAttributeRestriction<>(
 					Attribute.ORACLE_USED, "distinctionTree"));
@@ -729,6 +731,7 @@ public class GlobalGraphGenerator extends GraphGenerator {
 							.resolve("benchmarkStrongDS").toFile(),
 					DS, columns, rows);
 			table.setRotateHeader(75);
+			table.topCell = "automata";
 			table.export(TableOutputFormat.LATEX);
 
 			// now proceed not strongly connected
@@ -771,7 +774,7 @@ public class GlobalGraphGenerator extends GraphGenerator {
 
 			ArrayList<Restriction> hWUnknownWReset = new ArrayList<>(
 					hWUnknownW);
-			hWCol = new TraceLengthCol("hW", true,
+			hWCol = new TraceLengthCol("$hW$", true,
 					hWUnknownWReset.toArray(new Restriction[0]));
 			columns.add(hWCol);
 			hWCol.dispOracle = true;
@@ -779,14 +782,21 @@ public class GlobalGraphGenerator extends GraphGenerator {
 			columns.add(lmCol);
 			columns.add(new ResetCostComparisonCol(lmCol, hWCol));
 
-			new Table(
+			table = new Table(
 					Options.getArticleDir("JSS2018").resolve("figures")
 							.resolve("benchmarkResetMrBean").toFile(),
-					MrBean, columns, rows).export(TableOutputFormat.LATEX);
-			new Table(
+					MrBean, columns, rows);
+			table.setRotateHeader(null);
+			table.topCell = "automata";
+			table.export(TableOutputFormat.LATEX);
+
+			table = new Table(
 					Options.getArticleDir("JSS2018").resolve("figures")
 							.resolve("benchmarkResetDS").toFile(),
-					DS, columns, rows).export(TableOutputFormat.LATEX);
+					DS, columns, rows);
+			table.setRotateHeader(null);
+			table.topCell = "automata";
+			table.export(TableOutputFormat.LATEX);
 		}
 	}
 
@@ -936,6 +946,7 @@ public class GlobalGraphGenerator extends GraphGenerator {
 		dispName = dispName.replaceAll("two_client", "2 client");
 		dispName = dispName.replaceAll("model3", "3");
 		dispName = dispName.replaceAll("_", " ");
+		dispName = dispName.replaceAll("%20", " 20");
 		return dispName;
 	}
 
