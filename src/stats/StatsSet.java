@@ -163,6 +163,16 @@ public class StatsSet {
 		return sum/restrictedStats.size();
 	}
 
+	public <T extends Comparable<T>> float attributeVar(Attribute<T> a) {
+		float avg = attributeAVG(a);
+		Float sum = Float.valueOf(0);
+		for (StatsEntry s : restrictedStats) {
+			float diff = avg - s.getFloatValue(a);
+			sum += diff * diff;
+		}
+		return sum / restrictedStats.size();
+	}
+
 	public <T extends Comparable<T>> T attributeMin(Attribute<T> a){
 		assert restrictedStats.size() > 0;
 		T min = restrictedStats.get(0).get(a);

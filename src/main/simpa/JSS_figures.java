@@ -44,22 +44,7 @@ public class JSS_figures extends SIMPA {
 	static void resetInferenceOption() {
 		setUseDT(false);
 		modeOption.selectChoice(modeOption.stats);
-		modeOption.stats.inferenceNb.getValueHolder().setValue(50);
-		//if (random)
-		//	modeOption.stats.inferenceNb.getValueHolder().setValue(150);// for
-																		// reproductibility,
-																		// because
-																		// there
-																		// are
-																		// already
-																		// 150
-																		// inferences
-																		// at
-																		// start
-																		// of
-																		// CSV
-																		// files
-
+		modeOption.stats.inferenceNb.getValueHolder().setValue(100);
 		modeOption.stats.makeGraphs.getValueHolder().setValue(true);
 	}
 
