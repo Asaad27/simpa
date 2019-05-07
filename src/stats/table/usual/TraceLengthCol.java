@@ -28,6 +28,7 @@ public class TraceLengthCol extends TableColumn {
 	protected final String title;
 	final boolean dispReset;
 	public boolean dispOracle = false;
+	public boolean dispStdDev = true;
 	final Restriction[] restrictions;
 
 	@Override
@@ -46,6 +47,11 @@ public class TraceLengthCol extends TableColumn {
 	public String getRawData(StatsSet stats) {
 		assert stats.size() != 0;
 		String out = "" + (int) stats.attributeAVG(Attribute.TRACE_LENGTH);
+		if (dispStdDev)
+			out += " / \\textit{"
+					+ (int) Math
+							.sqrt(stats.attributeVar(Attribute.TRACE_LENGTH))
+					+ "}";
 		boolean showReset = dispReset;
 		if (showReset) {
 			if (stats.get(0).hasAttribute(Attribute.USE_RESET)) {
