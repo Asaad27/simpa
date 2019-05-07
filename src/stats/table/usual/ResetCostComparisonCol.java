@@ -12,6 +12,8 @@
  ********************************************************************************/
 package stats.table.usual;
 
+import java.util.Locale;
+
 import stats.StatsSet;
 import stats.attribute.Attribute;
 import stats.table.TableColumn;
@@ -48,12 +50,19 @@ public class ResetCostComparisonCol extends TableColumn {
 		return s;
 	}
 
+	static String floatToString(float f) {
+		String string = String.format(Locale.ENGLISH, "%.2g", f);
+		if (f >= 100 && f < 1000)
+			string = String.format(Locale.ENGLISH, "%.2g", f / 10) + "0";
+		return string;
+	}
+
 	@Override
 	public String getRawData(StatsSet stats) {
 		StatsSet refStats = ref.restrict(stats);
 		StatsSet testStats = test.restrict(stats);
 		if (refStats.size() == 0 || testStats.size() == 0)
-			return "";
+			return "missing data";
 		float refReset = refStats.attributeAVG(Attribute.RESET_CALL_NB);
 		float testLength = testStats.attributeAVG(Attribute.TRACE_LENGTH);
 		float refLength = refStats.attributeAVG(Attribute.TRACE_LENGTH);
@@ -64,7 +73,7 @@ public class ResetCostComparisonCol extends TableColumn {
 			if (resetRatio < 0) {
 				return "-";
 			} else {
-				String ratioString = String.format("%.2g", resetRatio);
+				String ratioString = floatToString(resetRatio);
 				if (resetRatio > 1) {
 					return " ≥ " + ratioString;
 				} else {
@@ -72,8 +81,10 @@ public class ResetCostComparisonCol extends TableColumn {
 				}
 			}
 		} else {
-			if (testReset > refReset)
-				throw new RuntimeException();
+			if (testReset > refReset) {
+				String ratioString = floatToString(resetRatio);
+				return " ≤ " + ratioString;
+			}
 			return "0";
 		}
 	}
