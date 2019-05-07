@@ -12,6 +12,8 @@
  ********************************************************************************/
 package stats.table.usual;
 
+import java.util.Locale;
+
 import stats.StatsSet;
 import stats.attribute.Attribute;
 import stats.table.TableColumn;
@@ -64,7 +66,11 @@ public class ResetCostComparisonCol extends TableColumn {
 			if (resetRatio < 0) {
 				return "-";
 			} else {
-				String ratioString = String.format("%.2g", resetRatio);
+				String ratioString = String.format(Locale.ENGLISH, "%.2g",
+						resetRatio);
+				if (resetRatio >= 100 && resetRatio < 1000)
+					ratioString = String.format(Locale.ENGLISH, "%.2g",
+							resetRatio / 10) + "0";
 				if (resetRatio > 1) {
 					return " ≥ " + ratioString;
 				} else {

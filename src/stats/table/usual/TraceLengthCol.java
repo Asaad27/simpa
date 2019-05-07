@@ -46,7 +46,7 @@ public class TraceLengthCol extends TableColumn {
 	public String getRawData(StatsSet stats) {
 		assert stats.size() != 0;
 		String out = "" + (int) stats.attributeAVG(Attribute.TRACE_LENGTH);
-		out += " \\textit{"
+		out += " / \\textit{"
 				+ (int) Math.sqrt(stats.attributeVar(Attribute.TRACE_LENGTH))
 				+ "}";
 //		float expectedhW = 75 * stats.attributeAVG(Attribute.INPUT_SYMBOLS)

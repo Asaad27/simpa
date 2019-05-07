@@ -659,24 +659,14 @@ public class GlobalGraphGenerator extends GraphGenerator {
 										2), }));
 				List<Restriction> hWWithW = new ArrayList<>(hWBaseRestrictions);
 				hWWithW.addAll(Arrays.asList(
-						new EqualsRestriction<>(Attribute.MAX_W_SIZE, 2),
 						new EqualsRestriction<>(Attribute.PRECOMPUTED_W,
 								true)));
 
-				columns.add(new TraceLengthCol("hW with known W", false,
-						hWWithW.toArray(new Restriction[0])) {
-					@Override
-					public String getRawTitle() {
-						return super.title + "(#oracle)";
-					}
-
-					@Override
-					public String getRawData(StatsSet stats) {
-						return super.getRawData(stats) + "(" + stats
-								.attributeAVG(Attribute.ASKED_COUNTER_EXAMPLE)
-								+ ")";
-					}
-				});
+				TraceLengthCol hWwithWCol = new TraceLengthCol(
+						"hW with known W", false,
+						hWWithW.toArray(new Restriction[0]));
+				hWwithWCol.dispOracle = true;
+				columns.add(hWwithWCol);
 				Table table = new Table(
 						Options.getArticleDir("JSS2018").resolve("figures")
 								.resolve("benchmarkLocW").toFile(),
@@ -934,19 +924,25 @@ public class GlobalGraphGenerator extends GraphGenerator {
 		dispName = dispName.replaceAll("TLS_GnuTLS", "GnuTLS");
 		dispName = dispName.replaceAll("TLS_OpenSSL", "OpenSSL");
 		dispName = dispName.replaceAll("TLS_RSA", "RSA");
+		dispName = dispName.replaceAll("RSA_BSAFE_C_4.0.4_server_regular",
+				"RSA_BSAFE_C");
+		dispName = dispName.replaceAll("RSA_BSAFE_Java_6.1.1_server_regular",
+				"RSA_BSAFE_Java");
 		dispName = dispName.replaceAll("MQTT_VerneMQ__", "VerneMQ ");
 		dispName = dispName.replaceAll("MQTT_ActiveMQ__", "ActiveMQ ");
 		dispName = dispName.replaceAll("MQTT_emqtt__", "emqtt ");
 		dispName = dispName.replaceAll("MQTT_mosquitto__", "Mosquitto ");
 		dispName = dispName.replaceAll("Edentifier2_learnresult_",
 				"Edentifier2 ");
+		dispName = dispName.replaceAll("new_Rand_500_10-15_MC", "new_Rand");
 		dispName = dispName.replaceAll("-simple_fix", "");
 		dispName = dispName.replaceAll("will_retain", "ret.");
 		dispName = dispName.replaceAll("same_id", "1 id");
 		dispName = dispName.replaceAll("two_client", "2 client");
 		dispName = dispName.replaceAll("model3", "3");
+		dispName = dispName.replaceAll("_*fix$", "");
 		dispName = dispName.replaceAll("_", " ");
-		dispName = dispName.replaceAll("%20", " 20");
+		dispName = dispName.replaceAll("%20", " ");
 		return dispName;
 	}
 
