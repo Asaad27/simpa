@@ -83,39 +83,39 @@ public class HWGraphGenerator extends GraphGenerator {
 			HWStatsEntry.PRECOMPUTED_W, true);
 	static public final Restriction withUnknownWRestriction = new EqualsRestriction<Boolean>(
 			HWStatsEntry.PRECOMPUTED_W, false);
-	static Restriction MrBeanRestriction = new EqualsRestriction<>(
+	static public final Restriction MrBeanRestriction = new EqualsRestriction<>(
 			HWStatsEntry.ORACLE_USED, "MrBean");
-	static Restriction shortestOracleRestriction = new EqualsRestriction<>(
+	static public final Restriction shortestOracleRestriction = new EqualsRestriction<>(
 			HWStatsEntry.ORACLE_USED, "shortest");
 
-	static Restriction hInWRestriction = new EqualsRestriction<>(
+	static public final Restriction hInWRestriction = new EqualsRestriction<>(
 			HWStatsEntry.ADD_H_IN_W, true);
-	static Restriction hNotInWRestriction = new EqualsRestriction<>(
+	static public final Restriction hNotInWRestriction = new EqualsRestriction<>(
 			HWStatsEntry.ADD_H_IN_W, false);
 
-	static Restriction simpleTraceSearchRestriction = new EqualsRestriction<>(
+	static public final Restriction simpleTraceSearchRestriction = new EqualsRestriction<>(
 			HWStatsEntry.SEARCH_CE_IN_TRACE, "simple");;
-	static Restriction noTraceSearchRestriction = new EqualsRestriction<>(
+	static public final Restriction noTraceSearchRestriction = new EqualsRestriction<>(
 			HWStatsEntry.SEARCH_CE_IN_TRACE, "none");
 
-	static Restriction check3rdRestriction = new EqualsRestriction<>(
+	static public final Restriction check3rdRestriction = new EqualsRestriction<>(
 			HWStatsEntry.CHECK_3rd_INCONSISTENCY, true);
-	static Restriction noCheck3rdRestriction = new EqualsRestriction<>(
+	static public final Restriction noCheck3rdRestriction = new EqualsRestriction<>(
 			HWStatsEntry.CHECK_3rd_INCONSISTENCY, false);
 
-	static Restriction withHZXWRestriction = new EqualsRestriction<>(
+	static public final Restriction withHZXWRestriction = new EqualsRestriction<>(
 			HWStatsEntry.REUSE_HZXW, true);
-	static Restriction withoutHZXWRestriction = new EqualsRestriction<>(
+	static public final Restriction withoutHZXWRestriction = new EqualsRestriction<>(
 			HWStatsEntry.REUSE_HZXW, false);
 
-	static Restriction fixedHomingSequenceRestriction = new EqualsRestriction<>(
+	static public final Restriction fixedHomingSequenceRestriction = new EqualsRestriction<>(
 			HWStatsEntry.USE_ADAPTIVE_H, false);
-	static Restriction adaptiveHomingSequenceRestriction = new EqualsRestriction<>(
+	static public final Restriction adaptiveHomingSequenceRestriction = new EqualsRestriction<>(
 			HWStatsEntry.USE_ADAPTIVE_H, true);
 
-	static Restriction fixedWRestriction = new EqualsRestriction<>(
+	static public final Restriction fixedWRestriction = new EqualsRestriction<>(
 			HWStatsEntry.USE_ADAPTIVE_W, false);
-	static Restriction adaptiveWRestriction = new EqualsRestriction<>(
+	static public final Restriction adaptiveWRestriction = new EqualsRestriction<>(
 			HWStatsEntry.USE_ADAPTIVE_W, true);
 
 	{
