@@ -295,6 +295,13 @@ public class LocalizerBasedLearner extends Learner {
 		return WResponses;
 	}
 
+	public static class W_Set_exception extends RuntimeException {
+
+		public W_Set_exception(String string) {
+			super(string);
+		}
+	}
+
 	public static List<InputSequence> computeCharacterizationSet(
 			MealyDriver driver) {
 		if (driver instanceof TransparentMealyDriver) {
@@ -305,6 +312,11 @@ public class LocalizerBasedLearner extends Learner {
 		}
 	}
 
+	// control if we should compute the W-set in the old way or in order to
+	// find a W-set of size 2.
+	// Note that searching a W-set of size 2 can be very long for some
+	// automata
+	static public boolean findShortestWSet = true;
 	private static List<InputSequence> computeCharacterizationSet(
 			RandomGenerator rand, TransparentMealyDriver driver) {
 		LogManager.logStep(LogManager.STEPOTHER,
@@ -313,11 +325,10 @@ public class LocalizerBasedLearner extends Learner {
 		Mealy automata = driver.getAutomata();
 		assert (automata != null);
 		
-		// control if we should compute the W-set in the old way or in order to
-		// find a W-set of size 2.
-		// Note that searching a W-set of size 2 can be very long for some
-		// automata
-		boolean findShortestWSet = true;
+		if (findShortestWSet)
+			System.out.println("searching shortest W-set");
+		else
+			System.out.println("searching W-set by discriminating seequences");
 		
 		if (findShortestWSet) {
 			List<InputSequence> toTry = new ArrayList<InputSequence>();
@@ -428,7 +439,7 @@ public class LocalizerBasedLearner extends Learner {
 				}
 				current = shortestTried;
 			}
-			throw new RuntimeException("cannot compute W-set");
+			throw new W_Set_exception("cannot compute W-set");
 		}
 
 		List<InputSequence> W = new ArrayList<InputSequence>();
@@ -497,7 +508,7 @@ public class LocalizerBasedLearner extends Learner {
 					"unable to distinguish two states for W set (with getDistinctionSequence from Mealy)");
 		}
 		if (W.size() >= 2)
-			throw new RuntimeException("W-set too large");
+			throw new W_Set_exception("W-set too large");
 		// then we try to compute a w from scratch
 		LinkedList<InputSequence> testW = new LinkedList<InputSequence>();
 		for (String i : inputSymbols)
