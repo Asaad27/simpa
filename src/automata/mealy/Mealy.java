@@ -428,7 +428,15 @@ public class Mealy extends Automata implements Serializable {
 			LogManager.logError("Are you sure that '" + file + "' is a dot file ?");
 
 		DotParser dotParser = new DotParser();
-		return dotParser.getAutomaton(file);
+		Mealy automaton = dotParser.getAutomaton(file);
+		if (automaton.name.equalsIgnoreCase("g")) {
+			String[] parts = file.toString().split(File.separator);
+			if (parts.length >= 2)
+				automaton.name = "dot_file(" + parts[parts.length - 2] + "_"
+						+ parts[parts.length - 1].replaceAll("\\.dot$", "")
+						+ ")";
+		}
+		return automaton;
 	}
 
 	/**
@@ -444,8 +452,6 @@ public class Mealy extends Automata implements Serializable {
 		File file = tools.Utils.downloadWithCache(url);
 		assert file.exists();
 		Mealy m = importFromDot(file);
-		String[] parts = url.toString().split("/");
-		m.name = parts[parts.length - 2] + "_" + parts[parts.length - 1];
 		return m;
 	}
 
