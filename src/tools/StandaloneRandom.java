@@ -12,9 +12,6 @@
  ********************************************************************************/
 package tools;
 
-import java.util.Random;
-
-import main.simpa.Options;
 import options.valueHolders.SeedHolder;
 
 /**
@@ -28,20 +25,8 @@ import options.valueHolders.SeedHolder;
  *
  */
 public class StandaloneRandom extends SeedHolder {
-	static Random seedProvider = null;
-
-	static void setSeed(long s) {
-		new StandaloneRandom();
-		seedProvider.setSeed(s);
-	}
-
 	public StandaloneRandom() {
-		super("");
-		if (seedProvider == null) {
-			seedProvider = new Random();
-			seedProvider.setSeed(Options.SEED);
-		}
-		setValue(seedProvider.nextLong());
+		super("Standalone random not available through options");
 		initRandom();
 	}
 }

@@ -19,15 +19,9 @@ package main.simpa;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Random;
-
 import tools.loggers.LogManager;
 
 public class Options {
-
-	// General seed for SIMPA (generation of automata and algo)
-	@Deprecated
-	public static long SEED = new Random().nextLong();
 
 	// Test or not
 
@@ -280,7 +274,6 @@ public class Options {
 
 	@Deprecated
 	public static void LogOptions() {
-		LogManager.logInfo("Seed used: " + SEED);
 		LogManager.logInfo("Applicable options:");
 
 		LogManager.logInfo("STOP_ON_CE_SEARCH = " + STOP_ON_CE_SEARCH);

@@ -74,13 +74,10 @@ public class SIMPATestMealy {
 					Options.LOG_HTML = true;
 				else if (args[i].equals("--openhtml"))
 					Options.AUTO_OPEN_HTML = true;
-				else if (args[i].equals("--seed"))
-					Options.SEED = Long.parseLong(args[++i]);
 
 				else if (args[i].equals("--help") || args[i].equals("-h"))
 					usage();
 			}
-			Utils.setSeed(Options.SEED);
 
 		} catch (NumberFormatException e) {
 			LogManager.logError("Error parsing argument (number) : " + args[i]);

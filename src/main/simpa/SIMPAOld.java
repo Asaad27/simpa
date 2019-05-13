@@ -95,8 +95,6 @@ public class SIMPAOld {
 					Options.SUPPORT_MIN = Integer.parseInt(args[++i]);
 				else if (args[i].startsWith("--outdir"))
 					Options.OUTDIR = args[++i];
-				else if (args[i].equals("--seed"))
-					Options.SEED = Long.parseLong(args[++i]);
 
 				else if (args[i].equals("--help") || args[i].equals("-h"))
 					usage();
@@ -104,7 +102,6 @@ public class SIMPAOld {
 					Options.SYSTEM = args[i];
 			}
 
-			Utils.setSeed(Options.SEED);
 			if (Options.SYSTEM.isEmpty())
 				usage();
 
