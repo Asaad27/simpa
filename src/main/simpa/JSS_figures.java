@@ -44,7 +44,15 @@ public class JSS_figures extends SIMPA {
 	static void resetInferenceOption() {
 		setUseDT(false);
 		modeOption.selectChoice(modeOption.stats);
-		modeOption.stats.inferenceNb.getValueHolder().setValue(100);
+		if (run_nb == 1)
+			modeOption.stats.inferenceNb.getValueHolder().setValue(10);
+		if (run_nb == 2)
+			modeOption.stats.inferenceNb.getValueHolder().setValue(50);
+		if (run_nb == 3)
+			modeOption.stats.inferenceNb.getValueHolder().setValue(100);
+		if (random != makeRandom)
+			modeOption.stats.inferenceNb.getValueHolder().setValue(0);
+
 		modeOption.stats.makeGraphs.getValueHolder().setValue(true);
 	}
 
@@ -430,7 +438,35 @@ public class JSS_figures extends SIMPA {
 		return !errorInOne;
 	}
 
+	public static void usage() {
+		System.out.println("usage : SIMPA r|b ");
+	}
+
 	public static void main(String[] args) {
+		if (args.length == 0) {
+			usage();
+			System.exit(1);
+		}
+		if (args[0].equalsIgnoreCase("b"))
+			makeRandom = false;
+		else if (args[0].equalsIgnoreCase("r")) {
+			makeRandom = true;
+		}
+		else {
+			usage();
+			System.exit(1);
+		}
+		run_nb = 1;
+		main2();
+		run_nb = 2;
+		main2();
+		run_nb = 3;
+		main2();
+	}
+
+	static int run_nb;
+	private static void main2() {
+
 		errorLogger = new ErrorLogger() {
 			@Override
 			public void addReadMeInformationForFail(Writer readMeWriter,
