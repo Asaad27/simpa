@@ -209,7 +209,7 @@ public class HWStatsEntry extends StatsEntry {
 	public HWStatsEntry(MealyDriver d, HWOptions options) {
 		this.inputSymbols = d.getInputSymbols().size();
 		this.automata = d.getSystemName();
-		this.seed = SeedHolder.MAIN_SEED;
+		this.seed = SeedHolder.getMainSeed();
 		this.reuse_hzxw = options.useDictionary.isEnabled();
 		this.precomputedW = options.usePrecomputedW();
 		this.useAdaptiveH = options.useAdaptiveH();

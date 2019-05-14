@@ -123,7 +123,7 @@ public class ZStatsEntry extends StatsEntry {
 	public ZStatsEntry(MealyDriver d, OracleOption oracleOptions) {
 		this.inputSymbols = d.getInputSymbols().size();
 		this.automata = d.getSystemName();
-		this.seed = SeedHolder.MAIN_SEED;
+		this.seed = SeedHolder.getMainSeed();
 		oracle = new StatsEntry_OraclePart(oracleOptions);
 	}
 
