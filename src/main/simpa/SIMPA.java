@@ -57,6 +57,7 @@ import drivers.efsm.real.ScanDriver;
 import drivers.mealy.MealyDriver;
 import learner.Learner;
 import learner.mealy.LmConjecture;
+import learner.mealy.hW.HWLearner;
 import learner.mealy.localizerBased.LocalizerBasedLearner.W_Set_exception;
 import main.simpa.Options.LogLevel;
 import options.MultiArgChoiceOptionItem;
@@ -619,6 +620,7 @@ public class SIMPA {
 			globalGraph.generate();
 		}
 
+	static int hwLines = 0;
 	/**
 	 * Launch one inference and record result in CSV files.
 	 * 
@@ -666,6 +668,13 @@ public class SIMPA {
 
 			globalStatsWriter.append(learnerStats.toCSV() + "\n");
 			globalStatsWriter.close();
+			if (l instanceof HWLearner)
+				hwLines++;
+			if (hwLines == 1453)
+				Utils.setSeed(-8745071090226556923L);
+			if (hwLines == 1453 + 8347)// doesn't work, we don't know when the
+										// seed was changed
+       			Utils.setSeed(742760930762518410L);
 
 			// for JSS debug
 			File backupFile = new File(Options.getStatsCSVDir().getParentFile()
