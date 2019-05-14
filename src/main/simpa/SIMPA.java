@@ -620,6 +620,7 @@ public class SIMPA {
 			globalGraph.generate();
 		}
 
+	static protected boolean makeRandom;
 	static int hwLines = 0;
 	/**
 	 * Launch one inference and record result in CSV files.
@@ -670,11 +671,18 @@ public class SIMPA {
 			globalStatsWriter.close();
 			if (l instanceof HWLearner)
 				hwLines++;
-			if (hwLines == 1453)
-				Utils.setSeed(-8745071090226556923L);
-			if (hwLines == 1453 + 8347)// doesn't work, we don't know when the
-										// seed was changed
-       			Utils.setSeed(742760930762518410L);
+			if (!makeRandom) {
+				// benchmark
+				if (hwLines == 1453)
+					Utils.setSeed(-8745071090226556923L);
+				if (hwLines == 1453 + 8347)// doesn't work, we don't know when
+											// the
+											// seed was changed
+					Utils.setSeed(742760930762518410L);
+			} else {
+				if (hwLines == 858)
+					Utils.setSeed(-9137303702455561520L);
+			}
 
 			// for JSS debug
 			File backupFile = new File(Options.getStatsCSVDir().getParentFile()
