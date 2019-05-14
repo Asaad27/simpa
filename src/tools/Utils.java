@@ -372,9 +372,13 @@ public class Utils {
 	 * @return a directory trying to match a standard cache format.
 	 */
 	public static File getSIMPACacheDirectory() {
+		if (SIMPACacheDirectory != null)
+			return SIMPACacheDirectory;
 		String system = System.getProperty("deployment.user.cachedir");
-		if (system != null)
-			return new File(system + File.separator + "SIMPA");
+		if (system != null) {
+			SIMPACacheDirectory = new File(system + File.separator + "SIMPA");
+			return SIMPACacheDirectory;
+		}
 		File nonStandardPath = null;
 		if (isMac()) {
 			String home = System.getProperty("user.home");
@@ -394,8 +398,11 @@ public class Utils {
 				+ nonStandardPath.getAbsolutePath() + "' instead.");
 		nonStandardPath.mkdirs();
 		nonStandardPath.deleteOnExit();
-		return nonStandardPath;
+		SIMPACacheDirectory = nonStandardPath;
+		return SIMPACacheDirectory;
 	}
+
+	private static File SIMPACacheDirectory = null;
 
 	public static String filter(Object s) {
 		return s.toString().replaceAll(Options.SYMBOL_AND, "&")
