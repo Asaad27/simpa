@@ -354,7 +354,7 @@ public class JSS_figures extends SIMPA {
 		return learnAndSaveOneTime();
 	}
 
-	static int configNb = 0;
+	static int configNb;
 	static int loopNumber;
 	static double oracleFactor = 1;
 
@@ -466,7 +466,7 @@ public class JSS_figures extends SIMPA {
 
 	static int run_nb;
 	private static void main2() {
-
+		configNb = 0;
 		errorLogger = new ErrorLogger() {
 			@Override
 			public void addReadMeInformationForFail(Writer readMeWriter,
