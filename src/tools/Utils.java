@@ -48,6 +48,7 @@ import main.simpa.Options;
 public class Utils {
 	@Deprecated
 	public static void setSeed(long seed) {
+		Options.SEED = seed;
 		StandaloneRandom.setSeed(seed);
 	}
 
