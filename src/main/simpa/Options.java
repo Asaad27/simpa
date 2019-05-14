@@ -19,14 +19,13 @@ package main.simpa;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Random;
 import tools.loggers.LogManager;
 
 public class Options {
 
 	// General seed for SIMPA (generation of automata and algo)
 	@Deprecated
-	public static long SEED = new Random().nextLong();
+	public static long SEED = 7834700974713762254L;
 
 	// Test or not
 
