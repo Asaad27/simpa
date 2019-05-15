@@ -32,12 +32,22 @@ public class JSS_figures extends SIMPA {
 	static void resetInferenceOption() {
 		setUseDT(false);
 		modeOption.selectChoice(modeOption.stats);
+		if (makeRandom) {
+			if (run_nb == 1)
+				modeOption.stats.inferenceNb.getValueHolder().setValue(50);
+			if (run_nb == 2)
+				modeOption.stats.inferenceNb.getValueHolder().setValue(50);
+			if (run_nb == 3)
+				modeOption.stats.inferenceNb.getValueHolder().setValue(100);
+
+		} else {
 		if (run_nb == 1)
 			modeOption.stats.inferenceNb.getValueHolder().setValue(10);
 		if (run_nb == 2)
 			modeOption.stats.inferenceNb.getValueHolder().setValue(50);
 		if (run_nb == 3)
 			modeOption.stats.inferenceNb.getValueHolder().setValue(100);
+		}
 		if (random != makeRandom)
 			modeOption.stats.inferenceNb.getValueHolder().setValue(0);
 
