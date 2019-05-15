@@ -25,7 +25,7 @@ public class Options {
 
 	// General seed for SIMPA (generation of automata and algo)
 	@Deprecated
-	public static long SEED = 7834700974713762254L;
+	public static long SEED = 0;
 
 	// Test or not
 
