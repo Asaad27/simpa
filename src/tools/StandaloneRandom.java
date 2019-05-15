@@ -30,6 +30,10 @@ import options.valueHolders.SeedHolder;
 public class StandaloneRandom extends SeedHolder {
 	static Random seedProvider = null;
 
+	public static void deinit() {
+		seedProvider = null;
+	}
+
 	static void setSeed(long s) {
 		new StandaloneRandom();
 		seedProvider.setSeed(s);

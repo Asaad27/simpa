@@ -36,6 +36,7 @@ import options.automataOptions.DriverChoiceItem;
 import options.learnerOptions.MealyLearnerChoice;
 import options.learnerOptions.OracleOption;
 import options.valueHolders.SeedHolder;
+import tools.StandaloneRandom;
 
 public class JSS_figures extends SIMPA {
 
@@ -472,8 +473,10 @@ public class JSS_figures extends SIMPA {
 		}
 		run_nb = 1;
 		main2();
+		StandaloneRandom.deinit();
 		run_nb = 2;
 		main2();
+		StandaloneRandom.deinit();
 		run_nb = 3;
 		main2();
 	}
