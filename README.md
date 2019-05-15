@@ -62,13 +62,27 @@ And now you can launch SIMPA :
 
 #  Usage
 
-The class `JSS_figure` has no argument. It will run several inferences (which
-can take several days of computation in total) and then generate the figures
-used for our JSS paper.
-
 The experiments are based on random walk, but the seeds used to initialize the
 random sources are pre-defined, so you should get the same results as us.
 
-It is possible to interrupt the inferences, and they should start almost at the
-same point the next time you launch the script.
+However, because of a mistake I made, some seeds were not initialized carefully
+and thus, the experiments are hard to reproduce exactly.
+
+In order to get exactly the same results, you should launch SIMPA several times :
+
+    ./launch_SIMPA.sh r 1
+    ./launch_SIMPA.sh r 2
+    ./launch_SIMPA.sh r 3
+
+this will produce the graphs of the article.
+
+then run 
+
+    ./launch_SIMPA b 1
+    ./launch_SIMPA b 2
+    ./launch_SIMPA b 3
+
+this will produce the tables of the article
+
+This is still under test to check whether we get exactly the same results or slightly different results due to random behavior.
 
