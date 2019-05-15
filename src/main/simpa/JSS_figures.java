@@ -442,7 +442,7 @@ public class JSS_figures extends SIMPA {
 	}
 
 	public static void usage() {
-		System.out.println("usage : SIMPA r|b ");
+		System.out.println("usage : SIMPA r|b 1|2|3");
 	}
 
 	public static void main(String[] args) {
@@ -459,6 +459,8 @@ public class JSS_figures extends SIMPA {
 			usage();
 			System.exit(1);
 		}
+		if (args.length == 1) {
+			// temptative
 		run_nb = 1;
 		main2();
 		StandaloneRandom.deinit();
@@ -467,6 +469,10 @@ public class JSS_figures extends SIMPA {
 		StandaloneRandom.deinit();
 		run_nb = 3;
 		main2();
+		} else {
+			run_nb = Integer.valueOf(args[1]);
+			main2();
+		}
 	}
 
 	static int run_nb;
