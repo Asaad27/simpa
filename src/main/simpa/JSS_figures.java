@@ -407,6 +407,8 @@ public class JSS_figures extends SIMPA {
 		for (loopNumber = 1; loopNumber <= modeOption.stats.inferenceNb.getValue(); loopNumber++) {
 			if (hwLines == 1453 && !makeRandom && run_nb == 1)
 				return true;
+			if (hwLines == 858 && makeRandom && run_nb == 1)
+				return true;
 			File inference = Options.getStatsCSVDir().getParentFile().toPath()
 					.resolve("" + configNb).resolve("" + loopNumber).toFile();
 			if (inference.exists())
