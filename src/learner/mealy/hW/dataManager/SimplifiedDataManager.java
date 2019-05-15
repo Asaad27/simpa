@@ -20,7 +20,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.Set;
 
 import automata.mealy.GenericInputSequence;
@@ -566,15 +565,25 @@ public class SimplifiedDataManager {
 				return diff;
 			}
 		}
-		PriorityQueue<Node> paths = new PriorityQueue<Node>(10,
-				new PathComparator());
+//		PriorityQueue<Node> paths = new PriorityQueue<Node>(10,
+//				new PathComparator());
+		ArrayList<Node> paths = new ArrayList<>();
 		Node firstNode = new Node();
 		firstNode.end = s;
 		firstNode.path = new InputSequence();
 		paths.add(firstNode);
 		List<FullyQualifiedState> reachedStates = new ArrayList<FullyQualifiedState>();
 		while (!paths.isEmpty()) {
-			firstNode = paths.poll();
+			int max = 0;
+			firstNode = paths.get(max);
+			for (int i = 0; i < paths.size(); i++) {
+				if (paths.get(i).path.getLength() < firstNode.path
+						.getLength()) {
+					firstNode = paths.get(i);
+					max = i;
+				}
+			}
+			paths.remove(max);
 			if (reachedStates.contains(firstNode.end))
 				continue;
 			reachedStates.add(firstNode.end);
