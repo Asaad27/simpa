@@ -45,7 +45,7 @@ public class SeedHolder extends SingleValueAutoHolder<Long, LongHolder>
 	 */
 	static public final Random seedGenerator;
 	static {
-		MAIN_SEED = new Random().nextLong();
+		MAIN_SEED = 0;
 		seedGenerator = new Random();
 		seedGenerator.setSeed(MAIN_SEED);
 	}
