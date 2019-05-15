@@ -54,12 +54,18 @@ public class JSS_figures extends SIMPA {
 				modeOption.stats.inferenceNb.getValueHolder().setValue(100);
 
 		} else {
-		if (run_nb == 1)
-			modeOption.stats.inferenceNb.getValueHolder().setValue(10);
-		if (run_nb == 2)
-			modeOption.stats.inferenceNb.getValueHolder().setValue(50);
-		if (run_nb == 3)
-			modeOption.stats.inferenceNb.getValueHolder().setValue(100);
+			if (run_nb == 1) {
+				modeOption.stats.inferenceNb.getValueHolder().setValue(10);
+				SeedHolder.MAIN_SEED = 7834700974713762254L;
+			}
+			if (run_nb == 2) {
+				modeOption.stats.inferenceNb.getValueHolder().setValue(50);
+				SeedHolder.MAIN_SEED = -8745071090226556923L;
+			}
+			if (run_nb == 3) {
+				modeOption.stats.inferenceNb.getValueHolder().setValue(100);
+				SeedHolder.MAIN_SEED = 742760930762518410L;
+			}
 		}
 		if (random != makeRandom)
 			modeOption.stats.inferenceNb.getValueHolder().setValue(0);

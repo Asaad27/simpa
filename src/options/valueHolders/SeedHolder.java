@@ -38,7 +38,7 @@ public class SeedHolder extends SingleValueAutoHolder<Long, LongHolder>
 	 * This seed is used to create seeds of each {@link RandomOption}. It might
 	 * be used for deep debugging.
 	 */
-	static public final long MAIN_SEED;
+	static public long MAIN_SEED;
 	/**
 	 * The {@link Random} source of seed for each {@link RandomOption}. It is
 	 * initialize with {@link #MAIN_SEED}.
