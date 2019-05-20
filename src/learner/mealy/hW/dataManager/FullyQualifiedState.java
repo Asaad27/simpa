@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.HashMap;
 import java.util.Collection;
+import java.util.Comparator;
 
 import tools.loggers.LogManager;
 
@@ -423,7 +424,17 @@ public class FullyQualifiedState{
 
 
 	public Collection<FullyKnownTrace> getVerifiedTrace() {
-		return V.values();
+		ArrayList<FullyKnownTrace> values = new ArrayList<>(V.values());
+		values.sort(new Comparator<FullyKnownTrace>() {
+			@Override
+			public int compare(FullyKnownTrace o1, FullyKnownTrace o2) {
+				assert o1.getStart() == o2.getStart();
+				int diff = o1.getTrace().compareTo(o2.getTrace());
+				assert diff != 0;
+				return diff;
+			}
+		});
+		return values;
 	}
 
 	public State getState() {
