@@ -21,7 +21,7 @@ import automata.mealy.InputSequence;
 import automata.mealy.OutputSequence;
 import main.simpa.Options;
 
-public class LmTrace {
+public class LmTrace implements Comparable<LmTrace> {
 	// at any time, inputs and outputs must have the same length
 	private InputSequence inputs;
 	private OutputSequence outputs;
@@ -225,5 +225,28 @@ public class LmTrace {
 		c.inputs=inputs.clone();
 		c.outputs=outputs.clone();
 		return c;
+	}
+
+	/**
+	 * Compare two traces in a deterministic order.
+	 * 
+	 * @param o
+	 * @return
+	 */
+	@Override
+	public int compareTo(LmTrace o) {
+		int minLength = size();
+		if (o.size() < minLength)
+			minLength = o.size();
+		for (int i = 0; i < minLength; i++) {
+			int c;
+			c = getInput(i).compareTo(o.getInput(i));
+			if (c != 0)
+				return c;
+			c = getOutput(i).compareTo(o.getOutput(i));
+			if (c != 0)
+				return c;
+		}
+		return (size() - o.size());
 	}
 }
