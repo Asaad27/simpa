@@ -56,7 +56,7 @@ public class StatsEntry_OraclePart {
 		else if (mode == oracle.mrBean)
 			oracleUsed = "MrBean";
 		else if (mode == oracle.distinctionTreeBased)
-			oracleUsed = "distinctionTree";
+			oracleUsed = oracle.distinctionTreeBased.toCSV();
 		else
 			throw new RuntimeException("must be implemented");
 	}

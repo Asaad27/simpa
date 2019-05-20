@@ -32,6 +32,8 @@ import automata.mealy.OutputSequence;
 import automata.mealy.multiTrace.MultiTrace;
 import automata.mealy.multiTrace.NoRecordMultiTrace;
 import drivers.Driver;
+import drivers.mealy.DTOracle.DTOption;
+import drivers.mealy.DTOracle.DTOracle;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.mealy.CeExposedUnknownStateException;
 import learner.mealy.LmConjecture;
@@ -184,16 +186,16 @@ public abstract class MealyDriver extends Driver<String, String> {
 	 *         transitions were tested but without finding a discrepancy.
 	 */
 	public Boolean getDistinctionTreeBasedCE(LmConjecture c, State curentState,
-			MultiTrace traces, boolean resetAllowed) {
+			MultiTrace traces, boolean resetAllowed, DTOption options) {
 		assert curentState != null;
 		if (!c.isFullyKnown())
 			return null;
 		// TODO extend oracle to incomplete automata
-		LY_basedOracle oracle = new LY_basedOracle(this, c, curentState,
-				traces);
+		DTOracle oracle = new DTOracle(this, c, curentState, traces,
+				Options.getLogLevel() == LogLevel.ALL);
 		oracle.resetAllowed = resetAllowed;
 		stopLog();
-		Boolean found = oracle.searchCE(curentState);
+		Boolean found = oracle.searchCE(curentState, options);
 		startLog();
 		return found;
 	}
@@ -336,7 +338,8 @@ public abstract class MealyDriver extends Driver<String, String> {
 					conjectureState, appliedSequences);
 		} else if (options.getSelectedItem() == options.distinctionTreeBased) {
 			Boolean r = getDistinctionTreeBasedCE(conjecture, conjectureState,
-					appliedSequences, resetIsAllowed);
+					appliedSequences, resetIsAllowed,
+					options.distinctionTreeBased);
 			return r != null && r;
 		} else {
 			throw new RuntimeException("option not implemented");
@@ -598,7 +601,8 @@ public abstract class MealyDriver extends Driver<String, String> {
 			return false;
 		}
 		Boolean r = getDistinctionTreeBasedCE(conj, conjState,
-				new NoRecordMultiTrace(), conj.getInitialState() != null);
+				new NoRecordMultiTrace(), conj.getInitialState() != null,
+				new DTOption(null));
 		assert r != null : "conjecture should be complete";
 		if (r == null || r) {
 			LogManager.logError("Conjecture is inconsitent with driver");

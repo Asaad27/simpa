@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import drivers.mealy.MealyDriver;
+import drivers.mealy.DTOracle.DTOption;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import options.AutoIntegerOption;
 import options.BooleanOption;
@@ -171,7 +172,7 @@ public class OracleOption extends MultiArgChoiceOption {
 	public MultiArgChoiceOptionItem shortest;
 	public MrBeanOptionItem mrBean;
 	public MultiArgChoiceOptionItem interactive;
-	public MultiArgChoiceOptionItem distinctionTreeBased;
+	public DTOption distinctionTreeBased;
 
 	public OracleOption(boolean resetAllowed) {
 		super("Oracle choice");
@@ -185,9 +186,7 @@ public class OracleOption extends MultiArgChoiceOption {
 		interactive = new MultiArgChoiceOptionItem(
 				"prompt user each time a CE is needed", "--O_interactive",
 				this);
-		distinctionTreeBased = new MultiArgChoiceOptionItem(
-				"pseudo checking sequence using distinction tree", "--O_DT",
-				this);
+		distinctionTreeBased = new DTOption(this);
 		addChoice(shortest);
 		addChoice(mrBean);
 		addChoice(interactive);
