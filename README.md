@@ -23,9 +23,7 @@ command-line.
     - Select ***General*** > ***Existing Project into Workspace*** and click
     Next.
     - Choose ***Select root directory***  and click the associated **Browse** to
-    locate the directory ***simpa-clean***.
-    - Under ***simpa-clean*** select the project or projects which you would
-    like to import.
+    locate the directory ***SIMPA***.
     - Click Finish to start the import.
 - The class to run is `main.simpa.SIMPA`.
 
