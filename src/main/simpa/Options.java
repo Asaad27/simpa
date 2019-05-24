@@ -242,12 +242,18 @@ public class Options {
 
 	@Deprecated
 	public static int NBTEST = 1;
+	@Deprecated
 	public static int MINSTATES = 5;
+	@Deprecated
 	public static int MAXSTATES = 5;
 	public static int TRANSITIONPERCENT = 90;
+	@Deprecated
 	public static int MININPUTSYM = 5;
+	@Deprecated
 	public static int MAXINPUTSYM = 5;
+	@Deprecated
 	public static int MINOUTPUTSYM = 5;
+	@Deprecated
 	public static int MAXOUTPUTSYM = 5;
 
 	// EFSM

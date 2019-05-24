@@ -32,6 +32,10 @@ import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
+import options.GenericChoiceOption;
+import options.GenericOneArgChoiceOption;
+import options.IntegerOption;
+import options.OneArgChoiceOptionItem;
 import tools.RandomGenerator;
 import tools.Utils;
 import tools.loggers.LogManager;
@@ -41,6 +45,59 @@ public class RandomMealy extends Mealy implements Serializable {
 
 	public enum OUTPUT_STYLE {
 		RANDOM, ONE_DIFF_PER_STATE,
+	}
+
+	public static class OuputStyleItem extends OneArgChoiceOptionItem {
+		OUTPUT_STYLE outputStyle;
+
+		public OuputStyleItem(String name, String argValue,
+				GenericChoiceOption<?> parent, OUTPUT_STYLE outputStyle) {
+			super(name, argValue, parent);
+			this.outputStyle = outputStyle;
+		}
+
+	}
+
+	public static class RandomOutputOptions
+			extends GenericOneArgChoiceOption<OuputStyleItem> {
+
+		private IntegerOption outputNumber = new IntegerOption(
+				"--DRnd_output_number", "number of output symbols",
+				"The number of output symbols to generate.", 2);
+
+		public OuputStyleItem random = new OuputStyleItem("Random outputs",
+				"random", this, OUTPUT_STYLE.RANDOM);
+		public OuputStyleItem oneDiff = new OuputStyleItem(
+				"One random output different from the others", "oneDiff", this,
+				OUTPUT_STYLE.ONE_DIFF_PER_STATE);
+
+		public RandomOutputOptions(
+		) {
+			super("--DRnd_generator_type", "Type of outputs",
+					"Select the repartition of output symbols.");
+			random.subTrees.add(outputNumber);
+			this.addChoice(random);
+			this.addChoice(oneDiff);
+			this.setDefaultItem(random);
+			outputNumber.setDefaultValue(2);
+		}
+
+		public RandomOutputOptions(OUTPUT_STYLE random2) {
+			this();
+			switch (random2) {
+			case RANDOM:
+				selectChoice(random);
+				break;
+			case ONE_DIFF_PER_STATE:
+				selectChoice(oneDiff);
+				break;
+			}
+		}
+
+		public int getOutputNumber() {
+			assert getSelectedItem() == random;
+			return outputNumber.getValue();
+		}
 	}
 
 	private List<String> inputSymbols = null;
@@ -54,23 +111,28 @@ public class RandomMealy extends Mealy implements Serializable {
 		return buf.toString();
 	}
 
-	private void generateSymbols() {
-		int nbSym = 0;
+	/**
+	 * generate the list of input symbols and the list of output symbols.
+	 */
+	private void generateSymbols(int nbInput, int nbOutput) {
 		String s = "a";
 		inputSymbols = new ArrayList<String>();
-		nbSym = rand.randIntBetween(Options.MININPUTSYM, Options.MAXINPUTSYM);
-		for (int i = 0; i < nbSym; i++) {
+		for (int i = 0; i < nbInput; i++) {
 			inputSymbols.add(s);
 			s = Utils.nextSymbols(s);
 		}
 		int o = 0;
 		outputSymbols = new ArrayList<String>();
-		nbSym = rand.randIntBetween(Options.MINOUTPUTSYM, Options.MAXOUTPUTSYM);
-		for (int i = 0; i < nbSym; i++) {
+		for (int i = 0; i < nbOutput; i++) {
 			outputSymbols.add(String.valueOf(o++));
 		}
 	}
 
+	/**
+	 * Select the output symbols associated to each transition.
+	 * 
+	 * @return a Map of State -> (Input -> Output)
+	 */
 	private Map<State, Map<String, String>> chooseOutputs() {
 		Map<State, Map<String, String>> outputs = new HashMap<>();
 		for (State s : states) {
@@ -96,13 +158,13 @@ public class RandomMealy extends Mealy implements Serializable {
 		return outputs;
 	}
 
-	public RandomMealy(RandomGenerator rand) {
-		this(rand, false, OUTPUT_STYLE.RANDOM);
-	}
+//	public RandomMealy(RandomGenerator rand) {
+//		this(rand, false, OUTPUT_STYLE.RANDOM);
+//	}
 
-	public RandomMealy(RandomGenerator rand, boolean forceConnex) {
-		this(rand, forceConnex, OUTPUT_STYLE.RANDOM);
-	}
+//	public RandomMealy(RandomGenerator rand, boolean forceConnex) {
+//		this(rand, forceConnex, OUTPUT_STYLE.RANDOM);
+//	}
 
 	private static String getOutputStyleName(OUTPUT_STYLE outputStyle) {
 		switch (outputStyle) {
@@ -115,18 +177,21 @@ public class RandomMealy extends Mealy implements Serializable {
 		}
 	}
 
-	public RandomMealy(RandomGenerator rand, boolean forceConnex,
-			OUTPUT_STYLE outputStyle) {
-		super((forceConnex ? "ConnexRandom(" : ("Random("
+
+	public RandomMealy(RandomGenerator rand, boolean connex, int statesNumber,
+			int inputNumber, RandomOutputOptions outputs) {
+		super((connex ? "ConnexRandom("
+				: ("Random("
 				+ Options.TRANSITIONPERCENT + ";"))
-				+ getOutputStyleName(outputStyle) + ")");
+				+ getOutputStyleName(outputs.getSelectedItem().outputStyle)
+				+ ")");
 		this.rand = rand;
 		assert rand.getRand() != null;
 		LogManager.logStep(LogManager.STEPOTHER, "Generating random Mealy");
-		this.outputStyle = outputStyle;
-		generateSymbols();
-		createStates();
-		if (forceConnex)
+		this.outputStyle = outputs.getSelectedItem().outputStyle;
+		generateSymbols(inputNumber,(outputStyle==OUTPUT_STYLE.ONE_DIFF_PER_STATE?0:outputs.getOutputNumber()));
+		createStates(statesNumber);
+		if (connex)
 			createConnexTransitions(chooseOutputs());
 		else
 			createTransitions(chooseOutputs());
@@ -134,6 +199,7 @@ public class RandomMealy extends Mealy implements Serializable {
 			exportToDot();
 	}
 	
+
 	public static void serialize(RandomMealy o) {
 		FileOutputStream fos = null;
 		ObjectOutputStream oos = null;
@@ -244,30 +310,41 @@ public class RandomMealy extends Mealy implements Serializable {
 		}
 	}
 
-	private void createStates() {
-		int nbStates = rand.randIntBetween(Options.MINSTATES,
-				Options.MAXSTATES);
+	private void createStates(int nbStates) {
 		for (int i = 0; i < nbStates; i++)
 			addState(i == 0);
 		LogManager.logInfo("Number of states : " + nbStates);
 	}
 
+	@Deprecated
+	/**
+	 * kept for compilation issue but this method is hard-coded and should be
+	 * removed
+	 * 
+	 * @param rand
+	 * @return
+	 */
 	public static RandomMealy getConnexRandomMealy(RandomGenerator rand) {
-		return getConnexRandomMealy(rand, OUTPUT_STYLE.RANDOM);
+		return getRandomMealy(rand, true, 10, 2, new RandomOutputOptions());
 	}
 
-	public static RandomMealy getConnexRandomMealy(RandomGenerator rand,
-			OUTPUT_STYLE outputStyle) {
+
+
+	public static RandomMealy getRandomMealy(RandomGenerator rand,
+			boolean connex, int statesNumber, int inputNumber,
+			RandomOutputOptions outputs) {
 
 		RandomMealy automata;
 		int nbTry = 0;
 		do {
-			automata = new RandomMealy(rand, true, outputStyle);
 			nbTry++;
 			if (nbTry > 100)
 				throw new RuntimeException(
 						"tried several time to generate a random automaton but each time, it wasn't minimal.");
+			automata = new RandomMealy(rand, connex, statesNumber, inputNumber,
+					outputs);
 		} while (!automata.isMinimal());
 		return automata;
+
 	}
 }

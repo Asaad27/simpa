@@ -14,7 +14,6 @@ package stats.externalData;
 
 import examples.mealy.RandomMealy;
 import stats.GraphGenerator;
-import stats.StatsEntry;
 import stats.StatsSet;
 import stats.attribute.Attribute;
 import tools.StandaloneRandom;
@@ -29,8 +28,10 @@ public class Article_2017PetrenkoStatEntry extends ExternalData {
 
 	public static StatsSet getSet() {
 		StatsSet set = new StatsSet();
-		String randomName = new RandomMealy(new StandaloneRandom(), true)
-				.getName();
+		String randomName = new RandomMealy(new StandaloneRandom(), true, 1, 1,
+				new RandomMealy.RandomOutputOptions(
+						RandomMealy.OUTPUT_STYLE.RANDOM)).getName();
+
 	//	@formatter:off
 		set.add(new Article_2017PetrenkoStatEntry(randomName,   2,  1, 2, 2, (float) 0.01));
 		set.add(new Article_2017PetrenkoStatEntry(randomName,   7,  2, 2, 2, (float) 0.01));

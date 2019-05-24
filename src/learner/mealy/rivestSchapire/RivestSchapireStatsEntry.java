@@ -13,13 +13,13 @@
 package learner.mealy.rivestSchapire;
 
 import java.util.HashSet;
+import examples.mealy.RandomMealy;
 import java.util.StringTokenizer;
 
 import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
 import drivers.mealy.MealyDriver;
-import drivers.mealy.transparent.RandomMealyDriver;
 import stats.Graph;
 import stats.GraphGenerator;
 import stats.LineStyle;
@@ -27,6 +27,7 @@ import stats.StatsEntry;
 import stats.StatsSet;
 import stats.attribute.Attribute;
 import stats.attribute.restriction.EqualsRestriction;
+import tools.StandaloneRandom;
 
 public class RivestSchapireStatsEntry extends StatsEntry {
 	public static final Attribute<Integer>RESET_CALL_NB = Attribute.RESET_CALL_NB;
@@ -227,7 +228,12 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 			public void generate(StatsSet s) {
 				
 				StatsSet RandomCounter = new StatsSet(s);
-				RandomCounter.restrict(new EqualsRestriction<String>(AUTOMATA, new RandomMealyDriver().getSystemName()));
+				RandomCounter.restrict(new EqualsRestriction<String>(
+						Attribute.AUTOMATA,
+						new RandomMealy(new StandaloneRandom(), true, 1, 1,
+								new RandomMealy.RandomOutputOptions(
+										RandomMealy.OUTPUT_STYLE.RANDOM))
+												.getName()));
 				Graph<Integer, Integer> g2 = new Graph<Integer,Integer>(OUTPUT_SYMBOLS, TRACE_LENGTH);
 				StatsSet s2 = new StatsSet(RandomCounter);
 				s2.restrict(new EqualsRestriction<Integer>(STATE_NUMBER,5));

@@ -22,8 +22,11 @@ import examples.mealy.RandomMealy;
 
 public class RandomMealyDriver extends AutomatonMealyDriver {
 
+	@Deprecated
 	public RandomMealyDriver() {
-		super(new RandomMealy(new StandaloneRandom()));// TODO option for seed
+		super(new RandomMealy(new StandaloneRandom(), true, 10, 2,
+				new RandomMealy.RandomOutputOptions()));// TODO option
+																// for seed
 	}
 
 	public RandomMealyDriver(Mealy a) {

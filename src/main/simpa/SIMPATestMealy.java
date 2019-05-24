@@ -120,7 +120,7 @@ public class SIMPATestMealy {
 						LogManager.start();
 						Options.LogOptions();
 
-						driver = new RandomMealyDriver();
+						// TODO driver = new RandomMealyDriver();
 						Learner l = Learner.getLearnerFor(driver);
 						l.learn();
 						driver.logStats();

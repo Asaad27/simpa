@@ -13,13 +13,14 @@
 package learner.mealy.combinatorial;
 
 
-import drivers.mealy.transparent.RandomMealyDriver;
+import examples.mealy.RandomMealy;
 import stats.Graph;
 import stats.GraphGenerator;
 import stats.LineStyle;
 import stats.StatsSet;
 import stats.attribute.Attribute;
 import stats.attribute.restriction.EqualsRestriction;
+import tools.StandaloneRandom;
 
 public class CombinatorialGraphGenerator extends GraphGenerator {
 	private static StatsSet withCut = null;
@@ -161,13 +162,21 @@ public class CombinatorialGraphGenerator extends GraphGenerator {
 			return;
 
 		StatsSet s3withCut = new StatsSet(withCut);
-		s3withCut.restrict(new EqualsRestriction<String>(CombinatorialStatsEntry.AUTOMATA,
-				new RandomMealyDriver().getSystemName()));
+		s3withCut
+				.restrict(new EqualsRestriction<String>(Attribute.AUTOMATA,
+						new RandomMealy(new StandaloneRandom(), true, 1, 1,
+								new RandomMealy.RandomOutputOptions(
+										RandomMealy.OUTPUT_STYLE.RANDOM))
+												.getName()));
 		s3withCut.restrict(new EqualsRestriction<Integer>(CombinatorialStatsEntry.OUTPUT_SYMBOLS, 4));
 		s3withCut.restrict(new EqualsRestriction<Integer>(CombinatorialStatsEntry.STATE_NUMBER, 3));
 		StatsSet s3withoutCut = new StatsSet(withoutCut);
-		s3withoutCut.restrict(new EqualsRestriction<String>(CombinatorialStatsEntry.AUTOMATA,
-				new RandomMealyDriver().getSystemName()));
+		s3withoutCut
+				.restrict(new EqualsRestriction<String>(Attribute.AUTOMATA,
+						new RandomMealy(new StandaloneRandom(), true, 1, 1,
+								new RandomMealy.RandomOutputOptions(
+										RandomMealy.OUTPUT_STYLE.RANDOM))
+												.getName()));
 		s3withoutCut.restrict(new EqualsRestriction<Integer>(CombinatorialStatsEntry.OUTPUT_SYMBOLS, 4));
 		s3withoutCut.restrict(new EqualsRestriction<Integer>(CombinatorialStatsEntry.STATE_NUMBER, 3));
 		StatsSet s3both = new StatsSet(s3withCut);
@@ -197,13 +206,21 @@ public class CombinatorialGraphGenerator extends GraphGenerator {
 		g3b.export();
 
 		StatsSet s3bwithCut = new StatsSet(withCut);
-		s3bwithCut.restrict(new EqualsRestriction<String>(CombinatorialStatsEntry.AUTOMATA,
-				new RandomMealyDriver().getSystemName()));
+		s3bwithCut.restrict(
+				new EqualsRestriction<String>(Attribute.AUTOMATA,
+						new RandomMealy(new StandaloneRandom(), true, 1, 1,
+								new RandomMealy.RandomOutputOptions(
+										RandomMealy.OUTPUT_STYLE.RANDOM))
+												.getName()));
 		s3bwithCut.restrict(new EqualsRestriction<Integer>(CombinatorialStatsEntry.OUTPUT_SYMBOLS, 4));
 		s3bwithCut.restrict(new EqualsRestriction<Integer>(CombinatorialStatsEntry.STATE_NUMBER, 4));
 		StatsSet s3bwithoutCut = new StatsSet(withoutCut);
-		s3bwithoutCut.restrict(new EqualsRestriction<String>(CombinatorialStatsEntry.AUTOMATA,
-				new RandomMealyDriver().getSystemName()));
+		s3bwithoutCut.restrict(
+				new EqualsRestriction<String>(Attribute.AUTOMATA,
+						new RandomMealy(new StandaloneRandom(), true, 1, 1,
+								new RandomMealy.RandomOutputOptions(
+										RandomMealy.OUTPUT_STYLE.RANDOM))
+												.getName()));
 		s3bwithoutCut.restrict(new EqualsRestriction<Integer>(CombinatorialStatsEntry.OUTPUT_SYMBOLS, 4));
 		s3bwithoutCut.restrict(new EqualsRestriction<Integer>(CombinatorialStatsEntry.STATE_NUMBER, 4));
 		StatsSet s3bboth = new StatsSet(s3bwithCut);
@@ -220,13 +237,22 @@ public class CombinatorialGraphGenerator extends GraphGenerator {
 		g3b_.export();
 
 		StatsSet s4withCut = new StatsSet(withCut);
-		s4withCut.restrict(new EqualsRestriction<String>(CombinatorialStatsEntry.AUTOMATA,
-				new RandomMealyDriver().getSystemName()));
+		s4withCut.restrict(
+				new EqualsRestriction<String>(Attribute.AUTOMATA,
+						new RandomMealy(new StandaloneRandom(), true, 1, 1,
+								new RandomMealy.RandomOutputOptions(
+										RandomMealy.OUTPUT_STYLE.RANDOM))
+												.getName()));
 		s4withCut.restrict(new EqualsRestriction<Integer>(CombinatorialStatsEntry.OUTPUT_SYMBOLS, 4));
 		s4withCut.restrict(new EqualsRestriction<Integer>(CombinatorialStatsEntry.INPUT_SYMBOLS, 2));
 		StatsSet s4withoutCut = new StatsSet(withoutCut);
-		s4withoutCut.restrict(new EqualsRestriction<String>(CombinatorialStatsEntry.AUTOMATA,
-				new RandomMealyDriver().getSystemName()));
+		s4withoutCut
+				.restrict(
+				new EqualsRestriction<String>(Attribute.AUTOMATA,
+						new RandomMealy(new StandaloneRandom(), true, 1, 1,
+								new RandomMealy.RandomOutputOptions(
+										RandomMealy.OUTPUT_STYLE.RANDOM))
+												.getName()));
 		s4withoutCut.restrict(new EqualsRestriction<Integer>(CombinatorialStatsEntry.OUTPUT_SYMBOLS, 4));
 		s4withoutCut.restrict(new EqualsRestriction<Integer>(CombinatorialStatsEntry.INPUT_SYMBOLS, 2));
 		StatsSet s4both = new StatsSet(s4withCut);

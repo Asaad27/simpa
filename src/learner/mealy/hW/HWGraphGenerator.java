@@ -13,6 +13,7 @@
 package learner.mealy.hW;
 
 import java.util.ArrayList;
+import examples.mealy.RandomMealy;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -21,8 +22,6 @@ import java.util.Map.Entry;
 import java.util.TreeSet;
 
 import drivers.mealy.transparent.RandomAndCounterMealyDriver;
-import drivers.mealy.transparent.RandomMealyDriver;
-import drivers.mealy.transparent.RandomOneOutputDiffMealyDriver;
 import stats.Graph;
 import stats.GraphGenerator;
 import stats.LineStyle;
@@ -38,6 +37,7 @@ import stats.attribute.Attribute;
 import stats.attribute.restriction.EqualsRestriction;
 import stats.attribute.restriction.InSetRestriction;
 import stats.attribute.restriction.Restriction;
+import tools.StandaloneRandom;
 
 public class HWGraphGenerator extends GraphGenerator {
 
@@ -55,7 +55,11 @@ public class HWGraphGenerator extends GraphGenerator {
 	static Restriction fileRestriction = new EqualsRestriction<String>(
 			HWStatsEntry.AUTOMATA, "G");
 	static Restriction randomMealyRestriction = new EqualsRestriction<String>(
-			HWStatsEntry.AUTOMATA, new RandomMealyDriver().getSystemName());
+			Attribute.AUTOMATA,
+					new RandomMealy(new StandaloneRandom(), true, 1, 1,
+							new RandomMealy.RandomOutputOptions(
+									RandomMealy.OUTPUT_STYLE.RANDOM))
+									.getName());
 	static Restriction fromDotFileRestriction = new Restriction() {
 		{
 			setTitle("from dot file");
@@ -289,7 +293,10 @@ public class HWGraphGenerator extends GraphGenerator {
 		StatsSet oneOutputDiff = new StatsSet(allStats);
 		oneOutputDiff
 				.restrict(new EqualsRestriction<String>(HWStatsEntry.AUTOMATA,
-						new RandomOneOutputDiffMealyDriver().getSystemName()));
+						new RandomMealy(new StandaloneRandom(), true, 1, 1,
+								new RandomMealy.RandomOutputOptions(
+										RandomMealy.OUTPUT_STYLE.ONE_DIFF_PER_STATE))
+												.getName()));
 		oneOutputDiff.restrict(
 				new EqualsRestriction<Integer>(HWStatsEntry.INPUT_SYMBOLS, 5));
 		oneOutputDiff.restrict(new InSetRestriction<Integer>(
@@ -549,7 +556,10 @@ public class HWGraphGenerator extends GraphGenerator {
 			oneOutputDiff_.restrict(withUnknownWRestriction);
 			oneOutputDiff_.restrict(new EqualsRestriction<String>(
 					HWStatsEntry.AUTOMATA,
-					new RandomOneOutputDiffMealyDriver().getSystemName()));
+					new RandomMealy(new StandaloneRandom(), true, 1, 1,
+							new RandomMealy.RandomOutputOptions(
+									RandomMealy.OUTPUT_STYLE.ONE_DIFF_PER_STATE))
+											.getName()));
 			oneOutputDiff_.restrict(input5);
 			oneOutputDiff_.setTitle("one output diff");
 			baseSets.add(oneOutputDiff_);

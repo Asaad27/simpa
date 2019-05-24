@@ -26,8 +26,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import drivers.mealy.transparent.RandomMealyDriver;
-import drivers.mealy.transparent.RandomOneOutputDiffMealyDriver;
+import examples.mealy.RandomMealy;
 import learner.mealy.combinatorial.CutterCombinatorialStatsEntry;
 import learner.mealy.hW.HWGraphGenerator;
 import learner.mealy.hW.HWStatsEntry;
@@ -53,6 +52,7 @@ import stats.table.usual.AutomataRow;
 import stats.table.usual.ResetCostComparisonCol;
 import stats.table.usual.TraceLengthCol;
 import stats.table.usual.TransitionCol;
+import tools.StandaloneRandom;
 
 /**
  * This class aim to make graphs with data of multiple kind of inferences
@@ -113,7 +113,10 @@ public class GlobalGraphGenerator extends GraphGenerator {
 		StatsSet comb = new StatsSet(combinatorialPruning);
 
 		Restriction automaRestriction = new EqualsRestriction<String>(
-				Attribute.AUTOMATA, new RandomMealyDriver().getSystemName());
+				Attribute.AUTOMATA,
+				new RandomMealy(new StandaloneRandom(), true, 1, 1,
+						new RandomMealy.RandomOutputOptions(
+								RandomMealy.OUTPUT_STYLE.RANDOM)).getName());
 		Restriction inputsRestriction = new EqualsRestriction<>(
 				Attribute.INPUT_SYMBOLS, 5);
 		Restriction outputsRestriction = new EqualsRestriction<>(
@@ -987,7 +990,10 @@ public class GlobalGraphGenerator extends GraphGenerator {
 						Attribute.STATE_NUMBER, 0, 130)));
 
 			set.restrict(new EqualsRestriction<String>(Attribute.AUTOMATA,
-					new RandomMealyDriver().getSystemName()));
+					new RandomMealy(new StandaloneRandom(), true, 1, 1,
+							new RandomMealy.RandomOutputOptions(
+									RandomMealy.OUTPUT_STYLE.RANDOM))
+											.getName()));
 			set.restrict(new EqualsRestriction<>(Attribute.INPUT_SYMBOLS, 2));
 			set.restrict(new EqualsRestriction<>(Attribute.OUTPUT_SYMBOLS, 2));
 			set.restrict(statesRestriction);
@@ -1035,7 +1041,10 @@ public class GlobalGraphGenerator extends GraphGenerator {
 						new RangeRestriction<>(Attribute.STATE_NUMBER, 0, 55)));
 
 			set.restrict(new EqualsRestriction<String>(Attribute.AUTOMATA,
-					new RandomOneOutputDiffMealyDriver().getSystemName()));
+					new RandomMealy(new StandaloneRandom(), true, 1, 1,
+							new RandomMealy.RandomOutputOptions(
+									RandomMealy.OUTPUT_STYLE.ONE_DIFF_PER_STATE))
+											.getName()));
 			set.restrict(new EqualsRestriction<>(Attribute.INPUT_SYMBOLS, 5));
 			set.restrict(new EqualsRestriction<>(Attribute.OUTPUT_SYMBOLS, 2));
 			set.restrict(
@@ -1081,7 +1090,10 @@ public class GlobalGraphGenerator extends GraphGenerator {
 						Attribute.STATE_NUMBER, 0, 130)));
 
 			set.restrict(new EqualsRestriction<String>(Attribute.AUTOMATA,
-					new RandomMealyDriver().getSystemName()));
+					new RandomMealy(new StandaloneRandom(), true, 1, 1,
+							new RandomMealy.RandomOutputOptions(
+									RandomMealy.OUTPUT_STYLE.RANDOM))
+											.getName()));
 			set.restrict(new EqualsRestriction<>(Attribute.INPUT_SYMBOLS, 2));
 			set.restrict(new EqualsRestriction<>(Attribute.OUTPUT_SYMBOLS, 2));
 			set.restrict(
@@ -1123,7 +1135,10 @@ public class GlobalGraphGenerator extends GraphGenerator {
 				set.add(new StatsSet(zQ));
 
 			set.restrict(new EqualsRestriction<String>(Attribute.AUTOMATA,
-					new RandomMealyDriver().getSystemName()));
+					new RandomMealy(new StandaloneRandom(), true, 1, 1,
+							new RandomMealy.RandomOutputOptions(
+									RandomMealy.OUTPUT_STYLE.ONE_DIFF_PER_STATE))
+											.getName()));
 			set.restrict(new EqualsRestriction<>(Attribute.STATE_NUMBER, 30));
 			set.restrict(new EqualsRestriction<>(Attribute.OUTPUT_SYMBOLS, 2));
 			set.restrict(new InSetRestriction<>(Attribute.INPUT_SYMBOLS,

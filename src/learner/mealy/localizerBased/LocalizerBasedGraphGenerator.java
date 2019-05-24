@@ -12,7 +12,7 @@
  ********************************************************************************/
 package learner.mealy.localizerBased;
 
-import drivers.mealy.transparent.RandomMealyDriver;
+import examples.mealy.RandomMealy;
 import stats.Graph;
 import stats.GraphGenerator;
 import stats.LineStyle;
@@ -20,6 +20,7 @@ import stats.StatsSet;
 import stats.attribute.Attribute;
 import stats.attribute.restriction.EqualsRestriction;
 import stats.attribute.restriction.RangeRestriction;
+import tools.StandaloneRandom;
 
 public class LocalizerBasedGraphGenerator extends GraphGenerator {
 
@@ -34,7 +35,11 @@ public class LocalizerBasedGraphGenerator extends GraphGenerator {
 
 		StatsSet random = new StatsSet(withoutSpeedUp);
 		random.restrict(
-				new EqualsRestriction<String>(LocalizerBasedStatsEntry.AUTOMATA, new RandomMealyDriver().getSystemName()));
+				new EqualsRestriction<String>(Attribute.AUTOMATA,
+						new RandomMealy(new StandaloneRandom(), true, 1, 1,
+								new RandomMealy.RandomOutputOptions(
+										RandomMealy.OUTPUT_STYLE.RANDOM))
+												.getName()));
 
 		Graph<Integer, Integer> g1 = new Graph<Integer, Integer>(LocalizerBasedStatsEntry.OUTPUT_SYMBOLS,
 				LocalizerBasedStatsEntry.TRACE_LENGTH);
