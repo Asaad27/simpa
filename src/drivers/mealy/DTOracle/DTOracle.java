@@ -206,11 +206,18 @@ public class DTOracle {
 		for (State s : conjecture.getStates()) {
 			ExtendedState<TestPoint> extended = extendedStates.get(s);
 			for (String input : conjecture.getInputSymbols()) {
-				insert(new FullCharacterizationTest(extended,
-						new InputSequence(input).addInputSequence(InputSequence
-								.generate(conjecture.getInputSymbols(),
-										extendedMode.getLength(),
-										extendedMode.rand.getRand()))));
+				for (int i = 0; i < extendedMode.getSequenceNumber(); i++) {
+					int length = extendedMode.getLength();
+					if (extendedMode.useRandomLength())
+						length = extendedMode.rand.getRand()
+								.randInt(length + 1);
+					insert(new FullCharacterizationTest(extended,
+							new InputSequence(input)
+									.addInputSequence(InputSequence.generate(
+											conjecture.getInputSymbols(),
+											length,
+											extendedMode.rand.getRand()))));
+				}
 			}
 		}
 

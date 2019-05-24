@@ -12,10 +12,14 @@
  ********************************************************************************/
 package drivers.mealy.DTOracle;
 
+import java.util.Collections;
+
+import options.BooleanOption;
 import options.GenericMultiArgChoiceOption;
 import options.IntegerOption;
 import options.MultiArgChoiceOption;
 import options.MultiArgChoiceOptionItem;
+import options.OptionTree.ArgumentDescriptor.AcceptedValues;
 import options.RandomOption;
 
 public class DTOption extends MultiArgChoiceOptionItem {
@@ -27,24 +31,52 @@ public class DTOption extends MultiArgChoiceOptionItem {
 			RandomOption rand = new RandomOption("--ODT_seed",
 					"random sequences");
 			private IntegerOption sequenceLength = new IntegerOption(
-					"--ODT_sequence_length"// TODO check name
-					, "length for added sequences",
+					"--ODT_sequence_length", "length for added sequences",
 					"Length for the random sequences added after each transition.",
+					5);
+			private BooleanOption randomLength = new BooleanOption(
+					"use random length", "ODT_random_length",
+					"Reduce randomly the length of each sequence.",
+					Collections.emptyList(), Collections.emptyList(), true) {
+				@Override
+				protected void makeArgumentDescriptors(String argument) {
+					super.makeArgumentDescriptors(argument);
+					disableArgumentDescriptor = new ArgumentDescriptor(
+							AcceptedValues.NONE, "--ODT_fixed_length", this);
+				}
+
+			};
+			private IntegerOption sequenceNumber = new IntegerOption(
+					"--ODT_sequence_number", "number a sequences",
+					"Number of random sequences added after each transition.",
 					2);
 
 			public ExtendedMode(GenericMultiArgChoiceOption<?> parent) {
 				super("extended (add a random path after each transition)",
 						"--ODT_extended", parent);
+				sequenceLength.setDefaultValue(5);
+				sequenceNumber.setDefaultValue(2);
 				subTrees.add(rand);
 				subTrees.add(sequenceLength);
+				subTrees.add(randomLength);
+				subTrees.add(sequenceNumber);
 			}
 
 			public int getLength() {
 				return sequenceLength.getValue();
 			}
 
+			public int getSequenceNumber() {
+				return sequenceNumber.getValue();
+			}
+
+			public boolean useRandomLength() {
+				return randomLength.isEnabled();
+			}
+
 			public String toCSV() {
-				return Integer.toString(getLength());
+				return getSequenceNumber() + ";" + getLength() + ";"
+						+ useRandomLength();
 			}
 
 		}
