@@ -66,7 +66,7 @@ The experiments are based on random walk, but the seeds used to initialize the
 random sources are pre-defined, so you should get the same results as us.
 
 However, because of a mistake I made, some seeds were not initialized carefully
-and thus, the experiments are hard to reproduce exactly.
+and thus, the experiments must be done in several steps to get the same seeds.
 
 In order to get exactly the same results, you should launch SIMPA several times :
 
@@ -74,7 +74,7 @@ In order to get exactly the same results, you should launch SIMPA several times 
     ./launch_SIMPA.sh r 2
     ./launch_SIMPA.sh r 3
 
-this will produce the graphs of the article.
+this will produce the graphs of the article (on random automata).
 
 then run 
 
@@ -82,7 +82,6 @@ then run
     ./launch_SIMPA b 2
     ./launch_SIMPA b 3
 
-this will produce the tables of the article
+this will produce the tables of the article (on automata from the benchmark).
 
-This is still under test to check whether we get exactly the same results or slightly different results due to random behavior.
 
