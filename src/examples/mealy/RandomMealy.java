@@ -40,6 +40,8 @@ import tools.RandomGenerator;
 import tools.Utils;
 import tools.loggers.LogManager;
 
+import options.valueHolders.SeedHolder; // Added by Catherine
+
 public class RandomMealy extends Mealy implements Serializable {
 	private static final long serialVersionUID = -4610287835922377376L;
 
@@ -186,6 +188,12 @@ public class RandomMealy extends Mealy implements Serializable {
 				+ getOutputStyleName(outputs.getSelectedItem().outputStyle)
 				+ ")");
 		this.rand = rand;
+
+                if (rand instanceof SeedHolder) {
+                   SeedHolder seedHolder = (SeedHolder) rand; 
+                   seedHolder.initRandom();
+                } // Patch added by Catherine, very dirty
+                
 		assert rand.getRand() != null;
 		LogManager.logStep(LogManager.STEPOTHER, "Generating random Mealy");
 		this.outputStyle = outputs.getSelectedItem().outputStyle;
