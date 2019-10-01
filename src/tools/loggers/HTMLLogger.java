@@ -17,8 +17,10 @@ package tools.loggers;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -230,6 +232,29 @@ public class HTMLLogger implements ILogger {
 			writer.write("<ul>\n");
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+		String[] resources = { "script.js", "style.css", "jquery.min.js" };
+		for (String resource : resources) {
+			File target = dir.toPath().resolve(resource).toFile();
+			if (target.exists())
+				continue;
+			ClassLoader cl = this.getClass().getClassLoader();
+			String source = "loggers/html/" + resource;
+			InputStream content = cl.getResourceAsStream(source);
+			if (content == null) {
+				LogManager.logConsole("cannot find resource " + source);
+				continue;
+			}
+			FileOutputStream out;
+			try {
+				out = new FileOutputStream(target);
+				content.transferTo(out);
+			} catch (IOException e) {
+				LogManager.logError(
+						"Unable to write HTML resource file in " + target);
+				e.printStackTrace();
+			}
+
 		}
 	}
 

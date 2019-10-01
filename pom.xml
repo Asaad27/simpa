@@ -15,6 +15,14 @@
 		<testSourceDirectory>tests</testSourceDirectory>
 		<resources>
 			<resource>
+				<directory>resources</directory>
+				<includes>
+					<include>loggers/html/script.js</include>
+					<include>loggers/html/jquery.min.js</include>
+					<include>loggers/html/style.css</include>
+				</includes>
+			</resource>
+			<resource>
 				<directory>${basedir}</directory>
 				<includes>
 					<include>LICENSE</include>
