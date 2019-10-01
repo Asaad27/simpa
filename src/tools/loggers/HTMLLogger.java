@@ -205,19 +205,17 @@ public class HTMLLogger implements ILogger {
 		try {
 			file = new File(dir.getAbsolutePath() + File.separator
 					+ filenameFm.format(new Date()) + ".html");
-			writer = new BufferedWriter(new FileWriter(file));
+			FileWriter baseWriter = new FileWriter(file);
+			writer = new BufferedWriter(baseWriter);
 			writer.flush();
 			writer.write("<html>\n");
 			writer.write("<head>\n");
 			writer.write("<title>" + SIMPA.name + " - " + dfm.format(new Date())
 					+ "</title>\n");
-			writer.write("<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />\n");
-			writer.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + new File("log").getAbsolutePath()
-					+ File.separator + "style.css\">\n");
-			writer.write("<script src=\"" + new File("log").getAbsolutePath()
-					+ File.separator + "jquery.min.js\"></script>\n");
-			writer.write("<script src=\"" + new File("log").getAbsolutePath()
-					+ File.separator + "script.js\"></script>\n");
+			writer.write("<meta http-equiv=\"content-type\" content=\"text/html; charset="+baseWriter.getEncoding()+"\" />\n");
+			writer.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">\n");
+			writer.write("<script src=\"jquery.min.js\"></script>\n");
+			writer.write("<script src=\"script.js\"></script>\n");
 			writer.write("</head>\n");
 			writer.write("<body>\n");
 			writer.write("<div id=\"info\">\n");
