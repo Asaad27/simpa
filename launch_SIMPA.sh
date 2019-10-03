@@ -7,12 +7,17 @@ src="$base_dir/src"
 classpath="$(find "$base_dir/lib" -iname '*.jar' -exec echo -n ':{}' \;)"
 mkdir -p "$bin"
 
-lastSource=$(find "$src" -name '*.java' -exec stat --format=%Y {} \; | sort -n | tail -n 1)
-lastBin=$(find "$bin" -name '*.class' -exec stat --format=%Y {} \; | sort -n | tail -n 1)
+case "$(uname -s)" in
+    Darwin*)    STAT="stat -f %m";;
+    *)          STAT="stat --format=%Y"
+esac
+
+lastSource=$(find "$src" -name '*.java' -exec $STAT {} \; | sort -n | tail -n 1)
+lastBin=$(find "$bin" -name '*.class' -exec $STAT {} \; | sort -n | tail -n 1)
 
 if [ "$lastBin" == "" ] || [[ "$lastSource" -gt "$lastBin" ]]
 then
-echo "compiling"
+echo "compiling with CLASSPATH=$classpath"
 pushd "$src" >/dev/null
 java -jar "$base_dir/lib/antlr-4.5.3-complete.jar" -no-visitor -package tools.antlr4.DotMealy "$base_dir/src/tools/antlr4/DotMealy/DotMealy.g4"
 popd > /dev/null
