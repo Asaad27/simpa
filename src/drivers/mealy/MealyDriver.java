@@ -375,7 +375,6 @@ public abstract class MealyDriver extends Driver<String, String> {
 						+ "'\n\t'a,b,c' for the sequence a, b, c\n");
 
 		String answer = input.nextLine();
-		input.close();
 		if (answer.equals(""))
 			answer = "auto";
 		System.out.println("understood «" + answer + "»");
