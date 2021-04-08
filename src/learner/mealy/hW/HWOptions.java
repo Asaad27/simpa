@@ -12,19 +12,22 @@
  ********************************************************************************/
 package learner.mealy.hW;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 
 import drivers.mealy.MealyDriver;
-import options.BooleanOption;
-import options.GenericOneArgChoiceOption;
-import options.OneArgChoiceOptionItem;
-import options.OptionCategory;
-import options.OptionTree;
+import options.*;
+import options.FileOption.FileSelectionMode;
 import options.OptionTree.ArgumentDescriptor.AcceptedValues;
 import options.automataOptions.TransparentDriverValidator;
 import options.learnerOptions.OracleOption;
+
+import static options.FileOption.FileExistance.NO_CHECK;
+import static options.FileOption.FileExistance.WILL_OVERWITE;
+import static options.FileOption.FileSelectionMode.FILES_ONLY;
 
 public class HWOptions extends OneArgChoiceOptionItem {
 	class PreComputedW extends BooleanOption {
@@ -61,7 +64,9 @@ public class HWOptions extends OneArgChoiceOptionItem {
 			driverValidator.setLastDriver(d);
 			validateSelectedTree();
 		}
-	};
+	}
+
+	;
 
 	public final BooleanOption addHInW;
 	public final BooleanOption useReset;
@@ -72,6 +77,7 @@ public class HWOptions extends OneArgChoiceOptionItem {
 	private final BooleanOption addIInW;
 	private final BooleanOption useAdaptiveH;
 	private final BooleanOption useAdaptiveW;
+	private final FileOption transferSequencesRecord;
 
 	public final OracleOption getOracleOption() {
 		if (useReset.isEnabled())
@@ -98,6 +104,18 @@ public class HWOptions extends OneArgChoiceOptionItem {
 
 	private final OracleOption oracleWhenUsingReset;
 	private final OracleOption oracleWithoutReset;
+	private final GenericOneArgChoiceOption<OneArgChoiceOptionItem> findPathStrategy;
+
+	public String getFindPathStrategy() {
+		return findPathStrategy.getSelectedItem().argValue;
+	}
+
+	public Optional<Path> getTransferSequenceRecord() {
+		if (getFindPathStrategy().equals("interactive-record"))
+			return Optional.of(transferSequencesRecord.getcompletePath().toPath());
+		else
+			return Optional.empty();
+	}
 
 	public HWOptions(GenericOneArgChoiceOption<?> parent) {
 		super("hW", "MhW", parent);
@@ -215,12 +233,28 @@ public class HWOptions extends OneArgChoiceOptionItem {
 						"--MhW_without_reset", this);
 			}
 		};
+		findPathStrategy = new GenericOneArgChoiceOption<>("--transferOracle", "Transfer Oracle",
+				"Strategy to choose a path from the current state to a not fully" +
+						" characterized state.") {
+			{
+				OneArgChoiceOptionItem shortestPathChoiceItem = new OneArgChoiceOptionItem("lexicographic", "lexicographic", this);
+				addChoice(shortestPathChoiceItem);
+				addChoice(new OneArgChoiceOptionItem("interactive", "interactive", this));
+				addChoice(new OneArgChoiceOptionItem("interactive-record", "interactive-record", this));
+				setDefaultItem(shortestPathChoiceItem);
+			}
+		};
+		transferSequencesRecord = new FileOption("--transferSequencesRecord", FILES_ONLY, NO_CHECK);
+
+
 		subTrees.add(useReset);
 		subTrees.add(usePrecomputedW);
 		subTrees.add(addHInW);
 		subTrees.add(useDictionary);
 		subTrees.add(checkInconsistenciesHMapping);
 		subTrees.add(searchCeInTrace);
+		subTrees.add(findPathStrategy);
+		subTrees.add(transferSequencesRecord);
 		for (OptionTree option : subTrees)
 			option.setCategoryIfUndef(OptionCategory.ALGO_HW);
 	}

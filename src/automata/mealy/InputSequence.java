@@ -14,16 +14,18 @@
  ********************************************************************************/
 package automata.mealy;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Objects;
+import java.io.Serializable;
+import java.util.*;
+import java.util.regex.Pattern;
 
 import learner.mealy.LmTrace;
 import main.simpa.Options;
 import tools.RandomGenerator;
 
-public class InputSequence implements Cloneable, GenericInputSequence {
+public class InputSequence implements Cloneable, GenericInputSequence, Serializable {
+
+	public static final char DELIMETER = '.';
+
 	public class SequenceIterator implements Iterator {
 		ListIterator<String> parent;
 		OutputSequence response = new OutputSequence();
@@ -67,6 +69,10 @@ public class InputSequence implements Cloneable, GenericInputSequence {
 		sequence = new ArrayList<>();
 	}
 
+	public InputSequence(List<String> sequence) {
+		this.sequence = sequence;
+	}
+
 	public InputSequence(String input) {
 		this();
 		sequence.add(input);
@@ -80,6 +86,22 @@ public class InputSequence implements Cloneable, GenericInputSequence {
 	public InputSequence addInputSequence(InputSequence inputSeq) {
 		sequence.addAll(inputSeq.sequence);
 		return this;
+	}
+
+	public String serialize() {
+		if (sequence.isEmpty()) return Options.SYMBOL_EPSILON;
+		return String.join(String.valueOf(DELIMETER), sequence);
+	}
+
+	public static InputSequence deserialize(String s) {
+		if (s.equals(Options.SYMBOL_EPSILON)) return new InputSequence(); //empty sequence
+		String delimeterPattern = Pattern.quote(String.valueOf(DELIMETER));
+		String regex = "[\\w\\d]+(" + delimeterPattern + "[\\w\\d]+)*";
+		if (!s.matches(regex)) {
+			throw new IllegalArgumentException("Cannot deserialize input sequence " + s);
+		}
+		List<String> sequence = Arrays.asList(s.split(delimeterPattern));
+		return new InputSequence(sequence);
 	}
 
 	public int getLength() {
@@ -198,22 +220,22 @@ public class InputSequence implements Cloneable, GenericInputSequence {
 			int i = 0;
 			while (i < Options.REDUCE_DISPLAYED_TRACES / 2) {
 				s.append(sequence.get(i));
-				s.append('.');
+				s.append(DELIMETER);
 				i++;
 			}
 			s.append(" … ");
-			s.append('.');
+			s.append(DELIMETER);
 			while (i < Options.REDUCE_DISPLAYED_TRACES) {
 				s.append(sequence.get(
 						sequence.size() - Options.REDUCE_DISPLAYED_TRACES + i));
-				s.append('.');
+				s.append(DELIMETER);
 				i++;
 			}
 			s.deleteCharAt(s.length() - 1);
 		} else {
 			for (String input : sequence) {
 				s.append(input);
-				s.append('.');
+				s.append(DELIMETER);
 			}
 			s.deleteCharAt(s.length() - 1);
 		}

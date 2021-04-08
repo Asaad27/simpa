@@ -18,14 +18,7 @@ package learner.mealy.hW;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import automata.State;
 import automata.mealy.AdaptiveSymbolSequence;
@@ -60,6 +53,7 @@ import learner.mealy.hW.dataManager.GenericHNDException;
 import learner.mealy.hW.dataManager.LocalizedHZXWSequence;
 import learner.mealy.hW.dataManager.SimplifiedDataManager;
 import learner.mealy.hW.dataManager.TraceTree;
+import learner.mealy.hW.dataManager.transfers.TransferOracle;
 import learner.mealy.localizerBased.LocalizerBasedLearner;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
@@ -67,7 +61,12 @@ import tools.StandaloneRandom;
 
 import tools.loggers.LogManager;
 
+import static learner.mealy.hW.dataManager.transfers.TransferOracle.getTransferOracle;
+
 public class HWLearner extends Learner {
+
+	private TransferOracle transferOracle;
+
 	private static class CanNotExtendWException extends RuntimeException {
 		private static final long serialVersionUID = -7523569929856877603L;
 
@@ -84,6 +83,7 @@ public class HWLearner extends Learner {
 	private GenericHomingSequenceChecker hChecker = null;
 	private Map<GenericOutputSequence, List<HZXWSequence>> hZXWSequences = new HashMap<>();
 	private List<HZXWSequence> zXWSequences = new ArrayList<>();
+	/** Maps homing responses to traces subsequently applied characterization sequences (e.g. h/r.w/v r -> Trace(w,v) */
 	private Map<GenericOutputSequence, List<LmTrace>> hWSequences = new HashMap<>();
 	int wRefinenmentNb = 0;
 	int nbOfTriedWSuffixes = 0;
@@ -315,7 +315,6 @@ public class HWLearner extends Learner {
 		}
 		if (W.isEmpty())
 			W.refine(W.getEmptyCharacterization(), new LmTrace());
-
 		long start = System.nanoTime();
 
 		GenericInputSequence h = null;
@@ -329,6 +328,8 @@ public class HWLearner extends Learner {
 		LmTrace counterExampleTrace;
 		boolean inconsistencyFound;
 		boolean stateDiscoveredInCe = false;
+
+		transferOracle = getTransferOracle(options);
 
 		do {
 			stats.updateMemory((int) (runtime.totalMemory() - runtime
@@ -530,6 +531,7 @@ public class HWLearner extends Learner {
 		//checkEquivalence(new File("reference.dot"));
 
 	}
+
 
 	/**
 	 * Extends W-set according to a list of characterizations which will be
@@ -1018,8 +1020,9 @@ public class HWLearner extends Learner {
 				break;
 			InputSequence alpha;
 			try {
-				alpha = dataManager.getShortestAlpha(q);
+				alpha = transferOracle.getTransferSequenceToNextNotFullyKnownState(q);
 			} catch (ConjectureNotConnexException e) {
+				e.setNotFullyKnownStates(dataManager.getNotFullyKnownStates());
 				if (!options.useReset.isEnabled())
 					throw e;
 				LogManager.logInfo(
@@ -1066,7 +1069,7 @@ public class HWLearner extends Learner {
 				assert R != null;
 				assert dataManager.getCurrentState() != null;
 				try {
-					alpha = dataManager.getShortestAlpha(R);// might throw an
+					alpha = transferOracle.getTransferSequenceToNextNotFullyKnownState(R);// might throw an
 															// ConjectureNotConnex
 															// exception again
 				} catch (ConjectureNotConnexException e2) {
@@ -1075,6 +1078,7 @@ public class HWLearner extends Learner {
 					throw e;
 				}
 			}
+			LogManager.logInfo("We apply transfer sequence " + alpha);
 			OutputSequence alphaResponse = dataManager.apply(alpha);
 			assert dataManager.getCurrentState() != null;
 			lastKnownQ = dataManager.getCurrentState();
@@ -1083,7 +1087,7 @@ public class HWLearner extends Learner {
 			assert !X.isEmpty();
 			String x = X.iterator().next(); // here we CHOOSE to take the
 											// first
-			LogManager.logInfo("We choose x = " + x + " in " + X);
+			LogManager.logInfo("We choose transition x = " + x + " in " + X);
 			String o = dataManager.apply(x);
 			sigma = new LmTrace(x, o);
 			LogManager.logInfo("So sigma = " + sigma);
@@ -1257,12 +1261,14 @@ public class HWLearner extends Learner {
 		}
 		GenericOutputSequence hResponse;
 		do {
+			/// Apply h
 			LogManager.logInfo("Applying h to localize (h=" + dataManager.h
 					+ ")");
 			hResponse = dataManager.apply(dataManager.h);
 			lastDeliberatelyAppliedH = hResponse;
 			s = dataManager.getState(hResponse);
 			if (s == null) {
+				//State is not fully characterized
 				GenericInputSequence missingW = dataManager
 						.getMissingInputSequence(hResponse);
 				LogManager
@@ -1270,13 +1276,9 @@ public class HWLearner extends Learner {
 								+ missingW + " from W-set");
 				GenericOutputSequence wResponse = dataManager.apply(missingW);
 				dataManager.addWresponseAfterH(hResponse, missingW, wResponse);
-				List<LmTrace> wObserved = hWSequences.get(hResponse);
-				if (wObserved == null) {
-					wObserved = new ArrayList<>();
-					hWSequences.put(hResponse, wObserved);
-				}
-				assert !wObserved.contains(missingW.buildTrace(wResponse));
-				wObserved.add(missingW.buildTrace(wResponse));
+				LmTrace wTrace = missingW.buildTrace(wResponse);
+				assert !hWSequences.containsKey(hResponse) || !hWSequences.get(hResponse).contains(wTrace);
+				hWSequences.getOrDefault(hResponse, new ArrayList<>()).add(wTrace);
 			}
 
 		} while (s == null);

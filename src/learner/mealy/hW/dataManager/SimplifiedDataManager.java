@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import automata.mealy.GenericInputSequence;
 import automata.mealy.GenericInputSequence.GenericOutputSequence;
@@ -52,7 +54,8 @@ public class SimplifiedDataManager {
 	public final GenericInputSequence h;
 	private final ArrayList<String> I;// Input Symbols
 	private Map<Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence>, FullyQualifiedState> Q;// known
-																															// states
+
+	// states
 	private Set<FullyQualifiedState> notFullyKnownStates;// Fully qualified
 															// states with
 															// undefined
@@ -108,6 +111,11 @@ public class SimplifiedDataManager {
 		}
 		return wR;
 	}
+
+	public Set<FullyQualifiedState> getNotFullyKnownStates() {
+		return notFullyKnownStates;
+	}
+
 
 	/**
 	 * use as much sequences as possible in dictionary to improve the
@@ -438,7 +446,7 @@ public class SimplifiedDataManager {
 	/**
 	 * get an existing or create a new FullyQualifiedState
 	 * 
-	 * @param wResponses
+	 * @param WResponses
 	 * @return
 	 */
 	public FullyQualifiedState getFullyQualifiedState(
@@ -462,7 +470,7 @@ public class SimplifiedDataManager {
 	 * check if there is a known state corresponding to the given
 	 * characterization.
 	 * 
-	 * @param wResponses
+	 * @param WResponses
 	 *            the characterization of wanted state
 	 * @return true if a state has already been created for this
 	 *         characterization.
@@ -519,83 +527,7 @@ public class SimplifiedDataManager {
 		notFullyKnownStates.remove(s);
 	}
 
-	/**
-	 * TODO This is a function often used in algorithm. It cost time and memory
-	 * (because of multiple creation/deletion).We should change it into a
-	 * version which keep data between calls. For example, keep in each state
-	 * the length of shortest path and the input used to reach it. Because this
-	 * length can only grows, it is easy to refine when it become wrong.
-	 * 
-	 * find a shortest path alpha to a FullyQualifiedState with unknown outputs.
-	 * 
-	 * @param s
-	 *            the start state
-	 * @return an empty list if the state himself has unknown outputs
-	 * @throws ConjectureNotConnexException
-	 */
-	public InputSequence getShortestAlpha(FullyQualifiedState s)
-			throws ConjectureNotConnexException {
-		assert s != null;
-		class Node {
-			public InputSequence path;
-			public FullyQualifiedState end;
 
-			public boolean equals(Object o) {
-				if (o instanceof Node)
-					return equals((Node) o);
-				return false;
-			}
-
-			public boolean equals(Node o) {
-				return path.equals(o.path) && end.equals(o.end);
-			}
-
-			public String toString() {
-				return path.toString() + "→" + end.toString();
-			}
-
-			@Override
-			public int hashCode() {
-				throw new UnsupportedOperationException();
-			}
-		}
-		class PathComparator implements Comparator<Node> {
-			@Override
-			public int compare(Node o1, Node o2) {
-				int diff = o1.path.getLength() - o2.path.getLength();
-				return diff;
-			}
-		}
-		PriorityQueue<Node> paths = new PriorityQueue<Node>(10,
-				new PathComparator());
-		Node firstNode = new Node();
-		firstNode.end = s;
-		firstNode.path = new InputSequence();
-		paths.add(firstNode);
-		List<FullyQualifiedState> reachedStates = new ArrayList<FullyQualifiedState>();
-		while (!paths.isEmpty()) {
-			firstNode = paths.poll();
-			if (reachedStates.contains(firstNode.end))
-				continue;
-			reachedStates.add(firstNode.end);
-			if (!firstNode.end.getUnknowTransitions().isEmpty()) {
-				LogManager.logInfo("chosen alpha is " + firstNode.path
-						+ " that lead in " + firstNode.end);
-				return firstNode.path;
-			}
-			for (FullyKnownTrace t : firstNode.end.getVerifiedTrace()) {
-				Node childNode = new Node();
-				childNode.end = t.getEnd();
-				childNode.path = new InputSequence();
-				childNode.path.addInputSequence(firstNode.path);
-				childNode.path.addInputSequence(t.getTrace()
-						.getInputsProjection());
-				paths.add(childNode);
-			}
-		}
-		throw new ConjectureNotConnexException(reachedStates,
-				notFullyKnownStates);
-	}
 
 	public Collection<FullyQualifiedState> getStates() {
 		return Q.values();

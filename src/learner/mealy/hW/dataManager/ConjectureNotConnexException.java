@@ -12,6 +12,8 @@
  ********************************************************************************/
 package learner.mealy.hW.dataManager;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -28,8 +30,17 @@ public class ConjectureNotConnexException extends Exception {
 		this.notFullyKnownStates = notFullyKnownStates;
 	}
 
+	public ConjectureNotConnexException(Collection<FullyQualifiedState> reachedStates) {
+		this.reachedStates = new ArrayList<>(reachedStates);
+	}
+
+	public void setNotFullyKnownStates(Set<FullyQualifiedState> notFullyKnownStates) {
+		this.notFullyKnownStates = notFullyKnownStates;
+	}
+
 	public String toString() {
 		return "The infered automata seems to be not totaly connex : we reached "
 				+ reachedStates + " but not " + notFullyKnownStates;
 	}
+
 }

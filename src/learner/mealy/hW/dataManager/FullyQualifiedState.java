@@ -12,16 +12,7 @@
  ********************************************************************************/
 package learner.mealy.hW.dataManager;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.HashMap;
-import java.util.Collection;
-import java.util.Comparator;
+import java.util.*;
 
 import tools.loggers.LogManager;
 
@@ -202,13 +193,16 @@ public class FullyQualifiedState{
 			Collection<String> inputSymbols, State state) {
 		this.WResponses = WResponses;
 		this.state = state;
-		R_ = new HashSet<String>(inputSymbols);
+		R_ = new TreeSet<>(inputSymbols);
 		K = new HashMap<String, PartiallyKnownTrace>();
 		V = new HashMap<LmTrace, FullyKnownTrace>();
 		T = new HashMap<String, FullyKnownTrace>();
 		driverStates = SimplifiedDataManager.instance.getDriverStates(WResponses);
-		if (driverStates!=null && driverStates.size()==0)
+		if (driverStates!=null && driverStates.size()==0) {
 			SimplifiedDataManager.instance.identifiedFakeStates.add(this);
+			LogManager.logInfo("Found fake state with characterization: " + WResponses.toString());
+			SimplifiedDataManager.instance.getDriverStates(WResponses);
+		}
 		expectedTraces=new TraceTree();
 		for (LmTrace trace : WResponses.knownResponses()) {
 			if (!expectedTraces.addTrace(trace)) {
@@ -229,7 +223,7 @@ public class FullyQualifiedState{
 
 	/**
 	 * this method must be called by DataManager because in order to have T and V coherent
-	 * @param t a trace starting from this state
+	 * @param v a trace starting from this state
 	 */
 	protected boolean addFullyKnownTrace(FullyKnownTrace v){
 		assert v.getStart() == this;
@@ -331,7 +325,6 @@ public class FullyQualifiedState{
 	}
 	
 	/**
-	 * @see learner.mealy.noReset.dataManager.DataManeger.getxNotInR
 	 * @return
 	 */
 	public Set<String> getUnknowTransitions(){
@@ -386,7 +379,6 @@ public class FullyQualifiedState{
 	}
 	
 	/**
-	 * @see mealy.noReset.dataManager.SimplifiedDataManager.getwNotInK
 	 */
 	protected List<? extends GenericInputSequence> getwNotInK(
 			LmTrace transition) {
