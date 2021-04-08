@@ -15,12 +15,7 @@
  ********************************************************************************/
 package automata.mealy;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Serializable;
-import java.io.Writer;
+import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -257,53 +252,7 @@ public class Mealy extends Automata implements Serializable {
 
 			file = new File(dir.getPath() + File.separatorChar + name + "_inf.dot");
 			writer = new BufferedWriter(new FileWriter(file));
-			writer.write("digraph G {\n");
-			boolean groupTransitions = false; // TODO make an option for this
-			if (groupTransitions) {
-				Map<State, Map<State, List<MealyTransition>>> grouped = new HashMap<>();
-				for (MealyTransition t : getTransitions()) {
-					Map<State, List<MealyTransition>> from = grouped
-							.get(t.getFrom());
-					if (from == null) {
-						from = new HashMap<>();
-						grouped.put(t.getFrom(), from);
-					}
-					List<MealyTransition> to = from.get(t.getTo());
-					if (to == null) {
-						to = new ArrayList<>();
-						from.put(t.getTo(), to);
-					}
-					to.add(t);
-				}
-				for (Map.Entry<State, Map<State, List<MealyTransition>>> from : grouped
-						.entrySet()) {
-					for (Entry<State, List<MealyTransition>> to : from
-							.getValue().entrySet()) {
-						StringBuilder txt = new StringBuilder();
-						for (MealyTransition t : to.getValue()) {
-							txt.append(
-									t.getInput() + "/" + t.getOutput() + "\\n");
-						}
-						txt.delete(txt.length() - 2, txt.length());
-						writer.write(
-								"\t" + from.getKey() + " -> " + to.getKey()
-										+ " [label=" + tools.GraphViz
-												.id2DotAuto(txt.toString())
-										+ "];\n");
-					}
-				}
-			} else {
-				for (MealyTransition t : getTransitions()) {
-					writer.write("\t" + t.toDot() + "\n");
-				}
-			}
-			for (State s : states) {
-				if (s.isInitial()) {
-					writer.write("\t" + s.getName() + " [shape=doubleoctagon]\n");
-				}
-			}
-			writer.write(comments);
-			writer.write("}\n");
+			writeInDotFormat(writer, comments);
 			writer.close();
 			LogManager.logInfo("Conjecture has been exported to " + file.getName());
 			File imagePath = GraphViz.dotToFile(file.getPath());
@@ -312,6 +261,65 @@ public class Mealy extends Automata implements Serializable {
 		} catch (IOException e) {
 			LogManager.logException("Error writing dot file", e);
 		}
+	}
+
+	public String asDotString(String comments) {
+		try (StringWriter writer = new StringWriter()) {
+			writeInDotFormat(writer, comments);
+			return writer.toString();
+		} catch (IOException e) {
+			throw new RuntimeException("Writing to String Writer should not yield IOException");
+		}
+	}
+
+	public void writeInDotFormat(Writer writer, String comments) throws IOException {
+		writer.write("digraph G {\n");
+		boolean groupTransitions = false; // TODO make an option for this
+		if (groupTransitions) {
+			Map<State, Map<State, List<MealyTransition>>> grouped = new HashMap<>();
+			for (MealyTransition t : getTransitions()) {
+				Map<State, List<MealyTransition>> from = grouped
+						.get(t.getFrom());
+				if (from == null) {
+					from = new HashMap<>();
+					grouped.put(t.getFrom(), from);
+				}
+				List<MealyTransition> to = from.get(t.getTo());
+				if (to == null) {
+					to = new ArrayList<>();
+					from.put(t.getTo(), to);
+				}
+				to.add(t);
+			}
+			for (Map.Entry<State, Map<State, List<MealyTransition>>> from : grouped
+					.entrySet()) {
+				for (Entry<State, List<MealyTransition>> to : from
+						.getValue().entrySet()) {
+					StringBuilder txt = new StringBuilder();
+					for (MealyTransition t : to.getValue()) {
+						txt.append(
+								t.getInput() + "/" + t.getOutput() + "\\n");
+					}
+					txt.delete(txt.length() - 2, txt.length());
+					writer.write(
+							"\t" + from.getKey() + " -> " + to.getKey()
+									+ " [label=" + tools.GraphViz
+									.id2DotAuto(txt.toString())
+									+ "];\n");
+				}
+			}
+		} else {
+			for (MealyTransition t : getTransitions()) {
+				writer.write("\t" + t.toDot() + "\n");
+			}
+		}
+		for (State s : states) {
+			if (s.isInitial()) {
+				writer.write("\t" + s.getName() + " [shape=doubleoctagon]\n");
+			}
+		}
+		writer.write(comments);
+		writer.write("}\n");
 	}
 
 	public OutputSequence apply(InputSequence I, State s) {
