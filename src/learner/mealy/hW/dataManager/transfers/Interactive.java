@@ -35,11 +35,18 @@ public class Interactive extends TransferOracle {
 
     @Override
     public InputSequence getTransferSequenceToNextNotFullyKnownState(FullyQualifiedState s) throws ConjectureNotConnexException {
+        List<Node> transfers = findAllTransfers(s);
+        transfers.sort(TransferOracle::compareNodesLexicographically);
+        InputSequence is;
         if (useLog && record.hasNext()) {
-                counter++;
-                return InputSequence.deserialize(record.next());
+            is = InputSequence.deserialize(record.next());
+        } else {
+            is = letUserPickTransfer(transfers);
         }
-        var is = askUser(s);
+        if (transfers.stream().filter(n -> n.path.equals(is)).findAny().isEmpty()) {
+            throw new IllegalArgumentException("User chose transfer sequence " + is + " which is not among the" +
+                    " possible shortest transfer sequences.");
+        }
         if (useLog) {
             try {
                 writer.append(is.serialize());
@@ -53,9 +60,7 @@ public class Interactive extends TransferOracle {
         return is;
     }
 
-    private InputSequence askUser(FullyQualifiedState s) throws ConjectureNotConnexException {
-        List<Node> transfers = findAllTransfers(s);
-        transfers.sort(TransferOracle::compareNodesLexicographically);
+    private InputSequence letUserPickTransfer(List<Node> transfers) throws ConjectureNotConnexException {
         System.out.println("Transfer sequence number " + counter);
         if (transfers.size() == 1) {
             System.out.println("Only one transfer available, choosing " + transfers.get(0).path);
@@ -81,10 +86,6 @@ public class Interactive extends TransferOracle {
                 return transfers.get(userChoice).path;
             } else {
                 String customSequence = in.next();
-                if (transfers.stream().filter(n -> n.path.sequence.toString().equals(customSequence)).findAny().isEmpty()) {
-                    LogManager.logWarning("User chose transfer sequence " + customSequence + " which is not among the" +
-                            " possible shortest transfer sequences.");
-                }
                 return new InputSequence(Arrays.asList(customSequence.split("\\.")));
             }
         } catch (InputMismatchException ex) {

@@ -140,6 +140,15 @@ public class FileOption extends OptionTree {
 		this.fileExistance = fileExistance;
 	}
 
+	public FileOption(String argument, String description, FileSelectionMode fileSelectionMode,
+					  FileExistance fileExistance) {
+		this(argument);
+		this.description = description;
+		this.fileSelectionMode = fileSelectionMode;
+		this.fileExistance = fileExistance;
+	}
+
+
 	public FileOption(String argument, String description, File defaultFile,
 			FileSelectionMode fileSelectionMode, FileExistance fileExistance) {
 		this(argument, fileSelectionMode, fileExistance);

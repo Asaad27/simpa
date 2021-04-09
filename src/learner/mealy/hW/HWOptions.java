@@ -244,7 +244,7 @@ public class HWOptions extends OneArgChoiceOptionItem {
 				setDefaultItem(shortestPathChoiceItem);
 			}
 		};
-		transferSequencesRecord = new FileOption("--transferSequencesRecord", FILES_ONLY, NO_CHECK);
+		transferSequencesRecord = new FileOption("--transferSequencesRecord", "Transfer Record", FILES_ONLY, NO_CHECK);
 
 
 		subTrees.add(useReset);
