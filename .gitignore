@@ -18,4 +18,3 @@ build/
 dist/
 **/testAgent_*.txt
 /target/
-/samples
