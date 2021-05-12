@@ -17,6 +17,7 @@ import java.util.List;
 import drivers.ExhaustiveGeneratorOption;
 import drivers.mealy.real.SIPDriverIPTel;
 import drivers.mealy.real.mqtt.MQTTDriverOption;
+import drivers.mealy.simulation.ScanetteDriverOption;
 import drivers.mealy.transparent.EnumeratedMealyDriver.EnumeratedMealyOption;
 import drivers.mealy.transparent.RandomMealyDriver;
 import drivers.mealy.transparent.TransparentFromDotMealyDriver;
@@ -38,6 +39,7 @@ public class MealyDriverChoice extends DriverChoice<MealyDriver> {
 		addChoice(new TransparentFromDotMealyDriver.FromDotChoiceItem(this));
 		addChoice(exhaustiveDriver);
 		addChoice(new MQTTDriverOption(this));
+		addChoice(new ScanetteDriverOption(this));
 	}
 
 	@Override
