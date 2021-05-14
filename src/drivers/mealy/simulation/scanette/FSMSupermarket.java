@@ -14,14 +14,16 @@ public class FSMSupermarket {
     public static final long ITEM_A_EAN = 5410188006711L;
     public static final long ITEM_B_EAN = 3560070048786L;
     public static final long ITEM_INCONNUE_EAN = 3570590109324L; //knwon to caisse, but not scanette
-    public static final int MAX_NR_OF_ITEMS_IN_CADDIE = 1;
+    public static final int MAX_NR_OF_ITEMS_IN_CADDIE = 2;
     private Scanette scanette;
-    private Caisse caisse;
+    private FSMCaisse caisse;
     private Map<Long, Integer> caddie;
+    private Map<Long, Integer> caddieCaisse;
     private State scanetteState = State.SHOPPING;
 
     public FSMSupermarket() {
         caddie = new HashMap<>();
+        caddieCaisse = new HashMap<>();
         try {
             scanette = new Scanette(PRODUITS_SCANETTE_CSV);
             caisse = new FSMCaisse(PRODUITS_CAISSE_CSV);
@@ -37,7 +39,7 @@ public class FSMSupermarket {
                 caddie.put(ean, count + 1);
                 return scanette.scanner(ean);
             } else {
-                return -2;
+                return -4;
             }
         } else { //checkout ("relecutre")
             return scanette.scanner(ean);
@@ -45,23 +47,29 @@ public class FSMSupermarket {
     }
 
     public int scanetteSupprimer(long ean) {
-        if (scanetteState == State.SHOPPING) {
+        int returnCode = scanette.supprimer(ean);
+        if (returnCode == 0) {
             int count = caddie.getOrDefault(ean, 0);
             if (count > 0) {
                 caddie.put(ean, count - 1);
             }
         }
-        return scanette.supprimer(ean);
+        return  returnCode;
     }
 
     public int caisseScan(long ean) {
-        int count = caddie.getOrDefault(ean, 0);
-        if (count > 0) {
-            caddie.put(ean, count - 1);
-            return caisse.scanner(ean);
-        } else {
-            return -2;
-        }
+        //caddie can be empty, when scanette is abandoned
+        return caisse.scanner(ean);
+//        int count = caddie.getOrDefault(ean, 0);
+//        if (count > 0) {
+//            int returnCode = caisse.scanner(ean);
+//            if (returnCode != -1) { //caisse is in the correct state
+//                caddie.put(ean, count - 1);
+//            }
+//            return returnCode;
+//        } else {
+//            return -2;
+//        }
     }
 
     public int caisseSupprimer(long ean) {
@@ -77,6 +85,7 @@ public class FSMSupermarket {
         int returnCode = scanette.debloquer();
         if (returnCode == 0) { //debloquer successful
             scanetteState = State.SHOPPING;
+            caddie = new HashMap<>();
         }
         return returnCode;
     }
@@ -87,15 +96,37 @@ public class FSMSupermarket {
     }
 
     public int scanetteTransmission() {
-        scanetteState = State.CHECKOUT;
-        return scanette.transmission(caisse);
+        caisse.setNextRelecture(false);
+        int returnCode = scanette.transmission(caisse);
+        if (returnCode != -1) {
+            scanetteState = State.CHECKOUT;
+            //caddieCaisse = Map.copyOf(caddie)
+        }
+        return returnCode;
+    }
+
+    public int scanetteTransmissionRelecture() {
+        caisse.setNextRelecture(true);
+        int returnCode = scanette.transmission(caisse);
+        if (returnCode != -1) {
+            scanetteState = State.CHECKOUT;
+        }
+        return returnCode;
     }
 
     public int caissePayer(double amount) {
         double change = caisse.payer(amount);
-        if (change == -42.0) return -42;
         return (int) Math.signum(change);
     }
+
+    /**
+     * Pay exactly the required amount.
+     * @return
+     */
+    public int caissePayEnough() {
+        return (int) Math.signum(caisse.payer(caisse.aPayer()));
+    }
+
 
     public int caisseAbandon() {
         caisse.abandon();
@@ -109,6 +140,7 @@ public class FSMSupermarket {
     public int caisseFermer() {
         return caisse.fermerSession();
     }
+
 
     private enum State {SHOPPING, CHECKOUT};
 }

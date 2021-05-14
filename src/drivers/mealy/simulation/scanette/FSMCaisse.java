@@ -52,7 +52,7 @@ public class FSMCaisse implements Caisse {
         }
 
         // (1), (2), (3) remove 1 of the 3 conditions below
-        if (!s.relectureEffectuee() && s.getArticles().size() > 0 && getAndToggleRelecture()) {
+        if (!s.relectureEffectuee() && s.getArticles().size() > 0 && demandeRelecture()) {
             return 1;
         }
 
@@ -81,13 +81,7 @@ public class FSMCaisse implements Caisse {
         return nextConnectionRelecture;
     }
 
-    public boolean getAndToggleRelecture() {
-        boolean current = nextConnectionRelecture;
-        nextConnectionRelecture = !nextConnectionRelecture;
-        return current;
-    }
-
-    public void setRelecture(boolean relecture) {
+    public void setNextRelecture(boolean relecture) {
         nextConnectionRelecture = relecture;
     }
 
@@ -103,15 +97,20 @@ public class FSMCaisse implements Caisse {
             return -42;
         }
         // calcul du montant total des achats
-        aPayer = 0;
-        for (Article a : achats.keySet()) {
-            aPayer += a.getPrixUnitaire() * achats.get(a);  // (6) remove operand
-        }
+        double aPayer = aPayer();
         if (aPayer - somme < 0.01) {
             achats.clear();   // (7) remove this line
             etat = ETAT_CAISSE.EN_ATTENTE;
         }
         return somme - aPayer;
+    }
+
+    public double aPayer() {
+        double aPayer = 0;
+        for (Article a : achats.keySet()) {
+            aPayer += a.getPrixUnitaire() * achats.get(a);  // (6) remove operand
+        }
+        return aPayer;
     }
 
 
