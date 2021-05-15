@@ -25,53 +25,100 @@ import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedOutput;
 
 public interface ILogger {
-	public void logControlTable(LiControlTable ct);
+    default void logControlTable(LiControlTable ct) {
+    }
 
-	public void logControlTable(LmControlTable ct);
+    default void logControlTable(LmControlTable ct) {
 
-	public void logDataTable(LiDataTable dt);
+    }
 
-	public void logEnd();
+    default void logDataTable(LiDataTable dt) {
 
-	public void logReset();
+    }
 
-	public void logError(String s);
+    default void logEnd() {
 
-	public void logException(String s, Exception e);
-	
-	public void logFatalError(String s);
+    }
 
-	public void logInfo(String s);
+    default void logReset() {
 
-	public void logWarning(String s);
+    }
 
-	public void logRequest(ParameterizedInput pi, ParameterizedOutput po);
+    default void logError(String s) {
 
-	public void logRequest(String input, String ouput, int n);
+    }
 
-	public void logRequest(String input, String output, int n, State before,
-			State after);
+    default void logException(String s, Exception e) {
 
-	public void logStart();
+    }
 
-	public void logStat(String s);
+    default void logFatalError(String s) {
 
-	public void logStep(int step, Object o);
+    }
 
-	public void logData(String data);
+    default void logInfo(String s) {
 
-	public void logTransition(String trans);
+    }
 
-	public void logLine();
+    default void logWarning(String s) {
 
-	public void logImage(String path);
+    }
 
-	public void logConcrete(String data);
+    default void logRequest(ParameterizedInput pi, ParameterizedOutput po) {
 
-	public void logParameters(Map<String, Integer> params);
+    }
 
-	public void logObservationTree(ZObservationNode root);
+    default void logRequest(String input, String ouput, int n) {
 
-	public void logXObservationTree(ZXObservationNode root);
+    }
+
+    default void logRequest(String input, String output, int n, State before,
+                            State after) {
+
+    }
+
+    default void logStart() {
+
+    }
+
+    default void logStat(String s) {
+
+    }
+
+    default void logStep(int step, Object o) {
+
+    }
+
+    default void logData(String data) {
+
+    }
+
+    default void logTransition(String trans) {
+
+    }
+
+    default void logLine() {
+
+    }
+
+    default void logImage(String path) {
+
+    }
+
+    default void logConcrete(String data) {
+
+    }
+
+    default void logParameters(Map<String, Integer> params) {
+
+    }
+
+    default void logObservationTree(ZObservationNode root) {
+
+    }
+
+    default void logXObservationTree(ZXObservationNode root) {
+
+    }
 
 }
