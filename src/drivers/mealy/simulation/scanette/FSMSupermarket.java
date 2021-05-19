@@ -18,12 +18,10 @@ public class FSMSupermarket {
     private Scanette scanette;
     private FSMCaisse caisse;
     private Map<Long, Integer> caddie;
-    private Map<Long, Integer> caddieCaisse;
     private State scanetteState = State.SHOPPING;
 
     public FSMSupermarket() {
         caddie = new HashMap<>();
-        caddieCaisse = new HashMap<>();
         try {
             scanette = new Scanette(PRODUITS_SCANETTE_CSV);
             caisse = new FSMCaisse(PRODUITS_CAISSE_CSV);

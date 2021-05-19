@@ -3,21 +3,20 @@ package drivers.mealy.simulation;
 import drivers.mealy.MealyDriver;
 import drivers.mealy.simulation.scanette.FSMSupermarket;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
 import static drivers.mealy.simulation.scanette.FSMSupermarket.*;
-import static java.lang.Math.signum;
 import static java.util.Map.entry;
 
 public class ScanetteDriver extends MealyDriver {
-    public static final int I = 42;
 
     private FSMSupermarket supermarket;
     private final Map<String, Supplier<Integer>> actions;
-    private CSVLogger logger = new CSVLogger();
+    private TransitionLogger logger = new TransitionLogger(Path.of("log/scanette"));
 
 
     public ScanetteDriver(String name) {
@@ -51,8 +50,7 @@ public class ScanetteDriver extends MealyDriver {
         if (!actions.containsKey(input)) {
             throw new IllegalArgumentException("Learner tried to applied non-existing input " + input);
         }
-        var concreteOutput = actions.get(input).get();
-        return abstractOf(concreteOutput);
+        return String.valueOf(actions.get(input).get());
     }
 
     @Override
@@ -64,4 +62,5 @@ public class ScanetteDriver extends MealyDriver {
     public List<String> getInputSymbols() {
         return new ArrayList<>(actions.keySet());
     }
+
 }
