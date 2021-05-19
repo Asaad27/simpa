@@ -17,6 +17,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -659,7 +661,11 @@ public abstract class AdaptiveStructure<InputT, OutputT>
 
 	public void exportToDot(File file, String name) {
 		try {
-			Writer writer = new BufferedWriter(new FileWriter(file));
+			Path exportFile = Path.of(file.toURI());
+			Path dir = exportFile.getParent();
+			if (!Files.exists(dir)) Files.createDirectories(dir);
+			if (!Files.exists(exportFile)) Files.createFile(exportFile);
+			Writer writer = Files.newBufferedWriter(exportFile);
 			writer.write("digraph " + GraphViz.id2DotAuto(name) + " {\n");
 			root.dot_appendAll(writer);
 			writer.write("}\n");
