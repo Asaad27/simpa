@@ -512,6 +512,7 @@ public class HWLearner extends Learner {
 	
 		stats.updateMemory((int) (runtime.totalMemory() - runtime.freeMemory()));
 		stats.finalUpdate(dataManager);
+		dataManager.getConjecture().exportToDot();
 
 		if (!dataManager.getConjecture().checkOnAllStatesWithReset(fullTraces)
 				.isCompatible()) {
