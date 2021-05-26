@@ -25,6 +25,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
+import automata.mealy.GenericInputSequence;
+import automata.mealy.distinctionStruct.DistinctionStruct;
+import learner.mealy.LmConjecture;
+import options.OptionsGroup;
 import tools.GraphViz;
 
 import learner.efsm.table.LiControlTable;
@@ -277,5 +281,29 @@ public class LogManager {
 	public static String prefixMultiLines(String prefix, String message) {
 		String otherLinePrefix = Utils.space(prefix.length());
 		return prefix + message.replace("\n", "\n" + otherLinePrefix);
+	}
+
+    public static void logH(GenericInputSequence h) {
+		loggers.forEach(l -> l.logH(h));
+    }
+
+	public static void logW(DistinctionStruct<? extends GenericInputSequence,? extends GenericInputSequence.GenericOutputSequence> w) {
+		loggers.forEach(l -> l.logW(w));
+	}
+
+	public static void startNewSubInference() {
+		loggers.forEach(ILogger::startNewSubInference);
+	}
+
+	public static void startNewInference() {
+		loggers.forEach(ILogger::startNewInference);
+	}
+
+    public static void logConjecture(LmConjecture conjecture) {
+		loggers.forEach(l -> l.logConjecture(conjecture));
+    }
+
+	public static void logCLIOptions(OptionsGroup allOptions) {
+		loggers.forEach(l -> l.logCLIOptions(allOptions));
 	}
 }

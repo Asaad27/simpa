@@ -15,14 +15,19 @@ package tools.loggers;
 
 import java.util.Map;
 
+import automata.mealy.GenericInputSequence;
+import automata.mealy.Mealy;
+import automata.mealy.distinctionStruct.DistinctionStruct;
 import learner.efsm.table.LiControlTable;
 import learner.efsm.table.LiDataTable;
 import learner.efsm.tree.ZXObservationNode;
+import learner.mealy.LmConjecture;
 import learner.mealy.table.LmControlTable;
 import learner.mealy.tree.ZObservationNode;
 import automata.State;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedOutput;
+import options.OptionsGroup;
 
 public interface ILogger {
     default void logControlTable(LiControlTable ct) {
@@ -121,4 +126,22 @@ public interface ILogger {
 
     }
 
+    default void logConjecture(LmConjecture conjecture) {
+    }
+
+    default void logH(GenericInputSequence h) {
+    }
+
+    default void logW(DistinctionStruct<? extends GenericInputSequence, ?
+            extends GenericInputSequence.GenericOutputSequence> w) {
+    }
+
+    default void startNewSubInference() {
+    }
+
+    default void startNewInference() {
+    }
+
+    default void logCLIOptions(OptionsGroup allOptions) {
+    }
 }

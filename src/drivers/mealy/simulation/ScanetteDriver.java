@@ -16,8 +16,6 @@ public class ScanetteDriver extends MealyDriver {
 
     private FSMSupermarket supermarket;
     private final Map<String, Supplier<Integer>> actions;
-    private TransitionLogger logger = new TransitionLogger(Path.of("log/scanette"));
-
 
     public ScanetteDriver(String name) {
         super(name);

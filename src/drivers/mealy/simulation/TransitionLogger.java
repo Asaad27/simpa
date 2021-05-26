@@ -1,69 +1,77 @@
 package drivers.mealy.simulation;
 
+import automata.mealy.GenericInputSequence;
+import automata.mealy.Mealy;
+import automata.mealy.distinctionStruct.DistinctionStruct;
 import learner.mealy.LmConjecture;
-import learner.mealy.hW.dataManager.SimplifiedDataManager;
+import options.OptionsGroup;
 import tools.loggers.ILogger;
 import tools.loggers.LogManager;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
+/**
+ * Logger to log traces of subinference, h, W and intermediate conjectures
+ */
 public class TransitionLogger implements ILogger {
     private final Path logFolder;
     private Path currentInferenceDir;
-    private int backboneIteration;
-    private Writer currentLogWriter;
-    private Writer statsWriter;
-    private String h;
-    private String W;
+    private int subinference;
+    private Writer subinferenceTraceWriter;
     private Writer completeTrace;
+    private OptionsGroup cliOptions;
 
     public TransitionLogger(Path logFolder) {
         this.logFolder = logFolder;
-        LogManager.addLogger(this);
     }
 
+    @Override
     public void startNewInference() {
         String name = LocalDateTime.now()
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
         try {
             currentInferenceDir = Files.createDirectory(logFolder.resolve(name));
-            backboneIteration = 0;
-            Path statsFile = Files.createFile(currentInferenceDir.resolve("stats"));
-            statsWriter = Files.newBufferedWriter(statsFile);
+            subinference = 0;
             Path completeFile = Files.createFile(currentInferenceDir.resolve("completeTrace"));
             completeTrace = Files.newBufferedWriter(completeFile);
+            Path optionsFile = Files.createFile(currentInferenceDir.resolve("options"));
+            if (cliOptions != null) Files.writeString(optionsFile, cliOptions.buildBackCLILine(false));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void startBackboneIteration() {
+    @Override
+    public void startNewSubInference() {
         flush();
-        String name = String.format("backboneIteration_%03d", backboneIteration++);
-        name = "final";
+        String traceFileName = String.format("%03d_trace", subinference++);
+        //name = "final";
         try {
-            Path currentIterationLogFile = currentInferenceDir.resolve(name);
-            Files.deleteIfExists(currentIterationLogFile);
+            Path currentIterationLogFile = currentInferenceDir.resolve(traceFileName);
+           // Files.deleteIfExists(currentIterationLogFile);
             Path currentLogFile = Files.createFile(currentIterationLogFile);
-            currentLogWriter = Files.newBufferedWriter(currentLogFile);
+            subinferenceTraceWriter = Files.newBufferedWriter(currentLogFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void logCLIOptions(OptionsGroup allOptions) {
+        cliOptions = allOptions;
     }
 
     private void flush() {
-        if (currentLogWriter != null) {
+        if (subinferenceTraceWriter != null) {
             try {
-                currentLogWriter.flush();
-                statsWriter.flush();
+                subinferenceTraceWriter.flush();
                 completeTrace.flush();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -72,27 +80,41 @@ public class TransitionLogger implements ILogger {
     }
 
     @Override
-    public void logStep(int step, Object o) {
-        if ("Starting new learning".equals(o)) {
-            startBackboneIteration();
+    public void logH(GenericInputSequence h) {
+        Path hFile = currentInferenceDir.resolve(String.format("%03d_h", subinference));
+        try {
+            Files.writeString(hFile, h.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     @Override
-    public void logInfo(String s) {
-        if (s.startsWith("Maximum counter example length")){
-            startNewInference();
-        } else if (s.startsWith("Using homing sequence")) {
-            h = s;
-        } else if (s.startsWith("Using characterization struct")) {
-            W = s;
+    public void logW(DistinctionStruct<? extends GenericInputSequence, ?
+            extends GenericInputSequence.GenericOutputSequence> w) {
+        Path wFile = currentInferenceDir.resolve(String.format("%03d_W", subinference));
+        try {
+            Files.writeString(wFile, w.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void logConjecture(LmConjecture conjecture) {
+        Path file = currentInferenceDir.resolve(String.format("%03d_conjecture", subinference));
+        try (Writer writer = Files.newBufferedWriter(file)){
+            conjecture.writeInDotFormat(writer, "");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     @Override
     public void logStat(String s) {
+        Path statsFile = currentInferenceDir.resolve("stats");
         try {
-            statsWriter.append(s).append("\n");
+            Files.writeString(statsFile, s + "\n", StandardOpenOption.APPEND, StandardOpenOption.CREATE);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -100,20 +122,13 @@ public class TransitionLogger implements ILogger {
 
     @Override
     public void logEnd() {
-        try {
-            statsWriter.append("\n")
-                    .append(W).append("\n")
-                    .append(h).append("\n");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         flush();
     }
 
     public void logRequest(String in, String out, int n) {
         String logLine = in + "/" + out +"\n";
         try {
-            currentLogWriter.append(logLine);
+            subinferenceTraceWriter.append(logLine);
             completeTrace.append(logLine);
         } catch (IOException e) {
             e.printStackTrace();

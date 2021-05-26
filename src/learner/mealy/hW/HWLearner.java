@@ -57,6 +57,7 @@ import learner.mealy.hW.dataManager.transfers.TransferOracle;
 import learner.mealy.localizerBased.LocalizerBasedLearner;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
+import org.apache.commons.logging.Log;
 import tools.StandaloneRandom;
 
 import tools.loggers.LogManager;
@@ -330,7 +331,7 @@ public class HWLearner extends Learner {
 		boolean stateDiscoveredInCe = false;
 
 		transferOracle = getTransferOracle(options);
-
+		LogManager.startNewInference();
 		do {
 			stats.updateMemory((int) (runtime.totalMemory() - runtime
 					.freeMemory()));
@@ -951,6 +952,7 @@ public class HWLearner extends Learner {
 			OracleGiveCounterExampleException,
 			InconsistencyBeforeSearchingAdvancedAlphaException {
 		assert checkTraces();
+		LogManager.startNewSubInference();
 		if (!continueLastLearning) {
 			LogManager.logStep(LogManager.STEPOTHER, "Inferring the system");
 			if (Options.getLogLevel() != LogLevel.LOW)
@@ -979,6 +981,8 @@ public class HWLearner extends Learner {
 						"W-tree");
 			}
 			LogManager.logInfo(logW.toString());
+			LogManager.logH(h);
+			LogManager.logW(W);
 			LogManager.logInfo("Using homing sequence «" + h + "»"
 					+ ((Options.getLogLevel() == LogLevel.ALL
 							&& driver instanceof TransparentMealyDriver)
@@ -1140,6 +1144,7 @@ public class HWLearner extends Learner {
 			}
 		} while (!dataManager.isFullyKnown());
 
+		LogManager.logConjecture(dataManager.getConjecture());
 		if (Options.getLogLevel() == Options.LogLevel.ALL)
 			dataManager.getConjecture().exportToDot();
 		LogManager.logInfo("end of sub-learning.");

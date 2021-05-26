@@ -29,6 +29,8 @@ public class OutputOptions extends OptionsGroup {
 	public final BooleanOption htmlLoggerOption = new BooleanOption(
 			"html logger", "html", "Write output log to a '.html' file.",
 			Collections.emptyList(), new ArrayList<>());
+	public final BooleanOption dataLoggerOption = new BooleanOption("raw data logger", "raw", "Log transitions, h, W," +
+			" intermediate conjecture, and stats in an easy to parse format");
 	public final LogLevelOption logLevel = new LogLevelOption();
 	public final FileOption outputDir;
 
@@ -39,6 +41,7 @@ public class OutputOptions extends OptionsGroup {
 		logLevel.setDefaultItem(logLevel.getItemForLevel(LogLevel.ALL));
 		addSubOption(textLoggerOption);
 		addSubOption(htmlLoggerOption);
+		addSubOption(dataLoggerOption);
 		addSubOption(logLevel);
 		outputDir = new FileOption("--outdir", "Output directory.",
 				new File(System.getProperty("user.dir")),

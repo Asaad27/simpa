@@ -55,6 +55,7 @@ import drivers.ExhaustiveGeneratorOption;
 import drivers.efsm.real.GenericDriver;
 import drivers.efsm.real.ScanDriver;
 import drivers.mealy.MealyDriver;
+import drivers.mealy.simulation.TransitionLogger;
 import learner.Learner;
 import learner.mealy.LmConjecture;
 import main.simpa.Options.LogLevel;
@@ -502,9 +503,12 @@ public class SIMPA {
 			LogManager.addLogger(new TextLogger());
 		if (getOutputsOptions().htmlLoggerOption.isEnabled())
 			LogManager.addLogger(new HTMLLogger());
+		if (getOutputsOptions().dataLoggerOption.isEnabled())
+			LogManager.addLogger(new TransitionLogger(Options.getLogDir().toPath()));
 		LogManager.start();
 		LogManager.logInfo("starting inference with options "
 				+ allOptions.buildBackCLILine(false));
+		LogManager.logCLIOptions(allOptions);
 		for (OptionTree option : allOptions.getAllSelectedChildren()) {
 			ValueHolder<?, ?> value = option.getValueHolder();
 			if (value != null && value instanceof SeedHolder)
