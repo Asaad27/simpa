@@ -309,6 +309,9 @@ public class HWLearner extends Learner {
 				W = new TotallyFixedW(LocalizerBasedLearner
 						.computeCharacterizationSet(driver));
 			}
+			if (!options.initialW.getText().isEmpty()) {
+				W = TotallyFixedW.deserialize(options.initialW.getText());
+			}
 			if (options.addIInW()) {
 				for (String input : driver.getInputSymbols())
 					W_fixed.add(new InputSequence(input));
@@ -318,11 +321,15 @@ public class HWLearner extends Learner {
 			W.refine(W.getEmptyCharacterization(), new LmTrace());
 		long start = System.nanoTime();
 
-		GenericInputSequence h = null;
-		if (!options.useAdaptiveH())
+		GenericInputSequence h;
+		if (!options.useAdaptiveH()) {
 			h = new InputSequence();
-		else
+			if (!options.initialH.getText().isEmpty()) {
+				h = InputSequence.deserialize(options.initialH.getText());
+			}
+		} else {
 			h = new AdaptiveSymbolSequence();
+		}
 		hChecker = GenericHomingSequenceChecker.getChecker(h);
 		stats = new HWStatsEntry(driver, options);
 

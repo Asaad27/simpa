@@ -12,10 +12,7 @@
  ********************************************************************************/
 package automata.mealy.distinctionStruct;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import automata.mealy.GenericInputSequence;
 import automata.mealy.GenericInputSequence.GenericOutputSequence;
@@ -27,6 +24,17 @@ import tools.loggers.LogManager;
 public class TotallyFixedW extends ArrayList<InputSequence>
 		implements DistinctionStruct<InputSequence, OutputSequence> {
 	private static final long serialVersionUID = 38357699697464527L;
+
+	public static TotallyFixedW deserialize(String input) {
+		TotallyFixedW W = new TotallyFixedW();
+		Scanner s = new Scanner(input);
+		s.useDelimiter("[,\\s]+");
+		s.skip("[\\[\\s]*"); //skip leading white space and "["
+		while (s.hasNext()) {
+			W.add(InputSequence.deserialize(s.next()));
+		}
+		return W;
+	}
 
 	private class FixedCharacterization
 			implements Characterization<InputSequence, OutputSequence> {
