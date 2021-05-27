@@ -83,11 +83,13 @@ public class TransitionLogger implements ILogger {
     @Override
     public void logH(GenericInputSequence h) {
         Path hFile = currentInferenceDir.resolve(String.format("%03d_h", subinference));
-        try {
-            Files.writeString(hFile, h.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        withReduceTracesDisabled(() -> {
+            try {
+                Files.writeString(hFile, h.toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void withReduceTracesDisabled(Runnable r) {
