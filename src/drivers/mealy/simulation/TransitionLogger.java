@@ -4,6 +4,7 @@ import automata.mealy.GenericInputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.distinctionStruct.DistinctionStruct;
 import learner.mealy.LmConjecture;
+import main.simpa.Options;
 import options.OptionsGroup;
 import tools.loggers.ILogger;
 import tools.loggers.LogManager;
@@ -55,7 +56,7 @@ public class TransitionLogger implements ILogger {
         //name = "final";
         try {
             Path currentIterationLogFile = currentInferenceDir.resolve(traceFileName);
-           // Files.deleteIfExists(currentIterationLogFile);
+            // Files.deleteIfExists(currentIterationLogFile);
             Path currentLogFile = Files.createFile(currentIterationLogFile);
             subinferenceTraceWriter = Files.newBufferedWriter(currentLogFile);
         } catch (IOException e) {
@@ -89,25 +90,36 @@ public class TransitionLogger implements ILogger {
         }
     }
 
+    private void withReduceTracesDisabled(Runnable r) {
+        int oldValue = Options.REDUCE_DISPLAYED_TRACES;
+        Options.REDUCE_DISPLAYED_TRACES = 0;
+        r.run();
+        Options.REDUCE_DISPLAYED_TRACES = oldValue;
+    }
+
     @Override
     public void logW(DistinctionStruct<? extends GenericInputSequence, ?
             extends GenericInputSequence.GenericOutputSequence> w) {
         Path wFile = currentInferenceDir.resolve(String.format("%03d_W", subinference));
-        try {
-            Files.writeString(wFile, w.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        withReduceTracesDisabled(() -> {
+            try {
+                Files.writeString(wFile, w.toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override
     public void logConjecture(LmConjecture conjecture) {
         Path file = currentInferenceDir.resolve(String.format("%03d_conjecture", subinference));
-        try (Writer writer = Files.newBufferedWriter(file)){
-            conjecture.writeInDotFormat(writer, "");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        withReduceTracesDisabled(() -> {
+            try (Writer writer = Files.newBufferedWriter(file)) {
+                conjecture.writeInDotFormat(writer, "");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override
@@ -126,7 +138,7 @@ public class TransitionLogger implements ILogger {
     }
 
     public void logRequest(String in, String out, int n) {
-        String logLine = in + "/" + out +"\n";
+        String logLine = in + "/" + out + "\n";
         try {
             subinferenceTraceWriter.append(logLine);
             completeTrace.append(logLine);
