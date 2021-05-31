@@ -19,17 +19,19 @@ import java.util.Collections;
 import java.util.Optional;
 
 import drivers.mealy.MealyDriver;
+import learner.mealy.hW.refineW.PassThroughWSet;
+import learner.mealy.hW.refineW.ReduceW;
+import learner.mealy.hW.refineW.WSetOptimization;
 import options.*;
-import options.FileOption.FileSelectionMode;
 import options.OptionTree.ArgumentDescriptor.AcceptedValues;
 import options.automataOptions.TransparentDriverValidator;
 import options.learnerOptions.OracleOption;
 
 import static options.FileOption.FileExistance.NO_CHECK;
-import static options.FileOption.FileExistance.WILL_OVERWITE;
 import static options.FileOption.FileSelectionMode.FILES_ONLY;
 
 public class HWOptions extends OneArgChoiceOptionItem {
+
 
 
     class PreComputedW extends BooleanOption {
@@ -82,6 +84,7 @@ public class HWOptions extends OneArgChoiceOptionItem {
     private final FileOption transferSequencesRecord;
     public final TextOption initialW;
     public TextOption initialH;
+    private final GenericOneArgChoiceOption<OneArgChoiceOptionItem> wRefinement;
 
     public final OracleOption getOracleOption() {
         if (useReset.isEnabled())
@@ -112,6 +115,18 @@ public class HWOptions extends OneArgChoiceOptionItem {
 
     public String getFindPathStrategy() {
         return findPathStrategy.getSelectedItem().argValue;
+    }
+
+    public WSetOptimization getWRefinement() {
+        switch (wRefinement.getSelectedItem().argValue) {
+            case "none":
+                return new PassThroughWSet();
+            case "reduceW":
+                return new ReduceW();
+          //  case "genW":
+            default:
+                throw new IllegalArgumentException("There is no W-Optimization strategy \"" + wRefinement.getSelectedItem().argValue + "\"");
+        }
     }
 
     public Optional<Path> getTransferSequenceRecord() {
@@ -253,6 +268,16 @@ public class HWOptions extends OneArgChoiceOptionItem {
                 setDefaultItem(shortestPathChoiceItem);
             }
         };
+        wRefinement = new GenericOneArgChoiceOption<>("--wRefinement", "refine W-set after subinference",
+                "Strategy that attempts to reduce the size of W after every subinference.") {
+            {
+                OneArgChoiceOptionItem defaultChoice = new OneArgChoiceOptionItem("none", "none", this);
+                addChoice(defaultChoice);
+                addChoice(new OneArgChoiceOptionItem("reduceW", "reduceW", this));
+                addChoice(new OneArgChoiceOptionItem("genWFromConjecture", "genWFromConjecture", this));
+                setDefaultItem(defaultChoice);
+            }
+        };
         transferSequencesRecord = new FileOption("--transferSequencesRecord", "Transfer Record", FILES_ONLY, NO_CHECK);
 
 
@@ -266,6 +291,7 @@ public class HWOptions extends OneArgChoiceOptionItem {
         subTrees.add(initialH);
         subTrees.add(findPathStrategy);
         subTrees.add(transferSequencesRecord);
+        subTrees.add(wRefinement);
         for (OptionTree option : subTrees)
             option.setCategoryIfUndef(OptionCategory.ALGO_HW);
     }

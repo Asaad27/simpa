@@ -54,10 +54,10 @@ import learner.mealy.hW.dataManager.LocalizedHZXWSequence;
 import learner.mealy.hW.dataManager.SimplifiedDataManager;
 import learner.mealy.hW.dataManager.TraceTree;
 import learner.mealy.hW.dataManager.transfers.TransferOracle;
+import learner.mealy.hW.refineW.WSetOptimization;
 import learner.mealy.localizerBased.LocalizerBasedLearner;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
-import org.apache.commons.logging.Log;
 import tools.StandaloneRandom;
 
 import tools.loggers.LogManager;
@@ -67,6 +67,7 @@ import static learner.mealy.hW.dataManager.transfers.TransferOracle.getTransferO
 public class HWLearner extends Learner {
 
 	private TransferOracle transferOracle;
+	private WSetOptimization wSetOptimizer;
 
 	private static class CanNotExtendWException extends RuntimeException {
 		private static final long serialVersionUID = -7523569929856877603L;
@@ -338,6 +339,7 @@ public class HWLearner extends Learner {
 		boolean stateDiscoveredInCe = false;
 
 		transferOracle = getTransferOracle(options);
+		wSetOptimizer = options.getWRefinement();
 		LogManager.startNewInference();
 		do {
 			stats.updateMemory((int) (runtime.totalMemory() - runtime
@@ -402,6 +404,7 @@ public class HWLearner extends Learner {
 				counterExampleTrace = e.getCounterExampletrace();
 			}
 
+			W = wSetOptimizer.optimizeW(W, dataManager.getConjecture());
 			// TODO since we apply counterExampleTrace on dataManager after
 			// processing it, it would be nicer to add it just after running it
 			// on driver.
@@ -465,7 +468,6 @@ public class HWLearner extends Learner {
 				}
 
 			}
-
 			if (counterExampleTrace != null) {
 				dataManager.walkWithoutCheck(counterExampleTrace, hExceptions);
 				LogManager
@@ -511,6 +513,7 @@ public class HWLearner extends Learner {
 
 			}
 			assert checkTraces();
+
 		} while (counterExampleTrace != null || inconsistencyFound
 				|| stateDiscoveredInCe);
 
