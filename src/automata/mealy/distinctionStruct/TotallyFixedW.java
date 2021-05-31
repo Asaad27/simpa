@@ -13,6 +13,8 @@
 package automata.mealy.distinctionStruct;
 
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import automata.mealy.GenericInputSequence;
 import automata.mealy.GenericInputSequence.GenericOutputSequence;
@@ -20,6 +22,8 @@ import automata.mealy.InputSequence;
 import automata.mealy.OutputSequence;
 import learner.mealy.LmTrace;
 import tools.loggers.LogManager;
+
+import static java.util.function.Predicate.not;
 
 public class TotallyFixedW extends ArrayList<InputSequence>
         implements DistinctionStruct<InputSequence, OutputSequence> {
@@ -38,30 +42,15 @@ public class TotallyFixedW extends ArrayList<InputSequence>
 
     private class FixedCharacterization
             implements Characterization<InputSequence, OutputSequence> {
-        List<OutputSequence> WResponses;
+        Map<InputSequence, OutputSequence> WResponses;
 
         public FixedCharacterization() {
-            WResponses = new ArrayList<>(TotallyFixedW.this.size());
+            WResponses = new HashMap<>();
         }
 
         @Override
         public boolean acceptNextPrint(LmTrace print) {
-            // start with heuristics checking to save time :
-            if (isComplete())
-                return false;
-            if (TotallyFixedW.this.size() > WResponses.size()
-                    && TotallyFixedW.this.get(WResponses.size())
-                    .equals(print.getInputsProjection()))
-                return true;
-            // Otherwise, perform a complete checking.
-            for (int i = 0; i < TotallyFixedW.this.size(); i++) {
-                if (TotallyFixedW.this.get(i)
-                        .equals(print.getInputsProjection())
-                        && (WResponses.size() < i || WResponses.get(i) == null))
-                    return true;
-            }
-
-            return false;
+            return !WResponses.containsKey(print.getInputsProjection());
         }
 
         @Override
@@ -78,124 +67,41 @@ public class TotallyFixedW extends ArrayList<InputSequence>
 
         public void addPrint(InputSequence w, OutputSequence wResponse) {
             assert w.hasAnswer(new LmTrace(w, wResponse));
-            // heuristic add
-            if (TotallyFixedW.this.size() > WResponses.size()
-                    && TotallyFixedW.this.get(WResponses.size()).equals(w)) {
-                WResponses.add(wResponse);
-                return;
+            if (!TotallyFixedW.this.contains(w)) {
+                throw new RuntimeException("Invalid print: The input sequence " + w + " is not in W.");
             }
-            // complete checking for adding
-            for (int i = 0; i < TotallyFixedW.this.size(); i++) {
-                if (TotallyFixedW.this.get(i).equals(w)
-                        && (WResponses.size() <= i
-                        || WResponses.get(i) == null)) {
-                    for (int j = WResponses.size(); j <= i; j++)
-                        WResponses.add(null);
-                    WResponses.set(i, wResponse);
-                    return;
-                }
-            }
-            throw new RuntimeException("invalid print");
+            WResponses.put(w, wResponse);
         }
 
         @Override
         public Iterable<LmTrace> knownResponses() {
-            class KnownResponsesIterator
-                    implements java.util.Iterator<LmTrace> {
-                int pos = 0;
-
-                @Override
-                public boolean hasNext() {
-                    while (pos < WResponses.size()) {
-                        if (WResponses.get(pos) != null)
-                            return true;
-                        pos++;
-                    }
-                    return false;
-                }
-
-                @Override
-                public LmTrace next() {
-                    if (!hasNext())
-                        throw new NoSuchElementException();
-                    assert TotallyFixedW.this.get(pos).getLength() == WResponses
-                            .get(pos).getLength();
-                    LmTrace trace = new LmTrace(TotallyFixedW.this.get(pos),
-                            WResponses.get(pos));
-                    pos++;
-                    return trace;
-                }
-            }
-
-            return new Iterable<LmTrace>() {
-                @Override
-                public Iterator<LmTrace> iterator() {
-                    return new KnownResponsesIterator();
-                }
-
-            };
+            return TotallyFixedW.this.stream()
+                    .filter(WResponses::containsKey)
+                    .map(w -> new LmTrace(w, WResponses.get(w)))
+                    .collect(Collectors.toList());
         }
 
         @Override
         public Iterable<InputSequence> unknownPrints() {
-            class UnknownResponsesIterator
-                    implements java.util.Iterator<InputSequence> {
-                int pos = 0;
-
-                @Override
-                public boolean hasNext() {
-                    while (pos < TotallyFixedW.this.size()) {
-                        if (pos >= WResponses.size()
-                                || WResponses.get(pos) == null)
-                            return true;
-                        pos++;
-                    }
-                    return false;
-
-                }
-
-                @Override
-                public InputSequence next() {
-                    if (!hasNext())
-                        throw new NoSuchElementException();
-                    return TotallyFixedW.this.get(pos++);
-                }
-
-            }
-            return new Iterable<InputSequence>() {
-
-                @Override
-                public Iterator<InputSequence> iterator() {
-                    return new UnknownResponsesIterator();
-                }
-
-            };
+            return getUnknownPrints();
         }
 
         @Override
         public List<InputSequence> getUnknownPrints() {
-            List<InputSequence> res = new ArrayList<>();
-            for (int i = 0; i < TotallyFixedW.this.size(); i++) {
-                if (i >= WResponses.size() || WResponses.get(i) == null)
-                    res.add(TotallyFixedW.this.get(i));
-            }
-            return res;
+            return TotallyFixedW.this.stream()
+                    .filter(not(WResponses::containsKey))
+                    .collect(Collectors.toList());
         }
 
         @Override
         public boolean isComplete() {
-            return WResponses.size() == TotallyFixedW.this.size()
-                    && !WResponses.contains(null);
+            return TotallyFixedW.this.stream().allMatch(WResponses::containsKey);
         }
 
         @Override
         public boolean contains(LmTrace trace) {
             assert isComplete();
-            for (InputSequence w : TotallyFixedW.this) {
-                if (w.hasPrefix(trace))
-                    return true;
-            }
-            return false;
+            return WResponses.keySet().stream().anyMatch(w -> w.hasPrefix(trace));
         }
 
         @Override
@@ -215,24 +121,15 @@ public class TotallyFixedW extends ArrayList<InputSequence>
 
         @Override
         public String toString() {
-            int i = 0;
-            StringBuilder s = new StringBuilder();
-            s.append("[");
-            for (InputSequence inSeq : TotallyFixedW.this) {
-                if (WResponses.size() <= i || WResponses.get(i) == null) {
-                    s.append(inSeq);
-                    s.append("/not executed yet");
-                } else {
-                    s.append(inSeq.buildTrace(WResponses.get(i)));
-                }
-                s.append(", ");
-                i++;
-            }
-            if (i != 0) {
-                s.setLength(s.length() - 2);
-            }
-            s.append("]");
-            return s.toString();
+            return "[" +
+                    TotallyFixedW.this.stream().map(inSeq -> {
+                        if (WResponses.containsKey(inSeq)) {
+                            return inSeq.buildTrace(WResponses.get(inSeq)).toString();
+                        } else {
+                            return inSeq.toString() + "/not executed yet";
+                        }
+                    }).collect(Collectors.joining(", "))
+                    + "]";
         }
     }
 
