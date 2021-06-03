@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static drivers.mealy.simulation.scanette.FSMSupermarket.*;
 import static java.util.Map.entry;
@@ -58,7 +59,7 @@ public class ScanetteDriver extends MealyDriver {
 
     @Override
     public List<String> getInputSymbols() {
-        return new ArrayList<>(actions.keySet());
+        return actions.keySet().stream().sorted().collect(Collectors.toList());
     }
 
 }

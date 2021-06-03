@@ -20,6 +20,8 @@
 					<include>loggers/html/script.js</include>
 					<include>loggers/html/jquery.min.js</include>
 					<include>loggers/html/style.css</include>
+					<include>scanette/produitsCaisse.csv</include>
+					<include>scanette/produitsScanette.csv</include>
 				</includes>
 			</resource>
 			<resource>
