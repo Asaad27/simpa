@@ -70,8 +70,10 @@ public class Attribute <T extends Comparable<T>> {
 	public final static Attribute<Integer>	SUCCEEDED_PROBALISTIC_SEARCH=new Attribute<Integer>("number of succeeded probalistic search",		false,	Units.FUNCTION_CALL,false,	false,	false);
 	public final static Attribute<Float>	ORACLE_TRACE_PERCENTAGE=	new Attribute<Float>(	"percentage of trace used by oracle",			true,	Units.PERCENT,		false,	false,	true);
 	public final static Attribute<Float>	AVG_NB_TRIED_W =			new Attribute<Float>(	"average number of prefixes of W tried",		true,	Units.SEQUENCES,	false,	false,	false);
-	
-	private String name;
+    public static final Attribute<Integer> DICTIONARY_TOTAL_LOOKUP_LENGTH = new Attribute<>("total number of " +
+			"transitions looked up in the dictionary", false, Units.TRANSITIONS, false, false, false);
+
+    private String name;
 	private Units units;
 	private boolean isParameter;
 	private boolean isVirtual;

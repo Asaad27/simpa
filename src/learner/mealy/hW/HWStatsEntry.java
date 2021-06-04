@@ -66,7 +66,7 @@ public class HWStatsEntry extends StatsEntry {
 	public static final Attribute<Integer>RESET_CALL_NB =			Attribute.RESET_CALL_NB;
 	public static final Attribute<Integer>ORACLE_RESET_NB =			Attribute.ORACLE_RESET_NB;
 	public static final Attribute<Float> ORACLE_TRACE_PERCENTAGE =	Attribute.ORACLE_TRACE_PERCENTAGE;
-
+	public static final Attribute<Integer> DICTIONARY_TOTAL_LOOKUP_LENGTH = Attribute.DICTIONARY_TOTAL_LOOKUP_LENGTH;
 	
 	// TODO : remove the USE_SPEEDUP which not used by hW.
 	private static Attribute<?>[] attributes = new Attribute<?>[]{
@@ -106,6 +106,7 @@ public class HWStatsEntry extends StatsEntry {
 			AVG_NB_TRIED_W,
 			RESET_CALL_NB,
 			ORACLE_RESET_NB,
+			DICTIONARY_TOTAL_LOOKUP_LENGTH
 	};
 	
 	public static String getCSVHeader_s(){
@@ -155,6 +156,7 @@ public class HWStatsEntry extends StatsEntry {
 	private boolean useReset = false;
 	private float avgNbTriedWSuffixes = -1;
 	private int resetCallNb = 0;
+	private int dictionaryLookups = 0;
 
 	final StatsEntry_OraclePart oracle;
 
@@ -200,6 +202,7 @@ public class HWStatsEntry extends StatsEntry {
 		avgNbTriedWSuffixes = Float.parseFloat(st.nextToken());
 		resetCallNb = Integer.parseInt(st.nextToken());
 		st.nextToken();//Oracle reset nb
+		dictionaryLookups = Integer.parseInt(st.nextToken());
 		
 		st = new StringTokenizer(line, ",");
 		oracle = new StatsEntry_OraclePart(st, getAttributes());
@@ -385,6 +388,8 @@ public class HWStatsEntry extends StatsEntry {
 			return (T) Integer.valueOf(resetCallNb);
 		if (a == ORACLE_RESET_NB)
 			return (T) Integer.valueOf(oracle.getResetNb());
+		if (a == DICTIONARY_TOTAL_LOOKUP_LENGTH)
+			return (T) Integer.valueOf(dictionaryLookups);
 		throw new RuntimeException("unspecified attribute for this stats\n(no "+a.getName()+" in "+this.getClass()+")");
 
 	}
@@ -436,4 +441,8 @@ public class HWStatsEntry extends StatsEntry {
 	public void setAvgTriedWSuffixes(float f) {
 		avgNbTriedWSuffixes = f;
 	}
+
+    public void increaseDictionaryLookups(int totalLength) {
+		dictionaryLookups += totalLength;
+    }
 }

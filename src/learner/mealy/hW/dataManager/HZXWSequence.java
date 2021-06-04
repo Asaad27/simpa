@@ -83,6 +83,14 @@ public class HZXWSequence {
 				&& wResponse.equals(o.wResponse);
 	}
 
+	/**
+	 * Get the cumulated length of transfer, transition anc characterization
+	 * @return the total lenth of the z,x, and w
+	 */
+	public int getTotalLength() {
+		return transferSequence.size() + transition.size() + wResponse.size();
+	}
+
 	@Override
 	public int hashCode() {
 		throw new UnsupportedOperationException();
