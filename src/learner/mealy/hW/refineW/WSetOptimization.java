@@ -13,21 +13,22 @@ import javax.swing.*;
 
 public interface WSetOptimization {
 
-    public default DistinctionStruct<? extends GenericInputSequence, ? extends GenericInputSequence.GenericOutputSequence> optimizeW(DistinctionStruct<? extends GenericInputSequence, ? extends GenericInputSequence.GenericOutputSequence> wSet, LmConjecture conjecture) {
+    public default void optimizeW(DistinctionStruct<? extends GenericInputSequence, ?
+            extends GenericInputSequence.GenericOutputSequence> wSet, LmConjecture conjecture) {
         if (wSet instanceof  TotallyFixedW) {
-            return optimizePresetW((TotallyFixedW) wSet, conjecture);
+            optimizePresetW((TotallyFixedW) wSet, conjecture);
         } else if (wSet instanceof TotallyAdaptiveW){
-            return optimizeAdaptiveW((TotallyAdaptiveW) wSet, conjecture);
+            optimizeAdaptiveW((TotallyAdaptiveW) wSet, conjecture);
         } else {
             throw new IllegalStateException("No refinement strategy for class " + wSet.getClass().getTypeName());
         }
     }
 
-    public default TotallyFixedW optimizePresetW(TotallyFixedW wSet, LmConjecture conjecture) {
+    public default void optimizePresetW(TotallyFixedW wSet, LmConjecture conjecture) {
         throw new IllegalStateException("refinement for preset W is not implmented");
     }
 
-    public default TotallyAdaptiveW optimizeAdaptiveW(TotallyAdaptiveW wSet, LmConjecture conjecture) {
+    public default void optimizeAdaptiveW(TotallyAdaptiveW wSet, LmConjecture conjecture) {
         throw new IllegalStateException("refinement for adaptive W is not implmented");
     }
 

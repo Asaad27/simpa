@@ -337,6 +337,7 @@ public class HWLearner extends Learner {
 		LmTrace counterExampleTrace;
 		boolean inconsistencyFound;
 		boolean stateDiscoveredInCe = false;
+		int nrOfStates = 1;
 
 		transferOracle = getTransferOracle(options);
 		wSetOptimizer = options.getWRefinement();
@@ -404,7 +405,10 @@ public class HWLearner extends Learner {
 				counterExampleTrace = e.getCounterExampletrace();
 			}
 
-			W = wSetOptimizer.optimizeW(W, dataManager.getConjecture());
+			if (dataManager.getConjecture().getStates().size() > nrOfStates) {
+				wSetOptimizer.optimizeW(W, dataManager.getConjecture());
+			}
+			nrOfStates = dataManager.getStates().size();
 			// TODO since we apply counterExampleTrace on dataManager after
 			// processing it, it would be nicer to add it just after running it
 			// on driver.
@@ -1223,6 +1227,7 @@ public class HWLearner extends Learner {
 				if (Options.getLogLevel() != LogLevel.LOW)
 					LogManager
 							.logInfo("reusing trace " + localizedSeq.sequence);
+					stats.increaseDictionaryLookups(localizedSeq.sequence.getTotalLength());
 				dataManager.addPartiallyKnownTrace(initialState, transition,
 						wResponse);
 			} else {

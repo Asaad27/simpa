@@ -15,12 +15,36 @@ public class ReduceW implements WSetOptimization {
 
     private Map<State, Map<InputSequence, OutputSequence>> cache;
     private LmConjecture conjecture;
+    private int numberOfCalls;
+    private final int samplingRate;
+
+    /**
+     * A new instance to reduce W. The parameter k determines, that the reduce algorithm is performed only on every
+     * k-th call, i.e. the number of executing reduced is decreased by factor k.
+     *
+     * @param samplingRate k, default = 1
+     */
+    public ReduceW(int samplingRate) {
+        this.samplingRate = samplingRate;
+    }
+
+    public ReduceW() {
+        this(1);
+    }
+
+    private boolean runThisReduce() {
+        return samplingRate != 0 && numberOfCalls++ % samplingRate == 0;
+    }
 
     @Override
-    public TotallyFixedW optimizePresetW(TotallyFixedW wSet, LmConjecture conjecture) {
+    public void optimizePresetW(TotallyFixedW wSet, LmConjecture conjecture) {
         if (!conjecture.isFullyKnown()) {
             LogManager.logInfo("Skip reducing W, because Conjecture is not complete");
-            return wSet;
+            return;
+        }
+        if (!runThisReduce()) {
+            LogManager.logInfo("Intentionally skip reducing W.");
+            return;
         }
         int size = wSet.size();
         int totalLength = wSet.stream().mapToInt(InputSequence::getLength).sum();
@@ -49,7 +73,6 @@ public class ReduceW implements WSetOptimization {
             wSet.add(new InputSequence());
         }
         LogManager.logInfo("New W:" + wSet);
-        return wSet;
     }
 
     private OutputSequence apply(InputSequence is, State s) {

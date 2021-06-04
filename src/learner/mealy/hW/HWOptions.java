@@ -121,8 +121,12 @@ public class HWOptions extends OneArgChoiceOptionItem {
         switch (wRefinement.getSelectedItem().argValue) {
             case "none":
                 return new PassThroughWSet();
-            case "reduceW":
-                return new ReduceW();
+            case "reduceW1":
+                return new ReduceW(1);
+            case "reduceW2":
+                return new ReduceW(2);
+            case "reduceW3":
+                return new ReduceW(3);
           //  case "genW":
             default:
                 throw new IllegalArgumentException("There is no W-Optimization strategy \"" + wRefinement.getSelectedItem().argValue + "\"");
@@ -273,8 +277,10 @@ public class HWOptions extends OneArgChoiceOptionItem {
             {
                 OneArgChoiceOptionItem defaultChoice = new OneArgChoiceOptionItem("none", "none", this);
                 addChoice(defaultChoice);
-                addChoice(new OneArgChoiceOptionItem("reduceW", "reduceW", this));
-                addChoice(new OneArgChoiceOptionItem("genWFromConjecture", "genWFromConjecture", this));
+                addChoice(new OneArgChoiceOptionItem("reduceW1", "reduceW1", this));
+                addChoice(new OneArgChoiceOptionItem("reduceW2", "reduceW2", this));
+                addChoice(new OneArgChoiceOptionItem("reduceW3", "reduceW3", this));
+             //   addChoice(new OneArgChoiceOptionItem("genWFromConjecture", "genWFromConjecture", this));
                 setDefaultItem(defaultChoice);
             }
         };
