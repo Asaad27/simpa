@@ -101,9 +101,8 @@ public class LmTrace implements Comparable<LmTrace> {
 	 * Iterate over the given sequence and check whether the inputs applied are
 	 * the same as the ones in this trace.
 	 * 
-	 * Behavior is undefined if this trace has same inputs but is shorter than
-	 * (i.e. is a prefix of) the given sequence.
-	 * 
+	 * false, if the given seq is longer than this sequence
+	 *
 	 * @param seq
 	 *            the input sequence to check
 	 * @return false if the inputs in {@code seq} differs from this trace.
@@ -113,6 +112,9 @@ public class LmTrace implements Comparable<LmTrace> {
 		int pos = 0;
 		while (it.hasNext()) {
 			assert (pos < size()) : "undifed behavior. can be modified to return true or false";
+			if (pos == size()) { //seq is longer than this sequence -> can't be a prefix
+				return false;
+			}
 			String input = it.next();
 			if (!input.equals(getInput(pos)))
 				return false;
