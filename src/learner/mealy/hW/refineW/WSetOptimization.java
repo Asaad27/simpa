@@ -2,36 +2,43 @@ package learner.mealy.hW.refineW;
 
 import automata.mealy.GenericInputSequence;
 import automata.mealy.InputSequence;
-import automata.mealy.OutputSequence;
-import automata.mealy.distinctionStruct.Characterization;
 import automata.mealy.distinctionStruct.DistinctionStruct;
-import automata.mealy.distinctionStruct.TotallyAdaptiveW;
 import automata.mealy.distinctionStruct.TotallyFixedW;
 import learner.mealy.LmConjecture;
+import tools.loggers.LogManager;
 
-import javax.swing.*;
+import java.util.Collection;
 
 public interface WSetOptimization {
 
-    public default void optimizeW(DistinctionStruct<? extends GenericInputSequence, ?
+    default void optimizeW(DistinctionStruct<? extends GenericInputSequence, ?
             extends GenericInputSequence.GenericOutputSequence> wSet, LmConjecture conjecture) {
-        if (wSet instanceof  TotallyFixedW) {
-            optimizePresetW((TotallyFixedW) wSet, conjecture);
-        } else if (wSet instanceof TotallyAdaptiveW){
-            optimizeAdaptiveW((TotallyAdaptiveW) wSet, conjecture);
-        } else {
-            throw new IllegalStateException("No refinement strategy for class " + wSet.getClass().getTypeName());
+
+        if(!(wSet instanceof  TotallyFixedW)) {
+            throw new IllegalStateException("W set reduction not implemented for adaptive W yet");
         }
+        var w = (TotallyFixedW) wSet;
+
+        if (!conjecture.isFullyKnown()) {
+            LogManager.logInfo("Skip reducing W, because Conjecture is not complete");
+            return;
+        }
+
+        int size = w.size();
+        int totalLength = w.stream().mapToInt(InputSequence::getLength).sum();
+        var tentativeW = computeSmallerWSet(w, conjecture);
+
+        LogManager.logInfo(String.format("Reduced W. Old size %d (%d). New size: %d (%d)", size, totalLength,
+                tentativeW.size(), tentativeW.stream().mapToInt(InputSequence::getLength).sum()));
+
+        w.clear();
+        w.addAll(tentativeW);
+        if (w.isEmpty()) {
+            w.add(new InputSequence());
+        }
+        LogManager.logInfo("New W:" + w);
     }
 
-    public default void optimizePresetW(TotallyFixedW wSet, LmConjecture conjecture) {
-        throw new IllegalStateException("refinement for preset W is not implmented");
-    }
-
-    public default void optimizeAdaptiveW(TotallyAdaptiveW wSet, LmConjecture conjecture) {
-        throw new IllegalStateException("refinement for adaptive W is not implmented");
-    }
-
-
+    Collection<InputSequence> computeSmallerWSet(TotallyFixedW wSet, LmConjecture conjecture);
 
 }

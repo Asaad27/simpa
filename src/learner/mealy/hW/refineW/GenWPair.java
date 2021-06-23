@@ -3,34 +3,25 @@ package learner.mealy.hW.refineW;
 import automata.State;
 import automata.Transition;
 import automata.mealy.InputSequence;
-import automata.mealy.OutputSequence;
 import automata.mealy.distinctionStruct.TotallyFixedW;
 import learner.mealy.LmConjecture;
 import tools.loggers.LogManager;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class GenWPair implements WSetOptimization {
     Map<StatePair, InputSequence> distinguishedBy;
     Map<State, Map<String, Set<State>>> reverseInputMapping;
-    Set<InputSequence> w;
+    Set<InputSequence> newW;
     LmConjecture conjecture;
-    private Map<State, Map<InputSequence, OutputSequence>> cache;
 
-    public  void optimizePresetW(TotallyFixedW wSet, LmConjecture conjecture) {
-        if (!conjecture.isFullyKnown()) {
-            LogManager.logInfo("Skip reducing W, because Conjecture is not complete");
-            return;
-        }
+    public Collection<InputSequence> computeSmallerWSet(TotallyFixedW oldW, LmConjecture conjecture) {
         distinguishedBy = new HashMap<>();
-        w = new HashSet<>();
+        newW = new HashSet<>();
         reverseInputMapping = new HashMap<>();
         this.conjecture = conjecture;
-        cache = new HashMap<>();
-
+        var conjectureProxy = new ConjectureWrapper(conjecture);
 
         var states = conjecture.getStates();
         computeReverseInputMapping(conjecture);
@@ -39,10 +30,7 @@ public class GenWPair implements WSetOptimization {
             for (int j = 0; j < i; ++j) {
                 var s1 = states.get(i);
                 var s2 = states.get(j);
-                var distinguishingInput= findDistinguishingInput(conjecture, s1, s2);
-//                = conjecture.getInputSymbols().stream()
-//                        .filter(input -> !conjecture.getTransitionFromWithInput(s1, input).getOutput().equals(conjecture.getTransitionFromWithInput(s2, input).getOutput()))
-//                        .findAny();
+                var distinguishingInput= conjectureProxy.findDistinguishingInput(s1, s2);
                 if (distinguishingInput.isPresent()) {
                     InputSequence is = new InputSequence(distinguishingInput.get());
                     addToW(is);
@@ -65,55 +53,17 @@ public class GenWPair implements WSetOptimization {
                 }
             }
         }
-        LogManager.logInfo(String.format("Reduced W. Old size %d (%d). New size: %d (%d)", wSet.size(), wSet.stream().mapToInt(InputSequence::getLength).sum(),
-                w.size(), w.stream().mapToInt(InputSequence::getLength).sum()));
 
-        wSet.clear();
-        wSet.addAll(w);
-        if (wSet.isEmpty()) {
-            wSet.add(new InputSequence());
-        }
-        if (!isCharacterizing(wSet)) {
-            throw new IllegalStateException("reduced w-set not characterizing");
-        }
+        return newW;
     }
 
-    private OutputSequence apply(InputSequence is, State s) {
-        return cache.computeIfAbsent(s, k -> new HashMap<>())
-                .computeIfAbsent(is, k -> conjecture.apply(k, s));
-    }
 
-    private boolean isCharacterizing(Collection<InputSequence> w) {
-        List<State> states = conjecture.getStates();
-        for (int i = 0; i < states.size(); ++i) {
-            for (int j = 0; j < i; ++j) {
-                State s1 = states.get(i);
-                State s2 = states.get(j);
-                //check if s1 and s2 are not distinguished
-                if (w.stream().allMatch(is -> apply(is, s1).equals(apply(is, s2)))) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    private Optional<String> findDistinguishingInput(LmConjecture conjecture, State s1, State s2) {
-        for (var in : conjecture.getInputSymbols()) {
-            var o1 = conjecture.getTransitionFromWithInput(s1, in).getOutput();
-            var o2 = conjecture.getTransitionFromWithInput(s2, in).getOutput();
-            if (!o1.equals(o2)) {
-                return Optional.of(in);
-            }
-        }
-        return Optional.empty();
-    }
 
     private void addToW(InputSequence is) {
         for (int i = 0; i < is.getLength(); ++i) {
-            w.remove(is.getIthPreffix(i));
+            newW.remove(is.getIthPreffix(i));
         }
-        w.add(is);
+        newW.add(is);
     }
 
     private void computeReverseInputMapping(LmConjecture conjecture) {

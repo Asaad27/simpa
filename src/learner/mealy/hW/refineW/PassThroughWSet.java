@@ -1,18 +1,25 @@
 package learner.mealy.hW.refineW;
 
+import automata.mealy.GenericInputSequence;
+import automata.mealy.InputSequence;
+import automata.mealy.distinctionStruct.DistinctionStruct;
 import automata.mealy.distinctionStruct.TotallyAdaptiveW;
 import automata.mealy.distinctionStruct.TotallyFixedW;
 import learner.mealy.LmConjecture;
+import org.apache.http.MethodNotSupportedException;
+
+import java.util.Collection;
 
 public class PassThroughWSet implements WSetOptimization {
 
     @Override
-    public void optimizePresetW(TotallyFixedW wSet, LmConjecture conjecture) {
-
+    public void optimizeW(DistinctionStruct<? extends GenericInputSequence, ?
+            extends GenericInputSequence.GenericOutputSequence> wSet, LmConjecture conjecture) {
+        //intentionally do nothing here
     }
 
     @Override
-    public void optimizeAdaptiveW(TotallyAdaptiveW wSet, LmConjecture conjecture) {
-
+    public Collection<InputSequence> computeSmallerWSet(TotallyFixedW wSet, LmConjecture conjecture) {
+        throw new IllegalStateException("should not be called, since we do not reduce W");
     }
 }
