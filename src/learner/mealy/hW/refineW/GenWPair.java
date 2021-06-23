@@ -10,6 +10,8 @@ import tools.loggers.LogManager;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static learner.mealy.hW.refineW.ReduceW.reduceW;
+
 public class GenWPair implements WSetOptimization {
     Map<StatePair, InputSequence> distinguishedBy;
     Map<State, Map<String, Set<State>>> reverseInputMapping;
@@ -54,7 +56,7 @@ public class GenWPair implements WSetOptimization {
             }
         }
 
-        return newW;
+        return reduceW(conjectureProxy, new ArrayList<>(newW));
     }
 
 

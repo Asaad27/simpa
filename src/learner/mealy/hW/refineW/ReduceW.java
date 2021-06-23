@@ -21,7 +21,7 @@ public class ReduceW implements WSetOptimization {
         return tentativeW;
     }
 
-    public List<InputSequence> reduceW(ConjectureWrapper conjectureProxy, List<InputSequence> tentativeW) {
+    public static List<InputSequence> reduceW(ConjectureWrapper conjectureProxy, List<InputSequence> tentativeW) {
         while (true) {
             var smallerW = oneSeqOut(tentativeW).filter(conjectureProxy::isWSet).findAny();
             if (smallerW.isEmpty()) break;
