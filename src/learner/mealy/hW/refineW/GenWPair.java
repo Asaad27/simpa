@@ -5,7 +5,6 @@ import automata.Transition;
 import automata.mealy.InputSequence;
 import automata.mealy.distinctionStruct.TotallyFixedW;
 import learner.mealy.LmConjecture;
-import tools.loggers.LogManager;
 
 import java.util.*;
 import java.util.stream.Collectors;

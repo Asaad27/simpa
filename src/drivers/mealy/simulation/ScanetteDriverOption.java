@@ -1,7 +1,5 @@
 package drivers.mealy.simulation;
 
-import drivers.Driver;
-import drivers.mealy.simulation.scanette.Scanette;
 import options.automataOptions.DriverChoice;
 import options.automataOptions.DriverChoiceItem;
 

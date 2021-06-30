@@ -4,9 +4,9 @@ import automata.mealy.InputSequence;
 import learner.mealy.hW.dataManager.ConjectureNotConnexException;
 import learner.mealy.hW.dataManager.FullyKnownTrace;
 import learner.mealy.hW.dataManager.FullyQualifiedState;
-import tools.loggers.LogManager;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;

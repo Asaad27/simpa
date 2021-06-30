@@ -3,10 +3,8 @@ package learner.mealy.hW.refineW;
 import automata.mealy.GenericInputSequence;
 import automata.mealy.InputSequence;
 import automata.mealy.distinctionStruct.DistinctionStruct;
-import automata.mealy.distinctionStruct.TotallyAdaptiveW;
 import automata.mealy.distinctionStruct.TotallyFixedW;
 import learner.mealy.LmConjecture;
-import org.apache.http.MethodNotSupportedException;
 
 import java.util.Collection;
 

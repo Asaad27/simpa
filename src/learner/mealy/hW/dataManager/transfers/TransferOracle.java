@@ -6,7 +6,7 @@ import learner.mealy.hW.dataManager.ConjectureNotConnexException;
 import learner.mealy.hW.dataManager.FullyQualifiedState;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Comparator;
 
 public abstract class TransferOracle {
 

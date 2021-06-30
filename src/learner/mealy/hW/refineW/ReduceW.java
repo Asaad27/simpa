@@ -1,13 +1,12 @@
 package learner.mealy.hW.refineW;
 
-import automata.State;
 import automata.mealy.InputSequence;
-import automata.mealy.OutputSequence;
 import automata.mealy.distinctionStruct.TotallyFixedW;
 import learner.mealy.LmConjecture;
-import tools.loggers.LogManager;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 

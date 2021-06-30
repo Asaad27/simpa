@@ -3,14 +3,13 @@ package drivers.mealy.simulation;
 import drivers.mealy.MealyDriver;
 import drivers.mealy.simulation.scanette.FSMSupermarket;
 
-import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static drivers.mealy.simulation.scanette.FSMSupermarket.*;
+import static drivers.mealy.simulation.scanette.FSMSupermarket.ITEM_A_EAN;
+import static drivers.mealy.simulation.scanette.FSMSupermarket.ITEM_INCONNUE_EAN;
 import static java.util.Map.entry;
 
 public class ScanetteDriver extends MealyDriver {

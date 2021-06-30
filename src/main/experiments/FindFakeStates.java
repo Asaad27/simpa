@@ -1,23 +1,21 @@
 package main.experiments;
 
 import automata.mealy.Mealy;
-import drivers.Driver;
-import drivers.mealy.MealyDriver;
 import drivers.mealy.transparent.RandomMealyDriver;
 import examples.mealy.RandomMealy;
-import learner.Learner;
 import learner.mealy.LmConjecture;
 import learner.mealy.hW.HWLearner;
 import learner.mealy.hW.HWOptions;
 import learner.mealy.hW.HWStatsEntry;
 import main.simpa.Options;
 import options.valueHolders.SeedHolder;
-import org.apache.commons.collections.BagUtils;
 import stats.StatsWriter;
 import tools.GraphViz;
 import tools.loggers.LogManager;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
