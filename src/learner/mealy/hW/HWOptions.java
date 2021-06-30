@@ -12,21 +12,18 @@
  ********************************************************************************/
 package learner.mealy.hW;
 
+import drivers.mealy.MealyDriver;
+import learner.mealy.hW.refineW.*;
+import options.*;
+import options.OptionTree.ArgumentDescriptor.AcceptedValues;
+import options.automataOptions.TransparentDriverValidator;
+import options.learnerOptions.OracleOption;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
-
-import drivers.mealy.MealyDriver;
-import learner.mealy.hW.refineW.GenWPair;
-import learner.mealy.hW.refineW.PassThroughWSet;
-import learner.mealy.hW.refineW.ReduceW;
-import learner.mealy.hW.refineW.WSetOptimization;
-import options.*;
-import options.OptionTree.ArgumentDescriptor.AcceptedValues;
-import options.automataOptions.TransparentDriverValidator;
-import options.learnerOptions.OracleOption;
 
 import static options.FileOption.FileExistance.NO_CHECK;
 import static options.FileOption.FileSelectionMode.FILES_ONLY;
@@ -70,8 +67,6 @@ public class HWOptions extends OneArgChoiceOptionItem {
             validateSelectedTree();
         }
     }
-
-    ;
 
     public final BooleanOption addHInW;
     public final BooleanOption useReset;
@@ -126,6 +121,8 @@ public class HWOptions extends OneArgChoiceOptionItem {
                 return new ReduceW();
             case "genWPair":
                 return new GenWPair();
+            case "genW":
+                return new GenW();
             default:
                 throw new IllegalArgumentException("There is no W-Optimization strategy \"" + wRefinement.getSelectedItem().argValue + "\"");
         }
@@ -244,8 +241,8 @@ public class HWOptions extends OneArgChoiceOptionItem {
         useReset = new BooleanOption("use reset", "MhW_use_reset",
                 "Allows the algorithm to use reset when it seems to be necessary "
                         + "(the oracle will also use reset to check validity of conjecture).",
-                Arrays.asList((OptionTree) oracleWhenUsingReset),
-                Arrays.asList((OptionTree) oracleWithoutReset), false) {
+                Arrays.asList(oracleWhenUsingReset),
+                Arrays.asList(oracleWithoutReset), false) {
             @Override
             public String getDisableHelp() {
                 return "Infer without reseting the driver (assuming that the SUL is connected).";
@@ -277,7 +274,7 @@ public class HWOptions extends OneArgChoiceOptionItem {
                 addChoice(defaultChoice);
                 addChoice(new OneArgChoiceOptionItem("reduceW", "reduceW", this));
                 addChoice(new OneArgChoiceOptionItem("genWPair", "genWPair", this));
-            //    addChoice(new OneArgChoiceOptionItem("reduceW3", "reduceW3", this));
+                addChoice(new OneArgChoiceOptionItem("genW", "genW", this));
              //   addChoice(new OneArgChoiceOptionItem("genWFromConjecture", "genWFromConjecture", this));
                 setDefaultItem(defaultChoice);
             }

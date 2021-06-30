@@ -7,6 +7,9 @@ import learner.mealy.LmConjecture;
 
 import java.util.*;
 
+/**
+ * Proxy for a LmConjecture that caches outputs for input sequences.
+ */
 public class ConjectureWrapper {
     private final LmConjecture conjecture;
     private final Map<State, Map<InputSequence, OutputSequence>> cache;

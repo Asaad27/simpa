@@ -78,43 +78,14 @@ public class GenWPair implements WSetOptimization {
     }
 
     public Set<StatePair> getPreceedingPairs(StatePair p, String input) {
-        var s1predcessors = reverseInputMapping.getOrDefault(p.getS0(), Map.of()).getOrDefault(input, Set.of());
-        var s2predcessors = reverseInputMapping.getOrDefault(p.getS1(), Map.of()).getOrDefault(input, Set.of());
+        var s1predcessors = reverseInputMapping.getOrDefault(p.s1(), Map.of()).getOrDefault(input, Set.of());
+        var s2predcessors = reverseInputMapping.getOrDefault(p.s0(), Map.of()).getOrDefault(input, Set.of());
 
         return s1predcessors.stream()
                 .flatMap(s1 -> s2predcessors.stream().map(s2 -> new StatePair(s1, s2)))
-                .filter(pair -> !pair.getS0().equals(pair.getS1()))
+                .filter(pair -> !pair.s1().equals(pair.s0()))
                 .collect(Collectors.toSet());
     }
 
 
-    private static class StatePair {
-        State[] states;
-
-        public StatePair(State s1, State s2) {
-            states = new State[]{s1, s2};
-            Arrays.sort(states, Comparator.comparingInt(State::hashCode));
-        }
-
-        State getS1() {
-            return states[0];
-        }
-
-        State getS0() {
-            return states[1];
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            StatePair statePair = (StatePair) o;
-            return Arrays.equals(states, statePair.states);
-        }
-
-        @Override
-        public int hashCode() {
-            return Arrays.hashCode(states);
-        }
-    }
 }
