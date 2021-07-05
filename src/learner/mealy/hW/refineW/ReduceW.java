@@ -22,13 +22,13 @@ public class ReduceW implements WSetOptimization {
 
     public static List<InputSequence> reduceW(ConjectureWrapper conjectureProxy, List<InputSequence> tentativeW) {
         while (true) {
-            var smallerW = oneSeqOut(tentativeW).filter(conjectureProxy::isWSet).findAny();
+            var smallerW = oneSeqOut(tentativeW).filter(conjectureProxy::isWSet).findFirst();
             if (smallerW.isEmpty()) break;
             tentativeW = smallerW.get();
         }
 
         while (true) {
-            var smallerW = oneEventOut(tentativeW).filter(conjectureProxy::isWSet).findAny();
+            var smallerW = oneEventOut(tentativeW).filter(conjectureProxy::isWSet).findFirst();
             if (smallerW.isEmpty()) break;
             tentativeW = smallerW.get();
         }

@@ -43,14 +43,18 @@ public class ConjectureWrapper {
                 .computeIfAbsent(is, k -> conjecture.apply(k, s));
     }
 
-    public Optional<String> findDistinguishingInput(State s1, State s2) {
+    public Optional<String> findDistinguishingInput(StatePair s) {
         for (var in : conjecture.getInputSymbols()) {
-            var o1 = conjecture.getTransitionFromWithInput(s1, in).getOutput();
-            var o2 = conjecture.getTransitionFromWithInput(s2, in).getOutput();
+            var o1 = conjecture.getTransitionFromWithInput(s.s0(), in).getOutput();
+            var o2 = conjecture.getTransitionFromWithInput(s.s1(), in).getOutput();
             if (!o1.equals(o2)) {
                 return Optional.of(in);
             }
         }
         return Optional.empty();
+    }
+
+    public Optional<InputSequence> isDistinguishedByWSet(StatePair pair, Collection<InputSequence> w) {
+        return w.stream().filter(x -> !apply(x, pair.s0()).equals(apply(x, pair.s1()))).findFirst();
     }
 }

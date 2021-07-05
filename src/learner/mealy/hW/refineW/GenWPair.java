@@ -14,12 +14,12 @@ import static learner.mealy.hW.refineW.ReduceW.reduceW;
 public class GenWPair implements WSetOptimization {
     Map<StatePair, InputSequence> distinguishedBy;
     Map<State, Map<String, Set<State>>> reverseInputMapping;
-    Set<InputSequence> newW;
+    List<InputSequence> newW;
     LmConjecture conjecture;
 
     public Collection<InputSequence> computeSmallerWSet(TotallyFixedW oldW, LmConjecture conjecture) {
         distinguishedBy = new HashMap<>();
-        newW = new HashSet<>();
+        newW = new ArrayList<>();
         reverseInputMapping = new HashMap<>();
         this.conjecture = conjecture;
         var conjectureProxy = new ConjectureWrapper(conjecture);
@@ -29,38 +29,56 @@ public class GenWPair implements WSetOptimization {
         Queue<StatePair> queue = new ArrayDeque<>();
         for (int i = 0; i < states.size(); ++i) {
             for (int j = 0; j < i; ++j) {
-                var s1 = states.get(i);
-                var s2 = states.get(j);
-                var distinguishingInput= conjectureProxy.findDistinguishingInput(s1, s2);
-                if (distinguishingInput.isPresent()) {
-                    InputSequence is = new InputSequence(distinguishingInput.get());
-                    addToW(is);
-                    StatePair statePair = new StatePair(s1, s2);
+                StatePair statePair = new StatePair(states.get(i), states.get(j));
+                var distinguishingSeqInW = conjectureProxy.isDistinguishedByWSet(statePair, newW);
+                if (distinguishingSeqInW.isPresent()) {
+                    distinguishedBy.put(statePair, distinguishingSeqInW.get());
                     queue.add(statePair);
-                    distinguishedBy.put(statePair, is);
+                } else {
+                    var distinguishingInput = conjectureProxy.findDistinguishingInput(statePair);
+                    if (distinguishingInput.isPresent()) {
+                        InputSequence is = new InputSequence(distinguishingInput.get());
+                        addToW(is);
+                        queue.add(statePair);
+                        distinguishedBy.put(statePair, is);
+                    }
                 }
             }
         }
         while (!queue.isEmpty()) {
             var statePair = queue.remove();
             for (var input : conjecture.getInputSymbols()) {
-                for (var predecessor : getPreceedingPairs(statePair, input)) {
-                    if (!distinguishedBy.containsKey(predecessor)) {
-                        InputSequence distinguishingSequence = new InputSequence(input).addInputSequence(distinguishedBy.get(statePair));
-                        distinguishedBy.put(predecessor, distinguishingSequence);
-                        queue.add(predecessor);
+                for (var predecessorPair : getPreceedingPairs(statePair, input)) {
+                    //is there already a dist. sequence for this pair?
+                    if (distinguishedBy.containsKey(predecessorPair)) continue;
+                    //if not, is there a sequence in W that distinguishes this pair?
+                    var alreadyDistinguishedByOtherSequence = conjectureProxy.isDistinguishedByWSet(predecessorPair,
+                            newW);
+                    if (alreadyDistinguishedByOtherSequence.isPresent()) {
+                        distinguishedBy.put(predecessorPair, alreadyDistinguishedByOtherSequence.get());
+                    } else {
+                        //Otherwise add longer sequence
+                        InputSequence distinguishingSequence =
+                                new InputSequence(input).addInputSequence(distinguishedBy.get(statePair));
+                        distinguishedBy.put(predecessorPair, distinguishingSequence);
                         addToW(distinguishingSequence);
                     }
+                    queue.add(predecessorPair);
                 }
             }
         }
 
-        return reduceW(conjectureProxy, new ArrayList<>(newW));
+        var reducedW = reduceW(conjectureProxy, new ArrayList<>(newW));
+        assert conjectureProxy.isWSet(reducedW);
+        return reducedW;
     }
 
 
 
     private void addToW(InputSequence is) {
+        for (var w : newW) {
+            if (w.startsWith(is)) return;
+        }
         for (int i = 0; i < is.getLength(); ++i) {
             newW.remove(is.getIthPreffix(i));
         }
