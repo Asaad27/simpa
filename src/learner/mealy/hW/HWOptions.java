@@ -77,7 +77,6 @@ public class HWOptions extends OneArgChoiceOptionItem {
     private final BooleanOption addIInW;
     private final BooleanOption useAdaptiveH;
     private final BooleanOption useAdaptiveW;
-    private final FileOption transferSequencesRecord;
     public final TextOption initialW;
     public TextOption initialH;
     private final GenericOneArgChoiceOption<OneArgChoiceOptionItem> wRefinement;
@@ -129,10 +128,12 @@ public class HWOptions extends OneArgChoiceOptionItem {
     }
 
     public Optional<Path> getTransferSequenceRecord() {
-        if (getFindPathStrategy().equals("interactive-record"))
-            return Optional.of(transferSequencesRecord.getcompletePath().toPath());
-        else
+        if (getFindPathStrategy().equals("interactive-record")) {
+            var fileOption = (FileOption) findPathStrategy.getSelectedItem().subTrees.get(0);
+            return Optional.of(fileOption.getcompletePath().toPath());
+        } else {
             return Optional.empty();
+        }
     }
 
     public HWOptions(GenericOneArgChoiceOption<?> parent) {
@@ -260,10 +261,17 @@ public class HWOptions extends OneArgChoiceOptionItem {
                 "Strategy to choose a path from the current state to a not fully" +
                         " characterized state.") {
             {
-                OneArgChoiceOptionItem shortestPathChoiceItem = new OneArgChoiceOptionItem("lexicographic", "lexicographic", this);
+                OneArgChoiceOptionItem shortestPathChoiceItem = new OneArgChoiceOptionItem("lexicographic",
+                        "lexicographic", this);
                 addChoice(shortestPathChoiceItem);
                 addChoice(new OneArgChoiceOptionItem("interactive", "interactive", this));
-                addChoice(new OneArgChoiceOptionItem("interactive-record", "interactive-record", this));
+                addChoice(new OneArgChoiceOptionItem("interactive-record", "interactive-record", this) {
+                    {
+                        subTrees.add(new FileOption("--transferSequencesRecord", "Transfer Record", FILES_ONLY,
+                                NO_CHECK));
+                    }
+
+                });
                 setDefaultItem(shortestPathChoiceItem);
             }
         };
@@ -275,13 +283,10 @@ public class HWOptions extends OneArgChoiceOptionItem {
                 addChoice(new OneArgChoiceOptionItem("reduceW", "reduceW", this));
                 addChoice(new OneArgChoiceOptionItem("genWPair", "genWPair", this));
                 addChoice(new OneArgChoiceOptionItem("genW", "genW", this));
-             //   addChoice(new OneArgChoiceOptionItem("genWFromConjecture", "genWFromConjecture", this));
+                //   addChoice(new OneArgChoiceOptionItem("genWFromConjecture", "genWFromConjecture", this));
                 setDefaultItem(defaultChoice);
             }
         };
-        transferSequencesRecord = new FileOption("--transferSequencesRecord", "Transfer Record", FILES_ONLY, NO_CHECK);
-
-
         subTrees.add(useReset);
         subTrees.add(usePrecomputedW);
         subTrees.add(addHInW);
@@ -291,7 +296,6 @@ public class HWOptions extends OneArgChoiceOptionItem {
         subTrees.add(initialW);
         subTrees.add(initialH);
         subTrees.add(findPathStrategy);
-        subTrees.add(transferSequencesRecord);
         subTrees.add(wRefinement);
         for (OptionTree option : subTrees)
             option.setCategoryIfUndef(OptionCategory.ALGO_HW);
