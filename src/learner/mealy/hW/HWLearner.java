@@ -15,14 +15,8 @@
  ********************************************************************************/
 package learner.mealy.hW;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-
 import automata.State;
-import automata.mealy.AdaptiveSymbolSequence;
-import automata.mealy.GenericInputSequence;
+import automata.mealy.*;
 import automata.mealy.GenericInputSequence.GenericOutputSequence;
 import automata.mealy.distinctionStruct.Characterization;
 import automata.mealy.distinctionStruct.DistinctionStruct;
@@ -30,43 +24,30 @@ import automata.mealy.distinctionStruct.TotallyAdaptiveW;
 import automata.mealy.distinctionStruct.TotallyFixedW;
 import automata.mealy.multiTrace.SimpleMultiTrace;
 import automata.mealy.splittingTree.smetsersSplittingTree.SplittingTree;
-import automata.mealy.InputSequence;
-import automata.mealy.Mealy;
-import automata.mealy.MealyTransition;
-import automata.mealy.OutputSequence;
 import drivers.mealy.MealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
 import learner.mealy.CeExposedUnknownStateException;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
-import learner.mealy.hW.dataManager.AdaptiveHomingSequenceChecker;
-import learner.mealy.hW.dataManager.ConjectureNotConnexException;
-import learner.mealy.hW.dataManager.FullyKnownTrace;
-import learner.mealy.hW.dataManager.FullyQualifiedState;
-import learner.mealy.hW.dataManager.GenericHomingSequenceChecker;
-import learner.mealy.hW.dataManager.HZXWSequence;
-import learner.mealy.hW.dataManager.InconsistancyHMappingAndConjectureException;
-import learner.mealy.hW.dataManager.InconsistancyWhileMergingExpectedTracesException;
-import learner.mealy.hW.dataManager.InconsistancyWithConjectureAtEndOfTraceException;
-import learner.mealy.hW.dataManager.GenericHNDException;
-import learner.mealy.hW.dataManager.LocalizedHZXWSequence;
-import learner.mealy.hW.dataManager.SimplifiedDataManager;
-import learner.mealy.hW.dataManager.TraceTree;
-import learner.mealy.hW.dataManager.transfers.TransferOracle;
+import learner.mealy.hW.dataManager.*;
 import learner.mealy.hW.refineW.WSetOptimization;
 import learner.mealy.localizerBased.LocalizerBasedLearner;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
 import tools.StandaloneRandom;
-
 import tools.loggers.LogManager;
 
-import static learner.mealy.hW.dataManager.transfers.TransferOracle.getTransferOracle;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+
+import static learner.mealy.hW.dataManager.FindTransferSequence.getTransferSequenceToNextNotFullyKnownState;
+
 
 public class HWLearner extends Learner {
 
-	private TransferOracle transferOracle;
 	private WSetOptimization wSetOptimizer;
 
 	private static class CanNotExtendWException extends RuntimeException {
@@ -76,17 +57,20 @@ public class HWLearner extends Learner {
 			super("W-set cannot be extended");
 		}
 	}
-	private MealyDriver driver;
+
+	private final MealyDriver driver;
 	private SimplifiedDataManager dataManager;
 	private HWStatsEntry stats;
 	protected DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W;
 	private List<LmTrace> fullTraces;
 	private GenericOutputSequence lastDeliberatelyAppliedH = null;
 	private GenericHomingSequenceChecker hChecker = null;
-	private Map<GenericOutputSequence, List<HZXWSequence>> hZXWSequences = new HashMap<>();
-	private List<HZXWSequence> zXWSequences = new ArrayList<>();
-	/** Maps homing responses to traces subsequently applied characterization sequences (e.g. h/r.w/v r -> Trace(w,v) */
-	private Map<GenericOutputSequence, List<LmTrace>> hWSequences = new HashMap<>();
+	private final Map<GenericOutputSequence, List<HZXWSequence>> hZXWSequences = new HashMap<>();
+	private final List<HZXWSequence> zXWSequences = new ArrayList<>();
+	/**
+	 * Maps homing responses to traces subsequently applied characterization sequences (e.g. h/r.w/v r -> Trace(w,v)
+	 */
+	private final Map<GenericOutputSequence, List<LmTrace>> hWSequences = new HashMap<>();
 	int wRefinenmentNb = 0;
 	int nbOfTriedWSuffixes = 0;
 
@@ -128,9 +112,7 @@ public class HWLearner extends Learner {
 		}
 		if (totalLength != driver.getNumberOfAtomicRequest())
 			return false;
-		if (fullTraces.size() - 1 != driver.getNumberOfRequest())
-			return false;
-		return true;
+		return fullTraces.size() - 1 == driver.getNumberOfRequest();
 
 	}
 
@@ -339,7 +321,6 @@ public class HWLearner extends Learner {
 		boolean stateDiscoveredInCe = false;
 		int nrOfStates = 1;
 
-		transferOracle = getTransferOracle(options);
 		wSetOptimizer = options.getWRefinement();
 		LogManager.startNewInference();
 		do {
@@ -656,7 +637,6 @@ public class HWLearner extends Learner {
 							+ " : finally, apply distinction sequence '"
 							+ distinctionW
 							+ "' in order to raise an inconsistency of type one or two");
-					;
 					dataManager.apply(distinctionW);
 					throw new RuntimeException(
 							"an inconsistency of type one or two was expected");
@@ -1039,7 +1019,7 @@ public class HWLearner extends Learner {
 				break;
 			InputSequence alpha;
 			try {
-				alpha = transferOracle.getTransferSequenceToNextNotFullyKnownState(q);
+				alpha = getTransferSequenceToNextNotFullyKnownState(q);
 			} catch (ConjectureNotConnexException e) {
 				e.setNotFullyKnownStates(dataManager.getNotFullyKnownStates());
 				if (!options.useReset.isEnabled())
@@ -1088,9 +1068,9 @@ public class HWLearner extends Learner {
 				assert R != null;
 				assert dataManager.getCurrentState() != null;
 				try {
-					alpha = transferOracle.getTransferSequenceToNextNotFullyKnownState(R);// might throw an
-															// ConjectureNotConnex
-															// exception again
+					alpha = getTransferSequenceToNextNotFullyKnownState(R);// might throw an
+					// ConjectureNotConnex
+					// exception again
 				} catch (ConjectureNotConnexException e2) {
 					LogManager.logInfo(
 							"Some incomplete states are unreachable from the identified initial state. Stoping here and look for a counter example");

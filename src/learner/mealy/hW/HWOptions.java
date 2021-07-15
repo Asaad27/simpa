@@ -19,14 +19,9 @@ import options.OptionTree.ArgumentDescriptor.AcceptedValues;
 import options.automataOptions.TransparentDriverValidator;
 import options.learnerOptions.OracleOption;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Optional;
-
-import static options.FileOption.FileExistance.NO_CHECK;
-import static options.FileOption.FileSelectionMode.FILES_ONLY;
 
 public class HWOptions extends OneArgChoiceOptionItem {
 
@@ -105,11 +100,6 @@ public class HWOptions extends OneArgChoiceOptionItem {
 
     private final OracleOption oracleWhenUsingReset;
     private final OracleOption oracleWithoutReset;
-    private final GenericOneArgChoiceOption<OneArgChoiceOptionItem> findPathStrategy;
-
-    public String getFindPathStrategy() {
-        return findPathStrategy.getSelectedItem().argValue;
-    }
 
     public WSetOptimization getWRefinement() {
         switch (wRefinement.getSelectedItem().argValue) {
@@ -123,15 +113,6 @@ public class HWOptions extends OneArgChoiceOptionItem {
                 return new GenW();
             default:
                 throw new IllegalArgumentException("There is no W-Optimization strategy \"" + wRefinement.getSelectedItem().argValue + "\"");
-        }
-    }
-
-    public Optional<Path> getTransferSequenceRecord() {
-        if (getFindPathStrategy().equals("interactive-record")) {
-            var fileOption = (FileOption) findPathStrategy.getSelectedItem().subTrees.get(0);
-            return Optional.of(fileOption.getcompletePath().toPath());
-        } else {
-            return Optional.empty();
         }
     }
 
@@ -258,25 +239,6 @@ public class HWOptions extends OneArgChoiceOptionItem {
                         "--MhW_without_reset", this);
             }
         };
-        findPathStrategy = new GenericOneArgChoiceOption<>("--transferOracle", "Transfer Oracle",
-                "Strategy to choose a path from the current state to a not fully" +
-                        " characterized state.") {
-            {
-                OneArgChoiceOptionItem shortestPathChoiceItem = new OneArgChoiceOptionItem("lexicographic",
-                        "lexicographic", this);
-                addChoice(shortestPathChoiceItem);
-                addChoice(new OneArgChoiceOptionItem("interactive", "interactive", this));
-                addChoice(new OneArgChoiceOptionItem("interactive-record", "interactive-record", this) {
-                    {
-                        subTrees.add(new FileOption("--transferSequencesRecord", "Transfer Record if the " +
-                                "interactive-record option is chosen", FILES_ONLY,
-                                NO_CHECK));
-                    }
-
-                });
-                setDefaultItem(shortestPathChoiceItem);
-            }
-        };
         wRefinement = new GenericOneArgChoiceOption<>("--wRefinement", "refine W-set after subinference",
                 "Strategy that attempts to reduce the size of W after every subinference.") {
             {
@@ -296,7 +258,6 @@ public class HWOptions extends OneArgChoiceOptionItem {
         subTrees.add(searchCeInTrace);
         subTrees.add(initialW);
         subTrees.add(initialH);
-        subTrees.add(findPathStrategy);
         subTrees.add(wRefinement);
         for (OptionTree option : subTrees)
             option.setCategoryIfUndef(OptionCategory.ALGO_HW);
