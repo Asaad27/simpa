@@ -9,9 +9,9 @@ import learner.mealy.LmConjecture;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static learner.mealy.hW.refineW.ReduceW.reduceW;
+import static learner.mealy.hW.refineW.PruneW.reduceW;
 
-public class GenWPair implements WSetOptimization {
+public class GenWPart implements WSetOptimization {
     Map<StatePair, InputSequence> distinguishedBy;
     Map<State, Map<String, Set<State>>> reverseInputMapping;
     List<InputSequence> newW;

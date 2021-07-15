@@ -8,9 +8,9 @@ import learner.mealy.hW.refineW.ProductMachine.Node;
 
 import java.util.*;
 
-import static learner.mealy.hW.refineW.ReduceW.reduceW;
+import static learner.mealy.hW.refineW.PruneW.reduceW;
 
-public class GenW implements WSetOptimization {
+public class GenWProd implements WSetOptimization {
     private ProductMachine pm;
     private ConjectureWrapper conjectureWrapper;
     private Set<StatePair> distinguishedStatePairs;

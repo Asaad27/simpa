@@ -105,12 +105,12 @@ public class HWOptions extends OneArgChoiceOptionItem {
         switch (wRefinement.getSelectedItem().argValue) {
             case "none":
                 return new PassThroughWSet();
-            case "reduceW":
-                return new ReduceW();
-            case "genWPair":
-                return new GenWPair();
-            case "genW":
-                return new GenW();
+            case "pruneW":
+                return new PruneW();
+            case "genWPart":
+                return new GenWPart();
+            case "genWProd":
+                return new GenWProd();
             default:
                 throw new IllegalArgumentException("There is no W-Optimization strategy \"" + wRefinement.getSelectedItem().argValue + "\"");
         }
@@ -242,11 +242,11 @@ public class HWOptions extends OneArgChoiceOptionItem {
         wRefinement = new GenericOneArgChoiceOption<>("--wRefinement", "refine W-set after subinference",
                 "Strategy that attempts to reduce the size of W after every subinference.") {
             {
-                OneArgChoiceOptionItem reduceW = new OneArgChoiceOptionItem("reduceW", "reduceW", this);
+                OneArgChoiceOptionItem reduceW = new OneArgChoiceOptionItem("pruneW", "pruneW", this);
                 addChoice(new OneArgChoiceOptionItem("none", "none", this));
                 addChoice(reduceW);
-                addChoice(new OneArgChoiceOptionItem("genWPair", "genWPair", this));
-                addChoice(new OneArgChoiceOptionItem("genW", "genW", this));
+                addChoice(new OneArgChoiceOptionItem("genWPart", "genWPart", this));
+                addChoice(new OneArgChoiceOptionItem("genWProd", "genWProd", this));
                 setDefaultItem(reduceW);
             }
         };

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class ReduceW implements WSetOptimization {
+public class PruneW implements WSetOptimization {
 
     @Override
     public Collection<InputSequence> computeSmallerWSet(TotallyFixedW wSet, LmConjecture conjecture) {
