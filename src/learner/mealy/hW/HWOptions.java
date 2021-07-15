@@ -31,7 +31,6 @@ import static options.FileOption.FileSelectionMode.FILES_ONLY;
 public class HWOptions extends OneArgChoiceOptionItem {
 
 
-
     class PreComputedW extends BooleanOption {
         private final TransparentDriverValidator driverValidator = new TransparentDriverValidator() {
             @Override
@@ -231,11 +230,13 @@ public class HWOptions extends OneArgChoiceOptionItem {
             }
 
         };
-        initialW = new TextOption("--MhW_initial_W", "", "initial W-set", "W-set to" +
+        initialW = new TextOption("MhW_initial_W", "", "initial W-set", "W-set to" +
                 " use " +
-                "for the first subinference (default: empty set)");
+                "for the first subinference (default: empty set). Input sequences are seperated by commas, inputs " +
+                "within a sequence are seperated by dots. Example: in1.in2,in3.in1,in4");
         initialH = new TextOption("--MhW_initial_h", "", "intial homing sequence", "homing sequence to use in the " +
-                "first subinference (default: empty sequence)");
+                "first subinference (default: empty sequence). Inputs within sequence are seperated by dots. Example:" +
+                " a.b.c");
         oracleWithoutReset = new OracleOption(false);
         oracleWhenUsingReset = new OracleOption(true);
 
@@ -267,7 +268,8 @@ public class HWOptions extends OneArgChoiceOptionItem {
                 addChoice(new OneArgChoiceOptionItem("interactive", "interactive", this));
                 addChoice(new OneArgChoiceOptionItem("interactive-record", "interactive-record", this) {
                     {
-                        subTrees.add(new FileOption("--transferSequencesRecord", "Transfer Record", FILES_ONLY,
+                        subTrees.add(new FileOption("--transferSequencesRecord", "Transfer Record if the " +
+                                "interactive-record option is chosen", FILES_ONLY,
                                 NO_CHECK));
                     }
 
@@ -278,13 +280,12 @@ public class HWOptions extends OneArgChoiceOptionItem {
         wRefinement = new GenericOneArgChoiceOption<>("--wRefinement", "refine W-set after subinference",
                 "Strategy that attempts to reduce the size of W after every subinference.") {
             {
-                OneArgChoiceOptionItem defaultChoice = new OneArgChoiceOptionItem("none", "none", this);
-                addChoice(defaultChoice);
-                addChoice(new OneArgChoiceOptionItem("reduceW", "reduceW", this));
+                OneArgChoiceOptionItem reduceW = new OneArgChoiceOptionItem("reduceW", "reduceW", this);
+                addChoice(new OneArgChoiceOptionItem("none", "none", this));
+                addChoice(reduceW);
                 addChoice(new OneArgChoiceOptionItem("genWPair", "genWPair", this));
                 addChoice(new OneArgChoiceOptionItem("genW", "genW", this));
-                //   addChoice(new OneArgChoiceOptionItem("genWFromConjecture", "genWFromConjecture", this));
-                setDefaultItem(defaultChoice);
+                setDefaultItem(reduceW);
             }
         };
         subTrees.add(useReset);
