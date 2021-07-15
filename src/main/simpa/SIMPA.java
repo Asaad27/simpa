@@ -17,53 +17,20 @@
  ********************************************************************************/
 package main.simpa;
 
-import java.awt.Container;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.HeadlessException;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.Writer;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.StringTokenizer;
-import java.util.function.Predicate;
-
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.ScrollPaneLayout;
-
 import automata.mealy.InputSequence;
 import drivers.Driver;
 import drivers.ExhaustiveGeneratorOption;
-//EFSM//import drivers.efsm.EFSMDriver;
 import drivers.efsm.real.GenericDriver;
 import drivers.efsm.real.ScanDriver;
 import drivers.mealy.MealyDriver;
-import drivers.mealy.simulation.TransitionLogger;
 import learner.Learner;
 import learner.mealy.LmConjecture;
 import main.simpa.Options.LogLevel;
 import options.MultiArgChoiceOptionItem;
 import options.OptionTree;
 import options.OptionValidator;
-import options.OptionsGroup;
 import options.OptionValidator.CriticalityLevel;
+import options.OptionsGroup;
 import options.automataOptions.AutomataChoice;
 import options.automataOptions.PostDriverValidator;
 import options.modeOptions.ModeOption;
@@ -80,6 +47,17 @@ import tools.Utils;
 import tools.loggers.HTMLLogger;
 import tools.loggers.LogManager;
 import tools.loggers.TextLogger;
+import tools.loggers.TransitionLogger;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.*;
+import java.util.function.Predicate;
 
 abstract class Option<T> {
 	protected String consoleName;
@@ -300,39 +278,40 @@ public class SIMPA {
 
 
 	// ZQ options
-	private static BooleanOption STOP_AT_CE_SEARCH = new BooleanOption("--stopatce",
+	private static final BooleanOption STOP_AT_CE_SEARCH = new BooleanOption("--stopatce",
 			"Stop inference when a counter exemple is asked");
-	private static StringOption INITIAL_INPUT_SYMBOLS = new StringOption("-I", "Initial input symbols (a,b,c)",
+	private static final StringOption INITIAL_INPUT_SYMBOLS = new StringOption("-I", "Initial input symbols (a,b,c)",
 			Options.INITIAL_INPUT_SYMBOLS);
-	private static StringOption INITIAL_INPUT_SEQUENCES = new StringOption("-Z",
+	private static final StringOption INITIAL_INPUT_SEQUENCES = new StringOption("-Z",
 			"Initial distinguishing sequences (a-b,a-c,a-c-b))", Options.INITIAL_INPUT_SEQUENCES);
-	private static BooleanOption INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = new BooleanOption("-I=X",
+	private static final BooleanOption INITIAL_INPUT_SYMBOLS_EQUALS_TO_X = new BooleanOption("-I=X",
 			"Initial input symbols set to X");
-	private static Option<?>[] ZQOptions = new Option<?>[] { STOP_AT_CE_SEARCH,
+	private static final Option<?>[] ZQOptions = new Option<?>[]{STOP_AT_CE_SEARCH,
 			INITIAL_INPUT_SYMBOLS,
-			INITIAL_INPUT_SEQUENCES, INITIAL_INPUT_SYMBOLS_EQUALS_TO_X };
-
+			INITIAL_INPUT_SEQUENCES, INITIAL_INPUT_SYMBOLS_EQUALS_TO_X};
 
 
 	// Random driver options
-	private static IntegerOption MIN_STATE = new IntegerOption("--minstates",
+	private static final IntegerOption MIN_STATE = new IntegerOption("--minstates",
 			"Minimal number of states for random automatas", Options.MINSTATES);
-	private static IntegerOption MAX_STATE = new IntegerOption("--maxstates",
+	private static final IntegerOption MAX_STATE = new IntegerOption("--maxstates",
 			"Maximal number of states for random automatas", Options.MAXSTATES);
-	private static IntegerOption MIN_INPUT_SYM = new IntegerOption("--mininputsym",
+	private static final IntegerOption MIN_INPUT_SYM = new IntegerOption("--mininputsym",
 			"Minimal number of input symbols for random automatas", Options.MININPUTSYM);
-	private static IntegerOption MAX_INPUT_SYM = new IntegerOption("--maxinputsym",
+	private static final IntegerOption MAX_INPUT_SYM = new IntegerOption("--maxinputsym",
 			"Maximal number of input symbols for random automatas", Options.MAXINPUTSYM);
-	private static IntegerOption MIN_OUTPUT_SYM = new IntegerOption("--minoutputsym",
-			"Minimal number of output symbols for random automatas\nThat is the minimal number used for output symbol genration but it is possible that less symbols are used",
+	private static final IntegerOption MIN_OUTPUT_SYM = new IntegerOption("--minoutputsym",
+			"Minimal number of output symbols for random automatas\nThat is the minimal number used for output symbol " +
+                    "genration but it is possible that less symbols are used",
 			Options.MINOUTPUTSYM);
-	private static IntegerOption MAX_OUTPUT_SYM = new IntegerOption("--maxoutputsym",
+	private static final IntegerOption MAX_OUTPUT_SYM = new IntegerOption("--maxoutputsym",
 			"Maximal number of output symbols for random automatas", Options.MAXOUTPUTSYM);
-	private static IntegerOption TRANSITION_PERCENT = new IntegerOption("--transitions",
-			"percentage of loop in random automatas\nSome other loop may be generated randomly so it's a minimal percentage",
+	private static final IntegerOption TRANSITION_PERCENT = new IntegerOption("--transitions",
+			"percentage of loop in random automatas\nSome other loop may be generated randomly so it's a minimal " +
+                    "percentage",
 			Options.TRANSITIONPERCENT);
-	private static Option<?>[] randomAutomataOptions = new Option<?>[] { MIN_STATE, MAX_STATE, MIN_INPUT_SYM,
-			MAX_INPUT_SYM, MIN_OUTPUT_SYM, MAX_OUTPUT_SYM, TRANSITION_PERCENT };
+	private static final Option<?>[] randomAutomataOptions = new Option<?>[]{MIN_STATE, MAX_STATE, MIN_INPUT_SYM,
+			MAX_INPUT_SYM, MIN_OUTPUT_SYM, MAX_OUTPUT_SYM, TRANSITION_PERCENT};
 
 	private static void parse(String[] args, ArrayList<Boolean> used, Option<?>[] options) {
 		for (Option<?> o : options)
@@ -459,15 +438,14 @@ public class SIMPA {
 				return false;
 			}
 		} else if (selectedMode == modeOption.stats) {
-			if (!run_stats())
-				return false;
+			return run_stats();
 		}
 		return true;
 	}
 
 	private static class InvalidOptionException extends Exception {
 		private static final long serialVersionUID = -1383827043195278927L;
-	};
+	}
 
 	private static class WrongConjectureException extends Exception {
 		private static final long serialVersionUID = -7414261848736360688L;
@@ -489,9 +467,7 @@ public class SIMPA {
 		Predicate<OptionValidator> postDriverPredicate = new Predicate<OptionValidator>() {
 					@Override
 					public boolean test(OptionValidator t) {
-						if (t instanceof PostDriverValidator)
-					return true;
-				return false;
+						return t instanceof PostDriverValidator;
 					}
 		};
 		if (allOptions.validateSelectedTree(true, postDriverPredicate.negate())
@@ -609,8 +585,8 @@ public class SIMPA {
 			for (File statFile : Options.getStatsCSVDir().listFiles()) {
 				String statName = statFile.getName().substring(0,
 						statFile.getName().length() - 4);
-				statName = statName.substring(statName.lastIndexOf(".") + 1,
-						statName.length());
+				statName = statName.substring(statName.lastIndexOf(".") + 1
+				);
 				System.out.println("\tmaking graph for " + statName);
 				Utils.cleanDir(Options.getStatsGraphDir());
 				StatsSet stats = new StatsSet(statFile);
@@ -727,7 +703,7 @@ public class SIMPA {
 			Runtime.getRuntime().gc();
 			System.out.println("\t" + testedAutomata);
 				learnAndSaveOneTime();
-				testedAutomata++;
+			testedAutomata++;
 
 
 		}
@@ -737,7 +713,7 @@ public class SIMPA {
 
 
 	public static AutomataChoice automataChoice = new AutomataChoice();
-	private static ModeOption modeOption = new ModeOption(automataChoice);
+	private static final ModeOption modeOption = new ModeOption(automataChoice);
 
 	static OutputOptions getOutputsOptions() {
 		if (modeOption.getSelectedItem() == modeOption.simple)
@@ -752,7 +728,7 @@ public class SIMPA {
 		return getOutputsOptions().logLevel.getSelectedItem().level;
 	}
 
-	private static OptionsGroup allOptions = new OptionsGroup("all") {
+	private static final OptionsGroup allOptions = new OptionsGroup("all") {
 		{
 			addSubOption(automataChoice);
 			addSubOption(modeOption);

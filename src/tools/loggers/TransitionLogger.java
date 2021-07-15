@@ -1,11 +1,10 @@
-package drivers.mealy.simulation;
+package tools.loggers;
 
 import automata.mealy.GenericInputSequence;
 import automata.mealy.distinctionStruct.DistinctionStruct;
 import learner.mealy.LmConjecture;
 import main.simpa.Options;
 import options.OptionsGroup;
-import tools.loggers.ILogger;
 
 import java.io.IOException;
 import java.io.Writer;
