@@ -211,7 +211,7 @@ public class HWOptions extends OneArgChoiceOptionItem {
             }
 
         };
-        initialW = new TextOption("MhW_initial_W", "", "initial W-set", "W-set to" +
+        initialW = new TextOption("--MhW_initial_W", "", "initial W-set", "W-set to" +
                 " use " +
                 "for the first subinference (default: empty set). Input sequences are seperated by commas, inputs " +
                 "within a sequence are seperated by dots. Example: in1.in2,in3.in1,in4");
