@@ -12,14 +12,8 @@
  ********************************************************************************/
 package drivers.mealy;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
 import automata.State;
+import automata.Transition;
 import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
@@ -29,6 +23,9 @@ import learner.mealy.LmConjecture;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
 import tools.loggers.LogManager;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class AutomatonMealyDriver extends MealyDriver {
 
@@ -58,7 +55,7 @@ public class AutomatonMealyDriver extends MealyDriver {
 	}
 
 	@Override
-	public final String execute_implem(String input) {
+	public final String execute_defined(String input) {
 		assert currentState != null : "is the initial state of driver specified ?";
 		previousState = currentState;
 		String output = null;
@@ -66,10 +63,10 @@ public class AutomatonMealyDriver extends MealyDriver {
 			MealyTransition currentTrans = automata
 					.getTransitionFromWithInput(currentState, input);
 			if (currentTrans != null) {
-				output = new String(currentTrans.getOutput());
+				output = currentTrans.getOutput();
 				currentState = currentTrans.getTo();
 			} else {
-				output = new String();
+				output = "";
 			}
 		}
 		return output;
@@ -86,11 +83,19 @@ public class AutomatonMealyDriver extends MealyDriver {
 		return is;
 	}
 
+	@Override
+	public List<String> getDefinedInputs() {
+		return automata.getTransitionFrom(currentState)
+				.stream()
+				.map(Transition::getInput)
+				.sorted().collect(Collectors.toList());
+	}
+
 	/**
 	 * get the number of states in driver if the driver is transparent.
-	 * 
+	 *
 	 * @return the number of states in driver or {@code null} if the driver is
-	 *         not transparent.
+	 * not transparent.
 	 */
 	public Integer getStateCount() {
 		if (this instanceof TransparentMealyDriver) {

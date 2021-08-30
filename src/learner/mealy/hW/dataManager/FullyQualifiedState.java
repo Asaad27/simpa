@@ -12,13 +12,6 @@
  ********************************************************************************/
 package learner.mealy.hW.dataManager;
 
-import java.util.*;
-
-import tools.loggers.LogManager;
-
-import learner.mealy.LmConjecture;
-import learner.mealy.LmTrace;
-import main.simpa.Options;
 import automata.State;
 import automata.mealy.GenericInputSequence;
 import automata.mealy.GenericInputSequence.GenericOutputSequence;
@@ -26,25 +19,34 @@ import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
 import automata.mealy.distinctionStruct.Characterization;
+import learner.mealy.LmConjecture;
+import learner.mealy.LmTrace;
+import main.simpa.Options;
+import tools.loggers.LogManager;
 
-public class FullyQualifiedState{
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static drivers.mealy.MealyDriver.OUTPUT_FOR_UNDEFINED_INPUT;
+
+public class FullyQualifiedState {
 	private final Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> WResponses;
 	// TODO V should be a mapping from String to FullyKnownTrace (or can be
 	// removed because it will duplicate T (which already duplicate the
 	// conjecture))
-	private Map<LmTrace, FullyKnownTrace> V;//FullyKnownTrace starting from this node
-	private Map<String, PartiallyKnownTrace> K;//PartialyllyKnownTrace starting from this node
-	private Map<String, FullyKnownTrace> T;//Fully known transitions starting from this node
-	private Set<String> R_;//Complementary set of R : unknown transition
+	private final Map<LmTrace, FullyKnownTrace> V;//FullyKnownTrace starting from this node
+	private final Map<String, PartiallyKnownTrace> K;//PartialyllyKnownTrace starting from this node
+	private final Map<String, FullyKnownTrace> T;//Fully known transitions starting from this node
+	private final Set<String> R_;//Complementary set of R : unknown transition
 	private final State state;
 	private boolean markedAsSink = false;
-	
-	private TraceTree expectedTraces;
-	private Map<String, List<LocalizedHZXWSequence>> toLocalizeHZXWSequences = new HashMap<>();
-	private  List<LocalizedHZXWSequence>notYetInWSequences=new LinkedList<>();
 
-	private List<State> driverStates;
-	
+	private final TraceTree expectedTraces;
+	private final Map<String, List<LocalizedHZXWSequence>> toLocalizeHZXWSequences = new HashMap<>();
+	private final List<LocalizedHZXWSequence> notYetInWSequences = new LinkedList<>();
+
+	private final List<State> driverStates;
+
 	public List<LocalizedHZXWSequence> getPendingSequences(String input) {
 		List<LocalizedHZXWSequence> list = toLocalizeHZXWSequences.get(input);
 		if (list == null) {
@@ -60,7 +62,7 @@ public class FullyQualifiedState{
 	 * sequence can be useless at one time and will be needed later to complete
 	 * characterization of a state. The elements returned are removed from
 	 * storage of this state and will not be returned on another call.
-	 * 
+	 *
 	 * @return the elements which will bring information to characterize the
 	 *         state after one transition or which can create a W-ND.
 	 * @see #hZXWSequenceIsInNeededW(LocalizedHZXWSequence)
@@ -212,8 +214,8 @@ public class FullyQualifiedState{
 			}
 		}
 	}
-	
-	public Boolean equals(FullyQualifiedState other){
+
+	public Boolean equals(FullyQualifiedState other) {
 		return WResponses.equals(other.WResponses);
 	}
 
@@ -222,19 +224,21 @@ public class FullyQualifiedState{
 	}
 
 	/**
+	 * Adds a learned transition to the conjecture and cleans up data structures that store traces.
 	 * this method must be called by DataManager because in order to have T and V coherent
+	 *
 	 * @param v a trace starting from this state
 	 */
-	protected boolean addFullyKnownTrace(FullyKnownTrace v){
+	protected boolean addFullyKnownTrace(FullyKnownTrace v) {
 		assert v.getStart() == this;
-		if (V.containsKey(v.getTrace())){
+		if (V.containsKey(v.getTrace())) {
 			return false;
 		}
 		if (Options.getLogLevel() != Options.LogLevel.LOW)
 			LogManager.logInfo("New transition found : " + v);
 		LinkedList<LmTrace> toRemove = new LinkedList<LmTrace>();
-		for (FullyKnownTrace knownV : V.values()){
-			if (v.getTrace().equals(knownV.getTrace().subtrace(0, v.getTrace().size()))){
+		for (FullyKnownTrace knownV : V.values()) {
+			if (v.getTrace().equals(knownV.getTrace().subtrace(0, v.getTrace().size()))) {
 				FullyKnownTrace vToAdd = new FullyKnownTrace(v.getEnd(), knownV.getTrace().subtrace(v.getTrace().size(), knownV.getTrace().size()), knownV.getEnd());
 				if (Options.getLogLevel() != Options.LogLevel.LOW)
 					LogManager.logInfo("Split transition : " + v + " + " + vToAdd);
@@ -367,7 +371,11 @@ public class FullyQualifiedState{
 				|| V.get(T.get(input).getTrace()).equals(T.get(input));
 		return T.get(input);
 	}
-	
+
+	public Collection<FullyKnownTrace> getKnownTransitions() {
+		return T.values();
+	}
+
 	protected void addPartiallyKnownTrace(LmTrace transition, LmTrace print) {
 		PartiallyKnownTrace k = getKEntry(transition);
 		k.addPrint(print);
@@ -377,8 +385,9 @@ public class FullyQualifiedState{
 		boolean result = expectedTraces.addTrace(trace);
 		assert (result);
 	}
-	
+
 	/**
+	 *
 	 */
 	protected List<? extends GenericInputSequence> getwNotInK(
 			LmTrace transition) {
@@ -463,11 +472,23 @@ public class FullyQualifiedState{
 	 * Indicate if a state has been identified as a sink by
 	 * {@link #markAsSink()}. There is no computation in this method to
 	 * calculate if the state is a sink or not.
-	 * 
+	 *
 	 * @return {@code true} if {@link #markAsSink()} has been called on this
-	 *         state or one of its parent, {@code false} otherwise.
+	 * state or one of its parent, {@code false} otherwise.
 	 */
 	public boolean isMarkedAsSink() {
 		return markedAsSink;
+	}
+
+	/**
+	 * Returns all inputs which are marked as undefined.
+	 *
+	 * @return
+	 */
+	public List<String> getUndefinedInputs() {
+		return T.values().stream()
+				.filter(t -> t.getTrace().getOutput(0).equals(OUTPUT_FOR_UNDEFINED_INPUT))
+				.map(t -> t.getTrace().getInput(0))
+				.sorted().collect(Collectors.toList());
 	}
 }

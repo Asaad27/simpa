@@ -12,22 +12,11 @@
  ********************************************************************************/
 package drivers.mealy.real.mqtt;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import drivers.mealy.real.RealDriver;
+import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
-import drivers.mealy.real.RealDriver;
+import java.util.*;
 
 public class MQTT extends RealDriver {
 
@@ -213,7 +202,7 @@ public class MQTT extends RealDriver {
 	}
 
 	@Override
-	public String execute_implem(String input) {
+	public String execute_defined(String input) {
 
 		String output = execute_intern(input);
 		sleepTimeout();

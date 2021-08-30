@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
+import static drivers.mealy.MealyDriver.OUTPUT_FOR_UNDEFINED_INPUT;
 import static learner.mealy.hW.dataManager.FindTransferSequence.getTransferSequenceToNextNotFullyKnownState;
 
 
@@ -79,7 +80,7 @@ public class HWLearner extends Learner {
 	/**
 	 * Verify that recorded trace can be produced by the driver (need a
 	 * Transparent driver). This method is for assert and debug.
-	 * 
+	 *
 	 * @return false if one trace produce a different output when executed on
 	 *         driver.
 	 */
@@ -99,7 +100,7 @@ public class HWLearner extends Learner {
 	/**
 	 * try to check that all executions on driver are recorded in
 	 * {@link #fullTraces}. This method is for assertions and debug.
-	 * 
+	 *
 	 * @return false if there is an inconsistency between driver and traces
 	 *         recorded.
 	 */
@@ -164,7 +165,7 @@ public class HWLearner extends Learner {
 	/**
 	 * Add a new sequence in a W-set. If an element of W is a prefix of new
 	 * sequence, it is replaced by the new sequence.
-	 * 
+	 *
 	 * @param newW
 	 *            The sequence to add in W. This is not allowed to be a prefix
 	 *            of an existing sequence in W
@@ -505,7 +506,7 @@ public class HWLearner extends Learner {
 		float duration = (float) (System.nanoTime() - start) / 1000000000;
 		stats.setDuration(duration);
 		stats.setAvgTriedWSuffixes((float)nbOfTriedWSuffixes/wRefinenmentNb);
-	
+
 		stats.updateMemory((int) (runtime.totalMemory() - runtime.freeMemory()));
 		stats.finalUpdate(dataManager);
 		dataManager.getConjecture().exportToDot();
@@ -533,11 +534,11 @@ public class HWLearner extends Learner {
 	/**
 	 * Extends W-set according to a list of characterizations which will be
 	 * extended by suffixes of trace.
-	 * 
+	 *
 	 * There might be different ways of increasing W. Current implementation
 	 * take the shortest suffix of {@code trace} which is not already in the
 	 * given characterization.
-	 * 
+	 *
 	 * @param states
 	 *            the states used to know which characterization should be
 	 *            extended.
@@ -686,9 +687,9 @@ public class HWLearner extends Learner {
 	 * Use a detected inconsistency showing that h is not a homing sequence for
 	 * conjecture and try to transform this into an inconsistency of type one or
 	 * two.
-	 * 
+	 *
 	 * This function suppose that the reachable part of conjecture is complete.
-	 * 
+	 *
 	 * @param aStart
 	 *            a reachable State giving the same answer than bStart to h but
 	 *            leading in a different state.
@@ -790,7 +791,7 @@ public class HWLearner extends Learner {
 	 * This method calls
 	 * {@link #searchAndProceedCEInOneTrace(LmTrace, FullyQualifiedState, int)}
 	 * on all traces observed until a counter example is found.
-	 * 
+	 *
 	 * @return true if one counter example is found, false otherwise
 	 */
 	private boolean searchAndProceedCEInTrace() {
@@ -819,7 +820,7 @@ public class HWLearner extends Learner {
 
 	/**
 	 * search an inconsistency between a trace and the conjecture.
-	 * 
+	 *
 	 * @param trace
 	 *            a trace observed from real automaton
 	 * @param currentState
@@ -1073,7 +1074,8 @@ public class HWLearner extends Learner {
 					// exception again
 				} catch (ConjectureNotConnexException e2) {
 					LogManager.logInfo(
-							"Some incomplete states are unreachable from the identified initial state. Stoping here and look for a counter example");
+							"Some incomplete states are unreachable from the identified initial state. Stoping here " +
+									"and look for a counter example");
 					throw e;
 				}
 			}
@@ -1083,9 +1085,33 @@ public class HWLearner extends Learner {
 			lastKnownQ = dataManager.getCurrentState();
 
 			Set<String> X = dataManager.getxNotInR(lastKnownQ);
+			//Add loops for no-nops
+			List<String> undefInputsDriver = driver.getUndefinedInputs();
+			if (lastKnownQ.getKnownTransitions().isEmpty()) {
+				//the first time we encounter this state
+				// -> add loops for all undefined inputs intputs
+				for (String input : undefInputsDriver) {
+					FullyKnownTrace trace = new FullyKnownTrace(lastKnownQ, new LmTrace(input,
+							OUTPUT_FOR_UNDEFINED_INPUT), lastKnownQ);
+					dataManager.addFullyKnownTrace(trace);
+				}
+			} else {
+				//second time we encounter this state
+				//check the current driver states has the same defined inputs as the model state
+				var undefInputsModel = lastKnownQ.getUndefinedInputs();
+				var counterexample = undefInputsModel.stream()
+						.filter(x -> !undefInputsDriver.contains(x)).
+						findFirst()
+						.or(() -> undefInputsDriver.stream()
+								.filter(y -> !undefInputsModel.contains(y))
+								.findFirst());
+				//we've found one different input -> trigger an inconsistency
+				counterexample.ifPresent(s -> dataManager.apply(s));
+			}
+
 			assert !X.isEmpty();
 			String x = X.iterator().next(); // here we CHOOSE to take the
-											// first
+			// first
 			LogManager.logInfo("We choose transition x = " + x + " in " + X);
 			String o = dataManager.apply(x);
 			sigma = new LmTrace(x, o);
@@ -1147,7 +1173,7 @@ public class HWLearner extends Learner {
 	private void proceedReadyHZXW(
 			List<LocalizedHZXWSequence> readyForReapplyHZXWSequence) {
 		assert options.useDictionary.isEnabled();
-		
+
 		for (LocalizedHZXWSequence localizedSeq : readyForReapplyHZXWSequence) {
 			LmTrace transition = localizedSeq.sequence.getTransition();
 			FullyQualifiedState initialState = localizedSeq.endOfTransferState;
@@ -1251,7 +1277,7 @@ public class HWLearner extends Learner {
 		return stats;
 	}
 
-	
+
 	private FullyQualifiedState localize(SimplifiedDataManager dataManager) {
 		LogManager.logInfo("Localizing...");
 		FullyQualifiedState s = dataManager.getCurrentState();
@@ -1294,16 +1320,16 @@ public class HWLearner extends Learner {
 	/**
 	 * This function check equivalence between conjecture and a reference dot
 	 * file. It needs to have a complete conjecture.
-	 * 
+	 *
 	 * This function is not needed by the algorithm itself, this is a tool for
 	 * improving usage of this learner. Actually, it was written for article
 	 * JSS2018 when we experimented the inference of muted versions of a same
 	 * software.
-	 * 
+	 *
 	 * The procedure to use this is to infer the normal software, save the
 	 * generated dot file, and then add a call to this function at the end of
 	 * learner with the reference dot file as argument.
-	 * 
+	 *
 	 * @param referenceFile
 	 *            the dot file containing reference automata
 	 * @return true if conjecture is equivalent to reference automata.

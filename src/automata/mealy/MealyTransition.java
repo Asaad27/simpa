@@ -16,6 +16,8 @@ package automata.mealy;
 import automata.State;
 import automata.Transition;
 
+import static drivers.mealy.MealyDriver.OUTPUT_FOR_UNDEFINED_INPUT;
+
 public class MealyTransition extends Transition {
 	private static final long serialVersionUID = 6719440643049324689L;
 
@@ -23,7 +25,7 @@ public class MealyTransition extends Transition {
 	protected Mealy automata;
 
 	public MealyTransition(Mealy automata, State s1, State s2, String input,
-			String output) {
+						   String output) {
 		super(s1, s2, input);
 		this.output = output;
 		this.automata = automata;
@@ -33,11 +35,15 @@ public class MealyTransition extends Transition {
 		return output;
 	}
 
+	public boolean isUndefined() {
+		return output.equals(OUTPUT_FOR_UNDEFINED_INPUT);
+	}
+
 	public void setOutput(String symbol) {
 		output = symbol;
 	}
-	
-	public boolean isLoop(){
+
+	public boolean isLoop() {
 		return from.equals(to);
 	}
 

@@ -15,19 +15,6 @@
  ********************************************************************************/
 package automata.mealy;
 
-import java.io.*;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import automata.Automata;
 import automata.State;
 import automata.Transition;
@@ -46,6 +33,13 @@ import options.valueHolders.SeedHolder;
 import tools.DotParser;
 import tools.GraphViz;
 import tools.loggers.LogManager;
+
+import java.io.*;
+import java.net.URL;
+import java.util.*;
+import java.util.Map.Entry;
+
+import static drivers.mealy.MealyDriver.OUTPUT_FOR_UNDEFINED_INPUT;
 
 public class Mealy extends Automata implements Serializable {
 	private static final long serialVersionUID = 3590635279837551088L;
@@ -168,9 +162,12 @@ public class Mealy extends Automata implements Serializable {
 	public MealyTransition getTransitionFromWithInput(State s, String input) {
 		assert states.contains(s);
 		Map<String, MealyTransition> map = transitions.get(s);
-		if (map != null)
+		if (map == null) return null;
+		if (map.containsKey(input)) { //is transition defined?
 			return map.get(input);
-		return null;
+		} else {
+			return new MealyTransition(this, s, s, input, OUTPUT_FOR_UNDEFINED_INPUT);
+		}
 	}
 
 	public MealyTransition getTransitionFromWithInput(State s, String input, boolean loop) {
@@ -331,7 +328,6 @@ public class Mealy extends Automata implements Serializable {
 		while (it.hasNext()) {
 			String input = it.next();
 			MealyTransition t = getTransitionFromWithInput(s, input);
-			assert t != null;
 			s = t.getTo();
 			it.setPreviousOutput(t.getOutput());
 		}
@@ -367,6 +363,7 @@ public class Mealy extends Automata implements Serializable {
 		while (it.hasNext()) {
 			String input = it.next();
 			MealyTransition t = getTransitionFromWithInput(s, input);
+			if (t == null) t = new MealyTransition(this, s, s, input, OUTPUT_FOR_UNDEFINED_INPUT);
 			assert t != null;
 			s = t.getTo();
 			it.setPreviousOutput(t.getOutput());
@@ -817,7 +814,6 @@ for (int j=i+1;j<getStateCount();j++){
 	public int countCharacterization(
 			DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W) {
 		Set<Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence>> characterizations = new HashSet<>();
-		;
 		for (State s : getStates()) {
 			Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> characterization = W
 					.getEmptyCharacterization();

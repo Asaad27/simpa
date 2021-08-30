@@ -15,32 +15,23 @@ package drivers.mealy.real;
 
 import gov.nist.javax.sip.header.ProxyAuthenticate;
 import gov.nist.javax.sip.header.WWWAuthenticate;
-
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.sip.address.Address;
-import javax.sip.address.AddressFactory;
-import javax.sip.address.URI;
-import javax.sip.header.AuthorizationHeader;
-import javax.sip.header.FromHeader;
-import javax.sip.header.HeaderFactory;
-import javax.sip.header.ProxyAuthorizationHeader;
-import javax.sip.header.RecordRouteHeader;
-import javax.sip.header.ToHeader;
-import javax.sip.header.ViaHeader;
-import javax.sip.message.MessageFactory;
-import javax.sip.message.Request;
-import javax.sip.message.Response;
-
 import org.cafesip.sipunit.SipPhone;
 import org.cafesip.sipunit.SipStack;
-
 import tools.DigestClientAuthenticationMethod;
 import tools.UDPSend;
 import tools.Utils;
 import tools.loggers.LogManager;
+
+import javax.sip.address.Address;
+import javax.sip.address.AddressFactory;
+import javax.sip.address.URI;
+import javax.sip.header.*;
+import javax.sip.message.MessageFactory;
+import javax.sip.message.Request;
+import javax.sip.message.Response;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SIPDriverIPTel extends RealDriver {
 
@@ -50,8 +41,8 @@ public class SIPDriverIPTel extends RealDriver {
 	private AddressFactory addr_factory;
 	private HeaderFactory hdr_factory;
 
-	private String HOST = "82.233.118.237";
-	private int PORT = 5070;
+	private final String HOST = "82.233.118.237";
+	private final int PORT = 5070;
 	private long cseq = 1;
 	private Response lastResp = null;
 	private AuthorizationHeader lastInvite = null;
@@ -313,7 +304,7 @@ public class SIPDriverIPTel extends RealDriver {
 	}
 
 	@Override
-	public String execute_implem(String input) {
+	public String execute_defined(String input) {
 		Request req = abstractToConcrete(input);
 		LogManager.logInfo("\n" + req.toString());
 		Response resp = null;

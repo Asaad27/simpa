@@ -15,20 +15,10 @@
  ********************************************************************************/
 package drivers.mealy;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Set;
-
 import automata.State;
-import automata.mealy.GenericInputSequence;
+import automata.mealy.*;
 import automata.mealy.GenericInputSequence.GenericOutputSequence;
 import automata.mealy.GenericInputSequence.Iterator;
-import automata.mealy.InputSequence;
-import automata.mealy.Mealy;
-import automata.mealy.MealyTransition;
-import automata.mealy.OutputSequence;
 import automata.mealy.multiTrace.MultiTrace;
 import automata.mealy.multiTrace.NoRecordMultiTrace;
 import drivers.Driver;
@@ -44,7 +34,38 @@ import tools.RandomGenerator;
 import tools.StandaloneRandom;
 import tools.loggers.LogManager;
 
+import java.util.*;
+
+import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.toList;
+
 public abstract class MealyDriver extends Driver<String, String> {
+	public static final String OUTPUT_FOR_UNDEFINED_INPUT = "undefined";
+	private Set<String> definedInputsForCurrentState;
+
+	/**
+	 * Returns the input symbols availabel in the current state.
+	 * Drivers for partial machines can overwrite this method. The default implementation passes all inputs returned by
+	 * {@link MealyDriver#getInputSymbols()}
+	 *
+	 * @return
+	 */
+	protected List<String> getDefinedInputs() {
+		return getInputSymbols();
+	}
+
+	public boolean isDefined(String input) {
+		if (Objects.isNull(definedInputsForCurrentState))
+			definedInputsForCurrentState = new TreeSet<>(getDefinedInputs());
+		return definedInputsForCurrentState.contains(input);
+	}
+
+	public List<String> getUndefinedInputs() {
+		return getInputSymbols().stream()
+				.filter(not(this::isDefined))
+				.collect(toList());
+	}
+
 	public class UnableToComputeException extends Exception {
 		private static final long serialVersionUID = -6169240870495799817L;
 
@@ -80,12 +101,31 @@ public abstract class MealyDriver extends Driver<String, String> {
 	}
 
 	public final OutputSequence execute(InputSequence in) {
-		OutputSequence out=new OutputSequence();
-		for (String i:in.sequence){
+		OutputSequence out = new OutputSequence();
+		for (String i : in.sequence) {
 			out.addOutput(execute(i));
 		}
 		return out;
 	}
+
+	protected final String execute_implem(String input) {
+		if (isDefined(input)) {
+			var out = execute_defined(input);
+			definedInputsForCurrentState = new TreeSet<>(getDefinedInputs());
+			return out;
+		}
+		return OUTPUT_FOR_UNDEFINED_INPUT;
+	}
+
+	/**
+	 * Execute an input on the SUT and return the output.
+	 * Will only be called with defined inputs, i.e. strings that are contained in the set returned  by
+	 * {@link MealyDriver#getDefinedInputs()}
+	 *
+	 * @param input
+	 * @return
+	 */
+	protected abstract String execute_defined(String input);
 
 	@Override
 	public abstract List<String> getInputSymbols();
@@ -97,7 +137,7 @@ public abstract class MealyDriver extends Driver<String, String> {
 
 	/**
 	 * Search a counter-example.
-	 * 
+	 *
 	 * @param options
 	 *            the options for oracle selection and settings
 	 * @param conjecture
@@ -169,7 +209,7 @@ public abstract class MealyDriver extends Driver<String, String> {
 
 	/**
 	 * Search a counter example by using a distinction tree
-	 * 
+	 *
 	 * @param c
 	 *            the conjecture to test
 	 * @param curentState
@@ -202,7 +242,7 @@ public abstract class MealyDriver extends Driver<String, String> {
 	 * Same as
 	 * {@link #getCounterExample(OracleOption, LmConjecture, State, MultiTrace, Boolean, StatsEntry_OraclePart)}
 	 * but this method do not record statistics.
-	 * 
+	 *
 	 * @throws CeExposedUnknownStateException
 	 *             if a new state is found while searching the initial state in
 	 *             conjecture (during the potential call to
@@ -431,7 +471,7 @@ public abstract class MealyDriver extends Driver<String, String> {
 	/**
 	 * compute an input sequence s.t. the output sequence entirely define the
 	 * final state
-	 * 
+	 *
 	 * @return null if a such sequence cannot be computed
 	 * @throws UnableToComputeException
 	 */
@@ -459,15 +499,15 @@ public abstract class MealyDriver extends Driver<String, String> {
 		return false;
 	}
 
-	
+
 	/**
 	 * Synchronize the driver and the given automata to a given state (without
 	 * using a transparent box). It apply inputs on driver to eliminate states
 	 * in automata.
-	 * 
+	 *
 	 * If driver is not equivalent to automata, this method MIGHT find a
 	 * counterexample.
-	 * 
+	 *
 	 * @param automata
 	 *            the automata to synchronize with.
 	 * @param trace
@@ -567,7 +607,7 @@ public abstract class MealyDriver extends Driver<String, String> {
 
 	/**
 	 * check if conjecture is compatible with this driver.
-	 * 
+	 *
 	 * @param conj
 	 *            the conjecture to test.
 	 * @return {@code false} if a discrepancy is found between conjecture and
@@ -629,5 +669,5 @@ public abstract class MealyDriver extends Driver<String, String> {
 
 		return true;
 	}
-	
+
 }

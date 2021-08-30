@@ -12,23 +12,22 @@
  ********************************************************************************/
 package drivers.mealy.real;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.List;
-
 import automata.mealy.InputSequence;
 import tools.StandaloneRandom;
 import tools.Utils;
 import tools.loggers.LogManager;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
+
 /**
  * This driver is an interface to an arduino-based heating manager. The original
  * manager is too complex but it can be simplified (reducing counters) to be
  * able to infer it.
- * 
- * @author Nicolas BREMOND
  *
+ * @author Nicolas BREMOND
  */
 public class HeatingSystem extends RealDriver {
 	public static class SUIDiedException extends RuntimeException {
@@ -39,7 +38,7 @@ public class HeatingSystem extends RealDriver {
 		}
 	}
 
-	private static String EXEC_PATH = "../../cheminée/arduino/simu/simulator";
+	private static final String EXEC_PATH = "../../cheminée/arduino/simu/simulator";
 	Runtime RT = Runtime.getRuntime();
 	Process process = null;
 	private OutputStream processInput;
@@ -53,7 +52,7 @@ public class HeatingSystem extends RealDriver {
 	}
 
 	@Override
-	public String execute_implem(String input) {
+	public String execute_defined(String input) {
 		if (process == null)
 			reset();
 		assert !input.contains("\n");
@@ -105,11 +104,11 @@ public class HeatingSystem extends RealDriver {
 				EOLseen = true;
 			}
 		}
-		byte b[] = new byte[4096];
+		byte[] b = new byte[4096];
 		try {
 			process.getErrorStream().read(b);
 			// System.out.println(input+new String(b));
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

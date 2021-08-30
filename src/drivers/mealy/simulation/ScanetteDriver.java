@@ -44,7 +44,7 @@ public class ScanetteDriver extends MealyDriver {
     }
 
     @Override
-    protected String execute_implem(String input) {
+    protected String execute_defined(String input) {
         if (!actions.containsKey(input)) {
             throw new IllegalArgumentException("Learner tried to applied non-existing input " + input);
         }

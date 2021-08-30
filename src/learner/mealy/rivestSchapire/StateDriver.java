@@ -13,8 +13,6 @@
  ********************************************************************************/
 package learner.mealy.rivestSchapire;
 
-import java.util.List;
-
 import automata.State;
 import automata.mealy.OutputSequence;
 import automata.mealy.multiTrace.MultiTrace;
@@ -27,94 +25,99 @@ import options.learnerOptions.OracleOption;
 import stats.StatsEntry_OraclePart;
 import tools.loggers.LogManager;
 
+import java.util.List;
+
 class StateDriver extends MealyDriver {
-	class ThreadEndException extends RuntimeException{
-		private static final long serialVersionUID = -2529130613268413483L;
+    class ThreadEndException extends RuntimeException {
+        private static final long serialVersionUID = -2529130613268413483L;
 
-	}
-	private MealyDriver realDriver;
-	protected OutputSequence homingSequenceResponse;
-	private Learner stateLearner;
-	protected RivestSchapireLearner learner;
-	protected Thread thread;
-	private boolean resetDone;
-	protected boolean paused;
-	private String prefix;
-	private int globalTraceLengthBeforeLastCE = 0;
+    }
 
-	/**
-	 * should be invoke only if we are in  the initial state of this driver (i.e reset() has no effect)
-	 */
-	StateDriver(MealyDriver realDriver, OutputSequence response, RivestSchapireLearner learner){
-		super(realDriver.getSystemName() + " for state " + response);
-		homingSequenceResponse = response;
-		StringBuilder prefixBuilder = new StringBuilder();
-		prefixBuilder.append("[");
-		for (String o : homingSequenceResponse.sequence)
+    private final MealyDriver realDriver;
+    protected OutputSequence homingSequenceResponse;
+    private final Learner stateLearner;
+    protected RivestSchapireLearner learner;
+    protected Thread thread;
+    private boolean resetDone;
+    protected boolean paused;
+    private final String prefix;
+    private int globalTraceLengthBeforeLastCE = 0;
+
+    /**
+     * should be invoke only if we are in  the initial state of this driver (i.e reset() has no effect)
+     */
+    StateDriver(MealyDriver realDriver, OutputSequence response, RivestSchapireLearner learner) {
+        super(realDriver.getSystemName() + " for state " + response);
+        homingSequenceResponse = response;
+        StringBuilder prefixBuilder = new StringBuilder();
+        prefixBuilder.append("[");
+        for (String o : homingSequenceResponse.sequence)
 			prefixBuilder.append(o + ", ");
 		if (homingSequenceResponse.getLength()==0)
 			prefixBuilder.append("empty ");
 		prefixBuilder.setCharAt(prefixBuilder.length()-1, ']');
-		prefixBuilder.append(", ");
-		prefix = prefixBuilder.toString();
-		this.realDriver = realDriver;
-		this.learner = learner;
-		resetDone = true;
-		stateLearner = (learner.hIsGiven)
-				? new LmLearner(this, learner.options.lmOptions)
-				: new LmForRSLearner(this, learner.options.lmOptions,
-						learner.options.seedForProbabilistic);
-		paused = true;
-		class R implements Runnable{
-			private Learner learner;
-			private StateDriver d;
-			R(Learner l, StateDriver s){
-				learner = l;
-				d = s;
-			}
-			@Override
-			public void run(){
-				d.learner.lock.lock();
-				try{
-					LogManager.logInfo("thread started");
-					learner.learn();
-					d.getLearner().finishedLearner = d;
-					LogManager.logInfo(d.homingSequenceResponse + " learner has finish");
-				}catch(ThreadEndException e){
-					LogManager.logInfo(d.homingSequenceResponse + " interrupted");
-				} catch (KnownTracesTree.InconsistencyException e) {
-					d.learner.threadThrown = e;
-				}catch(Throwable e){
-					LogManager.logInfo("Exception caught in thread " + homingSequenceResponse);
-					LogManager.logException("in thread "+homingSequenceResponse, new Exception(e));
-					d.learner.threadThrown = e;
+        prefixBuilder.append(", ");
+        prefix = prefixBuilder.toString();
+        this.realDriver = realDriver;
+        this.learner = learner;
+        resetDone = true;
+        stateLearner = (learner.hIsGiven)
+                ? new LmLearner(this, learner.options.lmOptions)
+                : new LmForRSLearner(this, learner.options.lmOptions,
+                learner.options.seedForProbabilistic);
+        paused = true;
+        class R implements Runnable {
+            private final Learner learner;
+            private final StateDriver d;
+
+            R(Learner l, StateDriver s) {
+                learner = l;
+                d = s;
+            }
+
+            @Override
+            public void run() {
+                d.learner.lock.lock();
+                try {
+                    LogManager.logInfo("thread started");
+                    learner.learn();
+                    d.getLearner().finishedLearner = d;
+                    LogManager.logInfo(d.homingSequenceResponse + " learner has finish");
+                } catch (ThreadEndException e) {
+                    LogManager.logInfo(d.homingSequenceResponse + " interrupted");
+                } catch (KnownTracesTree.InconsistencyException e) {
+                    d.learner.threadThrown = e;
+                } catch (Throwable e) {
+                    LogManager.logInfo("Exception caught in thread " + homingSequenceResponse);
+                    LogManager.logException("in thread " + homingSequenceResponse, new Exception(e));
+                    d.learner.threadThrown = e;
 				}finally {
 					d.learner.lock.unlock();
-				}
-			}
-		}
-		thread = new Thread(new R(stateLearner, this));
-		thread.start();
-	}
+                }
+            }
+        }
+        thread = new Thread(new R(stateLearner, this));
+        thread.start();
+    }
 
-	protected void computeStep(){
-		thread.notify();
-	}
+    protected void computeStep() {
+        thread.notify();
+    }
 
-	@Override
-	protected String execute_implem(String i) {
-		resetDone = false;
-		return realDriver.execute(i);
-	}
+    @Override
+    protected String execute_defined(String i) {
+        resetDone = false;
+        return realDriver.execute(i);
+    }
 
-	@Override
-	public List<String> getInputSymbols(){
-		return realDriver.getInputSymbols();
-	}
+    @Override
+    public List<String> getInputSymbols() {
+        return realDriver.getInputSymbols();
+    }
 
-	//	//this let us to have a global dictionary for used CE.
-	//	public InputSequence getRandomCounterExemple(Mealy c){
-	//		return realDriver.getRandomCounterExemple(c); // this do not work because returned CE start from initial state of realDriver
+    //	//this let us to have a global dictionary for used CE.
+    //	public InputSequence getRandomCounterExemple(Mealy c){
+    //		return realDriver.getRandomCounterExemple(c); // this do not work because returned CE start from initial state of realDriver
 	//	}
 
 	@Override

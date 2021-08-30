@@ -12,27 +12,14 @@
  ********************************************************************************/
 package learner.mealy.hW.dataManager;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import automata.State;
 import automata.mealy.GenericInputSequence;
 import automata.mealy.GenericInputSequence.GenericOutputSequence;
+import automata.mealy.InputSequence;
+import automata.mealy.Mealy;
+import automata.mealy.OutputSequence;
 import automata.mealy.distinctionStruct.Characterization;
 import automata.mealy.distinctionStruct.DistinctionStruct;
-import automata.mealy.InputSequence;
-import automata.mealy.OutputSequence;
-import automata.mealy.Mealy;
-import automata.State;
 import drivers.mealy.MealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.mealy.LmConjecture;
@@ -41,58 +28,64 @@ import main.simpa.Options;
 import main.simpa.Options.LogLevel;
 import tools.loggers.LogManager;
 
+import java.util.*;
+
 public class SimplifiedDataManager {
 	public static SimplifiedDataManager instance;// TODO either make a proper
-													// singleton either do
-													// something else
-	private MealyDriver driver;
+	// singleton either do
+	// something else
+	private final MealyDriver driver;
 	private int numberOfInputsApplied;
-	private List<LmTrace> globalTraces;
+	private final List<LmTrace> globalTraces;
 	private LmTrace traceSinceReset;
-	private final DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W; // Characterization
-																										// set
+	private final DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W; //
+	// Characterization
+	// set
 	public final GenericInputSequence h;
 	private final ArrayList<String> I;// Input Symbols
-	private Map<Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence>, FullyQualifiedState> Q;// known
+	private final Map<Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence>,
+			FullyQualifiedState> Q;// known
 
 	// states
-	private Set<FullyQualifiedState> notFullyKnownStates;// Fully qualified
-															// states with
-															// undefined
-															// transitions
-	private HWConjecture conjecture;
+	private final Set<FullyQualifiedState> notFullyKnownStates;// Fully qualified
+	// states with
+	// undefined
+	// transitions
+	private final HWConjecture conjecture;
 	private FullyQualifiedState currentState;
 	private FullyQualifiedState lastknownState = null;
 	private int lastknownStatePos = 0;
 
-	private Map<GenericOutputSequence, FullyQualifiedState> hResponse2State;
-	private Map<GenericOutputSequence, Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence>> hResponse2Wresponses;
-	private GenericHomingSequenceChecker hChecker;
+	private final Map<GenericOutputSequence, FullyQualifiedState> hResponse2State;
+	private final Map<GenericOutputSequence, Characterization<? extends GenericInputSequence, ?
+			extends GenericOutputSequence>> hResponse2Wresponses;
+	private final GenericHomingSequenceChecker hChecker;
 
 	private Collection<TraceTree> expectedTraces;
-	
-	private Map<GenericOutputSequence, List<HZXWSequence>> hZXWSequences;
-	private List<HZXWSequence> zXWSequences;
-	private Map<GenericOutputSequence, List<LmTrace>> hWSequences;
+
+	private final Map<GenericOutputSequence, List<HZXWSequence>> hZXWSequences;
+	private final List<HZXWSequence> zXWSequences;
+	private final Map<GenericOutputSequence, List<LmTrace>> hWSequences;
 	private List<LocalizedHZXWSequence> readyForReapplyHZXWSequence = new ArrayList<>();
 
-	protected Collection<FullyQualifiedState> identifiedFakeStates=new ArrayList<>();
-	private Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> initialStateCharacterization;
+	protected Collection<FullyQualifiedState> identifiedFakeStates = new ArrayList<>();
+	private final Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> initialStateCharacterization;
 	private FullyQualifiedState initialState;
 
 	public Collection<FullyQualifiedState> getIdentifiedFakeStates() {
 		return identifiedFakeStates;
 	}
-	public int getHResponsesNb(){
+
+	public int getHResponsesNb() {
 		return hResponse2State.keySet().size();
 	}
 
 	public FullyQualifiedState getState(GenericOutputSequence hResponse) {
 		assert hResponse.checkCompatibilityWith(h);
 		getOrCreateWResponseAfterHresponse(hResponse);// create an empty
-														// characterization and
-														// possibly fill it from
-														// dictionary.
+		// characterization and
+		// possibly fill it from
+		// dictionary.
 		FullyQualifiedState s = hResponse2State.get(hResponse);
 		if (s == null && W.isEmpty()) {
 			s = getFullyQualifiedState(W.getEmptyCharacterization());
@@ -240,14 +233,18 @@ public class SimplifiedDataManager {
 			getInitialCharacterization();
 		}
 	}
-	
-	private void extendTrace(String input, String output){
+
+	public void extendInputAlphabet(List<String> newInputSymbols) {
+
+	}
+
+	private void extendTrace(String input, String output) {
 		numberOfInputsApplied++;
 		traceSinceReset.append(input, output);
 	}
-	
+
 	public String walkWithoutCheck(String input, String output,
-			List<GenericHNDException> hExceptions) {
+								   List<GenericHNDException> hExceptions) {
 		extendTrace(input, output);
 		String expectedOutput = null;
 		// check for Non-Determinism after homing sequence
@@ -392,7 +389,7 @@ public class SimplifiedDataManager {
 		readyForReapplyHZXWSequence.addAll(start.pollSequencesNeededInW());
 	}
 
-	protected void addFullyKnownTrace(FullyKnownTrace v) {
+	public void addFullyKnownTrace(FullyKnownTrace v) {
 		v.getStart().addFullyKnownTrace(v);
 		assert v.getTrace().size() == 1;
 		String input = v.getTrace().getInput(0);
