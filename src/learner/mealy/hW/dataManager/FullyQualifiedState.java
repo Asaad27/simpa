@@ -491,4 +491,14 @@ public class FullyQualifiedState {
 				.map(t -> t.getTrace().getInput(0))
 				.sorted().collect(Collectors.toList());
 	}
+
+	/**
+	 * Updates the data structures
+	 *
+	 * @param newInputSymbols
+	 */
+	public void extendInputAlphabet(List<String> newInputSymbols) {
+		R_.addAll(newInputSymbols);
+
+	}
 }

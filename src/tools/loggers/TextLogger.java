@@ -14,28 +14,11 @@
  ********************************************************************************/
 package tools.loggers;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import learner.efsm.table.LiControlTable;
-import learner.efsm.table.LiControlTableItem;
-import learner.efsm.table.LiControlTableRow;
-import learner.efsm.table.LiDataTable;
-import learner.efsm.table.LiDataTableItem;
-import learner.efsm.table.LiDataTableRow;
-import learner.efsm.table.NBP;
-import learner.efsm.table.NDF;
-import learner.efsm.table.NDV;
+import automata.State;
+import automata.efsm.ParameterizedInput;
+import automata.efsm.ParameterizedInputSequence;
+import automata.efsm.ParameterizedOutput;
+import learner.efsm.table.*;
 import learner.efsm.tree.ZXObservationNode;
 import learner.mealy.table.LmControlTable;
 import learner.mealy.table.LmControlTableItem;
@@ -43,37 +26,37 @@ import learner.mealy.table.LmControlTableRow;
 import learner.mealy.tree.ZObservationNode;
 import main.simpa.Options;
 import main.simpa.SIMPA;
-import automata.State;
-import automata.efsm.ParameterizedInput;
-import automata.efsm.ParameterizedInputSequence;
-import automata.efsm.ParameterizedOutput;
-import automata.mealy.InputSequence;
+
+import java.io.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class TextLogger implements ILogger {
-	private File file;
-	private File dir;
-	private DateFormat tfm;
-	private DateFormat dfm;
-	private DateFormat filenameFm;
-	private Writer writer = null;
-	private String ret = null;
+    private File file;
+    private final File dir;
+    private final DateFormat tfm;
+    private final DateFormat dfm;
+    private final DateFormat filenameFm;
+    private Writer writer = null;
+    private String ret = null;
 
-	public TextLogger() {
-		ret = System.getProperty("line.separator");
-		dir = Options.getLogDir();
-		filenameFm = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS");
-		tfm = new SimpleDateFormat("[HH:mm:ss:SSS] ");
-		dfm = new SimpleDateFormat("MM/dd/yyyy");
-		try {
-			if (!dir.isDirectory()) {
-				if (!dir.mkdirs())
-					throw new IOException("unable to create "
-							+ dir.getAbsolutePath() + " directory");
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    public TextLogger() {
+        ret = System.getProperty("line.separator");
+        dir = Options.getLogDir();
+        filenameFm = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS");
+        tfm = new SimpleDateFormat("[HH:mm:ss:SSS] ");
+        dfm = new SimpleDateFormat("MM/dd/yyyy");
+        try {
+            if (!dir.isDirectory()) {
+                if (!dir.mkdirs())
+                    throw new IOException("unable to create "
+                            + dir.getAbsolutePath() + " directory");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 	
 	@Override
 	public void logFatalError(String s) {
@@ -103,20 +86,20 @@ public class TextLogger implements ILogger {
 				}
 			}
 			StringBuilder s = new StringBuilder(ret
-					+ printLine(width, l.inputSymbols.size()));
-			s.append(tfm.format(new Date())).append("|").append(pad("", width.get(0))).append("|");
-			for (int i = 0; i < nbSymbols; i++)
-				s.append(pad(l.inputSymbols.get(i), width.get(i + 1))).append("|");
-			s.append(ret).append(printLine(width, nbSymbols));
-			for (LiControlTableRow ctr : l.S)
-				s.append(printRows(ctr, width));
-			s.append(printLine(width, nbSymbols));
-			for (LiControlTableRow ctr : l.R)
-				s.append(printRows(ctr, width));
-			s.append(printLine(width, nbSymbols));
-			writer.write(s.toString() + ret);
-			writer.flush();
-		} catch (IOException e) {
+                    + printLine(width, l.inputSymbols.size()));
+            s.append(tfm.format(new Date())).append("|").append(pad("", width.get(0))).append("|");
+            for (int i = 0; i < nbSymbols; i++)
+                s.append(pad(l.inputSymbols.get(i), width.get(i + 1))).append("|");
+            s.append(ret).append(printLine(width, nbSymbols));
+            for (LiControlTableRow ctr : l.S)
+                s.append(printRows(ctr, width));
+            s.append(printLine(width, nbSymbols));
+            for (LiControlTableRow ctr : l.R)
+                s.append(printRows(ctr, width));
+            s.append(printLine(width, nbSymbols));
+            writer.write(s + ret);
+            writer.flush();
+        } catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -143,20 +126,20 @@ public class TextLogger implements ILogger {
 						width.set(i + 1, maxwidth);
 				}
 			}
-			StringBuilder s = new StringBuilder(ret + printLine(width, nbCols));
-			s.append(tfm.format(new Date())).append("|").append(pad("", width.get(0))).append("|");
-			for (int i = 0; i < nbCols; i++)
-				s.append(pad(l.getColSuffix(i).toString(), width.get(i + 1))).append("|");
-			s.append(ret).append(printLine(width, nbCols));
-			for (LmControlTableRow ctr : l.S)
-				s.append(printRows(ctr, width));
-			s.append(printLine(width, nbCols));
-			for (LmControlTableRow ctr : l.R)
-				s.append(printRows(ctr, width));
-			s.append(printLine(width, nbCols));
-			writer.write(s.toString() + ret);
-			writer.flush();
-		} catch (IOException e) {
+            StringBuilder s = new StringBuilder(ret + printLine(width, nbCols));
+            s.append(tfm.format(new Date())).append("|").append(pad("", width.get(0))).append("|");
+            for (int i = 0; i < nbCols; i++)
+                s.append(pad(l.getColSuffix(i).toString(), width.get(i + 1))).append("|");
+            s.append(ret).append(printLine(width, nbCols));
+            for (LmControlTableRow ctr : l.S)
+                s.append(printRows(ctr, width));
+            s.append(printLine(width, nbCols));
+            for (LmControlTableRow ctr : l.R)
+                s.append(printRows(ctr, width));
+            s.append(printLine(width, nbCols));
+            writer.write(s + ret);
+            writer.flush();
+        } catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -182,20 +165,20 @@ public class TextLogger implements ILogger {
 				}
 			}
 			StringBuilder s = new StringBuilder(printLine(width, nbSymbols));
-			s.append(tfm.format(new Date())).append("|").append(pad(" ", width.get(0))).append("|");
-			for (int i = 0; i < nbSymbols; i++)
-				s.append(pad(l.inputSymbols.get(i), width.get(i + 1))).append("|");
-			s.append(ret);
-			s.append(printLine(width, nbSymbols));
-			for (LiDataTableRow dtr : l.S)
-				s.append(printRows(dtr, width));
-			s.append(printLine(width, nbSymbols));
-			for (LiDataTableRow dtr : l.R)
-				s.append(printRows(dtr, width));
-			s.append(printLine(width, nbSymbols));
-			writer.write(s.toString() + ret);
-			writer.flush();
-		} catch (IOException e) {
+            s.append(tfm.format(new Date())).append("|").append(pad(" ", width.get(0))).append("|");
+            for (int i = 0; i < nbSymbols; i++)
+                s.append(pad(l.inputSymbols.get(i), width.get(i + 1))).append("|");
+            s.append(ret);
+            s.append(printLine(width, nbSymbols));
+            for (LiDataTableRow dtr : l.S)
+                s.append(printRows(dtr, width));
+            s.append(printLine(width, nbSymbols));
+            for (LiDataTableRow dtr : l.R)
+                s.append(printRows(dtr, width));
+            s.append(printLine(width, nbSymbols));
+            writer.write(s + ret);
+            writer.flush();
+        } catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -387,20 +370,20 @@ public class TextLogger implements ILogger {
 		String s = null;
 		switch (step) {
 		case LogManager.STEPNDV:
-			s = "NDV : " + NDV.class.cast(o).toString();
+            s = "NDV : " + o.toString();
 			break;
 		case LogManager.STEPNBP:
-			s = "NBP : " + NBP.class.cast(o).toString();
+            s = "NBP : " + o.toString();
 			break;
 		case LogManager.STEPNCR:
-			if (o instanceof ParameterizedInputSequence)
-				s = "NCR : "
-						+ ParameterizedInputSequence.class.cast(o).toString();
-			else
-				s = "NCR : " + InputSequence.class.cast(o).toString();
+            if (o instanceof ParameterizedInputSequence)
+                s = "NCR : "
+                        + o;
+            else
+                s = "NCR : " + o.toString();
 			break;
 		case LogManager.STEPNDF:
-			s = "NDF : " + NDF.class.cast(o).toString();
+            s = "NDF : " + o.toString();
 			break;
 		case LogManager.STEPOTHER:
 			s = (String) o;
@@ -487,37 +470,49 @@ public class TextLogger implements ILogger {
 
 	@Override
 	public void logRequest(String input, String ouput, int n) {
-		try {
-			writer.write(tfm.format(new Date()) + "transition n°" + n  + " : " + input + " -> " + ouput + ret);
-			writer.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        try {
+            writer.write(tfm.format(new Date()) + "transition n°" + n + " : " + input + " -> " + ouput + ret);
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@Override
-	public void logRequest(String input, String ouput, int n, State before,
-			State after) {
-		try {
-			writer.write(tfm.format(new Date()) + "transition n°" + n + " : ("
-					+ before + ") --" + input + "/" + ouput + "--> (" + after
-					+ ")" + ret);
-			writer.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    @Override
+    public void logRequest(String input, String ouput, int n, State before,
+                           State after) {
+        try {
+            writer.write(tfm.format(new Date()) + "transition n°" + n + " : ("
+                    + before + ") --" + input + "/" + ouput + "--> (" + after
+                    + ")" + ret);
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@Override
-	public void logObservationTree(ZObservationNode root) {
-		// TODO Auto-generated method stub
 
-	}
+    @Override
+    public void logUndefinedRequest(String input, int n, State s) {
+        try {
+            writer.write(tfm.format(new Date()) + "undefined transition n°" + n + " : ("
+                    + s + ") --" + input + "--> (" + s + ")" + ret);
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@Override
-	public void logXObservationTree(ZXObservationNode root) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void logObservationTree(ZObservationNode root) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void logXObservationTree(ZXObservationNode root) {
+        // TODO Auto-generated method stub
+
+    }
 
 }

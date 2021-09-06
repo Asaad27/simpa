@@ -49,9 +49,14 @@ public class AutomatonMealyDriver extends MealyDriver {
 	}
 
 	@Override
-	protected void logRequest(String input, String output) {
+	protected void logDefinedRequest(String input, String output, int numberOfAtomicRequests) {
 		LogManager.logRequest(input, output, getNumberOfAtomicRequest(),
 				previousState, currentState);
+	}
+
+	@Override
+	protected void logUndefinedRequest(String input, String output, int numberOfUndefRequests) {
+		LogManager.logUndefinedRequest(input, numberOfUndefRequests, currentState);
 	}
 
 	@Override

@@ -13,10 +13,10 @@
  ********************************************************************************/
 package tools.loggers;
 
-import java.util.Map;
-
+import automata.State;
+import automata.efsm.ParameterizedInput;
+import automata.efsm.ParameterizedOutput;
 import automata.mealy.GenericInputSequence;
-import automata.mealy.Mealy;
 import automata.mealy.distinctionStruct.DistinctionStruct;
 import learner.efsm.table.LiControlTable;
 import learner.efsm.table.LiDataTable;
@@ -24,10 +24,10 @@ import learner.efsm.tree.ZXObservationNode;
 import learner.mealy.LmConjecture;
 import learner.mealy.table.LmControlTable;
 import learner.mealy.tree.ZObservationNode;
-import automata.State;
-import automata.efsm.ParameterizedInput;
-import automata.efsm.ParameterizedOutput;
 import options.OptionsGroup;
+
+import java.util.List;
+import java.util.Map;
 
 public interface ILogger {
     default void logControlTable(LiControlTable ct) {
@@ -143,5 +143,12 @@ public interface ILogger {
     }
 
     default void logCLIOptions(OptionsGroup allOptions) {
+    }
+
+    default void logUndefinedRequest(String input, int n, State s) {
+    }
+
+    default void inputAlphabetChanged(List<String> inputAlphabet) {
+        logInfo("New input alphabet: " + inputAlphabet);
     }
 }

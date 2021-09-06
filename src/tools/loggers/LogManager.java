@@ -14,38 +14,34 @@
  ********************************************************************************/
 package tools.loggers;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import automata.State;
+import automata.efsm.ParameterizedInput;
+import automata.efsm.ParameterizedOutput;
+import automata.mealy.GenericInputSequence;
+import automata.mealy.distinctionStruct.DistinctionStruct;
+import detection.Reflection;
+import drivers.efsm.real.GenericDriver;
+import learner.efsm.table.LiControlTable;
+import learner.efsm.table.LiDataTable;
+import learner.efsm.tree.ZXObservationNode;
+import learner.mealy.LmConjecture;
+import learner.mealy.table.LmControlTable;
+import learner.mealy.tree.ZObservationNode;
+import main.simpa.Options;
+import options.OptionsGroup;
+import tools.GraphViz;
+import tools.Utils;
+
+import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
-import automata.mealy.GenericInputSequence;
-import automata.mealy.distinctionStruct.DistinctionStruct;
-import learner.mealy.LmConjecture;
-import options.OptionsGroup;
-import tools.GraphViz;
-
-import learner.efsm.table.LiControlTable;
-import learner.efsm.table.LiDataTable;
-import learner.efsm.tree.ZXObservationNode;
-import learner.mealy.table.LmControlTable;
-import learner.mealy.tree.ZObservationNode;
-import main.simpa.Options;
-import automata.State;
-import automata.efsm.ParameterizedInput;
-import automata.efsm.ParameterizedOutput;
-import detection.Reflection;
-import drivers.efsm.real.GenericDriver;
-import tools.Utils;
-
 public class LogManager {
-	private static DateFormat tfm = new SimpleDateFormat("[HH:mm:ss:SSS] ");
+	private static final DateFormat tfm = new SimpleDateFormat("[HH:mm:ss:SSS] ");
 
 	public static final int STEPOTHER = -1;
 	public static final int STEPNDV = 0;
@@ -149,8 +145,14 @@ public class LogManager {
 			l.logRequest(input, output, n);
 	}
 
+	public static void logUndefinedRequest(String input, int n, State s) {
+		for (ILogger l : loggers) {
+			l.logUndefinedRequest(input, n, s);
+		}
+	}
+
 	public static void logRequest(String input, String output, int n,
-			State before, State after) {
+								  State before, State after) {
 		for (ILogger l : loggers)
 			l.logRequest(input, output, n, before, after);
 	}
@@ -299,11 +301,15 @@ public class LogManager {
 		loggers.forEach(ILogger::startNewInference);
 	}
 
-    public static void logConjecture(LmConjecture conjecture) {
+	public static void logConjecture(LmConjecture conjecture) {
 		loggers.forEach(l -> l.logConjecture(conjecture));
-    }
+	}
 
 	public static void logCLIOptions(OptionsGroup allOptions) {
 		loggers.forEach(l -> l.logCLIOptions(allOptions));
+	}
+
+	public static void inputAlphabetChanged(List<String> inputAlphabet) {
+		loggers.forEach(l -> l.inputAlphabetChanged(inputAlphabet));
 	}
 }

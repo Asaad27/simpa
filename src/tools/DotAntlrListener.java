@@ -13,26 +13,20 @@
  ********************************************************************************/
 package tools;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import org.antlr.v4.runtime.ParserRuleContext;
-
 import automata.State;
 import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
-
+import org.antlr.v4.runtime.ParserRuleContext;
 import tools.antlr4.DotMealy.DotMealyBaseListener;
 import tools.antlr4.DotMealy.DotMealyParser;
+import tools.loggers.LogManager;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 public class DotAntlrListener extends DotMealyBaseListener {
-	private Map<String, String> allInputs = new HashMap<>();
-	private Map<String, String> allOutputs = new HashMap<>();
+	private final Map<String, String> allInputs = new HashMap<>();
+	private final Map<String, String> allOutputs = new HashMap<>();
 
 	public class ParseException extends RuntimeException {
 		private static final long serialVersionUID = 3326922575373002881L;
@@ -228,7 +222,7 @@ public class DotAntlrListener extends DotMealyBaseListener {
 		for (String i : inputs) {
 			for (State s : states.values())
 				if (automaton.getTransitionFromWithInput(s, i) == null)
-					throw new ParseException("automaton is not complete");
+					LogManager.logWarning("Automaton " + automaton.getName() + " is not complete.");
 		}
 	}
 
@@ -325,7 +319,7 @@ public class DotAntlrListener extends DotMealyBaseListener {
 						}
 					}
 				}
-				split2.add(label.substring(splitStart, label.length()));
+				split2.add(label.substring(splitStart));
 
 				if (split2.size() == 2 && !fail) {
 					split = new String[2];

@@ -12,10 +12,6 @@
  ********************************************************************************/
 package learner.mealy.hW;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.StringTokenizer;
-
 import automata.mealy.MealyTransition;
 import drivers.mealy.MealyDriver;
 import learner.mealy.LmConjecture;
@@ -28,25 +24,29 @@ import stats.StatsEntry;
 import stats.StatsEntry_OraclePart;
 import stats.attribute.Attribute;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.StringTokenizer;
+
 public class HWStatsEntry extends StatsEntry {
-	public static final Attribute<Integer>MAX_W_TOTAL_LENGTH = 		Attribute.MAX_W_TOTAL_LENGTH;
-	public static final Attribute<Float>AVERAGE_W_SIZE = 			Attribute.AVERAGE_W_SIZE;
-	public static final Attribute<Integer>MAX_W_SIZE = 				Attribute.MAX_W_SIZE;
+	public static final Attribute<Integer> MAX_W_TOTAL_LENGTH = Attribute.MAX_W_TOTAL_LENGTH;
+	public static final Attribute<Float> AVERAGE_W_SIZE = Attribute.AVERAGE_W_SIZE;
+	public static final Attribute<Integer> MAX_W_SIZE = Attribute.MAX_W_SIZE;
 	public static final Attribute<Integer> H_MAX_LENGTH = Attribute.H_MAX_LENGTH;
-	public final static Attribute<Integer> H_ANSWERS_NB =	Attribute.H_ANSWERS_NB;
-	public static final Attribute<Integer>LOCALIZER_CALL_NB = Attribute.LOCALIZER_CALL_NB;
-	public static final Attribute<Integer>TRACE_LENGTH = Attribute.TRACE_LENGTH;
-	public static final Attribute<Integer>INPUT_SYMBOLS = Attribute.INPUT_SYMBOLS;
-	public static final Attribute<Integer>OUTPUT_SYMBOLS = Attribute.OUTPUT_SYMBOLS;
-	public static final Attribute<Integer>STATE_NUMBER = Attribute.STATE_NUMBER;
-	public static final Attribute<Integer>LOOP_RATIO = Attribute.LOOP_RATIO;
+	public final static Attribute<Integer> H_ANSWERS_NB = Attribute.H_ANSWERS_NB;
+	public static final Attribute<Integer> LOCALIZER_CALL_NB = Attribute.LOCALIZER_CALL_NB;
+	public static final Attribute<Integer> TRACE_LENGTH = Attribute.TRACE_LENGTH;
+	public static final Attribute<Integer> INPUT_SYMBOLS = Attribute.INPUT_SYMBOLS;
+	public static final Attribute<Integer> OUTPUT_SYMBOLS = Attribute.OUTPUT_SYMBOLS;
+	public static final Attribute<Integer> STATE_NUMBER = Attribute.STATE_NUMBER;
+	public static final Attribute<Integer> LOOP_RATIO = Attribute.LOOP_RATIO;
 	public static final Attribute<String> AUTOMATA = Attribute.AUTOMATA;
 	public static final Attribute<Float> DURATION = Attribute.DURATION;
-	public static final Attribute<Integer>MEMORY = Attribute.MEMORY;
-	public static final Attribute<Integer>MAX_RECKONED_STATES = Attribute.MAX_RECKONED_STATES;
-	public static final Attribute<Integer>MAX_FAKE_STATES = Attribute.MAX_FAKE_STATES;
-	public static final Attribute<Long>SEED = Attribute.SEED;
-	public final static Attribute<Integer>ASKED_COUNTER_EXAMPLE =	Attribute.ASKED_COUNTER_EXAMPLE;
+	public static final Attribute<Integer> MEMORY = Attribute.MEMORY;
+	public static final Attribute<Integer> MAX_RECKONED_STATES = Attribute.MAX_RECKONED_STATES;
+	public static final Attribute<Integer> MAX_FAKE_STATES = Attribute.MAX_FAKE_STATES;
+	public static final Attribute<Long> SEED = Attribute.SEED;
+	public final static Attribute<Integer> ASKED_COUNTER_EXAMPLE = Attribute.ASKED_COUNTER_EXAMPLE;
 	public final static Attribute<Integer>H_INCONSISTENCY_FOUND =	Attribute.H_INCONSISTENCY_FOUND;
 	public final static Attribute<Integer>W_INCONSISTENCY_FOUND =	Attribute.W_INCONSISTENCY_FOUND;
 	public final static Attribute<Integer>SUB_INFERANCE_NB =		Attribute.SUB_INFERANCE_NB;
@@ -67,9 +67,9 @@ public class HWStatsEntry extends StatsEntry {
 	public static final Attribute<Integer>ORACLE_RESET_NB =			Attribute.ORACLE_RESET_NB;
 	public static final Attribute<Float> ORACLE_TRACE_PERCENTAGE =	Attribute.ORACLE_TRACE_PERCENTAGE;
 	public static final Attribute<Integer> DICTIONARY_TOTAL_LOOKUP_LENGTH = Attribute.DICTIONARY_TOTAL_LOOKUP_LENGTH;
-	
+
 	// TODO : remove the USE_SPEEDUP which not used by hW.
-	private static Attribute<?>[] attributes = new Attribute<?>[]{
+	private static final Attribute<?>[] attributes = new Attribute<?>[]{
 			MAX_W_TOTAL_LENGTH,
 			AVERAGE_W_SIZE,
 			MAX_W_SIZE,
@@ -132,22 +132,22 @@ public class HWStatsEntry extends StatsEntry {
 	private int hResponses;
 	private int localizeCallNb = 0;
 	private int traceLength = 0;
-	private int inputSymbols;
+	private final int inputSymbols;
 	private int outputSymbols;
 	private int statesNumber;
 	private int loopTransitionPercentage;
-	private String automata;
+	private final String automata;
 	private float duration;
 	private int memory = 0;
 	private int maxReckonedStates = -1;
 	private int maxFakeStates = -1;
-	private long seed;
+	private final long seed;
 	private int hInconsistencies = 0;
 	private int wInconsistencies = 0;
 	private int subInferenceNb = 0;
-	private String searchCEInTrace;
-	private boolean add_h_in_w=false;
-	private boolean check_3rd_inconsistency=false;
+	private final String searchCEInTrace;
+	private boolean add_h_in_w = false;
+	private boolean check_3rd_inconsistency = false;
 	private boolean reuse_hzxw = false;
 	private boolean precomputedW = false;
 	private boolean add_I_in_W = false;
@@ -286,7 +286,7 @@ public class HWStatsEntry extends StatsEntry {
 			if (WTotalLength > maxWTotalLength)
 				maxWTotalLength = WTotalLength;
 		}
-		avgWSize = sumWSize / statesNb;
+		avgWSize = statesNb == 0 ? 0.0f : (float) sumWSize / statesNb;
 
 		hResponses = dataManager.getHResponsesNb();
 		hMaxLength = dataManager.h.getMaxLength();
@@ -299,14 +299,15 @@ public class HWStatsEntry extends StatsEntry {
 	
 	public void updateWithConjecture(LmConjecture conjecture) {
 		statesNumber = conjecture.getStateCount();
-		int loopTransitions=0;
-		Set<String> outputSymbols=new HashSet<>();
-		for (MealyTransition t : conjecture.getTransitions()){
+		int loopTransitions = 0;
+		Set<String> outputSymbols = new HashSet<>();
+		for (MealyTransition t : conjecture.getTransitions()) {
 			outputSymbols.add(t.getOutput());
 			if (t.getTo() == t.getFrom())
 				loopTransitions++;
 		}
-		loopTransitionPercentage = ((100*loopTransitions)/conjecture.getTransitionCount());
+		loopTransitionPercentage = conjecture.getTransitionCount() == 0 ? 0 :
+				((100 * loopTransitions) / conjecture.getTransitionCount());
 		this.outputSymbols = outputSymbols.size();
 	}
 

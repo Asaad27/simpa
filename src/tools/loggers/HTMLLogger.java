@@ -15,29 +15,12 @@
  ********************************************************************************/
 package tools.loggers;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Writer;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
-
-import learner.efsm.table.LiControlTable;
-import learner.efsm.table.LiControlTableItem;
-import learner.efsm.table.LiControlTableRow;
-import learner.efsm.table.LiDataTable;
-import learner.efsm.table.LiDataTableItem;
-import learner.efsm.table.LiDataTableRow;
-import learner.efsm.table.NBP;
-import learner.efsm.table.NDF;
-import learner.efsm.table.NDV;
+import automata.State;
+import automata.efsm.ParameterizedInput;
+import automata.efsm.ParameterizedInputSequence;
+import automata.efsm.ParameterizedOutput;
+import drivers.mealy.MealyDriver;
+import learner.efsm.table.*;
 import learner.efsm.tree.ZXObservationNode;
 import learner.mealy.table.LmControlTable;
 import learner.mealy.table.LmControlTableItem;
@@ -47,20 +30,23 @@ import main.simpa.Options;
 import main.simpa.SIMPA;
 import tools.Base64;
 import tools.Utils;
-import automata.State;
-import automata.efsm.ParameterizedInput;
-import automata.efsm.ParameterizedInputSequence;
-import automata.efsm.ParameterizedOutput;
-import automata.mealy.InputSequence;
+
+import java.io.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Map;
 
 public class HTMLLogger implements ILogger {
 	private File file;
-	private File dir;
-	private DateFormat dfm;
-	private DateFormat tfm;
-	private DateFormat filenameFm;
+	private final File dir;
+	private final DateFormat dfm;
+	private final DateFormat tfm;
+	private final DateFormat filenameFm;
 	private Writer writer = null;
-	
+
 	private boolean htmlLogDivOpened = false;
 
 	public HTMLLogger() {
@@ -312,11 +298,11 @@ public class HTMLLogger implements ILogger {
 						+ cti.getInputParameters().toString()
 						+ "</span>,</td>"
 						+ "<td><span class=\"state\">"
-						+ cti.getAutomataState().values().toString()
+						+ cti.getAutomataState().values()
 						+ "</span>) -></td>"
 						+ "<td><span class=\"outputparam\">"
 						+ (cti.getOutputParameters().isEmpty() ? Options.SYMBOL_OMEGA_LOW
-								: cti.getOutputParameters().toString())
+						: cti.getOutputParameters().toString())
 						+ "</span></td>");
 				s.append("</tr>");
 			}
@@ -367,25 +353,24 @@ public class HTMLLogger implements ILogger {
 			switch (step) {
 			case LogManager.STEPNDV:
 				writer.write("<li class=\"step ndv\">\n");
-				s = "NonDeterministicValue : " + NDV.class.cast(o).toString();
+				s = "NonDeterministicValue : " + o.toString();
 				break;
 			case LogManager.STEPNBP:
 				writer.write("<li class=\"step nbp\">\n");
-				s = "NonBalancedParameter : " + NBP.class.cast(o).toString();
+				s = "NonBalancedParameter : " + o.toString();
 				break;
 			case LogManager.STEPNCR:
 				writer.write("<li class=\"step ncr\">\n");
 				if (o instanceof ParameterizedInputSequence)
 					s = "NonClosedRow : "
-							+ ParameterizedInputSequence.class.cast(o)
-									.toString();
+							+ o;
 				else
 					s = "NonClosedRow : "
-							+ InputSequence.class.cast(o).toString();
+							+ o.toString();
 				break;
 			case LogManager.STEPNDF:
 				writer.write("<li class=\"step ndf\">\n");
-				s = "NonDisputedFree : " + NDF.class.cast(o).toString();
+				s = "NonDisputedFree : " + o.toString();
 				break;
 			case LogManager.STEPOTHER:
 				writer.write("<li class=\"step stepunknown\">\n");
@@ -528,6 +513,23 @@ public class HTMLLogger implements ILogger {
 					+ "</span>/<span class=\"po\">"
 					+ (output.length() > 0 ? output : Options.SYMBOL_OMEGA_LOW)
 					+ "</span>--&gt (" + after + ")</span>\n</li>\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void logUndefinedRequest(String input, int n, State state) {
+		try {
+			writer.flush();
+			writer.write("<li class=\"request\">\n");
+			writer.write("<span class=\"date\">" + tfm.format(new Date())
+					+ "</span><span class=\"content\">" + LogManager.getPrefix()
+					+ "undefined transition n°" + n + " : (" + state
+					+ ") --<span class=\"pi\">" + input
+					+ "</span>/<span class=\"po\">"
+					+ MealyDriver.OUTPUT_FOR_UNDEFINED_INPUT
+					+ "</span>--&gt (" + state + ")</span>\n</li>\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

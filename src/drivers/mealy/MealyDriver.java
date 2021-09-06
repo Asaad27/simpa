@@ -42,15 +42,17 @@ import static java.util.stream.Collectors.toList;
 public abstract class MealyDriver extends Driver<String, String> {
 	public static final String OUTPUT_FOR_UNDEFINED_INPUT = "undefined";
 	private Set<String> definedInputsForCurrentState;
+	private int numberOfUndefinedRequests = 0;
 
 	/**
-	 * Returns the input symbols availabel in the current state.
-	 * Drivers for partial machines can overwrite this method. The default implementation passes all inputs returned by
+	 * Returns the input symbols defined in the current state. This allows to infer partial systems, i.e. systems
+	 * where the set of executable inputs depends on the state.
+	 * Drivers for partial systems can overwrite this method. The default implementation passes all inputs returned by
 	 * {@link MealyDriver#getInputSymbols()}
 	 *
 	 * @return
 	 */
-	protected List<String> getDefinedInputs() {
+	public List<String> getDefinedInputs() {
 		return getInputSymbols();
 	}
 
@@ -84,13 +86,6 @@ public abstract class MealyDriver extends Driver<String, String> {
 		this.name = name;
 		type = DriverType.MEALY;
 	}
-
-
-	@Override
-	protected void logRequest(String input, String output) {
-		LogManager.logRequest(input, output, getNumberOfAtomicRequest());
-	}
-
 	public final GenericOutputSequence execute(GenericInputSequence in) {
 		Iterator it = in.inputIterator();
 		while (it.hasNext()) {
@@ -114,7 +109,23 @@ public abstract class MealyDriver extends Driver<String, String> {
 			definedInputsForCurrentState = new TreeSet<>(getDefinedInputs());
 			return out;
 		}
+		numberOfUndefinedRequests++;
 		return OUTPUT_FOR_UNDEFINED_INPUT;
+	}
+
+	protected void logDefinedRequest(String input, String output, int numberOfAtomicRequests) {
+	}
+
+	protected void logUndefinedRequest(String input, String output, int numberOfAtomicRequests) {
+	}
+
+	@Override
+	public void logRequest(String input, String output) {
+		if (output.equals(OUTPUT_FOR_UNDEFINED_INPUT)) {
+			logUndefinedRequest(input, OUTPUT_FOR_UNDEFINED_INPUT, numberOfUndefinedRequests);
+		} else {
+			logDefinedRequest(input, output, getNumberOfAtomicRequest());
+		}
 	}
 
 	/**

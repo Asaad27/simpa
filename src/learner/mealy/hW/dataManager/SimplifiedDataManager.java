@@ -29,6 +29,10 @@ import main.simpa.Options.LogLevel;
 import tools.loggers.LogManager;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static drivers.mealy.MealyDriver.OUTPUT_FOR_UNDEFINED_INPUT;
+import static java.util.function.Predicate.not;
 
 public class SimplifiedDataManager {
 	public static SimplifiedDataManager instance;// TODO either make a proper
@@ -42,7 +46,7 @@ public class SimplifiedDataManager {
 	// Characterization
 	// set
 	public final GenericInputSequence h;
-	private final ArrayList<String> I;// Input Symbols
+	private final List<String> I;// Input Symbols
 	private final Map<Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence>,
 			FullyQualifiedState> Q;// known
 
@@ -200,18 +204,18 @@ public class SimplifiedDataManager {
 	}
 
 	public SimplifiedDataManager(MealyDriver driver,
-			DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W,
-			GenericInputSequence h, List<LmTrace> globalTraces,
-			Map<GenericOutputSequence, List<HZXWSequence>> hZXWSequences,
-			List<HZXWSequence> zXWSequences,
-			Map<GenericOutputSequence, List<LmTrace>> hWSequences,
-			GenericHomingSequenceChecker hChecker) {
+								 DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W,
+								 GenericInputSequence h, List<LmTrace> globalTraces,
+								 Map<GenericOutputSequence, List<HZXWSequence>> hZXWSequences,
+								 List<HZXWSequence> zXWSequences,
+								 Map<GenericOutputSequence, List<LmTrace>> hWSequences,
+								 GenericHomingSequenceChecker hChecker, List<String> inputAlphabet) {
 		numberOfInputsApplied = 0;
 		this.globalTraces = globalTraces;
 		traceSinceReset = globalTraces.get(globalTraces.size() - 1);
 		this.W = W;
 		this.h = h;
-		this.I = new ArrayList<String>(driver.getInputSymbols());
+		this.I = inputAlphabet;
 		this.driver = driver;
 		this.hZXWSequences = hZXWSequences;
 		this.zXWSequences = zXWSequences;
@@ -234,7 +238,24 @@ public class SimplifiedDataManager {
 		}
 	}
 
-	public void extendInputAlphabet(List<String> newInputSymbols) {
+	/**
+	 * Extends the input alphabet I with the symbols in delta. No input symbol in delta must be contained in the old
+	 * input alphabet I. The symobls in delta are assumed to be undefined for all states learned so far. This method
+	 * adds loops to all learned states for the symbols in delta.
+	 *
+	 * @param delta
+	 */
+	public void extendInputAlphabet(List<String> delta) {
+		for (var state : getStates()) {
+			state.extendInputAlphabet(delta);
+			for (var sym : delta) {
+
+				FullyKnownTrace loop = new FullyKnownTrace(state, new LmTrace(sym,
+						OUTPUT_FOR_UNDEFINED_INPUT), state);
+				addFullyKnownTrace(loop);
+			}
+		}
+		I.addAll(delta);
 
 	}
 
@@ -328,6 +349,33 @@ public class SimplifiedDataManager {
 							currentState.getExpectedTraces());
 			} else
 				currentState = null;
+		}
+
+		if (currentState != null) {
+			//check defined outputs for model and driver states are identical
+			var undefInputsDriver = driver.getUndefinedInputs();
+			for (var trace : currentState.getKnownTransitions()) {
+				var in = trace.getTrace().getInput(0);
+				var out = trace.getTrace().getOutput(0);
+				if (out.equals(OUTPUT_FOR_UNDEFINED_INPUT) && driver.isDefined(in)) {
+					LogManager.logInfo("Input " + in + " is undefined in model state " + currentState + ", but " +
+							"defined" +
+							" in current driver state.");
+					apply(in);
+				} else if (!out.equals(OUTPUT_FOR_UNDEFINED_INPUT) && !driver.isDefined(in)) {
+					LogManager.logInfo("Input " + in + " is defined in model state " + currentState +
+							", but undefined" +
+							" in current driver state.");
+					apply(in);
+				}
+			}
+		}
+		//check for new inputs
+		if (!I.containsAll(driver.getDefinedInputs())) {
+			var delta = driver.getDefinedInputs().stream().filter(not(I::contains)).collect(Collectors.toList());
+//			LogManager.logInfo("New inputs discovered: " + delta);
+//			extendInputAlphabet(delta);
+			throw new NewInputsFoundException(delta);
 		}
 
 		return output;
@@ -714,7 +762,12 @@ public class SimplifiedDataManager {
 		}
 		return initialStateCharacterization;
 	}
+
 	public int getTotalResetNb() {
 		return globalTraces.size() - 1;
+	}
+
+	public List<String> getInputAlphabet() {
+		return I;
 	}
 }
