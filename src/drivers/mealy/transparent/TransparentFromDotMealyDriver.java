@@ -16,7 +16,8 @@ import java.io.File;
 import java.io.IOException;
 
 import automata.mealy.Mealy;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
+import drivers.mealy.PartialMealyDriver;
 import options.FileOption;
 import options.FileOption.FileExistance;
 import options.FileOption.FileSelectionMode;
@@ -25,11 +26,11 @@ import options.automataOptions.DriverChoiceItem;
 
 public class TransparentFromDotMealyDriver extends TransparentMealyDriver {
 	public static class FromDotChoiceItem
-			extends DriverChoiceItem<MealyDriver> {
+			extends DriverChoiceItem<PartialMealyDriver> {
 
 		FileOption file;
 
-		public FromDotChoiceItem(DriverChoice<MealyDriver> parent) {
+		public FromDotChoiceItem(DriverChoice<PartialMealyDriver> parent) {
 			super(parent, TransparentFromDotMealyDriver.class);
 			file = new FileOption("--TDDotFile",
 					"Select the file to load as driver.", null,
@@ -38,7 +39,7 @@ public class TransparentFromDotMealyDriver extends TransparentMealyDriver {
 		}
 
 		@Override
-		public MealyDriver createDriver() {
+		public PartialMealyDriver createDriver() {
 			try {
 				return new TransparentFromDotMealyDriver(
 						file.getcompletePath());

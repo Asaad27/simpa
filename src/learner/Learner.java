@@ -31,7 +31,7 @@ import tools.loggers.LogManager;
 import automata.Automata;
 import drivers.Driver;
 //EFSM//import drivers.efsm.EFSMDriver;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 
 public abstract class Learner {
 	protected boolean addtolog = true;
@@ -75,7 +75,7 @@ public abstract class Learner {
 //EFSM//					.getLearner((EFSMDriver) driver);
 //EFSM//		} else 
 		if (selectedAutomataChoice == automataChoice.mealy) {
-			MealyDriver mDriver = (MealyDriver) driver;
+			CompleteMealyDriver mDriver = (CompleteMealyDriver) driver;
 			MealyLearnerChoice learnerChoice = automataChoice.mealyLearnerChoice;
 			ChoiceOptionItem selectedLearnerChoice = learnerChoice
 					.getSelectedItem();

@@ -18,7 +18,7 @@ import learner.mealy.LmTrace;
 import learner.mealy.combinatorial.Conjecture;
 import automata.State;
 import automata.mealy.MealyTransition;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 
 public abstract class TreeNode {
 	private boolean haveForcedChild;//indicate that there is only one child which is imposed due to a previous transition
@@ -37,7 +37,7 @@ public abstract class TreeNode {
 	 * Create the root of the tree.
 	 * @param d the driver used to create conjecture
 	 */
-	public TreeNode(MealyDriver d){
+	public TreeNode(CompleteMealyDriver d){
 		haveForcedChild = false;
 		isCut = false;
 		depth = 0;
@@ -50,7 +50,7 @@ public abstract class TreeNode {
 	/**
 	 * init the node in order to call addState
 	 */
-	protected abstract void initStates(MealyDriver d);
+	protected abstract void initStates(CompleteMealyDriver d);
 
 	/**
 	 * create a child node in the tree.

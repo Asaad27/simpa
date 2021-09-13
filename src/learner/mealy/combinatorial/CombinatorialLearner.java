@@ -26,7 +26,7 @@ import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
 import automata.mealy.multiTrace.SimpleMultiTrace;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 import learner.Learner;
 import learner.mealy.LmTrace;
 import learner.mealy.combinatorial.node.ArrayTreeNodeWithoutConjecture;
@@ -39,15 +39,15 @@ import tools.loggers.LogManager;
 
 
 public class CombinatorialLearner extends Learner {
-	private MealyDriver driver;
+	private CompleteMealyDriver driver;
 	private LmTrace trace;
 	private TreeNode root;
 	private Conjecture conjecture;
 	private CombinatorialStatsEntry stats;
 	private final CombinatorialOptions options;
 
-	public CombinatorialLearner(MealyDriver driver,
-			CombinatorialOptions options) {
+	public CombinatorialLearner(CompleteMealyDriver driver,
+                                CombinatorialOptions options) {
 		assert !options.withCut();
 		this.driver = driver;
 		this.options = options;

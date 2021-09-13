@@ -17,18 +17,18 @@ import java.util.List;
 import learner.mealy.combinatorial.Conjecture;
 import automata.State;
 import automata.mealy.MealyTransition;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 
 public abstract class TreeNodeWithConjecture extends TreeNode{
 	private Conjecture conjecture;//by defaults the conjecture is shared with the father's conjecture. Note that the father is not suppose to update the conjecture.
 	private boolean copyConjectureOnWrite;//indicate if the conjecture is shared with the father's.
 
-	public TreeNodeWithConjecture(MealyDriver d){
+	public TreeNodeWithConjecture(CompleteMealyDriver d){
 		super(d);
 		copyConjectureOnWrite = false;
 	}
 
-	protected void initStates(MealyDriver d){
+	protected void initStates(CompleteMealyDriver d){
 		conjecture = new Conjecture(d);
 	}
 	

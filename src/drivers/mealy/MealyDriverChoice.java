@@ -24,16 +24,16 @@ import drivers.mealy.transparent.TransparentFromDotMealyDriver;
 import options.automataOptions.DriverChoice;
 import options.automataOptions.DriverChoiceItem;
 
-public class MealyDriverChoice extends DriverChoice<MealyDriver> {
-	DriverChoiceItem<MealyDriver> SIPDriverIpTel = new DriverChoiceItem<MealyDriver>(
+public class MealyDriverChoice extends DriverChoice<PartialMealyDriver> {
+	DriverChoiceItem<CompleteMealyDriver> SIPDriverIpTel = new DriverChoiceItem<CompleteMealyDriver>(
 			this, SIPDriverIPTel.class);
-	public final ExhaustiveGeneratorOption<? extends MealyDriver> exhaustiveDriver = new EnumeratedMealyOption(
+	public final ExhaustiveGeneratorOption<? extends PartialMealyDriver> exhaustiveDriver = new EnumeratedMealyOption(
 			this);
 
 	public MealyDriverChoice() {
-		super(MealyDriver.class, "Mealy driver");
+		super(PartialMealyDriver.class, "Mealy driver");
 		addChoice(SIPDriverIpTel);
-		addChoice(new DriverChoiceItem<MealyDriver>(this,
+		addChoice(new DriverChoiceItem<PartialMealyDriver>(this,
 				RandomMealyDriver.class));
 		// addChoice(new FromDotMealyDriver.FromDotChoiceItem(this));
 		addChoice(new TransparentFromDotMealyDriver.FromDotChoiceItem(this));

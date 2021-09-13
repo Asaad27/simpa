@@ -22,8 +22,8 @@ import automata.Automata;
 import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.OutputSequence;
-import drivers.mealy.MealyDriver;
-import drivers.mealy.MealyDriver.UnableToComputeException;
+import drivers.mealy.CompleteMealyDriver;
+import drivers.mealy.PartialMealyDriver.UnableToComputeException;
 import learner.Learner;
 import learner.mealy.LmTrace;
 import main.simpa.Options;
@@ -34,7 +34,7 @@ import tools.loggers.LogManager;
 
 public class RivestSchapireLearner extends Learner {
 	private InputSequence homingSequence;
-	private MealyDriver driver;
+	private CompleteMealyDriver driver;
 	private Map<OutputSequence,StateDriver> drivers;
 	protected StateDriver finishedLearner;
 	protected Throwable threadThrown = null;
@@ -45,8 +45,8 @@ public class RivestSchapireLearner extends Learner {
 	protected boolean hIsGiven=true;
 	protected RivestSchapireOptions options;
 	
-	public RivestSchapireLearner(MealyDriver driver,
-			RivestSchapireOptions options) {
+	public RivestSchapireLearner(CompleteMealyDriver driver,
+                                 RivestSchapireOptions options) {
 		this.driver = driver;
 		options.updateWithDriver(driver);
 		this.options = options;

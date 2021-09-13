@@ -12,12 +12,12 @@
  ********************************************************************************/
 package learner.mealy.table;
 
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 import learner.mealy.tree.ZStatsEntry;
 
 public class LmStatsEntry extends ZStatsEntry {
 
-	public LmStatsEntry(MealyDriver d, LmOptions options) {
+	public LmStatsEntry(CompleteMealyDriver d, LmOptions options) {
 		super(d, options.oracle);
 	}
 

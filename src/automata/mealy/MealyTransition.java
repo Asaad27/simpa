@@ -16,7 +16,7 @@ package automata.mealy;
 import automata.State;
 import automata.Transition;
 
-import static drivers.mealy.MealyDriver.OUTPUT_FOR_UNDEFINED_INPUT;
+import static drivers.mealy.CompleteMealyDriver.OUTPUT_FOR_UNDEFINED_INPUT;
 
 public class MealyTransition extends Transition {
 	private static final long serialVersionUID = 6719440643049324689L;

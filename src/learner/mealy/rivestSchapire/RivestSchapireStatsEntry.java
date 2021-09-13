@@ -18,7 +18,7 @@ import java.util.StringTokenizer;
 import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 import drivers.mealy.transparent.RandomMealyDriver;
 import stats.Graph;
 import stats.GraphGenerator;
@@ -123,8 +123,8 @@ public class RivestSchapireStatsEntry extends StatsEntry {
 		askedCE = Integer.parseUnsignedInt(st.nextToken());
 	}
 
-	public RivestSchapireStatsEntry(MealyDriver d, boolean hIsGiven,
-			RivestSchapireOptions options) {
+	public RivestSchapireStatsEntry(CompleteMealyDriver d, boolean hIsGiven,
+                                    RivestSchapireOptions options) {
 		this.hIsGiven = hIsGiven;
 		this.inputSymbols = d.getInputSymbols().size();
 		this.automata = d.getSystemName();

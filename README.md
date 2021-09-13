@@ -80,7 +80,7 @@ Some example are shown when you use the `--help` argument.
 
 # Inferring a real system (writing a new Driver)
 
-To write a new driver, you must extends the class `drivers.mealy.MealyDriver` or
+To write a new driver, you must extends the class `drivers.mealy.CompleteMealyDriver` or
 `drivers.efsm.EMFSDriver`. You must define the following methods :
 
 	@Override

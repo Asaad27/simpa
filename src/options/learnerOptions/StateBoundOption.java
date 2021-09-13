@@ -15,7 +15,8 @@ package options.learnerOptions;
 import java.util.Arrays;
 
 import drivers.mealy.AutomatonMealyDriver;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
+import drivers.mealy.PartialMealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import options.BooleanOption;
 import options.IntegerOption;
@@ -73,7 +74,7 @@ public class StateBoundOption extends BooleanOption {
 		validateSelectedTree();
 	}
 
-	public void updateWithDriver(MealyDriver d) {
+	public void updateWithDriver(PartialMealyDriver d) {
 		if (isEnabled()) {
 			if (d instanceof TransparentMealyDriver) {
 				int bound = stateOffset.getValue()

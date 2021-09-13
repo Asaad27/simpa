@@ -16,13 +16,13 @@ import java.util.HashMap;
 
 import automata.Transition;
 import automata.mealy.MealyTransition;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 import learner.mealy.LmConjecture;
 
 public class Conjecture extends LmConjecture{
 	private static final long serialVersionUID = 4982526952134622520L;
 
-	public Conjecture(MealyDriver d) {
+	public Conjecture(CompleteMealyDriver d) {
 		super(d);
 	}
 

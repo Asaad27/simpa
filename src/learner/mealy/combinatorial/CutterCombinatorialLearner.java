@@ -29,7 +29,7 @@ import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
 import automata.mealy.multiTrace.SimpleMultiTrace;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 import learner.Learner;
 import learner.mealy.LmTrace;
 import learner.mealy.combinatorial.node.ArrayTreeNodeWithConjecture;
@@ -42,7 +42,7 @@ import tools.loggers.LogManager;
 
 
 public class CutterCombinatorialLearner extends Learner {
-	private MealyDriver driver;
+	private CompleteMealyDriver driver;
 	private LmTrace trace;
 	private TreeNode root;
 	private Conjecture conjecture;
@@ -51,8 +51,8 @@ public class CutterCombinatorialLearner extends Learner {
 	private ArrayList<TreeNode> nextLevel;
 	private CombinatorialOptions options;
 
-	public CutterCombinatorialLearner(MealyDriver driver,
-			CombinatorialOptions options) {
+	public CutterCombinatorialLearner(CompleteMealyDriver driver,
+                                      CombinatorialOptions options) {
 		assert options.withCut();
 		this.driver = driver;
 		this.options = options;

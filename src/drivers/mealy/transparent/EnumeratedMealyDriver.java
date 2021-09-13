@@ -16,7 +16,8 @@ import java.util.Iterator;
 
 import drivers.EnumeratedDriver;
 import drivers.ExhaustiveGeneratorOption;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
+import drivers.mealy.PartialMealyDriver;
 import examples.mealy.EnumeratedMealy;
 import options.automataOptions.DriverChoice;
 
@@ -33,7 +34,7 @@ public class EnumeratedMealyDriver extends TransparentMealyDriver
 			extends ExhaustiveGeneratorOption<EnumeratedMealyDriver> {
 
 		public EnumeratedMealyOption(
-				DriverChoice<? extends MealyDriver> parent) {
+				DriverChoice<? extends PartialMealyDriver> parent) {
 			super(parent, EnumeratedMealyDriver.class);
 		}
 

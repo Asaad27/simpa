@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 import learner.mealy.table.LmOptions;
 import options.BooleanOption;
 import options.GenericChoiceOption;
@@ -79,7 +79,7 @@ public class RivestSchapireOptions extends OneArgChoiceOptionItem {
 			option.setCategoryIfUndef(OptionCategory.ALGO_RS);
 	}
 
-	public void updateWithDriver(MealyDriver driver) {
+	public void updateWithDriver(CompleteMealyDriver driver) {
 		stateBound.updateWithDriver(driver);
 	}
 

@@ -1,6 +1,6 @@
 package learner.mealy.hW;
 
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 import drivers.mealy.transparent.TransparentFromDotMealyDriver;
 import learner.mealy.LmConjecture;
 import options.valueHolders.SeedHolder;
@@ -44,7 +44,7 @@ public class PartialMachines {
     }
 
     @Test
-    void testMachine(MealyDriver driver) {
+    void testMachine(CompleteMealyDriver driver) {
         HWLearner learner = new HWLearner(driver, hwOptions);
 
         learner.learn();

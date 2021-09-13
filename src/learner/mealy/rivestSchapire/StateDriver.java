@@ -16,7 +16,7 @@ package learner.mealy.rivestSchapire;
 import automata.State;
 import automata.mealy.OutputSequence;
 import automata.mealy.multiTrace.MultiTrace;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 import learner.Learner;
 import learner.mealy.CeExposedUnknownStateException;
 import learner.mealy.LmConjecture;
@@ -27,13 +27,13 @@ import tools.loggers.LogManager;
 
 import java.util.List;
 
-class StateDriver extends MealyDriver {
+class StateDriver extends CompleteMealyDriver {
     class ThreadEndException extends RuntimeException {
         private static final long serialVersionUID = -2529130613268413483L;
 
     }
 
-    private final MealyDriver realDriver;
+    private final CompleteMealyDriver realDriver;
     protected OutputSequence homingSequenceResponse;
     private final Learner stateLearner;
     protected RivestSchapireLearner learner;
@@ -46,7 +46,7 @@ class StateDriver extends MealyDriver {
     /**
      * should be invoke only if we are in  the initial state of this driver (i.e reset() has no effect)
      */
-    StateDriver(MealyDriver realDriver, OutputSequence response, RivestSchapireLearner learner) {
+    StateDriver(CompleteMealyDriver realDriver, OutputSequence response, RivestSchapireLearner learner) {
         super(realDriver.getSystemName() + " for state " + response);
         homingSequenceResponse = response;
         StringBuilder prefixBuilder = new StringBuilder();

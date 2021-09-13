@@ -12,13 +12,14 @@
  ********************************************************************************/
 package options.automataOptions;
 
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
+import drivers.mealy.PartialMealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import options.OptionValidator;
 
 public class TransparentDriverValidator extends OptionValidator
 		implements PostDriverValidator {
-	MealyDriver lastDriver = null;
+	PartialMealyDriver lastDriver = null;
 
 	@Override
 	public void check() {
@@ -32,7 +33,7 @@ public class TransparentDriverValidator extends OptionValidator
 		}
 	}
 
-	public void setLastDriver(MealyDriver d) {
+	public void setLastDriver(PartialMealyDriver d) {
 		lastDriver = d;
 		check();
 	}

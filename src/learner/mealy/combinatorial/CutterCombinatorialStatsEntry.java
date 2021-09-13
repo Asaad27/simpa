@@ -12,7 +12,7 @@
  ********************************************************************************/
 package learner.mealy.combinatorial;
 
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 
 public class CutterCombinatorialStatsEntry extends CombinatorialStatsEntry {
 
@@ -20,8 +20,8 @@ public class CutterCombinatorialStatsEntry extends CombinatorialStatsEntry {
 		super(line);
 	}
 
-	protected CutterCombinatorialStatsEntry(MealyDriver d,
-			CombinatorialOptions options) {
+	protected CutterCombinatorialStatsEntry(CompleteMealyDriver d,
+                                            CombinatorialOptions options) {
 		super(d, options);
 		traceLength = 0;
 	}

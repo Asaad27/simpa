@@ -1,6 +1,6 @@
 package drivers.mealy.simulation;
 
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 import drivers.mealy.simulation.scanette.FSMSupermarket;
 
 import java.util.List;
@@ -12,7 +12,7 @@ import static drivers.mealy.simulation.scanette.FSMSupermarket.ITEM_A_EAN;
 import static drivers.mealy.simulation.scanette.FSMSupermarket.ITEM_INCONNUE_EAN;
 import static java.util.Map.entry;
 
-public class ScanetteDriver extends MealyDriver {
+public class ScanetteDriver extends CompleteMealyDriver {
 
     private FSMSupermarket supermarket;
     private final Map<String, Supplier<Integer>> actions;

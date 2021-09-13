@@ -24,11 +24,11 @@ import options.automataOptions.DriverChoiceItem;
 
 public class FromDotMealyDriver extends AutomatonMealyDriver {
 	public static class FromDotChoiceItem
-			extends DriverChoiceItem<MealyDriver> {
+			extends DriverChoiceItem<PartialMealyDriver> {
 
 		FileOption file;
 
-		public FromDotChoiceItem(DriverChoice<MealyDriver> parent) {
+		public FromDotChoiceItem(DriverChoice<PartialMealyDriver> parent) {
 			super(parent, FromDotMealyDriver.class);
 			file = new FileOption("--DDotFile",
 					"Select the file to load as driver (in case of Transparent driver).",
@@ -38,7 +38,7 @@ public class FromDotMealyDriver extends AutomatonMealyDriver {
 		}
 
 		@Override
-		public MealyDriver createDriver() {
+		public PartialMealyDriver createDriver() {
 			try {
 				return new FromDotMealyDriver(file.getcompletePath());
 			} catch (IOException e) {

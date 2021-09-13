@@ -30,15 +30,15 @@ import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
 import automata.mealy.multiTrace.SimpleMultiTrace;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 
 public class LmLearner extends Learner {
-	private MealyDriver driver;
+	private CompleteMealyDriver driver;
 	protected LmControlTable cTable;
 	private LmStatsEntry stats;
 	private LmOptions options;
 
-	public LmLearner(MealyDriver driver, LmOptions options) {
+	public LmLearner(CompleteMealyDriver driver, LmOptions options) {
 		this.options = options;
 		this.driver = driver;
 		this.cTable = new LmControlTable(driver.getInputSymbols());

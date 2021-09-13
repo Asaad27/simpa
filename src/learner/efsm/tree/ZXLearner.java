@@ -29,7 +29,7 @@ import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
 import drivers.Driver;
 import drivers.efsm.real.ScanDriver;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 
 public class ZXLearner extends Learner {
 	private ScanDriver driver;
@@ -352,7 +352,7 @@ public class ZXLearner extends Learner {
 		// extends Mealy an thus, it should have a MealyDriver. The next call is
 		// considered invalid because a ScanDriver (which extends EFSM) should
 		// not have a Mealy conjecture.
-		LmConjecture c = new LmConjecture((MealyDriver) (Driver<?, ?>) driver);
+		LmConjecture c = new LmConjecture((CompleteMealyDriver) (Driver<?, ?>) driver);
 
 		for (int i = 0; i < states.size(); i++)
 			c.addState(new State("S" + i, i == 0));

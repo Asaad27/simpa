@@ -19,7 +19,7 @@ import automata.State;
 import automata.efsm.ParameterizedInput;
 import automata.efsm.ParameterizedInputSequence;
 import automata.efsm.ParameterizedOutput;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.PartialMealyDriver;
 import learner.efsm.table.*;
 import learner.efsm.tree.ZXObservationNode;
 import learner.mealy.table.LmControlTable;
@@ -528,7 +528,7 @@ public class HTMLLogger implements ILogger {
 					+ "undefined transition n°" + n + " : (" + state
 					+ ") --<span class=\"pi\">" + input
 					+ "</span>/<span class=\"po\">"
-					+ MealyDriver.OUTPUT_FOR_UNDEFINED_INPUT
+					+ PartialMealyDriver.OUTPUT_FOR_UNDEFINED_INPUT
 					+ "</span>--&gt (" + state + ")</span>\n</li>\n");
 		} catch (IOException e) {
 			e.printStackTrace();

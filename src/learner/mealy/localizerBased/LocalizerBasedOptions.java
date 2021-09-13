@@ -12,7 +12,8 @@
  ********************************************************************************/
 package learner.mealy.localizerBased;
 
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -83,7 +84,7 @@ public class LocalizerBasedOptions extends OneArgChoiceOptionItem {
 		return stateNumberBound.getValue();
 	}
 
-	public void updateWithDriver(MealyDriver d) {
+	public void updateWithDriver(CompleteMealyDriver d) {
 		stateNumberBound.updateWithDriver(d);
 		if (computeWSet())
 			wSet.updateWithDriver(d);

@@ -27,7 +27,7 @@ import tools.loggers.LogManager;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static drivers.mealy.MealyDriver.OUTPUT_FOR_UNDEFINED_INPUT;
+import static drivers.mealy.CompleteMealyDriver.OUTPUT_FOR_UNDEFINED_INPUT;
 
 public class FullyQualifiedState {
 	private final Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> WResponses;

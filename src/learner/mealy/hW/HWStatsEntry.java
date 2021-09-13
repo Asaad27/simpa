@@ -13,7 +13,7 @@
 package learner.mealy.hW;
 
 import automata.mealy.MealyTransition;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import learner.mealy.hW.dataManager.FullyQualifiedState;
@@ -209,7 +209,7 @@ public class HWStatsEntry extends StatsEntry {
 
 	}
 
-	public HWStatsEntry(MealyDriver d, HWOptions options) {
+	public HWStatsEntry(CompleteMealyDriver d, HWOptions options) {
 		this.inputSymbols = d.getInputSymbols().size();
 		this.automata = d.getSystemName();
 		this.seed = SeedHolder.getMainSeed();

@@ -15,22 +15,22 @@ package learner.mealy.combinatorial.node;
 import java.util.ArrayList;
 import java.util.List;
 
+import drivers.mealy.CompleteMealyDriver;
 import learner.mealy.combinatorial.Conjecture;
 import automata.State;
 import automata.mealy.MealyTransition;
-import drivers.mealy.MealyDriver;
 
 public abstract class TreeNodeWithoutConjecture extends TreeNode {
 	private MealyTransition transition;
 	private List<State> states;
-	private MealyDriver driver;
+	private CompleteMealyDriver driver;
 
-	public TreeNodeWithoutConjecture(MealyDriver d){
+	public TreeNodeWithoutConjecture(CompleteMealyDriver d){
 		super(d);
 		driver = d;
 	}
 	
-	protected void initStates(MealyDriver d){
+	protected void initStates(CompleteMealyDriver d){
 		states = new ArrayList<State>();
 	}
 

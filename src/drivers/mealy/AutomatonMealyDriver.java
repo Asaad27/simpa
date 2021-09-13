@@ -27,7 +27,7 @@ import tools.loggers.LogManager;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class AutomatonMealyDriver extends MealyDriver {
+public class AutomatonMealyDriver extends CompleteMealyDriver {
 
 	protected Mealy automata;
 	protected State currentState;
@@ -77,16 +77,16 @@ public class AutomatonMealyDriver extends MealyDriver {
 		return output;
 	}
 
-	@Override
-	public List<String> getInputSymbols() {
-		List<String> is = new ArrayList<String>();
-		for (MealyTransition t : automata.getTransitions()) {
-			if (!is.contains(t.getInput()))
-				is.add(t.getInput());
-		}
-		Collections.sort(is);
-		return is;
-	}
+//	@Override
+//	public List<String> getInputSymbols() {
+//		List<String> is = new ArrayList<String>();
+//		for (MealyTransition t : automata.getTransitions()) {
+//			if (!is.contains(t.getInput()))
+//				is.add(t.getInput());
+//		}
+//		Collections.sort(is);
+//		return is;
+//	}
 
 	@Override
 	public List<String> getDefinedInputs() {
@@ -94,6 +94,11 @@ public class AutomatonMealyDriver extends MealyDriver {
 				.stream()
 				.map(Transition::getInput)
 				.sorted().collect(Collectors.toList());
+	}
+
+	@Override
+	public List<String> getInputSymbols() {
+		return automata.getInputSymbols();
 	}
 
 	/**
@@ -195,7 +200,7 @@ public class AutomatonMealyDriver extends MealyDriver {
 								}
 
 							} else {
-								for (String in : getInputSymbols()) {
+								for (String in : automata.getInputSymbols()) {
 									InputSequence toTry = new InputSequence();
 									toTry.addInputSequence(current);
 									toTry.addInput(in);

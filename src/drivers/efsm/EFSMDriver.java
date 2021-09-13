@@ -76,6 +76,11 @@ public abstract class EFSMDriver
 		return po;
 	}
 
+	@Override
+	public List<String> getDefinedInputs() {
+		return getInputSymbols();
+	}
+
 	public List<String> getInputSymbols() {
 		List<String> is = new ArrayList<String>();
 		for (EFSMTransition t : automata.getTransitions()) {

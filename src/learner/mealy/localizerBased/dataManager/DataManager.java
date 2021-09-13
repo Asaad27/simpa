@@ -32,7 +32,7 @@ import automata.State;
 import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.OutputSequence;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
@@ -47,7 +47,7 @@ import tools.loggers.LogManager;
 public class DataManager {
 	class WaitingState {public FullyQualifiedState state; public int pos;}
 	public static DataManager instance;//TODO either make a proper singleton either do something else
-	private MealyDriver driver;
+	private CompleteMealyDriver driver;
 	private LmTrace trace;
 	private ArrayList<FullyQualifiedState> C;//Identified states in trace
 	private ArrayList<InputSequence> WInTrace;//Identified w-sequences in trace //TODO check that a W cannot be a prefix of another W
@@ -66,8 +66,8 @@ public class DataManager {
 	
 	public int maxStates;
 
-	public DataManager(MealyDriver driver, ArrayList<InputSequence> W,
-			int maxStates, LocalizerBasedOptions options) {
+	public DataManager(CompleteMealyDriver driver, ArrayList<InputSequence> W,
+                       int maxStates, LocalizerBasedOptions options) {
 		this.maxStates = maxStates;
 		this.trace = new LmTrace();
 		this.W = W;

@@ -17,12 +17,12 @@ import java.util.Iterator;
 import java.util.Map;
 
 import automata.State;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 
 class HashMapTreeNodeWithConjecture extends TreeNodeWithConjecture{
 	private Map<State,HashMapTreeNodeWithConjecture> children;
 
-	public HashMapTreeNodeWithConjecture(MealyDriver d){
+	public HashMapTreeNodeWithConjecture(CompleteMealyDriver d){
 		super(d);
 		children = new HashMap<State, HashMapTreeNodeWithConjecture>();
 	}

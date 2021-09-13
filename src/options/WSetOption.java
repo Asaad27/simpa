@@ -15,13 +15,13 @@ package options;
 import java.util.List;
 
 import automata.mealy.InputSequence;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 import options.valueHolders.InputSequenceHolder;
 
 public class WSetOption extends ListOption<InputSequence, InputSequenceHolder> {
 
 	class InputExistanceValidator extends OptionValidator {
-		MealyDriver lastDriver = null;
+		CompleteMealyDriver lastDriver = null;
 
 		@Override
 		public void check() {
@@ -39,7 +39,7 @@ public class WSetOption extends ListOption<InputSequence, InputSequenceHolder> {
 			}
 		}
 
-		public void setLastDriver(MealyDriver d) {
+		public void setLastDriver(CompleteMealyDriver d) {
 			lastDriver = d;
 			check();
 		}
@@ -66,7 +66,7 @@ public class WSetOption extends ListOption<InputSequence, InputSequenceHolder> {
 		return "Add new sequence";
 	}
 
-	public void updateWithDriver(MealyDriver d) {
+	public void updateWithDriver(CompleteMealyDriver d) {
 		inputValidator.setLastDriver(d);
 		validateSelectedTree();
 	}

@@ -18,7 +18,7 @@ import java.util.StringTokenizer;
 
 import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 import learner.mealy.LmConjecture;
 import stats.GraphGenerator;
 import stats.StatsEntry;
@@ -113,7 +113,7 @@ public class LocalizerBasedStatsEntry extends StatsEntry {
 		with_speedup = Boolean.parseBoolean(st.nextToken());
 	}
 
-	public LocalizerBasedStatsEntry(List<InputSequence> W, MealyDriver d,
+	public LocalizerBasedStatsEntry(List<InputSequence> W, CompleteMealyDriver d,
 			int n, LocalizerBasedOptions options) {
 		WSize = W.size();
 		w1Length = W.get(0).getLength();

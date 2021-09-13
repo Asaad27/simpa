@@ -15,7 +15,8 @@ package options.learnerOptions;
 import java.util.ArrayList;
 import java.util.List;
 
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
+import drivers.mealy.PartialMealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import options.AutoIntegerOption;
 import options.BooleanOption;
@@ -138,13 +139,13 @@ public class OracleOption extends MultiArgChoiceOption {
 			return 1;
 		}
 
-		public void updateWithDriver(MealyDriver d) {
+		public void updateWithDriver(PartialMealyDriver d) {
 			ifExistValidator.setLastDriver(d);
 			maxTraceNumberValidator.setLastDriver(d);
 			final boolean isSelected = OracleOption.this
 					.getSelectedItem() == this;
 			if (maxTraceLength.useAutoValue()) {
-				maxTraceLength.setValueAuto(d.getInputSymbols().size() * 5000);
+				maxTraceLength.setValueAuto(d.getDefinedInputs().size() * 25000);
 				if (isSelected)
 					LogManager.logInfo("Maximum counter example length set to ",
 							getMaxTraceLength());
@@ -205,7 +206,7 @@ public class OracleOption extends MultiArgChoiceOption {
 	 * @param driver
 	 *            the SUI
 	 */
-	public void updateWithDriver(MealyDriver driver) {
+	public void updateWithDriver(CompleteMealyDriver driver) {
 		driverValidator.setLastDriver(driver);
 		mrBean.updateWithDriver(driver);
 		validateSelectedTree();

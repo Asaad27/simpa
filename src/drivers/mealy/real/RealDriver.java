@@ -13,9 +13,9 @@
  ********************************************************************************/
 package drivers.mealy.real;
 
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 
-public abstract class RealDriver extends MealyDriver {
+public abstract class RealDriver extends CompleteMealyDriver {
 
 	public RealDriver(String name) {
 		super(name);

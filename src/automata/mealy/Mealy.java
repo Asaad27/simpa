@@ -38,8 +38,9 @@ import java.io.*;
 import java.net.URL;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
-import static drivers.mealy.MealyDriver.OUTPUT_FOR_UNDEFINED_INPUT;
+import static drivers.mealy.CompleteMealyDriver.OUTPUT_FOR_UNDEFINED_INPUT;
 
 public class Mealy extends Automata implements Serializable {
 	private static final long serialVersionUID = 3590635279837551088L;
@@ -638,7 +639,14 @@ for (int j=i+1;j<getStateCount();j++){
 		return i;
 	}
 
-	public class compatibilityCheckResult {
+    public List<String> getInputSymbols() {
+		return transitions.values().stream()
+				.map(Map::keySet).flatMap(Collection::stream)
+				.sorted().distinct()
+				.collect(Collectors.toList());
+    }
+
+    public class compatibilityCheckResult {
 		private boolean isCompatible;
 		private LmTrace simpleDiffTrace = null;
 		private int simpleDiffPos;

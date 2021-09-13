@@ -12,7 +12,7 @@
  ********************************************************************************/
 package learner.mealy.hW;
 
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 import learner.mealy.hW.refineW.*;
 import options.*;
 import options.OptionTree.ArgumentDescriptor.AcceptedValues;
@@ -56,7 +56,7 @@ public class HWOptions extends OneArgChoiceOptionItem {
                     AcceptedValues.NONE, "--MhW_without_computed_W", this);
         }
 
-        void updateWithDriver(MealyDriver d) {
+        void updateWithDriver(CompleteMealyDriver d) {
             driverValidator.setLastDriver(d);
             validateSelectedTree();
         }
@@ -263,7 +263,7 @@ public class HWOptions extends OneArgChoiceOptionItem {
             option.setCategoryIfUndef(OptionCategory.ALGO_HW);
     }
 
-    public void updateWithDriver(MealyDriver d) {
+    public void updateWithDriver(CompleteMealyDriver d) {
         usePrecomputedW.updateWithDriver(d);
         oracleWhenUsingReset.updateWithDriver(d);
         oracleWithoutReset.updateWithDriver(d);

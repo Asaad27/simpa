@@ -16,12 +16,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import automata.State;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 
 public class ArrayTreeNodeWithConjecture extends TreeNodeWithConjecture{
 	private List<ArrayTreeNodeWithConjecture> children;
 
-	public ArrayTreeNodeWithConjecture(MealyDriver d){
+	public ArrayTreeNodeWithConjecture(CompleteMealyDriver d){
 		super(d);
 		children = new ArrayList<ArrayTreeNodeWithConjecture>();
 	}

@@ -28,7 +28,7 @@ import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
 import learner.mealy.LmConjecture;
@@ -41,14 +41,14 @@ import tools.StandaloneRandom;
 import tools.loggers.LogManager;
 
 public class LocalizerBasedLearner extends Learner {
-	private MealyDriver driver;
+	private CompleteMealyDriver driver;
 	private DataManager dataManager;
 	private LocalizerBasedStatsEntry stats;
 	protected ArrayList<InputSequence> W;
 	private int n;// the maximum number of states
 	protected LocalizerBasedOptions options;
 
-	public LocalizerBasedLearner(MealyDriver d, LocalizerBasedOptions options) {
+	public LocalizerBasedLearner(CompleteMealyDriver d, LocalizerBasedOptions options) {
 		driver = d;
 		options.updateWithDriver(d);
 		this.options = options;
@@ -303,7 +303,7 @@ public class LocalizerBasedLearner extends Learner {
 	}
 
 	public static List<InputSequence> computeCharacterizationSet(
-			MealyDriver driver) {
+			CompleteMealyDriver driver) {
 		if (driver instanceof TransparentMealyDriver) {
 			return computeCharacterizationSet(new StandaloneRandom(),
 					(TransparentMealyDriver) driver);

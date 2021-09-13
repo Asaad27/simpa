@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import automata.mealy.MealyTransition;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 import stats.GraphGenerator;
 import stats.StatsEntry;
 import stats.StatsEntry_OraclePart;
@@ -63,8 +63,8 @@ public class CombinatorialStatsEntry extends StatsEntry {
 		return makeCSVHeader(attributes);
 	}
 
-	protected CombinatorialStatsEntry(MealyDriver d,
-			CombinatorialOptions options) {
+	protected CombinatorialStatsEntry(CompleteMealyDriver d,
+                                      CombinatorialOptions options) {
 		this.inputSymbols = d.getInputSymbols().size();
 		automata = d.getSystemName();
 		nodesNB = 0;

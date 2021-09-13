@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import drivers.mealy.CompleteMealyDriver;
 import learner.Learner;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
@@ -31,10 +32,9 @@ import automata.State;
 import automata.mealy.InputSequence;
 import automata.mealy.MealyTransition;
 import automata.mealy.multiTrace.SimpleMultiTrace;
-import drivers.mealy.MealyDriver;
 
 public class ZLearner extends Learner {
-	private MealyDriver driver;
+	private CompleteMealyDriver driver;
 	private List<InputSequence> z;
 	private List<String> i;
 	private ZObservationNode u;
@@ -42,7 +42,7 @@ public class ZLearner extends Learner {
 	private ZStatsEntry stats;
 	private ZOptions options;
 
-	public ZLearner(MealyDriver driver, ZOptions options) {
+	public ZLearner(CompleteMealyDriver driver, ZOptions options) {
 		this.options = options;
 		this.driver = driver;
 		options.oracle.updateWithDriver(this.driver);

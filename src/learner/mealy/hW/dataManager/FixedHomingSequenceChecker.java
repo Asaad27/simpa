@@ -151,6 +151,9 @@ public class FixedHomingSequenceChecker extends GenericHomingSequenceChecker {
 			while (current.afterH == null) {
 				fromH.push(current);
 				current = current.father;
+				if (current == null) {
+
+				}
 			}
 			LmTrace traceA = new LmTrace(h, current.afterH);
 			while (!fromH.isEmpty()) {

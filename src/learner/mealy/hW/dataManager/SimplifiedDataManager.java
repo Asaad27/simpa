@@ -20,7 +20,7 @@ import automata.mealy.Mealy;
 import automata.mealy.OutputSequence;
 import automata.mealy.distinctionStruct.Characterization;
 import automata.mealy.distinctionStruct.DistinctionStruct;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
@@ -31,14 +31,14 @@ import tools.loggers.LogManager;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static drivers.mealy.MealyDriver.OUTPUT_FOR_UNDEFINED_INPUT;
+import static drivers.mealy.CompleteMealyDriver.OUTPUT_FOR_UNDEFINED_INPUT;
 import static java.util.function.Predicate.not;
 
 public class SimplifiedDataManager {
 	public static SimplifiedDataManager instance;// TODO either make a proper
 	// singleton either do
 	// something else
-	private final MealyDriver driver;
+	private final CompleteMealyDriver driver;
 	private int numberOfInputsApplied;
 	private final List<LmTrace> globalTraces;
 	private LmTrace traceSinceReset;
@@ -203,7 +203,7 @@ public class SimplifiedDataManager {
 		return null;
 	}
 
-	public SimplifiedDataManager(MealyDriver driver,
+	public SimplifiedDataManager(CompleteMealyDriver driver,
 								 DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W,
 								 GenericInputSequence h, List<LmTrace> globalTraces,
 								 Map<GenericOutputSequence, List<HZXWSequence>> hZXWSequences,
@@ -353,7 +353,6 @@ public class SimplifiedDataManager {
 
 		if (currentState != null) {
 			//check defined outputs for model and driver states are identical
-			var undefInputsDriver = driver.getUndefinedInputs();
 			for (var trace : currentState.getKnownTransitions()) {
 				var in = trace.getTrace().getInput(0);
 				var out = trace.getTrace().getOutput(0);

@@ -92,7 +92,7 @@ public class LY_basedOracle {
 	 * The traces applied on driver.
 	 */
 	MultiTrace traces;
-	final MealyDriver driver;
+	final PartialMealyDriver driver;
 	final List<String> inputSymbols;
 	public boolean verbose = Options.getLogLevel() == LogLevel.ALL;
 	/**
@@ -100,15 +100,15 @@ public class LY_basedOracle {
 	 */
 	public boolean resetAllowed = true;
 
-	public LY_basedOracle(MealyDriver driver, LmConjecture c,
-			State expectedStartingState, MultiTrace traces) {
+	public LY_basedOracle(PartialMealyDriver driver, LmConjecture c,
+                          State expectedStartingState, MultiTrace traces) {
 		depths = c.computeDepths(expectedStartingState, verbose);
 		this.currentState = null;
 		this.conjecture = c;
 		this.driver = driver;
 		this.traces = traces;
 		assert traces != null;
-		inputSymbols = driver.getInputSymbols();
+		inputSymbols = c.getInputSymbols();
 		TotallyAdaptiveW distinctionTree = new SplittingTree(conjecture)
 				.computeW();
 		if (!conjecture.acceptCharacterizationSet(distinctionTree))

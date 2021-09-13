@@ -22,7 +22,7 @@ import drivers.Driver;
 import drivers.ExhaustiveGeneratorOption;
 import drivers.efsm.real.GenericDriver;
 import drivers.efsm.real.ScanDriver;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 import learner.Learner;
 import learner.mealy.LmConjecture;
 import main.simpa.Options.LogLevel;
@@ -516,9 +516,9 @@ public class SIMPA {
 		boolean conjectureIsFalse = false;
 		try {
 			l.learn();
-			if (d instanceof MealyDriver) {
+			if (d instanceof CompleteMealyDriver) {
 				System.out.println("checking conjecture");
-				conjectureIsFalse |= !((MealyDriver) d).searchConjectureError(
+				conjectureIsFalse |= !((CompleteMealyDriver) d).searchConjectureError(
 						(LmConjecture) l.createConjecture());
 			}
 			l.logStats();

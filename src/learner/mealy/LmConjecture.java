@@ -28,16 +28,16 @@ import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
 import automata.mealy.multiTrace.MultiTrace;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 import tools.loggers.LogManager;
 
 
 public class LmConjecture extends automata.mealy.Mealy {
 	private static final long serialVersionUID = -6920082057724492261L;
 	private List<String> inputSymbols;
-	protected MealyDriver driver;
+	protected CompleteMealyDriver driver;
 
-	public LmConjecture(MealyDriver d) {
+	public LmConjecture(CompleteMealyDriver d) {
 		super(d.getSystemName());
 		this.inputSymbols = d.getInputSymbols();
 		driver = d;

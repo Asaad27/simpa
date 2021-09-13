@@ -52,7 +52,7 @@ public abstract class Driver<I, O> {
 	 * 
 	 * @return the list of input which can be applied on SUI.
 	 */
-	public abstract List<String> getInputSymbols();
+	public abstract List<String> getDefinedInputs();
 
 	/**
 	 * Get the name of the System Under Inference.

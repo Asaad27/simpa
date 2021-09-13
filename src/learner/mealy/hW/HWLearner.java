@@ -24,7 +24,7 @@ import automata.mealy.distinctionStruct.TotallyAdaptiveW;
 import automata.mealy.distinctionStruct.TotallyFixedW;
 import automata.mealy.multiTrace.SimpleMultiTrace;
 import automata.mealy.splittingTree.smetsersSplittingTree.SplittingTree;
-import drivers.mealy.MealyDriver;
+import drivers.mealy.CompleteMealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
 import learner.mealy.CeExposedUnknownStateException;
@@ -43,7 +43,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-import static drivers.mealy.MealyDriver.OUTPUT_FOR_UNDEFINED_INPUT;
+import static drivers.mealy.CompleteMealyDriver.OUTPUT_FOR_UNDEFINED_INPUT;
 import static learner.mealy.hW.dataManager.FindTransferSequence.getTransferSequenceToNextNotFullyKnownState;
 
 
@@ -59,7 +59,7 @@ public class HWLearner extends Learner {
         }
     }
 
-    private final MealyDriver driver;
+    private final CompleteMealyDriver driver;
     private SimplifiedDataManager dataManager;
     private HWStatsEntry stats;
     protected DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W;
@@ -117,7 +117,7 @@ public class HWLearner extends Learner {
 
     }
 
-    public HWLearner(MealyDriver d, HWOptions options) {
+    public HWLearner(CompleteMealyDriver d, HWOptions options) {
         driver = d;
         this.options = options;
         options.updateWithDriver(driver);
@@ -1359,7 +1359,7 @@ public class HWLearner extends Learner {
         InputSequence randomEquivalenceI = InputSequence
                 .generate(driver.getInputSymbols(), fullTrace.size() * 10,
                         new StandaloneRandom());
-        MealyDriver d;
+        CompleteMealyDriver d;
         if (driver instanceof TransparentMealyDriver) {
             d = new TransparentMealyDriver(
                     ((TransparentMealyDriver) driver).getAutomata());
