@@ -12,9 +12,9 @@
  ********************************************************************************/
 package drivers.mealy;
 
-import java.util.List;
-
 import drivers.ExhaustiveGeneratorOption;
+import drivers.mealy.gui.SampleWizardDriverOption;
+import drivers.mealy.gui.UPMDriverOption;
 import drivers.mealy.real.SIPDriverIPTel;
 import drivers.mealy.real.mqtt.MQTTDriverOption;
 import drivers.mealy.simulation.ScanetteDriverOption;
@@ -23,6 +23,8 @@ import drivers.mealy.transparent.RandomMealyDriver;
 import drivers.mealy.transparent.TransparentFromDotMealyDriver;
 import options.automataOptions.DriverChoice;
 import options.automataOptions.DriverChoiceItem;
+
+import java.util.List;
 
 public class MealyDriverChoice extends DriverChoice<PartialMealyDriver> {
 	DriverChoiceItem<CompleteMealyDriver> SIPDriverIpTel = new DriverChoiceItem<CompleteMealyDriver>(
@@ -40,6 +42,8 @@ public class MealyDriverChoice extends DriverChoice<PartialMealyDriver> {
 		addChoice(exhaustiveDriver);
 		addChoice(new MQTTDriverOption(this));
 		addChoice(new ScanetteDriverOption(this));
+		addChoice(new SampleWizardDriverOption(this));
+		addChoice(new UPMDriverOption(this));
 	}
 
 	@Override

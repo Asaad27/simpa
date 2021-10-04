@@ -21,7 +21,6 @@ import java.util.*;
 public abstract class PartialMealyDriver extends Driver<String, String> {
     public static final String OUTPUT_FOR_UNDEFINED_INPUT = "undefined";
     protected String name = null;
-    private Set<String> definedInputsForCurrentState;
     private int numberOfUndefinedRequests = 0;
 
     public PartialMealyDriver(String name) {
@@ -37,9 +36,7 @@ public abstract class PartialMealyDriver extends Driver<String, String> {
     public abstract List<String> getDefinedInputs();
 
     public boolean isDefined(String input) {
-        if (Objects.isNull(definedInputsForCurrentState))
-            definedInputsForCurrentState = new TreeSet<>(getDefinedInputs());
-        return definedInputsForCurrentState.contains(input);
+        return getDefinedInputs().contains(input);
     }
 
     public final GenericInputSequence.GenericOutputSequence execute(GenericInputSequence in) {
@@ -61,9 +58,7 @@ public abstract class PartialMealyDriver extends Driver<String, String> {
 
     protected final String execute_implem(String input) {
         if (isDefined(input)) {
-            var out = execute_defined(input);
-            definedInputsForCurrentState = new TreeSet<>(getDefinedInputs());
-            return out;
+            return execute_defined(input);
         }
         numberOfUndefinedRequests++;
         return OUTPUT_FOR_UNDEFINED_INPUT;

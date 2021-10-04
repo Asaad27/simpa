@@ -12,7 +12,7 @@
  ********************************************************************************/
 package learner.mealy.hW;
 
-import drivers.mealy.CompleteMealyDriver;
+import drivers.mealy.PartialMealyDriver;
 import learner.mealy.hW.refineW.*;
 import options.*;
 import options.OptionTree.ArgumentDescriptor.AcceptedValues;
@@ -56,7 +56,7 @@ public class HWOptions extends OneArgChoiceOptionItem {
                     AcceptedValues.NONE, "--MhW_without_computed_W", this);
         }
 
-        void updateWithDriver(CompleteMealyDriver d) {
+        void updateWithDriver(PartialMealyDriver d) {
             driverValidator.setLastDriver(d);
             validateSelectedTree();
         }
@@ -72,6 +72,7 @@ public class HWOptions extends OneArgChoiceOptionItem {
     private final BooleanOption useAdaptiveH;
     private final BooleanOption useAdaptiveW;
     public final TextOption initialW;
+    public final IntegerOption timeoutOption;
     public TextOption initialH;
     private final GenericOneArgChoiceOption<OneArgChoiceOptionItem> wRefinement;
 
@@ -250,6 +251,9 @@ public class HWOptions extends OneArgChoiceOptionItem {
                 setDefaultItem(reduceW);
             }
         };
+        timeoutOption = new IntegerOption("--timeout", "timeout", "cancel inference prematurley after a timeout has " +
+                "passed (value in seoncds, run until termination for value -1)" +
+                " (-1 = never)", -1);
         subTrees.add(useReset);
         subTrees.add(usePrecomputedW);
         subTrees.add(addHInW);
@@ -259,11 +263,12 @@ public class HWOptions extends OneArgChoiceOptionItem {
         subTrees.add(initialW);
         subTrees.add(initialH);
         subTrees.add(wRefinement);
+        subTrees.add(timeoutOption);
         for (OptionTree option : subTrees)
             option.setCategoryIfUndef(OptionCategory.ALGO_HW);
     }
 
-    public void updateWithDriver(CompleteMealyDriver d) {
+    public void updateWithDriver(PartialMealyDriver d) {
         usePrecomputedW.updateWithDriver(d);
         oracleWhenUsingReset.updateWithDriver(d);
         oracleWithoutReset.updateWithDriver(d);

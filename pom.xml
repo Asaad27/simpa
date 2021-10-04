@@ -22,6 +22,7 @@
 					<include>loggers/html/style.css</include>
 					<include>scanette/produitsCaisse.csv</include>
 					<include>scanette/produitsScanette.csv</include>
+					<include>upmtest</include>
 				</includes>
 			</resource>
 			<resource>
@@ -167,28 +168,63 @@
 			<groupId>org.cafesip.sipunit</groupId>
 			<artifactId>sipunit</artifactId>
 			<version>2.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.paho</groupId>
-			<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-			<version>1.1.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.1</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sourceforge.htmlunit</groupId>
-			<artifactId>htmlunit</artifactId>
-			<version>2.11</version>
-		</dependency>
-		<dependency>
-			<groupId>org.antlr</groupId>
-			<artifactId>antlr4</artifactId>
-			<version>4.5.3</version>
-		</dependency>
-	</dependencies>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.paho</groupId>
+            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.3</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-validator</groupId>
+            <artifactId>commons-validator</artifactId>
+            <version>1.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk14</artifactId>
+            <version>1.45</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+            <version>3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.htmlunit</groupId>
+            <artifactId>htmlunit</artifactId>
+            <version>2.11</version>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4</artifactId>
+            <version>4.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>de.fzi.guitesting</groupId>
+            <artifactId>driver</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com._17od.upm</groupId>
+            <artifactId>upm-swing</artifactId>
+            <version>1.15.1</version>
+        </dependency>
+    </dependencies>
 	<licenses>
 		<license>
 			<name>Eclipse Public License 2.0</name>

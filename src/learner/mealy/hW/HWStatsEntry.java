@@ -13,7 +13,7 @@
 package learner.mealy.hW;
 
 import automata.mealy.MealyTransition;
-import drivers.mealy.CompleteMealyDriver;
+import drivers.mealy.PartialMealyDriver;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
 import learner.mealy.hW.dataManager.FullyQualifiedState;
@@ -132,7 +132,7 @@ public class HWStatsEntry extends StatsEntry {
 	private int hResponses;
 	private int localizeCallNb = 0;
 	private int traceLength = 0;
-	private final int inputSymbols;
+	private int inputSymbols;
 	private int outputSymbols;
 	private int statesNumber;
 	private int loopTransitionPercentage;
@@ -157,6 +157,7 @@ public class HWStatsEntry extends StatsEntry {
 	private float avgNbTriedWSuffixes = -1;
 	private int resetCallNb = 0;
 	private int dictionaryLookups = 0;
+	private boolean prematureCanceled = false;
 
 	final StatsEntry_OraclePart oracle;
 
@@ -203,14 +204,14 @@ public class HWStatsEntry extends StatsEntry {
 		resetCallNb = Integer.parseInt(st.nextToken());
 		st.nextToken();//Oracle reset nb
 		dictionaryLookups = Integer.parseInt(st.nextToken());
+		prematureCanceled = Boolean.parseBoolean(st.nextToken());
 		
 		st = new StringTokenizer(line, ",");
 		oracle = new StatsEntry_OraclePart(st, getAttributes());
 
 	}
 
-	public HWStatsEntry(CompleteMealyDriver d, HWOptions options) {
-		this.inputSymbols = d.getInputSymbols().size();
+	public HWStatsEntry(PartialMealyDriver d, HWOptions options) {
 		this.automata = d.getSystemName();
 		this.seed = SeedHolder.getMainSeed();
 		this.reuse_hzxw = options.useDictionary.isEnabled();
@@ -443,7 +444,15 @@ public class HWStatsEntry extends StatsEntry {
 		avgNbTriedWSuffixes = f;
 	}
 
-    public void increaseDictionaryLookups(int totalLength) {
+	public void increaseDictionaryLookups(int totalLength) {
 		dictionaryLookups += totalLength;
-    }
+	}
+
+	public void setInputSymbols(int size) {
+		inputSymbols = size;
+	}
+
+	public void setPrematureCanceled(boolean b) {
+		prematureCanceled = b;
+	}
 }

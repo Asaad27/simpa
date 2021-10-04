@@ -15,20 +15,13 @@
  ********************************************************************************/
 package learner.mealy.localizerBased;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-
 import automata.State;
 import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
 import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
 import drivers.mealy.CompleteMealyDriver;
+import drivers.mealy.PartialMealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
 import learner.mealy.LmConjecture;
@@ -40,8 +33,10 @@ import tools.RandomGenerator;
 import tools.StandaloneRandom;
 import tools.loggers.LogManager;
 
+import java.util.*;
+
 public class LocalizerBasedLearner extends Learner {
-	private CompleteMealyDriver driver;
+	private final CompleteMealyDriver driver;
 	private DataManager dataManager;
 	private LocalizerBasedStatsEntry stats;
 	protected ArrayList<InputSequence> W;
@@ -303,7 +298,7 @@ public class LocalizerBasedLearner extends Learner {
 	}
 
 	public static List<InputSequence> computeCharacterizationSet(
-			CompleteMealyDriver driver) {
+			PartialMealyDriver driver) {
 		if (driver instanceof TransparentMealyDriver) {
 			return computeCharacterizationSet(new StandaloneRandom(),
 					(TransparentMealyDriver) driver);

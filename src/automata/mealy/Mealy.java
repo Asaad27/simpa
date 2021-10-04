@@ -162,8 +162,7 @@ public class Mealy extends Automata implements Serializable {
 
 	public MealyTransition getTransitionFromWithInput(State s, String input) {
 		assert states.contains(s);
-		Map<String, MealyTransition> map = transitions.get(s);
-		if (map == null) return null;
+		Map<String, MealyTransition> map = transitions.getOrDefault(s, Map.of());
 		if (map.containsKey(input)) { //is transition defined?
 			return map.get(input);
 		} else {

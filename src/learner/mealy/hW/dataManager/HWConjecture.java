@@ -17,40 +17,47 @@ import automata.mealy.GenericInputSequence;
 import automata.mealy.GenericInputSequence.GenericOutputSequence;
 import automata.mealy.distinctionStruct.Characterization;
 import automata.mealy.multiTrace.MultiTrace;
-import drivers.mealy.CompleteMealyDriver;
+import drivers.mealy.PartialMealyDriver;
 import learner.mealy.CeExposedUnknownStateException;
 import learner.mealy.LmConjecture;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
 import tools.loggers.LogManager;
 
+import java.util.List;
+
 public class HWConjecture extends LmConjecture {
-	private static final long serialVersionUID = 1829831676465011460L;
+    private static final long serialVersionUID = 1829831676465011460L;
 
-	final SimplifiedDataManager dataManager;
+    final SimplifiedDataManager dataManager;
 
-	public HWConjecture(CompleteMealyDriver d, SimplifiedDataManager dm) {
-		super(d);
-		dataManager = dm;
-	}
+    public HWConjecture(PartialMealyDriver d, SimplifiedDataManager dm) {
+        super(d);
+        dataManager = dm;
+    }
 
-	@Override
-	public State searchInitialState(MultiTrace appliedSequences)
-			throws CeExposedUnknownStateException {
-		State s = getInitialState();
-		if (s != null)
-			return s;
-		Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> characterization = dataManager
-				.getInitialCharacterization();
-		for (GenericInputSequence w : characterization.unknownPrints()) {
-			driver.reset();
-			appliedSequences.recordReset();
-			GenericOutputSequence r = driver.execute(w);
-			appliedSequences.recordTrace(w.buildTrace(r));
-			if (Options.getLogLevel() != LogLevel.LOW)
-				LogManager.logInfo(
-						"characterizing initial state with sequence ", w);
-			characterization.addPrint(w, r);
+    public List<String> getInputSymbols() {
+        return dataManager.getInputAlphabet();
+    }
+
+    @Override
+    public State searchInitialState(MultiTrace appliedSequences)
+            throws CeExposedUnknownStateException {
+        State s = getInitialState();
+        if (s != null)
+            return s;
+        Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence> characterization =
+                dataManager
+                        .getInitialCharacterization();
+        for (GenericInputSequence w : characterization.unknownPrints()) {
+            driver.reset();
+            appliedSequences.recordReset();
+            GenericOutputSequence r = driver.execute(w);
+            appliedSequences.recordTrace(w.buildTrace(r));
+            if (Options.getLogLevel() != LogLevel.LOW)
+                LogManager.logInfo(
+                        "characterizing initial state with sequence ", w);
+            characterization.addPrint(w, r);
 		}
 		if (!dataManager.hasState(characterization))
 			throw new CeExposedUnknownStateException(characterization);

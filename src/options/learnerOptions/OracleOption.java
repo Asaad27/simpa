@@ -12,23 +12,15 @@
  ********************************************************************************/
 package options.learnerOptions;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import drivers.mealy.CompleteMealyDriver;
 import drivers.mealy.PartialMealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
-import options.AutoIntegerOption;
-import options.BooleanOption;
-import options.GenericMultiArgChoiceOption;
-import options.MultiArgChoiceOption;
-import options.MultiArgChoiceOptionItem;
-import options.OptionCategory;
-import options.OptionTree;
+import options.*;
 import options.OptionTree.ArgumentDescriptor.AcceptedValues;
-import options.RandomOption;
 import options.automataOptions.TransparentDriverValidator;
 import tools.loggers.LogManager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class OracleOption extends MultiArgChoiceOption {
 	protected final boolean resetAllowed;
@@ -53,7 +45,7 @@ public class OracleOption extends MultiArgChoiceOption {
 					super.check();
 				else
 					clear();
-			};
+			}
 		};
 		private final TransparentDriverValidator maxTraceNumberValidator = new TransparentDriverValidator() {
 			@Override
@@ -63,7 +55,7 @@ public class OracleOption extends MultiArgChoiceOption {
 					super.check();
 				else
 					clear();
-			};
+			}
 		};
 		AutoIntegerOption maxTraceLength;
 		AutoIntegerOption maxTraceNumber;// null if reset is not allowed
@@ -202,11 +194,10 @@ public class OracleOption extends MultiArgChoiceOption {
 	/**
 	 * compute parameters which depends of driver and check that options are
 	 * compatible with the selected driver.
-	 * 
-	 * @param driver
-	 *            the SUI
+	 *
+	 * @param driver the SUI
 	 */
-	public void updateWithDriver(CompleteMealyDriver driver) {
+	public void updateWithDriver(PartialMealyDriver driver) {
 		driverValidator.setLastDriver(driver);
 		mrBean.updateWithDriver(driver);
 		validateSelectedTree();

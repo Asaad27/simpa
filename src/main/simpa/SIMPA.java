@@ -915,6 +915,7 @@ public class SIMPA {
 				}
 				runWithOptions();
 				System.out.println("[+] End");
+				System.exit(0);
 			}
 		}
 	}

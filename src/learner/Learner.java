@@ -14,24 +14,24 @@
  ********************************************************************************/
 package learner;
 
-import options.ChoiceOptionItem;
-import options.automataOptions.AutomataChoice;
-import options.learnerOptions.MealyLearnerChoice;
-import learner.mealy.rivestSchapire.RivestSchapireLearner;
-import learner.mealy.table.LmLearner;
-import learner.mealy.tree.ZLearner;
+import automata.Automata;
+import drivers.Driver;
+import drivers.mealy.CompleteMealyDriver;
+import drivers.mealy.PartialMealyDriver;
 import learner.mealy.combinatorial.CombinatorialLearner;
 import learner.mealy.combinatorial.CutterCombinatorialLearner;
 import learner.mealy.hW.HWLearner;
 import learner.mealy.localizerBased.LocalizerBasedLearner;
+import learner.mealy.rivestSchapire.RivestSchapireLearner;
+import learner.mealy.table.LmLearner;
+import learner.mealy.tree.ZLearner;
 import main.simpa.SIMPA;
+import options.ChoiceOptionItem;
+import options.automataOptions.AutomataChoice;
+import options.learnerOptions.MealyLearnerChoice;
 import stats.StatsEntry;
 import stats.attribute.Attribute;
 import tools.loggers.LogManager;
-import automata.Automata;
-import drivers.Driver;
-//EFSM//import drivers.efsm.EFSMDriver;
-import drivers.mealy.CompleteMealyDriver;
 
 public abstract class Learner {
 	protected boolean addtolog = true;
@@ -75,10 +75,13 @@ public abstract class Learner {
 //EFSM//					.getLearner((EFSMDriver) driver);
 //EFSM//		} else 
 		if (selectedAutomataChoice == automataChoice.mealy) {
-			CompleteMealyDriver mDriver = (CompleteMealyDriver) driver;
 			MealyLearnerChoice learnerChoice = automataChoice.mealyLearnerChoice;
 			ChoiceOptionItem selectedLearnerChoice = learnerChoice
 					.getSelectedItem();
+			if (selectedLearnerChoice == learnerChoice.hW) {
+				return new HWLearner((PartialMealyDriver) driver, learnerChoice.hW);
+			}
+			CompleteMealyDriver mDriver = (CompleteMealyDriver) driver;
 			if (selectedLearnerChoice == learnerChoice.tree) {
 				return new ZLearner(mDriver, learnerChoice.tree);
 			} else if (selectedLearnerChoice == learnerChoice.combinatorial) {
@@ -94,8 +97,6 @@ public abstract class Learner {
 			} else if (selectedLearnerChoice == learnerChoice.localizerBased) {
 				return new LocalizerBasedLearner(mDriver,
 						learnerChoice.localizerBased);
-			} else if (selectedLearnerChoice == learnerChoice.hW) {
-				return new HWLearner(mDriver, learnerChoice.hW);
 			} else if (selectedLearnerChoice == learnerChoice.lm) {
 				return new LmLearner(mDriver, learnerChoice.lm);
 			} else {

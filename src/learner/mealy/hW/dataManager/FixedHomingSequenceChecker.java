@@ -12,25 +12,17 @@
  ********************************************************************************/
 package learner.mealy.hW.dataManager;
 
-import java.util.ArrayDeque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-import java.util.Stack;
-import java.util.Map.Entry;
-
-import tools.CompiledSearchGraph;
-import tools.loggers.LogManager;
-
+import automata.mealy.InputSequence;
+import automata.mealy.OutputSequence;
 import learner.mealy.LmTrace;
 import learner.mealy.hW.dataManager.FixedHomingSequenceChecker.Node.Child;
 import main.simpa.Options;
 import main.simpa.Options.LogLevel;
+import tools.CompiledSearchGraph;
+import tools.loggers.LogManager;
 
-import automata.mealy.InputSequence;
-import automata.mealy.OutputSequence;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class FixedHomingSequenceChecker extends GenericHomingSequenceChecker {
 	class Node {
@@ -113,11 +105,11 @@ public class FixedHomingSequenceChecker extends GenericHomingSequenceChecker {
 	}
 
 	protected InputSequence h;
-	private Map<OutputSequence, Node> knownResponses;
+	private final Map<OutputSequence, Node> knownResponses;
 	private Node currentNode;
 	private final Node startNode;
 	private LmTrace lastApplied;
-	private CompiledSearchGraph compiledSearchGraph;
+	private final CompiledSearchGraph compiledSearchGraph;
 
 	public FixedHomingSequenceChecker(InputSequence h) {
 		this.h = h;
@@ -148,34 +140,33 @@ public class FixedHomingSequenceChecker extends GenericHomingSequenceChecker {
 		if (knownOutput != null && !knownOutput.equals(output)) {
 			Stack<Node> fromH = new Stack<>();
 			Node current = previousNode;
-			while (current.afterH == null) {
+			while (current != null && current.afterH == null) {
 				fromH.push(current);
 				current = current.father;
-				if (current == null) {
-
-				}
 			}
-			LmTrace traceA = new LmTrace(h, current.afterH);
-			while (!fromH.isEmpty()) {
-				Node parent = current;
-				current = fromH.pop();
-				for (java.util.Map.Entry<String, Child> e : parent.children
-						.entrySet()) {
-					if (e.getValue().n == current) {
-						traceA.append(e.getKey(), e.getValue().output);
-						break;
+			if (current != null) {
+				LmTrace traceA = new LmTrace(h, current.afterH);
+				while (!fromH.isEmpty()) {
+					Node parent = current;
+					current = fromH.pop();
+					for (java.util.Map.Entry<String, Child> e : parent.children
+							.entrySet()) {
+						if (e.getValue().n == current) {
+							traceA.append(e.getKey(), e.getValue().output);
+							break;
+						}
 					}
 				}
-			}
-			LmTrace traceB = traceA.clone();
-			traceB.append(input, knownOutput);
-			traceA.append(input, output);
-			this.currentNode=previousNode.children.get(input).n;
-			if (Options.getLogLevel() == LogLevel.ALL) {
-				LogManager.logInfo("Inconsistency found in homing sequence");
-				exportToDot();
+				LmTrace traceB = traceA.clone();
+				traceB.append(input, knownOutput);
+				traceA.append(input, output);
+				this.currentNode = previousNode.children.get(input).n;
+				if (Options.getLogLevel() == LogLevel.ALL) {
+					LogManager.logInfo("Inconsistency found in homing sequence");
+					exportToDot();
 				}
-			throw new FixedHNDException(traceA, traceB, h);
+				throw new FixedHNDException(traceA, traceB, h);
+			}
 		}
 		if (hIsObserved && knownOutput == null) {
 			LmTrace hTrace = (lastApplied.subtrace(

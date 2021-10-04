@@ -14,14 +14,6 @@
  ********************************************************************************/
 package learner.mealy;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import automata.State;
 import automata.mealy.InputSequence;
 import automata.mealy.Mealy;
@@ -29,33 +21,38 @@ import automata.mealy.MealyTransition;
 import automata.mealy.OutputSequence;
 import automata.mealy.multiTrace.MultiTrace;
 import drivers.mealy.CompleteMealyDriver;
+import drivers.mealy.PartialMealyDriver;
 import tools.loggers.LogManager;
+
+import java.util.*;
 
 
 public class LmConjecture extends automata.mealy.Mealy {
-	private static final long serialVersionUID = -6920082057724492261L;
-	private List<String> inputSymbols;
-	protected CompleteMealyDriver driver;
+    private static final long serialVersionUID = -6920082057724492261L;
+    //	private List<String> inputSymbols;
+    protected PartialMealyDriver driver;
 
-	public LmConjecture(CompleteMealyDriver d) {
-		super(d.getSystemName());
-		this.inputSymbols = d.getInputSymbols();
-		driver = d;
-	}
+    public LmConjecture(PartialMealyDriver d) {
+        super(d.getSystemName());
+        //this.inputSymbols = d.getInputSymbols();
+        driver = d;
+    }
 
-	public List<String> getInputSymbols() {
-		return inputSymbols;
-	}
-	
-	/**
-	 * check if a conjecture has all transitions
-	 * @return true if there is a transition from any state with any input symbol
-	 */
-	public boolean isFullyKnown(){
-		for (State s : getStates())
-			for (String i : inputSymbols)
-				if (getTransitionFromWithInput(s, i) == null)
-					return false;
+    public List<String> getInputSymbols() {
+        //Partial conjectures should override this method
+        return ((CompleteMealyDriver) driver).getInputSymbols();
+    }
+
+    /**
+     * check if a conjecture has all transitions
+     *
+     * @return true if there is a transition from any state with any input symbol
+     */
+	public boolean isFullyKnown() {
+        for (State s : getStates())
+            for (String i : getInputSymbols())
+                if (getTransitionFromWithInput(s, i) == null)
+                    return false;
 		return true;
 	}
 
@@ -63,47 +60,47 @@ public class LmConjecture extends automata.mealy.Mealy {
 	 * This class stores several information on the result of a search of
 	 * counter example. It stores counter example paths and indicate if a search
 	 * completely checked an automaton.
-	 * 
-	 * @author Nicolas BREMOND
-	 */
-	public class CounterExampleResult {
-		CounterExampleResult(List<State> realStates,
-				List<State> conjectureStates) {
-			super();
-			this.realStates = realStates;
-			this.conjectureStates = conjectureStates;
-		}
+     *
+     * @author Nicolas BREMOND
+     */
+    public class CounterExampleResult {
+        CounterExampleResult(List<State> realStates,
+                             List<State> conjectureStates) {
+            super();
+            this.realStates = realStates;
+            this.conjectureStates = conjectureStates;
+        }
 
-		/**
-		 * list of counter examples found from current state.
-		 */
-		private List<InputSequence> noResetCE = new ArrayList<>();
-		/**
-		 * list of counter examples found from initial state.
-		 */
-		private List<InputSequence> fromResetCE = new ArrayList<>();
-		private Set<State> testedRealStates = new HashSet<>();
-		private Set<State> reachedConjectureStates = new HashSet<>();
-		private List<State> realStates;
-		private List<State> conjectureStates;
+        /**
+         * list of counter examples found from current state.
+         */
+        private List<InputSequence> noResetCE = new ArrayList<>();
+        /**
+         * list of counter examples found from initial state.
+         */
+        private List<InputSequence> fromResetCE = new ArrayList<>();
+        private final Set<State> testedRealStates = new HashSet<>();
+        private final Set<State> reachedConjectureStates = new HashSet<>();
+        private final List<State> realStates;
+        private final List<State> conjectureStates;
 
-		void addReachedConjectureState(State s) {
-			reachedConjectureStates.add(s);
-		}
+        void addReachedConjectureState(State s) {
+            reachedConjectureStates.add(s);
+        }
 
-		void addTestedRealState(State realState) {
-			testedRealStates.add(realState);
-		}
+        void addTestedRealState(State realState) {
+            testedRealStates.add(realState);
+        }
 
-		void addNoResetCE(InputSequence counterExample) {
-			noResetCE.add(counterExample);
-		}
+        void addNoResetCE(InputSequence counterExample) {
+            noResetCE.add(counterExample);
+        }
 
-		/**
-		 * Indicate if the automaton is exactly equivalent to the reference. For
-		 * a detailed explanation of the result given, see {@link #what()}.
-		 * 
-		 * Notice that this method can return {@code false} for automata with
+        /**
+         * Indicate if the automaton is exactly equivalent to the reference. For
+         * a detailed explanation of the result given, see {@link #what()}.
+         *
+         * Notice that this method can return {@code false} for automata with
 		 * unreachable parts even if they were equivalent.
 		 * 
 		 * @return {@code true} if all states of conjecture and reference were
@@ -301,29 +298,29 @@ public class LmConjecture extends automata.mealy.Mealy {
 		uncheckedStates.add(realStartingState);
 
 		while (!uncheckedStates.isEmpty()) {
-			State realState = uncheckedStates.pollFirst();
-			State conjectureState = realToConjecture.get(realState);
-			assert conjectureState != null;
-			for (String i : inputSymbols) {
-				MealyTransition realTransition = realAutomaton
-						.getTransitionFromWithInput(realState, i);
-				MealyTransition conjectureTransition = conjecture
-						.getTransitionFromWithInput(conjectureState, i);
-				State realTarget = realTransition.getTo();
-				State conjectureTarget = conjectureTransition.getTo();
-				String realOutput = realTransition.getOutput();
-				String conjectureOutput = conjectureTransition.getOutput();
-				result.addReachedConjectureState(conjectureTarget);
+            State realState = uncheckedStates.pollFirst();
+            State conjectureState = realToConjecture.get(realState);
+            assert conjectureState != null;
+            for (String i : getInputSymbols()) {
+                MealyTransition realTransition = realAutomaton
+                        .getTransitionFromWithInput(realState, i);
+                MealyTransition conjectureTransition = conjecture
+                        .getTransitionFromWithInput(conjectureState, i);
+                State realTarget = realTransition.getTo();
+                State conjectureTarget = conjectureTransition.getTo();
+                String realOutput = realTransition.getOutput();
+                String conjectureOutput = conjectureTransition.getOutput();
+                result.addReachedConjectureState(conjectureTarget);
 
-				// first check if transition in both automata provide same
-				// output
-				if (!realOutput.equals(conjectureOutput)) {
-					InputSequence counterExample = new InputSequence();
-					counterExample.addInputSequence(accesPath.get(realState));
-					counterExample.addInput(i);
-					result.addNoResetCE(counterExample);
-					if (stopOnFirst)
-						return result;
+                // first check if transition in both automata provide same
+                // output
+                if (!realOutput.equals(conjectureOutput)) {
+                    InputSequence counterExample = new InputSequence();
+                    counterExample.addInputSequence(accesPath.get(realState));
+                    counterExample.addInput(i);
+                    result.addNoResetCE(counterExample);
+                    if (stopOnFirst)
+                        return result;
 				}
 				// now map the realTarget to a state in conjecture (if not
 				// already done)

@@ -20,7 +20,7 @@ import automata.mealy.Mealy;
 import automata.mealy.OutputSequence;
 import automata.mealy.distinctionStruct.Characterization;
 import automata.mealy.distinctionStruct.DistinctionStruct;
-import drivers.mealy.CompleteMealyDriver;
+import drivers.mealy.PartialMealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.mealy.LmConjecture;
 import learner.mealy.LmTrace;
@@ -38,7 +38,7 @@ public class SimplifiedDataManager {
 	public static SimplifiedDataManager instance;// TODO either make a proper
 	// singleton either do
 	// something else
-	private final CompleteMealyDriver driver;
+	private final PartialMealyDriver driver;
 	private int numberOfInputsApplied;
 	private final List<LmTrace> globalTraces;
 	private LmTrace traceSinceReset;
@@ -203,7 +203,7 @@ public class SimplifiedDataManager {
 		return null;
 	}
 
-	public SimplifiedDataManager(CompleteMealyDriver driver,
+	public SimplifiedDataManager(PartialMealyDriver driver,
 								 DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W,
 								 GenericInputSequence h, List<LmTrace> globalTraces,
 								 Map<GenericOutputSequence, List<HZXWSequence>> hZXWSequences,

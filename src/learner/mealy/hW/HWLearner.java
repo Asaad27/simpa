@@ -24,7 +24,7 @@ import automata.mealy.distinctionStruct.TotallyAdaptiveW;
 import automata.mealy.distinctionStruct.TotallyFixedW;
 import automata.mealy.multiTrace.SimpleMultiTrace;
 import automata.mealy.splittingTree.smetsersSplittingTree.SplittingTree;
-import drivers.mealy.CompleteMealyDriver;
+import drivers.mealy.PartialMealyDriver;
 import drivers.mealy.transparent.TransparentMealyDriver;
 import learner.Learner;
 import learner.mealy.CeExposedUnknownStateException;
@@ -41,6 +41,7 @@ import tools.loggers.LogManager;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.time.Duration;
 import java.util.*;
 
 import static drivers.mealy.CompleteMealyDriver.OUTPUT_FOR_UNDEFINED_INPUT;
@@ -50,6 +51,7 @@ import static learner.mealy.hW.dataManager.FindTransferSequence.getTransferSeque
 public class HWLearner extends Learner {
 
     private WSetOptimization wSetOptimizer;
+    private long startTime;
 
     private static class CanNotExtendWException extends RuntimeException {
         private static final long serialVersionUID = -7523569929856877603L;
@@ -59,7 +61,7 @@ public class HWLearner extends Learner {
         }
     }
 
-    private final CompleteMealyDriver driver;
+    private final PartialMealyDriver driver;
     private SimplifiedDataManager dataManager;
     private HWStatsEntry stats;
     protected DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W;
@@ -117,7 +119,7 @@ public class HWLearner extends Learner {
 
     }
 
-    public HWLearner(CompleteMealyDriver d, HWOptions options) {
+    public HWLearner(PartialMealyDriver d, HWOptions options) {
         driver = d;
         this.options = options;
         options.updateWithDriver(driver);
@@ -297,7 +299,7 @@ public class HWLearner extends Learner {
         }
         if (W.isEmpty())
             W.refine(W.getEmptyCharacterization(), new LmTrace());
-        long start = System.nanoTime();
+        startTime = System.nanoTime();
 
         GenericInputSequence h;
         if (!options.useAdaptiveH()) {
@@ -387,6 +389,9 @@ public class HWLearner extends Learner {
                 inputSymbolDiscovered = true;
                 inputAlphabet.addAll(e.getDelta());
                 LogManager.inputAlphabetChanged(inputAlphabet);
+            } catch (InferenceTimeoutException e) {
+                LogManager.logInfo("Timeour reached");
+                break;
             }
 
             if (dataManager.getConjecture().getStates().size() > nrOfStates) {
@@ -518,11 +523,10 @@ public class HWLearner extends Learner {
 
             }
             assert checkTraces();
-
         } while (counterExampleTrace != null || inconsistencyFound
                 || stateDiscoveredInCe || inputSymbolDiscovered);
 
-        float duration = (float) (System.nanoTime() - start) / 1000000000;
+        float duration = (float) (System.nanoTime() - startTime) / 1000000000;
         stats.setDuration(duration);
         stats.setAvgTriedWSuffixes((float) nbOfTriedWSuffixes / wRefinenmentNb);
 
@@ -534,8 +538,6 @@ public class HWLearner extends Learner {
                 .isCompatible()) {
             LogManager.logWarning(
                     "conjecture is false or driver is not strongly connected");
-            throw new RuntimeException(
-                    "conjecture is not compatible with trace observed");
         }
 
         // State initialState=searchInitialState();
@@ -1014,6 +1016,11 @@ public class HWLearner extends Learner {
 
         // start of the algorithm
         do {
+            var elapsedTime = Duration.ofNanos(System.nanoTime() - startTime).toSeconds();
+            if (options.timeoutOption.getValue() != -1 && elapsedTime > options.timeoutOption.getValue()) {
+                stats.setPrematureCanceled(true);
+                throw new InferenceTimeoutException();
+            }
             Runtime runtime = Runtime.getRuntime();
             // runtime.gc(); //The garbage collection takes time and induce
             // wrong measurement of duration
@@ -1357,9 +1364,9 @@ public class HWLearner extends Learner {
         }
         LmConjecture conjecture = dataManager.getConjecture();
         InputSequence randomEquivalenceI = InputSequence
-                .generate(driver.getInputSymbols(), fullTrace.size() * 10,
+                .generate(dataManager.getInputAlphabet(), fullTrace.size() * 10,
                         new StandaloneRandom());
-        CompleteMealyDriver d;
+        PartialMealyDriver d;
         if (driver instanceof TransparentMealyDriver) {
             d = new TransparentMealyDriver(
                     ((TransparentMealyDriver) driver).getAutomata());
