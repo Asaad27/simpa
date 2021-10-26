@@ -480,7 +480,9 @@ public class SIMPA {
 		if (getOutputsOptions().htmlLoggerOption.isEnabled())
 			LogManager.addLogger(new HTMLLogger());
 		if (getOutputsOptions().dataLoggerOption.isEnabled())
-			LogManager.addLogger(new TransitionLogger(Options.getLogDir().toPath()));
+			LogManager.addLogger(new TransitionLogger(Options.getLogDir().toPath(), true));
+		if (getOutputsOptions().compactLoggerOption.isEnabled())
+			LogManager.addLogger(new TransitionLogger(Options.getLogDir().toPath(), false));
 		LogManager.start();
 		LogManager.logInfo("starting inference with options "
 				+ allOptions.buildBackCLILine(false));

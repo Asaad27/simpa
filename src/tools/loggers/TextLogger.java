@@ -493,15 +493,15 @@ public class TextLogger implements ILogger {
 
 
     @Override
-    public void logUndefinedRequest(String input, int n, State s) {
-        try {
-            writer.write(tfm.format(new Date()) + "undefined transition n°" + n + " : ("
-                    + s + ") --" + input + "--> (" + s + ")" + ret);
-            writer.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+	public void logUndefinedRequest(String input, String output, int n) {
+		try {
+			writer.write(tfm.format(new Date()) + "undefined transition n°" + output + " : ("
+					+ n + ") --" + input + "--> (" + n + ")" + ret);
+			writer.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
     @Override
     public void logObservationTree(ZObservationNode root) {

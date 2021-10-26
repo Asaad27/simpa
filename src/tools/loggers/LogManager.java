@@ -145,9 +145,9 @@ public class LogManager {
 			l.logRequest(input, output, n);
 	}
 
-	public static void logUndefinedRequest(String input, int n, State s) {
+	public static void logUndefinedRequest(String input, String output, int n) {
 		for (ILogger l : loggers) {
-			l.logUndefinedRequest(input, n, s);
+			l.logUndefinedRequest(input, output, n);
 		}
 	}
 

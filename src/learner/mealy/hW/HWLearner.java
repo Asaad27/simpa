@@ -392,6 +392,8 @@ public class HWLearner extends Learner {
             } catch (InferenceTimeoutException e) {
                 LogManager.logInfo("Timeour reached");
                 break;
+            } finally {
+                LogManager.logConjecture(dataManager.getConjecture());
             }
 
             if (dataManager.getConjecture().getStates().size() > nrOfStates) {
@@ -493,22 +495,6 @@ public class HWLearner extends Learner {
                 try {
                     extendsW(states, lastTrace, firstStatePos);
                 } catch (CanNotExtendWException e) {
-//                    if (h instanceof InputSequence) {
-//                        var fixedH = (InputSequence) h;
-//                        var traceA = lastTrace.subtrace(firstStatePos - fixedH.getLength(), lastTrace.size());
-//                        LmTrace traceB;
-//                        for (var r : states.get(0).getWResponses().knownResponses()) {
-//                            if (r.getInputsProjection().equals(lastTrace.subtrace(firstStatePos, lastTrace.size())
-//                            .getInputsProjection())) {
-//                                var hTrace = lastTrace.subtrace(firstStatePos - fixedH.getLength(), firstStatePos);
-//                                traceB = hTrace.clone();
-//                                traceB.append(r);
-//                                GenericHNDException exception = new FixedHNDException(traceA, traceB, fixedH);
-//                                hExceptions.add(exception);
-//                                break;
-//                            }
-//                        }
-//                    }
                     if (hExceptions.size() == 0)
                         throw e;
                 }
@@ -1017,7 +1003,7 @@ public class HWLearner extends Learner {
         // start of the algorithm
         do {
             var elapsedTime = Duration.ofNanos(System.nanoTime() - startTime).toSeconds();
-            if (options.timeoutOption.getValue() != -1 && elapsedTime > options.timeoutOption.getValue()) {
+            if (options.timeoutOption.getValue() != 0 && elapsedTime > options.timeoutOption.getValue()) {
                 stats.setPrematureCanceled(true);
                 throw new InferenceTimeoutException();
             }
@@ -1180,7 +1166,6 @@ public class HWLearner extends Learner {
             }
         } while (!dataManager.isFullyKnown());
 
-        LogManager.logConjecture(dataManager.getConjecture());
         if (Options.getLogLevel() == Options.LogLevel.ALL)
             dataManager.getConjecture().exportToDot();
         LogManager.logInfo("end of sub-learning.");

@@ -24,7 +24,10 @@ import main.simpa.Options;
 import main.simpa.Options.LogLevel;
 import tools.loggers.LogManager;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class AutomatonMealyDriver extends CompleteMealyDriver {
@@ -56,7 +59,7 @@ public class AutomatonMealyDriver extends CompleteMealyDriver {
 
 	@Override
 	protected void logUndefinedRequest(String input, String output, int numberOfUndefRequests) {
-		LogManager.logUndefinedRequest(input, numberOfUndefRequests, currentState);
+		LogManager.logUndefinedRequest(input, output, numberOfUndefRequests);
 	}
 
 	@Override

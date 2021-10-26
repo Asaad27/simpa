@@ -65,9 +65,11 @@ public abstract class PartialMealyDriver extends Driver<String, String> {
     }
 
     protected void logDefinedRequest(String input, String output, int numberOfAtomicRequests) {
+        LogManager.logRequest(input, output, numberOfAtomicRequests);
     }
 
     protected void logUndefinedRequest(String input, String output, int numberOfAtomicRequests) {
+        LogManager.logUndefinedRequest(input, output, numberOfAtomicRequests);
     }
 
     @Override

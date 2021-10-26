@@ -519,13 +519,13 @@ public class HTMLLogger implements ILogger {
 	}
 
 	@Override
-	public void logUndefinedRequest(String input, int n, State state) {
+	public void logUndefinedRequest(String input, String output, int state) {
 		try {
 			writer.flush();
 			writer.write("<li class=\"request\">\n");
 			writer.write("<span class=\"date\">" + tfm.format(new Date())
 					+ "</span><span class=\"content\">" + LogManager.getPrefix()
-					+ "undefined transition n°" + n + " : (" + state
+					+ "undefined transition n°" + output + " : (" + state
 					+ ") --<span class=\"pi\">" + input
 					+ "</span>/<span class=\"po\">"
 					+ PartialMealyDriver.OUTPUT_FOR_UNDEFINED_INPUT

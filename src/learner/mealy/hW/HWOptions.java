@@ -252,8 +252,8 @@ public class HWOptions extends OneArgChoiceOptionItem {
             }
         };
         timeoutOption = new IntegerOption("--timeout", "timeout", "cancel inference prematurley after a timeout has " +
-                "passed (value in seoncds, run until termination for value -1)" +
-                " (-1 = never)", -1);
+                "passed (value in seoncds, run until termination for value -0" +
+                " (0= never)", 0);
         subTrees.add(useReset);
         subTrees.add(usePrecomputedW);
         subTrees.add(addHInW);

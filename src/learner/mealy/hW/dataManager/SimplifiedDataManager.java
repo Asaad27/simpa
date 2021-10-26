@@ -47,6 +47,7 @@ public class SimplifiedDataManager {
 	// set
 	public final GenericInputSequence h;
 	private final List<String> I;// Input Symbols
+	private final Set<String> O = new HashSet<>();
 	private final Map<Characterization<? extends GenericInputSequence, ? extends GenericOutputSequence>,
 			FullyQualifiedState> Q;// known
 
@@ -113,11 +114,14 @@ public class SimplifiedDataManager {
 		return notFullyKnownStates;
 	}
 
+	public Set<String> getOutputs() {
+		return O;
+	}
 
 	/**
 	 * use as much sequences as possible in dictionary to improve the
 	 * characterization
-	 * 
+	 *
 	 * @param wR
 	 *            the characterization to improve.
 	 * @param hResponse
@@ -260,7 +264,7 @@ public class SimplifiedDataManager {
 	}
 
 	private void extendTrace(String input, String output) {
-		numberOfInputsApplied++;
+		if (!output.equals(OUTPUT_FOR_UNDEFINED_INPUT)) numberOfInputsApplied++;
 		traceSinceReset.append(input, output);
 	}
 
@@ -303,6 +307,7 @@ public class SimplifiedDataManager {
 		if (Options.getLogLevel() == Options.LogLevel.ALL)
 			LogManager.logInfo("expected Traces are ", expectedTraces);
 		String output = driver.execute(input);
+		O.add(output);
 		extendTrace(input, output);
 		// check for Non-Determinism after homing sequence
 		hChecker.apply(input, output);

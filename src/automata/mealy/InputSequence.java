@@ -14,13 +14,13 @@
  ********************************************************************************/
 package automata.mealy;
 
-import java.io.Serializable;
-import java.util.*;
-import java.util.regex.Pattern;
-
 import learner.mealy.LmTrace;
 import main.simpa.Options;
 import tools.RandomGenerator;
+
+import java.io.Serializable;
+import java.util.*;
+import java.util.regex.Pattern;
 
 public class InputSequence implements Cloneable, GenericInputSequence, Serializable {
 
@@ -96,7 +96,7 @@ public class InputSequence implements Cloneable, GenericInputSequence, Serializa
 	public static InputSequence deserialize(String s) {
 		if (s.equals(Options.SYMBOL_EPSILON)) return new InputSequence(); //empty sequence
 		String delimeterPattern = Pattern.quote(String.valueOf(DELIMETER));
-		String regex = "[\\w\\d]+(" + delimeterPattern + "[\\w\\d]+)*";
+		String regex = "[^.]+(" + delimeterPattern + "[^.]+)*";
 		if (!s.matches(regex)) {
 			throw new IllegalArgumentException("Cannot deserialize input sequence " + s);
 		}
@@ -159,10 +159,7 @@ public class InputSequence implements Cloneable, GenericInputSequence, Serializa
 			return false;
 		}
 		final InputSequence other = (InputSequence) obj;
-		if (!Objects.equals(this.sequence, other.sequence)) {
-			return false;
-		}
-		return true;
+		return Objects.equals(this.sequence, other.sequence);
 	}
 
 	public String getFirstSymbol() {

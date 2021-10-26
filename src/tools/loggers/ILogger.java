@@ -145,7 +145,7 @@ public interface ILogger {
     default void logCLIOptions(OptionsGroup allOptions) {
     }
 
-    default void logUndefinedRequest(String input, int n, State s) {
+    default void logUndefinedRequest(String input, String output, int n) {
     }
 
     default void inputAlphabetChanged(List<String> inputAlphabet) {

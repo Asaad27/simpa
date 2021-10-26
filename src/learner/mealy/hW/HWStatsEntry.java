@@ -158,6 +158,7 @@ public class HWStatsEntry extends StatsEntry {
 	private int resetCallNb = 0;
 	private int dictionaryLookups = 0;
 	private boolean prematureCanceled = false;
+	private final Set<String> outputs = new HashSet<>();
 
 	final StatsEntry_OraclePart oracle;
 
@@ -262,6 +263,8 @@ public class HWStatsEntry extends StatsEntry {
 
 	protected void increaseWithDataManager(SimplifiedDataManager dataManager) {
 		subInferenceNb++;
+		outputs.addAll(dataManager.getOutputs());
+		outputSymbols = outputs.size();
 		updateMaxReckonedStates(dataManager.getConjecture().getStateCount());
 		updateMaxFakeStates(dataManager.getIdentifiedFakeStates().size());
 		increaseTraceLength(dataManager.traceSize());
@@ -309,7 +312,6 @@ public class HWStatsEntry extends StatsEntry {
 		}
 		loopTransitionPercentage = conjecture.getTransitionCount() == 0 ? 0 :
 				((100 * loopTransitions) / conjecture.getTransitionCount());
-		this.outputSymbols = outputSymbols.size();
 	}
 
 	@SuppressWarnings("unchecked")

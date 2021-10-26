@@ -24,9 +24,11 @@ public class TransitionLogger implements ILogger {
     private Writer subinferenceTraceWriter;
     private Writer completeTrace;
     private OptionsGroup cliOptions;
+    private final boolean logTransitions;
 
-    public TransitionLogger(Path logFolder) {
+    public TransitionLogger(Path logFolder, boolean logTransitions) {
         this.logFolder = logFolder;
+        this.logTransitions = logTransitions;
     }
 
     @Override
@@ -34,7 +36,7 @@ public class TransitionLogger implements ILogger {
         String name = LocalDateTime.now()
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
         try {
-            currentInferenceDir = Files.createDirectory(logFolder.resolve(name));
+            currentInferenceDir = Files.createDirectories(logFolder.resolve(name));
             subinference = 0;
             Path completeFile = Files.createFile(currentInferenceDir.resolve("completeTrace"));
             completeTrace = Files.newBufferedWriter(completeFile);
@@ -50,6 +52,7 @@ public class TransitionLogger implements ILogger {
         flush();
         String traceFileName = String.format("%03d_trace", subinference++);
         //name = "final";
+        if (!logTransitions) return;
         try {
             Path currentIterationLogFile = currentInferenceDir.resolve(traceFileName);
             // Files.deleteIfExists(currentIterationLogFile);
@@ -66,7 +69,7 @@ public class TransitionLogger implements ILogger {
     }
 
     private void flush() {
-        if (subinferenceTraceWriter != null) {
+        if (logTransitions && subinferenceTraceWriter != null) {
             try {
                 subinferenceTraceWriter.flush();
                 completeTrace.flush();
@@ -136,6 +139,7 @@ public class TransitionLogger implements ILogger {
     }
 
     public void logRequest(String in, String out, int n) {
+        if (!logTransitions) return;
         String logLine = in + "/" + out + "\n";
         try {
             subinferenceTraceWriter.append(logLine);
@@ -145,4 +149,8 @@ public class TransitionLogger implements ILogger {
         }
     }
 
+    @Override
+    public void logUndefinedRequest(String input, String output, int n) {
+        //do nothing
+    }
 }
