@@ -18,6 +18,9 @@ import options.*;
 import options.OptionTree.ArgumentDescriptor.AcceptedValues;
 import options.automataOptions.TransparentDriverValidator;
 import options.learnerOptions.OracleOption;
+import options.traceOptions.TraceKOption;
+import options.traceOptions.TraceNOption;
+import options.traceOptions.TraceOption;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -79,6 +82,9 @@ public class HWOptions extends OneArgChoiceOptionItem {
     public final TextOption initialW;
     public TextOption initialH;
     private final GenericOneArgChoiceOption<OneArgChoiceOptionItem> wRefinement;
+    public final TraceOption initialTraceFile;
+    public final TraceKOption traceK;
+    public final TraceNOption traceN;
 
     public final OracleOption getOracleOption() {
         if (useReset.isEnabled())
@@ -288,6 +294,9 @@ public class HWOptions extends OneArgChoiceOptionItem {
                 setDefaultItem(reduceW);
             }
         };
+        initialTraceFile = new TraceOption();
+        traceK = new TraceKOption();
+        traceN = new TraceNOption();
         subTrees.add(useReset);
         subTrees.add(usePrecomputedW);
         subTrees.add(addHInW);
@@ -298,6 +307,9 @@ public class HWOptions extends OneArgChoiceOptionItem {
         subTrees.add(initialH);
         subTrees.add(findPathStrategy);
         subTrees.add(wRefinement);
+        subTrees.add(initialTraceFile);
+        subTrees.add(traceK);
+        subTrees.add(traceN);
         for (OptionTree option : subTrees)
             option.setCategoryIfUndef(OptionCategory.ALGO_HW);
     }

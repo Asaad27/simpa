@@ -23,7 +23,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import automata.mealy.GenericInputSequence;
 import automata.mealy.distinctionStruct.DistinctionStruct;
@@ -132,6 +134,23 @@ public class LogManager {
 			logInfo(sb.toString());
 		}
 	}
+
+	public static void logList(List<?> list) {
+		var strBuilder = new StringBuilder();
+		strBuilder.append("[");
+		list.forEach(o -> strBuilder.append(o.toString()).append(","));
+		strBuilder.append("]");
+		logInfo(strBuilder.toString());
+	}
+
+	public static void logStream(Stream<?> stream) {
+		var strBuilder = new StringBuilder();
+		strBuilder.append("[");
+		stream.forEachOrdered(o -> strBuilder.append(o.toString()).append(","));
+		strBuilder.append("]");
+		logInfo(strBuilder.toString());
+	}
+
 
 	public static void logWarning(String s) {
 		System.err.println(prefixMultiLines("Warning : ", s));
