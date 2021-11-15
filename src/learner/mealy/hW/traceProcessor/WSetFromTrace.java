@@ -1,5 +1,6 @@
 package learner.mealy.hW.traceProcessor;
 
+import main.simpa.Options;
 import org.antlr.v4.runtime.misc.Interval;
 import tools.loggers.LogManager;
 
@@ -221,12 +222,16 @@ public class WSetFromTrace {
         return Files.newBufferedReader(traceFile.toPath()).lines();
     }
 
-    public List<InfoHolder> getWSetListInfoFromFile() {
+    private List<InfoHolder> getWSetListInfoFromFile() {
+        LogManager.logLine();
         LogManager.logInfo("Starting WSet inference from trace: " + traceFile.getAbsolutePath() + " with K=" + k + " and N=" + n);
         try {
             LogManager.logInfo("The trace has " + getTraceStream().count() + " input/output pairs");
-            LogManager.logInfo("Original Trace File:");
-            LogManager.logStream(getTraceStream());
+            if (Options.getLogLevel() != Options.LogLevel.LOW) {
+                LogManager.logInfo("Original Trace File:");
+                LogManager.logStream(getTraceStream());
+            }
+            var initialTime = System.nanoTime();
             var enumerator = new FileSplitter(getTraceStream().iterator());
             enumerator.forEachRemaining(tracePoints -> {
                         var allSubTraces = getAllSubTraces(tracePoints);
@@ -241,7 +246,10 @@ public class WSetFromTrace {
                     }
             );
             var allInputSequences = positionsMap.keySet().stream().map(InputOutputSequence::getInputSequence).distinct().collect(Collectors.toList());
-            return getAllBestWs(allInputSequences);
+            var bestWs = getAllBestWs(allInputSequences);
+            var finalTime = System.nanoTime();
+            LogManager.logInfo("W-Set learning time : " + (finalTime - initialTime) / 1_000_000_000.0 + "s");
+            return bestWs;
         } catch (Exception e) {
             LogManager.logInfo("It was not possible to read the trace file: " + traceFile.getAbsolutePath());
             LogManager.logException("Fatal Error", e);
@@ -250,6 +258,9 @@ public class WSetFromTrace {
     }
 
     public List<InputSequence> getWSetListFromFile() {
-        return getWSetListInfoFromFile().stream().map(infoHolder -> infoHolder.inputSequence).collect(Collectors.toList());
+        var wSet = getWSetListInfoFromFile().stream().map(infoHolder -> infoHolder.inputSequence).collect(Collectors.toList());
+        LogManager.logInfo("Learned W-Set:");
+        LogManager.logList(wSet);
+        return wSet;
     }
 }
