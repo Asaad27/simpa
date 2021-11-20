@@ -319,8 +319,8 @@ public class HWLearner extends Learner {
 				for (String input : driver.getInputSymbols())
 					W_fixed.add(new InputSequence(input));
 			}
-			var traceFile = options.initialTraceFile.getcompletePath();
-			if (traceFile != null) {
+			if (options.isProcessingTraceFileWorth()){
+				var traceFile = options.initialTraceFile.getcompletePath();
 				var wSetProcessor = new WSetFromTrace(traceFile, options.traceK.getValue(), options.traceN.getValue());
 				var wSet = wSetProcessor.getWSetListFromFile().stream().map(InputSequence::new).collect(Collectors.toList());
 				W = new TotallyFixedW(wSet);

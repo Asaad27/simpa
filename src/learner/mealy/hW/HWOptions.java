@@ -22,6 +22,7 @@ import options.traceOptions.TraceKOption;
 import options.traceOptions.TraceNOption;
 import options.traceOptions.TraceOption;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -318,5 +319,14 @@ public class HWOptions extends OneArgChoiceOptionItem {
         usePrecomputedW.updateWithDriver(d);
         oracleWhenUsingReset.updateWithDriver(d);
         oracleWithoutReset.updateWithDriver(d);
+    }
+
+    public boolean isProcessingTraceFileWorth() {
+        try {
+            var size = Files.size(initialTraceFile.getcompletePath().toPath());
+            return size != 0 && traceK.getValue() > 0 && traceN.getValue() > 0;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
