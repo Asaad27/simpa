@@ -290,6 +290,8 @@ public class HWLearner extends Learner {
 		Runtime runtime = Runtime.getRuntime();
 		runtime.gc();
 
+		stats = new HWStatsEntry(driver, options);
+
 		DistinctionStruct<? extends GenericInputSequence, ? extends GenericOutputSequence> W;
 		if (options.useAdaptiveW()) {
 			W = new TotallyAdaptiveW();
@@ -324,6 +326,9 @@ public class HWLearner extends Learner {
 				var wSetProcessor = new WSetFromTrace(traceFile, options.traceK.getValue(), options.traceN.getValue());
 				var wSet = wSetProcessor.getWSetListFromFile().stream().map(InputSequence::new).collect(Collectors.toList());
 				W = new TotallyFixedW(wSet);
+				stats.setWSetInferenceDuration(wSetProcessor.getDuration());
+			} else {
+				stats.setWSetInferenceDuration(0f);
 			}
 		}
 		if (W.isEmpty())
@@ -340,7 +345,6 @@ public class HWLearner extends Learner {
 			h = new AdaptiveSymbolSequence();
 		}
 		hChecker = GenericHomingSequenceChecker.getChecker(h);
-		stats = new HWStatsEntry(driver, options);
 
 		LmTrace counterExampleTrace;
 		boolean inconsistencyFound;

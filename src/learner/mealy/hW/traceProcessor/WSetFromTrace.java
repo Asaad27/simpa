@@ -144,12 +144,18 @@ public class WSetFromTrace {
     private final Integer k;
     private final Integer n;
     private final PositionsMap positionsMap;
+    private float duration;
 
     public WSetFromTrace(File traceFile, Integer k, Integer n) {
         this.traceFile = traceFile;
         this.k = k;
         this.n = n;
         positionsMap = new PositionsMap();
+        duration = 0f;
+    }
+
+    public float getDuration() {
+        return duration;
     }
 
     private Set<List<TracePoint>> getAllSubTraces(List<TracePoint> traceChunk) {
@@ -248,7 +254,8 @@ public class WSetFromTrace {
             var allInputSequences = positionsMap.keySet().stream().map(InputOutputSequence::getInputSequence).distinct().collect(Collectors.toList());
             var bestWs = getAllBestWs(allInputSequences);
             var finalTime = System.nanoTime();
-            LogManager.logInfo("W-Set learning time : " + (finalTime - initialTime) / 1_000_000_000.0 + "s");
+            duration = (finalTime - initialTime) / 1_000_000_000f;
+            //LogManager.logInfo("W-Set learning time : " + duration + "s");
             return bestWs;
         } catch (Exception e) {
             LogManager.logInfo("It was not possible to read the trace file: " + traceFile.getAbsolutePath());

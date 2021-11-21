@@ -37,6 +37,7 @@ public class Attribute <T extends Comparable<T>> {
 	public final static Attribute<Integer>	STATE_BOUND_OFFSET = 		new Attribute<Integer>(	"difference between bound and real state number",true,	Units.STATES,		false,	true,	true);
 	public final static Attribute<Integer>	LOOP_RATIO = 				new Attribute<Integer>(	"percentage of loop transitions",				true,	Units.PERCENT,		false,	true,	false);
 	public final static Attribute<Float>	DURATION = 					new Attribute<Float>(	"duration of learning",							true,	Units.SECONDS,		false,	false,	false);
+	public final static Attribute<Float>	W_SET_INFERENCE_DURATION =  new Attribute<Float>(	"duration of W-set inference",					true,	Units.SECONDS,		false,	false,	false);
 	public final static Attribute<String>	AUTOMATA =					new Attribute<String>(	"infered automata",								false,	Units.NO_UNITS,		false, 	true, 	false);
 	public static final Attribute<Integer>	MEMORY = 					new Attribute<Integer>(	"used memory", 									true,	Units.BYTE, 		false, 	false, 	false);
 	public final static Attribute<Integer>	NODES_NB =					new Attribute<Integer>(	"number of nodes",								false,	Units.NODES,		true,	false,	false);

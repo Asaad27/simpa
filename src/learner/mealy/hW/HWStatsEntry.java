@@ -42,6 +42,7 @@ public class HWStatsEntry extends StatsEntry {
 	public static final Attribute<Integer>LOOP_RATIO = Attribute.LOOP_RATIO;
 	public static final Attribute<String> AUTOMATA = Attribute.AUTOMATA;
 	public static final Attribute<Float> DURATION = Attribute.DURATION;
+	public static final Attribute<Float> W_SET_INFERENCE_DURATION = Attribute.W_SET_INFERENCE_DURATION;
 	public static final Attribute<Integer>MEMORY = Attribute.MEMORY;
 	public static final Attribute<Integer>MAX_RECKONED_STATES = Attribute.MAX_RECKONED_STATES;
 	public static final Attribute<Integer>MAX_FAKE_STATES = Attribute.MAX_FAKE_STATES;
@@ -83,6 +84,7 @@ public class HWStatsEntry extends StatsEntry {
 			LOOP_RATIO,
 			AUTOMATA,
 			DURATION,
+			W_SET_INFERENCE_DURATION,
 			MEMORY,
 			MAX_RECKONED_STATES,
 			MAX_FAKE_STATES,
@@ -138,6 +140,7 @@ public class HWStatsEntry extends StatsEntry {
 	private int loopTransitionPercentage;
 	private String automata;
 	private float duration;
+	private float wSetInferenceDuration;
 	private int memory = 0;
 	private int maxReckonedStates = -1;
 	private int maxFakeStates = -1;
@@ -179,6 +182,7 @@ public class HWStatsEntry extends StatsEntry {
 		loopTransitionPercentage = Integer.parseInt(st.nextToken());
 		automata = st.nextToken();
 		duration = Float.parseFloat(st.nextToken());
+		wSetInferenceDuration = Float.parseFloat(st.nextToken());
 		memory = Integer.parseUnsignedInt(st.nextToken());
 		maxReckonedStates = Integer.parseInt(st.nextToken());
 		maxFakeStates = Integer.parseInt(st.nextToken());
@@ -293,6 +297,7 @@ public class HWStatsEntry extends StatsEntry {
 		resetCallNb = dataManager.getTotalResetNb();
 		traceLength -= oracle.getLastTraceLength();
 		duration -= oracle.getLastDuration();
+		duration -= wSetInferenceDuration;
 		resetCallNb -= oracle.getLastResetNb();
 	}
 
@@ -339,6 +344,8 @@ public class HWStatsEntry extends StatsEntry {
 			return (T) automata;
 		if (a == DURATION)
 			return (T) Float.valueOf(duration);
+		if (a == W_SET_INFERENCE_DURATION)
+			return (T) Float.valueOf(wSetInferenceDuration);
 		if (a == MEMORY)
 			return (T) Integer.valueOf(memory);
 		if (a == MAX_RECKONED_STATES)
@@ -418,7 +425,7 @@ public class HWStatsEntry extends StatsEntry {
 			return ((Integer) get(a)).floatValue();
 		if (a == SEED)
 			return ((Long) get(a)).floatValue();
-		if (a == DURATION || a == ORACLE_DURATION || a == AVERAGE_W_SIZE
+		if (a == DURATION || a == W_SET_INFERENCE_DURATION || a == ORACLE_DURATION || a == AVERAGE_W_SIZE
 				|| a == ORACLE_TRACE_PERCENTAGE || a == AVG_NB_TRIED_W)
 			return (Float) get(a);
 		throw new RuntimeException(a.getName() + " is not available or cannot be cast to float");
@@ -431,6 +438,10 @@ public class HWStatsEntry extends StatsEntry {
 
 	public void setDuration(float duration) {
 		this.duration = duration;
+	}
+
+	public void setWSetInferenceDuration(float wSetInferenceDuration) {
+		this.wSetInferenceDuration = wSetInferenceDuration;
 	}
 
 	public void updateMemory(int currentMemory) {
