@@ -36,6 +36,7 @@ public class HWStatsEntry extends StatsEntry {
 	public final static Attribute<Integer> H_ANSWERS_NB =	Attribute.H_ANSWERS_NB;
 	public static final Attribute<Integer>LOCALIZER_CALL_NB = Attribute.LOCALIZER_CALL_NB;
 	public static final Attribute<Integer>TRACE_LENGTH = Attribute.TRACE_LENGTH;
+	public static final Attribute<Integer>PROVIDED_TRACE_LENGTH = Attribute.PROVIDED_TRACE_LENGTH;
 	public static final Attribute<Integer>INPUT_SYMBOLS = Attribute.INPUT_SYMBOLS;
 	public static final Attribute<Integer>OUTPUT_SYMBOLS = Attribute.OUTPUT_SYMBOLS;
 	public static final Attribute<Integer>STATE_NUMBER = Attribute.STATE_NUMBER;
@@ -78,6 +79,7 @@ public class HWStatsEntry extends StatsEntry {
 			H_ANSWERS_NB,
 			LOCALIZER_CALL_NB,
 			TRACE_LENGTH,
+			PROVIDED_TRACE_LENGTH,
 			INPUT_SYMBOLS,
 			OUTPUT_SYMBOLS,
 			STATE_NUMBER,
@@ -134,6 +136,7 @@ public class HWStatsEntry extends StatsEntry {
 	private int hResponses;
 	private int localizeCallNb = 0;
 	private int traceLength = 0;
+	private int providedTraceLength = 0;
 	private int inputSymbols;
 	private int outputSymbols;
 	private int statesNumber;
@@ -176,6 +179,7 @@ public class HWStatsEntry extends StatsEntry {
 		hResponses = Integer.parseInt(st.nextToken());
 		localizeCallNb = Integer.parseInt(st.nextToken());
 		traceLength = Integer.parseInt(st.nextToken());
+		providedTraceLength = Integer.parseInt(st.nextToken());
 		inputSymbols = Integer.parseInt(st.nextToken());
 		outputSymbols = Integer.parseInt(st.nextToken());
 		statesNumber = Integer.parseInt(st.nextToken());
@@ -332,6 +336,8 @@ public class HWStatsEntry extends StatsEntry {
 			return (T) Integer.valueOf(localizeCallNb);
 		if (a == TRACE_LENGTH)
 			return (T) Integer.valueOf(traceLength);
+		if (a == PROVIDED_TRACE_LENGTH)
+			return (T) Integer.valueOf(providedTraceLength);
 		if (a == INPUT_SYMBOLS)
 			return (T) Integer.valueOf(inputSymbols);
 		if (a == OUTPUT_SYMBOLS)
@@ -407,6 +413,7 @@ public class HWStatsEntry extends StatsEntry {
 				a == H_MAX_LENGTH ||
 				a == LOCALIZER_CALL_NB ||
 				a == TRACE_LENGTH ||
+				a == PROVIDED_TRACE_LENGTH ||
 				a == INPUT_SYMBOLS ||
 				a == OUTPUT_SYMBOLS ||
 				a == STATE_NUMBER ||
@@ -438,6 +445,10 @@ public class HWStatsEntry extends StatsEntry {
 
 	public void setDuration(float duration) {
 		this.duration = duration;
+	}
+
+	public void setProvidedTraceLength(int providedTraceLength) {
+		this.providedTraceLength = providedTraceLength;
 	}
 
 	public void setWSetInferenceDuration(float wSetInferenceDuration) {

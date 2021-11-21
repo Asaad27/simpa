@@ -327,8 +327,10 @@ public class HWLearner extends Learner {
 				var wSet = wSetProcessor.getWSetListFromFile().stream().map(InputSequence::new).collect(Collectors.toList());
 				W = new TotallyFixedW(wSet);
 				stats.setWSetInferenceDuration(wSetProcessor.getDuration());
+				stats.setProvidedTraceLength(wSetProcessor.getTraceLength());
 			} else {
 				stats.setWSetInferenceDuration(0f);
+				stats.setProvidedTraceLength(0);
 			}
 		}
 		if (W.isEmpty())

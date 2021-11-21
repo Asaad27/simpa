@@ -145,6 +145,7 @@ public class WSetFromTrace {
     private final Integer n;
     private final PositionsMap positionsMap;
     private float duration;
+    private int traceLength;
 
     public WSetFromTrace(File traceFile, Integer k, Integer n) {
         this.traceFile = traceFile;
@@ -152,10 +153,15 @@ public class WSetFromTrace {
         this.n = n;
         positionsMap = new PositionsMap();
         duration = 0f;
+        traceLength = 0;
     }
 
     public float getDuration() {
         return duration;
+    }
+
+    public int getTraceLength() {
+        return traceLength;
     }
 
     private Set<List<TracePoint>> getAllSubTraces(List<TracePoint> traceChunk) {
@@ -232,7 +238,9 @@ public class WSetFromTrace {
         LogManager.logLine();
         LogManager.logInfo("Starting WSet inference from trace: " + traceFile.getAbsolutePath() + " with K=" + k + " and N=" + n);
         try {
-            LogManager.logInfo("The trace has " + getTraceStream().count() + " input/output pairs");
+            traceLength = (int) getTraceStream().count();
+            LogManager.logInfo("The trace has " + traceLength + " input/output pairs");
+
             if (Options.getLogLevel() != Options.LogLevel.LOW) {
                 LogManager.logInfo("Original Trace File:");
                 LogManager.logStream(getTraceStream());
