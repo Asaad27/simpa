@@ -546,6 +546,9 @@ public class SIMPA {
 						(LmConjecture) l.createConjecture());
 			}
 			l.logStats();
+			if (getOutputsOptions().statsCsvOption.isEnabled()) {
+				l.logStatsCsv();
+			}
 		} finally {
 			LogManager.end();
 			LogManager.clearsLoggers();

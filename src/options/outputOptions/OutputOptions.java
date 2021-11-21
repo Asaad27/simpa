@@ -34,6 +34,9 @@ public class OutputOptions extends OptionsGroup {
 	public final LogLevelOption logLevel = new LogLevelOption();
 	public final FileOption outputDir;
 
+	public final BooleanOption statsCsvOption = new BooleanOption(
+			"csv stats logger", "stats_csv", "Write output log to a '.csv' file.");
+
 	public OutputOptions() {
 		super("outputs");
 		textLoggerOption.setEnabledByDefault(false);
@@ -42,6 +45,7 @@ public class OutputOptions extends OptionsGroup {
 		addSubOption(textLoggerOption);
 		addSubOption(htmlLoggerOption);
 		addSubOption(dataLoggerOption);
+		addSubOption(statsCsvOption);
 		addSubOption(logLevel);
 		outputDir = new FileOption("--outdir", "Output directory.",
 				new File(System.getProperty("user.dir")),

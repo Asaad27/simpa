@@ -26,12 +26,15 @@ import learner.mealy.hW.HWLearner;
 import learner.mealy.localizerBased.LocalizerBasedLearner;
 import main.simpa.SIMPA;
 import stats.StatsEntry;
+import stats.StatsWriter;
 import stats.attribute.Attribute;
 import tools.loggers.LogManager;
 import automata.Automata;
 import drivers.Driver;
 //EFSM//import drivers.efsm.EFSMDriver;
 import drivers.mealy.MealyDriver;
+
+import java.io.IOException;
 
 public abstract class Learner {
 	protected boolean addtolog = true;
@@ -64,6 +67,22 @@ public abstract class Learner {
 					+ a.getUnits());
 		}
 		LogManager.logLine();
+	}
+
+	public void logStatsCsv(){
+		var s = getStats();
+		if (s == null) {
+			LogManager.logInfo("unable to get learner stats");
+			return;
+		}
+		LogManager.logLine();
+		try (var writer = new StatsWriter()) {
+			writer.append(s);
+			LogManager.logInfo("stats CSV file generated");
+			LogManager.logLine();
+		} catch (IOException e) {
+			LogManager.logInfo("it was not possible to generate the stats CSV file");
+		}
 	}
 
 	public static Learner getLearnerFor(Driver<?, ?> driver) {
